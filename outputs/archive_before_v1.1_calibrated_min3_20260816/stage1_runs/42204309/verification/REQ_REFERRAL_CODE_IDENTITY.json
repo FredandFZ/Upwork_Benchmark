@@ -1,0 +1,183 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 143,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "referral_code_basis": "NFT mint number",
+          "referral_code_lifetime": "permanent"
+        },
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "SMART_CONTRACT",
+            "FRONTEND"
+          ],
+          "contexts": [
+            "REFERRAL_MINT",
+            "NFT_METADATA"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        143
+      ],
+      "decision_note": "The requirement and persistent frontend/on-chain scope are explicit, but this source does not establish a backend component.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        291
+      ],
+      "decision_note": "The client explicitly limits valid codes to already minted NFTs to prevent use of the NFT currently being minted.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        291
+      ],
+      "decision_note": "The client reports that an ineligible referral number is being accepted as valid.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 310,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        291,
+        305,
+        310
+      ],
+      "decision_note": "The freelancer states that the validation fixes are live and supplies the expected production tests.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 313,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        310,
+        313
+      ],
+      "decision_note": "The client confirms that invalid-code feedback works, while separately requesting revised wording.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 585,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        585,
+        590
+      ],
+      "decision_note": "The client reports that NFT #5 shows the purchase code rather than its own mint number.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 604,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        585,
+        590,
+        604
+      ],
+      "decision_note": "The freelancer explicitly claims that the NFT attribute now uses its own token ID.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 607,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        604,
+        606,
+        607
+      ],
+      "decision_note": "In direct response to the request to check the fixes, the client confirms the referral-code attribute is fixed.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 305,
+        "speaker": "client",
+        "text": "also, with the ' Valid referral number' popup:\n\\- Only already minted NFTs should be valid.\n\n\\- The message for a valid code should read: 'Valid referral code! $5 + $500 prize draw ticket to your selected referer.'\n\n\\- For an invalid/no code, a message should read: 'No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random.'"
+      },
+      "supporting_message_ids": [
+        291
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "valid_code_feedback": "Valid referral code! $5 + $500 prize draw ticket to your selected referer.",
+        "invalid_or_missing_code_feedback": "No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random."
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 313,
+        "speaker": "client",
+        "text": "1 - Invalid code message is great, but needs one more reword to 'No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random'.\n\n2 - First mint still not working (possibly due to commission and ticket coded to go to an existing NFT holder, which for the first mint doesn't exist)\n\n3 - NFT sizing is good. and 'View Book' botton looks good too.\n\n4 - Badges are good, but right now has 5 on the top row and 3 on the bottom row, if possible, change to 4 on top row and 4 on bottom row."
+      },
+      "supporting_message_ids": [
+        305,
+        310
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "invalid_or_missing_code_feedback": "No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ]
+}

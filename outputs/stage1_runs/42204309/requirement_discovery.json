@@ -1,0 +1,1658 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2025-11-18",
+      "end": "2025-11-25",
+      "milestone": null,
+      "phase_label": "Core NFT, referral, and prize-contract definition"
+    },
+    {
+      "session_id": "S2",
+      "start": "2025-11-26",
+      "end": "2025-12-07",
+      "milestone": null,
+      "phase_label": "Backend and frontend integration, provider selection, and product content"
+    },
+    {
+      "session_id": "S3",
+      "start": "2025-12-08",
+      "end": "2025-12-31",
+      "milestone": null,
+      "phase_label": "Launch preparation, landing-page refinement, and ebook delivery design"
+    },
+    {
+      "session_id": "S4",
+      "start": "2026-01-01",
+      "end": "2026-01-05",
+      "milestone": null,
+      "phase_label": "Production minting, payment, dashboard, and reader debugging"
+    },
+    {
+      "session_id": "S5",
+      "start": "2026-01-06",
+      "end": "2026-01-08",
+      "milestone": null,
+      "phase_label": "Reward-accounting stabilization, mobile testing, and launch completion"
+    },
+    {
+      "session_id": "S6",
+      "start": "2026-01-09",
+      "end": "2026-01-20",
+      "milestone": null,
+      "phase_label": "Post-launch verification and contract-event operations"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "PRIZE_MECHANICS",
+      "title": "Prize Mechanics"
+    },
+    {
+      "family_id": "REFERRAL_SYSTEM",
+      "title": "Referral System"
+    },
+    {
+      "family_id": "MINT_PAYMENT",
+      "title": "Minting and Payment"
+    },
+    {
+      "family_id": "AUTH_ACCESS",
+      "title": "Authentication and Public Access"
+    },
+    {
+      "family_id": "EBOOK_DELIVERY",
+      "title": "Ebook Delivery and Access"
+    },
+    {
+      "family_id": "NFT_INFORMATION",
+      "title": "NFT Information and Presentation"
+    },
+    {
+      "family_id": "LANDING_EXPERIENCE",
+      "title": "Landing-Page Experience"
+    },
+    {
+      "family_id": "USER_SUPPORT",
+      "title": "User Support and Community"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_PROJECT_NAME",
+      "title": "Current Project Name",
+      "family_id": null,
+      "definition": "Use Project Rebuild as the current product name while reserving BooksOnChain as a possible future platform name.",
+      "anchor_message_ids": [
+        2,
+        4,
+        5,
+        7
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "UI_UX"
+        ],
+        "contexts": [
+          "PROJECT_BRANDING"
+        ]
+      },
+      "boundary_note": "Covers only the active product name and contemplated future rename, not general landing-page copy.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_TOP_AFFILIATE_PRIZES",
+      "title": "Top Affiliate Prizes",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Historical prize mechanism that rewarded top affiliates and was explicitly eliminated from the visible project requirements.",
+      "anchor_message_ids": [
+        8
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "PRIZE_SYSTEM"
+        ]
+      },
+      "boundary_note": "Retained as a distinct historical Requirement because its first observable evidence removes the entire mechanism; it must not be merged into the replacement random block prizes.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "title": "Small Block Prize Mechanism",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Rules for the recurring small-block prize, including prize amount, winner count, draw trigger, and eligible ticket population.",
+      "anchor_message_ids": [
+        8,
+        21,
+        143,
+        158,
+        195,
+        210
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "SMALL_BLOCK",
+          "PRIZE_SYSTEM"
+        ]
+      },
+      "boundary_note": "Winner count, prize amount, and sales trigger are attributes of one small-prize mechanism; ticket issuance, winner randomness, and prize claiming are independently testable sibling Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "title": "Big Block Prize Mechanism",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Rules and lifecycle of the independently evolving large-value Big Block prize mechanism.",
+      "anchor_message_ids": [
+        8,
+        21,
+        123,
+        125,
+        158,
+        195,
+        198
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "BIG_BLOCK",
+          "PRIZE_SYSTEM"
+        ]
+      },
+      "boundary_note": "Kept separate from Small Block because its parameters changed independently and the entire Big Block mechanism was later removed while Small Block remained.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+      "title": "Prize Ticket Lifecycle",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Maintain prize-entry counters, weight winning chances by ticket count, and reset or expire tickets at the applicable draw boundary.",
+      "anchor_message_ids": [
+        8,
+        21,
+        143,
+        146,
+        210
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "DATABASE"
+        ],
+        "contexts": [
+          "PRIZE_TICKETS",
+          "SMALL_BLOCK",
+          "BIG_BLOCK"
+        ]
+      },
+      "boundary_note": "Covers ticket persistence and expiration semantics, not the separate business rule that awards a ticket for a coded or no-code mint.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PRIZE_WINNER_SELECTION",
+      "title": "Provably Fair Prize Winner Selection",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Select prize winners on-chain using Chainlink VRF with ticket-weighted, publicly verifiable randomness.",
+      "anchor_message_ids": [
+        21,
+        27,
+        143,
+        156,
+        157,
+        242
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "API"
+        ],
+        "contexts": [
+          "PRIZE_SYSTEM",
+          "CHAINLINK_VRF"
+        ]
+      },
+      "boundary_note": "Random winner selection is independently implementable and verifiable from prize amounts, ticket issuance, and prize-claim UX.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PRIZE_CLAIM",
+      "title": "Prize Claim Workflow",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Expose a conditional claim action to eligible prize winners and permit winners to collect awarded prizes.",
+      "anchor_message_ids": [
+        21,
+        143,
+        146,
+        156,
+        781,
+        782,
+        784,
+        785
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "PRIZE_CLAIM",
+          "WINNERS_PAGE"
+        ]
+      },
+      "boundary_note": "Covers winner collection after a draw; it does not own winner selection or automatic referral-commission payments.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PRIZE_POOL_FUNDING",
+      "title": "Prize Pool Funding and Balance",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Fund the active prize pool from the designated portions of mint and secondary-sale revenue and expose an accurate pool balance.",
+      "anchor_message_ids": [
+        21,
+        143,
+        146,
+        195,
+        288,
+        377,
+        430,
+        441
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PRIZE_POOL",
+          "PRIMARY_MINT",
+          "SECONDARY_SALES"
+        ]
+      },
+      "boundary_note": "Covers sources and balance of prize funds; draw size and cadence belong to the Small or Big Block Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AAVE_PRIZE_POOL_YIELD",
+      "title": "Aave Prize-Pool Yield Integration",
+      "family_id": "PRIZE_MECHANICS",
+      "definition": "Deposit prize-pool funds into Aave to generate yield when that integration is required.",
+      "anchor_message_ids": [
+        156,
+        159,
+        190,
+        191,
+        192
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "PRIZE_POOL",
+          "AAVE_YIELD"
+        ]
+      },
+      "boundary_note": "Aave yield generation can be removed without removing the underlying prize pool, so it remains a separate Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NFT_REFERRAL_IDENTITY",
+      "title": "NFT Mint Number as Referral Code",
+      "family_id": "REFERRAL_SYSTEM",
+      "definition": "Assign each NFT its own permanent referral code equal to that NFT's mint or token number and expose that identity to the owner.",
+      "anchor_message_ids": [
+        143,
+        146,
+        210,
+        585,
+        590,
+        604
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "REFERRAL_MINT",
+          "NFT_METADATA",
+          "DASHBOARD"
+        ]
+      },
+      "boundary_note": "Defines the referral identity itself; validation and display correctness are separate behaviors.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+      "title": "Referral Code Validation",
+      "family_id": "REFERRAL_SYSTEM",
+      "definition": "Accept only referral codes belonging to already minted NFTs and prevent buyers from referring a mint to itself or to a future token number.",
+      "anchor_message_ids": [
+        291,
+        305,
+        308,
+        310,
+        313
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "REFERRAL_MINT",
+          "REFERRAL_VALIDATION"
+        ]
+      },
+      "boundary_note": "Validation is independently testable from reward distribution and from the copy shown after validation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CODED_REFERRAL_REWARD",
+      "title": "Coded Referral Reward",
+      "family_id": "REFERRAL_SYSTEM",
+      "definition": "When a valid referral code is used for a mint, automatically award the referenced NFT holder the configured commission and prize ticket.",
+      "anchor_message_ids": [
+        21,
+        143,
+        146,
+        566,
+        581,
+        672,
+        687,
+        688
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "REFERRAL_MINT"
+        ]
+      },
+      "boundary_note": "The commission and ticket form one coupled coded-referral reward package; no-code random assignment follows a different execution path and remains separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NO_CODE_RANDOM_REWARD",
+      "title": "No-Code Random Referral Reward",
+      "family_id": "REFERRAL_SYSTEM",
+      "definition": "When a mint uses no valid referral code, randomly assign the commission and ticket to an existing NFT holder, subject to the accepted first-mint exception.",
+      "anchor_message_ids": [
+        21,
+        146,
+        288,
+        305,
+        308,
+        374,
+        375,
+        565,
+        579,
+        583,
+        595,
+        672,
+        684,
+        687,
+        724,
+        732
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "NO_REFERRAL",
+          "PRIMARY_MINT"
+        ]
+      },
+      "boundary_note": "Owns random reward assignment and the first-mint exception; leaderboard and metadata reflection of the award belongs to reward accounting.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "title": "Referral Reward Accounting",
+      "family_id": "REFERRAL_SYSTEM",
+      "definition": "Reflect awarded referral tickets, commissions, and referral totals consistently in the leaderboard, NFT detail data, and account views.",
+      "anchor_message_ids": [
+        441,
+        449,
+        455,
+        592,
+        599,
+        608,
+        615,
+        622,
+        662,
+        669,
+        672,
+        688,
+        691,
+        692
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND",
+          "API"
+        ],
+        "contexts": [
+          "LEADERBOARD",
+          "DASHBOARD",
+          "NFT_DETAILS",
+          "REFERRAL_REWARDS"
+        ]
+      },
+      "boundary_note": "Covers accurate representation of already awarded rewards; it does not own the contract rule that awards coded or random rewards.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MINT_REVENUE_ALLOCATION",
+      "title": "Mint Revenue Allocation",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Split the fixed mint proceeds among the founder, referral commission, and active prize pool according to the client-confirmed allocation.",
+      "anchor_message_ids": [
+        143,
+        146,
+        195,
+        198,
+        199,
+        210
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "REVENUE_SPLIT"
+        ]
+      },
+      "boundary_note": "Revenue shares are attributes of one allocation mechanism; payment-currency execution and secondary royalties are separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NFT_MINT_FULFILLMENT",
+      "title": "NFT Mint Fulfillment",
+      "family_id": "MINT_PAYMENT",
+      "definition": "A successful purchase must execute an on-chain mint and deliver the ebook NFT to the buyer rather than recording only a payment, approval, or database entry.",
+      "anchor_message_ids": [
+        288,
+        294,
+        303,
+        304,
+        341,
+        345,
+        358,
+        364,
+        377,
+        398,
+        401,
+        569
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "DATABASE"
+        ],
+        "contexts": [
+          "PRIMARY_MINT"
+        ]
+      },
+      "boundary_note": "Owns end-to-end creation and delivery of the NFT; USDC approvals, ETH conversion, success messaging, and dashboard synchronization have separate trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_USDC_MINT_FLOW",
+      "title": "USDC Wallet Mint Flow",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Allow a connected wallet to approve the required USDC amount and then complete the NFT mint automatically and correctly.",
+      "anchor_message_ids": [
+        72,
+        294,
+        310,
+        323,
+        341,
+        345,
+        357,
+        358,
+        364,
+        377,
+        398,
+        401,
+        569,
+        580,
+        610
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "USDC_PAYMENT",
+          "PRIMARY_MINT"
+        ]
+      },
+      "boundary_note": "Covers the USDC approval-to-mint path only; NFT delivery and success-modal correctness are independently evaluated.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ETH_MINT_FLOW",
+      "title": "ETH Mint and Conversion Flow",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Allow buyers to pay in ETH, convert only the amount required for the fixed USDC mint price, handle shortfalls safely, and refund excess value according to the confirmed flow.",
+      "anchor_message_ids": [
+        326,
+        330,
+        335,
+        341,
+        352,
+        357,
+        359,
+        365,
+        378,
+        395,
+        401,
+        409,
+        430,
+        482,
+        490,
+        494,
+        498,
+        516,
+        518,
+        529,
+        530,
+        532,
+        534,
+        539,
+        546,
+        571
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "ETH_PAYMENT",
+          "PRIMARY_MINT"
+        ]
+      },
+      "boundary_note": "Dynamic quoting, swap routing, exact-output behavior, and excess refund are attributes of one ETH payment mechanism.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+      "title": "Mint Payment Method Selection",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Clearly disclose supported mint currencies and let the buyer select among currently enabled wallet and card payment methods.",
+      "anchor_message_ids": [
+        312,
+        314,
+        319,
+        321,
+        323,
+        324,
+        326,
+        328,
+        330,
+        424,
+        430
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "PAYMENT_SELECTION"
+        ]
+      },
+      "boundary_note": "Covers selection and disclosure in the UI, not whether the selected USDC, ETH, or fiat path executes successfully.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FIAT_ONRAMP",
+      "title": "Fiat Card On-Ramp",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Provide a true fiat-to-crypto card purchase path for non-crypto buyers using the client-confirmed provider, while supporting temporary crypto-only launch deferral.",
+      "anchor_message_ids": [
+        72,
+        77,
+        122,
+        140,
+        141,
+        142,
+        177,
+        188,
+        220,
+        225,
+        227,
+        284,
+        424,
+        787
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "FIAT_PAYMENT",
+          "TRANSAK"
+        ]
+      },
+      "boundary_note": "Provider choice, launch deferral, and later resumption are attributes of one fiat on-ramp lifecycle; the buyer-wallet behavior is independently testable.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FIAT_BUYER_WALLET",
+      "title": "Wallet Provisioning for Fiat Buyers",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Provision a non-custodial wallet experience for fiat buyers so their NFT, commissions, and prizes can be received and accessed without requiring an existing crypto wallet.",
+      "anchor_message_ids": [
+        184,
+        210
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "BACKEND",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "FIAT_PAYMENT",
+          "NON_CRYPTO_BUYER"
+        ]
+      },
+      "boundary_note": "Separated from Transak provider integration because wallet provisioning and reward access can fail or change independently of card processing.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_MINT_TIPPING",
+      "title": "Optional Mint Tipping",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Allow buyers to add preset or custom tips during minting and clearly disclose any separate follow-up tip transaction.",
+      "anchor_message_ids": [
+        169,
+        182,
+        183,
+        615,
+        622,
+        631,
+        633,
+        649,
+        660,
+        664,
+        666
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "TIPPING"
+        ]
+      },
+      "boundary_note": "Tip amount choices, transfer execution, second-transaction disclosure, and self-tip protection are attributes of one optional tipping mechanism.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "title": "Accurate Mint Success Feedback",
+      "family_id": "MINT_PAYMENT",
+      "definition": "Show mint-success feedback only after a real mint and required reward finalization, with the correct token number and path-specific referral message.",
+      "anchor_message_ids": [
+        345,
+        358,
+        359,
+        360,
+        361,
+        364,
+        368,
+        370,
+        569,
+        575,
+        598,
+        609,
+        610,
+        649,
+        730,
+        738,
+        740,
+        742,
+        746,
+        747,
+        750
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "MINT_CONFIRMATION"
+        ]
+      },
+      "boundary_note": "Owns modal timing, token ID, and referral-path copy; it does not establish whether the mint or reward transfer actually succeeded.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "title": "Secondary-Sale Royalty Enforcement",
+      "family_id": null,
+      "definition": "Use an NFT contract and marketplace controls that enforce the configured flat royalty on supported secondary sales.",
+      "anchor_message_ids": [
+        21,
+        143,
+        146,
+        240,
+        241
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "SECONDARY_SALES",
+          "MARKETPLACE_CONTROL"
+        ]
+      },
+      "boundary_note": "Royalty enforcement is independent of primary-mint revenue allocation and prize parameters.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_UNLIMITED_NFT_SUPPLY",
+      "title": "Unlimited Ebook NFT Supply",
+      "family_id": null,
+      "definition": "Offer the ebook as an unlimited-supply NFT mint rather than a capped collection.",
+      "anchor_message_ids": [
+        143,
+        146,
+        210
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "NFT_SUPPLY"
+        ]
+      },
+      "boundary_note": "Supply policy is independently changeable from mint price, payment method, and referral mechanics.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BASE_NETWORK_DEPLOYMENT",
+      "title": "Base Network Deployment",
+      "family_id": null,
+      "definition": "Deploy and operate the NFT and associated on-chain functionality on the Base network.",
+      "anchor_message_ids": [
+        27,
+        143,
+        146,
+        156,
+        240,
+        287
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "BASE_MAINNET"
+        ]
+      },
+      "boundary_note": "Network choice is a project-wide runtime constraint rather than an attribute of any single payment or prize mechanism.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_WALLET_AUTH",
+      "title": "Wallet Authentication",
+      "family_id": "AUTH_ACCESS",
+      "definition": "Support wallet-based authentication using SIWE or equivalent signing for crypto-user paths that require wallet ownership.",
+      "anchor_message_ids": [
+        69,
+        72,
+        623,
+        627
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "WALLET_USER",
+          "PRIMARY_MINT"
+        ]
+      },
+      "boundary_note": "Wallet authentication can evolve independently from email dashboard authentication and unauthenticated public APIs.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_EMAIL_AUTH",
+      "title": "Email Dashboard Authentication",
+      "family_id": "AUTH_ACCESS",
+      "definition": "Allow non-wallet users to authenticate to dashboard features through a low-friction email or magic-link flow with correct verification state.",
+      "anchor_message_ids": [
+        69,
+        72,
+        184,
+        210,
+        445,
+        446,
+        448,
+        449
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "EMAIL",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "DASHBOARD_ACCESS",
+          "EMAIL_USER"
+        ]
+      },
+      "boundary_note": "Owns email identity and access state; delivery of transactional emails is a separate service behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PUBLIC_API_ACCESS",
+      "title": "Unauthenticated Public APIs",
+      "family_id": "AUTH_ACCESS",
+      "definition": "Keep public information such as leaderboards and prize-pool values accessible without user authentication.",
+      "anchor_message_ids": [
+        69,
+        72
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "BACKEND"
+        ],
+        "contexts": [
+          "PUBLIC_DATA",
+          "LEADERBOARD",
+          "PRIZE_POOL"
+        ]
+      },
+      "boundary_note": "Public API access is independently enabled or disabled and must not be merged with wallet or email authentication.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+      "title": "Transactional Email Delivery",
+      "family_id": null,
+      "definition": "Send project transactional and notification emails reliably through the selected email provider and verified sender configuration.",
+      "anchor_message_ids": [
+        70,
+        72,
+        86,
+        89,
+        92,
+        102,
+        390,
+        398,
+        445
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "EMAIL",
+          "BACKEND"
+        ],
+        "contexts": [
+          "EMAIL_NOTIFICATIONS",
+          "MINT_CONFIRMATION",
+          "REWARD_NOTIFICATIONS"
+        ]
+      },
+      "boundary_note": "Provider setup and delivery reliability form one email infrastructure behavior; badge-award correctness and email authentication remain separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NFT_CERTIFICATE_EMAIL",
+      "title": "NFT Certificate and Confirmation Email",
+      "family_id": null,
+      "definition": "Provide eligible buyers with an email confirmation or NFT certificate containing mint details, referral information, and an ebook-access link.",
+      "anchor_message_ids": [
+        184,
+        210,
+        390,
+        624
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "EMAIL",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "MINT_CONFIRMATION",
+          "EBOOK_ACCESS"
+        ]
+      },
+      "boundary_note": "This is a user-facing email artifact, distinct from generic Brevo delivery reliability.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_EBOOK_STORAGE",
+      "title": "Controllable IPFS Ebook Storage",
+      "family_id": "EBOOK_DELIVERY",
+      "definition": "Store the finished ebook PDF through Pinata/IPFS in a manner that preserves the client's ability to withdraw the hosted copy if needed.",
+      "anchor_message_ids": [
+        217,
+        219,
+        224,
+        226
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "STORAGE",
+          "BACKEND"
+        ],
+        "contexts": [
+          "BOOK_STORAGE",
+          "IPFS"
+        ]
+      },
+      "boundary_note": "Storage location and takedown control are independent of NFT ownership gating and reader navigation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_EBOOK_HOLDER_ACCESS",
+      "title": "NFT-Holder-Only Ebook Access",
+      "family_id": "EBOOK_DELIVERY",
+      "definition": "Gate the ebook so only a wallet owning a valid project NFT can decrypt and access it through the viewer.",
+      "anchor_message_ids": [
+        217,
+        224,
+        237,
+        238,
+        460,
+        461,
+        462,
+        463,
+        469,
+        560,
+        569,
+        616,
+        624,
+        626,
+        703,
+        706,
+        707,
+        708,
+        710
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "STORAGE",
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "BOOK_READER",
+          "NFT_GATED_ACCESS",
+          "LIT_PROTOCOL"
+        ]
+      },
+      "boundary_note": "Covers authorization and decryption only; page navigation and visual reader behavior are separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_EBOOK_READER_UX",
+      "title": "Ebook Reader Experience",
+      "family_id": "EBOOK_DELIVERY",
+      "definition": "Provide a usable read-only ebook viewer with functional page navigation and the requested optional offline-download affordance.",
+      "anchor_message_ids": [
+        184,
+        411,
+        424,
+        442,
+        455,
+        469,
+        569,
+        573,
+        576,
+        610,
+        704
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "BOOK_READER",
+          "DESKTOP",
+          "MOBILE"
+        ]
+      },
+      "boundary_note": "Owns reader rendering and navigation after access has been granted, not the ownership or Lit Protocol authorization check.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NFT_TRANSFER_INHERITANCE",
+      "title": "Transferred NFT Rights and Attributes",
+      "family_id": "EBOOK_DELIVERY",
+      "definition": "When an NFT is transferred or sold, transfer the book access, mint-number referral identity, badges, and applicable active ticket state with it.",
+      "anchor_message_ids": [
+        143,
+        146
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "SECONDARY_SALES",
+          "NFT_TRANSFER",
+          "BOOK_READER"
+        ]
+      },
+      "boundary_note": "Transfer inheritance is a separate ownership-lifecycle behavior from royalty enforcement and initial mint fulfillment.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_NFT_DASHBOARD_OWNERSHIP",
+      "title": "Owned NFT Dashboard Synchronization",
+      "family_id": "NFT_INFORMATION",
+      "definition": "Show the wallet's actual owned NFTs on the project dashboard without false, missing, duplicated, or stale NFT records.",
+      "anchor_message_ids": [
+        288,
+        303,
+        309,
+        312,
+        340,
+        377,
+        388,
+        398,
+        404,
+        411,
+        430,
+        437,
+        441,
+        449,
+        455,
+        496,
+        556,
+        569
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND",
+          "API"
+        ],
+        "contexts": [
+          "DASHBOARD",
+          "NFT_OWNERSHIP"
+        ]
+      },
+      "boundary_note": "Owns the list and count of NFTs owned by the connected user; aggregate platform statistics and NFT metadata fields are separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "title": "NFT Metadata and Attribute Accuracy",
+      "family_id": "NFT_INFORMATION",
+      "definition": "Expose resolvable NFT metadata, images, referral identity, ticket count, referrals, and earnings using a consistent authoritative source.",
+      "anchor_message_ids": [
+        27,
+        143,
+        288,
+        377,
+        388,
+        390,
+        393,
+        398,
+        401,
+        411,
+        585,
+        590,
+        604,
+        688,
+        691,
+        692
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API",
+          "STORAGE"
+        ],
+        "contexts": [
+          "NFT_METADATA",
+          "NFT_DETAILS"
+        ]
+      },
+      "boundary_note": "Covers correctness of per-NFT metadata fields and assets; dashboard ownership synchronization and leaderboard aggregation remain separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BADGE_AWARD_RULES",
+      "title": "NFT Badge Award Rules",
+      "family_id": "NFT_INFORMATION",
+      "definition": "Award only badges whose referral or achievement conditions have actually been met, including the First Referral milestone.",
+      "anchor_message_ids": [
+        109,
+        111,
+        114,
+        143,
+        146,
+        398,
+        441,
+        445,
+        449,
+        473,
+        476,
+        496
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "SMART_CONTRACT",
+          "DATABASE"
+        ],
+        "contexts": [
+          "BADGES",
+          "REFERRAL_MILESTONES"
+        ]
+      },
+      "boundary_note": "Owns eligibility and award correctness; badge icons, count, and grid layout belong to presentation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BADGE_PRESENTATION",
+      "title": "Badge Set and Presentation",
+      "family_id": "NFT_INFORMATION",
+      "definition": "Present the accepted badge set with appropriate labels, icons, count, and responsive grid arrangement.",
+      "anchor_message_ids": [
+        109,
+        111,
+        114,
+        117,
+        306,
+        310,
+        313,
+        704
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "BADGES",
+          "DASHBOARD",
+          "MOBILE"
+        ]
+      },
+      "boundary_note": "Visual badge selection and layout can change independently from the backend rules that determine whether a badge is earned.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PLATFORM_AGGREGATE_STATS",
+      "title": "Accurate Platform Aggregate Statistics",
+      "family_id": "NFT_INFORMATION",
+      "definition": "Display accurate project-wide totals for mints, supply, prize-pool balance, referrals, and related public statistics.",
+      "anchor_message_ids": [
+        340,
+        430,
+        437,
+        441,
+        455,
+        492,
+        496,
+        499,
+        556
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND",
+          "API"
+        ],
+        "contexts": [
+          "PLATFORM_STATS",
+          "LANDING_PAGE",
+          "LEADERBOARD"
+        ]
+      },
+      "boundary_note": "Covers project-wide aggregate values; the connected user's owned NFTs and per-NFT referral attributes have separate trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LANDING_PAGE_MESSAGING",
+      "title": "Landing Page and FAQ Messaging",
+      "family_id": "LANDING_EXPERIENCE",
+      "definition": "Present the client-approved project explanation, FAQ, mission, referral, prize, payment, and support wording without misleading or obsolete mechanics.",
+      "anchor_message_ids": [
+        143,
+        146,
+        156,
+        157,
+        192,
+        210,
+        211,
+        212,
+        248
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LANDING_PAGE",
+          "FAQ",
+          "ABOUT_PAGE",
+          "MISSION_PAGE"
+        ]
+      },
+      "boundary_note": "Owns informational copy and labels; hero geometry, cover rendering, and underlying mechanics are independently evaluated.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_HERO_LAYOUT",
+      "title": "Landing Page Hero Layout",
+      "family_id": "LANDING_EXPERIENCE",
+      "definition": "Present the headline, subtitle, mechanics summary, CTA, and imagery in a clean hero layout without oversized or overlapping elements.",
+      "anchor_message_ids": [
+        192,
+        210,
+        211,
+        212
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LANDING_PAGE",
+          "HERO_SECTION"
+        ]
+      },
+      "boundary_note": "Hero arrangement is independently testable from the exact marketing wording and from full book-cover rendering.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "title": "Landing Page Book Cover Display",
+      "family_id": "LANDING_EXPERIENCE",
+      "definition": "Show the ebook cover on the landing page at an aesthetically appropriate size without cropping or cutting off any part of the cover.",
+      "anchor_message_ids": [
+        192,
+        210,
+        212,
+        213,
+        217,
+        248,
+        273,
+        275
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LANDING_PAGE",
+          "BOOK_COVER"
+        ]
+      },
+      "boundary_note": "The cover had its own repeated failure, fix, and resizing trajectory, so it is separate from general landing-page layout.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MOBILE_RESPONSIVE_LAYOUT",
+      "title": "Mobile Responsive Layout",
+      "family_id": "LANDING_EXPERIENCE",
+      "definition": "Ensure landing, dashboard, mechanics, badge, and related UI sections remain usable and properly arranged on mobile screens.",
+      "anchor_message_ids": [
+        210,
+        313,
+        704
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "MOBILE",
+          "LANDING_PAGE",
+          "DASHBOARD"
+        ]
+      },
+      "boundary_note": "Covers responsive visual arrangement, not mobile-wallet signing or Lit Protocol compatibility.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_MAURITIUS_GEOBLOCK",
+      "title": "Mauritius Landing-Page Geoblock",
+      "family_id": null,
+      "definition": "Block access from Mauritius to the Project Rebuild landing page.",
+      "anchor_message_ids": [
+        23,
+        26,
+        121,
+        122
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "LANDING_PAGE_ACCESS",
+          "MAURITIUS"
+        ]
+      },
+      "boundary_note": "Geographic access control is separate from payment-provider availability for a Mauritius-incorporated business.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DISCORD_COMMUNITY_SERVER",
+      "title": "Discord Community Server",
+      "family_id": "USER_SUPPORT",
+      "definition": "Provide a structured Project Rebuild Discord community with onboarding, announcements, discussion, feedback, support, and bug-report channels.",
+      "anchor_message_ids": [
+        751,
+        753,
+        757,
+        758,
+        761,
+        763,
+        764,
+        767,
+        776,
+        777,
+        779
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "UI_UX"
+        ],
+        "contexts": [
+          "COMMUNITY_SUPPORT",
+          "DISCORD"
+        ]
+      },
+      "boundary_note": "The Discord server is an independently requested operational deliverable, not generic project communication.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SUPPORT_CONTACT_FORM",
+      "title": "Website Help and Contact Form",
+      "family_id": "USER_SUPPORT",
+      "definition": "Provide a website support entry point and form for user identity, contact details, subject, and issue or suggestion text.",
+      "anchor_message_ids": [
+        773,
+        774,
+        775
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "EMAIL"
+        ],
+        "contexts": [
+          "USER_SUPPORT",
+          "LANDING_PAGE"
+        ]
+      },
+      "boundary_note": "The website contact form is a distinct support channel from the externally hosted Discord community.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SITE_AVAILABILITY",
+      "title": "Production Website Availability",
+      "family_id": null,
+      "definition": "Keep the production Project Rebuild website reachable after deployments without gateway failures or deployment-induced outages.",
+      "anchor_message_ids": [
+        337,
+        338,
+        339,
+        340
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "PRODUCTION"
+        ]
+      },
+      "boundary_note": "Availability is a production runtime behavior distinct from correctness of minting, dashboard data, or individual page features.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BLOCKAID_PROJECT_VERIFICATION",
+      "title": "Wallet Security False-Positive Remediation",
+      "family_id": null,
+      "definition": "Submit Project Rebuild for wallet-security project verification so legitimate users are not shown a false malicious-site warning.",
+      "anchor_message_ids": [
+        794,
+        796,
+        799,
+        800
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "AUTH"
+        ],
+        "contexts": [
+          "WALLET_CONNECTION",
+          "PRODUCTION"
+        ]
+      },
+      "boundary_note": "This is a bounded external verification obligation, not a general security or deployment Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CONTRACT_EVENT_WEBHOOK",
+      "title": "Contract Event Webhook",
+      "family_id": null,
+      "definition": "Configure an Alchemy Base Mainnet webhook to capture the active contract's events and deliver them to the backend event endpoint.",
+      "anchor_message_ids": [
+        802,
+        804,
+        810,
+        812,
+        814,
+        815,
+        816,
+        817,
+        818
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API",
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "CONTRACT_EVENTS",
+          "BASE_MAINNET",
+          "PRODUCTION"
+        ]
+      },
+      "boundary_note": "The webhook is an independently required operational mechanism that supports event synchronization; it is not generic testing or deployment activity.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_TRANSAK_KYB_DEMO_VIDEO",
+      "title": "Transak KYB UX Demo Video",
+      "family_id": null,
+      "definition": "Produce a demonstration video showing how the Transak widget will be used on Project Rebuild for the provider's KYB review.",
+      "anchor_message_ids": [
+        276,
+        278,
+        279,
+        282
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "PAYMENT",
+          "UI_UX"
+        ],
+        "contexts": [
+          "TRANSAK",
+          "KYB_REVIEW"
+        ]
+      },
+      "boundary_note": "The video is a standalone provider-review artifact, distinct from implementing the fiat on-ramp itself.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CONTRACT_SETUP_GUIDE",
+      "title": "Contract Setup and Testing Guide",
+      "family_id": null,
+      "definition": "Provide the client with a step-by-step guide for setting up and independently checking the deployed contracts.",
+      "anchor_message_ids": [
+        27,
+        30,
+        38
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "CONTRACT_HANDOFF"
+        ]
+      },
+      "boundary_note": "Included only because the guide itself was explicitly requested as a deliverable; routine live testing and demo scheduling are excluded.",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        105,
+        106,
+        107
+      ],
+      "description": "A hosting-service choice was requested, but the visible evidence identifies only the domain registrar and contains no reliable client decision between VPS, AWS, or another hosting platform.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        797,
+        798,
+        801
+      ],
+      "description": "The freelancer proposed and documented a Super Admin dashboard, but it is unclear whether the client accepted implementation of the dashboard or only preparation of the proposal document.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        624,
+        626,
+        703,
+        710,
+        712,
+        720
+      ],
+      "description": "Mobile-wallet ebook access is clearly expected, but the evidence does not safely establish whether repeat signing should be removed or whether the remaining failures were product defects, wallet configuration issues, or Lit Protocol compatibility limitations.",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

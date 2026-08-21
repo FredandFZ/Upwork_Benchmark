@@ -1,0 +1,109 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_CONTRACT_EVENT_WEBHOOK",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 807,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "webhook_provider": "Alchemy",
+          "event_source": "Project Rebuild smart contract logs",
+          "contract_address": "0xDFD5768747Ff063871C345B9cE369f9D41E852A8"
+        },
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        803,
+        804,
+        805,
+        806,
+        807
+      ],
+      "decision_note": "The client asks how to configure the Alchemy webhook in tightly coupled context, but the original backend, API, and production scope is not yet established.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 812,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        810,
+        812
+      ],
+      "decision_note": "The client concretely reports being unable to edit the webhook query required to apply the contract address.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 818,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "The client reports completing the webhook setup after following the supplied configuration procedure; no executed event-delivery test is reported."
+        }
+      },
+      "evidence_message_ids": [
+        813,
+        816,
+        817,
+        818
+      ],
+      "decision_note": "The target-specific completion statement supports a setup claim, but it does not report a concrete runtime test of log capture or backend delivery.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 818,
+        "speaker": "client",
+        "text": "cool, webhook is done. but i forget how to 'copy the webhook secret'"
+      },
+      "supporting_message_ids": [
+        816,
+        817
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "chain": "Base Mainnet",
+        "log_capture": "all logs from the Project Rebuild contract",
+        "webhook_url": "https://api.projectrebuild.xyz/api/webhook/contract-events",
+        "event_routing": "backend routes contract logs by event signature"
+      },
+      "scope_updates": {
+        "persistence": null,
+        "components": [
+          "BACKEND",
+          "API",
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "CONTRACT_EVENT_SYNC",
+          "PRODUCTION"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NFT_IMAGE_ASSET_RESOLUTION",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "I have fixed.\nHow to see it in your wallet/dashboard now:\n\\=&gt; Import NFT manually if needed:\n\\- contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n\\- token ID: 1\n\\- chain: Base Mainnet\n\nRefresh the dashboard; backend already has the token in DB (tokenId 1), so it should render with the new metadata/image and PDF link\n\n."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer claims the NFT should render on the dashboard with its new metadata and image after refresh."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "In Rabby, once i deselect 'hide low-value NFTs' I could see the NFT but it still had no image or information. and i haven't been able to import it as a custom token.\n\nIll try to do an ETH buy now and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The NFT is visible in Rabby, but its image and associated information do not render."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 396,
+        "speaker": "freelancer",
+        "text": "About importing: this is an ERC‑721 NFT, so you must “Import NFT” (not “Import token”) in your wallet’s NFT section, on Base Mainnet, using:\n\\- Contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n\\- Token ID: 1 (the minted token to 0x3b55868Dd2ebA28f97b3dB55a4cB706a078154B5)\n\\- If your wallet asks for both contract and token ID, fill both. If it only asks for a contract, switch to Base and use the contract above; then select/refresh NFTs.\nYou can verify the asset is live:\n\\- Metadata: <https://api.projectrebuild.xyz/metadata/1>\n\\- Image: <https://api.projectrebuild.xyz/images/1.png>\n\\- PDF: <https://api.projectrebuild.xyz/pdf/1>\n\nIf you still don’t see it:\n1) Confirm you’re on Base network.\n2) Use the NFT import flow (not token import).\n3) Manually enter contract + token ID.\n4) Refresh/force-reload the wallet’s NFT view."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer claims the NFT metadata and image assets are live at their specified API URLs."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 401,
+        "speaker": "freelancer",
+        "text": "Findings\nYour ETH mint reverted (0x3af7…0855c on Base) because the on-chain swap router is set to 0x2626…e481, which isn’t the Uniswap V3 SwapRouter. The contract calls exactInputSingle there and it reverts, so every ETH mint will fail until the router is corrected on-chain.\n\nUSDC mint works;\n\\- token #1 exists and is owned by 0x3b55868Dd2ebA28f97b3dB55a4cB706a078154B5. Metadata and assets resolve:\n\\- Metadata: <https://api.projectrebuild.xyz/metadata/1>\n\\- Image: <https://api.projectrebuild.xyz/images/1.png>"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Freelancer reports checking token #1 and confirms that its metadata and image asset endpoints resolve."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "NFTs are showing up on my dashboard now (images not showing when i click through). and when i click 'View Book' its not showing up"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "NFT records appear on the dashboard, but their images do not render on the NFT detail view."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 423,
+        "speaker": "freelancer",
+        "text": "Please hard refresh the app:\n\\- Dashboard/NFT detail: images and “View Book” should work without XML errors.\n\\- Quick live ETH mint test now to confirm end-to-end (UI + on-chain) with the new router."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer claims dashboard and NFT-detail images should now work without XML errors."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 273,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "description": "This message concerns landing-page book-cover sizing and clipping rather than NFT media asset resolution."
+    },
+    {
+      "message_id": 377,
+      "suggested_requirement_id": "REQ_NFT_DASHBOARD_OWNERSHIP",
+      "description": "The reported NFT absence from both the wallet and dashboard primarily concerns owned-NFT synchronization."
+    },
+    {
+      "message_id": 398,
+      "suggested_requirement_id": "REQ_NFT_DASHBOARD_OWNERSHIP",
+      "description": "The NFT-not-showing observation concerns dashboard ownership synchronization; the message does not specifically report an image asset failure."
+    },
+    {
+      "message_id": 404,
+      "suggested_requirement_id": "REQ_NFT_DASHBOARD_OWNERSHIP",
+      "description": "The NFT is confirmed on BaseScan but absent from the project dashboard, which is an ownership synchronization failure."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_NFT_DASHBOARD_OWNERSHIP",
+      "description": "The dashboard regression removes the NFT records themselves rather than only their images."
+    },
+    {
+      "message_id": 411,
+      "suggested_requirement_id": "REQ_EBOOK_HOLDER_ACCESS",
+      "description": "The separate View Book failure in this multi-requirement message belongs to the ebook-access Requirement."
+    }
+  ],
+  "missing_requirement_candidates": [
+    {
+      "message_ids": [
+        288,
+        310,
+        313
+      ],
+      "suggested_title": "NFT Detail Book-Cover Presentation",
+      "description": "These messages form an independent failure, fix claim, and verification trajectory for NFT-detail cover sizing and clipping, which is visual presentation rather than image/media asset URL resolution."
+    }
+  ]
+}

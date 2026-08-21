@@ -1,0 +1,757 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-07-25",
+      "end": "2026-07-25",
+      "milestone": null,
+      "phase_label": "Scope, platform, design, security, and deadline agreement"
+    },
+    {
+      "session_id": "S2",
+      "start": "2026-07-26",
+      "end": "2026-07-27",
+      "milestone": null,
+      "phase_label": "UI implementation and feature clarification"
+    },
+    {
+      "session_id": "S3",
+      "start": "2026-07-28",
+      "end": "2026-07-30",
+      "milestone": null,
+      "phase_label": "Source delivery, test access, deployment dispute, and security remediation"
+    },
+    {
+      "session_id": "S4",
+      "start": "2026-07-31",
+      "end": "2026-07-31",
+      "milestone": null,
+      "phase_label": "Store deployment request and contract termination"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "APPLICATION_SURFACES",
+      "title": "Application Surfaces"
+    },
+    {
+      "family_id": "ACCOUNT_AND_ACCESS",
+      "title": "Account and Access Capabilities"
+    },
+    {
+      "family_id": "INVOICING_FEATURES",
+      "title": "Invoicing Features"
+    },
+    {
+      "family_id": "BACKEND_STACK",
+      "title": "Mandatory Backend Stack"
+    },
+    {
+      "family_id": "SECURITY_CONTROLS",
+      "title": "Security Controls"
+    },
+    {
+      "family_id": "DELIVERABLE_ARTIFACTS",
+      "title": "Deliverable Artifacts"
+    },
+    {
+      "family_id": "DEPLOYMENT_OUTPUTS",
+      "title": "Deployment Outputs"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_WEB_APPLICATION",
+      "title": "Web Application",
+      "family_id": "APPLICATION_SURFACES",
+      "definition": "Provide the billing software as a usable responsive web application.",
+      "anchor_message_ids": [
+        31
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "WEB_APP"
+        ]
+      },
+      "boundary_note": "Covers availability of the customer-facing web application; mobile, desktop, and administrative surfaces remain independently deliverable Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MOBILE_APPLICATION",
+      "title": "Flutter Mobile Application",
+      "family_id": "APPLICATION_SURFACES",
+      "definition": "Provide a Flutter-based mobile application supporting the requested Android and iOS platforms.",
+      "anchor_message_ids": [
+        31,
+        102,
+        108,
+        110,
+        111
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "MOBILE"
+        ],
+        "contexts": [
+          "MOBILE_APP"
+        ]
+      },
+      "boundary_note": "Covers the mobile application and its Flutter implementation; publication through mobile stores is a separate operational Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DESKTOP_APPLICATION",
+      "title": "Flutter Desktop Application",
+      "family_id": "APPLICATION_SURFACES",
+      "definition": "Provide Flutter desktop support for the requested Windows and macOS platforms.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "DESKTOP"
+        ],
+        "contexts": [
+          "DESKTOP_APP"
+        ]
+      },
+      "boundary_note": "Windows and macOS are treated as target platforms of one desktop application mechanism; web and mobile availability can evolve independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ADMIN_INTERFACE",
+      "title": "Administrative Interface",
+      "family_id": "APPLICATION_SURFACES",
+      "definition": "Provide an administrative interface for managing the billing system independently of ordinary user-facing workflows.",
+      "anchor_message_ids": [
+        31
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "ADMIN",
+          "BACKEND"
+        ],
+        "contexts": [
+          "ADMIN_PORTAL"
+        ]
+      },
+      "boundary_note": "The admin interface is independently usable and testable and is not merged into the general web application surface.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MULTI_COMPANY_TENANCY",
+      "title": "Multi-Company Tenancy",
+      "family_id": "ACCOUNT_AND_ACCESS",
+      "definition": "Allow the billing system to support and separate multiple companies.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "MULTI_TENANCY"
+        ]
+      },
+      "boundary_note": "Company tenancy is distinct from permitting multiple users within or across companies.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MULTI_USER_ACCESS",
+      "title": "Multi-User Access",
+      "family_id": "ACCOUNT_AND_ACCESS",
+      "definition": "Allow multiple users to access and use the billing system with appropriate account separation.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "USER_MANAGEMENT"
+        ]
+      },
+      "boundary_note": "User multiplicity can be changed or tested independently from company tenancy and from the authentication method.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_EMAIL_OTP_AUTHENTICATION",
+      "title": "Email OTP Authentication",
+      "family_id": "ACCOUNT_AND_ACCESS",
+      "definition": "Support authentication or verification using one-time passwords delivered through email.",
+      "anchor_message_ids": [
+        62,
+        63,
+        64
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "EMAIL",
+          "BACKEND"
+        ],
+        "contexts": [
+          "EMAIL_AUTH"
+        ]
+      },
+      "boundary_note": "SendGrid or Hostinger is an implementation/provider attribute of the OTP mechanism rather than a separate Requirement; client confirmation of the precise provider remains weak.",
+      "confidence": "LOW"
+    },
+    {
+      "requirement_id": "REQ_INDIAN_GST_SUPPORT",
+      "title": "Optional Indian GST Support",
+      "family_id": "INVOICING_FEATURES",
+      "definition": "Allow Indian GST treatment to be applied when applicable without forcing GST on every invoice.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "FRONTEND",
+          "DATABASE"
+        ],
+        "contexts": [
+          "GST_INVOICING"
+        ]
+      },
+      "boundary_note": "GST calculation and presentation form one configurable invoicing mechanism and are independent of invoice templates and PDF generation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MULTIPLE_INVOICE_TEMPLATES",
+      "title": "Multiple Invoice Templates",
+      "family_id": "INVOICING_FEATURES",
+      "definition": "Allow users to select from multiple invoice presentation templates.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "INVOICE_MANAGEMENT"
+        ]
+      },
+      "boundary_note": "Template selection is independently configurable and is not merged with PDF generation or visual styling of the overall application.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_TABULAR_DATA_IMPORT_EXPORT",
+      "title": "CSV and Spreadsheet Import and Export",
+      "family_id": "INVOICING_FEATURES",
+      "definition": "Support importing and exporting billing data through CSV, XLS, and XLSX formats.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "DATABASE"
+        ],
+        "contexts": [
+          "DATA_EXCHANGE"
+        ]
+      },
+      "boundary_note": "The supported file formats are attributes of one tabular data-exchange mechanism; import and export remain tightly coupled in the supplied specification.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PDF_INVOICE_GENERATION",
+      "title": "PDF Invoice Generation",
+      "family_id": "INVOICING_FEATURES",
+      "definition": "Generate invoices as PDF documents.",
+      "anchor_message_ids": [
+        69
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "INVOICE_PDF"
+        ]
+      },
+      "boundary_note": "Generating the PDF is independently testable from sharing an already generated PDF through external channels.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PDF_INVOICE_SHARING",
+      "title": "PDF Invoice Sharing",
+      "family_id": "INVOICING_FEATURES",
+      "definition": "Provide a share action for PDF invoices through channels such as WhatsApp, Gmail, and a shareable link.",
+      "anchor_message_ids": [
+        69
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "MOBILE"
+        ],
+        "contexts": [
+          "INVOICE_SHARING"
+        ]
+      },
+      "boundary_note": "WhatsApp, Gmail, and link sharing are channels of one sharing mechanism; PDF generation remains a separate prerequisite behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_RESPONSIVE_PROFESSIONAL_UI",
+      "title": "Responsive Professional UI",
+      "family_id": null,
+      "definition": "Provide a responsive, elegant, professional-looking interface with suitable colors and typography.",
+      "anchor_message_ids": [
+        35,
+        36,
+        59,
+        65,
+        66
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "UI_UX",
+          "FRONTEND",
+          "MOBILE"
+        ],
+        "contexts": [
+          "WEB_APP",
+          "MOBILE_APP",
+          "ADMIN_PORTAL"
+        ]
+      },
+      "boundary_note": "Color palette, font family, font weight, elegance, and responsiveness are attributes of one visual-design mechanism; the font complaint does not create a separate Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DAILY_BACKUP_AND_RESTORE",
+      "title": "Daily Automatic Backup and Restore",
+      "family_id": null,
+      "definition": "Automatically create daily data backups and provide a corresponding restore capability.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DATABASE",
+          "BACKEND",
+          "STORAGE"
+        ],
+        "contexts": [
+          "BACKUP_RECOVERY"
+        ]
+      },
+      "boundary_note": "Backup scheduling and restoration are treated as the tightly coupled backup-and-recovery mechanism requested in the job description.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NESTJS_BACKEND",
+      "title": "NestJS Backend",
+      "family_id": "BACKEND_STACK",
+      "definition": "Implement the application backend using NestJS and TypeScript.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "BACKEND_ARCHITECTURE"
+        ]
+      },
+      "boundary_note": "The backend framework choice is independently enforceable from the database, ORM, caching, and client framework choices.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_POSTGRESQL_PRISMA_DATA_LAYER",
+      "title": "PostgreSQL and Prisma Data Layer",
+      "family_id": "BACKEND_STACK",
+      "definition": "Use PostgreSQL as the database and Prisma ORM for application data access.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DATABASE",
+          "BACKEND"
+        ],
+        "contexts": [
+          "DATA_LAYER"
+        ]
+      },
+      "boundary_note": "PostgreSQL and Prisma are tightly coupled database-layer choices in the specification; schema and migration delivery is a separate artifact obligation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_REDIS_INTEGRATION",
+      "title": "Redis Integration",
+      "family_id": "BACKEND_STACK",
+      "definition": "Include Redis in the application architecture for the backend use cases defined by the detailed specification.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "CACHE"
+        ],
+        "contexts": [
+          "CACHING"
+        ]
+      },
+      "boundary_note": "Redis is a separately mandated infrastructure technology; its precise caching or queueing role is not visible in the supplied history.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_PRODUCTION_QUALITY_CODE",
+      "title": "Production-Quality Code",
+      "family_id": null,
+      "definition": "Deliver clean, scalable, reviewed, understood, and production-ready code rather than unverified generated output.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "DATABASE"
+        ],
+        "contexts": [
+          "CODE_QUALITY"
+        ]
+      },
+      "boundary_note": "This is a code-quality constraint, not a generic testing or debugging Requirement; concrete test outcomes should be routed to the affected product behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_APPLICATION_SECURITY",
+      "title": "Application Security",
+      "family_id": "SECURITY_CONTROLS",
+      "definition": "Treat secure implementation and production operation as a major application-wide quality constraint.",
+      "anchor_message_ids": [
+        40
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "API",
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "APPLICATION_SECURITY"
+        ]
+      },
+      "boundary_note": "Covers the general secure-implementation constraint; the later repository-visibility and exposed-endpoint obligations have distinct fixes and remain separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOURCE_REPOSITORY_PRIVACY",
+      "title": "Source Repository Privacy",
+      "family_id": "SECURITY_CONTROLS",
+      "definition": "Keep the project's source repository from being publicly exposed.",
+      "anchor_message_ids": [
+        118,
+        119,
+        120,
+        128
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SOURCE_CONTROL"
+        ],
+        "contexts": [
+          "SOURCE_CONFIDENTIALITY"
+        ]
+      },
+      "boundary_note": "Repository visibility has its own failure and remediation trajectory and is separate from application runtime security and API endpoint replacement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_API_ENDPOINT_PROTECTION",
+      "title": "Protection and Replacement of Exposed API Endpoints",
+      "family_id": "SECURITY_CONTROLS",
+      "definition": "Protect API configuration and replace endpoint paths or identifiers that were exposed through the public repository.",
+      "anchor_message_ids": [
+        121,
+        129
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "BACKEND"
+        ],
+        "contexts": [
+          "API_SECURITY"
+        ]
+      },
+      "boundary_note": "Endpoint replacement can be implemented independently from changing repository visibility, so it is not represented as an attribute of repository privacy.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOURCE_CODE_DELIVERY",
+      "title": "Complete Source Code Delivery",
+      "family_id": "DELIVERABLE_ARTIFACTS",
+      "definition": "Deliver the complete codebase, including the web and Flutter application source code.",
+      "anchor_message_ids": [
+        71,
+        102,
+        108,
+        110,
+        111,
+        130
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "SOURCE_CONTROL",
+          "FRONTEND",
+          "MOBILE",
+          "BACKEND"
+        ],
+        "contexts": [
+          "SOURCE_DELIVERY"
+        ]
+      },
+      "boundary_note": "This Requirement concerns delivery and accessibility of source artifacts, not whether each application surface functions correctly.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DATABASE_SCHEMA_MIGRATIONS",
+      "title": "Database Schema and Migrations",
+      "family_id": "DELIVERABLE_ARTIFACTS",
+      "definition": "Deliver the database schema and executable migration artifacts.",
+      "anchor_message_ids": [],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "DATABASE",
+          "BACKEND"
+        ],
+        "contexts": [
+          "DATABASE_DELIVERY"
+        ]
+      },
+      "boundary_note": "The migration artifacts are an independent deliverable even though they implement the PostgreSQL and Prisma data-layer choice.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_API_DOCUMENTATION",
+      "title": "API Documentation",
+      "family_id": "DELIVERABLE_ARTIFACTS",
+      "definition": "Deliver documentation describing the application's API.",
+      "anchor_message_ids": [
+        73
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "API",
+          "DOCUMENTATION"
+        ],
+        "contexts": [
+          "API_DOCUMENTATION"
+        ]
+      },
+      "boundary_note": "API reference documentation can be completed independently from the setup guide and deployment instructions.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SETUP_AND_README_DOCUMENTATION",
+      "title": "Setup Guide and README",
+      "family_id": "DELIVERABLE_ARTIFACTS",
+      "definition": "Deliver a README and setup instructions sufficient to configure and run the project.",
+      "anchor_message_ids": [
+        73
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "DOCUMENTATION"
+        ],
+        "contexts": [
+          "PROJECT_SETUP"
+        ]
+      },
+      "boundary_note": "General setup and README material form one onboarding artifact; detailed production deployment steps are separately requested.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DEPLOYMENT_GUIDE",
+      "title": "Step-by-Step Deployment Guide",
+      "family_id": "DELIVERABLE_ARTIFACTS",
+      "definition": "Provide a step-by-step deployment document that a server administrator can use to deploy the project.",
+      "anchor_message_ids": [
+        81,
+        87,
+        91
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "DOCUMENTATION",
+          "DEVOPS"
+        ],
+        "contexts": [
+          "SERVER_DEPLOYMENT"
+        ]
+      },
+      "boundary_note": "The guide is an independently requested artifact and does not substitute for the separate obligation to provide an accessible deployed application.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LIVE_SERVER_DEPLOYMENT",
+      "title": "Accessible Dockerized Server Deployment",
+      "family_id": "DEPLOYMENT_OUTPUTS",
+      "definition": "Deploy the full-stack application to an accessible environment, ultimately supporting Docker-based deployment on the client's Ubuntu VPS.",
+      "anchor_message_ids": [
+        39,
+        72,
+        75,
+        77,
+        80,
+        86,
+        106,
+        112,
+        115,
+        116,
+        124,
+        127,
+        146
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "DEVOPS",
+          "FRONTEND",
+          "BACKEND",
+          "DATABASE"
+        ],
+        "contexts": [
+          "SERVER_DEPLOYMENT",
+          "LIVE_TEST_ENVIRONMENT"
+        ]
+      },
+      "boundary_note": "Temporary Vercel or Heroku hosting, deployment from GitHub, Docker Compose, and the Ubuntu VPS are evolving targets or methods of one live-server deployment obligation; documentation and mobile-store publication remain separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MOBILE_STORE_PUBLICATION",
+      "title": "Play Store and App Store Publication",
+      "family_id": "DEPLOYMENT_OUTPUTS",
+      "definition": "Assist with publishing the mobile application through Google Play and Apple's App Store using the client's accounts.",
+      "anchor_message_ids": [
+        28,
+        29,
+        30,
+        133,
+        134,
+        135
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "MOBILE",
+          "DEVOPS"
+        ],
+        "contexts": [
+          "MOBILE_DISTRIBUTION"
+        ]
+      },
+      "boundary_note": "The two stores are distribution targets of the same requested mobile-release task; server deployment is an independent channel.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_SEVEN_DAY_DELIVERY",
+      "title": "Seven-Day Delivery Deadline",
+      "family_id": null,
+      "definition": "Complete the project, including the agreed deployment work, within seven calendar days.",
+      "anchor_message_ids": [
+        39,
+        41,
+        136,
+        137
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [],
+        "contexts": [
+          "PROJECT_DELIVERY"
+        ]
+      },
+      "boundary_note": "This is a bounded delivery constraint rather than a software feature; it is kept separate from the technical deployment behavior.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        26
+      ],
+      "description": "The referenced detailed feature attachment is unavailable and may define additional independent Requirements or clarify the visible job-description features.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        62,
+        63,
+        64,
+        67
+      ],
+      "description": "Email OTP appears to be under implementation, but the supplied history does not clearly establish whether Hostinger must replace SendGrid or whether a configurable service-API field was client-required.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        76
+      ],
+      "description": "The client requests implementation of an unavailable referenced item, so its affected Requirement and behavior cannot be identified.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        107
+      ],
+      "description": "The phrase 'Did you apply these?' refers to missing context and cannot be safely mapped to an existing or new Requirement.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        133,
+        134,
+        135,
+        137
+      ],
+      "description": "Mobile-store publication is requested as bonus work shortly before cancellation; later passes should determine whether it became an operative task before termination.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        137,
+        146,
+        147
+      ],
+      "description": "Contract cancellation clearly terminates the engagement, but later extraction must determine whether it supports REMOVE events for all active obligations or only task-local delivery obligations.",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

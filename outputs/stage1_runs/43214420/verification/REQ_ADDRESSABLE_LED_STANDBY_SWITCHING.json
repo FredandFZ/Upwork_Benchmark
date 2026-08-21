@@ -1,0 +1,106 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 281,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "power_cutoff_behavior": "Cut LED power when the LEDs are not needed",
+          "control_gpio": "GPIO3",
+          "standby_current_target": "zero"
+        },
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "LED",
+            "POWER",
+            "MCU"
+          ],
+          "contexts": [
+            "ADDRESSABLE_LED"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        279,
+        281
+      ],
+      "decision_note": "The client explicitly proposes GPIO3-controlled LED rail cutoff; the original board and status-lighting contexts are not established by this evidence.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        425
+      ],
+      "decision_note": "The client explicitly changes the design to control LED and sensor power separately.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 459,
+        "event_type": "AMBIGUOUS",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        456,
+        458,
+        459,
+        460
+      ],
+      "decision_note": "The freelancer identifies a material mismatch between ground-side switching and the intended 3.3V supply switching topology.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 468,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        460,
+        465,
+        466,
+        468
+      ],
+      "decision_note": "The client reports updating the documentation with the newly proposed complementary MOSFET pair.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 468,
+        "event_type": "RESUME",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        460,
+        466,
+        468
+      ],
+      "decision_note": "The documented transistor update resolves the preceding switching-topology conflict.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

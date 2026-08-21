@@ -1,0 +1,302 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_OWNED_NFT_DASHBOARD",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, but there are bugs.\n\n**I tried to mint a couple times last night, with ETH in my wallet (no USDC), but it seems to have failed, yet, on <http://ProjectRebuild.xyz|ProjectRebuild.xyz> it says i have minted twice.**\n\nAlso, i used no referral code, so (not sure what should have happened to the commission and ticket on mint 1, as its mean to go to an already minted NFT holder... a one off edge case i hadn't thought of, but) mint 2 should have allocated the commission and ticket to mint 1 - (Maybe this is due to the mint not going through)\n\nAlso, when i click to view NFT from the dashboard, the book cover is too big and cut off, and (maybe because the mint didn't actually work) im not sure how to view the actual book.\n\nIll try minting now with USDC and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "dashboard_inventory_rule": "Show the connected user's actual owned NFTs and exclude failed or nonexistent mints.",
+        "nft_detail_page": "Each owned NFT opens a detail page with a fully visible book-cover image and an owner-facing way to access the ebook."
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "DASHBOARD",
+          "NFT_OWNERSHIP"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, but there are bugs.\n\n**I tried to mint a couple times last night, with ETH in my wallet (no USDC), but it seems to have failed, yet, on <http://ProjectRebuild.xyz|ProjectRebuild.xyz> it says i have minted twice.**\n\nAlso, i used no referral code, so (not sure what should have happened to the commission and ticket on mint 1, as its mean to go to an already minted NFT holder... a one off edge case i hadn't thought of, but) mint 2 should have allocated the commission and ticket to mint 1 - (Maybe this is due to the mint not going through)\n\nAlso, when i click to view NFT from the dashboard, the book cover is too big and cut off, and (maybe because the mint didn't actually work) im not sure how to view the actual book.\n\nIll try minting now with USDC and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Failed mint attempts appeared as owned NFTs, and the dashboard NFT detail view showed an oversized, cropped cover without a clear ebook-access path."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 310,
+        "speaker": "freelancer",
+        "text": "**Testing checklist**\n**Please test the following on production:**\n\n***1\\. Referral code validation***\n\\- Try an invalid code (*e.g., \"5\" when only 1-2 NFTs exist*) — should show invalid message\n\\- Try a valid code (*e.g., \"1\" if NFT #1 exists*) — should show a valid message\n\\- Try no code — should show \"No/Invalid referral code\" message\n\n***2\\. Minting***\n\\- Attempt a mint with USDC — should work\n\\- Check dashboard — only successful mints should appear\n\n***3\\. NFT detail page***\n\\- View an NFT detail page — book cover should display fully\n\\- As an owner, the \"*View Book*\" button should be visible\n\n***4\\. Badges***\n\\- Check dashboard badges section — should show 8 badges (Legend removed). Remember badges display is responsive, so the screen size determines it\n\nAll fixes are live and ready for testing."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that only successful mints appear on the dashboard and that NFT detail pages show the full cover and an owner-only View Book button."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 312,
+        "speaker": "client",
+        "text": "Most tweaks are great, but mint is still not working.\n\nOn mint attempt, i don't get the option to choose to pay in ETH/USDC/etc, but, i have both ETH and USDC in the wallet and the first mint is still not working...\n\nAnd on my dashboard, it is still showing that i have 2 NFTs, but when i click through to 'read' (on these false NFTs) it goes nowhere"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The dashboard continued to show two nonexistent NFTs from failed mints, and their read links went nowhere."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 313,
+        "speaker": "client",
+        "text": "1 - Invalid code message is great, but needs one more reword to 'No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random'.\n\n2 - First mint still not working (possibly due to commission and ticket coded to go to an existing NFT holder, which for the first mint doesn't exist)\n\n3 - NFT sizing is good. and 'View Book' botton looks good too.\n\n4 - Badges are good, but right now has 5 on the top row and 3 on the bottom row, if possible, change to 4 on top row and 4 on bottom row."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirms that NFT sizing and the View Book button presentation look correct."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 340,
+        "speaker": "client",
+        "text": "the site is working, and the false NFTs are no longer showing up on my dashboard, but:\n\nIts saying we are up to mint number 4, yet i have not received any payments, so i think that is wrong"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirms that the previously displayed false NFTs no longer appear on the dashboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 377,
+        "speaker": "client",
+        "text": "USDC Mint attempt: Approval transaction executed → “Mint Successful” modal appeared → Mint transaction appeared → transaction executed → “Mint Successful” modal appeared, NFT certificate working, mint counted, pool contribution made..... but I can't find the NFT in my wallet or on our dashboard.\nTransaction - 0x821207F44209Be7556fE30643a1EeD4BA6E6ce52"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A confirmed USDC mint was counted and produced a certificate, but the resulting NFT did not appear on the dashboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "I have fixed.\nHow to see it in your wallet/dashboard now:\n\\=&gt; Import NFT manually if needed:\n\\- contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n\\- token ID: 1\n\\- chain: Base Mainnet\n\nRefresh the dashboard; backend already has the token in DB (tokenId 1), so it should render with the new metadata/image and PDF link\n\n."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the dashboard token-rendering issue is fixed and that token 1 should appear with metadata, image, and PDF link after refresh."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 404,
+        "speaker": "client",
+        "text": "yeah, i can see on Base scan that i own the NFTs but on the Project Rebuild dashboard it still says 0 and shows nothing (although ticket the first referral badge).\nThese links took me to this (attached)"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "BaseScan confirmed that the client owned NFTs, while the Project Rebuild dashboard reported zero NFTs and displayed none."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "NFTs are showing up on my dashboard now (images not showing when i click through). and when i click 'View Book' its not showing up"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirms that owned NFTs are now appearing on the dashboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "NFTs are showing up on my dashboard now (images not showing when i click through). and when i click 'View Book' its not showing up"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Although the NFT inventory appeared, images failed to render on the NFT detail pages."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 423,
+        "speaker": "freelancer",
+        "text": "Please hard refresh the app:\n\\- Dashboard/NFT detail: images and “View Book” should work without XML errors.\n\\- Quick live ETH mint test now to confirm end-to-end (UI + on-chain) with the new router."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that dashboard NFT-detail images and the View Book integration should now work without XML errors."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 430,
+        "speaker": "client",
+        "text": "\\- My NFTs are no longer showing in the dashboard.\n\\- I can select to pay in ETH, but transaction failed.\n\nDashboard is still saying we are up to mint number 3, but that the prize pool is now empty, see screenshots"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The client's NFTs disappeared from the dashboard after previously becoming visible."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 441,
+        "speaker": "client",
+        "text": "Dashboard is now saying and showing i have 3 NFTs, but a total supply of 2.\n\nNo badges (I should have first referral badge)\n\n$10 in the prize pool\n\nAnd that i have 0 tickets, 0 referrals and have made $0"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The dashboard showed three owned NFTs even though total supply was only two, demonstrating an inaccurate NFT inventory."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 492,
+        "speaker": "freelancer",
+        "text": "I have fixed this as well:\n3\\. All Data Now Accurate:\nTotal NFTs: 2\nTotal Referrals: 1\nPrize Draw Tickets: 1\nTotal Earnings: $5\nNFT Details: All accurate (referrals, tickets, earnings per NFT)"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the total NFT count is now two and that NFT details are accurate."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 496,
+        "speaker": "client",
+        "text": "updates to landing page, the good:\nmy NFTs - 2\nreferrals - 1\ntickets - 1\nbadges - first referral ticked\n\nUpdates to landing page, the bad:\nPrize pool - $5\nMy referral code - 10,001 (mint numbers starting from 10,000)\n\n(platform statistics)\nTotal mints - 1\n\nalso says we're now up to mint number 4, did you mint one?\n\nAnd View Book is still registering the same error"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client lists the owned-NFT dashboard count of two among the correctly displayed values."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "On approval for USDC spend (not minting) the 'successful mint' popup appeared, and stated mint number 2 (in this case i used referral code 2), see screenshot with the wallet popup in view.\nI cancelled the buy, checked and had no NFT.\nThen minted with referral code 3, no approve USDC sign happened, it went straight to mint and worked perfectly, popup appeared. NFT is visible on dashboard.\n\ndecrypting the book worked (i had to sign a transaction), but i am stuck on the cover page."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "After a successful mint on the replacement contract, the resulting NFT was visible on the dashboard."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 393,
+      "suggested_requirement_id": "REQ_NFT_METADATA",
+      "description": "The missing image and information in Rabby concerns wallet metadata and asset rendering rather than dashboard inventory."
+    },
+    {
+      "message_id": 424,
+      "suggested_requirement_id": "REQ_EBOOK_READER",
+      "description": "The View Book control opening a blank page is primarily ebook-reader rendering evidence rather than an owned-NFT inventory failure."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

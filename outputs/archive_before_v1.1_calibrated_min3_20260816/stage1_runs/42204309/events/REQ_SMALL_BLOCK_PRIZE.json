@@ -1,0 +1,131 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 8,
+        "speaker": "client",
+        "text": "I just noticed a bug in the gameification mechanics. \n \nWe need to eliminate &#39;top affiliate prizes&#39; and instead go with:\nSmall blocks - 5 x $500 prizes to random affiliates of the block.\nBig blocks - 5 x $20k prizes to random affiliates of the block.\n\nMore &#39;tickets&#39; earned = more chances to win."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "winner_count": 5,
+        "prize_amount_per_winner": "$500",
+        "winner_selection": "random affiliates of the block",
+        "chance_weighting": "More tickets earned gives an affiliate more chances to win."
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PRIZE_SYSTEM",
+          "SMALL_BLOCK"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Hey Joseph,\nOne final-final mechanics tweak that actually makes everything cleaner and simpler to code (no weird half-expiring tickets).\nNew rule (replaces the previous ticket lifespan description):\n→ Every time someone mints with a referral code, the referrer instantly gets two separate tickets added to their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThese are two completely independent counters.\nSmall Block ($2,500 pool → 5 × $500 draw):\nDraw only from Small Block Tickets issued since the last small block.\nAfter the draw, burn/reset all Small Block Tickets to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nDraw only from Big Block Tickets issued since the last big block.\nAfter the draw, burn/reset all Big Block Tickets to 0.\n\nThis way:\nSmall blocks stay super fair and fresh (no one carries old tickets forward).\nBig blocks naturally accumulate (people can see their big block entries climbing over weeks/months).\nMetadata is trivial: just show the two counters + permanent badges.\n\nTriggers stay pool-based (small block fires the moment small pool = exactly $2,500, big block when big pool = exactly $100,000). Secondary royalties still fill pools but don’t create tickets.\nEverything else stays identical (auto $5 commission, random ticket to existing NFT when no ref used, manual claim, etc.).\nThis version should be easier to implement and explain to users.\nSorry for the flip-flop — Once you confirm this is cleaner for you too, we’re 100% locked.\n\nThanks man!"
+      },
+      "supporting_message_ids": [
+        8
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "draw_condition": "when the small prize pool equals exactly $2,500",
+        "eligible_entries": "Small Block Tickets issued since the last small block",
+        "post_draw_ticket_action": "Burn or reset all Small Block Tickets to 0 after the draw.",
+        "secondary_royalties_contribute_to_pool": true
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 27,
+        "speaker": "freelancer",
+        "text": "Hi Trent,\nI’m pleased to inform you that the full smart contract system is now operational on the Base testnet. Everything is compiling, deploying, and functioning correctly, minting, referral logic, enforced royalties, prize pools, VRF, and dynamic metadata are all in place.\n\nWould you like me to send you a simple step-by-step guide so you can set up the project on your end and test the contracts yourself?\n\nAlternatively, if you prefer, I can proceed directly with the backend and frontend integration next, so we can both test the full flow together from the UI in real-time.\n\nJust let me know which direction you’d like to take, and I’ll continue immediately."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the Base testnet smart-contract system is operational, including prize pools and VRF."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 158,
+        "speaker": "client",
+        "text": "I just had a thought.... I think we need to tweak the block prizes to\n- Small = 1 x $500 every 100 sales.\n- Big = 1 x $10,000 every 10,000 sales.\n\nSame net $ amount given away but smoother, cleaner, clearer and more consistent stream of winners"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "winner_count": 1,
+        "draw_condition": "every 100 sales"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 204,
+        "speaker": "freelancer",
+        "text": "I have finished implementing this. You can check on the landing page"
+      },
+      "supporting_message_ids": [
+        158,
+        195,
+        209
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the recent block changes were implemented and made available on the landing page."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 377,
+        "speaker": "client",
+        "text": "USDC Mint attempt: Approval transaction executed → “Mint Successful” modal appeared → Mint transaction appeared → transaction executed → “Mint Successful” modal appeared, NFT certificate working, mint counted, pool contribution made..... but I can't find the NFT in my wallet or on our dashboard.\nTransaction - 0x821207F44209Be7556fE30643a1EeD4BA6E6ce52"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A successful USDC mint was counted and made a prize-pool contribution."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 195,
+      "suggested_requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "description": "The client removes the Big Block and changes the overall mint revenue split; the message does not change the existing $500 Small Block configuration."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

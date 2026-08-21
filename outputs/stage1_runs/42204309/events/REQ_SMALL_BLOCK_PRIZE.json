@@ -1,0 +1,85 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 8,
+        "speaker": "client",
+        "text": "I just noticed a bug in the gameification mechanics. \n \nWe need to eliminate &#39;top affiliate prizes&#39; and instead go with:\nSmall blocks - 5 x $500 prizes to random affiliates of the block.\nBig blocks - 5 x $20k prizes to random affiliates of the block.\n\nMore &#39;tickets&#39; earned = more chances to win."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "winner_count": 5,
+        "prize_amount_per_winner_usd": 500,
+        "eligible_population": "affiliates of the current small block"
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "SMALL_BLOCK",
+          "PRIZE_SYSTEM"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Hey Joseph,\nOne final-final mechanics tweak that actually makes everything cleaner and simpler to code (no weird half-expiring tickets).\nNew rule (replaces the previous ticket lifespan description):\n→ Every time someone mints with a referral code, the referrer instantly gets two separate tickets added to their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThese are two completely independent counters.\nSmall Block ($2,500 pool → 5 × $500 draw):\nDraw only from Small Block Tickets issued since the last small block.\nAfter the draw, burn/reset all Small Block Tickets to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nDraw only from Big Block Tickets issued since the last big block.\nAfter the draw, burn/reset all Big Block Tickets to 0.\n\nThis way:\nSmall blocks stay super fair and fresh (no one carries old tickets forward).\nBig blocks naturally accumulate (people can see their big block entries climbing over weeks/months).\nMetadata is trivial: just show the two counters + permanent badges.\n\nTriggers stay pool-based (small block fires the moment small pool = exactly $2,500, big block when big pool = exactly $100,000). Secondary royalties still fill pools but don’t create tickets.\nEverything else stays identical (auto $5 commission, random ticket to existing NFT when no ref used, manual claim, etc.).\nThis version should be easier to implement and explain to users.\nSorry for the flip-flop — Once you confirm this is cleaner for you too, we’re 100% locked.\n\nThanks man!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "draw_trigger": {
+          "basis": "PRIZE_POOL_BALANCE",
+          "threshold_usd": 2500
+        },
+        "eligible_population": "holders of Small Block Tickets issued since the previous small-block draw"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 158,
+        "speaker": "client",
+        "text": "I just had a thought.... I think we need to tweak the block prizes to\n- Small = 1 x $500 every 100 sales.\n- Big = 1 x $10,000 every 10,000 sales.\n\nSame net $ amount given away but smoother, cleaner, clearer and more consistent stream of winners"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "winner_count": 1,
+        "draw_trigger": {
+          "basis": "SALES_COUNT",
+          "threshold": 100
+        }
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 156,
+      "suggested_requirement_id": "REQ_PRIZE_CLAIM",
+      "description": "The unresolved question about automatic prize payout versus a claim button concerns the separate prize-claim workflow."
+    },
+    {
+      "message_id": 781,
+      "suggested_requirement_id": "REQ_PRIZE_CLAIM",
+      "description": "The question about whether the $500 prize uses a claim button concerns the separate prize-claim workflow."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

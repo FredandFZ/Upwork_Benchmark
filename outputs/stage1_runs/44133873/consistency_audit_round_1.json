@@ -1,0 +1,311 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_ARTICLE_WHITESPACE_BALANCE"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_ARTICLE_WHITESPACE_BALANCE",
+            "title": "Article Ending Whitespace Balance",
+            "family_id": "ARTICLE_PRESENTATION"
+          },
+          {
+            "requirement_id": "REQ_ARTICLE_TEXT_VISUAL_PACING",
+            "title": "Article Text and Visual Pacing",
+            "family_id": "ARTICLE_PRESENTATION"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        7,
+        36,
+        38,
+        88,
+        116
+      ],
+      "decision_note": "Breaking up text-heavy articles with images, quotes, or blurbs is independently testable from eliminating empty areas at article endings. Rerun extraction for both Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_AD_ASSET_QUALITY_AND_SAFE_PLACEMENT"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_AD_ASSET_QUALITY_AND_SAFE_PLACEMENT",
+            "title": "Advertisement Rendering Quality",
+            "family_id": "VISUAL_ASSET_QUALITY"
+          },
+          {
+            "requirement_id": "REQ_AD_SAFE_PLACEMENT",
+            "title": "Advertisement Trim, Bleed, and Safe Placement",
+            "family_id": "VISUAL_ASSET_QUALITY"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        81,
+        82,
+        88,
+        102
+      ],
+      "decision_note": "Advertisement clarity and resolution can fail or be repaired independently of trim, bleed, sizing, and safe-zone placement. Rerun extraction for both Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_PRINT_READY_PDF",
+        "title": "Print-Ready Magazine PDF",
+        "family_id": null,
+        "definition": "Deliver a physical-print-ready magazine output with the required prepress preparation when the print deliverable remains in scope.",
+        "anchor_message_ids": [
+          4,
+          7,
+          103,
+          113,
+          136,
+          192
+        ]
+      },
+      "evidence_message_ids": [
+        4,
+        7,
+        103,
+        113,
+        136,
+        192
+      ],
+      "decision_note": "The print-ready output is an independent deliverable with its own removal and conditional-scope history and must not be represented under the launch deadline.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_TABLE_OF_CONTENTS_ACCURACY",
+        "title": "Accurate Table of Contents",
+        "family_id": "EDITORIAL_STRUCTURE",
+        "definition": "Complete the table of contents after pagination is finalized and ensure its article references and page numbers are accurate.",
+        "anchor_message_ids": [
+          72,
+          88
+        ]
+      },
+      "evidence_message_ids": [
+        72,
+        88
+      ],
+      "decision_note": "Table-of-contents accuracy is explicitly requested and can fail independently of cover references and general pagination.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_WEBSITE_ARTICLE_SOURCING",
+        "title": "Website Article Sourcing",
+        "family_id": null,
+        "definition": "Gather the issue's articles directly from the WB Edition website as instructed by the client.",
+        "anchor_message_ids": [
+          7
+        ]
+      },
+      "evidence_message_ids": [
+        7
+      ],
+      "decision_note": "Direct website sourcing is an explicit task-local obligation and is not equivalent to verifying that all required issue content was ultimately included.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_COVER_REFERENCE_ACCURACY",
+        "event_locator": {
+          "message_id": 72,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        72
+      ],
+      "decision_note": "This message requires adding cover-listed articles to the issue and choosing their placement; it does not establish an incorrect cover reference requiring correction.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_COVER_REFERENCE_ACCURACY",
+        "event_locator": {
+          "message_id": 88,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "cover_page_references": "The page numbers displayed with cover-listed articles must match the articles' final page locations."
+        },
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "DOCUMENT_LAYOUT",
+            "CONTENT"
+          ],
+          "contexts": [
+            "MAGAZINE_COVER",
+            "AUGUST_ISSUE"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        88
+      ],
+      "decision_note": "After removing the misrouted message 72 Event, message 88 is the first supplied evidence establishing the cover page-number requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ARTICLE_BODY_TYPOGRAPHY",
+        "event_locator": {
+          "message_id": 88,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "body_typeface": "Garamond",
+          "font_weight_requirement": "not too light or frail"
+        },
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "DOCUMENT_LAYOUT",
+            "UI_UX"
+          ],
+          "contexts": [
+            "ARTICLE_PAGES",
+            "DIGITAL_FLIPBOOK"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        88
+      ],
+      "decision_note": "The source recommends Garamond and rejects a light or frail main font, but it does not explicitly establish the broader comfortable-reading assertion.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IMAGE_QUALITY_ENHANCEMENT",
+        "event_locator": {
+          "message_id": 163,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        156,
+        163
+      ],
+      "decision_note": "The image treatment addresses insertion and composition of the page-specific whitespace-filling image, not enhancement of a low-quality source asset.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IMAGE_QUALITY_ENHANCEMENT",
+        "event_locator": {
+          "message_id": 164,
+          "event_type": "RUNTIME_VERIFICATION",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        162,
+        163,
+        164
+      ],
+      "decision_note": "The approval verifies the page-specific whitespace image treatment and is already represented under the appropriate layout Requirement; it does not verify general image-quality enhancement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_LAUNCH_DEADLINE"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        7,
+        27,
+        103
+      ],
+      "decision_note": "Message 7 contains conflicting July 25 launch and approximate July 27 completion targets, while anchor message 27 is absent from the extracted lifecycle. Raw context is needed to determine whether AMBIGUOUS and subsequent resolution Events are required.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_EDITABLE_MAGAZINE_TEMPLATE"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        4,
+        198
+      ],
+      "decision_note": "The inventory identifies message 4 as earlier template evidence, but the lifecycle begins at message 198. Inspect message 4 and add the earlier Event if it establishes the template obligation.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        87,
+        88,
+        89,
+        90
+      ],
+      "decision_note": "The exchange discusses punctuation and editorial inconsistencies, but it remains unclear whether comprehensive copy editing became an independently accepted deliverable.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        148,
+        149,
+        150,
+        167,
+        168,
+        171,
+        172,
+        174,
+        175
+      ],
+      "decision_note": "The approvals refer to unavailable attachment contents, so their target Requirements and any verification Events cannot be resolved safely.",
+      "confidence": "LOW"
+    }
+  ]
+}

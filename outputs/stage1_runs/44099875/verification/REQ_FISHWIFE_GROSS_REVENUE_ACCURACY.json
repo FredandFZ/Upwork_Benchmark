@@ -1,0 +1,84 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_FISHWIFE_GROSS_REVENUE_ACCURACY",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 30,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "expected_behavior": "Gross-revenue numbers from the BigQuery data source should match the existing dashboard result under equivalent comparison conditions."
+        },
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        30
+      ],
+      "decision_note": "The mismatch report reveals the expected gross-revenue behavior, but the source does not establish the proposed persistence and full scope.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 30,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The freelancer tested the BigQuery data source and reported that its gross-revenue numbers did not match."
+        }
+      },
+      "evidence_message_ids": [
+        30
+      ],
+      "decision_note": "First concrete gross-revenue mismatch; the revised observation avoids asserting an unstated comparison source.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 32,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        30,
+        31,
+        32
+      ],
+      "decision_note": "The client establishes date-range selection as the condition for a valid comparison.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 32,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        30,
+        31,
+        32
+      ],
+      "decision_note": "First concrete verification: the client reports that the previously identified gross-revenue results match when the date-range issue is corrected.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

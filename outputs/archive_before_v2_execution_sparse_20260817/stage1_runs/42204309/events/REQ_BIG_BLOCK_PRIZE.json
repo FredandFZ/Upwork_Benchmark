@@ -1,0 +1,134 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_BIG_BLOCK_PRIZE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 8,
+        "speaker": "client",
+        "text": "I just noticed a bug in the gameification mechanics. \n \nWe need to eliminate &#39;top affiliate prizes&#39; and instead go with:\nSmall blocks - 5 x $500 prizes to random affiliates of the block.\nBig blocks - 5 x $20k prizes to random affiliates of the block.\n\nMore &#39;tickets&#39; earned = more chances to win."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "winner_count": 5,
+        "prize_amount_per_winner": "$20,000",
+        "eligible_winners": "affiliates of the block"
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PRIZE_SYSTEM",
+          "BIG_BLOCK"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Hey Joseph,\nOne final-final mechanics tweak that actually makes everything cleaner and simpler to code (no weird half-expiring tickets).\nNew rule (replaces the previous ticket lifespan description):\n→ Every time someone mints with a referral code, the referrer instantly gets two separate tickets added to their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThese are two completely independent counters.\nSmall Block ($2,500 pool → 5 × $500 draw):\nDraw only from Small Block Tickets issued since the last small block.\nAfter the draw, burn/reset all Small Block Tickets to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nDraw only from Big Block Tickets issued since the last big block.\nAfter the draw, burn/reset all Big Block Tickets to 0.\n\nThis way:\nSmall blocks stay super fair and fresh (no one carries old tickets forward).\nBig blocks naturally accumulate (people can see their big block entries climbing over weeks/months).\nMetadata is trivial: just show the two counters + permanent badges.\n\nTriggers stay pool-based (small block fires the moment small pool = exactly $2,500, big block when big pool = exactly $100,000). Secondary royalties still fill pools but don’t create tickets.\nEverything else stays identical (auto $5 commission, random ticket to existing NFT when no ref used, manual claim, etc.).\nThis version should be easier to implement and explain to users.\nSorry for the flip-flop — Once you confirm this is cleaner for you too, we’re 100% locked.\n\nThanks man!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "pool_amount": "$100,000",
+        "draw_condition": "when the Big Block pool equals exactly $100,000",
+        "secondary_royalties_contribute_to_pool": true
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 27,
+        "speaker": "freelancer",
+        "text": "Hi Trent,\nI’m pleased to inform you that the full smart contract system is now operational on the Base testnet. Everything is compiling, deploying, and functioning correctly, minting, referral logic, enforced royalties, prize pools, VRF, and dynamic metadata are all in place.\n\nWould you like me to send you a simple step-by-step guide so you can set up the project on your end and test the contracts yourself?\n\nAlternatively, if you prefer, I can proceed directly with the backend and frontend integration next, so we can both test the full flow together from the UI in real-time.\n\nJust let me know which direction you’d like to take, and I’ll continue immediately."
+      },
+      "supporting_message_ids": [
+        21
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the Base-testnet smart-contract system, including the prize pools, is operational."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 123,
+        "speaker": "client",
+        "text": "Hey Joseph, i&#39;d like to tweak the big block parameters, halving them to &#39;5 x $10,000 every 50,000 sales&#39;. \n\nThis okay?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "prize_amount_per_winner": "$10,000",
+        "draw_condition": "every 50,000 sales"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 125,
+        "speaker": "freelancer",
+        "text": "I made the tweak.\nNow, the big block triggers at $50,000, with 5 winners each receiving $10,000."
+      },
+      "supporting_message_ids": [
+        123
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports implementing the revised Big Block trigger and five $10,000 prizes."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 158,
+        "speaker": "client",
+        "text": "I just had a thought.... I think we need to tweak the block prizes to\n- Small = 1 x $500 every 100 sales.\n- Big = 1 x $10,000 every 10,000 sales.\n\nSame net $ amount given away but smoother, cleaner, clearer and more consistent stream of winners"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "winner_count": 1,
+        "draw_condition": "every 10,000 sales"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 195,
+        "speaker": "client",
+        "text": "Hey Joseph, id like to eliminate the big blocks and give that extra $1 to me, so it&#39;ll be:\n$15 buy, $5 to me,  $5 to affiliate,  $5 to block prize pool.\n\nIncreases my bottom line with minimal impact on sales.\nPlus it simplifies the game mechanics and marketing.\n\nGiveing myself and each community member an even split, as well as everyone getting an even shot at the never ending $500 prizes seems aligned with the projects ethos."
+      },
+      "supporting_message_ids": [],
+      "event_type": "REMOVE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

@@ -1,0 +1,91 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_AXP_POWER_PATH",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 180,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        175,
+        179,
+        180
+      ],
+      "decision_note": "The client confirms the VBUS-to-VMID path and identifies the expected separate VMID and VSYS topology.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 263,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        263
+      ],
+      "decision_note": "The client explicitly defines the battery input range and AXP2101 as the normal system power path.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 753,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        750,
+        753
+      ],
+      "decision_note": "The client explicitly requires simultaneous battery charging and device operation for the integrated board.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 977,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        976,
+        977,
+        978
+      ],
+      "decision_note": "The client explicitly requires AXP-based operation without a connected battery and cites the AXP specifications.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 1046,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Battery-only operation succeeded on both boards, but operation from 5V USB caused the 3.3V rail to collapse under load and hard-reset the ESP32, preventing standalone USB operation."
+        }
+      },
+      "evidence_message_ids": [
+        1046
+      ],
+      "decision_note": "First concrete runtime result: battery operation succeeds, but the required USB-powered path fails; partial battery-path success does not verify the whole Requirement.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

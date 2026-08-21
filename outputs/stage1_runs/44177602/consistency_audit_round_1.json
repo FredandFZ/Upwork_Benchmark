@@ -1,0 +1,111 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "MOVE_EVENT",
+      "targets": {
+        "from_requirement_id": "REQ_HUBSPOT_SECURED_LEAD_ENTRY",
+        "to_requirement_id": "REQ_CRM_STRUCTURE_DOCUMENT",
+        "event_locator": {
+          "message_id": 179,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        84,
+        88,
+        91,
+        179,
+        221
+      ],
+      "decision_note": "The unavailable contact fields and property-editing permissions concern completion of the CRM structure task, not entry of an already secured host engagement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CRM_STRUCTURE_DOCUMENT"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 221,
+          "speaker": "client",
+          "text": "dont worry about hubspot we doing speedsheet and when the host or whoever is ready to schedule then we add then in from the speedsheet information"
+        },
+        "supporting_message_ids": [
+          179,
+          180
+        ],
+        "event_type": "DEFER",
+        "value_updates": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        179,
+        180,
+        221
+      ],
+      "decision_note": "After the CRM structure task was blocked, the client directs the freelancer not to work on HubSpot and to use a spreadsheet instead, deferring that task.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_HUBSPOT_SECURED_LEAD_ENTRY",
+        "event_locator": {
+          "message_id": 221,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "hubspot_entry_condition": "when the host is ready to schedule",
+          "lead_record_source": "spreadsheet information"
+        },
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "CRM",
+            "HUBSPOT"
+          ],
+          "contexts": [
+            "SECURED_HOSTS",
+            "OUTREACH_PIPELINE"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        221
+      ],
+      "decision_note": "This is the first target-specific evidence establishing the later HubSpot-entry rule; the earlier HubSpot failure concerns CRM structure work.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_TIKTOK_SHOP_PRODUCT_LISTING",
+        "event_locator": {
+          "message_id": 261,
+          "event_type": "DEFER",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        258,
+        260,
+        261
+      ],
+      "decision_note": "The source text is only \"Okay\"; the omitted message 260 must unambiguously propose postponing TikTok Shop work before this can support DEFER.",
+      "confidence": "LOW"
+    }
+  ]
+}

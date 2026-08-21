@@ -1,0 +1,319 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_BADGE_PRESENTATION"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_BADGE_PRESENTATION",
+            "title": "Badge Set and Icon Presentation",
+            "family_id": "BADGE_SYSTEM"
+          },
+          {
+            "requirement_id": "REQ_BADGE_RESPONSIVE_LAYOUT",
+            "title": "Badge Responsive Layout",
+            "family_id": "BADGE_SYSTEM"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        109,
+        111,
+        114,
+        306,
+        310,
+        313,
+        704
+      ],
+      "decision_note": "Badge selection and icon design can change independently from row arrangement and mobile responsiveness; message 704 establishes a layout-specific failure trajectory.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_REWARD_STATISTICS_ACCURACY"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_REWARD_STATISTICS_ACCURACY",
+            "title": "Dashboard and NFT-Summary Reward Statistics Accuracy",
+            "family_id": "ONCHAIN_DATA_PRESENTATION"
+          },
+          {
+            "requirement_id": "REQ_LEADERBOARD_REWARD_STATISTICS_ACCURACY",
+            "title": "Leaderboard Reward Statistics Accuracy",
+            "family_id": "ONCHAIN_DATA_PRESENTATION"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PRIZE_STATISTICS_ACCURACY",
+            "title": "Homepage Prize Statistics Accuracy",
+            "family_id": "ONCHAIN_DATA_PRESENTATION"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        430,
+        441,
+        449,
+        455,
+        608,
+        669,
+        688
+      ],
+      "decision_note": "Dashboard/NFT summaries, leaderboard accounting, and homepage prize values have distinct data paths and separate failure and recovery trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_TRANSAK_KYB_DEMO_VIDEO",
+        "title": "Transak KYB UX Demo Video",
+        "family_id": null,
+        "definition": "Deliver the independently requested demonstration video showing the Transak KYB user experience.",
+        "anchor_message_ids": [
+          276,
+          282
+        ]
+      },
+      "evidence_message_ids": [
+        276,
+        282
+      ],
+      "decision_note": "The demo video is a standalone requested deliverable and must not be treated as implementation evidence for the production fiat-on-ramp integration.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_DESIGNATED_AFFILIATE_CODE_1_OWNERSHIP",
+        "title": "Designated Ownership of Affiliate Code #1",
+        "family_id": "REFERRAL_REWARDS",
+        "definition": "Assign NFT and affiliate code #1 to the client-designated wallet as a one-off ownership obligation.",
+        "anchor_message_ids": [
+          793,
+          795
+        ]
+      },
+      "evidence_message_ids": [
+        793,
+        795
+      ],
+      "decision_note": "The requested one-off ownership assignment can be completed independently and should not modify the general rule that each NFT's referral code is its own token ID.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_PUBLIC_UNAUTHENTICATED_API_ACCESS",
+        "title": "Public Unauthenticated API Access",
+        "family_id": "IDENTITY_AND_ACCESS",
+        "definition": "Keep public data APIs such as leaderboards and prize-pool values accessible without authentication.",
+        "anchor_message_ids": [
+          72
+        ]
+      },
+      "evidence_message_ids": [
+        72
+      ],
+      "decision_note": "Public unauthenticated access is an independent access-control behavior and is not covered by wallet or email authentication.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_NEXT_PRIZE_DRAW_COUNTER",
+        "title": "Next Prize Draw Sales Counter",
+        "family_id": "LANDING_PAGE_EXPERIENCE",
+        "definition": "Display a live landing-page counter showing approximately how many sales remain before the next $500 prize draw.",
+        "anchor_message_ids": [
+          210
+        ]
+      },
+      "evidence_message_ids": [
+        210
+      ],
+      "decision_note": "The live draw counter is dynamic data behavior with its own acceptance criterion, not merely landing-page wording.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "CHANGE_FAMILY",
+      "targets": {
+        "requirement_id": "REQ_NFT_DETAIL_BOOK_COVER_PRESENTATION"
+      },
+      "replacement": {
+        "family_id": "NFT_CONTENT_ACCESS"
+      },
+      "evidence_message_ids": [
+        288,
+        310,
+        313
+      ],
+      "decision_note": "NFT detail-page book-cover presentation belongs with ebook content presentation rather than on-chain data accuracy.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+        "event_locator": {
+          "message_id": 21,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "draw_trigger": "when the Small Block prize pool reaches exactly $2,500",
+          "secondary_royalties_contribute_to_pool": true
+        },
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        21
+      ],
+      "decision_note": "The source explicitly establishes the $2,500 trigger and continued secondary-royalty funding; it does not newly establish the complete funding-source array.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CHAINLINK_VRF_WINNER_SELECTION",
+        "event_locator": {
+          "message_id": 308,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        308
+      ],
+      "decision_note": "This claim concerns no-referral recipient selection and is already represented under REQ_NO_REFERRAL_RANDOM_REWARDS.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "MOVE_EVENT",
+      "targets": {
+        "from_requirement_id": "REQ_CHAINLINK_VRF_WINNER_SELECTION",
+        "to_requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARDS",
+        "event_locator": {
+          "message_id": 588,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        579,
+        581,
+        588
+      ],
+      "decision_note": "VRF fulfilled, but the no-referral payout and ticket workflow failed because its required finalization transaction was not submitted; the failure belongs to the random-reward flow rather than VRF winner selection.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CHAINLINK_VRF_WINNER_SELECTION",
+        "event_locator": {
+          "message_id": 686,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        686,
+        687
+      ],
+      "decision_note": "The temporary backend logic concerns reward finalization and accounting, not the Chainlink randomness mechanism; message 687 provides the more specific retained claim under the no-referral Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "MOVE_EVENT",
+      "targets": {
+        "from_requirement_id": "REQ_CHAINLINK_VRF_WINNER_SELECTION",
+        "to_requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARDS",
+        "event_locator": {
+          "message_id": 735,
+          "event_type": "RUNTIME_VERIFICATION",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        719,
+        729,
+        730,
+        732,
+        734,
+        735
+      ],
+      "decision_note": "The observed wallet is the recipient selected for a no-referral mint's random ticket and commission, so the verification belongs to that reward flow.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+        "event_locator": {
+          "message_id": 143,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        143
+      ],
+      "decision_note": "The rule that an NFT's referral code is its own mint number is already owned by the narrower REQ_REFERRAL_CODE_IDENTITY_AND_VALIDATION and should not be duplicated under a broad metadata Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_LANDING_PAGE_BOOK_COVER"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 248,
+          "speaker": "client",
+          "text": "also, couple remaining tweaks to the landing page:\n\\- refit book cover to show in full\n\\- In 'how it works section' change 'share &amp; earn' to 'share &amp; earn commission'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "visibility": "show the full book cover without cropping"
+        },
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        248
+      ],
+      "decision_note": "The client explicitly reiterates that the landing-page cover must be refitted so the complete cover is visible.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [],
+      "decision_note": "The PRODUCTION_OPERATIONS Family has no members and should be removed rather than populated as a broad catch-all operations group; the audit patch schema has no DELETE_FAMILY operation.",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NFT_ASSET_RESOLUTION",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "I have fixed.\nHow to see it in your wallet/dashboard now:\n\\=&gt; Import NFT manually if needed:\n\\- contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n\\- token ID: 1\n\\- chain: Base Mainnet\n\nRefresh the dashboard; backend already has the token in DB (tokenId 1), so it should render with the new metadata/image and PDF link\n\n."
+      },
+      "supporting_message_ids": [
+        377
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports fixing the issue and says the NFT should render with its new metadata and image."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "In Rabby, once i deselect 'hide low-value NFTs' I could see the NFT but it still had no image or information. and i haven't been able to import it as a custom token.\n\nIll try to do an ETH buy now and see what happens"
+      },
+      "supporting_message_ids": [
+        388,
+        391,
+        392
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The NFT was visible in Rabby but displayed no image or metadata information."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 396,
+        "speaker": "freelancer",
+        "text": "About importing: this is an ERC‑721 NFT, so you must “Import NFT” (not “Import token”) in your wallet’s NFT section, on Base Mainnet, using:\n\\- Contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n\\- Token ID: 1 (the minted token to 0x3b55868Dd2ebA28f97b3dB55a4cB706a078154B5)\n\\- If your wallet asks for both contract and token ID, fill both. If it only asks for a contract, switch to Base and use the contract above; then select/refresh NFTs.\nYou can verify the asset is live:\n\\- Metadata: <https://api.projectrebuild.xyz/metadata/1>\n\\- Image: <https://api.projectrebuild.xyz/images/1.png>\n\\- PDF: <https://api.projectrebuild.xyz/pdf/1>\n\nIf you still don’t see it:\n1) Confirm you’re on Base network.\n2) Use the NFT import flow (not token import).\n3) Manually enter contract + token ID.\n4) Refresh/force-reload the wallet’s NFT view."
+      },
+      "supporting_message_ids": [
+        393
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the NFT asset is live and provides metadata and image endpoints."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 401,
+        "speaker": "freelancer",
+        "text": "Findings\nYour ETH mint reverted (0x3af7…0855c on Base) because the on-chain swap router is set to 0x2626…e481, which isn’t the Uniswap V3 SwapRouter. The contract calls exactInputSingle there and it reverts, so every ETH mint will fail until the router is corrected on-chain.\n\nUSDC mint works;\n\\- token #1 exists and is owned by 0x3b55868Dd2ebA28f97b3dB55a4cB706a078154B5. Metadata and assets resolve:\n\\- Metadata: <https://api.projectrebuild.xyz/metadata/1>\n\\- Image: <https://api.projectrebuild.xyz/images/1.png>"
+      },
+      "supporting_message_ids": [
+        393,
+        396
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Technical inspection confirmed that token #1 existed and its metadata and image endpoints resolved."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "NFTs are showing up on my dashboard now (images not showing when i click through). and when i click 'View Book' its not showing up"
+      },
+      "supporting_message_ids": [
+        404,
+        408
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "NFT records appeared on the dashboard, but their images did not load on the NFT detail view."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 423,
+        "speaker": "freelancer",
+        "text": "Please hard refresh the app:\n\\- Dashboard/NFT detail: images and “View Book” should work without XML errors.\n\\- Quick live ETH mint test now to confirm end-to-end (UI + on-chain) with the new router."
+      },
+      "supporting_message_ids": [
+        411
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that dashboard and NFT-detail images should now load without XML errors."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 27,
+      "suggested_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "description": "The broad claim that dynamic metadata is in place concerns metadata behavior but does not specifically establish metadata or asset resolution."
+    },
+    {
+      "message_id": 377,
+      "suggested_requirement_id": "REQ_MINTED_NFT_DELIVERY",
+      "description": "The NFT being absent from the wallet after a successful mint primarily concerns delivery rather than metadata or image resolution."
+    },
+    {
+      "message_id": 404,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_INVENTORY",
+      "description": "The NFT being owned on-chain while the dashboard reports zero holdings concerns dashboard inventory synchronization."
+    },
+    {
+      "message_id": 585,
+      "suggested_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "description": "The incorrect referral-code attribute concerns metadata value accuracy rather than whether metadata and assets resolve."
+    },
+    {
+      "message_id": 691,
+      "suggested_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "description": "Building dynamic attributes from live on-chain data concerns metadata attribute accuracy."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

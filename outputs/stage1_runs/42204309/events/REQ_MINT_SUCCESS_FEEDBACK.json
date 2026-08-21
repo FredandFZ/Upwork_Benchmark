@@ -1,0 +1,336 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 345,
+        "speaker": "client",
+        "text": "I tried buying with USDC, the approval transaction executed and i was then promoted with 'Mint Successful' popup, but still had no NFT and no option to then mint"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "success_modal_condition": "Show mint-success feedback only after an actual NFT mint succeeds."
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "MINT_CONFIRMATION"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 345,
+        "speaker": "client",
+        "text": "I tried buying with USDC, the approval transaction executed and i was then promoted with 'Mint Successful' popup, but still had no NFT and no option to then mint"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "USDC approval displayed a Mint Successful popup even though no mint occurred and no NFT was received."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 357,
+        "speaker": "freelancer",
+        "text": "How it works now\n\n\\- USDC: Approve → auto-mint → success modal (only after mint).\n\\- ETH: Dynamic price calculation → sufficient buffer → successful swap.\n\nThe ETH price shown will fluctuate to match $15 USDC based on current market rates. The contract’s minETHForMint is 0.0055 ETH (~$16.50), so the frontend uses the higher of the dynamic price or this minimum.\n\nHard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R) and try minting again.\nBoth USDC and ETH should work correctly."
+      },
+      "supporting_message_ids": [
+        345
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the USDC flow now auto-mints after approval and displays the success modal only after minting."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 358,
+        "speaker": "client",
+        "text": "USDC mint attempt: approval transaction executed → 'Mint Successful' popup appeared → no mint executed and could not mint.\nTransaction - 0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+      },
+      "supporting_message_ids": [
+        357
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the claimed fix, USDC approval still displayed Mint Successful even though no mint executed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 359,
+        "speaker": "client",
+        "text": "ETH mint attempt: transaction failed and 'Mint Successful' popup appeared\nfailed transaction - 0x821207F44209Be7556fE30643a1EeD4BA6E6ce52"
+      },
+      "supporting_message_ids": [
+        357
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A failed ETH mint transaction incorrectly displayed the Mint Successful popup."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 360,
+        "speaker": "client",
+        "text": "'Mint Successful' popup is appearing when entering/deleting a referral code"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Editing the referral-code field incorrectly triggered the Mint Successful popup."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 361,
+        "speaker": "freelancer",
+        "text": "I’ve shipped fixes to stop false “Mint Successful” modals and to ensure approval -&gt; mint flows run correctly. Deployed to production just now.\n\nWhat changed:\n\n\\- Success modal gating: Only shows when the mint transaction receipt matches the current mint hash and hasn’t already been shown. Typing/deleting referral codes will no longer trigger the success popup.\n\\- Reset on new mint attempt: When you click mint, we clear prior success state, pending params, and tracking refs so stale success states can’t leak into the next attempt.\n\\- USDC auto-mint after approval: Removed the stale success guard so the mint runs right after approval completes (no more approval-only success).\n\\- ETH amount and buffer: Dynamic ETH pricing still uses the higher of live price vs contract min (0.0055 ETH), with buffer; unchanged from prior hotfix.\n\nPlease hard refresh (Cmd/Ctrl+Shift+R) and try again:\n\\- USDC: approve -&gt; mint should fire automatically; success modal only after the mint tx confirms.\n\\- ETH: if a tx fails, no success modal will appear; only real mint receipts trigger it.\n\nIf you hit any further issues, send the latest tx hashes, and I’ll inspect immediately."
+      },
+      "supporting_message_ids": [
+        358,
+        359,
+        360
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports deploying receipt-gated success-modal handling so approval, failed transactions, and referral-code editing no longer produce false success."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 364,
+        "speaker": "client",
+        "text": "USDC attempt executed, “Mint Successful” modal appeared, but no mint &amp; no USDC spent.\n\nETH attempt failed"
+      },
+      "supporting_message_ids": [
+        361
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the receipt-gating fix claim, the USDC path still displayed Mint Successful without a mint or USDC payment."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 398,
+        "speaker": "client",
+        "text": "I just bought with USDC:\nThe buy went through in one transaction, but no 'mint successful' popup appeared.\nAnd I received emails for:\n\\- new badge - 'Medal'\n\\- new badge - 'Hustler'\n\\- new badge - 'High Roller'\n\\- new badge - 'First Referral'\n\\- Referral earnings - Earnings $5, Total referrals 2\n\nOn my dashboard, only 'first referral' badge is ticked. NFT still not showing up"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A completed USDC purchase produced no Mint Successful popup."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "On approval for USDC spend (not minting) the 'successful mint' popup appeared, and stated mint number 2 (in this case i used referral code 2), see screenshot with the wallet popup in view.\nI cancelled the buy, checked and had no NFT.\nThen minted with referral code 3, no approve USDC sign happened, it went straight to mint and worked perfectly, popup appeared. NFT is visible on dashboard.\n\ndecrypting the book worked (i had to sign a transaction), but i am stuck on the cover page."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "USDC approval alone displayed a successful-mint popup and mint number even though the purchase was cancelled and no NFT existed; a later real referral-code mint displayed the popup correctly."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 598,
+        "speaker": "client",
+        "text": "Also, the 'mint successful' popup is still appearing after approving USDC spend, before minting (see attached).\n\nAnd, in that popup (I would have been minting #8) it says 'Your NFT #6 has been minted successfully.'"
+      },
+      "supporting_message_ids": [
+        569
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The popup still appeared before minting and reported NFT #6 when the intended next mint was #8."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 609,
+        "speaker": "freelancer",
+        "text": "Approving USDC will NOT show “Mint successful”.\nAfter the actual mint tx confirms, the modal will show the correct minted tokenId (e.g. #8), pulled from the Mint event.\n\nI have fixed it!"
+      },
+      "supporting_message_ids": [
+        598
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports fixing the modal so it appears only after the actual mint confirms and uses the token ID from the Mint event."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 610,
+        "speaker": "client",
+        "text": "yes, I just tested and is working fine.\n\nAlso in the book reader, the arrow keys are now permanently on screen\n(it is better for them to fade when unused and to reappear when the cursor is activated, but this way is okay)"
+      },
+      "supporting_message_ids": [
+        609
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Client tested the immediately preceding mint-success timing and token-ID fix and reported it working fine."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 649,
+        "speaker": "client",
+        "text": "okay, i just minted with 'no referral code' and a '$1 tip'.\n\nI had to execute 1 transaction to mint - 0xc92e17e9e7f26e6b4e03093ce35f6ed3d7fc135c8ee00bc77357eb082779f715\n\nAnd then another transaction immediately appeared for the tip - 0x887c21856bddc283cd444881931a1d14469cbbd49c2c2764e15855a9181af3b0\n\n(We will have to put a UI note so that buyers know the tip transaction will come immediately after the mint transaction.)\n\nAlso, Perhaps it was hidden behind the tip transaction, but i didn't see the 'mint successful' modal.\n\nAnd, on the leaderboard, there was no new commission and ticket counted."
+      },
+      "supporting_message_ids": [
+        648
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After prior verification, a completed no-referral mint with a tip did not visibly display the Mint Successful modal."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 738,
+        "speaker": "client",
+        "text": "Well, if that modal pops up **after** the ticket and commission have been sent at random, then it should say &#39;No referral code used. $5 commission + $500 prize draw ticket has gone to a *My Underdog Journey: To Own Goal* NFT holder at random&#39;"
+      },
+      "supporting_message_ids": [
+        730,
+        732
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "no_referral_success_message": "No referral code used. $5 commission + $500 prize draw ticket has gone to a My Underdog Journey: To Own Goal NFT holder at random."
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 740,
+        "speaker": "client",
+        "text": "After the tx."
+      },
+      "supporting_message_ids": [
+        738
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "no_referral_success_timing": "Display after the transaction that sends the random commission and prize ticket."
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 746,
+        "speaker": "client",
+        "text": "Cool. Then the 'Mint successful' modal for when a code is used can say:\n'$5 commission + $500 prize draw ticket has gone to your chosen *My Underdog Journey: To Own Goal* NFT holder'"
+      },
+      "supporting_message_ids": [
+        742,
+        744,
+        745
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "coded_referral_success_message": "$5 commission + $500 prize draw ticket has gone to your chosen My Underdog Journey: To Own Goal NFT holder."
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 750,
+        "speaker": "freelancer",
+        "text": "Done! updated the mint success modal + removed the unnecessary “Finalize random referral” prompt\n\n**No referral code mint:**\n\\- The “Mint successful” modal now shows only after the random commission + ticket have actually been sent (i.e., after the random-referral finalization tx confirms).\n\n\\- Copy now reads: “No referral code used. $5 commission + $500 prize draw ticket has gone to a ***My Underdog Journey: To Own Goal*** NFT holder at random.”\n\n**Referral code mint:**\n\\- The “Mint successful” modal copy now reads: “$5 commission + $500 prize draw ticket has gone to your chosen ***My Underdog Journey: To Own Goal*** NFT holder.”\n\n\\- Fallback (only if needed):\nIf the finalized tx is rejected/failed, the modal will show a small retry section (and the main copy will not claim the reward “has gone” yet)."
+      },
+      "supporting_message_ids": [
+        738,
+        740,
+        746,
+        747
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports implementing separate referral and no-referral success messages, with no-referral success shown only after random reward finalization confirms."
+      }
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

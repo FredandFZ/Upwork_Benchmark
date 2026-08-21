@@ -1,0 +1,39 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_SENSOR_INPUT_BIASING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 887,
+        "speaker": "client",
+        "text": "Thanks Dusko, all clear:\n1. VRTC — agreed, NC for v1 (no external RTC chip on this board). But while we&#39;re on the RTC topic — I think I confused VRTC and VBACKUP earlier. VBACKUP (pin 27) is the input for backup power to keep the AXP2101&#39;s internal RTC alive when the main battery is removed. Could you also route VBACKUP to a small test pad / via alongside PWROK from item #10? That way we can later fit a 100 µF cap (\\~2-3 min hot-swap tolerance), a supercap (\\~weeks), or a CR1220 coin cell (\\~4 years) for real time-keeping if we ever want it. No need to populate anything now — just expose the pad.\n2. Buttons (R16/R17/R18) — agreed, change those three to pull-ups to 3V3 (active LOW: connector pin 1 stays GND, press shorts GPIO to GND). I&#39;ve updated <http://pcb-integrated.md|pcb-integrated.md> to match.\n3. PIR (R19) and Touch (R20/R25) — these are correct as pull-downs. Both AM312 (PIR) and TTP223 (touch) have push-pull active-HIGH outputs, so the sensor&#39;s internal driver overrides the 10 k pull-down when active. Pull-down to GND just gives a defined LOW state when the sensor is unplugged. No change needed."
+      },
+      "supporting_message_ids": [
+        886
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "pir_input_bias": "10 kΩ pull-down to GND",
+        "touch_input_bias": "10 kΩ pull-down to GND",
+        "sensor_output_behavior": "push-pull active-HIGH",
+        "unplugged_input_state": "defined LOW"
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "MCU",
+          "SENSORS"
+        ],
+        "contexts": [
+          "INTEGRATED_BOARD",
+          "PIR_INPUT",
+          "TOUCH_INPUT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

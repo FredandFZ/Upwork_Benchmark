@@ -1,0 +1,549 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-06-18",
+      "end": "2026-06-23",
+      "milestone": null,
+      "phase_label": "Franchise-site architecture and scope definition"
+    },
+    {
+      "session_id": "S2",
+      "start": "2026-06-24",
+      "end": "2026-07-04",
+      "milestone": null,
+      "phase_label": "Detailed page requirements and visual-design alignment"
+    },
+    {
+      "session_id": "S3",
+      "start": "2026-07-06",
+      "end": "2026-07-17",
+      "milestone": null,
+      "phase_label": "Website implementation and design review"
+    },
+    {
+      "session_id": "S4",
+      "start": "2026-07-21",
+      "end": "2026-07-24",
+      "milestone": null,
+      "phase_label": "Site-role correction and domain reassignment"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "MULTI_LOCATION_SITE_STRUCTURE",
+      "title": "Multi-Location Site Structure"
+    },
+    {
+      "family_id": "LOCATION_OPERATIONS",
+      "title": "Location Operations"
+    },
+    {
+      "family_id": "BRAND_AND_CONTENT",
+      "title": "Brand and Content Presentation"
+    },
+    {
+      "family_id": "SEATTLE_PRELAUNCH",
+      "title": "Seattle Prelaunch Experience"
+    },
+    {
+      "family_id": "SITE_MIGRATION",
+      "title": "Site Migration and Domain Configuration"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_NEW_MASTER_SITE_BUILD",
+      "title": "New Master Site Build",
+      "family_id": null,
+      "definition": "Build the new Smash Room master website from scratch rather than restructuring the existing Bay Area website.",
+      "anchor_message_ids": [
+        3,
+        8,
+        9,
+        54
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "FRONTEND",
+          "CMS"
+        ],
+        "contexts": [
+          "MASTER_SITE"
+        ]
+      },
+      "boundary_note": "Covers the new-build implementation approach only; visual styling, content reuse, routing, and location operations are separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MASTER_LOCATION_HUB",
+      "title": "Master Location-Selection Hub",
+      "family_id": "MULTI_LOCATION_SITE_STRUCTURE",
+      "definition": "The master site must present the national brand and let visitors select a location and continue to the appropriate location website, without owning location booking operations.",
+      "anchor_message_ids": [
+        1,
+        38,
+        39,
+        44,
+        54,
+        167,
+        170
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "CMS"
+        ],
+        "contexts": [
+          "MASTER_SITE",
+          "LOCATION_SELECTION"
+        ]
+      },
+      "boundary_note": "Covers location discovery, selection, and routing from the master site. Static homepage sections, location-site booking capability, and domain assignment are independently testable and excluded.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_REUSABLE_LOCATION_SITE_TEMPLATE",
+      "title": "Reusable Location-Site Template",
+      "family_id": "MULTI_LOCATION_SITE_STRUCTURE",
+      "definition": "Location websites must use a reusable structure that permits future franchise locations to be added without redesigning the overall experience.",
+      "anchor_message_ids": [
+        3,
+        24,
+        42,
+        54,
+        55
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "CMS",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LOCATION_SITES",
+          "FUTURE_LOCATION_ONBOARDING"
+        ]
+      },
+      "boundary_note": "Covers structural reuse and future-location extensibility. Specific Seattle sections, visual branding, and backend-account isolation remain separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LOCATION_BOOKING_FUNCTIONALITY",
+      "title": "Location-Site Booking Functionality",
+      "family_id": "LOCATION_OPERATIONS",
+      "definition": "Booking functionality must reside on the applicable location website and support location-specific appointments when that location is open, rather than operating on the master site.",
+      "anchor_message_ids": [
+        1,
+        15,
+        39,
+        44,
+        55,
+        162,
+        165
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BOOKING",
+          "FRONTEND",
+          "CMS"
+        ],
+        "contexts": [
+          "LOCATION_SITES",
+          "SEATTLE_LOCATION"
+        ]
+      },
+      "boundary_note": "Covers customer-facing booking capability and its placement on location sites. Segregation of booking records and staff access is handled by operational isolation; payment payouts are separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LOCATION_OPERATIONAL_ISOLATION",
+      "title": "Location Operational Data and Access Isolation",
+      "family_id": "LOCATION_OPERATIONS",
+      "definition": "Each location must independently control and track its bookings, calendar, customer data, analytics, memberships, gift cards, reporting, and staff access.",
+      "anchor_message_ids": [
+        1,
+        3,
+        15,
+        17,
+        33,
+        36,
+        55
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BOOKING",
+          "DATABASE",
+          "ANALYTICS",
+          "AUTH",
+          "CMS"
+        ],
+        "contexts": [
+          "LOCATION_OPERATIONS",
+          "SEATTLE_LOCATION",
+          "BAY_AREA_LOCATIONS"
+        ]
+      },
+      "boundary_note": "Covers per-location segregation of operational state and management access. The existence of booking functionality and separation of payment accounts or payouts have distinct acceptance criteria.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LOCATION_PAYMENT_PAYOUT_ISOLATION",
+      "title": "Location Payment and Payout Isolation",
+      "family_id": "LOCATION_OPERATIONS",
+      "definition": "Each franchise location must process payments and receive payouts through its own independently controlled payment setup.",
+      "anchor_message_ids": [
+        1,
+        15,
+        32,
+        35,
+        36,
+        38,
+        39,
+        55
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PAYMENT",
+          "CMS"
+        ],
+        "contexts": [
+          "LOCATION_OPERATIONS",
+          "SEATTLE_LOCATION",
+          "BAY_AREA_LOCATIONS"
+        ]
+      },
+      "boundary_note": "Separate payouts drove the change to separate Wix accounts and sites. It is independent from calendars, reporting, and customer-facing booking functionality.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SHARED_LOCATION_SERVICE_CATALOG",
+      "title": "Shared Location Packages and Pricing",
+      "family_id": "LOCATION_OPERATIONS",
+      "definition": "Location websites must provide the required service packages and use the common package and pricing model unless a location-specific change is established.",
+      "anchor_message_ids": [
+        42,
+        162
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BOOKING",
+          "CMS"
+        ],
+        "contexts": [
+          "LOCATION_SITES",
+          "SERVICE_CATALOG"
+        ]
+      },
+      "boundary_note": "Covers package and price availability, not the booking engine itself or the broader page layout.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_SHARED_VISUAL_BRAND_SYSTEM",
+      "title": "Shared Smash Room Visual Brand",
+      "family_id": "BRAND_AND_CONTENT",
+      "definition": "The master and location sites must consistently use the client's Smash Room identity, supplied logos, established colors, and the confirmed competitor-inspired design direction.",
+      "anchor_message_ids": [
+        3,
+        7,
+        9,
+        54,
+        81,
+        102,
+        105,
+        110,
+        112
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "UI_UX",
+          "FRONTEND",
+          "CMS"
+        ],
+        "contexts": [
+          "MASTER_SITE",
+          "LOCATION_SITES",
+          "BRAND_PRESENTATION"
+        ]
+      },
+      "boundary_note": "Covers logos, colors, visual style, national-brand presentation, and cross-site consistency. Responsive behavior and activity-specific image semantics are separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MOBILE_RESPONSIVE_EXPERIENCE",
+      "title": "Mobile-Friendly Responsive Experience",
+      "family_id": "BRAND_AND_CONTENT",
+      "definition": "The website experience must be usable and appropriately presented on mobile devices.",
+      "anchor_message_ids": [
+        54
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "MASTER_SITE",
+          "LOCATION_SITES",
+          "MOBILE_ACCESS"
+        ]
+      },
+      "boundary_note": "Responsive behavior can fail independently of colors, logos, or page content and is therefore not merely an attribute of the visual-brand Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_EXISTING_CONTENT_REUSE",
+      "title": "Reuse Existing Bay Area Content",
+      "family_id": "BRAND_AND_CONTENT",
+      "definition": "Use appropriate content, images, and booking information from the existing Bay Area Smash Room site as source material for the new websites while applying the new design.",
+      "anchor_message_ids": [
+        8,
+        9,
+        30,
+        78,
+        83,
+        84
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "CMS",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "CONTENT_MIGRATION",
+          "MASTER_SITE",
+          "SEATTLE_LOCATION"
+        ]
+      },
+      "boundary_note": "Covers source-content reuse, not preservation of SEO rankings or replication of the old visual style.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MASTER_HOMEPAGE_CONTENT",
+      "title": "Master Homepage Content Structure",
+      "family_id": "BRAND_AND_CONTENT",
+      "definition": "The master homepage must present the requested brand and activity information, including the hero, Rage Rooms, Axe Throwing, Splatter Room, events, parties, reviews, FAQ, and contact content.",
+      "anchor_message_ids": [
+        54,
+        167
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "CMS",
+          "UI_UX"
+        ],
+        "contexts": [
+          "MASTER_HOMEPAGE"
+        ]
+      },
+      "boundary_note": "Static homepage sections are attributes of one page-composition mechanism. The functional location selector and links are owned by the master-hub Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LOCATION_PAGE_CONTENT",
+      "title": "Location Page Content Structure",
+      "family_id": "BRAND_AND_CONTENT",
+      "definition": "Location pages, beginning with Seattle, must provide the specified location-oriented sections such as activity information, events, parties, FAQ, gallery, and contact information.",
+      "anchor_message_ids": [
+        54,
+        55,
+        102,
+        170
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "CMS",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LOCATION_PAGES",
+          "SEATTLE_LOCATION"
+        ]
+      },
+      "boundary_note": "Static location-page sections are grouped as one page-composition mechanism. VIP signup, booking behavior, coming-soon state, and imagery correctness are independently testable.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ACTIVITY_SPECIFIC_IMAGERY",
+      "title": "Activity-Specific Imagery",
+      "family_id": "BRAND_AND_CONTENT",
+      "definition": "Activity imagery must accurately depict the corresponding offering, including paint-related imagery for Splatter Room and targets or axe throwing for Axe Throwing.",
+      "anchor_message_ids": [
+        103
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CMS",
+          "UI_UX"
+        ],
+        "contexts": [
+          "SPLATTER_ROOM",
+          "AXE_THROWING"
+        ]
+      },
+      "boundary_note": "Image subject correctness can be revised or fail independently from the overall logo, colors, and design reference.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SEATTLE_COMING_SOON_EXPERIENCE",
+      "title": "Seattle Coming-Soon Experience",
+      "family_id": "SEATTLE_PRELAUNCH",
+      "definition": "Before opening, the Seattle location must operate as a promotional Coming Soon page with appropriate status controls and be prepared for later activation of bookings and updated photography without redesign.",
+      "anchor_message_ids": [
+        55,
+        64,
+        68,
+        142,
+        165
+      ],
+      "scope_hypothesis": {
+        "persistence": "MILESTONE_LOCAL",
+        "components": [
+          "FRONTEND",
+          "CMS",
+          "BOOKING"
+        ],
+        "contexts": [
+          "SEATTLE_PRELAUNCH",
+          "SEATTLE_LOCATION"
+        ]
+      },
+      "boundary_note": "Covers the temporary pre-opening state and activation readiness. The reusable location template and VIP email collection are separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SEATTLE_VIP_EMAIL_SIGNUP",
+      "title": "Seattle VIP Email Signup",
+      "family_id": "SEATTLE_PRELAUNCH",
+      "definition": "The Seattle prelaunch page must let visitors join a VIP email list.",
+      "anchor_message_ids": [
+        55
+      ],
+      "scope_hypothesis": {
+        "persistence": "MILESTONE_LOCAL",
+        "components": [
+          "FRONTEND",
+          "EMAIL",
+          "DATABASE"
+        ],
+        "contexts": [
+          "SEATTLE_PRELAUNCH",
+          "VIP_SIGNUP"
+        ]
+      },
+      "boundary_note": "Email capture has its own input and success behavior and is not merely a static Seattle page section.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SEO_PRESERVING_MIGRATION",
+      "title": "SEO-Preserving Site Migration",
+      "family_id": "SITE_MIGRATION",
+      "definition": "The transition from Bay Area Smash Room branding and sites to the new master presence must minimize SEO damage by preserving relevant SEO elements and maintaining an appropriate legacy-site transition or linkage.",
+      "anchor_message_ids": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        15
+      ],
+      "scope_hypothesis": {
+        "persistence": "MILESTONE_LOCAL",
+        "components": [
+          "SEO",
+          "DOMAIN",
+          "CMS"
+        ],
+        "contexts": [
+          "SITE_MIGRATION",
+          "BAY_AREA_LEGACY_SITE",
+          "MASTER_SITE"
+        ]
+      },
+      "boundary_note": "Covers search-ranking continuity during migration. Correct attachment of domains to Wix sites is a distinct deployment configuration Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CORRECT_DOMAIN_SITE_ASSIGNMENT",
+      "title": "Correct Domain-to-Site Assignment",
+      "family_id": "SITE_MIGRATION",
+      "definition": "Each domain must be connected to the correct Wix website and account so the master domain exposes the master experience and location identities remain associated with their proper profiles and settings.",
+      "anchor_message_ids": [
+        13,
+        54,
+        170,
+        178,
+        179,
+        183,
+        184,
+        189,
+        202,
+        204
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DOMAIN",
+          "CMS"
+        ],
+        "contexts": [
+          "MASTER_SITE",
+          "LOCATION_SITES",
+          "WIX_ACCOUNT_MAPPING"
+        ]
+      },
+      "boundary_note": "Covers persistent domain and Wix-profile mapping. It is separate from page-content roles and from the temporary SEO migration strategy because it has its own failure and verification trajectory.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        134,
+        170
+      ],
+      "description": "The history alternates between Seattle and Austin when naming the second Wix site or profile. It is unclear whether Austin is a typo, the account hosting Seattle content, or an additional location, so location-specific event routing requires review.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        55,
+        162,
+        163,
+        164,
+        165
+      ],
+      "description": "The complaint about missing packages and booking software does not initially identify a website, and the Seattle requirement previously called for bookings to remain inactive during the Coming Soon phase. Event extraction must resolve whether the failure concerns the master site, Seattle site, another location site, or multiple sites.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        178,
+        179,
+        186,
+        189,
+        190,
+        192
+      ],
+      "description": "The client considers same-domain hosting, domain reassignment, and copying content between Wix profiles while subscriptions and settings are locked to another account. The final technical arrangement beyond the verified domain connection is not fully established.",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

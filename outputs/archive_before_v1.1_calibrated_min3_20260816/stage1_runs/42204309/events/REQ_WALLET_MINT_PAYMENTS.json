@@ -1,0 +1,543 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_WALLET_MINT_PAYMENTS",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 72,
+        "speaker": "client",
+        "text": "For user authentication, let's go with a hybrid approach to keep it accessible for both crypto and non-crypto users (fiat on-ramp is key for virality):\n\\- Wallet auth (SIWE) for crypto paths—essential for mints/transfers.\n\\- Email-based auth for dashboard access (referrals, tickets, prizes)—ties to fiat users without wallets.\n\\- No auth for public APIs (e.g., leaderboards, pool values)—keeps it open and transparent.\n\nThis aligns with our lean MVP: non-crypto folks can mint via Stripe/email, crypto via wallet. Implement email as simple (e.g., magic links for low friction).\n\nFor email service, let's go with Brevo—I'll create the account and send credentials soon. If the paid Starter plan improves UX or deliverability, I'm fine with it (as long as it's worth the price).\n\nFor Stripe, I'll create a test account and share the details shortly—focus on fiat to USDC for now. Same as above: if a low-cost paid add-on boosts reliability/UX, let's discuss (free tier fine to start)."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "wallet_mint_path": "Crypto users mint through a connected wallet"
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "PRIMARY_MINT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, but there are bugs.\n\n**I tried to mint a couple times last night, with ETH in my wallet (no USDC), but it seems to have failed, yet, on <http://ProjectRebuild.xyz|ProjectRebuild.xyz> it says i have minted twice.**\n\nAlso, i used no referral code, so (not sure what should have happened to the commission and ticket on mint 1, as its mean to go to an already minted NFT holder... a one off edge case i hadn't thought of, but) mint 2 should have allocated the commission and ticket to mint 1 - (Maybe this is due to the mint not going through)\n\nAlso, when i click to view NFT from the dashboard, the book cover is too big and cut off, and (maybe because the mint didn't actually work) im not sure how to view the actual book.\n\nIll try minting now with USDC and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Wallet mint attempts using ETH failed and produced no actual NFT."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 294,
+        "speaker": "client",
+        "text": "attempted mints using USDC are failing (but not showing up as buys on dashboard)"
+      },
+      "supporting_message_ids": [
+        298
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Wallet mint attempts using USDC failed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 312,
+        "speaker": "client",
+        "text": "Most tweaks are great, but mint is still not working.\n\nOn mint attempt, i don't get the option to choose to pay in ETH/USDC/etc, but, i have both ETH and USDC in the wallet and the first mint is still not working...\n\nAnd on my dashboard, it is still showing that i have 2 NFTs, but when i click through to 'read' (on these false NFTs) it goes nowhere"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Minting still failed and no currency selector was available despite the wallet holding both ETH and USDC."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 321,
+        "speaker": "client",
+        "text": "If payment is ETH only (or USDC only), the customer needs to know what currency the payment is in.  \n\nBut if there is the option for either ETH or USDC, there needs to be a way to select."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "single_currency_disclosure": "If only one wallet currency is supported, clearly identify that currency to the customer",
+        "multi_currency_selection": "If both ETH and USDC are supported, provide a way to select between them"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 330,
+        "speaker": "client",
+        "text": "That would be great 👍"
+      },
+      "supporting_message_ids": [
+        326,
+        327,
+        328
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "supported_currencies": [
+          "USDC",
+          "ETH"
+        ],
+        "currency_selector": true
+      },
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "PRIMARY_MINT",
+          "USDC_PAYMENT",
+          "ETH_PAYMENT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 335,
+        "speaker": "freelancer",
+        "text": "I have finished implementing it"
+      },
+      "supporting_message_ids": [
+        327,
+        328,
+        330
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports completing the ETH payment option and ETH/USDC currency selector."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 341,
+        "speaker": "client",
+        "text": "When i try to mint with USDC, there is first an approval transaction which executed, but then i'm not getting any option to mint.\n\nWhen I try to mint with ETH, there was no approval transaction, transaction executed and took my ETH (0.0055 ETH = $16.75), but i received no NFT"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "USDC approval completed without proceeding to mint, while an ETH transaction charged the wallet but produced no NFT."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 352,
+        "speaker": "client",
+        "text": "ETH transaction failed. On the mint page it says 0.0055 ETH ($16.75) and in the transaction it comes up as 0.0061 ETH ($18.61).\nI wouldn't have thought a swap on base would cost $1.75 - $3.61\nIs the '0.0055ETH dynamic, as in, as ETH price fluctuates, does this amount fluctuate to match $15?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "An ETH mint failed and the transaction requested more ETH than the amount displayed on the mint page."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 357,
+        "speaker": "freelancer",
+        "text": "How it works now\n\n\\- USDC: Approve → auto-mint → success modal (only after mint).\n\\- ETH: Dynamic price calculation → sufficient buffer → successful swap.\n\nThe ETH price shown will fluctuate to match $15 USDC based on current market rates. The contract’s minETHForMint is 0.0055 ETH (~$16.50), so the frontend uses the higher of the dynamic price or this minimum.\n\nHard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R) and try minting again.\nBoth USDC and ETH should work correctly."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that USDC approval now triggers auto-mint and that ETH uses dynamic pricing and a buffered swap."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 358,
+        "speaker": "client",
+        "text": "USDC mint attempt: approval transaction executed → 'Mint Successful' popup appeared → no mint executed and could not mint.\nTransaction - 0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the claimed fix, USDC approval completed but no mint transaction executed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 359,
+        "speaker": "client",
+        "text": "ETH mint attempt: transaction failed and 'Mint Successful' popup appeared\nfailed transaction - 0x821207F44209Be7556fE30643a1EeD4BA6E6ce52"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the claimed fix, the ETH mint transaction failed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 361,
+        "speaker": "freelancer",
+        "text": "I’ve shipped fixes to stop false “Mint Successful” modals and to ensure approval -&gt; mint flows run correctly. Deployed to production just now.\n\nWhat changed:\n\n\\- Success modal gating: Only shows when the mint transaction receipt matches the current mint hash and hasn’t already been shown. Typing/deleting referral codes will no longer trigger the success popup.\n\\- Reset on new mint attempt: When you click mint, we clear prior success state, pending params, and tracking refs so stale success states can’t leak into the next attempt.\n\\- USDC auto-mint after approval: Removed the stale success guard so the mint runs right after approval completes (no more approval-only success).\n\\- ETH amount and buffer: Dynamic ETH pricing still uses the higher of live price vs contract min (0.0055 ETH), with buffer; unchanged from prior hotfix.\n\nPlease hard refresh (Cmd/Ctrl+Shift+R) and try again:\n\\- USDC: approve -&gt; mint should fire automatically; success modal only after the mint tx confirms.\n\\- ETH: if a tx fails, no success modal will appear; only real mint receipts trigger it.\n\nIf you hit any further issues, send the latest tx hashes, and I’ll inspect immediately."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports deploying another fix so USDC proceeds from approval to mint and ETH failures are handled without false success state."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 364,
+        "speaker": "client",
+        "text": "USDC attempt executed, “Mint Successful” modal appeared, but no mint &amp; no USDC spent.\n\nETH attempt failed"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The USDC flow still produced no mint or USDC spend, and the ETH attempt also failed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 377,
+        "speaker": "client",
+        "text": "USDC Mint attempt: Approval transaction executed → “Mint Successful” modal appeared → Mint transaction appeared → transaction executed → “Mint Successful” modal appeared, NFT certificate working, mint counted, pool contribution made..... but I can't find the NFT in my wallet or on our dashboard.\nTransaction - 0x821207F44209Be7556fE30643a1EeD4BA6E6ce52"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A USDC approval and mint transaction executed successfully, with the mint counted and its pool contribution made."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 401,
+        "speaker": "freelancer",
+        "text": "Findings\nYour ETH mint reverted (0x3af7…0855c on Base) because the on-chain swap router is set to 0x2626…e481, which isn’t the Uniswap V3 SwapRouter. The contract calls exactInputSingle there and it reverts, so every ETH mint will fail until the router is corrected on-chain.\n\nUSDC mint works;\n\\- token #1 exists and is owned by 0x3b55868Dd2ebA28f97b3dB55a4cB706a078154B5. Metadata and assets resolve:\n\\- Metadata: <https://api.projectrebuild.xyz/metadata/1>\n\\- Image: <https://api.projectrebuild.xyz/images/1.png>"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "On-chain inspection showed that every ETH mint reverted because the contract referenced the wrong swap router."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "Right now, 'View Book' still takes me to a blank page (see attached screenshot) and I can not select to pay in ETH - i can only select for USDC or Card (when card option should be the one I can not select, due to it not being implemented yet)"
+      },
+      "supporting_message_ids": [
+        423
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The deployed payment selector did not offer ETH and only displayed USDC and Card."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 430,
+        "speaker": "client",
+        "text": "\\- My NFTs are no longer showing in the dashboard.\n\\- I can select to pay in ETH, but transaction failed.\n\nDashboard is still saying we are up to mint number 3, but that the prize pool is now empty, see screenshots"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the ETH option became selectable, its mint transaction still failed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 494,
+        "speaker": "freelancer",
+        "text": "I have redeployed a new contract to fix ETH.  The Fix:\n\\* Configurable slippage tolerance (default: 85 = 15% slippage)\n\\* Owner-adjustable via setSwapSlippageTolerance() function\n\\* ETH minting will now work even in volatile markets\n\nNext Steps to Go Live:\nAdd to Chainlink VRF:\n\\* Go to vrf.chain.link\n\\* Add consumer: 0x339e73f5D77CA643ED4A39aA4Bc1DF5c6faACd9b"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports redeploying the contract with configurable slippage intended to make ETH minting work."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 498,
+        "speaker": "client",
+        "text": "right now, the contract is already trying to charge 0.0071 ETH, = $22.36"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The ETH mint flow requested approximately $22.36 for the $15 NFT."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 499,
+        "speaker": "client",
+        "text": "Your USDC mint seems to be from a different mint contract, which most of the stats on the site are now aligned to.\nI'll get the chainlink stuff ready, but will wait for you to wake up and confirm before I make any changes, as raising slippage to 15% doesn't make any sense to me."
+      },
+      "supporting_message_ids": [
+        494,
+        497,
+        498
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The client disputes the proposed 15% slippage approach, leaving the acceptable ETH conversion and pricing behavior unresolved."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 501,
+        "speaker": "freelancer",
+        "text": "Yes, I minted one NFT using USDC, using the new contract I deployed"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Freelancer reports completing a successful USDC mint using the newly deployed contract."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 504,
+        "speaker": "client",
+        "text": "okay, i have added the new consumer and will try to research for another solution later tonight, because to me, this one doesn't make sense, and we cant have people paying $22+ for a $15 NFT"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "eth_price_integrity": "An ETH mint for the $15 NFT must not leave users paying $22 or more"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 530,
+        "speaker": "freelancer",
+        "text": "I spent 0.0071022 ETH\nI got a refund of 7.48635 USDC"
+      },
+      "supporting_message_ids": [
+        529
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A live ETH mint completed, with the excess input returned to the payer in USDC."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 539,
+        "speaker": "client",
+        "text": "Hmmmmm... well, I do think that&#39;d be best. \nI&#39;m not too worried about the lost copies in the old contract"
+      },
+      "supporting_message_ids": [
+        532,
+        534,
+        535,
+        536,
+        537,
+        538
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "eth_swap_mode": "Use Uniswap V3 exactOutputSingle to obtain exactly 15 USDC",
+        "excess_refund_currency": "ETH",
+        "insufficient_eth_behavior": "Revert if the submitted ETH cannot obtain 15 USDC"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 539,
+        "speaker": "client",
+        "text": "Hmmmmm... well, I do think that&#39;d be best. \nI&#39;m not too worried about the lost copies in the old contract"
+      },
+      "supporting_message_ids": [
+        532,
+        534,
+        535,
+        536,
+        537,
+        538
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 546,
+        "speaker": "freelancer",
+        "text": "I deployed the new contract"
+      },
+      "supporting_message_ids": [
+        534,
+        539
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports deploying the accepted exact-output ETH mint contract."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "On approval for USDC spend (not minting) the 'successful mint' popup appeared, and stated mint number 2 (in this case i used referral code 2), see screenshot with the wallet popup in view.\nI cancelled the buy, checked and had no NFT.\nThen minted with referral code 3, no approve USDC sign happened, it went straight to mint and worked perfectly, popup appeared. NFT is visible on dashboard.\n\ndecrypting the book worked (i had to sign a transaction), but i am stuck on the cover page."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A subsequent USDC wallet mint completed successfully and produced an NFT visible on the dashboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 571,
+        "speaker": "client",
+        "text": "mint with eth worked perfectly, no 'approve eth spend'"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client successfully completed an ETH wallet mint."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 724,
+        "speaker": "client",
+        "text": "Worked perfectly!"
+      },
+      "supporting_message_ids": [
+        719,
+        721
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client reports that the final no-referral wallet mint test worked perfectly on mobile."
+      }
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

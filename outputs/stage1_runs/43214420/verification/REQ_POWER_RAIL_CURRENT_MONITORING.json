@@ -1,0 +1,145 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 315,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "monitoring_ic": "INA219",
+          "measured_rails": [
+            "3.3V"
+          ]
+        },
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "POWER"
+          ],
+          "contexts": [
+            "MODULAR_MAIN_BOARD",
+            "POWER_TELEMETRY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        314,
+        315
+      ],
+      "decision_note": "The client confirms an INA219 on the main board's 3.3V rail, but this source does not support a SENSORS component scope.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 336,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        335,
+        336
+      ],
+      "decision_note": "The immediate reply unambiguously confirms measurement of the entire 3.3V rail current.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 339,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        339
+      ],
+      "decision_note": "The client explicitly extends current monitoring to the 5V rail.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 347,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        344,
+        345,
+        347
+      ],
+      "decision_note": "The client specifies the monitor's in-series position and total downstream 3.3V measurement coverage.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 353,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        350,
+        351,
+        352,
+        353
+      ],
+      "decision_note": "The client clearly accepts INA3221 as preferable to INA219 in the tightly coupled exchange.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 354,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        350,
+        353,
+        354
+      ],
+      "decision_note": "The client establishes the INA3221 channel allocation for both monitored rails and identifies one spare channel.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 763,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "VALUE",
+          "description": "Whether the integrated board can omit a separate INA monitor and rely on the AXP2101 remains conditional on confirming that the AXP2101 provides the required current measurements."
+        },
+        "execution": null
+      },
+      "evidence_message_ids": [
+        761,
+        762,
+        763
+      ],
+      "decision_note": "The client conditionally prefers omitting INA, but the freelancer is uncertain whether AXP2101 provides the required monitoring.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

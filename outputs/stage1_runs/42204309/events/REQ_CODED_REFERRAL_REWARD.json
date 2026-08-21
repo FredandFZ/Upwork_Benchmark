@@ -1,0 +1,88 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_CODED_REFERRAL_REWARD",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Hey Joseph,\nOne final-final mechanics tweak that actually makes everything cleaner and simpler to code (no weird half-expiring tickets).\nNew rule (replaces the previous ticket lifespan description):\n→ Every time someone mints with a referral code, the referrer instantly gets two separate tickets added to their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThese are two completely independent counters.\nSmall Block ($2,500 pool → 5 × $500 draw):\nDraw only from Small Block Tickets issued since the last small block.\nAfter the draw, burn/reset all Small Block Tickets to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nDraw only from Big Block Tickets issued since the last big block.\nAfter the draw, burn/reset all Big Block Tickets to 0.\n\nThis way:\nSmall blocks stay super fair and fresh (no one carries old tickets forward).\nBig blocks naturally accumulate (people can see their big block entries climbing over weeks/months).\nMetadata is trivial: just show the two counters + permanent badges.\n\nTriggers stay pool-based (small block fires the moment small pool = exactly $2,500, big block when big pool = exactly $100,000). Secondary royalties still fill pools but don’t create tickets.\nEverything else stays identical (auto $5 commission, random ticket to existing NFT when no ref used, manual claim, etc.).\nThis version should be easier to implement and explain to users.\nSorry for the flip-flop — Once you confirm this is cleaner for you too, we’re 100% locked.\n\nThanks man!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "commission_amount_per_successful_referral": "$5",
+        "prize_ticket_award_per_successful_referral": "1 Small Block ticket and 1 Big Block ticket",
+        "award_timing": "instantly upon a successful mint using a referral code"
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "REFERRAL_MINT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 210,
+        "speaker": "client",
+        "text": "Hero Headline: Dropout multimillionaire to zero in one oversight. Now rebuilding, with an eBook model to free creators from Amazon's 70% cut.\n\nSub-Headline: \"My Underdog Journey: To Own Goal\" — Unlimited NFT book ⋅ $15 forever ⋅ Base.\n\nMechanics Tease: Buy → own the book + get your referral link. Refer → unlimited, instant $5 + 1 entry to $500 random giveaway, every 100 sales.\n\nCTA Button: Mint eBook NFT for $15\n\nEmphasize $500 Every 100 Sales: Update all to highlight frequency as the motivator (e.g., \"constant little cracks at $500\").\n\nIn prize section: \"Win $500 every 100 sales — 1 ticket per referral, fair Chainlink VRF draw. More referrals = more chances!\"\n\nAdd to mechanics tease: \"Refer for instant $5 + your shot at $500 every 100 sales.\"\nThis turns it into \"ongoing roulette spin\" for hustlers.\n\nAdd FAQs:\nHow Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\nIf you're buying with fiat (credit card, Apple Pay, etc.) and new to crypto, don't worry — the process is designed to be simple. When you mint the book for $15 via Transak, a non-custodial wallet is automatically created for you behind the scenes (no seed phrase needed at first). This wallet holds your NFT and receives any commissions or prizes. Here's how it works step by step:\n\nDuring the Purchase:\nTransak handles the fiat-to-crypto conversion and mints the NFT directly to a new wallet address for you. You don't need to set up anything manually — it's seamless and non-custodial (you own the keys, but no complicated seed phrase to manage right away).\nYou'll get an email confirmation with your mint number (your referral code), NFT details, and a link to your dashboard on <http://projectrebuild.xyz|projectrebuild.xyz>.\n\nEarning Commissions ($5 per Referral):\nShare your referral code (e.g., \"use 8421\"). When someone mints with it, $5 is automatically sent to your wallet address.\nTo collect: Log into your dashboard on <http://projectrebuild.xyz|projectrebuild.xyz> (using the email link or SIWE with the wallet Transak created). Your commissions appear there instantly — no action needed.\n\nEarning and Winning Prizes:\nEach referral gives you a ticket for the current prize draw. These are tied to your NFT/wallet automatically.\nDraws happen on-chain ($500, every 100 sales) via fair randomness. Winners are announced on the Winners page and emailed to you.\nTo collect a prize: If you win, $500 is sent straight to your wallet. Check your dashboard for notifications — we'll email step-by-step instructions to view/claim into fiat if needed (e.g., link to a simple exchange guide). No seed phrase required; use the dashboard to access..\n\nHow Do I Collect My Commissions and Prizes? (For Beginners)\nIf you're new to this, don't worry — everything is automatic and easy to track. Here's how it works step by step:\n\nEarning Commissions ($5 per Referral):\nWhen someone mints the book using your referral code (your mint number, found in your dashboard or email confirmation), $5 is sent straight to your wallet instantly. No action needed from you — the smart contract handles it.\n\nEarning Prize Tickets:\nEvery successful referral also gives you 1 ticket for the $500 prize, every 100 sales. These are automatically added to your NFT (visible in your dashboard).\nNo need to do anything — tickets are on-chain and tied to your mint number.\n\nWinning and Collecting Prizes:\nPrizes are drawn automatically using Chainlink VRF (a fair random system) when pools hit the trigger (every 100 sales). Winners are announced on the Winners page and via email (if you provided one).\nIf you win, $500 is sent to your wallet instantly. Check your dashboard for notifications — we'll also email you.\nTickets expire after the draw they're for, but new referrals get you tickets for the next blocks..\n\nOther Wording Tweaks:\nMechanics List: all focus on frequent $500 wins + your $5 commission to reinforce \"cut middlemen, funnel savings.\"\n\nPrize Section: change 'When the prize pool reaches $500 (every 100 sales), 1 winner is randomly selected from all ticket holders using Chainlink VRF for provably fair randomness.' to '**$500 every 100 sales!** 1 affiliate selected (from that 100 sales block), using Chainlink VRF for provably fair randomness. **More referrals = more chances to win!**' — make it the headline for skim.\n\nGeneral: Swap \"revolutionary\" to \"aligned\" or \"fair\" — less hype, more ethos. Add \"Help the rebuild — share to earn\" tagline below stats.\n\nVisual/UI Tweaks:\nAdd book cover to hero (integrate with headline).\nMint your eBook/ Mint your eBook NFT\nLive Counters: Add \"Next $500 Draw In: ~X Sales\" for urgency.\nMobile Test: Ensure stats/mechanics stack well — no cutoff."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "prize_ticket_award_per_successful_referral": "1 ticket for the $500 prize draw"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 581,
+        "speaker": "client",
+        "text": "yes, the USDC minting was successful, and my #4 mint now has $5 and a ticket.\n\nbut when we mint without using a referral code, there seems to be no ticket generated, and no ticket and commission given out at random"
+      },
+      "supporting_message_ids": [
+        580
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A successful USDC mint using referral code #4 awarded NFT #4 the configured $5 commission and one prize ticket."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 587,
+      "suggested_requirement_id": "REQ_NO_CODE_RANDOM_REWARD",
+      "description": "The fix claim concerns ticket and commission assignment for mints without a referral code, not coded referral rewards."
+    },
+    {
+      "message_id": 672,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The message primarily evaluates whether coded and randomly assigned rewards are reflected in leaderboards and NFT attributes."
+    },
+    {
+      "message_id": 688,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The reported leaderboard, NFT-page, and attribute consistency belongs to reward accounting rather than the coded award rule itself."
+    },
+    {
+      "message_id": 750,
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "The implementation claim concerns referral-specific mint-success modal timing and copy."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

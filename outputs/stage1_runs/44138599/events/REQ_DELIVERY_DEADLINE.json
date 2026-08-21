@@ -1,0 +1,104 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_DELIVERY_DEADLINE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 40,
+        "speaker": "client",
+        "text": "Sending you now. Got engaged somewhere yesterday."
+      },
+      "supporting_message_ids": [
+        29,
+        39
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "delivery_window": "within 48 hours of the order being placed"
+      },
+      "scope_updates": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "VIDEO_PRODUCTION"
+        ],
+        "contexts": [
+          "INITIAL_TEST_AD",
+          "DELIVERY"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 75,
+        "speaker": "client",
+        "text": "Any update it is more than 48 hrs now?"
+      },
+      "supporting_message_ids": [
+        29,
+        40
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The client reports that more than 48 hours have passed without receiving the commissioned video."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 97,
+        "speaker": "client",
+        "text": "you have to give this to me in next 24hrs i won't give you more time else i have to cancel and i need pristine quality in the video also any issues i will not pay. You have taken 3 times the time as you committed and still this is not ready. Very poor service."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "delivery_window": "within the next 24 hours",
+        "non_delivery_consequence": "contract cancellation"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 98,
+        "speaker": "client",
+        "text": "I think i must cancel the contract you are not able to do it."
+      },
+      "supporting_message_ids": [
+        97
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The video remains undelivered after the client's 24-hour final deadline, prompting the client to consider cancellation."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 104,
+        "speaker": "client",
+        "text": "If you are able to deliver it in next 12 hrs it is fine. If not please leave the task. We cannot take such a slow starter we needed an expert. Someone who is an expert will hardly takes few hrs to create this. So, i don't think you understand or you are an expert in this field. Please leave the task I don't think you can do it."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "delivery_window": "within the next 12 hours",
+        "non_delivery_consequence": "leave the task"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

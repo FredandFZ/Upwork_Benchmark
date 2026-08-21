@@ -1,0 +1,399 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NO_CODE_RANDOM_REWARD",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Hey Joseph,\nOne final-final mechanics tweak that actually makes everything cleaner and simpler to code (no weird half-expiring tickets).\nNew rule (replaces the previous ticket lifespan description):\n→ Every time someone mints with a referral code, the referrer instantly gets two separate tickets added to their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThese are two completely independent counters.\nSmall Block ($2,500 pool → 5 × $500 draw):\nDraw only from Small Block Tickets issued since the last small block.\nAfter the draw, burn/reset all Small Block Tickets to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nDraw only from Big Block Tickets issued since the last big block.\nAfter the draw, burn/reset all Big Block Tickets to 0.\n\nThis way:\nSmall blocks stay super fair and fresh (no one carries old tickets forward).\nBig blocks naturally accumulate (people can see their big block entries climbing over weeks/months).\nMetadata is trivial: just show the two counters + permanent badges.\n\nTriggers stay pool-based (small block fires the moment small pool = exactly $2,500, big block when big pool = exactly $100,000). Secondary royalties still fill pools but don’t create tickets.\nEverything else stays identical (auto $5 commission, random ticket to existing NFT when no ref used, manual claim, etc.).\nThis version should be easier to implement and explain to users.\nSorry for the flip-flop — Once you confirm this is cleaner for you too, we’re 100% locked.\n\nThanks man!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "no_code_trigger": "mint without a referral code",
+        "ticket_award": "random ticket",
+        "random_recipient_eligibility": "existing NFT holder"
+      },
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "NO_REFERRAL",
+          "PRIMARY_MINT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 146,
+        "speaker": "client",
+        "text": "tweak this where you have to , but here is the FAQ section -\n\nWhat is Project Rebuild?\nProject Rebuild is the live proof-of-concept for FAMM (Fully Autonomous Marketing Model) — the first system that lets indie creators sell unlimited NFT ebooks and pay readers real commissions + prizes to spread them.\nIt's launching with my raw memoir novella, \"My Underdog Journey: To Own Goal,\" on Base.\nAnd it's my public mission to rebuild my family's life after losing millions to a seed-phrase wipeout.\nIf FAMM proves itself, Project Rebuild evolves into BooksOnChain — a community-owned public good platform for every creator.\n\nHow do buyers earn money?\n1\\. $5 instant commission every time someone mints with your referral code\n2\\. Small &amp; Big Block prize tickets every time someone mints with your code\n3\\. \\*\\*\\*If FAMM is proven successful, and with zero guarantee of success or value\\*\\*\\*\nFuture BooksOnChain governance token allocation will be to buyers, affiliates, and tippers of \"My Underdog Journey: To Own Goal\".\n\nHow do referrals work?\nEvery NFT’s mint number IS its permanent referral code.\nExamples that both work perfectly:\n→ Share your full link\n→ Or just say “use referral 423”\nWhen someone mints using your code → you instantly get $5 + Small &amp; Big Block prize tickets for the current blocks.\n→ If no referral code is used on mint → commission and tickets are sent to a random existing NFT holder.\n\nWhere do I find my referral code?\nIt’s your mint number. You’ll see it:\n\\- On your NFT\n\\- In your NFT metadata\n\\- On your Dashboard after minting\n\\- In your confirmation email (optional)\n\nWhat are Small Block and Big Block prizes?\nSmall Block: 5 × $500 drawn every ~500 sales (mint + secondary)\nBig Block: 5 × $10,000 drawn every ~50,000 sales (mint + secondary)\nPools funded from every sale forever.\n\nHow are winners selected?\nChainlink VRF — fully on-chain, provably fair, verifiable on Basescan.\n\nWhat are Small &amp; Big Block prize tickets?\nEntries for the current Small &amp; Big Block prize draws.\nEarn them by getting people to mint with your code (1 Small + 1 Big per successful referral).\nMore tickets → more chances to win.\nOnce the block is drawn, those tickets expire and new referrals count toward the next blocks.\n\nHow do I claim my rewards?\n\\- $5 commissions → sent automatically to your wallet\n\\- Prize wins → announced on the Winners page and claimed with one click here on <http://projectrebuild.xyz>\n\nWhat are badges?\nOn-chain badges added to your NFT for hitting referral milestones (2, 10, 50, 100+).\nCurrently cosmetic + leaderboard flex.\nIn future these may be used to unlock any number of things, token-gated chats, discounts, etc.\n\nCan I mint with fiat (credit card)?\nYes — Transak supports cards, Apple Pay, Google Pay.\n\nDo I need a wallet to participate?\nNo, not for minting with fiat.\nBut yes if you want to receive commissions, hold prize tickets, or sell/trade the NFT later.\n\nWhat blockchain is this on?\nBase (Ethereum L2) — fast, cheap, secure.\n\nAre there any hidden fees?\nNo. Mint = exactly $15. Secondary sales carry a visible $10 flat royalty.\n\nWhat happens if I sell my NFT?\nThe buyer gets the book, mint number (now their referral code), any badges earned, and any active prize tickets (expired ones stay expired).\n\nHow do I share my referral link/code?\nDashboard → copy full link or just copy your mint number and tell people “use referral 423”.\n\nIs this a scam or pyramid scheme?\nNo. Single-level only. Full source verified on Basescan. I earn $4 on every sale forever (minus any fiat fees) — same cut on mints and secondary sales. The rest feeds commissions and prize pools.\n\nHow do I contact support?\nNo Discord yet (will launch once we have real traction).\nFor now:\nDM @ProjectRebuild on X\nor\nemail will@projectrebuild.xyz\n\nStill have questions? DM @ProjectRebuild on X or email will@projectrebuild.xyz — happy to help."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "commission_amount": "$5",
+        "ticket_award": "Small and Big Block prize tickets",
+        "random_recipient_eligibility": "existing NFT holder"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 156,
+        "speaker": "client",
+        "text": "QUESTION - Are we doing the block prizes instantly and automatically or will there be a 'claim' button?\nIf prizes are instant and automatic - disregard what i've written below about 'claim button'.\n\nAnd some tweaks in the 'About Project Rebuild' section (from your screenshot)\n\nPage Title: About Project Rebuild\nSub-title: The first ebook launch that pays readers to spread it.\n\nWhat is Project Rebuild?\nProject Rebuild is the live proof-of-concept for FAMM (Fully Autonomous Marketing Model) — The first system that lets indie creators sell unlimited mint NFT ebooks and pay readers real commissions + prize tickets to share them.\nLaunching with my own raw memoir novella, \"My Underdog Journey: To Own Goal,\" on Base.\nAnd is my public mission to rebuild my family's life after losing millions to a seed-phrase wipeout.\n\nIf our FAMM proves itself here, Project Rebuild evolves into BooksOnChain — a community-owned public good platform for every creator.\n\nBuilt on Cutting-Edge Technology\n\n\\- Smart Contracts\nAudited, secure Solidity on Base.\n\\- Chainlink VRF\nProvably fair random selection for prize draws.\n\\- Aave Integration\nYield generation on prize pools via deposits.\n\\- Base Network\nLow fees, fast transactions, Ethereum security.\n\\- Decentralized\nFully on-chain logic from day one, with initial V1 safeguards.\n(evolving to full decentralization with battle-testing)\n\n\\- Secure\nIndustry leading protocols and best practices.\n\nHow It Works\n\nMint Your ebook NFT\nPurchase your ebook NFT for $15 USD. Your mint number is your referral code.\n\nEarn Through Referrals\nShare your mint number or link. Instantly earn $5 USD every time someone mints using it. No limits, no expiration.\nIf no code is used → $5 + tickets go to a random existing ticket holder.\n\nAccumulate Tickets\nEach referral also gives you Small &amp; Big Block prize tickets for the current blocks.\nMore referrals = more tickets = better chances.\n\nWin Prizes\nSmall Block: 5 × $500 every 500 sales.\nBig Block: 5 × $10,000 every 50,000 sales.\n(Sales = mint + secondary)\nWinners selected randomly and fairly via Chainlink VRF.\n\nClaim Your Rewards\nCommissions sent automatically on-chain. Prizes announced on the Winners page — claim with one click whenever you're ready.\n\nKey Features\n\nAutomatic Rewards: Smart contracts handle all payments instantly.\nFair Prize Selection: Chainlink VRF ensures true randomness.\nYield Generation: Prize pools earn yield through Aave integration.\nGamification: Badges and leaderboards make it fun and competitive.\nTransparency: All transactions and rules on-chain and verifiable.\nLow Fees: Built on Base for speed and minimal transaction costs.\n\nOur Vision\nProject Rebuild starts with one book, but this is only the beginning.\nWe envision a world where ebooks succeed on merit alone, free from the gatekeepers and Amazon algorithms drowning indie voices.\nWhere creators (unknown or established) rise because their work resonates, not because they game a platform, have the connections or buy enough ads.\nWhere fans get paid for the word-of-mouth marketing they've always done for free, and where any hustler can jump in to earn if they spot a gem worth spreading.\n\nOur goal: a self-sustaining model that benefits everyone.\nArtists earn their fair share, fans &amp; affiliates build real income, communities forge direct bonds — transforming one underdog's recovery into a decentralized revolution for all creators.\nAll without hype, just aligned incentives."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "random_recipient_eligibility": "existing ticket holder"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, but there are bugs.\n\n**I tried to mint a couple times last night, with ETH in my wallet (no USDC), but it seems to have failed, yet, on <http://ProjectRebuild.xyz|ProjectRebuild.xyz> it says i have minted twice.**\n\nAlso, i used no referral code, so (not sure what should have happened to the commission and ticket on mint 1, as its mean to go to an already minted NFT holder... a one off edge case i hadn't thought of, but) mint 2 should have allocated the commission and ticket to mint 1 - (Maybe this is due to the mint not going through)\n\nAlso, when i click to view NFT from the dashboard, the book cover is too big and cut off, and (maybe because the mint didn't actually work) im not sure how to view the actual book.\n\nIll try minting now with USDC and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "random_recipient_eligibility": "already minted NFT holder"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, but there are bugs.\n\n**I tried to mint a couple times last night, with ETH in my wallet (no USDC), but it seems to have failed, yet, on <http://ProjectRebuild.xyz|ProjectRebuild.xyz> it says i have minted twice.**\n\nAlso, i used no referral code, so (not sure what should have happened to the commission and ticket on mint 1, as its mean to go to an already minted NFT holder... a one off edge case i hadn't thought of, but) mint 2 should have allocated the commission and ticket to mint 1 - (Maybe this is due to the mint not going through)\n\nAlso, when i click to view NFT from the dashboard, the book cover is too big and cut off, and (maybe because the mint didn't actually work) im not sure how to view the actual book.\n\nIll try minting now with USDC and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The destination and ticket treatment for the first no-code mint are unresolved because no prior NFT holder exists."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 305,
+        "speaker": "client",
+        "text": "also, with the ' Valid referral number' popup:\n\\- Only already minted NFTs should be valid.\n\n\\- The message for a valid code should read: 'Valid referral code! $5 + $500 prize draw ticket to your selected referer.'\n\n\\- For an invalid/no code, a message should read: 'No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random.'"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "no_code_trigger": "mint with no referral code or an invalid referral code",
+        "commission_amount": "$5",
+        "ticket_award": "one $500 prize-draw ticket",
+        "random_recipient_eligibility": "existing NFT holder"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 308,
+        "speaker": "freelancer",
+        "text": "Contract edge case\n\\- Mint #1 with no referral: commission goes to founder (no existing NFTs)\n\\- Mint #2 with no referral: uses random selection via VRF, which will select from existing NFTs (mint 1)\n\\- Self-referral prevention: contract checks referralCode &lt; tokenId, so users can't use their own token ID"
+      },
+      "supporting_message_ids": [
+        307
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the contract sends the first no-code commission to the founder and uses VRF to select an existing NFT for later no-code mints."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 375,
+        "speaker": "freelancer",
+        "text": "On Mint #1 (when no existing NFTs exist):\n\\- Commission ($5): Sent directly to the founder's wallet immediately\n\\- Ticket: Not awarded (no ticket given on the first mint)\n\nReason: The contract checks if totalSupply &lt;= 1. If true, it sends the commission to the founder and returns early, so no VRF request is made and no ticket is awarded."
+      },
+      "supporting_message_ids": [
+        374
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the implemented first-mint path sends $5 to the founder and awards no ticket because no prior NFT exists."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 579,
+        "speaker": "client",
+        "text": "I just did another USDC buy, but this time with no referral code, and there was no ticket generated.\n\nOn a 'no referral' buy, the commission and ticket is supposed to go to an already existing NFT holder, at random"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A completed USDC mint without a referral code generated no random ticket."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 583,
+        "speaker": "client",
+        "text": "No ticket generated on a 'no referral buy' might be okay. Weather or not a 'no referral buy' generates a ticket is a decision that could go either way...\n\nBut on these no referral mints, where is the $5 commission going?\n(I would love for those commissions to default to me, but that might encourage sympathetic buyers to not use their referral code, and discourage affiliates from affiliating. So, the $5 commission on 'no referral buys' has to be sent out at random)"
+      },
+      "supporting_message_ids": [],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The client leaves no-code ticket generation undecided while confirming that the $5 commission must be assigned randomly."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 587,
+        "speaker": "freelancer",
+        "text": "Fixed: “No referral code” mints now still generate a ticket + random commission"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer claims no-code mints now generate a ticket and a randomly assigned commission."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 595,
+        "speaker": "client",
+        "text": "There should be as many commissions and tickets as mints (excluding secondary market sales), but it seems those sent out at random aren't registering"
+      },
+      "supporting_message_ids": [
+        592,
+        593,
+        594
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "award_frequency": "one commission and one ticket per primary mint",
+        "secondary_market_sales_generate_reward": false
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 595,
+        "speaker": "client",
+        "text": "There should be as many commissions and tickets as mints (excluding secondary market sales), but it seems those sent out at random aren't registering"
+      },
+      "supporting_message_ids": [
+        592,
+        593,
+        594
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 631,
+        "speaker": "client",
+        "text": "Or is there no ticket generated?\n\n\\- No ticket generated for a 'no code buy' may be okay as is (we will just need to tweak some UI notes slightly).\nBut if the ticket is being generated and sent out randomly, but not recorded on the dashboard, this will have to be fixed.\n\\- And the commission sent out randomly needs to appear on the dashboard/attributes.\n\nNo code buy, plus $1 tip - 0x8101c6876c85a890325f0515b97426c915f4de5807e64180f4fcb96594acc6cf\n\n(If 'tips' are paid via a second transaction straight after mint, that's why the tip didn't work, and there will have to be a UI note for this)"
+      },
+      "supporting_message_ids": [],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The client again leaves ticket generation for no-code mints undecided while retaining the random-commission requirement."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 672,
+        "speaker": "client",
+        "text": "So far, we have done 12 mints, that should equal 12 tickets &amp; 12 x $5 commissions.\n\n**When there is no referral code used, there is still a ticket and commission**.\n\nRight now, **when a code is used**, it is correctly accounted for on the leaderboards/NFT attributes. Perfect.\n\nWhen there is **no referral code used**, the ticket and commission are randomly assigned.\n(B**ut they still need to be accounted for on the leaderboard/NFT attributes**.)\n\nI think since your last fix, (on the last 2 mints) the randomly assigned tickets have been accounted for on the leaderboard/NFT attributes. Great.\nBut they have not been backfilled to show the missing tickets.\n\nAnd the commissions (from these no code buys) are still not being accounted for on the leaderboard/NFT attributes.\n\nIn my screenshot you'll see i have an NFT with 2 tickets and only 1 x $5 commission - this should be impossible, as every ticket comes with a $5 commission.\n\nAnd on my leaderboard screenshot, you can count (from 12 total mints) 7 tickets and 5 x $5 commissions accounted for.\n12 mints should equal 12 tickets and 12 x $5 commissions, regardless of a referral code being used or not."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "no_code_reward_package": {
+          "commission": "$5",
+          "ticket_count": 1
+        },
+        "assignment_method": "random assignment to an NFT holder",
+        "award_frequency": "one reward package per no-code primary mint"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 672,
+        "speaker": "client",
+        "text": "So far, we have done 12 mints, that should equal 12 tickets &amp; 12 x $5 commissions.\n\n**When there is no referral code used, there is still a ticket and commission**.\n\nRight now, **when a code is used**, it is correctly accounted for on the leaderboards/NFT attributes. Perfect.\n\nWhen there is **no referral code used**, the ticket and commission are randomly assigned.\n(B**ut they still need to be accounted for on the leaderboard/NFT attributes**.)\n\nI think since your last fix, (on the last 2 mints) the randomly assigned tickets have been accounted for on the leaderboard/NFT attributes. Great.\nBut they have not been backfilled to show the missing tickets.\n\nAnd the commissions (from these no code buys) are still not being accounted for on the leaderboard/NFT attributes.\n\nIn my screenshot you'll see i have an NFT with 2 tickets and only 1 x $5 commission - this should be impossible, as every ticket comes with a $5 commission.\n\nAnd on my leaderboard screenshot, you can count (from 12 total mints) 7 tickets and 5 x $5 commissions accounted for.\n12 mints should equal 12 tickets and 12 x $5 commissions, regardless of a referral code being used or not."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 682,
+        "speaker": "freelancer",
+        "text": "With 12 total mints, the contract should have 11 tickets and $55 in referral commissions (the very first mint can’t award a ticket because no prior NFTs exist)."
+      },
+      "supporting_message_ids": [
+        681
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The freelancer proposes a first-mint exception that conflicts with the client's newly confirmed one-package-per-mint rule."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 684,
+        "speaker": "client",
+        "text": "Yeah, that's okay, as it's a one-off and won't affect anything into the future."
+      },
+      "supporting_message_ids": [
+        682,
+        683
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "first_mint_exception": "No random ticket or $5 referral commission is awarded because no prior NFT exists"
+      },
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 684,
+        "speaker": "client",
+        "text": "Yeah, that's okay, as it's a one-off and won't affect anything into the future."
+      },
+      "supporting_message_ids": [
+        682,
+        683
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 732,
+        "speaker": "client",
+        "text": "Im not sure which wallet the ticket and commission went to, but in counting the total number on the leaderboard, they were sent somewhere\nheres the tx - 0x59fe36e9ce4203728e29704840ea58e440d309053fbd8c45dead7e8eafc4dbb2"
+      },
+      "supporting_message_ids": [
+        719,
+        721,
+        724
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "After a mobile no-code mint, the client confirmed from leaderboard totals that both the ticket and commission were distributed."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 599,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The reported mismatch concerns whether previously awarded no-code rewards are registered in displayed totals."
+    },
+    {
+      "message_id": 608,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The message reports stale leaderboard totals rather than a distinct random-assignment outcome."
+    },
+    {
+      "message_id": 615,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The no-code reward issue is observed through missing leaderboard records and is better routed to reward accounting."
+    },
+    {
+      "message_id": 622,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The client explicitly says no-code rewards are not showing on the leaderboard or NFT attributes."
+    },
+    {
+      "message_id": 662,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The message states that rewards are sent but not recorded, which targets accounting rather than assignment."
+    },
+    {
+      "message_id": 674,
+      "suggested_requirement_id": "REQ_REFERRAL_REWARD_ACCOUNTING",
+      "description": "The client waives historical backfilling while retaining future correctness; this concerns historical accounting."
+    },
+    {
+      "message_id": 691,
+      "suggested_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "description": "The implementation claim concerns building NFT attributes from live on-chain metadata."
+    },
+    {
+      "message_id": 750,
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "The implementation claim primarily concerns modal timing, copy, and retry behavior after reward finalization."
+    }
+  ],
+  "missing_requirement_candidates": []
+}
