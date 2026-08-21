@@ -1,0 +1,791 @@
+{
+  "benchmark": "ReqMemBench",
+  "project_id": "42204309",
+  "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
+  "annotation_version": "pilot-v0.1",
+  "annotation_principle": "Gold truth is a longitudinal requirement-state graph. Raw messages provide provenance; later explicit client requirements override earlier requirements; runtime evidence outranks unverified implementation claims for execution status.",
+  "authority_order": [
+    "CURRENT_EXPLICIT_CLIENT_REQUIREMENT",
+    "LATER_CLIENT_CORRECTION",
+    "EARLIER_CLIENT_REQUIREMENT",
+    "CLIENT_APPROVED_FREELANCER_PROPOSAL",
+    "CLIENT_RUNTIME_TEST",
+    "FREELANCER_TECHNICAL_FINDING",
+    "FREELANCER_CLAIM"
+  ],
+  "gold_action_labels": [
+    "USE",
+    "IGNORE",
+    "OVERRIDE",
+    "CLARIFY"
+  ],
+  "state_labels": [
+    "ACTIVE",
+    "QUESTIONED",
+    "AMBIGUOUS",
+    "PENDING_REMOVAL",
+    "REMOVED",
+    "DEFERRED",
+    "INVALIDATED",
+    "USDC_ONLY"
+  ],
+  "sessions": [
+    {
+      "session_id": "S1",
+      "name": "Smart-contract MVP and testnet validation",
+      "start": "2025-11-18",
+      "end": "2025-11-25",
+      "contract_milestone": "M1",
+      "notes": "Initial mechanics, referral/ticket/prize contracts, testnet validation."
+    },
+    {
+      "session_id": "S2",
+      "name": "Backend/frontend integration",
+      "start": "2025-11-26",
+      "end": "2025-12-02",
+      "contract_milestone": "M2",
+      "notes": "Authentication, email, fiat provider choice, hosting/UI integration."
+    },
+    {
+      "session_id": "S3",
+      "name": "Requirement refinement",
+      "start": "2025-12-03",
+      "end": "2025-12-08",
+      "contract_milestone": "M2",
+      "notes": "Prize-frequency changes, Transak, Aave removal, phase-2 acceptance with remaining work."
+    },
+    {
+      "session_id": "S4",
+      "name": "Simplification and mainnet preparation",
+      "start": "2025-12-12",
+      "end": "2025-12-31",
+      "contract_milestone": "M2",
+      "notes": "Big Block removal, revenue split simplification, mainnet deployment, crypto-only launch decision."
+    },
+    {
+      "session_id": "S5",
+      "name": "Production QA and ETH payment addition",
+      "start": "2026-01-01",
+      "end": "2026-01-05",
+      "contract_milestone": "M2",
+      "notes": "Live mint debugging, new ETH-payment requirement, repeated runtime testing."
+    },
+    {
+      "session_id": "S6",
+      "name": "Final QA and launch",
+      "start": "2026-01-06",
+      "end": "2026-01-08",
+      "contract_milestone": "M2",
+      "notes": "No-referral finalization/accounting, final UX, prize claim checks, launch deliverable."
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_PRIZE_MECHANICS",
+      "title": "Prize-pool / Big Block mechanics",
+      "requirement_type": [
+        "BUSINESS_LOGIC",
+        "SMART_CONTRACT"
+      ],
+      "default_scope": "PROJECT_PERSISTENT",
+      "rq_tags": [
+        "RQ1",
+        "RQ2",
+        "RQ3",
+        "RQ5"
+      ],
+      "events": [
+        {
+          "message_id": 8,
+          "timestamp": "2025-11-19 08:04:39.593",
+          "speaker": "client",
+          "session_id": "S1",
+          "event_type": "INTRODUCE",
+          "state_after": "ACTIVE",
+          "normalized_change": "Replace top-affiliate prizes with Small Block 5x$500 and Big Block 5x$20,000; more tickets increase winning chance.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 21,
+          "timestamp": "2025-11-20 08:59:07.167",
+          "speaker": "client",
+          "session_id": "S1",
+          "event_type": "MODIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Two independent ticket counters; Small target $2,500 with 5x$500; Big target $100,000 with 5x$20,000; reset corresponding tickets after draw; pools triggered by target balances.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            8
+          ],
+          "evidence": [
+            "Milestone-1 code: contracts/core/PrizePool.sol lines 21-34",
+            "Milestone-1 code: contracts/core/ProjectRebuildNFT.sol lines 204-225"
+          ]
+        },
+        {
+          "message_id": 123,
+          "timestamp": "2025-11-30 06:25:10.623",
+          "speaker": "client",
+          "session_id": "S2",
+          "event_type": "MODIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Halve Big Block to 5x$10,000 every 50,000 sales.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            21
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 125,
+          "timestamp": "2025-12-01 19:11:51.485",
+          "speaker": "freelancer",
+          "session_id": "S2",
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "state_after": "ACTIVE",
+          "normalized_change": "Freelancer states Big Block now triggers at $50,000 with 5 winners receiving $10,000 each.",
+          "authority": "FREELANCER_CLAIM",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 158,
+          "timestamp": "2025-12-06 18:07:05.355",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "MODIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Change prize cadence to Small 1x$500 every 100 sales and Big 1x$10,000 every 10,000 sales.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            123
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 195,
+          "timestamp": "2025-12-12 17:49:26.703",
+          "speaker": "client",
+          "session_id": "S4",
+          "event_type": "REMOVE_AND_MODIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Eliminate Big Block entirely; $15 primary mint split becomes $5 founder + $5 affiliate + $5 (small) prize pool.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            158
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 210,
+          "timestamp": "2025-12-17 11:15:01.317",
+          "speaker": "client",
+          "session_id": "S4",
+          "event_type": "CLARIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Final marketing/behavioral state: one $500 giveaway every 100 sales; one ticket per referral; Chainlink VRF.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            195
+          ],
+          "evidence": [
+            "Final launch PDF p.2: Prize $500, every 100 sales, 1 ticket per referral",
+            "Final launch PDF p.3: $5 referral + $5 Small Block + $5 founder"
+          ]
+        }
+      ],
+      "gold_state_by_S6": {
+        "big_block": "REMOVED",
+        "small_prize": "$500",
+        "frequency": "every 100 sales",
+        "ticket_rule": "1 ticket per referral",
+        "primary_split": "$5 referral / $5 small prize pool / $5 founder"
+      },
+      "evaluation_notes": {
+        "RQ1": "Earlier Big Block versions are relevant historical evidence but not valid current requirements.",
+        "RQ2": "Prize mechanics are project-persistent, but each version is temporally scoped until superseded.",
+        "RQ3": "Strong override chain: 20k -> 10k -> different cadence -> removed.",
+        "RQ5": "M1 code strongly verifies the early state; final state is verified by launch deliverable, not by a final source snapshot."
+      }
+    },
+    {
+      "requirement_id": "REQ_FIAT_ONRAMP",
+      "title": "Fiat on-ramp provider and launch availability",
+      "requirement_type": [
+        "INTEGRATION",
+        "PAYMENT"
+      ],
+      "default_scope": "PROJECT_PERSISTENT",
+      "rq_tags": [
+        "RQ1",
+        "RQ3",
+        "RQ4",
+        "RQ5"
+      ],
+      "events": [
+        {
+          "message_id": 72,
+          "timestamp": "2025-11-26 15:04:44.545",
+          "speaker": "client",
+          "session_id": "S2",
+          "event_type": "INTRODUCE",
+          "state_after": "ACTIVE",
+          "normalized_change": "Use Stripe for fiat-to-USDC in the MVP; wallet auth for crypto paths and email auth for non-crypto/dashboard paths.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 77,
+          "timestamp": "2025-11-26 18:25:56.715",
+          "speaker": "client",
+          "session_id": "S2",
+          "event_type": "MODIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Stripe cannot be used from Mauritius; asks to switch to Coinbase Commerce for fiat on-ramp.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            72
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 140,
+          "timestamp": "2025-12-03 23:13:36.333",
+          "speaker": "freelancer",
+          "session_id": "S3",
+          "event_type": "VALIDITY_DISCOVERY",
+          "state_after": "INVALIDATED",
+          "normalized_change": "Coinbase Commerce is identified as a crypto gateway rather than a true card fiat on-ramp.",
+          "authority": "FREELANCER_TECHNICAL_FINDING",
+          "confidence": "HIGH",
+          "replaces": [
+            77
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 141,
+          "timestamp": "2025-12-04 04:50:31.125",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "PROPOSE",
+          "state_after": "ACTIVE",
+          "normalized_change": "Client proposes Transak.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 142,
+          "timestamp": "2025-12-04 05:53:30.555",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "CONFIRM",
+          "state_after": "ACTIVE",
+          "normalized_change": "Transak selected as best option, although fiat is described as non-essential for the proof of concept.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            140
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 188,
+          "timestamp": "2025-12-08 07:46:30.151",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "DEFER",
+          "state_after": "DEFERRED",
+          "normalized_change": "Transak integration must wait for business registration.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 225,
+          "timestamp": "2025-12-24 07:45:05.035",
+          "speaker": "client",
+          "session_id": "S4",
+          "event_type": "PRIORITY_UPDATE",
+          "state_after": "DEFERRED",
+          "normalized_change": "Transak on day one is not important; do not let it slow launch because initial users are crypto users.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 284,
+          "timestamp": "2025-12-31 05:40:50.061",
+          "speaker": "client",
+          "session_id": "S4",
+          "event_type": "LAUNCH_DECISION",
+          "state_after": "DEFERRED",
+          "normalized_change": "Explicit decision: go live crypto-only and add fiat payments later.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            142,
+            188,
+            225
+          ],
+          "evidence": [
+            "Final launch PDF p.3: Transak Fiat Payment Integration is 'Coming Soon'; code ready, pending API keys/KYC"
+          ]
+        }
+      ],
+      "gold_state_by_S6": {
+        "launch_payment_mode": "CRYPTO_ONLY",
+        "fiat_provider": "TRANSAK",
+        "transak_status": "DEFERRED / COMING_SOON"
+      },
+      "evaluation_notes": {
+        "RQ3": "Provider sequence Stripe -> Coinbase Commerce -> Transak -> deferred must resolve to latest valid state.",
+        "RQ4": "At launch, agent should not block release waiting for Transak; current explicit launch decision overrides older 'fiat is key' language.",
+        "RQ5": "Final launch document confirms Transak is not live."
+      }
+    },
+    {
+      "requirement_id": "REQ_MAURITIUS_GEOBLOCK",
+      "title": "Mauritius geoblock scope",
+      "requirement_type": [
+        "ACCESS_POLICY",
+        "FRONTEND"
+      ],
+      "default_scope": "PROJECT_PERSISTENT_WITH_COMPONENT_SCOPE",
+      "rq_tags": [
+        "RQ1",
+        "RQ2",
+        "RQ4"
+      ],
+      "events": [
+        {
+          "message_id": 23,
+          "timestamp": "2025-11-23 05:51:45.792",
+          "speaker": "client",
+          "session_id": "S1",
+          "event_type": "INTRODUCE",
+          "state_after": "ACTIVE",
+          "normalized_change": "Geoblock Mauritius from the Project Rebuild landing page.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 121,
+          "timestamp": "2025-11-27 16:26:48.913",
+          "speaker": "freelancer",
+          "session_id": "S2",
+          "event_type": "CLARIFICATION_REQUEST",
+          "state_after": "AMBIGUOUS",
+          "normalized_change": "Asks whether landing-page geoblocking means Stripe's Mauritius availability no longer matters.",
+          "authority": "FREELANCER_QUESTION",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 122,
+          "timestamp": "2025-11-27 16:45:51.052",
+          "speaker": "client",
+          "session_id": "S2",
+          "event_type": "SCOPE_CLARIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Clarifies geoblocking does not change payment-provider eligibility because the business itself is incorporated/located in Mauritius.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            121
+          ],
+          "evidence": []
+        }
+      ],
+      "gold_state_by_S2": {
+        "landing_page_access": "BLOCK_MAURITIUS",
+        "business_jurisdiction": "MAURITIUS_REMAINS_RELEVANT",
+        "stripe_eligibility": "NOT_RESOLVED_BY_GEOBLOCK"
+      },
+      "evaluation_notes": {
+        "RQ2": "Canonical scope-boundary example: an access-control rule must not be generalized to business/payment jurisdiction.",
+        "RQ4": "Message 121 is a positive gold example of CLARIFY rather than assuming scope transfer."
+      }
+    },
+    {
+      "requirement_id": "REQ_AAVE_INTEGRATION",
+      "title": "Aave yield integration",
+      "requirement_type": [
+        "SMART_CONTRACT",
+        "INTEGRATION"
+      ],
+      "default_scope": "PROJECT_PERSISTENT",
+      "rq_tags": [
+        "RQ1",
+        "RQ3",
+        "RQ5"
+      ],
+      "events": [
+        {
+          "message_id": 156,
+          "timestamp": "2025-12-05 07:41:29.317",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "ACTIVE_REFERENCE",
+          "state_after": "ACTIVE",
+          "normalized_change": "Client-facing requirements/copy still describes Aave integration for prize-pool yield generation.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": [
+            "Milestone-1 code contains contracts/core/AaveStaking.sol and deployment wiring"
+          ]
+        },
+        {
+          "message_id": 159,
+          "timestamp": "2025-12-06 18:31:52.908",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "VALIDITY_WARNING",
+          "state_after": "QUESTIONED",
+          "normalized_change": "After smaller/more frequent pools, client states Aave integration is becoming redundant.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 190,
+          "timestamp": "2025-12-08 07:54:41.845",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "REMOVAL_REQUEST",
+          "state_after": "PENDING_REMOVAL",
+          "normalized_change": "Client asks whether redundant Aave integration should be ripped out.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 191,
+          "timestamp": "2025-12-08 07:57:20.115",
+          "speaker": "freelancer",
+          "session_id": "S3",
+          "event_type": "REMOVAL_CONFIRMATION",
+          "state_after": "REMOVED",
+          "normalized_change": "Freelancer agrees to remove Aave integration completely.",
+          "authority": "CLIENT_PROPOSED_FREELANCER_CONFIRMED",
+          "confidence": "HIGH",
+          "replaces": [
+            156,
+            159,
+            190
+          ],
+          "evidence": [
+            "Final launch PDF p.4 technical stack lists no Aave integration"
+          ]
+        }
+      ],
+      "gold_state_by_S6": {
+        "aave": "REMOVED"
+      },
+      "evaluation_notes": {
+        "RQ3": "Tests whether stale early code/requirements are ignored after explicit removal.",
+        "RQ5": "M1 source confirms Aave existed; final deliverable omits it, but no final source snapshot is available to prove deletion at code level."
+      }
+    },
+    {
+      "requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARD",
+      "title": "No-referral random commission and ticket",
+      "requirement_type": [
+        "BUSINESS_LOGIC",
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "default_scope": "PROJECT_PERSISTENT",
+      "rq_tags": [
+        "RQ1",
+        "RQ2",
+        "RQ3",
+        "RQ4",
+        "RQ5"
+      ],
+      "events": [
+        {
+          "message_id": 21,
+          "timestamp": "2025-11-20 08:59:07.167",
+          "speaker": "client",
+          "session_id": "S1",
+          "event_type": "INTRODUCE",
+          "state_after": "ACTIVE",
+          "normalized_change": "When no referral is used, an existing NFT should receive the random referral reward/ticket; $5 commission logic remains automatic.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": [
+            "M1 ProjectRebuildNFT.sol lines 195-202 routes no/invalid referral to random selection",
+            "M1 ProjectRebuildNFT.sol lines 258-325 uses VRF, transfers $5, and awards tickets"
+          ]
+        },
+        {
+          "message_id": 146,
+          "timestamp": "2025-12-04 10:32:40.465",
+          "speaker": "client",
+          "session_id": "S3",
+          "event_type": "CLARIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Explicitly states that when no referral code is used, commission and tickets are sent to a random existing NFT holder.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            21
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 288,
+          "timestamp": "2026-01-01 09:16:51.938",
+          "speaker": "client",
+          "session_id": "S5",
+          "event_type": "RUNTIME_FAILURE_DISCOVERY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Live test notes no-referral behavior appears not to allocate commission/ticket as expected; also surfaces first-mint edge case.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 375,
+          "timestamp": "2026-01-02 22:14:01.783",
+          "speaker": "freelancer",
+          "session_id": "S5",
+          "event_type": "EDGE_CASE_EXPLANATION",
+          "state_after": "ACTIVE",
+          "normalized_change": "For mint #1 with no existing NFT: $5 commission goes to founder and no ticket is awarded.",
+          "authority": "FREELANCER_IMPLEMENTATION_EXPLANATION",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 579,
+          "timestamp": "2026-01-06 10:11:29.220",
+          "speaker": "client",
+          "session_id": "S6",
+          "event_type": "RUNTIME_FAILURE_DISCOVERY",
+          "state_after": "ACTIVE",
+          "normalized_change": "No-referral USDC mint produced no visible ticket.",
+          "authority": "CLIENT_RUNTIME_TEST",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 583,
+          "timestamp": "2026-01-06 10:23:15.756",
+          "speaker": "client",
+          "session_id": "S6",
+          "event_type": "PARTIAL_RECONSIDERATION",
+          "state_after": "AMBIGUOUS",
+          "normalized_change": "Client says no-referral ticket generation could go either way, but $5 commission must be distributed randomly.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            146
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 588,
+          "timestamp": "2026-01-06 10:29:26.059",
+          "speaker": "freelancer",
+          "session_id": "S6",
+          "event_type": "ROOT_CAUSE",
+          "state_after": "ACTIVE",
+          "normalized_change": "Contract creates VRF request, but backend had not listened for VRFFulfilled and therefore never submitted processRandomReferral follow-up transaction.",
+          "authority": "FREELANCER_TECHNICAL_FINDING",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 672,
+          "timestamp": "2026-01-07 10:54:19.087",
+          "speaker": "client",
+          "session_id": "S6",
+          "event_type": "FINAL_CLARIFY",
+          "state_after": "ACTIVE",
+          "normalized_change": "Reaffirms final rule: every mint generates a ticket and $5 commission; no-referral mints randomly assign both and must account for them in leaderboard/NFT attributes.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": [
+            583
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 688,
+          "timestamp": "2026-01-07 12:13:12.556",
+          "speaker": "client",
+          "session_id": "S6",
+          "event_type": "RUNTIME_VERIFICATION",
+          "state_after": "ACTIVE",
+          "normalized_change": "After 12 mints, client reports leaderboard shows 11 tickets and 11 commissions and calls the logic perfect; mint #1 remains a one-off exception.",
+          "authority": "CLIENT_RUNTIME_TEST",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": [
+            "Runtime verification in chat; source snapshot predates production backend fixes"
+          ]
+        }
+      ],
+      "gold_state_by_S6": {
+        "normal_no_referral": "random existing NFT gets +1 ticket and +$5 commission",
+        "accounting": "must appear in leaderboard/NFT state",
+        "first_mint_exception": "no prior NFT; accepted one-off exception"
+      },
+      "evaluation_notes": {
+        "RQ3": "Contains temporary ambiguity (ticket optional) followed by explicit re-confirmation.",
+        "RQ4": "At message 583, commission is decidable (USE); ticket policy is weak/ambiguous and should be clarified before changing persistent behavior.",
+        "RQ5": "Excellent end-to-end case: requirement existed and contract path existed, but production execution failed because follow-up/backend orchestration was missing, then later runtime verification succeeded."
+      }
+    },
+    {
+      "requirement_id": "REQ_ETH_PAYMENT",
+      "title": "ETH payment option for minting",
+      "requirement_type": [
+        "PAYMENT",
+        "SMART_CONTRACT",
+        "FRONTEND"
+      ],
+      "default_scope": "PROJECT_PERSISTENT",
+      "rq_tags": [
+        "RQ3",
+        "RQ4",
+        "RQ5"
+      ],
+      "events": [
+        {
+          "message_id": 324,
+          "timestamp": "2026-01-01 18:49:18.183",
+          "speaker": "freelancer",
+          "session_id": "S5",
+          "event_type": "CURRENT_STATE",
+          "state_after": "USDC_ONLY",
+          "normalized_change": "States the current contract accepts only USDC and has no direct ETH payment option.",
+          "authority": "FREELANCER_IMPLEMENTATION_EXPLANATION",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 325,
+          "timestamp": "2026-01-01 18:52:40.712",
+          "speaker": "freelancer",
+          "session_id": "S5",
+          "event_type": "CLARIFICATION_REQUEST",
+          "state_after": "AMBIGUOUS",
+          "normalized_change": "Asks whether ETH payment should be added because it requires contract changes.",
+          "authority": "FREELANCER_QUESTION",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 326,
+          "timestamp": "2026-01-01 19:00:10.302",
+          "speaker": "client",
+          "session_id": "S5",
+          "event_type": "NEW_REQUIREMENT",
+          "state_after": "ACTIVE",
+          "normalized_change": "Client prefers ETH payment to reduce buyer friction; if USDC-only remains, currency must be made explicit.",
+          "authority": "CLIENT_EXPLICIT",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 327,
+          "timestamp": "2026-01-01 19:01:57.666",
+          "speaker": "freelancer",
+          "session_id": "S5",
+          "event_type": "IMPLEMENTATION_COMMIT",
+          "state_after": "ACTIVE",
+          "normalized_change": "Freelancer commits to add ETH payment.",
+          "authority": "FREELANCER_COMMITMENT",
+          "confidence": "HIGH",
+          "replaces": [
+            324
+          ],
+          "evidence": []
+        },
+        {
+          "message_id": 341,
+          "timestamp": "2026-01-02 11:28:18.618",
+          "speaker": "client",
+          "session_id": "S5",
+          "event_type": "RUNTIME_FAILURE_DISCOVERY",
+          "state_after": "ACTIVE",
+          "normalized_change": "ETH transaction executes/consumes ETH but no NFT is received; ETH path is not yet correct.",
+          "authority": "CLIENT_RUNTIME_TEST",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 529,
+          "timestamp": "2026-01-05 12:45:36.548",
+          "speaker": "freelancer",
+          "session_id": "S5",
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "state_after": "ACTIVE",
+          "normalized_change": "Freelancer reports ETH path working after fixes.",
+          "authority": "FREELANCER_CLAIM",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        },
+        {
+          "message_id": 571,
+          "timestamp": "2026-01-06 10:01:50.650",
+          "speaker": "client",
+          "session_id": "S6",
+          "event_type": "RUNTIME_VERIFICATION",
+          "state_after": "ACTIVE",
+          "normalized_change": "Client reports ETH mint worked perfectly.",
+          "authority": "CLIENT_RUNTIME_TEST",
+          "confidence": "HIGH",
+          "replaces": null,
+          "evidence": []
+        }
+      ],
+      "gold_state_by_S6": {
+        "payment_options": [
+          "USDC",
+          "ETH"
+        ],
+        "eth_status": "LIVE_AND_RUNTIME_VERIFIED"
+      },
+      "evaluation_notes": {
+        "RQ4": "Message 325 is a clean CLARIFY example: older project history did not establish ETH support, so adding it should not be inferred silently.",
+        "RQ5": "Contains repeated fail/fix cycles and ends with client runtime verification of successful ETH mint."
+      }
+    }
+  ]
+}
