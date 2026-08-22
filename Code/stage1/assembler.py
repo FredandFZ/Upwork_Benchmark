@@ -17,6 +17,7 @@ def _canonical_event(event: dict[str, Any], event_id: str) -> dict[str, Any]:
         },
         "event_type": event.get("event_type"),
         "value_updates": deepcopy(event.get("value_updates")),
+        "value_removals": deepcopy(event.get("value_removals")),
         "scope_updates": deepcopy(event.get("scope_updates")),
         "ambiguity": deepcopy(event.get("ambiguity")),
         "execution": deepcopy(event.get("execution")),
@@ -84,7 +85,7 @@ def assemble_stage1_annotation(
     ]
     return {
         "benchmark": "ReqMemBench",
-        "annotation_version": "v0.5",
+        "annotation_version": "v0.6",
         "project": {
             "project_id": normalized["project_id"],
             "project_title": normalized.get("project_title") or normalized["project_id"],

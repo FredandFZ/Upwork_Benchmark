@@ -1,8 +1,49 @@
 # ReqMemBench Stage 1 batch annotation
 
-The default workflow uses `prompt/stage1_prompt_v1.1_calibrated.md`, `gpt-5.6-sol`, and `high` reasoning.
+The default workflow uses `prompt/stage1_prompt_v2.md`, `gpt-5.6-sol`, and `high` reasoning.
 `EVENT_VERIFICATION` additionally uses `prompt/stage1_event_verification_addendum.md` for stricter source alignment and execution-event pruning.
+`CROSS_REQUIREMENT_IMPACT_AUDIT` uses `prompt/stage1_cross_requirement_impact_audit.md` to judge candidates across all Requirement families.
 Credentials are read only from `UPWORK_API_KEY` and `UPWORK_BUDGET_ID`.
+
+The current output schema is annotation `v0.6`. Every Event contains `value_removals`; a MODIFY may delete obsolete top-level attributes before applying `value_updates`. After the global consistency audit, the pipeline replays provisional states at each material MODIFY/REMOVE, retrieves cross-Requirement candidates from title/current attributes/scope/history/family/shared entities, and asks the impact audit for `ADD_EVENT`, `EDIT_EVENT`, `NO_IMPACT`, or `HUMAN_REVIEW`. Only HIGH-confidence ADD/EDIT decisions are applied. The minimum-lifecycle filter now runs after this audit so a short Requirement is not discarded before it can receive a necessary propagated Event.
+
+New checkpoints and reports:
+
+```text
+impact_audited_state.json
+impact_audit/<phase>/round_NN/*.json
+cross_requirement_impact_audit.json
+```
+
+Relevant controls:
+
+```text
+--force-stage cross_requirement_impact_audit
+--max-impact-audit-rounds 2
+--max-impact-candidates-per-event 12
+```
+
+Incrementally upgrade one existing v0.5/v0.6 annotation instead of rerunning the
+full Stage 1 pipeline:
+
+```powershell
+& 'D:\Python_env\Miniconda\python.exe' Code\stage1_batch_annotate.py `
+  --dataset-root 'Pilot Benchmark' `
+  --project-id 42204309 `
+  --upgrade-existing-annotation 'outputs\stage1_annotations\42204309_stage1_annotation.json' `
+  --output-dir 'outputs\stage1_annotations_v06' `
+  --run-root 'outputs\stage1_upgrade_runs' `
+  --stats-file 'outputs\stage1_annotations_v06\statistics.csv' `
+  --insecure
+```
+
+This mode freezes and reuses the existing Requirement inventory and Events. It
+skips `EVIDENCE_SCAN`, `REQUIREMENT_DISCOVERY`, `EVENT_EXTRACTION`, and the old
+general `CONSISTENCY_AUDIT`. It runs only the migration-specific
+`VALUE_REMOVAL_AUDIT`, `CROSS_REQUIREMENT_IMPACT_AUDIT`, verification for
+Requirements actually changed by those audits, deterministic v0.6 assembly,
+and validation. The separate output directory above preserves the original
+annotation for comparison. Checkpoints are resumable by default.
 
 Run one project in resumable multi-pass mode:
 

@@ -30,6 +30,7 @@ EVIDENCE_TAGS = {
     "EXPECTED_BEHAVIOR_EVIDENCE",
 }
 CONFIDENCE = {"HIGH", "MEDIUM", "LOW"}
+IMPACT_DECISIONS = {"ADD_EVENT", "EDIT_EVENT", "NO_IMPACT", "HUMAN_REVIEW"}
 AUDIT_OPERATIONS = {
     "ADD_REQUIREMENT",
     "MERGE_REQUIREMENTS",
@@ -116,6 +117,21 @@ def validate_event_shape(event: dict[str, Any], allow_supporting: bool = True) -
         _list(event.get("supporting_message_ids"), "supporting_message_ids")
 
 
+def _locator_key(locator: dict[str, Any], *, include_requirement: bool) -> tuple[Any, ...]:
+    prefix: tuple[Any, ...] = ()
+    if include_requirement:
+        prefix = (str(locator.get("requirement_id")),)
+    try:
+        occurrence = int(locator.get("occurrence", 0))
+    except (TypeError, ValueError) as exc:
+        raise PassSchemaError("event locator occurrence must be an integer") from exc
+    return prefix + (
+        id_key(locator.get("message_id")),
+        str(locator.get("event_type")),
+        occurrence,
+    )
+
+
 def validate_event_extraction(data: dict[str, Any], requirement_id: str) -> None:
     _run_mode(data, "EVENT_EXTRACTION")
     if data.get("requirement_id") != requirement_id:
@@ -138,6 +154,51 @@ def validate_consistency_audit(data: dict[str, Any]) -> None:
             raise PassSchemaError("Unsupported patch confidence")
         if not isinstance(patch.get("decision_note"), str):
             raise PassSchemaError("patch.decision_note must be a string")
+
+
+def validate_cross_requirement_impact_audit(
+    data: dict[str, Any],
+    source_event_ref: dict[str, Any],
+    candidate_requirement_ids: set[str],
+) -> None:
+    _run_mode(data, "CROSS_REQUIREMENT_IMPACT_AUDIT")
+    received_source = _dict(data.get("source_event_ref"), "source_event_ref")
+    if _locator_key(received_source, include_requirement=True) != _locator_key(
+        source_event_ref, include_requirement=True
+    ):
+        raise PassSchemaError("Impact audit returned the wrong source_event_ref")
+
+    received_candidates: list[str] = []
+    for index, decision_value in enumerate(_list(data.get("decisions"), "decisions")):
+        decision = _dict(decision_value, f"decisions[{index}]")
+        candidate_id = decision.get("candidate_requirement_id")
+        if not isinstance(candidate_id, str) or candidate_id not in candidate_requirement_ids:
+            raise PassSchemaError(f"Unknown impact candidate Requirement: {candidate_id!r}")
+        received_candidates.append(candidate_id)
+        action = decision.get("decision")
+        if action not in IMPACT_DECISIONS:
+            raise PassSchemaError(f"Unsupported impact decision: {action!r}")
+        if decision.get("confidence") not in CONFIDENCE:
+            raise PassSchemaError("Unsupported impact decision confidence")
+        if not isinstance(decision.get("reason"), str) or not decision.get("reason"):
+            raise PassSchemaError("Impact decision reason must be a non-empty string")
+
+        new_event = decision.get("new_event")
+        event_locator = decision.get("event_locator")
+        if action in {"ADD_EVENT", "EDIT_EVENT"}:
+            event = _dict(new_event, "impact decision new_event")
+            validate_event_shape(event)
+            if event.get("event_type") != "MODIFY":
+                raise PassSchemaError("Cross-Requirement propagation may only add/edit MODIFY Events")
+            if action == "EDIT_EVENT":
+                _dict(event_locator, "impact decision event_locator")
+            elif event_locator is not None:
+                raise PassSchemaError("ADD_EVENT event_locator must be null")
+        elif new_event is not None or event_locator is not None:
+            raise PassSchemaError(f"{action} must not contain new_event or event_locator")
+
+    if len(received_candidates) != len(set(received_candidates)) or set(received_candidates) != candidate_requirement_ids:
+        raise PassSchemaError("Impact audit must return exactly one decision for every candidate Requirement")
 
 
 def event_locators(events: list[dict[str, Any]]) -> list[tuple[str, str, int]]:

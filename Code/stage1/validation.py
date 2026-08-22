@@ -20,6 +20,7 @@ CANONICAL_EVENT_FIELDS = {
     "source_message",
     "event_type",
     "value_updates",
+    "value_removals",
     "scope_updates",
     "ambiguity",
     "execution",
@@ -60,9 +61,25 @@ def canonicalize_event_source_texts(events: list[dict[str, Any]], normalized: di
     return corrections
 
 
+def canonicalize_event_payload_fields(events: list[dict[str, Any]]) -> int:
+    """Add newly introduced nullable fields to provisional/legacy Events.
+
+    Intermediate checkpoints predate annotation v0.6 and may not contain
+    ``value_removals``.  Treat omission as null while ensuring every newly
+    generated final Event has the canonical field.
+    """
+    additions = 0
+    for event in events:
+        if isinstance(event, dict) and "value_removals" not in event:
+            event["value_removals"] = None
+            additions += 1
+    return additions
+
+
 def validate_intermediate_events(events: list[dict[str, Any]], normalized: dict[str, Any]) -> None:
     message_by_id, order = message_index(normalized)
     previous = -1
+    current_attributes: dict[str, Any] = {}
     for number, event in enumerate(events, start=1):
         source = event.get("source_message")
         if not isinstance(source, dict):
@@ -79,13 +96,24 @@ def validate_intermediate_events(events: list[dict[str, Any]], normalized: dict[
             _error("Intermediate Events are not chronological")
         previous = order[key]
         _validate_event_payload(event, f"Intermediate Event {number}")
+        removals = event.get("value_removals") or []
+        missing = [attribute for attribute in removals if attribute not in current_attributes]
+        if missing:
+            _error(
+                f"Intermediate Event {number}.value_removals references attributes that do not exist "
+                f"before the Event: {', '.join(sorted(missing))}"
+            )
+        for attribute in removals:
+            current_attributes.pop(attribute, None)
+        for attribute, value in (event.get("value_updates") or {}).items():
+            current_attributes[attribute] = value
 
 
 def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str, Any]) -> None:
     if annotation.get("benchmark") != "ReqMemBench":
         _error("benchmark must equal ReqMemBench")
-    if annotation.get("annotation_version") != "v0.5":
-        _error("annotation_version must equal v0.5")
+    if annotation.get("annotation_version") != "v0.6":
+        _error("annotation_version must equal v0.6")
     project = annotation.get("project")
     if not isinstance(project, dict) or project.get("project_id") != normalized.get("project_id"):
         _error("project.project_id does not match normalized input")
@@ -120,6 +148,7 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
         if not isinstance(events, list):
             _error(f"{requirement_id}.events must be an array")
         previous_position = -1
+        current_attributes: dict[str, Any] = {}
         for number, event in enumerate(events, start=1):
             if not isinstance(event, dict) or set(event) != CANONICAL_EVENT_FIELDS:
                 _error(f"{requirement_id} event {number} has non-canonical fields")
@@ -145,6 +174,17 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
                 _error(f"{requirement_id} Events are not chronological")
             previous_position = position
             _validate_event_payload(event, expected_id)
+            removals = event.get("value_removals") or []
+            missing = [attribute for attribute in removals if attribute not in current_attributes]
+            if missing:
+                _error(
+                    f"{expected_id}.value_removals references attributes that do not exist before the Event: "
+                    f"{', '.join(sorted(missing))}"
+                )
+            for attribute in removals:
+                current_attributes.pop(attribute, None)
+            for attribute, value in (event.get("value_updates") or {}).items():
+                current_attributes[attribute] = value
     one_member = [family_id for family_id, count in family_counts.items() if count < 2]
     if one_member:
         _error(f"Meaningless one-member/empty Families remain: {', '.join(one_member)}")
@@ -155,19 +195,33 @@ def _validate_event_payload(event: dict[str, Any], event_id: str) -> None:
     if event_type not in EVENT_TYPES:
         _error(f"{event_id} has invalid event_type {event_type!r}")
     value = event.get("value_updates")
+    removals = event.get("value_removals")
     scope = event.get("scope_updates")
     ambiguity = event.get("ambiguity")
     execution = event.get("execution")
     if value is not None and not isinstance(value, dict):
         _error(f"{event_id}.value_updates must be an object or null")
-    if event_type in {"INTRODUCE", "MODIFY"}:
-        if ambiguity is not None or execution is not None or (value is None and scope is None):
-            _error(f"{event_id} violates INTRODUCE/MODIFY field constraints")
+    if removals is not None:
+        if not isinstance(removals, list) or not removals or any(
+            not isinstance(key, str) or not key for key in removals
+        ):
+            _error(f"{event_id}.value_removals must be a non-empty array of non-empty strings or null")
+        if len(removals) != len(set(removals)):
+            _error(f"{event_id}.value_removals must not contain duplicates")
+        overlap = set(removals).intersection((value or {}).keys())
+        if overlap:
+            _error(f"{event_id} cannot update and remove the same attribute: {', '.join(sorted(overlap))}")
+    if event_type == "INTRODUCE":
+        if removals is not None or ambiguity is not None or execution is not None or (value is None and scope is None):
+            _error(f"{event_id} violates INTRODUCE field constraints")
+    elif event_type == "MODIFY":
+        if ambiguity is not None or execution is not None or (value is None and scope is None and removals is None):
+            _error(f"{event_id} violates MODIFY field constraints")
     elif event_type in {"DEFER", "RESUME", "REMOVE"}:
-        if any(item is not None for item in (value, scope, ambiguity, execution)):
+        if any(item is not None for item in (value, removals, scope, ambiguity, execution)):
             _error(f"{event_id} lifecycle Event payload must be null")
     elif event_type == "AMBIGUOUS":
-        if value is not None or scope is not None or execution is not None or not isinstance(ambiguity, dict):
+        if value is not None or removals is not None or scope is not None or execution is not None or not isinstance(ambiguity, dict):
             _error(f"{event_id} violates AMBIGUOUS field constraints")
         if ambiguity.get("dimension") not in AMBIGUITY_DIMENSIONS:
             _error(f"{event_id} has invalid ambiguity dimension")
@@ -175,7 +229,7 @@ def _validate_event_payload(event: dict[str, Any], event_id: str) -> None:
             _error(f"{event_id} ambiguity.description must be a non-empty string")
     else:
         expected = EXECUTION_STATUS[event_type]
-        if value is not None or scope is not None or ambiguity is not None or not isinstance(execution, dict):
+        if value is not None or removals is not None or scope is not None or ambiguity is not None or not isinstance(execution, dict):
             _error(f"{event_id} violates execution Event field constraints")
         if execution.get("status") != expected:
             _error(f"{event_id} execution.status must equal {expected}")

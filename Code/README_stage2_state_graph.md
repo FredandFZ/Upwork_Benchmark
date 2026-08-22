@@ -24,6 +24,11 @@ outputs/stage2/<project_id>/requirement_state_graph.json
 
 Replay behavior:
 
+- Annotation v0.6 `MODIFY` first deletes every top-level key in
+  `value_removals`, then applies `value_updates` and per-dimension scope
+  updates. Attribute-deletion Events remain supporting evidence for the
+  current absence until that key is reintroduced.
+
 - Stage 1 Event array order is preserved. The Stage 1 assembler has already
   sorted Events by original project-history position, including ordered Events
   from the same source message.

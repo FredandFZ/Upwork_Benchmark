@@ -1,0 +1,163 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+    "message_id": 843,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The complete same-message MODIFY already updates the monitoring coverage and scope from the modular main board to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The complete same-message MODIFY already removes the obsolete interboard inputs and connector count while moving the external sensor interfaces to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "This Requirement was already scoped to the integrated board, and the single-board decision does not change its USB, battery, charging, or AXP2101 power-path behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The Schottky-compensation requirement remains, but its recorded reason refers to the former main-board circuit and must now refer to the integrated-board power OR-ing circuit.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "voltage_compensation_reason": "compensate for the Schottky diode drop in the integrated-board power OR-ing circuit"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY correctly removes the modular interface details but leaves scope tied to the obsolete three-board architecture; the retained removal fact applies to the integrated design.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "modular_interboard_interface_status": "removed by the integrated single-board design"
+        },
+        "value_removals": [
+          "connector_selection_reason",
+          "power_to_main_power_connector",
+          "power_to_main_signal_connector",
+          "power_connector_pin_order",
+          "board_power_topology",
+          "main_board_power_distribution",
+          "main_to_sensor_power_connector",
+          "main_to_sensor_signal_connector"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "INTERBOARD_CONNECTION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board layout does not change the rail voltage, powered sensors, GPIO control, converter, or independent sensor-rail behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The complete same-message MODIFY already moves the unchanged sensor logic-level requirement from the sensor board to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_DATA",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The complete same-message MODIFY already moves the USB-C programming interface scope from the modular main board to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The complete same-message MODIFY already relocates the power-button connector and PWRON connection to the integrated board and records the permitted connector-placement flexibility.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The board consolidation does not change the established 3.3V LED supply, direct ESP32 data drive, level-shifter decision, or accepted operating condition.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The complete same-message MODIFY already updates the module and breakout scope to the integrated board without altering the established module or breakout requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The complete same-message MODIFY already moves the unchanged BOOT and reset circuit scope from the modular main board to the integrated board.",
+      "new_event": null
+    }
+  ]
+}

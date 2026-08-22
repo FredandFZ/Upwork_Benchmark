@@ -10,6 +10,7 @@ def event(
     event_type: str,
     *,
     value_updates=None,
+    value_removals=None,
     scope_updates=None,
     ambiguity=None,
     execution=None,
@@ -23,6 +24,7 @@ def event(
         },
         "event_type": event_type,
         "value_updates": value_updates,
+        "value_removals": value_removals,
         "scope_updates": scope_updates,
         "ambiguity": ambiguity,
         "execution": execution,
@@ -180,6 +182,35 @@ class RequirementStateGraphTests(unittest.TestCase):
             event(3, "MODIFY", value_updates={"x": False}),
         ]
         with self.assertRaisesRegex(Stage2ReplayError, "after the Requirement was REMOVED"):
+            build_requirement_state_graph(annotation(events))
+
+    def test_value_removals_delete_stale_attribute_and_retain_absence_provenance(self) -> None:
+        events = [
+            event(1, "INTRODUCE", value_updates={"small_counter": True, "big_counter": True}),
+            event(2, "MODIFY", value_removals=["big_counter"]),
+        ]
+
+        graph = build_requirement_state_graph(annotation(events))["requirement_graphs"][0]
+        final_node = graph["nodes"][-1]
+
+        self.assertEqual(final_node["attributes"], {"small_counter": True})
+        self.assertEqual(final_node["supporting_event_ids"], ["REQ_X_E001", "REQ_X_E002"])
+        self.assertEqual(graph["edges"][-1]["value_removals"], ["big_counter"])
+
+    def test_value_removal_of_absent_attribute_fails(self) -> None:
+        events = [
+            event(1, "INTRODUCE", value_updates={"small_counter": True}),
+            event(2, "MODIFY", value_removals=["big_counter"]),
+        ]
+        with self.assertRaisesRegex(Stage2ReplayError, "absent attribute"):
+            build_requirement_state_graph(annotation(events))
+
+    def test_same_attribute_cannot_be_updated_and_removed(self) -> None:
+        events = [
+            event(1, "INTRODUCE", value_updates={"counter": True}),
+            event(2, "MODIFY", value_updates={"counter": False}, value_removals=["counter"]),
+        ]
+        with self.assertRaisesRegex(Stage2ReplayError, "updates and removes"):
             build_requirement_state_graph(annotation(events))
 
 

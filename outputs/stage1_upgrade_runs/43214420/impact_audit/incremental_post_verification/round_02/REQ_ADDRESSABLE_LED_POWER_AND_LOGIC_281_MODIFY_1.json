@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+    "message_id": 281,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The confirmed 5V LED supply removes the existing version-dependent condition from the LED board's supply rule.",
+      "new_event": {
+        "source_message": {
+          "message_id": 281,
+          "speaker": "client",
+          "text": "Doesn&#39;t the 5V_EN pin solve this? We can cut the entire 5V rail via GPIO3 when LEDs are not needed, dropping standby current to zero."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "led_supply_rule": "Use the GPIO3-controlled 5V rail"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The same source message already introduces the candidate's cutoff behavior, GPIO control, and zero-standby target; the supply-voltage change requires no additional candidate-state modification.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the addressable LED supply to 5V does not alter the listed I2C sensor modules or their 3.3V supply.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply decision does not change the standalone USB-powered 3.3V rail, its regulator, activation condition, or powered load.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A same-message MODIFY already records the addressable LEDs as loads of the GPIO3-controlled 5V rail and its shutdown behavior, so no additional or corrected Event is required.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Using the existing 5V_EN signal does not change the connector type, pinout, or matching-board interface requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED rail decision does not alter the AXP2101 battery, USB, VMID/VSYS, or DCDC1 power-path requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The addressable LED supply change has no effect on battery-connector placement, orientation, spacing, or mounting-hole clearance.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision concerns LED power routing and does not change any component availability, cost, or sourcing policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 5V LED supply decision does not change board dimensions, mounting, enclosure fit, or USB-C placement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply and cutoff decision does not resolve or change the battery connector's electrical pinout or physical interface.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source message does not change BOM completeness, part-number requirements, or the recorded R6 specification.",
+      "new_event": null
+    }
+  ]
+}

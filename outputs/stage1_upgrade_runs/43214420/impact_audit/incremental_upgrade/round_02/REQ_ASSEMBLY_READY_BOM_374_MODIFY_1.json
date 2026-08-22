@@ -1,0 +1,118 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+    "message_id": 374,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a complete same-message MODIFY establishing the 5V supply and 74AHCT1G125 data-level shifter.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Selecting the LED level-shifter part does not change the requirement to assist with assembly settings, pricing, and component availability.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source selects a specific level-shifter part but does not change the existing component sourceability policy or report a sourcing problem.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Replacing the LED data-level shifter does not affect whether the KiCad project resolves without local-library warnings.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The IRLML2402 replacement concerns the LED data line, not the separate GPIO-controlled cutoff of LED power during standby.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the separate board's role or its count of eight addressable LEDs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED 5V supply and data-level shifter decision does not alter the standalone USB 3.3V regulator path or capacity.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source resolves the previously conditional SK6812 load by requiring the LEDs to be powered from the switched 5V rail.",
+      "new_event": {
+        "source_message": {
+          "message_id": 374,
+          "speaker": "client",
+          "text": "The SK6812 minimum supply voltage is 3.5–3.7V so 3.3V is actually below spec, the LED might not light up reliably. Power it from 5V and use the 74AHCT1G125 level shifter (LCSC C151417) on the data line since at 5V the data threshold becomes 3.5V which is above what the ESP32 outputs. That's already in the design, so no changes needed just replace the IRLML2402 with the 74AHCT1G125."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_loads": [
+            "SPS30 particulate sensor",
+            "ZE08-CH2O formaldehyde sensor",
+            "SK6812 LEDs"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_DATA",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply and level-shifter selection does not change USB enumeration or USB-C programming behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the AXP2101 battery, USB, VMID, VSYS, or DCDC1 power-path requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes an LED data-line component but does not establish or revise any ESP32-S3 GPIO assignment.",
+      "new_event": null
+    }
+  ]
+}

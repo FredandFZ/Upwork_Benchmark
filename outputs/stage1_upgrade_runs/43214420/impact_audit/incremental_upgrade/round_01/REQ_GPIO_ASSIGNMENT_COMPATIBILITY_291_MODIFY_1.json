@@ -1,0 +1,98 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+    "message_id": 291,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Reassigning SCL0 to GPIO38 does not change the I2C cable length, bus speed, pull-up resistance or location, or series-resistor configuration.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector continues to carry the logical SCL0 and 5V_EN signals; changing their MCU GPIO assignments does not alter the specified connector type, pinout, or matching-board requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a complete same-message MODIFY changing boost_enable_gpio from GPIO3 to GPIO5, so no additional or edited Event is required.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO reassignment does not change the LED's 5V supply requirement or the requirement for a data-level shifter.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The changed GPIO assignments do not affect the standalone USB regulator, source-selection topology, activation condition, or powered 3.3V rail.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "This Requirement explicitly identifies GPIO3 as the control GPIO for cutting the shared 5V rail, and the client necessarily reassigns that 5V_EN control signal to GPIO5.",
+      "new_event": {
+        "source_message": {
+          "message_id": 291,
+          "speaker": "client",
+          "text": "Sorry, GPIO3 was from my original ESP32 design — mistake on my side. For 5V_EN you can use GPIO5. Also I realized GPIO22, 23, 25, 27 are not exposed on the WROOM-1 module, so I need to reassign SCL0 (GPIO22→38), SPI MOSI (GPIO23→26). I&#39;ll update the docs and send you the full updated GPIO table."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "control_gpio": "GPIO5"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes MCU GPIO assignments but does not change the sensor board's role of providing sensor connectors.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO reassignment does not affect the AXP2101 USB and battery power-path topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision concerns electrical GPIO compatibility and does not alter component sourceability, cost, availability, or connector sourcing strategy.",
+      "new_event": null
+    }
+  ]
+}

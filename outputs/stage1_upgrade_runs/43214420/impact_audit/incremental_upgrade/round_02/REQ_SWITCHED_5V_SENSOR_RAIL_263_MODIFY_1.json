@@ -1,0 +1,115 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+    "message_id": 263,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The switched 5V rail rating and loads do not change the independently defined standalone USB 3.3V supply; its separate same-message details are already represented.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The MT3608 5V load allocation does not alter the AXP2101 battery, USB, VMID/VSYS, or DCDC1 power-path requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source assigns SPS30 and ZE08-CH2O to the 5V rail but does not establish their sensor-board interfaces; the separate I2C sensor details are already represented.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The switched-rail load and current details do not change the existing interboard connector types, pinouts, or matching-order rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source describes system power rails and loads, not the battery connector series, pinout, mounting type, or unresolved labeling issue.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Specifying the MT3608 rail rating and powered loads does not change the component sourceability or cost policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The electrical power-allocation decision does not alter battery connector placement, orientation, spacing, or mounting-hole clearance.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 5V rail load assignment does not change I2C speed, pull-ups, cable length, or series-resistor configuration.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The switched 5V rail specification does not change any power-board dimensions, layer count, connector form, mounting, or enclosure-fit constraint.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source identifies the project's addressable LEDs as SK6812 devices and conditionally assigns them to the GPIO3-controlled MT3608 5V rail when the selected version is wired for 5V.",
+      "new_event": {
+        "source_message": {
+          "message_id": 263,
+          "speaker": "client",
+          "text": "3.3V rail (AXP2101 DCDC1, 2A) — primary power source when power board is connected:\n\\- ESP32-S3 module\n\\- INA219\n\\- All I2C sensors (SCD41, BME280, ENS160) via sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — controlled by ESP32 GPIO3:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (if wired to 5V — depends on version)\n\n3.3V rail (ME6211A LDO, 1A) — only active when USB-C on main board connected WITHOUT power board:\n\\- Same 3.3V rail as above — Schottky diode OR-ing means whichever source is present wins. Used for standalone programming.\n\nBattery (3.7–4.2V) — feeds AXP2101 which then feeds everything above.\n\nSimple rule: in normal operation AXP2101 powers everything. The LDO only kicks in when programming without the power board connected."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "led_family": "SK6812",
+          "power_supply_rule": "Use the GPIO3-controlled MT3608 5V rail when the selected SK6812 version is wired for 5V"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes rail allocation details but does not change BOM completeness, part-number requirements, R6 values, or DNP status.",
+      "new_event": null
+    }
+  ]
+}

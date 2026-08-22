@@ -1,0 +1,142 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+    "message_id": 281,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate's same-message INTRODUCE already captures GPIO3-controlled LED power cutoff and the zero-standby-current target.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED board's role and LED count remain unchanged; its supply voltage is owned by the separate LED power-and-logic Requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes the addressable LEDs' supply and cutoff behavior, not the 3.3V I2C sensor-module interfaces.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Using the switched 5V rail for LEDs does not alter the AXP2101 battery, USB, VMID/VSYS, or DCDC1 power path.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The standalone USB-powered 3.3V supply remains unchanged by the addressable LED 5V rail decision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 281,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY captures rail shutdown but leaves the LED load conditional and omits the addressable-LED scope added by the confirmed 5V connection.",
+      "new_event": {
+        "source_message": {
+          "message_id": 281,
+          "speaker": "client",
+          "text": "Doesn&#39;t the 5V_EN pin solve this? We can cut the entire 5V rail via GPIO3 when LEDs are not needed, dropping standby current to zero."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_loads": [
+            "SPS30 particulate sensor",
+            "ZE08-CH2O formaldehyde sensor",
+            "SK6812 LEDs"
+          ],
+          "shared_rail_loads": [
+            "5V sensors",
+            "Addressable LEDs"
+          ],
+          "shutdown_behavior": "Disable the entire 5V rail when its loads are not needed to eliminate standby current"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "SENSOR_POWER",
+            "ADDRESSABLE_LED"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source relies on the existing 5V_EN interboard signal but does not change its connector, pinout, or matching-board requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED rail decision does not affect battery-connector placement, orientation, spacing, or mounting-hole clearance.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source makes no component availability, sourcing, compatibility, or cost decision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The electrical LED supply decision does not change the power board's dimensions, layer count, connector form, or enclosure fit.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not resolve or modify the battery connector's series, mounting type, or pinout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change any BOM completeness, part-number, R6, or DNP requirement.",
+      "new_event": null
+    }
+  ]
+}

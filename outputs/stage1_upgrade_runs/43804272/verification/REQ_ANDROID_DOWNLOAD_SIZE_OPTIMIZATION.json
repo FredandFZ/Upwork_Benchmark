@@ -1,0 +1,129 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_ANDROID_DOWNLOAD_SIZE_OPTIMIZATION",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 14,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        14
+      ],
+      "decision_note": "The client explicitly requests Android app-size optimization and a lightweight application.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 23,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        23
+      ],
+      "decision_note": "The client specifies remote hosting of heavy assets to reduce the application package size.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 33,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        33
+      ],
+      "decision_note": "First concrete failure evidence: the assessed Android package was 89 MB and lacked size-reduction mechanisms.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 46,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "remote_asset_hosting_strategy": "Host heavy non-tutorial graphic images remotely rather than include them in the application package.",
+          "tutorial_asset_strategy": "Use shared tutorial background images with translatable text instead of separate language-specific tutorial images."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        23,
+        46,
+        47,
+        48
+      ],
+      "decision_note": "The edit consolidates duplicate tutorial attributes and narrows the prior remote-hosting rule so it does not conflict with the new tutorial-image strategy.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 82,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        80,
+        82,
+        83
+      ],
+      "decision_note": "The client identifies smallest possible app size and maximum language coverage as the remaining priorities.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 193,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "tutorial_asset_strategy": "Use a YouTube video instead of tutorial images."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        193
+      ],
+      "decision_note": "The source replaces the tutorial-image strategy with video; overwriting the consolidated strategy key avoids unsupported changes to other remotely hosted graphics.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 225,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        225
+      ],
+      "decision_note": "First concrete verification: the built Android APK measured 27.4 MB after an approximately 73% reduction.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

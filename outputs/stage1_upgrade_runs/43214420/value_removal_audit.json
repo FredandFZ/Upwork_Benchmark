@@ -1,0 +1,254 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "audit_scope": "VALUE_REMOVALS_ONLY",
+  "modify_requirement_ids": [
+    "REQ_ACTIVE_LOW_PANEL_INPUTS",
+    "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+    "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+    "REQ_ASSEMBLY_READY_BOM",
+    "REQ_AXP_POWER_PATH",
+    "REQ_AXP_THERMAL_ASSEMBLY",
+    "REQ_BATTERY_CONNECTOR_INTERFACE",
+    "REQ_BATTERY_CONNECTOR_PLACEMENT",
+    "REQ_BOOT_RESET_CIRCUIT",
+    "REQ_COMPONENT_SOURCEABILITY",
+    "REQ_DCDC1_3V3_REGULATION",
+    "REQ_DEVICE_ENCLOSURE",
+    "REQ_DISPLAY_BACKLIGHT_CONTROL",
+    "REQ_ESP32_LOCAL_SUPPLY_DECOUPLING",
+    "REQ_ESP32_MODULE_AND_BREAKOUT",
+    "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+    "REQ_I2C_BUS_ELECTRICALS",
+    "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+    "REQ_LED_INDICATOR_BOARD",
+    "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+    "REQ_MANUFACTURING_ORDER_SETUP",
+    "REQ_MODULAR_INTERBOARD_INTERFACE",
+    "REQ_NATIVE_USB_DATA",
+    "REQ_PANEL_POWER_CONTROL",
+    "REQ_PORTABLE_KICAD_PROJECT",
+    "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+    "REQ_POWER_CURRENT_PATH_CAPACITY",
+    "REQ_POWER_RAIL_CURRENT_MONITORING",
+    "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+    "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY",
+    "REQ_SENSOR_MODULE_INTERFACES",
+    "REQ_SPS30_I2C_MODE",
+    "REQ_SWITCHED_5V_SENSOR_RAIL",
+    "REQ_USB_STANDALONE_3V3_SUPPLY"
+  ],
+  "patches": [
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+        "event_locator": {
+          "message_id": 444,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "led_supply_voltage": "3.3V",
+          "data_drive": "Direct ESP32 3.3V output",
+          "data_level_shifter_required": false,
+          "accepted_operating_condition": "Indicator brightness levels"
+        },
+        "value_removals": [
+          "data_level_shifter_part"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        374,
+        444
+      ],
+      "decision_note": "Direct 3.3V data drive eliminates the previously selected level-shifter part while retaining the operational fact that no level shifter is required.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ESP32_LOCAL_SUPPLY_DECOUPLING",
+        "event_locator": {
+          "message_id": 883,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "decoupling_capacitor_placement": "Leave C18 (0.1 µF) and C19 (10 µF) at their existing positions"
+        },
+        "value_removals": [
+          "local_capacitor_max_distance_from_3v3_pin"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        870,
+        883
+      ],
+      "decision_note": "Accepting the existing capacitor positions cancels the earlier requirement to place the local capacitor within 2 mm of the 3V3 pin.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+        "event_locator": {
+          "message_id": 839,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "orientation_constraint": "Horizontal orientation is also permitted if it provides an advantage."
+        },
+        "value_removals": [
+          "board_orientation"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        838,
+        839
+      ],
+      "decision_note": "Permitting horizontal orientation supersedes the previously fixed vertical board orientation.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+        "event_locator": {
+          "message_id": 101,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_to_main_power_connector": {
+            "designation": "J_PWR_POWER",
+            "type": "JST-PH 2.0mm",
+            "pin_count": 4,
+            "pinout": [
+              "3V3",
+              "GND",
+              "5V",
+              "GND_5V_RETURN"
+            ]
+          },
+          "power_to_main_signal_connector": {
+            "designation": "J_PWR_SIGNAL",
+            "type": "JST-GH 1.25mm",
+            "pin_count": 7,
+            "pinout": [
+              "SDA0",
+              "SCL0",
+              "IRQ",
+              "PWRON",
+              "D+",
+              "D-",
+              "5V_EN"
+            ]
+          }
+        },
+        "value_removals": [
+          "interboard_connector_family"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        89,
+        101
+      ],
+      "decision_note": "The split JST-PH power and JST-GH signal interface supersedes the earlier blanket statement that the interboard connector family is JST-GH.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+        "event_locator": {
+          "message_id": 67,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "enclosure_fit_orientation": "must fit vertically in the depicted 3D-printed base arrangement"
+        },
+        "value_removals": [
+          "enclosure_orientation"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        55,
+        67
+      ],
+      "decision_note": "The required vertical fit in the base supersedes the previously recorded horizontal enclosure orientation.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_POWER_CURRENT_PATH_CAPACITY",
+        "event_locator": {
+          "message_id": 892,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "worst_case_current": "~1.5 A",
+          "required_copper_path": "Contiguous F.Cu/In2.Cu pours from the USB-C and battery connectors to the AXP2101 VBUS and BAT pins, without a thin-trace bottleneck in series",
+          "stitching_via_requirement": "Sufficient stitching vias between F.Cu and In2.Cu, typically 3 or more for approximately 1.5 A"
+        },
+        "value_removals": [
+          "minimum_power_trace_width"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        873,
+        892
+      ],
+      "decision_note": "The acceptance criterion changes from a blanket minimum trace width to a contiguous copper-pour path without a series bottleneck and with sufficient stitching vias.",
+      "confidence": "HIGH"
+    }
+  ],
+  "applied_patch_count": 6,
+  "affected_requirement_ids": [
+    "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+    "REQ_ESP32_LOCAL_SUPPLY_DECOUPLING",
+    "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+    "REQ_MODULAR_INTERBOARD_INTERFACE",
+    "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+    "REQ_POWER_CURRENT_PATH_CAPACITY"
+  ]
+}

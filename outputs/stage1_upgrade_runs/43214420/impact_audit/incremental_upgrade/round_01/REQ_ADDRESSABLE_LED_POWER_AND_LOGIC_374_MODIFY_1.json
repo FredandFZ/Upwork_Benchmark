@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+    "message_id": 374,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The level-shifter replacement does not change the existing GPIO-controlled cutoff of the entire 5V LED rail.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the separate board's role or its count of eight addressable LEDs; supply and data conditioning are owned by the source Requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply and data-level-shifter decision does not alter any interboard connector, pinout, or board power-distribution topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns the SK6812 supply and data line, not the sensor-board connector inventory or module interfaces.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "This Requirement already specifies a 5V rail shared by sensors and addressable LEDs; replacing the LED data-level shifter does not change its rail switching behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not resolve or modify the standalone USB 3.3V regulator, its capacity, source selection, or powered load.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Powering the LEDs from the already monitored 5V rail does not change the specified monitored rails, monitoring IC, or channel allocation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client explicitly replaces the existing SK6812 data-line component with a specific LCSC-listed part, which necessarily changes the assembly BOM.",
+      "new_event": {
+        "source_message": {
+          "message_id": 374,
+          "speaker": "client",
+          "text": "The SK6812 minimum supply voltage is 3.5–3.7V so 3.3V is actually below spec, the LED might not light up reliably. Power it from 5V and use the 74AHCT1G125 level shifter (LCSC C151417) on the data line since at 5V the data threshold becomes 3.5V which is above what the ESP32 outputs. That's already in the design, so no changes needed just replace the IRLML2402 with the 74AHCT1G125."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "addressable_led_data_level_shifter_part": "74AHCT1G125 (LCSC C151417)"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SK6812 supply and level-shifter selection does not alter the AXP2101 battery, USB, VMID, or VSYS power path.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Providing an LCSC part number for the level shifter does not change the existing general sourceability or cost-selection policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED electrical-component replacement has no effect on battery connector placement, orientation, spacing, or mounting-hole clearance.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the power board's dimensions, layer count, connector form, mounting arrangement, or enclosure fit.",
+      "new_event": null
+    }
+  ]
+}

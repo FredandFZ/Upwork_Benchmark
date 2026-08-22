@@ -29,7 +29,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--prompt-file",
         type=Path,
-        default=root / "prompt" / "stage1_prompt_v1.1_calibrated.md",
+        default=root / "prompt" / "stage1_prompt_v2.md",
     )
     parser.add_argument(
         "--verification-addendum-file",
@@ -37,7 +37,23 @@ def parse_args() -> argparse.Namespace:
         default=root / "prompt" / "stage1_event_verification_addendum.md",
         help="Stage-specific EVENT_VERIFICATION instructions.",
     )
-    parser.add_argument("--single-pass-prompt-file", type=Path, default=root / "prompt" / "stage1_prompt_old.md")
+    parser.add_argument(
+        "--impact-audit-addendum-file",
+        type=Path,
+        default=root / "prompt" / "stage1_cross_requirement_impact_audit.md",
+        help="Stage-specific CROSS_REQUIREMENT_IMPACT_AUDIT instructions.",
+    )
+    parser.add_argument(
+        "--value-removal-addendum-file",
+        type=Path,
+        default=root / "prompt" / "stage1_value_removal_audit.md",
+        help="Migration-only instructions for auditing stale attributes on existing MODIFY Events.",
+    )
+    parser.add_argument(
+        "--single-pass-prompt-file",
+        type=Path,
+        default=root / "prompt" / "stage1_prompt_single_pass_v0.6.md",
+    )
     parser.add_argument("--output-dir", type=Path, default=root / "outputs" / "stage1_annotations")
     parser.add_argument("--run-root", type=Path, default=root / "outputs" / "stage1_runs")
     parser.add_argument(
@@ -47,6 +63,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--log-dir", type=Path, default=root / "outputs" / "stage1_logs")
     parser.add_argument("--project-id", action="append", help="Project directory ID; repeat to select several.")
+    parser.add_argument(
+        "--upgrade-existing-annotation",
+        type=Path,
+        help=(
+            "Incrementally upgrade one existing Stage 1 annotation to v0.6 without rerunning "
+            "Evidence Scan, Requirement Discovery, or Event Extraction."
+        ),
+    )
     parser.add_argument(
         "--annotation-mode",
         choices=("multipass", "single-pass"),
@@ -87,6 +111,8 @@ def parse_args() -> argparse.Namespace:
         help="Remove Requirements with shorter lifecycles before downstream stages and final output (default: 3).",
     )
     parser.add_argument("--max-audit-rounds", type=int, default=1)
+    parser.add_argument("--max-impact-audit-rounds", type=int, default=2)
+    parser.add_argument("--max-impact-candidates-per-event", type=int, default=12)
     parser.add_argument("--resume", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--force-stage", action="append", choices=sorted(FORCE_STAGES), default=[])
     parser.add_argument("--force-requirement", action="append", default=[])
@@ -100,6 +126,13 @@ def parse_args() -> argparse.Namespace:
         parser.error("--retries must be >= 0 and --timeout must be > 0")
     if args.force_requirement and (not args.project_id or len(args.project_id) != 1):
         parser.error("--force-requirement requires exactly one --project-id")
+    if args.upgrade_existing_annotation is not None:
+        if not args.project_id or len(args.project_id) != 1:
+            parser.error("--upgrade-existing-annotation requires exactly one --project-id")
+        if args.annotation_mode != "multipass":
+            parser.error("--upgrade-existing-annotation cannot be combined with --annotation-mode single-pass")
+        if args.force_stage or args.force_requirement:
+            parser.error("--upgrade-existing-annotation cannot be combined with --force-stage/--force-requirement")
     return args
 
 
@@ -107,9 +140,17 @@ async def main_async(args: argparse.Namespace) -> int:
     try:
         common_prompt = args.prompt_file.read_text(encoding="utf-8-sig")
         verification_addendum = args.verification_addendum_file.read_text(encoding="utf-8-sig")
+        impact_audit_addendum = args.impact_audit_addendum_file.read_text(encoding="utf-8-sig")
+        value_removal_addendum = args.value_removal_addendum_file.read_text(encoding="utf-8-sig")
         single_prompt = args.single_pass_prompt_file.read_text(encoding="utf-8-sig")
     except OSError as exc:
         print(f"Cannot read prompt file: {exc}", file=sys.stderr)
+        return 2
+    if args.upgrade_existing_annotation is not None and not args.upgrade_existing_annotation.is_file():
+        print(
+            f"Existing annotation file not found: {args.upgrade_existing_annotation}",
+            file=sys.stderr,
+        )
         return 2
 
     wanted_ids = set(args.project_id) if args.project_id else None
@@ -124,7 +165,7 @@ async def main_async(args: argparse.Namespace) -> int:
             print(f"Unknown project ID(s): {', '.join(sorted(missing))}", file=sys.stderr)
             return 2
 
-    selective_force = bool(args.force_stage or args.force_requirement)
+    selective_force = bool(args.force_stage or args.force_requirement or args.upgrade_existing_annotation)
     projects = discovered
     if not args.overwrite and not selective_force:
         projects = [project for project in projects if not completed_for_mode(project, args.annotation_mode)]
@@ -155,6 +196,9 @@ async def main_async(args: argparse.Namespace) -> int:
         output_dir=args.output_dir,
         run_root=args.run_root,
         verification_addendum_path=args.verification_addendum_file,
+        impact_audit_addendum_path=args.impact_audit_addendum_file,
+        value_removal_addendum_path=args.value_removal_addendum_file,
+        upgrade_existing_annotation_path=args.upgrade_existing_annotation,
         model=args.model,
         reasoning_effort=args.reasoning_effort,
         annotation_mode=args.annotation_mode,
@@ -168,6 +212,8 @@ async def main_async(args: argparse.Namespace) -> int:
         max_requirement_context_messages=args.max_requirement_context_messages,
         min_requirement_events=args.min_requirement_events,
         max_audit_rounds=args.max_audit_rounds,
+        max_impact_audit_rounds=args.max_impact_audit_rounds,
+        max_impact_candidates_per_event=args.max_impact_candidates_per_event,
     )
     try:
         config.validate()
@@ -200,6 +246,8 @@ async def main_async(args: argparse.Namespace) -> int:
             call_log_path,
             single_prompt,
             verification_addendum,
+            impact_audit_addendum,
+            value_removal_addendum,
         )
 
         async def run_project(project):

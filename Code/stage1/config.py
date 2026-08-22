@@ -11,6 +11,7 @@ RUN_MODES = (
     "REQUIREMENT_DISCOVERY",
     "EVENT_EXTRACTION",
     "CONSISTENCY_AUDIT",
+    "CROSS_REQUIREMENT_IMPACT_AUDIT",
     "EVENT_VERIFICATION",
 )
 FORCE_STAGES = {
@@ -18,6 +19,7 @@ FORCE_STAGES = {
     "requirement_discovery",
     "event_extraction",
     "consistency_audit",
+    "cross_requirement_impact_audit",
     "event_verification",
     "assembly",
 }
@@ -38,6 +40,9 @@ class PipelineConfig:
     output_dir: Path
     run_root: Path
     verification_addendum_path: Path | None = None
+    impact_audit_addendum_path: Path | None = None
+    value_removal_addendum_path: Path | None = None
+    upgrade_existing_annotation_path: Path | None = None
     model: str = ANNOTATION_MODEL
     reasoning_effort: str = REASONING_EFFORT
     annotation_mode: str = "multipass"
@@ -51,6 +56,8 @@ class PipelineConfig:
     max_requirement_context_messages: int = 160
     min_requirement_events: int = 3
     max_audit_rounds: int = 1
+    max_impact_audit_rounds: int = 2
+    max_impact_candidates_per_event: int = 12
 
     def validate(self) -> None:
         if self.annotation_mode not in {"multipass", "single-pass"}:
@@ -74,6 +81,10 @@ class PipelineConfig:
             raise ValueError("min_requirement_events must be >= 1")
         if self.max_audit_rounds < 1:
             raise ValueError("max_audit_rounds must be >= 1")
+        if self.max_impact_audit_rounds < 1:
+            raise ValueError("max_impact_audit_rounds must be >= 1")
+        if self.max_impact_candidates_per_event < 1:
+            raise ValueError("max_impact_candidates_per_event must be >= 1")
 
     def expanded_force_stages(self) -> set[str]:
         """Invalidate downstream semantic checkpoints when an upstream stage is forced."""
@@ -82,6 +93,7 @@ class PipelineConfig:
             "requirement_discovery",
             "event_extraction",
             "consistency_audit",
+            "cross_requirement_impact_audit",
             "event_verification",
             "assembly",
         ]

@@ -11,6 +11,7 @@ from Code.stage1.assembler import assemble_stage1_annotation
 from Code.stage1.config import PipelineConfig, ProjectSource
 from Code.stage1.context import requirement_context
 from Code.stage1.filtering import filter_short_requirements
+from Code.stage1.impact import build_impact_cases, impact_decisions_to_patches
 from Code.stage1.pipeline import Stage1Pipeline
 from Code.stage1.patching import apply_audit_patches, apply_verification, has_valid_requirement_ids
 from Code.stage1.preprocessing import preprocess_project
@@ -137,6 +138,10 @@ class AssemblyAndValidationTests(unittest.TestCase):
             [item["event_id"] for item in annotation["requirements"][0]["events"]],
             ["REQ_X_E001", "REQ_X_E002", "REQ_X_E003"],
         )
+        self.assertEqual(annotation["annotation_version"], "v0.6")
+        self.assertTrue(
+            all("value_removals" in item for item in annotation["requirements"][0]["events"])
+        )
 
     def test_paraphrased_source_text_fails(self) -> None:
         annotation = valid_annotation()
@@ -187,6 +192,298 @@ class AssemblyAndValidationTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(Stage1ValidationError, "execution.status"):
             validate_stage1_annotation(annotation, normalized_fixture())
+
+    def test_value_removal_must_reference_existing_attribute(self) -> None:
+        normalized = normalized_fixture()
+        events = [
+            {
+                "source_message": {"message_id": 1, "speaker": "client", "text": "Make the button blue."},
+                "event_type": "MODIFY",
+                "value_updates": None,
+                "value_removals": ["missing"],
+                "scope_updates": None,
+                "ambiguity": None,
+                "execution": None,
+            }
+        ]
+        with self.assertRaisesRegex(Stage1ValidationError, "do not exist"):
+            validate_intermediate_events(events, normalized)
+
+    def test_value_update_and_removal_overlap_fails(self) -> None:
+        normalized = normalized_fixture()
+        events = [
+            {
+                "source_message": {"message_id": 1, "speaker": "client", "text": "Make the button blue."},
+                "event_type": "MODIFY",
+                "value_updates": {"color": "blue"},
+                "value_removals": ["color"],
+                "scope_updates": None,
+                "ambiguity": None,
+                "execution": None,
+            }
+        ]
+        with self.assertRaisesRegex(Stage1ValidationError, "update and remove"):
+            validate_intermediate_events(events, normalized)
+
+
+class CrossRequirementImpactTests(unittest.TestCase):
+    def _fixture(self):
+        messages = [
+            {
+                "message_id": 1,
+                "speaker": "client",
+                "text": "Add a Big Block prize.",
+                "created_ts": "2026-01-01",
+                "original_index": 0,
+            },
+            {
+                "message_id": 2,
+                "speaker": "client",
+                "text": "Show the Big Block ticket counter in NFT metadata.",
+                "created_ts": "2026-01-02",
+                "original_index": 1,
+            },
+            {
+                "message_id": 3,
+                "speaker": "client",
+                "text": "Remove Big Block entirely.",
+                "created_ts": "2026-01-03",
+                "original_index": 2,
+            },
+        ]
+        normalized = {
+            "project_id": "P",
+            "project_title": "P",
+            "project_metadata": {},
+            "messages": messages,
+        }
+        inventory = {
+            "sessions": [],
+            "requirement_families": [
+                {"family_id": "PRIZES", "title": "Prizes"},
+                {"family_id": "METADATA", "title": "Metadata"},
+            ],
+            "requirements": [
+                {"requirement_id": "REQ_BIG_BLOCK", "title": "Big Block Prize", "family_id": "PRIZES"},
+                {"requirement_id": "REQ_NFT_METADATA", "title": "NFT Metadata", "family_id": "METADATA"},
+            ],
+        }
+        def provisional(message_id, event_type, updates=None):
+            source = messages[message_id - 1]
+            return {
+                "source_message": {
+                    "message_id": message_id,
+                    "speaker": source["speaker"],
+                    "text": source["text"],
+                },
+                "event_type": event_type,
+                "value_updates": updates,
+                "value_removals": None,
+                "scope_updates": None,
+                "ambiguity": None,
+                "execution": None,
+            }
+        events = {
+            "REQ_BIG_BLOCK": [
+                provisional(1, "INTRODUCE", {"prize_type": "Big Block"}),
+                provisional(3, "REMOVE"),
+            ],
+            "REQ_NFT_METADATA": [
+                provisional(2, "INTRODUCE", {"big_block_ticket_counter_visible": True}),
+            ],
+        }
+        return normalized, inventory, events
+
+    def test_candidate_retrieval_crosses_family_boundary_at_source_cutoff(self) -> None:
+        normalized, inventory, events = self._fixture()
+        cases = build_impact_cases(inventory, events, normalized)
+        removal_case = next(case for case in cases if case["source_event"]["event_type"] == "REMOVE")
+        candidate_ids = {item["candidate_requirement_id"] for item in removal_case["candidates"]}
+        self.assertIn("REQ_NFT_METADATA", candidate_ids)
+        candidate = next(
+            item for item in removal_case["candidates"] if item["candidate_requirement_id"] == "REQ_NFT_METADATA"
+        )
+        self.assertTrue(candidate["current_state_at_source_event"]["attributes"]["big_block_ticket_counter_visible"])
+
+    def test_add_decision_edits_an_existing_same_message_modify(self) -> None:
+        normalized, inventory, events = self._fixture()
+        removal_case = next(
+            case for case in build_impact_cases(inventory, events, normalized)
+            if case["source_event"]["event_type"] == "REMOVE"
+        )
+        source_message = removal_case["source_event"]["source_message"]
+        events["REQ_NFT_METADATA"].append(
+            {
+                "source_message": dict(source_message),
+                "event_type": "MODIFY",
+                "value_updates": {"metadata_note": "Small Block only"},
+                "value_removals": None,
+                "scope_updates": None,
+                "ambiguity": None,
+                "execution": None,
+            }
+        )
+        audit = {
+            "decisions": [
+                {
+                    "candidate_requirement_id": "REQ_NFT_METADATA",
+                    "decision": "ADD_EVENT",
+                    "event_locator": None,
+                    "confidence": "HIGH",
+                    "reason": "Big Block counter is obsolete.",
+                    "new_event": {
+                        "source_message": dict(source_message),
+                        "event_type": "MODIFY",
+                        "value_updates": None,
+                        "value_removals": ["big_block_ticket_counter_visible"],
+                        "scope_updates": None,
+                        "ambiguity": None,
+                        "execution": None,
+                    },
+                }
+            ]
+        }
+        patches, review = impact_decisions_to_patches(removal_case, audit, events)
+        self.assertEqual(review, [])
+        self.assertEqual(patches[0]["operation"], "EDIT_EVENT")
+        self.assertEqual(patches[0]["replacement"]["value_updates"], {"metadata_note": "Small Block only"})
+        self.assertEqual(
+            patches[0]["replacement"]["value_removals"],
+            ["big_block_ticket_counter_visible"],
+        )
+
+    def test_pipeline_impact_stage_applies_high_confidence_add(self) -> None:
+        normalized, inventory, events = self._fixture()
+
+        class ImpactApi:
+            async def call(self, **kwargs):
+                self.run_mode = kwargs["run_mode"]
+                result = {
+                    "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+                    "source_event_ref": {
+                        "requirement_id": "REQ_BIG_BLOCK",
+                        "message_id": 3,
+                        "event_type": "REMOVE",
+                        "occurrence": 1,
+                    },
+                    "decisions": [
+                        {
+                            "candidate_requirement_id": "REQ_NFT_METADATA",
+                            "decision": "ADD_EVENT",
+                            "event_locator": None,
+                            "confidence": "HIGH",
+                            "reason": "The Big Block metadata counter is obsolete.",
+                            "new_event": {
+                                "source_message": {
+                                    "message_id": 3,
+                                    "speaker": "client",
+                                    "text": "Remove Big Block entirely.",
+                                },
+                                "supporting_message_ids": [],
+                                "event_type": "MODIFY",
+                                "value_updates": None,
+                                "value_removals": ["big_block_ticket_counter_visible"],
+                                "scope_updates": None,
+                                "ambiguity": None,
+                                "execution": None,
+                            },
+                        }
+                    ],
+                }
+                kwargs["validator"](result)
+                return result
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            project = ProjectSource(
+                "P",
+                root,
+                root / "chat_messages.json",
+                root / "output.json",
+                root / "run",
+            )
+            config = PipelineConfig(
+                prompt_path=root / "prompt.md",
+                output_dir=root,
+                run_root=root,
+                min_requirement_events=1,
+            )
+            api = ImpactApi()
+            pipeline = Stage1Pipeline(api, config, "prompt", root / "calls.jsonl")
+            result = asyncio.run(
+                pipeline._cross_requirement_impact_until_stable(
+                    project,
+                    normalized,
+                    inventory,
+                    events,
+                    force=True,
+                    phase="test",
+                )
+            )
+
+        updated_events, review, applied_count, decision_count, affected, report = result
+        self.assertEqual(api.run_mode, "CROSS_REQUIREMENT_IMPACT_AUDIT")
+        self.assertEqual(review, [])
+        self.assertEqual(applied_count, 1)
+        self.assertEqual(decision_count, 1)
+        self.assertEqual(affected, {"REQ_NFT_METADATA"})
+        self.assertEqual(
+            updated_events["REQ_NFT_METADATA"][-1]["value_removals"],
+            ["big_block_ticket_counter_visible"],
+        )
+        self.assertEqual(report["applied_patch_count"], 1)
+
+
+class IncrementalUpgradeTests(unittest.TestCase):
+    def test_v05_annotation_is_migrated_without_discovery_or_extraction_calls(self) -> None:
+        source_annotation = valid_annotation()
+        source_annotation["annotation_version"] = "v0.5"
+        for requirement in source_annotation["requirements"]:
+            for source_event in requirement["events"]:
+                source_event.pop("value_removals", None)
+
+        class NoCallsApi:
+            async def call(self, **kwargs):
+                raise AssertionError(f"Unexpected API call: {kwargs.get('run_mode')}")
+
+        raw_messages = [
+            {
+                "message_id": 1,
+                "created_ts": "2026-01-01 10:00:00",
+                "message_user_type": "client",
+                "message": "Make the button blue.",
+                "sender_id": "c1",
+            }
+        ]
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            project_dir = root / "P1"
+            project_dir.mkdir()
+            chat_path = project_dir / "chat_messages.json"
+            chat_path.write_text(json.dumps(raw_messages), encoding="utf-8")
+            existing_path = root / "existing.json"
+            existing_path.write_text(json.dumps(source_annotation), encoding="utf-8")
+            project = ProjectSource(
+                "P1",
+                project_dir,
+                chat_path,
+                root / "output.json",
+                root / "run",
+            )
+            config = PipelineConfig(
+                prompt_path=root / "prompt.md",
+                output_dir=root,
+                run_root=root,
+                min_requirement_events=1,
+            )
+            pipeline = Stage1Pipeline(NoCallsApi(), config, "prompt", root / "calls.jsonl")
+            annotation, metrics = asyncio.run(
+                pipeline._run_incremental_upgrade(project, existing_path)
+            )
+
+        self.assertEqual(annotation["annotation_version"], "v0.6")
+        self.assertIsNone(annotation["requirements"][0]["events"][0]["value_removals"])
+        self.assertIn("incremental_upgrade", metrics)
 
 
 class CostControlTests(unittest.TestCase):

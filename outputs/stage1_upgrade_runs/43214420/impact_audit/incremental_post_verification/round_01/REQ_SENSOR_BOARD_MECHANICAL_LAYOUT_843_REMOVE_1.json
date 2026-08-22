@@ -1,0 +1,154 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+    "message_id": 843,
+    "event_type": "REMOVE",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already records the integrated board's connector-placement flexibility, and removal of the separate sensor-board layout does not invalidate the integrated-board constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The battery connector remains subject to the immediately preceding short-edge constraint; removing the separate sensor-board layout does not necessarily alter its placement or accessibility requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already removes the obsolete modular interboard details and retains the operational fact that the interface was removed by the single-board design.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board design eliminates the interboard cable and moves the formerly main-board pull-ups into the integrated board, while the remaining I2C electrical constraints continue to apply.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "pull_up_location": "INTEGRATED_BOARD"
+        },
+        "value_removals": [
+          "interboard_cable_length"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "I2C_BUS",
+            "INTEGRATED_BOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The modular-main-board and sensor-board references are affected by the single-board design, but the candidate already has an unresolved value conflict about omitting the INA monitor, so the resulting monitoring state cannot be updated safely from this source alone.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already replaces the three-board enclosure inventory with one integrated board plus the external sensors, buttons, and LEDs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already removes the obsolete interboard-connector sourcing strategy; the general integrated-board sourcing policy remains valid.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The ESP32 module and full-pin-breakout behavior already applies to the integrated board and is independent of the removed sensor-board mechanical layout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already removes the separate sensor-board inputs and connector count, retains the external sensor-module connectors, and moves the requirement to the integrated-board context.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "A single integrated board makes the condition of operating without a separate power board obsolete, but the source does not establish whether the standalone LDO, Schottky OR-ing, or AXP2101 source-selection behavior should be retained or redesigned.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "With only one integrated board, the panel button remains required but can no longer tap an interboard J_PWR_SIG connection; it instead connects on the integrated board to the AXP2101 PWRON line.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "connector_board": "integrated board",
+          "signal_connection": "AXP2101 PWRON line"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ENCLOSURE_CONTROLS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ACTIVE_LOW_PANEL_INPUTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel controls can still connect through board connectors on the integrated board; removal of the separate sensor-board layout does not change their GPIO assignments or active-low input behavior.",
+      "new_event": null
+    }
+  ]
+}

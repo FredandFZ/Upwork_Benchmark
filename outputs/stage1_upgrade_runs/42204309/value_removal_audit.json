@@ -1,0 +1,278 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "audit_scope": "VALUE_REMOVALS_ONLY",
+  "modify_requirement_ids": [
+    "REQ_BADGE_AWARD_RULES",
+    "REQ_BADGE_PRESENTATION",
+    "REQ_BIG_BLOCK_PRIZE",
+    "REQ_BLOCKAID_PROJECT_VERIFICATION",
+    "REQ_CODED_REFERRAL_REWARD",
+    "REQ_CONTRACT_EVENT_WEBHOOK",
+    "REQ_DISCORD_COMMUNITY_SERVER",
+    "REQ_ETH_MINT_FLOW",
+    "REQ_FAQ_MESSAGING",
+    "REQ_FIAT_ONRAMP",
+    "REQ_HERO_LAYOUT",
+    "REQ_HERO_MESSAGING",
+    "REQ_LANDING_BOOK_COVER_DISPLAY",
+    "REQ_LANDING_PAGE_MESSAGING",
+    "REQ_MINT_REVENUE_ALLOCATION",
+    "REQ_MINT_SUCCESS_FEEDBACK",
+    "REQ_MINT_TIPPING",
+    "REQ_NFT_CERTIFICATE_EMAIL",
+    "REQ_NFT_DASHBOARD_OWNERSHIP",
+    "REQ_NFT_REFERRAL_IDENTITY",
+    "REQ_NO_CODE_RANDOM_REWARD",
+    "REQ_PAYMENT_METHOD_SELECTION",
+    "REQ_PRIZE_CLAIM",
+    "REQ_PRIZE_POOL_FUNDING",
+    "REQ_PRIZE_TICKET_LIFECYCLE",
+    "REQ_PRIZE_WINNER_SELECTION",
+    "REQ_REFERRAL_REWARD_ACCOUNTING",
+    "REQ_REFERRAL_VALIDATION_FEEDBACK",
+    "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+    "REQ_SMALL_BLOCK_PRIZE"
+  ],
+  "patches": [
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_PRIZE_CLAIM",
+        "event_locator": {
+          "message_id": 184,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "prize_payout_mode": "automatic transfer to the winner wallet",
+          "winner_notifications": [
+            "Winners page",
+            "email",
+            "dashboard"
+          ]
+        },
+        "value_removals": [
+          "claim_interaction"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        184
+      ],
+      "decision_note": "Automatic wallet transfer eliminates the previously established one-click claim interaction.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+        "event_locator": {
+          "message_id": 195,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "ticket_counters": [
+            "small_block"
+          ],
+          "big_block_ticket_lifecycle": "removed"
+        },
+        "value_removals": [
+          "counter_independence",
+          "big_block_eligibility_window",
+          "big_block_post_draw_action"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "PRIZE_TICKETS",
+            "SMALL_BLOCK"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        195
+      ],
+      "decision_note": "Eliminating Big Blocks makes the two-counter relationship and Big Block eligibility and reset details obsolete.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_FAQ_MESSAGING",
+        "event_locator": {
+          "message_id": 210,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "fiat_buyer_reward_collection_faq": "Add a FAQ explaining that a $15 Transak fiat purchase automatically creates a non-custodial wallet, mints the NFT to it, emails the mint number, NFT details, and dashboard link, sends referral commissions and prizes to that wallet, and provides dashboard and email guidance for accessing rewards.",
+          "beginner_reward_collection_faq": "Add a beginner FAQ explaining automatic $5 commission payments, one on-chain $500-draw ticket per successful referral, dashboard visibility, Chainlink VRF draws every 100 sales, winner announcements by page and email, direct prize payment to the wallet, and ticket expiration after each draw."
+        },
+        "value_removals": [
+          "buyer_earnings",
+          "prize_block_description",
+          "prize_ticket_rules",
+          "reward_claim"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        210
+      ],
+      "decision_note": "The new single-$500-draw and automatic-payout FAQ guidance supersedes FAQ attributes describing Small and Big Block tickets, old block parameters, and one-click prize claims.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_HERO_LAYOUT",
+        "event_locator": {
+          "message_id": 212,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "layout_direction": "restore the previous Project Rebuild top layout with subtitles",
+          "headline_sizing": "avoid oversized text",
+          "image_placement": "must not overlap the View Dashboard button"
+        },
+        "value_removals": [
+          "hero_imagery"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        212
+      ],
+      "decision_note": "Restoring the prior top layout and allowing the cover elsewhere on the landing page supersedes the requirement to integrate it with the headline.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_HERO_MESSAGING",
+        "event_locator": {
+          "message_id": 212,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "hero_title": "Project Rebuild",
+          "hero_copy_style": "Use subtitles and adapt the supplied wording as needed to avoid messy, repetitive, or overly sales-oriented copy.",
+          "emphasized_selling_points": [
+            "$500 random giveaway every 100 sales",
+            "$5 unlimited, instant commission"
+          ]
+        },
+        "value_removals": [
+          "hero_headline"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        212
+      ],
+      "decision_note": "The restored Project Rebuild title supersedes the previously supplied long-form hero headline.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+        "event_locator": {
+          "message_id": 273,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "size_preference": "small",
+          "fit": "show the full cover without cutting it off"
+        },
+        "value_removals": [
+          "size"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        273
+      ],
+      "decision_note": "The explicit small-size preference supersedes the earlier unconstrained aesthetic-size attribute.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BADGE_PRESENTATION",
+        "event_locator": {
+          "message_id": 313,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "badge_count": 8,
+          "legend_badge_included": false,
+          "badge_grid_layout": {
+            "row_count": 2,
+            "badges_per_row": 4
+          }
+        },
+        "value_removals": [
+          "badge_set"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        313
+      ],
+      "decision_note": "Selecting eight badges with Legend excluded supersedes the earlier instruction to use all presented badge designs.",
+      "confidence": "HIGH"
+    }
+  ],
+  "applied_patch_count": 7,
+  "affected_requirement_ids": [
+    "REQ_BADGE_PRESENTATION",
+    "REQ_FAQ_MESSAGING",
+    "REQ_HERO_LAYOUT",
+    "REQ_HERO_MESSAGING",
+    "REQ_LANDING_BOOK_COVER_DISPLAY",
+    "REQ_PRIZE_CLAIM",
+    "REQ_PRIZE_TICKET_LIFECYCLE"
+  ]
+}

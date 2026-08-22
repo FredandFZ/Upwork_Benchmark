@@ -1,7 +1,7 @@
 # ReqMemBench Stage 1 — Multi-Pass Annotation Prompt
 
-**Prompt version:** `stage1-multipass-v2-execution-sparse-min3`  
-**Benchmark annotation version:** `v0.5`  
+**Prompt version:** `stage1-multipass-v2.1-removals-cross-impact`
+**Benchmark annotation version:** `v0.6`
 **Recommended use:** API-based batch annotation with multi-pass LLM annotation. This revision preserves the v1.1 atomicity and evidence-alignment calibration while adding a stricter execution-event admission, compression, audit, and verification policy.
 
 ---
@@ -96,6 +96,7 @@ EVIDENCE_SCAN
 REQUIREMENT_DISCOVERY
 EVENT_EXTRACTION
 CONSISTENCY_AUDIT
+CROSS_REQUIREMENT_IMPACT_AUDIT
 EVENT_VERIFICATION
 ```
 
@@ -816,6 +817,7 @@ The final canonical Event schema is:
   },
   "event_type": null,
   "value_updates": null,
+  "value_removals": null,
   "scope_updates": null,
   "ambiguity": null,
   "execution": null
@@ -2187,7 +2189,7 @@ Canonical structure:
 ```json
 {
   "benchmark": "ReqMemBench",
-  "annotation_version": "v0.5",
+  "annotation_version": "v0.6",
   "project": {
     "project_id": "...",
     "project_title": "...",
@@ -2302,7 +2304,7 @@ Before accepting the Gold annotation, code and/or reviewer must verify:
 ## Structure
 
 - `benchmark == "ReqMemBench"`
-- `annotation_version == "v0.5"`
+- `annotation_version == "v0.6"`
 - Requirement IDs are unique
 - Family IDs are unique
 - every non-null `family_id` exists
@@ -2514,3 +2516,146 @@ A Stage 1 project annotation is complete only when:
 - no Stage 2 information is mixed into Stage 1.
 
 The final Stage 1 Gold must be sufficient for a separate deterministic replay process to recover Requirement state at any cutoff time without rereading the entire raw project history.
+
+---
+
+# 26. Annotation v0.6 authoritative override: removals and cross-Requirement impact
+
+This section supersedes every earlier v0.5 schema example or conflicting rule in this prompt.
+
+**Prompt version:** `stage1-multipass-v2.1-removals-cross-impact`
+
+**Benchmark annotation version:** `v0.6`
+
+`CROSS_REQUIREMENT_IMPACT_AUDIT` is an additional valid `RUN_MODE`. The intended order is:
+
+```text
+EVENT_EXTRACTION
+-> CONSISTENCY_AUDIT
+-> CROSS_REQUIREMENT_IMPACT_AUDIT
+-> EVENT_VERIFICATION
+-> deterministic v0.6 assembly
+```
+
+## 26.1 Canonical v0.6 Event
+
+Every Event now has exactly these semantic payload fields:
+
+```json
+{
+  "event_id": null,
+  "source_message": {
+    "message_id": null,
+    "speaker": null,
+    "text": null
+  },
+  "event_type": null,
+  "value_updates": null,
+  "value_removals": null,
+  "scope_updates": null,
+  "ambiguity": null,
+  "execution": null
+}
+```
+
+Intermediate Events omit `event_id` and may additionally contain `supporting_message_ids`.
+
+`value_removals` is either `null` or a non-empty, duplicate-free array of top-level attribute keys that exist immediately before the Event. A key cannot occur in both `value_updates` and `value_removals` in the same Event.
+
+- `INTRODUCE`: `value_removals = null` and at least one value/scope update.
+- `MODIFY`: at least one of `value_updates`, `value_removals`, or `scope_updates` is non-null.
+- Every other Event type: `value_removals = null`.
+
+Replay order for MODIFY is: delete `value_removals`, apply `value_updates`, apply non-null scope dimensions, reset execution to null, then resolve any ambiguity addressed by the changed dimension.
+
+## 26.2 Deleting an attribute versus retaining a removal fact
+
+Use:
+
+```json
+"value_removals": ["big_block_eligibility_window"]
+```
+
+when the key is obsolete and must no longer exist in current state.
+
+Use:
+
+```json
+"value_updates": {"big_block_prize_status": "removed"}
+```
+
+only when the negative/lifecycle status is itself a current business fact that future agents must remember. Boolean negative constraints such as `enabled: false` also remain values. Do not encode an obsolete detail as the literal value `"removed"` merely to avoid deleting its key.
+
+For every MODIFY, replay the prior state and explicitly inspect whether a replacement, cancellation, scope narrowing, provider switch, mode switch, count change, trigger change, or lifecycle change makes older keys stale. Include those keys in `value_removals`.
+
+Examples:
+
+- manual claim -> automatic wallet transfer: remove `claim_interaction` if no claim interaction remains;
+- Big Block cancellation: remove Big-Block eligibility/action/counter-detail keys while optionally retaining a concise current `big_block_status: "removed"` fact;
+- two counters -> Small Block only: remove obsolete Big Block counter semantics instead of leaving contradictory state.
+
+## 26.3 Local consistency and verification requirements
+
+`CONSISTENCY_AUDIT` and `EVENT_VERIFICATION` must check:
+
+1. every removed key exists immediately before the Event;
+2. update/removal sets do not overlap;
+3. replacement semantics do not leave stale mutually incompatible keys;
+4. an EDIT replacement includes `value_removals` explicitly, using null when empty;
+5. cross-Requirement propagation does not substitute for cleaning the source Requirement itself.
+
+## 26.4 CROSS_REQUIREMENT_IMPACT_AUDIT
+
+Deterministic code supplies one material source MODIFY/REMOVE and a candidate list retrieved across all Requirements using title, state-at-cutoff attributes, scope contexts, history, Family, shared business entities, and aliases. Family is only a signal, never a boundary. Candidate state is truncated at the source Event time; do not use future Events.
+
+Return exactly one decision for every supplied candidate:
+
+```json
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_BIG_BLOCK_PRIZE",
+    "message_id": 195,
+    "event_type": "REMOVE",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The current Requirement still exposes a Big Block ticket counter after Big Block was removed.",
+      "new_event": {
+        "source_message": {
+          "message_id": 195,
+          "speaker": "client",
+          "text": "copy the exact supplied source text"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": ["big_block_ticket_counter_visible"],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}
+```
+
+Allowed decisions are exactly:
+
+- `ADD_EVENT`: impact is real and no matching candidate Event exists;
+- `EDIT_EVENT`: a matching Event already exists but is incomplete; provide its locator and the corrected/augmented MODIFY;
+- `NO_IMPACT`: the match is historical, incidental, or semantically unaffected;
+- `HUMAN_REVIEW`: evidence is insufficient for safe propagation.
+
+Only propagate effects logically entailed by the client source decision. Keyword overlap creates a candidate, never an automatic Event. A propagated Event must cite the same source message and must be a MODIFY. Use HIGH confidence only when the effect is necessary; otherwise use HUMAN_REVIEW or lower confidence. Do not create a duplicate same-message MODIFY: use EDIT_EVENT.
+
+## 26.5 Final v0.6 validation
+
+Final assembly must output `annotation_version == "v0.6"`, and every final Event must contain `value_removals`. Any earlier v0.5 final-JSON example in this prompt is obsolete.
+
+The deterministic minimum-lifecycle eligibility filter is applied after the first cross-Requirement impact audit (and again after verification), so all discovered atomic Requirements remain available as impact candidates. Any earlier text saying they are filtered before global audit is obsolete.

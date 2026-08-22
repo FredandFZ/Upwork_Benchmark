@@ -1,0 +1,3190 @@
+{
+  "items": [
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_AXP_POWER_PATH",
+        "message_id": 263,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The stated 3.7–4.2V battery range applies to the battery connector's VCC electrical interface, while leaving the unresolved connector pinout unchanged.",
+      "new_event": {
+        "source_message": {
+          "message_id": 263,
+          "speaker": "client",
+          "text": "3.3V rail (AXP2101 DCDC1, 2A) — primary power source when power board is connected:\n\\- ESP32-S3 module\n\\- INA219\n\\- All I2C sensors (SCD41, BME280, ENS160) via sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — controlled by ESP32 GPIO3:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (if wired to 5V — depends on version)\n\n3.3V rail (ME6211A LDO, 1A) — only active when USB-C on main board connected WITHOUT power board:\n\\- Same 3.3V rail as above — Schottky diode OR-ing means whichever source is present wins. Used for standalone programming.\n\nBattery (3.7–4.2V) — feeds AXP2101 which then feeds everything above.\n\nSimple rule: in normal operation AXP2101 powers everything. The LDO only kicks in when programming without the power board connected."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "battery_input_voltage": "3.7–4.2V"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_AXP_POWER_PATH",
+        "message_id": 263,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The source identifies the addressable LEDs as SK6812 and records that 5V powering is conditional on the selected SK6812 version.",
+      "new_event": {
+        "source_message": {
+          "message_id": 263,
+          "speaker": "client",
+          "text": "3.3V rail (AXP2101 DCDC1, 2A) — primary power source when power board is connected:\n\\- ESP32-S3 module\n\\- INA219\n\\- All I2C sensors (SCD41, BME280, ENS160) via sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — controlled by ESP32 GPIO3:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (if wired to 5V — depends on version)\n\n3.3V rail (ME6211A LDO, 1A) — only active when USB-C on main board connected WITHOUT power board:\n\\- Same 3.3V rail as above — Schottky diode OR-ing means whichever source is present wins. Used for standalone programming.\n\nBattery (3.7–4.2V) — feeds AXP2101 which then feeds everything above.\n\nSimple rule: in normal operation AXP2101 powers everything. The LDO only kicks in when programming without the power board connected."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "led_type": "SK6812 addressable LEDs",
+          "supply_condition": "Use the 5V rail if the selected SK6812 version is wired for 5V"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+        "message_id": 263,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The SK6812 reference may describe the eight-LED board, but the source does not explicitly link them and leaves the 5V wiring dependent on the LED version.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+        "message_id": 750,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board redesign may replace the enclosure's three-board hardware assumption, but the source does not establish whether the existing enclosure is being redesigned, retained for the modular version, or superseded.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "Separate LED and sensor control could require another enable signal or a connector change, but the source does not identify the control location, signal, or revised pinout.",
+      "new_event": null
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+        "event_locator": {
+          "message_id": 425,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "control_topology": "Separate power control for LEDs and sensors",
+          "sensor_rail_control": "Independent from LED power control"
+        },
+        "value_removals": [
+          "shared_rail_loads",
+          "shutdown_behavior"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        425
+      ],
+      "decision_note": "The existing same-message Event records independent controls but leaves stale shared-rail and whole-rail shutdown semantics that conflict with the new control topology.",
+      "confidence": "HIGH",
+      "source_event_ref": {
+        "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "application_error": "Intermediate Event 9.value_removals references attributes that do not exist before the Event: shared_rail_loads"
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+        "message_id": 263,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source conditionally places SK6812 LEDs on 5V depending on their version, but it does not establish whether these are the eight LEDs on the separate indicator board.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+        "message_id": 432,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The exact SK6812MINI-E selection may inform voltage and level-shifter requirements, but the client had separately reopened the need for a shifter at message 425, and message 432 does not explicitly resolve that electrical decision. The existing same-message electrical MODIFY may therefore over-infer the impact.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_DEVICE_ENCLOSURE",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The monitoring requirement remains unresolved, but its modular-main-board scope and coverage statement referencing a downstream sensor board are stale under the one-board architecture.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "three_v_three_measurement_coverage"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "POWER_TELEMETRY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_DEVICE_ENCLOSURE",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The BOOT and reset behavior remains valid, but its active hardware context necessarily moves from the former modular main board to the sole integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "PROGRAMMING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The tentative phrase \"might not need shifter\" could affect the BOM's 74AHCT1G125 entry, but it does not establish that the level shifter must be removed; a further client decision is required.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "reason": "New candidate pairs remain after the configured convergence rounds.",
+      "remaining_pairs": [
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 291,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SPS30_I2C_MODE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 374,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_AXP_POWER_PATH",
+            "message_id": 977,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 434,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+            "message_id": 336,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+            "message_id": 339,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+            "message_id": 347,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+            "message_id": 353,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+            "message_id": 354,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_NATIVE_USB_DATA"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_CURRENT_PATH_CAPACITY",
+            "message_id": 892,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_NATIVE_USB_DATA",
+            "message_id": 1019,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_NATIVE_USB_DATA",
+            "message_id": 1019,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT",
+            "message_id": 547,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 291,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 296,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 304,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+            "message_id": 309,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+            "message_id": 311,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ACTIVE_LOW_PANEL_INPUTS",
+            "message_id": 887,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_BOOT_RESET_CIRCUIT",
+            "message_id": 320,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 371,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SPS30_I2C_MODE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 371,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SPS30_I2C_MODE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DISPLAY_BACKLIGHT_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 263,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 842,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MANUFACTURING_ORDER_SETUP"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_NATIVE_USB_DATA"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 444,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MANUFACTURING_ORDER_SETUP"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 468,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DISPLAY_BACKLIGHT_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MANUFACTURING_ORDER_SETUP"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SPS30_I2C_MODE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 802,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MANUFACTURING_ORDER_SETUP"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SPS30_I2C_MODE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MANUFACTURING_ORDER_SETUP"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SPS30_I2C_MODE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PORTABLE_KICAD_PROJECT",
+            "message_id": 934,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PORTABLE_KICAD_PROJECT",
+            "message_id": 934,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 401,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PORTABLE_KICAD_PROJECT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SPS30_I2C_MODE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 899,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 899,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+            "message_id": 899,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PRODUCTION_FILE_PACKAGE"
+        }
+      ]
+    },
+    {
+      "source": "EVENT_VERIFICATION",
+      "requirement_id": "REQ_AXP_POWER_PATH",
+      "missing_event_candidate": {
+        "source_message": {
+          "message_id": 182,
+          "speaker": "freelancer",
+          "text": "Also, in the schematic for the LilyGo T-Display S3 that you mentioned as a reference design, those pins are connected"
+        },
+        "supporting_message_ids": [
+          180
+        ],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "VALUE",
+          "description": "The freelancer cites a reference design with VMID and VSYS connected, conflicting with the client's requirement that they remain separate nets."
+        },
+        "execution": null
+      }
+    },
+    {
+      "source": "EVENT_VERIFICATION",
+      "requirement_id": "REQ_AXP_POWER_PATH",
+      "missing_event_candidate": {
+        "source_message": {
+          "message_id": 754,
+          "speaker": "client",
+          "text": "But it must be battery efficient as aim will be to make battery work as long as possible."
+        },
+        "supporting_message_ids": [
+          753
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "battery_efficiency_goal": "maximize battery runtime"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_AXP_POWER_PATH",
+        "message_id": 753,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The integrated-board redesign may eliminate the modular Schottky-drop condition that justified a 3.4V DCDC1 output, but the source neither confirms the integrated topology nor specifies a revised output voltage.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The required monitored loads remain the same, but the separate sensor-board reference and modular-main-board scope are obsolete under the integrated design.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "three_v_three_measurement_coverage": "total downstream current for the ESP32, external sensors, and addressable LEDs"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "POWER_TELEMETRY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The single-board design makes the condition of connecting main-board USB without the power board obsolete, but the source does not determine whether standalone USB supply is removed or redefined for the integrated board.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "REMOVE",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board architecture makes the condition 'USB-C connected without the power board' obsolete, but the source does not establish whether the standalone LDO and diode-OR behavior remain, are redesigned, or are removed.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "REMOVE",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board design invalidates the current main-board and J_PWR_SIG routing details, but the source does not safely establish whether the panel power connector is retained and rerouted directly, redesigned, or removed.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "REMOVE",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The single-board architecture may obsolete references to the modular main and sensor boards, but the source does not resolve the existing uncertainty about INA versus AXP2101 monitoring or establish the integrated-board measurement topology.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "REMOVE",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "With only one integrated board, the condition of using main-board USB without the power board may be obsolete, but the source does not establish whether the separate LDO is removed or how standalone USB power should now operate.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "REMOVE",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source makes the former interboard-cable basis obsolete, but sensors remain externally connected; it is unclear whether the 10–20 cm cable assumption and pull-up placement should be removed, renamed for sensor cabling, or retained.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "REMOVE",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The modular-main-board and sensor-board references are affected by the single-board design, but the candidate already has an unresolved value conflict about omitting the INA monitor, so the resulting monitoring state cannot be updated safely from this source alone.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "REMOVE",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "A single integrated board makes the condition of operating without a separate power board obsolete, but the source does not establish whether the standalone LDO, Schottky OR-ing, or AXP2101 source-selection behavior should be retained or redesigned.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The single-board design makes modular-board references potentially stale, but the source does not establish the integrated current-monitor topology or resolve whether the separate INA monitor is retained.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "With only one integrated board and no interboard cable path, the panel power-button connector necessarily moves from the modular main board to the integrated board and connects to the AXP2101 PWRON control there.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "connector_board": "integrated board",
+          "signal_connection": "AXP2101 PWRON on the integrated board"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ENCLOSURE_CONTROLS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The three-board interboard cable is obsolete, but the source does not determine whether its 10–20 cm electrical assumptions should be removed or transferred to the cables for the remaining external sensor modules.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+        "message_id": 750,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The enclosure currently accommodates three boards, while the proposed redesign uses one integrated board; it is unclear whether the redesign supersedes this enclosure configuration or is a separate future variant.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+        "message_id": 432,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The selected SK6812MINI-E model may bear on the unresolved supply-voltage and level-shifter question, but the source does not explicitly decide those electrical requirements and separate power control leaves multiple plausible interpretations.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board decision makes the modular-main-board and sensor-board wording potentially stale, but the source does not resolve whether the INA monitor remains, where it sits, or which loads it measures.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ASSEMBLY_READY_BOM",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The integrated-board decision may change the prior main-board Schottky OR-ing topology and its 3.4V compensation requirement, but the source does not specify the resulting power circuit.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board architecture makes the modular-main-board context and sensor-board coverage wording potentially stale, but the source does not establish the integrated board's monitoring topology or resolve whether a separate INA remains required.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_MANUFACTURING_ORDER_SETUP",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The one-board redesign may invalidate the prior Schottky-drop compensation rationale, but the source does not establish whether that OR-ing circuit remains or what DCDC1 voltage the integrated design requires.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_DEVICE_ENCLOSURE",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The monitoring requirement persists, but its scope and downstream-load description must reflect the integrated board rather than a separate sensor board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "three_v_three_measurement_coverage": "total downstream current for the ESP32, connected sensors, and addressable LEDs"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "POWER_TELEMETRY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "Separate LED and sensor controls could require an additional interboard control signal, but the source does not identify where the controls are implemented or specify any connector or pinout change.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "Omitting the level shifter would affect the BOM entry, but the client says only that it might not be needed and the nearby freelancer response indicates a contextual misunderstanding; removing the BOM attribute requires a confirmed decision.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board decision makes the stored reference to a main-board power OR-ing circuit obsolete, while the source state confirms that the Schottky-based regulation mechanism remains.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "voltage_compensation_reason": "compensate for the Schottky diode drop in the integrated-board power OR-ing circuit"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "source_event_ref": {
+        "requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The phrase 'only one board + sensors/buttons/leds' could mean the separate LED PCB was eliminated, or it could treat that LED assembly as an external peripheral; the source does not safely resolve the indicator board's status.",
+      "new_event": null
+    },
+    {
+      "source": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+      "reason": "New candidate pairs remain after the configured convergence rounds.",
+      "remaining_pairs": [
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DISPLAY_BACKLIGHT_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DCDC1_3V3_REGULATION",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PANEL_POWER_CONTROL",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_CURRENT_PATH_CAPACITY",
+            "message_id": 892,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_NATIVE_USB_DATA",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ACTIVE_LOW_PANEL_INPUTS"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_NATIVE_USB_DATA"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_BOOT_RESET_CIRCUIT",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_LED_INDICATOR_BOARD",
+            "message_id": 281,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "REMOVE",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 843,
+            "event_type": "REMOVE",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_PRODUCTION_FILE_PACKAGE",
+            "message_id": 843,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_DCDC1_3V3_REGULATION"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_POWER_PATH"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_AXP_THERMAL_ASSEMBLY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_NATIVE_USB_DATA"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD"
+        },
+        {
+          "source_event_ref": {
+            "requirement_id": "REQ_DEVICE_ENCLOSURE",
+            "message_id": 860,
+            "event_type": "MODIFY",
+            "occurrence": 1
+          },
+          "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY"
+        }
+      ]
+    },
+    {
+      "source": "EVENT_VERIFICATION",
+      "requirement_id": "REQ_AXP_POWER_PATH",
+      "missing_event_candidate": {
+        "source_message": {
+          "message_id": 182,
+          "speaker": "freelancer",
+          "text": "Also, in the schematic for the LilyGo T-Display S3 that you mentioned as a reference design, those pins are connected"
+        },
+        "supporting_message_ids": [
+          180
+        ],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "VALUE",
+          "description": "The freelancer cites a reference design with VMID and VSYS connected, conflicting with the client's requirement that they remain separate nets."
+        },
+        "execution": null
+      }
+    },
+    {
+      "source": "EVENT_VERIFICATION",
+      "requirement_id": "REQ_AXP_POWER_PATH",
+      "missing_event_candidate": {
+        "source_message": {
+          "message_id": 754,
+          "speaker": "client",
+          "text": "But it must be battery efficient as aim will be to make battery work as long as possible."
+        },
+        "supporting_message_ids": [
+          753
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "battery_efficiency_goal": "maximize battery runtime"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "source": "EVENT_VERIFICATION",
+      "requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT",
+      "missing_event_candidate": {
+        "source_message": {
+          "message_id": 611,
+          "speaker": "client",
+          "text": "that&#39;s why it has 44, but actual module is 40"
+        },
+        "supporting_message_ids": [
+          609,
+          610
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "module_pin_count": 40
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null,
+        "evidence_message_ids": [
+          609,
+          610,
+          611
+        ],
+        "decision_note": "Before resuming the Requirement, the client establishes the selected module's actual pin count as 40.",
+        "confidence": "HIGH"
+      }
+    },
+    {
+      "source": "EVENT_VERIFICATION",
+      "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "missing_event_candidate": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [
+          844
+        ],
+        "event_type": "REMOVE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+    "message_id": 843,
+    "event_type": "REMOVE",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board decision does not supersede the immediately stated requirement that J_BAT remain on a short edge, and the candidate is already scoped to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already records the permitted connector-edge flexibility for the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already removes the obsolete interboard-connector sourceability strategy while preserving sourcing policies that remain applicable.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already replaces the three-board enclosure inventory with the integrated board, battery, sensors, buttons, and LEDs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already retains the operational removal fact and deletes the obsolete modular interboard topology, connector, and pinout attributes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The separate modular main board no longer exists, so the breakout requirement's current scope must drop that context while retaining its integrated-board and reusable-platform contexts.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "GENERIC_MCU_PLATFORM"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board architecture makes the condition 'USB-C connected without the power board' obsolete, but the source does not establish whether the standalone LDO and diode-OR behavior remain, are redesigned, or are removed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Current monitoring remains unresolved at the value level, but its current application can no longer be scoped to a separate modular main board after adoption of one integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "POWER_TELEMETRY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board design invalidates the current main-board and J_PWR_SIG routing details, but the source does not safely establish whether the panel power connector is retained and rerouted directly, redesigned, or removed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already converts the board role to integrated-board sensor connectors, removes obsolete main-board inputs and connector-count details, and updates the scope.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The one-board architecture eliminates the interboard-cable constraint and relocates the central pull-ups from the former modular main board to the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [
+          844
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "pull_up_location": "INTEGRATED_BOARD"
+        },
+        "value_removals": [
+          "interboard_cable_length"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "I2C_BUS",
+            "INTEGRATED_BOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_DATA",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "USB-C remains required by the immediately preceding integrated-board constraints, but its programming requirement can no longer be scoped to a separate modular main board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [
+          842
+        ],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "PROGRAMMING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

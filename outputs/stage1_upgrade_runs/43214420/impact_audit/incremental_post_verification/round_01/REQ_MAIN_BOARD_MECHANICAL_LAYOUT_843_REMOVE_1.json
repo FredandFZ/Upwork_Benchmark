@@ -1,0 +1,130 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT",
+    "message_id": 843,
+    "event_type": "REMOVE",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already captures the connector-placement flexibility established for the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_MODULE_AND_BREAKOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Removing the former main-board mechanical layout does not change the ESP32 module, full-pin breakout, pitch, or generic-platform requirement, which already includes the integrated-board context.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_PLACEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The immediately preceding client message retains the specific J_BAT short-edge constraint, so the general connector flexibility does not cancel or modify this requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The single-board architecture may obsolete references to the modular main and sensor boards, but the source does not resolve the existing uncertainty about INA versus AXP2101 monitoring or establish the integrated-board measurement topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "With only one integrated board, the condition of using main-board USB without the power board may be obsolete, but the source does not establish whether the separate LDO is removed or how standalone USB power should now operate.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already records removal of the modular interboard interface and deletes its obsolete connector, pinout, and topology attributes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICALS",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source makes the former interboard-cable basis obsolete, but sensors remain externally connected; it is unclear whether the 10–20 cm cable assumption and pull-up placement should be removed, renamed for sensor cabling, or retained.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The only-board decision moves the panel power-button connector onto the integrated board, and removal of the modular J_PWR_SIG interface requires the button to tap the AXP2101 PWRON signal directly.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "connector_board": "integrated board",
+          "signal_connection": "AXP2101 PWRON on the integrated board"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ENCLOSURE_CONTROLS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_GPIO_ASSIGNMENT_COMPATIBILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Board-layout consolidation does not change the confirmed ESP32-S3 GPIO assignments or compatibility constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the BOOT button, reset connection, or capacitor requirements; these functions remain valid without relying on the removed mechanical constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DEVICE_ENCLOSURE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already replaces the three-board enclosure inventory with one integrated board plus the battery, sensors, buttons, and LEDs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_DATA",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The mechanical-layout removal does not alter the USB-C programming and enumeration behavior, and the preceding constraints continue to require USB-C on the integrated board.",
+      "new_event": null
+    }
+  ]
+}

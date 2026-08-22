@@ -1,0 +1,51 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_DISPLAY_BACKLIGHT_CONTROL",
+    "message_id": 802,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The backlight circuit selects a 5V supply configuration and specifies its load, but it does not change the established AXP2101 battery, USB, VMID/VSYS, charging, or 3.3V power-path requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client explicitly defines which J_DISP_LED components and jumper options must be populated or left DNP for this build, so the assembly-ready BOM must reflect that configuration.",
+      "new_event": {
+        "source_message": {
+          "message_id": 802,
+          "speaker": "client",
+          "text": "Hi Dusko — quick context on J\\_DISP\\_LED:\n\nThe e-paper has no built-in light, so we're adding an external LED behind it as a backlight. I haven't picked the final LED yet (testing a 5V COB strip first, may switch to a 3.3V frontlight module later), so the circuit needs to cover both.\n\nPlease populate for this build:\n\\- BSS138 (low-side switch, GPIO42 PWM controls brightness)\n\\- 10kΩ gate resistor + 10kΩ gate pull-down (keeps LED off during boot)\n\\- 5V jumper on Pin 1 — leave the 3V3 jumper footprint empty\n\\- 4.7µF X5R 0603 cap from Pin 1 to GND (PWM ripple decoupling)\n\\- Series resistor footprint: leave DNP (LED strip self-limits)\n\\- No flyback diode — LED is resistive, not inductive\n\nWorst-case current is ~70mA (5W/m strip × 67mm cut), well inside BSS138's 200mA rating.\n\nThe 3V3 jumper + DNP series R footprint exist only as fallback for a future bare-LED option — costs nothing to leave them empty now.\n\nFull spec is in <http://pcb-integrated-v2.md|pcb-integrated-v2.md> under the J\\_DISP\\_LED rows / pinout / Critical Routing."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "j_disp_led_current_build_population": {
+            "bss138_low_side_switch": "populate",
+            "gate_resistor": "populate 10kΩ",
+            "gate_pull_down": "populate 10kΩ",
+            "pin_1_5v_jumper": "populate",
+            "pin_1_3v3_jumper": "leave footprint empty",
+            "decoupling_capacitor": "populate 4.7µF X5R 0603 from Pin 1 to GND",
+            "series_resistor": "DNP",
+            "flyback_diode": "not required"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

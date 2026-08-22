@@ -1,0 +1,130 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+    "message_id": 425,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The possible removal of the data-level shifter is tentative and is already represented by the candidate's same-message AMBIGUOUS Event; no confirmed MODIFY is entailed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Separate LED and sensor power control does not change the indicator board's role, LED count, or unresolved LED-part selection.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event records independent controls but leaves stale shared-rail and whole-rail shutdown semantics that conflict with the new control topology.",
+      "new_event": {
+        "source_message": {
+          "message_id": 425,
+          "speaker": "client",
+          "text": "I added separate control for led vs sensors so we might not need shifter"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "control_topology": "Separate power control for LEDs and sensors",
+          "sensor_rail_control": "Independent from LED power control"
+        },
+        "value_removals": [
+          "shared_rail_loads",
+          "shutdown_behavior"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "Separate LED and sensor control could require another enable signal or a connector change, but the source does not identify the control location, signal, or revised pinout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the sensor-board connector inventory, connector types, pinouts, or count.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The separate control concerns LED and 5V sensor power and does not alter the standalone USB 3.3V supply requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Independent load control does not necessarily change the requirement to monitor the 3.3V and 5V rails or the established monitoring channels.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED and sensor power-control architecture is unrelated to the BOOT and reset circuit.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the AXP2101 USB, battery, VMID, or VSYS power-path requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The electrical control-topology change does not entail any mechanical-layout modification.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SPS30_I2C_MODE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Separate sensor and LED power control does not change the SPS30 SEL-to-GND I2C mode selection.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ACTIVE_LOW_PANEL_INPUTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the panel controls, GPIO assignments, or connector mounting.",
+      "new_event": null
+    }
+  ]
+}

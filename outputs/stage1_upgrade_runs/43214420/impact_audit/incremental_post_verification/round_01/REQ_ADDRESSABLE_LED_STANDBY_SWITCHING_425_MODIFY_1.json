@@ -1,0 +1,140 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING",
+    "message_id": 425,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source only tentatively reopens whether the data-level shifter is needed, and the candidate already records that same-message uncertainty as an AMBIGUOUS Event; no confirmed value change is entailed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_INDICATOR_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Separate LED and sensor power control does not change the indicator board's role, LED count, or established LED-family attributes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_SENSOR_RAIL",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY establishes separate controls but leaves the LED listed as a sensor-rail load and retains LED scope; those shared-rail semantics are stale after the split.",
+      "new_event": {
+        "source_message": {
+          "message_id": 425,
+          "speaker": "client",
+          "text": "I added separate control for led vs sensors so we might not need shifter"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_loads": [
+            "SPS30 particulate sensor",
+            "ZE08-CH2O formaldehyde sensor"
+          ],
+          "control_topology": "Separate power control for LEDs and sensors",
+          "sensor_rail_control": "Independent from LED power control"
+        },
+        "value_removals": [
+          "shared_rail_loads",
+          "shutdown_behavior"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "SENSOR_POWER"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "Separate LED and sensor controls could require an additional interboard control signal, but the source does not identify where the controls are implemented or specify any connector or pinout change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_MODULE_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes power-control architecture but does not change the sensor board's input connectors, module connectors, pinouts, or connector count.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ASSEMBLY_READY_BOM",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "Omitting the level shifter would affect the BOM entry, but the client says only that it might not be needed and the nearby freelancer response indicates a contextual misunderstanding; removing the BOM attribute requires a confirmed decision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Separate control of LED and sensor power does not change the standalone USB 3.3V regulator, activation condition, source selection, or stated debugging load requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "Separating LED and sensor controls does not necessarily change the requirement to measure both 3.3V and 5V current; the source specifies no monitoring-channel or measurement-placement change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOOT_RESET_CIRCUIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED-versus-sensor power-control change is unrelated to the ESP32 BOOT button, reset connection, and pin capacitance requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the AXP2101 USB or battery input path, VMID/VSYS topology, or normal 3.3V supply source.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The electrical control split does not entail any change to board dimensions, mounting holes, USB-C placement, aspect ratio, or enclosure fit.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SPS30_I2C_MODE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Independent sensor and LED power control does not change the SPS30 SEL-to-GND connection used to select I2C mode.",
+      "new_event": null
+    }
+  ]
+}

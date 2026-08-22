@@ -1,0 +1,222 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_MODULAR_INTERBOARD_INTERFACE",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 89,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        88,
+        89
+      ],
+      "decision_note": "The client explicitly selects compact JST-GH connectors for interboard connections.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 100,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        98,
+        99,
+        100
+      ],
+      "decision_note": "The client changes the power connection to JST-PH while retaining JST-GH for signals.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 101,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        101
+      ],
+      "decision_note": "The client provides concrete power-to-main connector types and pinouts; the removed generic family key exists in prior state.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 139,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_to_main_power_connector": {
+            "designation": "J_PWR_POWER",
+            "type": "JST-PH 2.0mm",
+            "pin_count": 4,
+            "signals": [
+              "3V3",
+              "GND",
+              "5V",
+              "GND_5V_RETURN"
+            ],
+            "pin_order_constraint": "May be arranged to suit the layout, provided the matching main-board connector uses the same order"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        138,
+        139
+      ],
+      "decision_note": "The flexible ordering replaces the previously fixed ordered pinout; updating the connector object avoids retaining contradictory pin-order semantics.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 235,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        234,
+        235
+      ],
+      "decision_note": "Target-specific implementation claim identifying the realized physical pin-1 assignment for J_PWR_PWR.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 347,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_to_main_power_connector": {
+            "designation": "J_PWR_PWR",
+            "type": "JST-PH 2.0mm",
+            "pin_count": 4,
+            "signals": [
+              "3V3",
+              "GND",
+              "5V",
+              "GND_5V_RETURN"
+            ],
+            "pin_order_constraint": "May be arranged to suit the layout, provided the matching main-board connector uses the same order"
+          },
+          "board_power_topology": "power board → main board → sensor board",
+          "main_board_power_distribution": {
+            "input_connector": "J_PWR_PWR",
+            "local_use": true,
+            "sensor_board_output_connector": "J_SENSOR_PWR"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "MODULAR_POWER_BOARD",
+            "MODULAR_MAIN_BOARD",
+            "SENSOR_BOARD",
+            "INTERBOARD_CONNECTION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        347
+      ],
+      "decision_note": "The client establishes the chained power topology and uses J_PWR_PWR as the connector designation; replacing the connector object prevents a stale conflicting designation.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 371,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        369,
+        371
+      ],
+      "decision_note": "The client explicitly specifies the main-to-sensor power and signal input connectors and their pinouts.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "modular_interboard_interface_status": "removed by the integrated single-board design"
+        },
+        "value_removals": [
+          "connector_selection_reason",
+          "power_to_main_power_connector",
+          "power_to_main_signal_connector",
+          "board_power_topology",
+          "main_board_power_distribution",
+          "main_to_sensor_power_connector",
+          "main_to_sensor_signal_connector"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "INTERBOARD_CONNECTION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        843,
+        844
+      ],
+      "decision_note": "The single-board design makes the modular interboard details obsolete; power_connector_pin_order is excluded because the corrected earlier replay no longer creates that key.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 843,
+        "speaker": "client",
+        "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+      },
+      "supporting_message_ids": [
+        844
+      ],
+      "event_type": "REMOVE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ]
+}

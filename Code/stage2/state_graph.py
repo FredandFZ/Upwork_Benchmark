@@ -68,6 +68,7 @@ class _ReplayState:
     ambiguity: dict[str, Any] | None = None
     execution: dict[str, Any] | None = None
     attribute_sources: dict[str, str] = field(default_factory=dict)
+    attribute_removal_sources: dict[str, str] = field(default_factory=dict)
     scope_sources: dict[str, str] = field(default_factory=dict)
     lifecycle_source: str | None = None
     ambiguity_source: str | None = None
@@ -76,6 +77,7 @@ class _ReplayState:
     def supporting_event_ids(self, event_positions: dict[str, int]) -> list[str]:
         """Return only Events that still directly establish the current state."""
         sources = set(self.attribute_sources.values())
+        sources.update(self.attribute_removal_sources.values())
         sources.update(self.scope_sources.values())
         for source in (self.lifecycle_source, self.ambiguity_source, self.execution_source):
             if source is not None:
@@ -107,11 +109,26 @@ def _validate_event(event: Any, requirement_id: str, number: int) -> dict[str, A
         raise Stage2ReplayError(f"{event_id}.source_message.message_id is required")
 
     value_updates = event.get("value_updates")
+    value_removals = event.get("value_removals")
     scope_updates = event.get("scope_updates")
     ambiguity = event.get("ambiguity")
     execution = event.get("execution")
     if value_updates is not None and not isinstance(value_updates, dict):
         raise Stage2ReplayError(f"{event_id}.value_updates must be an object or null")
+    if value_removals is not None:
+        if not isinstance(value_removals, list) or not value_removals or any(
+            not isinstance(attribute, str) or not attribute for attribute in value_removals
+        ):
+            raise Stage2ReplayError(
+                f"{event_id}.value_removals must be a non-empty string array or null"
+            )
+        if len(value_removals) != len(set(value_removals)):
+            raise Stage2ReplayError(f"{event_id}.value_removals contains duplicates")
+        overlap = set(value_removals).intersection((value_updates or {}).keys())
+        if overlap:
+            raise Stage2ReplayError(
+                f"{event_id} updates and removes the same attribute: {', '.join(sorted(overlap))}"
+            )
     if scope_updates is not None:
         scope_updates = _require_object(scope_updates, f"{event_id}.scope_updates")
         unknown = set(scope_updates).difference(SCOPE_FIELDS)
@@ -120,20 +137,27 @@ def _validate_event(event: Any, requirement_id: str, number: int) -> dict[str, A
                 f"{event_id}.scope_updates has unsupported fields: {', '.join(sorted(unknown))}"
             )
 
-    if event_type in {"INTRODUCE", "MODIFY"}:
+    if event_type == "INTRODUCE":
+        if value_removals is not None:
+            raise Stage2ReplayError(f"{event_id} INTRODUCE cannot remove attributes")
         if value_updates is None and scope_updates is None:
             raise Stage2ReplayError(f"{event_id} must update value or scope")
         if ambiguity is not None or execution is not None:
             raise Stage2ReplayError(f"{event_id} has an invalid definition-event payload")
+    elif event_type == "MODIFY":
+        if value_updates is None and value_removals is None and scope_updates is None:
+            raise Stage2ReplayError(f"{event_id} must update/remove value or update scope")
+        if ambiguity is not None or execution is not None:
+            raise Stage2ReplayError(f"{event_id} has an invalid definition-event payload")
     elif event_type in {"DEFER", "RESUME", "REMOVE"}:
-        if any(item is not None for item in (value_updates, scope_updates, ambiguity, execution)):
+        if any(item is not None for item in (value_updates, value_removals, scope_updates, ambiguity, execution)):
             raise Stage2ReplayError(f"{event_id} lifecycle payload fields must be null")
     elif event_type == "AMBIGUOUS":
         ambiguity = _require_object(ambiguity, f"{event_id}.ambiguity")
         if ambiguity.get("dimension") not in AMBIGUITY_DIMENSIONS:
             raise Stage2ReplayError(f"{event_id} has an invalid ambiguity dimension")
         _non_empty_string(ambiguity.get("description"), f"{event_id}.ambiguity.description")
-        if value_updates is not None or scope_updates is not None or execution is not None:
+        if value_updates is not None or value_removals is not None or scope_updates is not None or execution is not None:
             raise Stage2ReplayError(f"{event_id} has an invalid ambiguity-event payload")
     else:
         execution = _require_object(execution, f"{event_id}.execution")
@@ -146,7 +170,7 @@ def _validate_event(event: Any, requirement_id: str, number: int) -> dict[str, A
             execution.get("observed_behavior"),
             f"{event_id}.execution.observed_behavior",
         )
-        if value_updates is not None or scope_updates is not None or ambiguity is not None:
+        if value_updates is not None or value_removals is not None or scope_updates is not None or ambiguity is not None:
             raise Stage2ReplayError(f"{event_id} has an invalid execution-event payload")
     return event
 
@@ -158,6 +182,7 @@ def _scope_has_update(scope_updates: dict[str, Any] | None) -> bool:
 def _modify_resolves_ambiguity(
     state: _ReplayState,
     value_updates: dict[str, Any] | None,
+    value_removals: list[str] | None,
     scope_updates: dict[str, Any] | None,
 ) -> bool:
     """Apply the guideline's dimension-aware ambiguity resolution rule."""
@@ -165,12 +190,12 @@ def _modify_resolves_ambiguity(
         return False
     dimension = state.ambiguity.get("dimension")
     if dimension == "VALUE":
-        return bool(value_updates)
+        return bool(value_updates) or bool(value_removals)
     if dimension == "SCOPE":
         return _scope_has_update(scope_updates)
     # A concrete change confirms that a lifecycle-ambiguous Requirement still
     # exists.  Explicit lifecycle decisions are handled by DEFER/RESUME/REMOVE.
-    return bool(value_updates) or _scope_has_update(scope_updates)
+    return bool(value_updates) or bool(value_removals) or _scope_has_update(scope_updates)
 
 
 def _apply_event(state: _ReplayState, event: dict[str, Any], has_previous_state: bool) -> None:
@@ -184,10 +209,20 @@ def _apply_event(state: _ReplayState, event: dict[str, Any], has_previous_state:
 
     if event_type in {"INTRODUCE", "MODIFY"}:
         value_updates = event.get("value_updates")
+        value_removals = event.get("value_removals")
         scope_updates = event.get("scope_updates")
+        for key in value_removals or []:
+            if key not in state.attributes:
+                raise Stage2ReplayError(
+                    f"{event_id}.value_removals references absent attribute {key!r}"
+                )
+            state.attributes.pop(key)
+            state.attribute_sources.pop(key, None)
+            state.attribute_removal_sources[key] = event_id
         for key, value in (value_updates or {}).items():
             state.attributes[key] = deepcopy(value)
             state.attribute_sources[key] = event_id
+            state.attribute_removal_sources.pop(key, None)
         for key in SCOPE_FIELDS:
             value = (scope_updates or {}).get(key)
             # In Stage 1, null means this Event did not modify that dimension.
@@ -202,7 +237,7 @@ def _apply_event(state: _ReplayState, event: dict[str, Any], has_previous_state:
             # evidence for the previous version must not be carried forward.
             state.execution = None
             state.execution_source = None
-            if _modify_resolves_ambiguity(state, value_updates, scope_updates):
+            if _modify_resolves_ambiguity(state, value_updates, value_removals, scope_updates):
                 state.ambiguity = None
                 state.ambiguity_source = None
         return
@@ -303,6 +338,7 @@ def _build_requirement_graph(
                 "event_id": event["event_id"],
                 "event_type": event["event_type"],
                 "source_message_id": event["source_message"]["message_id"],
+                "value_removals": deepcopy(event.get("value_removals")),
             }
         )
         previous_state_id = state_id
