@@ -1,0 +1,959 @@
+{
+  "benchmark": "ReqMemBench",
+  "annotation_version": "v0.6",
+  "project": {
+    "project_id": "44186585",
+    "project_title": "WordPress Developer - Site Speed Optimization",
+    "sessions": [
+      {
+        "session_id": "S1",
+        "start": "2026-07-28",
+        "end": "2026-07-29",
+        "milestone": null
+      },
+      {
+        "session_id": "S2",
+        "start": "2026-07-29",
+        "end": "2026-07-30",
+        "milestone": null
+      },
+      {
+        "session_id": "S3",
+        "start": "2026-07-30",
+        "end": "2026-07-31",
+        "milestone": null
+      }
+    ]
+  },
+  "requirement_families": [
+    {
+      "family_id": "SOUTH_POINTE_SECURITY_INCIDENT",
+      "title": "South Pointe Security Incident Response"
+    },
+    {
+      "family_id": "OAKBRIDGE_INCIDENT_RECOVERY",
+      "title": "Oak Bridge Incident Recovery"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_SP_VISUAL_FORMATTING_INTEGRITY",
+      "title": "South Pointe Visual Formatting Integrity",
+      "family_id": null,
+      "events": [
+        {
+          "event_id": "REQ_SP_VISUAL_FORMATTING_INTEGRITY_E001",
+          "source_message": {
+            "message_id": 28,
+            "speaker": "client",
+            "text": "I’m speaking with WP engine now. I hadn’t realized they attempted to troubleshoot this today, and it appears they altered the whole site. A lot of the fonts and formatting disappeared, particularly on the Legacy site."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "expected_visual_behavior": "Preserve the site's legitimate fonts and formatting during troubleshooting and optimization."
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "SOUTH_POINTE_LEGACY_SITE",
+              "SOUTH_POINTE_RIB"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_VISUAL_FORMATTING_INTEGRITY_E002",
+          "source_message": {
+            "message_id": 28,
+            "speaker": "client",
+            "text": "I’m speaking with WP engine now. I hadn’t realized they attempted to troubleshoot this today, and it appears they altered the whole site. A lot of the fonts and formatting disappeared, particularly on the Legacy site."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "WP Engine troubleshooting changes caused fonts and formatting to be lost across the site, especially on legacy pages."
+          }
+        },
+        {
+          "event_id": "REQ_SP_VISUAL_FORMATTING_INTEGRITY_E003",
+          "source_message": {
+            "message_id": 32,
+            "speaker": "client",
+            "text": "Okay, WP Engine has rolled it back."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "The client reports that WP Engine reverted the site changes associated with the formatting regression."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_SP_UNAUTHORIZED_ACCOUNT_REMOVAL",
+      "title": "South Pointe Unauthorized Account Removal",
+      "family_id": "SOUTH_POINTE_SECURITY_INCIDENT",
+      "events": [
+        {
+          "event_id": "REQ_SP_UNAUTHORIZED_ACCOUNT_REMOVAL_E001",
+          "source_message": {
+            "message_id": 51,
+            "speaker": "client",
+            "text": "No, although we can remove access for everyone."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "account_removal_policy": "remove all current WordPress users"
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "AUTH",
+              "BACKEND",
+              "DATABASE"
+            ],
+            "contexts": [
+              "SOUTH_POINTE_SECURITY_INCIDENT"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_UNAUTHORIZED_ACCOUNT_REMOVAL_E002",
+          "source_message": {
+            "message_id": 56,
+            "speaker": "client",
+            "text": "These addresses belong to me:\ncmiller@southpointeadvisors\n[EMAIL_002]\n[EMAIL_003]\n\nAll other users can be removed."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "authorized_accounts_to_retain": [
+              "cmiller@southpointeadvisors",
+              "cmiller@oakbridgeroyalites.com",
+              "chris.miller.r@gmail.com"
+            ],
+            "account_removal_policy": "remove every other WordPress user"
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_UNAUTHORIZED_ACCOUNT_REMOVAL_E003",
+          "source_message": {
+            "message_id": 106,
+            "speaker": "freelancer",
+            "text": "Hi [CLIENT_NAME_001], here is the complete rundown after spending a day investigating.\n\nThe problem went beyond the fake admin users we found last night. I also discovered a hidden admin account embedded in the database, with around 470 casino spam pages published through it. Code planted in one of your plugins was concealing everything and interfering with the site's caching, which explains why visitors were experiencing page-load times of 15+ seconds.\n\nThe cleanup is now complete. It took About 7 hours all in today:\n\\- Deleted the hidden admin account along with all ~470 spam pages\n\\- Replaced the compromised plugin with a clean official copy\n\\- Performed a fresh installation of WordPress itself\n\\- Coordinated with WP Engine to reset the site's credentials and keys, and requested a full platform-level malware scan as independent confirmation\n\\- Configured Wordfence as a security scanner so it will notify us if anything suspicious occurs again\n\nThe outcome is that pages load in under 2 seconds rather than 16. I'll continue watching the site for the next couple of days to verify that it remains clean.\n\nI need a few actions from you:\n1\\. The security reset signed everyone out of WordPress. Set a new password when you log back in, and ask every other admin to do likewise\n2\\. As an additional precaution, change your WP Engine password as well\n3\\. Grant me access to your Google Search Console so I can remove the spam pages from Google before they damage your rankings. Go to Settings &gt; Users and permissions &gt; Add user &gt; Full access and use this email: [EMAIL_004]\n4\\. Submit a quick test through the contact form and verify that its email arrives, confirming that your leads still flow correctly after these changes\n\nThe remaining items on my list are:\n\\- Complete the Search Console cleanup after access is granted\n\\- Update the outdated plugins, which are probably how the attackers originally gained access\n\\- Provide WP Engine's scan results once they are returned\n\nI'm happy to address any questions, and if you want one for your records, I can also provide a proper written report."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "A hidden administrator account was found buried in the South Pointe database in addition to the previously visible fake users."
+          }
+        },
+        {
+          "event_id": "REQ_SP_UNAUTHORIZED_ACCOUNT_REMOVAL_E004",
+          "source_message": {
+            "message_id": 106,
+            "speaker": "freelancer",
+            "text": "Hi [CLIENT_NAME_001], here is the complete rundown after spending a day investigating.\n\nThe problem went beyond the fake admin users we found last night. I also discovered a hidden admin account embedded in the database, with around 470 casino spam pages published through it. Code planted in one of your plugins was concealing everything and interfering with the site's caching, which explains why visitors were experiencing page-load times of 15+ seconds.\n\nThe cleanup is now complete. It took About 7 hours all in today:\n\\- Deleted the hidden admin account along with all ~470 spam pages\n\\- Replaced the compromised plugin with a clean official copy\n\\- Performed a fresh installation of WordPress itself\n\\- Coordinated with WP Engine to reset the site's credentials and keys, and requested a full platform-level malware scan as independent confirmation\n\\- Configured Wordfence as a security scanner so it will notify us if anything suspicious occurs again\n\nThe outcome is that pages load in under 2 seconds rather than 16. I'll continue watching the site for the next couple of days to verify that it remains clean.\n\nI need a few actions from you:\n1\\. The security reset signed everyone out of WordPress. Set a new password when you log back in, and ask every other admin to do likewise\n2\\. As an additional precaution, change your WP Engine password as well\n3\\. Grant me access to your Google Search Console so I can remove the spam pages from Google before they damage your rankings. Go to Settings &gt; Users and permissions &gt; Add user &gt; Full access and use this email: [EMAIL_004]\n4\\. Submit a quick test through the contact form and verify that its email arrives, confirming that your leads still flow correctly after these changes\n\nThe remaining items on my list are:\n\\- Complete the Search Console cleanup after access is granted\n\\- Update the outdated plugins, which are probably how the attackers originally gained access\n\\- Provide WP Engine's scan results once they are returned\n\nI'm happy to address any questions, and if you want one for your records, I can also provide a proper written report."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports that the hidden South Pointe administrator account was removed and the cleanup was complete."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_SP_MALICIOUS_CONTENT_REMOVAL",
+      "title": "South Pointe Malicious Content Removal",
+      "family_id": "SOUTH_POINTE_SECURITY_INCIDENT",
+      "events": [
+        {
+          "event_id": "REQ_SP_MALICIOUS_CONTENT_REMOVAL_E001",
+          "source_message": {
+            "message_id": 42,
+            "speaker": "freelancer",
+            "text": "The content is related to casinos and was published mostly in July."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "Casino-related content was present on South Pointe pages that the client confirmed they did not create."
+          }
+        },
+        {
+          "event_id": "REQ_SP_MALICIOUS_CONTENT_REMOVAL_E002",
+          "source_message": {
+            "message_id": 60,
+            "speaker": "client",
+            "text": "Yes."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "content_to_remove": "all posts made by quartz78011"
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "BACKEND",
+              "DATABASE"
+            ],
+            "contexts": [
+              "SOUTH_POINTE_SECURITY_INCIDENT"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_MALICIOUS_CONTENT_REMOVAL_E003",
+          "source_message": {
+            "message_id": 78,
+            "speaker": "freelancer",
+            "text": "Current status\n\\- Security scans are running at the moment\n\\- I manually deleted 476 posts and 2 pages\n\\- I revoked the permissions of the 2 offending users, but will retain those accounts until I've located all malicious contents\n\\- I am now tightening security in other areas of the site"
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports manually removing 476 malicious posts and two pages."
+          }
+        },
+        {
+          "event_id": "REQ_SP_MALICIOUS_CONTENT_REMOVAL_E004",
+          "source_message": {
+            "message_id": 127,
+            "speaker": "freelancer",
+            "text": "Apologies for replying late. I worked about 7 hours on the first day, followed by another 3 hours to complete the remaining cleanup and page optimization.\n\n**Additional updates:**\n**1) Search results:** The cleanup has been completed and approved.\n**2) WP Engine Support:** They replied and confirmed that all remaining traces were cleaned up, so we can be confident that the problem is behind us now.\n**3) Plugins:** Every plugin is now current, and all plugins regarded as high risk were either removed or disabled.\n**4) Post Tags:** I discovered and cleared some additional post tags that remained from the previous spam.\n5) **Autoptimize plugin** - For future reference, I added this for page speed adjustments.\n\n**Side notes:**\nOnce you’re satisfied, please remove my access to the site: WordPress, WP Engine, Search Console."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "Additional post tags from the earlier spam remained after the initial content cleanup."
+          }
+        },
+        {
+          "event_id": "REQ_SP_MALICIOUS_CONTENT_REMOVAL_E005",
+          "source_message": {
+            "message_id": 127,
+            "speaker": "freelancer",
+            "text": "Apologies for replying late. I worked about 7 hours on the first day, followed by another 3 hours to complete the remaining cleanup and page optimization.\n\n**Additional updates:**\n**1) Search results:** The cleanup has been completed and approved.\n**2) WP Engine Support:** They replied and confirmed that all remaining traces were cleaned up, so we can be confident that the problem is behind us now.\n**3) Plugins:** Every plugin is now current, and all plugins regarded as high risk were either removed or disabled.\n**4) Post Tags:** I discovered and cleared some additional post tags that remained from the previous spam.\n5) **Autoptimize plugin** - For future reference, I added this for page speed adjustments.\n\n**Side notes:**\nOnce you’re satisfied, please remove my access to the site: WordPress, WP Engine, Search Console."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports clearing the additional post tags left behind by the earlier spam."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_SP_MALWARE_REMOVAL",
+      "title": "South Pointe Malware and Backdoor Removal",
+      "family_id": "SOUTH_POINTE_SECURITY_INCIDENT",
+      "events": [
+        {
+          "event_id": "REQ_SP_MALWARE_REMOVAL_E001",
+          "source_message": {
+            "message_id": 83,
+            "speaker": "freelancer",
+            "text": "Yikes, I have some bad news. The site is definitely infected with malware. Several \"fake\" plugins were injected to create all these admin users, etc."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "The freelancer reports a confirmed malware infection involving injected fake plugins that created unauthorized administrator users."
+          }
+        },
+        {
+          "event_id": "REQ_SP_MALWARE_REMOVAL_E002",
+          "source_message": {
+            "message_id": 94,
+            "speaker": "client",
+            "text": "I can contact WP Engine regarding #1. I do have earlier versions, but I don't know when the malware first appeared. It seems that admin user has been there for quite some time."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "remediation_approach": "Contact WP Engine about its Malware Remediation option."
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_MALWARE_REMOVAL_E003",
+          "source_message": {
+            "message_id": 106,
+            "speaker": "freelancer",
+            "text": "Hi [CLIENT_NAME_001], here is the complete rundown after spending a day investigating.\n\nThe problem went beyond the fake admin users we found last night. I also discovered a hidden admin account embedded in the database, with around 470 casino spam pages published through it. Code planted in one of your plugins was concealing everything and interfering with the site's caching, which explains why visitors were experiencing page-load times of 15+ seconds.\n\nThe cleanup is now complete. It took About 7 hours all in today:\n\\- Deleted the hidden admin account along with all ~470 spam pages\n\\- Replaced the compromised plugin with a clean official copy\n\\- Performed a fresh installation of WordPress itself\n\\- Coordinated with WP Engine to reset the site's credentials and keys, and requested a full platform-level malware scan as independent confirmation\n\\- Configured Wordfence as a security scanner so it will notify us if anything suspicious occurs again\n\nThe outcome is that pages load in under 2 seconds rather than 16. I'll continue watching the site for the next couple of days to verify that it remains clean.\n\nI need a few actions from you:\n1\\. The security reset signed everyone out of WordPress. Set a new password when you log back in, and ask every other admin to do likewise\n2\\. As an additional precaution, change your WP Engine password as well\n3\\. Grant me access to your Google Search Console so I can remove the spam pages from Google before they damage your rankings. Go to Settings &gt; Users and permissions &gt; Add user &gt; Full access and use this email: [EMAIL_004]\n4\\. Submit a quick test through the contact form and verify that its email arrives, confirming that your leads still flow correctly after these changes\n\nThe remaining items on my list are:\n\\- Complete the Search Console cleanup after access is granted\n\\- Update the outdated plugins, which are probably how the attackers originally gained access\n\\- Provide WP Engine's scan results once they are returned\n\nI'm happy to address any questions, and if you want one for your records, I can also provide a proper written report."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "The freelancer reports that the malware was cleaned up, the tampered plugin was replaced with an official copy, and WordPress was reinstalled; independent platform-level confirmation was still pending."
+          }
+        },
+        {
+          "event_id": "REQ_SP_MALWARE_REMOVAL_E004",
+          "source_message": {
+            "message_id": 127,
+            "speaker": "freelancer",
+            "text": "Apologies for replying late. I worked about 7 hours on the first day, followed by another 3 hours to complete the remaining cleanup and page optimization.\n\n**Additional updates:**\n**1) Search results:** The cleanup has been completed and approved.\n**2) WP Engine Support:** They replied and confirmed that all remaining traces were cleaned up, so we can be confident that the problem is behind us now.\n**3) Plugins:** Every plugin is now current, and all plugins regarded as high risk were either removed or disabled.\n**4) Post Tags:** I discovered and cleared some additional post tags that remained from the previous spam.\n5) **Autoptimize plugin** - For future reference, I added this for page speed adjustments.\n\n**Side notes:**\nOnce you’re satisfied, please remove my access to the site: WordPress, WP Engine, Search Console."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "WP Engine support independently confirmed that the remaining malware traces had been cleaned up."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_SP_WORDFENCE_PROTECTION",
+      "title": "South Pointe Wordfence Protection",
+      "family_id": "SOUTH_POINTE_SECURITY_INCIDENT",
+      "events": [
+        {
+          "event_id": "REQ_SP_WORDFENCE_PROTECTION_E001",
+          "source_message": {
+            "message_id": 60,
+            "speaker": "client",
+            "text": "Yes."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "security_tool": "Wordfence",
+            "security_behavior": "scan the site's plugins and themes for potential inserted exploits"
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "SECURITY"
+            ],
+            "contexts": [
+              "SOUTH_POINTE_SECURITY_MONITORING"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_WORDFENCE_PROTECTION_E002",
+          "source_message": {
+            "message_id": 80,
+            "speaker": "freelancer",
+            "text": "\\- Media was unaffected\n\\- Comments were unaffected\n\\- Widgets were unaffected\n\\- The themes functions.php file was unaffected\n\n\\- The Wordfence plugin has been configured. It functions like an Antivirus scanner and will run to block any potential attacks.\n\\- XML-RPC has been disabled. If you use a third party app/site to manage WordPress, please tell me, because this needs to be enabled."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports that Wordfence is configured to scan the South Pointe site and block potential attacks."
+          }
+        },
+        {
+          "event_id": "REQ_SP_WORDFENCE_PROTECTION_E003",
+          "source_message": {
+            "message_id": 144,
+            "speaker": "freelancer",
+            "text": "On Southpoint, for instance, Wordfence is actively stopping these attacks."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "Wordfence on South Pointe is observed actively blocking ongoing automated attacks."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_SP_SEARCH_INDEX_CLEANUP",
+      "title": "South Pointe Search-Index Spam Cleanup",
+      "family_id": "SOUTH_POINTE_SECURITY_INCIDENT",
+      "events": [
+        {
+          "event_id": "REQ_SP_SEARCH_INDEX_CLEANUP_E001",
+          "source_message": {
+            "message_id": 107,
+            "speaker": "client",
+            "text": "Thank you for the update. I've sent the Google search console invite."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "cleanup_action": "Submit malicious South Pointe search-result URLs for removal from Google"
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "SEO"
+            ],
+            "contexts": [
+              "SOUTH_POINTE_SEARCH_RESULTS",
+              "SOUTH_POINTE_SECURITY_INCIDENT"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_SEARCH_INDEX_CLEANUP_E002",
+          "source_message": {
+            "message_id": 108,
+            "speaker": "freelancer",
+            "text": "Thanks, [CLIENT_NAME_001]. I've submitted removal requests for 17 of the offending links to keep your website's Search trust ratings from deteriorating. I'll let you know once they are approved."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports submitting 17 offending South Pointe links for removal and awaiting approval."
+          }
+        },
+        {
+          "event_id": "REQ_SP_SEARCH_INDEX_CLEANUP_E003",
+          "source_message": {
+            "message_id": 127,
+            "speaker": "freelancer",
+            "text": "Apologies for replying late. I worked about 7 hours on the first day, followed by another 3 hours to complete the remaining cleanup and page optimization.\n\n**Additional updates:**\n**1) Search results:** The cleanup has been completed and approved.\n**2) WP Engine Support:** They replied and confirmed that all remaining traces were cleaned up, so we can be confident that the problem is behind us now.\n**3) Plugins:** Every plugin is now current, and all plugins regarded as high risk were either removed or disabled.\n**4) Post Tags:** I discovered and cleared some additional post tags that remained from the previous spam.\n5) **Autoptimize plugin** - For future reference, I added this for page speed adjustments.\n\n**Side notes:**\nOnce you’re satisfied, please remove my access to the site: WordPress, WP Engine, Search Console."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "Freelancer reports that the South Pointe search-results cleanup is complete and the removal submissions have been approved."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_SP_CREDENTIAL_ROTATION",
+      "title": "South Pointe Compromised Credential Rotation",
+      "family_id": "SOUTH_POINTE_SECURITY_INCIDENT",
+      "events": [
+        {
+          "event_id": "REQ_SP_CREDENTIAL_ROTATION_E001",
+          "source_message": {
+            "message_id": 106,
+            "speaker": "freelancer",
+            "text": "Hi [CLIENT_NAME_001], here is the complete rundown after spending a day investigating.\n\nThe problem went beyond the fake admin users we found last night. I also discovered a hidden admin account embedded in the database, with around 470 casino spam pages published through it. Code planted in one of your plugins was concealing everything and interfering with the site's caching, which explains why visitors were experiencing page-load times of 15+ seconds.\n\nThe cleanup is now complete. It took About 7 hours all in today:\n\\- Deleted the hidden admin account along with all ~470 spam pages\n\\- Replaced the compromised plugin with a clean official copy\n\\- Performed a fresh installation of WordPress itself\n\\- Coordinated with WP Engine to reset the site's credentials and keys, and requested a full platform-level malware scan as independent confirmation\n\\- Configured Wordfence as a security scanner so it will notify us if anything suspicious occurs again\n\nThe outcome is that pages load in under 2 seconds rather than 16. I'll continue watching the site for the next couple of days to verify that it remains clean.\n\nI need a few actions from you:\n1\\. The security reset signed everyone out of WordPress. Set a new password when you log back in, and ask every other admin to do likewise\n2\\. As an additional precaution, change your WP Engine password as well\n3\\. Grant me access to your Google Search Console so I can remove the spam pages from Google before they damage your rankings. Go to Settings &gt; Users and permissions &gt; Add user &gt; Full access and use this email: [EMAIL_004]\n4\\. Submit a quick test through the contact form and verify that its email arrives, confirming that your leads still flow correctly after these changes\n\nThe remaining items on my list are:\n\\- Complete the Search Console cleanup after access is granted\n\\- Update the outdated plugins, which are probably how the attackers originally gained access\n\\- Provide WP Engine's scan results once they are returned\n\nI'm happy to address any questions, and if you want one for your records, I can also provide a proper written report."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports working with WP Engine to reset the site's credentials and security keys."
+          }
+        },
+        {
+          "event_id": "REQ_SP_CREDENTIAL_ROTATION_E002",
+          "source_message": {
+            "message_id": 111,
+            "speaker": "client",
+            "text": "I changed all password."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "credentials_to_rotate": [
+              "WP_ADMIN_PASSWORDS",
+              "WP_ENGINE_PASSWORD"
+            ],
+            "account_coverage": "each account"
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "AUTH",
+              "SECURITY"
+            ],
+            "contexts": [
+              "SOUTH_POINTE_SECURITY_INCIDENT"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_CREDENTIAL_ROTATION_E003",
+          "source_message": {
+            "message_id": 111,
+            "speaker": "client",
+            "text": "I changed all password."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "Client reports changing all requested WP Engine and WordPress administrator passwords."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_OAK_SITE_CONTENT_LAYOUT_RECOVERY",
+      "title": "Oak Bridge Site Content and Layout Recovery",
+      "family_id": "OAKBRIDGE_INCIDENT_RECOVERY",
+      "events": [
+        {
+          "event_id": "REQ_OAK_SITE_CONTENT_LAYOUT_RECOVERY_E001",
+          "source_message": {
+            "message_id": 129,
+            "speaker": "client",
+            "text": "Could you repair this site's theme? It appears to have taken down our pages."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "expected_behavior": "Restore the Oak Bridge theme and pages so the site content is available again."
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "OAKBRIDGE_SITE_RECOVERY"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_OAK_SITE_CONTENT_LAYOUT_RECOVERY_E002",
+          "source_message": {
+            "message_id": 129,
+            "speaker": "client",
+            "text": "Could you repair this site's theme? It appears to have taken down our pages."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "The client reports that the Oak Bridge site's pages are down."
+          }
+        },
+        {
+          "event_id": "REQ_OAK_SITE_CONTENT_LAYOUT_RECOVERY_E003",
+          "source_message": {
+            "message_id": 158,
+            "speaker": "freelancer",
+            "text": "Yes, it’s the same casino malware. On this website, it trashed all of your pages/posts and caused them to appear blank."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "The Oak Bridge pages and posts had been trashed by malware and appeared blank."
+          }
+        },
+        {
+          "event_id": "REQ_OAK_SITE_CONTENT_LAYOUT_RECOVERY_E004",
+          "source_message": {
+            "message_id": 163,
+            "speaker": "freelancer",
+            "text": "This one was exceptionally difficult.\n\n\\- I detected and removed 19 different hacking backdoors, which suggests the site was probably hacked by several parties\n\\- Every malware spam post arrived in May, while the earliest attack files were uploaded in April\n\\- Given the severity, restoring from an earlier backup is the best approach. However, the earliest version available on WP-Engine was created on June 24th, and it is infected too\n\\- The removal was completed, but I encountered some problems with the page and post status\n\nI’m going to make another fresh attempt."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "Page and post status remained problematic after the initial malware and backdoor removal attempt."
+          }
+        },
+        {
+          "event_id": "REQ_OAK_SITE_CONTENT_LAYOUT_RECOVERY_E005",
+          "source_message": {
+            "message_id": 166,
+            "speaker": "freelancer",
+            "text": "Sorry, I missed my previous follow-up.\n\n**Latest update.**\nThe database shows that every page was moved to Trash on July 1st. That is when the website stopped functioning entirely.\n\nWe have now restored the 28th June's backup, and the website appears normal again. I’m using this version for the malware removal work."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "After restoration to the June 28 backup, the Oak Bridge website appeared normal again."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_OAK_MALWARE_REMOVAL",
+      "title": "Oak Bridge Malware and Backdoor Removal",
+      "family_id": "OAKBRIDGE_INCIDENT_RECOVERY",
+      "events": [
+        {
+          "event_id": "REQ_OAK_MALWARE_REMOVAL_E001",
+          "source_message": {
+            "message_id": 140,
+            "speaker": "freelancer",
+            "text": "There is definitely malware within the infinite theme."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "Investigation confirmed malware in the Oak Bridge Infinite theme."
+          }
+        },
+        {
+          "event_id": "REQ_OAK_MALWARE_REMOVAL_E002",
+          "source_message": {
+            "message_id": 149,
+            "speaker": "client",
+            "text": "Yes"
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "required_behavior": "Remove the confirmed malware and active compromise from the Oak Bridge site."
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "BACKEND",
+              "DATABASE",
+              "STORAGE",
+              "SECURITY"
+            ],
+            "contexts": [
+              "OAKBRIDGE_SECURITY_INCIDENT"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_OAK_MALWARE_REMOVAL_E003",
+          "source_message": {
+            "message_id": 163,
+            "speaker": "freelancer",
+            "text": "This one was exceptionally difficult.\n\n\\- I detected and removed 19 different hacking backdoors, which suggests the site was probably hacked by several parties\n\\- Every malware spam post arrived in May, while the earliest attack files were uploaded in April\n\\- Given the severity, restoring from an earlier backup is the best approach. However, the earliest version available on WP-Engine was created on June 24th, and it is infected too\n\\- The removal was completed, but I encountered some problems with the page and post status\n\nI’m going to make another fresh attempt."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports detecting and removing 19 hacking backdoors and completing malware removal, while separately noting page and post status issues."
+          }
+        },
+        {
+          "event_id": "REQ_OAK_MALWARE_REMOVAL_E004",
+          "source_message": {
+            "message_id": 167,
+            "speaker": "freelancer",
+            "text": "Current status\n\\- the site layout has been completely restored\n\\- Wordfence security has been set up\n\\- malware was cleared from around 15 outdated plugins\n\\- every fake admin was removed\n\nPlease complete the following\n\\- the pages look fine, but I cannot confirm whether all the private pages are functioning correctly.\n\\- test every contact form\n\\- change your admin password\n\nWhat I still require\n\\- Search Console access for Oakbridge too, so I can handle the search engine cleanup\n\n\\-----\n\n**Overall report**\n\\- Every page on the website was deleted on July 1st\n\\- Most of the 6000 posts were injected on May 3rd\n\\- There are indications of earlier, smaller-scale attacks dating back as far as 2025."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "After restoring an earlier backup, the freelancer reports removing malware from around 15 outdated plugins."
+          }
+        },
+        {
+          "event_id": "REQ_OAK_MALWARE_REMOVAL_E005",
+          "source_message": {
+            "message_id": 174,
+            "speaker": "freelancer",
+            "text": "WP Engine's internal scan has also given the site a clean bill of health. I think we can wrap things up for this site as well."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "WP Engine's internal scan returned a clean bill of health for the Oak Bridge site after malware removal."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_OAK_UNAUTHORIZED_ACCOUNT_REMOVAL",
+      "title": "Oak Bridge Unauthorized Account Removal",
+      "family_id": "OAKBRIDGE_INCIDENT_RECOVERY",
+      "events": [
+        {
+          "event_id": "REQ_OAK_UNAUTHORIZED_ACCOUNT_REMOVAL_E001",
+          "source_message": {
+            "message_id": 146,
+            "speaker": "freelancer",
+            "text": "Yes, there are unquestionably some hidden users. This is quite similar to what happened on South Pointe.\n\nThe database contains 8 accounts, while only 7 are visible in Wp-admin."
+          },
+          "event_type": "RUNTIME_FAILURE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "The database contained eight accounts while only seven were visible in WordPress administration, revealing a hidden account."
+          }
+        },
+        {
+          "event_id": "REQ_OAK_UNAUTHORIZED_ACCOUNT_REMOVAL_E002",
+          "source_message": {
+            "message_id": 156,
+            "speaker": "client",
+            "text": "You can remove every user except cmiller@oakbridgeroyalties.com."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "retained_account": "cmiller@oakbridgeroyalties.com",
+            "account_removal_rule": "remove all other users"
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "AUTH",
+              "BACKEND",
+              "DATABASE"
+            ],
+            "contexts": [
+              "OAKBRIDGE_SECURITY_INCIDENT"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_OAK_UNAUTHORIZED_ACCOUNT_REMOVAL_E003",
+          "source_message": {
+            "message_id": 167,
+            "speaker": "freelancer",
+            "text": "Current status\n\\- the site layout has been completely restored\n\\- Wordfence security has been set up\n\\- malware was cleared from around 15 outdated plugins\n\\- every fake admin was removed\n\nPlease complete the following\n\\- the pages look fine, but I cannot confirm whether all the private pages are functioning correctly.\n\\- test every contact form\n\\- change your admin password\n\nWhat I still require\n\\- Search Console access for Oakbridge too, so I can handle the search engine cleanup\n\n\\-----\n\n**Overall report**\n\\- Every page on the website was deleted on July 1st\n\\- Most of the 6000 posts were injected on May 3rd\n\\- There are indications of earlier, smaller-scale attacks dating back as far as 2025."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "The freelancer reports that all fake Oak Bridge administrator accounts were removed."
+          }
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_SP_PAGE_LOAD_PERFORMANCE",
+      "title": "South Pointe Legacy Page-Load Performance",
+      "family_id": null,
+      "events": [
+        {
+          "event_id": "REQ_SP_PAGE_LOAD_PERFORMANCE_E001",
+          "source_message": {
+            "message_id": 19,
+            "speaker": "client",
+            "text": "Please review both. RIB is the new version being tested."
+          },
+          "event_type": "INTRODUCE",
+          "value_updates": {
+            "expected_behavior": "Address the page-speed issue on the original South Pointe site."
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "BACKEND"
+            ],
+            "contexts": [
+              "SOUTH_POINTE_LEGACY_SITE"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SP_PAGE_LOAD_PERFORMANCE_E002",
+          "source_message": {
+            "message_id": 99,
+            "speaker": "freelancer",
+            "text": "I've disabled 4 infected plugins and deleted one of the replication files. The site's speed seems to be back to normal."
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports disabling four infected plugins and removing a replicator file, with site speed appearing restored to normal."
+          }
+        },
+        {
+          "event_id": "REQ_SP_PAGE_LOAD_PERFORMANCE_E003",
+          "source_message": {
+            "message_id": 101,
+            "speaker": "client",
+            "text": "Yes, looks good."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "After being asked to try the site following the speed restoration, the client reports that it looks good."
+          }
+        },
+        {
+          "event_id": "REQ_SP_PAGE_LOAD_PERFORMANCE_E004",
+          "source_message": {
+            "message_id": 106,
+            "speaker": "freelancer",
+            "text": "Hi [CLIENT_NAME_001], here is the complete rundown after spending a day investigating.\n\nThe problem went beyond the fake admin users we found last night. I also discovered a hidden admin account embedded in the database, with around 470 casino spam pages published through it. Code planted in one of your plugins was concealing everything and interfering with the site's caching, which explains why visitors were experiencing page-load times of 15+ seconds.\n\nThe cleanup is now complete. It took About 7 hours all in today:\n\\- Deleted the hidden admin account along with all ~470 spam pages\n\\- Replaced the compromised plugin with a clean official copy\n\\- Performed a fresh installation of WordPress itself\n\\- Coordinated with WP Engine to reset the site's credentials and keys, and requested a full platform-level malware scan as independent confirmation\n\\- Configured Wordfence as a security scanner so it will notify us if anything suspicious occurs again\n\nThe outcome is that pages load in under 2 seconds rather than 16. I'll continue watching the site for the next couple of days to verify that it remains clean.\n\nI need a few actions from you:\n1\\. The security reset signed everyone out of WordPress. Set a new password when you log back in, and ask every other admin to do likewise\n2\\. As an additional precaution, change your WP Engine password as well\n3\\. Grant me access to your Google Search Console so I can remove the spam pages from Google before they damage your rankings. Go to Settings &gt; Users and permissions &gt; Add user &gt; Full access and use this email: [EMAIL_004]\n4\\. Submit a quick test through the contact form and verify that its email arrives, confirming that your leads still flow correctly after these changes\n\nThe remaining items on my list are:\n\\- Complete the Search Console cleanup after access is granted\n\\- Update the outdated plugins, which are probably how the attackers originally gained access\n\\- Provide WP Engine's scan results once they are returned\n\nI'm happy to address any questions, and if you want one for your records, I can also provide a proper written report."
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "Freelancer reports measured visitor page loads improving from approximately 16 seconds to under 2 seconds after cleanup."
+          }
+        },
+        {
+          "event_id": "REQ_SP_PAGE_LOAD_PERFORMANCE_E005",
+          "source_message": {
+            "message_id": 121,
+            "speaker": "freelancer",
+            "text": "**For the malware**\nThank you. They now appear on my side as well. I’m still attempting to download the ([PHONE_001]) Jun 29th preinfection version of the site, and I’ve just submitted another request.\n\n**For speed optimization**\nI’ve configured the required optimizations. We’ve made solid progress on the Desktop side, averaging 90. The Mobile score is still 63—the attached Before and After shows this—and it continues to be penalized by these issues:\n\\- too many fonts are queued, with 4 different fonts loading on this site; this is a design issue\n\\- Stape Conversion Tracking has a random site configured as the \"Container URL.\" Was this intentional? [URL_007]\n\n[URL_008]"
+          },
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports setting up the necessary speed optimizations, with an average desktop performance score of 90 and a mobile score of 63."
+          }
+        },
+        {
+          "event_id": "REQ_SP_PAGE_LOAD_PERFORMANCE_E006",
+          "source_message": {
+            "message_id": 122,
+            "speaker": "freelancer",
+            "text": "The site now loads at a good speed on both mobile and desktop for largest content paint. It is already functioning correctly in every respect, although certain items are lowering the scores.\n\nIf you want to pursue a higher score, we can continue working together and discuss removing unused plugins, identifying fonts that can be converted, and, most importantly, addressing the GTM and pixels setup currently configured through multiple plugins.\n\nPlease let me know what you think. Thanks [CLIENT_NAME_001]"
+          },
+          "event_type": "RUNTIME_VERIFICATION",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "Freelancer reports good Largest Contentful Paint loading speed on both mobile and desktop after the speed optimizations."
+          }
+        }
+      ]
+    }
+  ]
+}
