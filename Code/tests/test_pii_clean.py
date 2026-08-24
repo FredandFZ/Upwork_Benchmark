@@ -120,6 +120,38 @@ class PiiReplacementTests(unittest.TestCase):
         cleaner = DeterministicPiiCleaner([message])
         self.assertEqual(cleaner.sanitize_message(message), message["text"])
 
+    def test_reintroduction_check_is_scoped_to_the_source_message(self):
+        cleaner = DeterministicPiiCleaner([])
+        cleaner.registry.token("ACCOUNT", "active")
+        cleaner.assert_no_known_pii("The task is active.", source_text="Please review the task.", message_id=2)
+        with self.assertRaisesRegex(ValueError, "category=ACCOUNT"):
+            cleaner.assert_no_known_pii("The account is active.", source_text="account: active", message_id=1)
+
+    def test_natural_login_phrase_is_not_treated_as_a_short_account(self):
+        natural = {"message_id": 1, "speaker": "client", "text": "The login is to be enabled tomorrow."}
+        explicit = {"message_id": 2, "speaker": "client", "text": "login: ab"}
+        cleaner = DeterministicPiiCleaner([natural, explicit])
+
+        self.assertEqual(cleaner.sanitize_message(natural), natural["text"])
+        self.assertEqual(cleaner.sanitize_message(explicit), "login: [ACCOUNT_001]")
+
+    def test_known_password_is_replaced_when_reused_inside_a_later_message(self):
+        messages = [
+            {"message_id": 1, "speaker": "client", "text": "A9verySecretKey"},
+            {
+                "message_id": 2,
+                "speaker": "client",
+                "text": "Use A9verySecretKey for the staging login and then confirm access.",
+            },
+        ]
+        cleaner = DeterministicPiiCleaner(messages)
+
+        self.assertEqual(cleaner.sanitize_message(messages[0]), "[PASSWORD_001]")
+        self.assertEqual(
+            cleaner.sanitize_message(messages[1]),
+            "Use [PASSWORD_001] for the staging login and then confirm access.",
+        )
+
 
 class RewriteValidationTests(unittest.TestCase):
     def test_requires_placeholders_and_numbers_to_remain_exact(self):
@@ -139,24 +171,56 @@ class RewriteValidationTests(unittest.TestCase):
                 }
             ]
         }
-        result = validate_rewrite_response(valid, inputs, cleaner)
+        result = validate_rewrite_response(valid, inputs)
         self.assertIn("7", result)
 
         invalid = copy.deepcopy(valid)
         invalid["rewrites"][0]["text"] = invalid["rewrites"][0]["text"].replace("$25", "$30")
         with self.assertRaisesRegex(ValueError, "numbers"):
-            validate_rewrite_response(invalid, inputs, cleaner)
+            validate_rewrite_response(invalid, inputs)
+
+    def test_allows_pii_during_phase_one_rewrite(self):
+        inputs = [
+            {
+                "message_id": 8,
+                "speaker": "client",
+                "text": "Please email Alice at alice@example.com before tomorrow.",
+            }
+        ]
+        result = validate_rewrite_response(
+            {
+                "rewrites": [
+                    {
+                        "message_id": 8,
+                        "text": "Before tomorrow, please contact Alice via alice@example.com.",
+                    }
+                ]
+            },
+            inputs,
+        )
+        self.assertIn("alice@example.com", result["8"])
+
+    def test_phase_two_scans_the_rewritten_message(self):
+        rewritten = {
+            "message_id": 9,
+            "speaker": "client",
+            "text": "Before tomorrow, contact Alice through alice@example.com and https://private.example.",
+        }
+        cleaner = DeterministicPiiCleaner([rewritten])
+        sanitized = cleaner.sanitize_message(rewritten)
+        cleaner.assert_no_known_pii(sanitized, source_text=rewritten["text"], message_id=9)
+        self.assertIn("[EMAIL_001]", sanitized)
+        self.assertIn("[URL_001]", sanitized)
+        self.assertNotIn("alice@example.com", sanitized)
 
     def test_rejects_unchanged_long_message(self):
         inputs = [
             {"message_id": "m1", "speaker": "client", "text": "Please provide the complete revised document tomorrow."}
         ]
-        cleaner = DeterministicPiiCleaner(inputs)
         with self.assertRaisesRegex(ValueError, "unchanged"):
             validate_rewrite_response(
                 {"rewrites": [{"message_id": "m1", "text": inputs[0]["text"]}]},
                 inputs,
-                cleaner,
             )
 
     def test_batch_limits(self):

@@ -78,6 +78,7 @@ class Stage1ApiClient:
         messages: list[dict[str, str]],
         target_requirement: str | None = None,
         validator: Callable[[dict[str, Any]], None] | None = None,
+        failed_response_redactor: Callable[[str], str] | None = None,
     ) -> dict[str, Any]:
         last_error: Exception | None = None
         raw_content = ""
@@ -132,6 +133,16 @@ class Stage1ApiClient:
             except (_RetryableError, httpx.HTTPError, json.JSONDecodeError, ValueError, ApiError) as exc:
                 last_error = exc
                 error_text = f"{type(exc).__name__}: {exc}" if str(exc) else type(exc).__name__
+                if failed_response_redactor is not None:
+                    # Some callers intentionally submit sensitive source text to
+                    # the model.  Keep diagnostic artifacts useful without
+                    # retaining a model response that could contain that text.
+                    try:
+                        raw_content = failed_response_redactor(raw_content)
+                        error_text = failed_response_redactor(error_text)
+                    except Exception:
+                        raw_content = "[REDACTED: failed-response redaction unavailable]"
+                        error_text = "[REDACTED: failure details unavailable]"
                 await self._save_failed_response(
                     project_id, run_mode, target_requirement, attempt, raw_content, error_text
                 )

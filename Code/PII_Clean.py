@@ -20,7 +20,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
 import httpx
 
@@ -36,7 +36,7 @@ except ModuleNotFoundError:  # ``python -m Code.PII_Clean`` and unit tests
     from Code.stage1.validation import validate_stage1_annotation
 
 
-CLEANING_VERSION = "1.0"
+CLEANING_VERSION = "2.0"
 RUN_MODE = "PII_CLEAN_REWRITE"
 PLACEHOLDER_RE = re.compile(
     r"\[(?:EMAIL|URL|ACCOUNT|PASSWORD|PHONE|HANDLE|SENDER_ID|CLIENT_NAME|FREELANCER_NAME|PERSON_NAME)_\d{3,}\]"
@@ -115,20 +115,38 @@ NON_NAME_WORDS = {
     "you",
 }
 NON_CREDENTIAL_VALUES = {
+    "an",
     "above",
+    "as",
+    "at",
     "attached",
+    "be",
     "below",
+    "by",
     "credentials",
     "details",
     "disabled",
     "enabled",
+    "if",
+    "in",
+    "it",
+    "my",
     "needed",
+    "no",
+    "not",
+    "of",
+    "on",
+    "or",
     "possible",
     "ready",
     "required",
     "same",
     "temporary",
+    "the",
+    "to",
     "unchanged",
+    "up",
+    "we",
     "working",
 }
 SHORT_ACKNOWLEDGEMENTS = re.compile(
@@ -138,7 +156,11 @@ SHORT_ACKNOWLEDGEMENTS = re.compile(
     re.IGNORECASE,
 )
 
-SYSTEM_PROMPT = """You rewrite already de-identified workplace chat messages.
+SYSTEM_PROMPT = """You are phase 1 of a two-phase workplace-chat cleaning pipeline.
+
+The input may contain personally identifiable information (PII). A local phase 2
+will deterministically replace PII after your rewrite. Do not perform PII
+redaction in this phase.
 
 Return JSON only, with exactly this shape:
 {"rewrites": [{"message_id": <same JSON value and type>, "text": "<rewritten text>"}]}
@@ -149,13 +171,17 @@ Rules:
 3. Preserve the complete meaning needed for downstream requirement/event annotation: speaker intent, request/acceptance/rejection, negation, uncertainty, modality, conditions, status, scope, chronology, and every factual detail.
 4. Preserve every number, amount, date, version, filename, technical identifier, and bracketed placeholder exactly. Do not translate placeholders or change their count.
 5. Keep the original language and roughly the original level of formality. Do not add facts, promises, conclusions, or explanations.
-6. The input has already been de-identified. Never reconstruct, guess, or invent names, email addresses, URLs, accounts, passwords, phone numbers, or handles.
+6. Preserve every existing proper name, email address, URL, account, password, phone number, and handle exactly as written. Do not redact, normalize, omit, move to another message, reconstruct, guess, or invent any PII.
 7. Each returned text must differ from its input text while remaining semantically equivalent.
 """
 
 
 class PiiCleanError(RuntimeError):
     """Raised when a project cannot be cleaned without violating invariants."""
+
+
+class PiiLeakError(ValueError):
+    """A model response contains a sensitive value from the same input message."""
 
 
 @dataclass(frozen=True)
@@ -207,6 +233,11 @@ class PlaceholderRegistry:
         for values in self._raw_values.values():
             yield from values
 
+    def sensitive_entries(self) -> Iterable[tuple[str, str]]:
+        for category, values in self._raw_values.items():
+            for value in values:
+                yield category, value
+
 
 class DeterministicPiiCleaner:
     """Detect and replace PII consistently within one project."""
@@ -227,6 +258,7 @@ class DeterministicPiiCleaner:
                     self.registry.token("SENDER_ID", value)
         self._discover_names(messages)
         self._discover_standalone_credentials(messages)
+        self._discover_inline_credentials(messages)
 
     def _add_name(self, raw_name: str, category: str, *, require_title_case: bool = False) -> None:
         cleaned = raw_name.strip(" \t\r\n,.!?:;\"'()[]{}")
@@ -318,6 +350,17 @@ class DeterministicPiiCleaner:
         self.registry.token(category, value)
         self._standalone_credentials.setdefault(message_key, []).append((category, value))
 
+    def _discover_inline_credentials(self, messages: Sequence[dict[str, Any]]) -> None:
+        """Register explicit credentials before any message is sanitized.
+
+        Pre-registration lets the same credential be replaced when it is reused
+        later in a sentence without another ``password:``/``login:`` prefix.
+        """
+        for message in messages:
+            text = str(message.get("text") or "")
+            for match in INLINE_CREDENTIAL_RE.finditer(text):
+                self._replace_inline_credential(match)
+
     @staticmethod
     def _looks_like_login_context(text: str) -> bool:
         lowered = text.casefold()
@@ -361,6 +404,7 @@ class DeterministicPiiCleaner:
         text = URL_RE.sub(self._replace_url, text)
         text = PHONE_RE.sub(self._replace_phone, text)
         text = HANDLE_RE.sub(lambda match: self.registry.token("HANDLE", match.group(0)), text)
+        text = self._replace_known_credentials(text)
         text = INLINE_CREDENTIAL_RE.sub(self._replace_inline_credential, text)
 
         for sender_id in self._sender_ids:
@@ -381,6 +425,31 @@ class DeterministicPiiCleaner:
                 continue
             text = re.sub(
                 rf"(?<!\w){re.escape(raw_name)}(?!\w)",
+                lambda _match, replacement=token: replacement,
+                text,
+                flags=re.IGNORECASE,
+            )
+        return text
+
+    def _replace_known_credentials(self, text: str) -> str:
+        for category, raw_value in sorted(
+            (
+                (category, raw_value)
+                for category, raw_value in self.registry.sensitive_entries()
+                if category in {"ACCOUNT", "PASSWORD"}
+            ),
+            key=lambda item: len(item[1]),
+            reverse=True,
+        ):
+            token = self.registry.existing_token(category, raw_value)
+            if token is None:
+                continue
+            if category == "PASSWORD":
+                pattern = re.escape(raw_value)
+            else:
+                pattern = rf"(?<!\w){re.escape(raw_value)}(?!\w)"
+            text = re.sub(
+                pattern,
                 lambda _match, replacement=token: replacement,
                 text,
                 flags=re.IGNORECASE,
@@ -408,17 +477,36 @@ class DeterministicPiiCleaner:
             return match.group(0)
         lowered_prefix = prefix.casefold()
         category = "PASSWORD" if any(word in lowered_prefix for word in ("password", "passcode", "pwd")) else "ACCOUNT"
+        explicit_separator = ":" in prefix or "=" in prefix
+        if category == "ACCOUNT" and not explicit_separator and value.isalpha() and len(value) <= 2:
+            # Natural-language phrases such as "login is to ..." are not credentials.
+            # Explicit forms such as "login: ab" remain protected.
+            return match.group(0)
         return prefix + self.registry.token(category, value)
 
-    def assert_no_known_pii(self, text: str) -> None:
-        for raw_value in self.registry.sensitive_values():
+    def assert_no_known_pii(self, text: str, *, source_text: str | None = None, message_id: Any = None) -> None:
+        """Reject a reintroduced PII value without exposing that value in logs.
+
+        ``source_text`` scopes the check to one message. This avoids treating a
+        normal word in message B as a leak merely because the same word happened
+        to be an account/name in a different message A.
+        """
+        for category, raw_value in self.registry.sensitive_entries():
             candidate = raw_value.strip()
             if len(candidate) < 2:
                 continue
-            if re.search(rf"(?<!\w){re.escape(candidate)}(?!\w)", text, flags=re.IGNORECASE):
-                raise ValueError("LLM output reintroduced a known sensitive value")
+            pattern = rf"(?<!\w){re.escape(candidate)}(?!\w)"
+            if source_text is not None and not re.search(pattern, source_text, flags=re.IGNORECASE):
+                continue
+            if re.search(pattern, text, flags=re.IGNORECASE):
+                fingerprint = sha256_text(f"{category}:{candidate}")[:12]
+                location = f" for message_id {message_id!r}" if message_id is not None else ""
+                raise PiiLeakError(
+                    f"PII reintroduced{location}: category={category}, fingerprint={fingerprint}"
+                )
         if EMAIL_RE.search(text) or ANGLE_URL_RE.search(text) or URL_RE.search(text):
-            raise ValueError("LLM output contains an unmasked email address or URL")
+            location = f" for message_id {message_id!r}" if message_id is not None else ""
+            raise PiiLeakError(f"PII reintroduced{location}: category=EMAIL_OR_URL")
 
 
 def repo_root() -> Path:
@@ -433,7 +521,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--source-root",
         type=Path,
-        default=root / "outputs" / "stage1_upgrade_runs",
+        default=root / "outputs" / "stage1_runs",
         help="Directory containing <project_id>/normalized_project.json and final annotations.",
     )
     parser.add_argument(
@@ -564,7 +652,6 @@ def protected_literals(text: str) -> Counter[str]:
 def validate_rewrite_response(
     payload: dict[str, Any],
     inputs: Sequence[dict[str, Any]],
-    pii_cleaner: DeterministicPiiCleaner,
 ) -> dict[str, str]:
     rewrites = payload.get("rewrites")
     if not isinstance(rewrites, list):
@@ -585,13 +672,10 @@ def validate_rewrite_response(
         input_text = str(expected[key]["text"])
         if output_text.strip() == input_text.strip():
             raise ValueError(f"Rewrite for {item.get('message_id')!r} is unchanged")
-        if Counter(PLACEHOLDER_RE.findall(output_text)) != Counter(PLACEHOLDER_RE.findall(input_text)):
-            raise ValueError(f"Rewrite for {item.get('message_id')!r} changed PII placeholders")
         if protected_numbers(output_text) != protected_numbers(input_text):
             raise ValueError(f"Rewrite for {item.get('message_id')!r} changed numbers, dates, or amounts")
         if protected_literals(output_text) != protected_literals(input_text):
             raise ValueError(f"Rewrite for {item.get('message_id')!r} changed versions, filenames, or identifiers")
-        pii_cleaner.assert_no_known_pii(output_text)
         actual[key] = output_text
     if set(actual) != set(expected):
         missing = set(expected).difference(actual)
@@ -627,10 +711,10 @@ async def rewrite_batch(
     project_id: str,
     batch_number: int,
     batch: Sequence[dict[str, Any]],
-    pii_cleaner: DeterministicPiiCleaner,
+    failed_response_redactor: Callable[[str], str],
 ) -> dict[str, str]:
     def validator(payload: dict[str, Any]) -> None:
-        validate_rewrite_response(payload, batch, pii_cleaner)
+        validate_rewrite_response(payload, batch)
 
     payload = await api.call(
         project_id=project_id,
@@ -638,15 +722,16 @@ async def rewrite_batch(
         target_requirement=f"batch_{batch_number:04d}",
         messages=rewrite_request_messages(batch),
         validator=validator,
+        failed_response_redactor=failed_response_redactor,
     )
-    return validate_rewrite_response(payload, batch, pii_cleaner)
+    return validate_rewrite_response(payload, batch)
 
 
 def source_signature(normalized: dict[str, Any]) -> str:
     return sha256_text(json.dumps(normalized, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
 
 
-def checkpoint_signature(source_sha256: str, config: CleanConfig) -> dict[str, Any]:
+def run_signature(source_sha256: str, config: CleanConfig) -> dict[str, Any]:
     return {
         "cleaning_version": CLEANING_VERSION,
         "source_sha256": source_sha256,
@@ -658,37 +743,6 @@ def checkpoint_signature(source_sha256: str, config: CleanConfig) -> dict[str, A
         ),
         "prompt_sha256": sha256_text(SYSTEM_PROMPT),
     }
-
-
-def load_checkpoint(path: Path, signature: dict[str, Any], resume: bool) -> dict[str, str]:
-    if not resume or not path.is_file():
-        return {}
-    value = read_json(path)
-    if not isinstance(value, dict) or value.get("signature") != signature:
-        raise PiiCleanError(f"Incompatible checkpoint: {path}; use --no-resume to replace it")
-    rows = value.get("rewrites")
-    if not isinstance(rows, list):
-        raise PiiCleanError(f"Invalid checkpoint rewrites: {path}")
-    completed: dict[str, str] = {}
-    for row in rows:
-        if not isinstance(row, dict) or not isinstance(row.get("text"), str):
-            raise PiiCleanError(f"Invalid checkpoint row: {path}")
-        completed[id_key(row.get("message_id"))] = row["text"]
-    return completed
-
-
-def write_checkpoint(
-    path: Path,
-    signature: dict[str, Any],
-    message_by_key: dict[str, dict[str, Any]],
-    rewrites: dict[str, str],
-) -> None:
-    rows = [
-        {"message_id": message_by_key[key]["message_id"], "text": rewrites[key]}
-        for key in message_by_key
-        if key in rewrites
-    ]
-    write_json(path, {"signature": signature, "rewrites": rows})
 
 
 def apply_message_texts(
@@ -782,71 +836,76 @@ async def clean_project(
     messages = validate_normalized_messages(original_normalized, project.project_id)
     validate_stage1_annotation(original_annotation, original_normalized)
     source_sha256 = source_signature(original_normalized)
-    signature = checkpoint_signature(source_sha256, config)
+    signature = run_signature(source_sha256, config)
 
     project_output = config.output_root / project.project_id
     normalized_output = project_output / "normalized_project.json"
     annotation_output = project_output / "final" / f"{project.project_id}_stage1_annotation.json"
     public_annotation_output = config.annotation_output_dir / f"{project.project_id}_stage1_annotation.json"
-    checkpoint_path = project_output / "rewrite_checkpoint.json"
     manifest_path = project_output / "pii_clean_manifest.json"
 
-    if not config.overwrite and output_is_current(
+    if config.resume and not config.overwrite and output_is_current(
         manifest_path, normalized_output, annotation_output, signature
     ):
         print(f"[{project.project_id}] already clean; skipped", flush=True)
         return {"project_id": project.project_id, "status": "SKIPPED"}
 
-    pii_cleaner = DeterministicPiiCleaner(messages, config.extra_names)
-    sanitized_by_key: dict[str, str] = {}
-    message_by_key: dict[str, dict[str, Any]] = {}
+    # Phase 1 intentionally works from the original message text.  Its raw
+    # responses are never persisted: a failed batch starts over on rerun.
+    rewritten_by_key: dict[str, str] = {}
     rewrite_candidates: list[dict[str, Any]] = []
-    pii_changed = 0
     short_preserved = 0
     for message in messages:
         key = id_key(message["message_id"])
-        sanitized = pii_cleaner.sanitize_message(message)
-        pii_cleaner.assert_no_known_pii(sanitized)
-        sanitized_by_key[key] = sanitized
-        message_by_key[key] = message
-        if sanitized != message["text"]:
-            pii_changed += 1
-        if should_rewrite(sanitized, config.short_message_max_words):
+        rewritten_by_key[key] = message["text"]
+        if should_rewrite(message["text"], config.short_message_max_words):
             rewrite_candidates.append(
-                {"message_id": message["message_id"], "speaker": message.get("speaker"), "text": sanitized}
+                {
+                    "message_id": message["message_id"],
+                    "speaker": message.get("speaker"),
+                    "text": message["text"],
+                }
             )
         else:
             short_preserved += 1
 
-    completed = load_checkpoint(checkpoint_path, signature, config.resume)
-    if not config.resume:
-        write_checkpoint(checkpoint_path, signature, message_by_key, {})
-    candidate_by_key = {id_key(message["message_id"]): message for message in rewrite_candidates}
-    for key, text in list(completed.items()):
-        candidate = candidate_by_key.get(key)
-        if candidate is None:
-            raise PiiCleanError(f"{project.project_id}: checkpoint contains an unexpected message_id")
-        validate_rewrite_response(
-            {"rewrites": [{"message_id": candidate["message_id"], "text": text}]},
-            [candidate],
-            pii_cleaner,
-        )
-
-    pending = [message for message in rewrite_candidates if id_key(message["message_id"]) not in completed]
-    batches = build_batches(pending, config.max_batch_messages, config.max_batch_chars)
+    batches = build_batches(rewrite_candidates, config.max_batch_messages, config.max_batch_chars)
     for batch_number, batch in enumerate(batches, start=1):
         print(
             f"[{project.project_id}] rewrite batch {batch_number}/{len(batches)} "
             f"({len(batch)} messages)",
             flush=True,
         )
-        completed.update(await rewrite_batch(api, project.project_id, batch_number, batch, pii_cleaner))
-        write_checkpoint(checkpoint_path, signature, message_by_key, completed)
+        rewritten_by_key.update(
+            await rewrite_batch(
+                api,
+                project.project_id,
+                batch_number,
+                batch,
+                lambda _raw: "[REDACTED: raw phase-one response omitted]",
+            )
+        )
 
-    final_texts = dict(sanitized_by_key)
-    final_texts.update(completed)
-    if len(final_texts) != len(messages):
-        raise PiiCleanError(f"{project.project_id}: cleaned message count mismatch")
+    # Phase 2 scans every rewritten (or deliberately preserved short) message.
+    # The mapping is created from the post-rewrite transcript so replacements
+    # remain stable even if wording or sentence order changed in phase 1.
+    rewritten_messages = copy.deepcopy(messages)
+    for message in rewritten_messages:
+        message["text"] = rewritten_by_key[id_key(message["message_id"])]
+    pii_cleaner = DeterministicPiiCleaner(rewritten_messages, config.extra_names)
+    final_texts: dict[str, str] = {}
+    pii_changed = 0
+    for message in rewritten_messages:
+        key = id_key(message["message_id"])
+        sanitized = pii_cleaner.sanitize_message(message)
+        pii_cleaner.assert_no_known_pii(
+            sanitized,
+            source_text=message["text"],
+            message_id=message["message_id"],
+        )
+        final_texts[key] = sanitized
+        if sanitized != message["text"]:
+            pii_changed += 1
 
     cleaned_normalized = apply_message_texts(original_normalized, final_texts, pii_cleaner)
     cleaned_annotation, updated_events = sync_annotation_texts(original_annotation, cleaned_normalized)
@@ -877,10 +936,10 @@ async def clean_project(
         },
         "counts": {
             "messages": len(messages),
-            "messages_with_pii_replaced": pii_changed,
+            "messages_with_pii_replaced_after_rewrite": pii_changed,
             "sender_ids_replaced": pii_cleaner.registry.counts().get("SENDER_ID", 0),
-            "short_messages_preserved_after_pii_replacement": short_preserved,
-            "messages_paraphrased": len(completed),
+            "short_messages_preserved_before_pii_replacement": short_preserved,
+            "messages_paraphrased": len(rewrite_candidates),
             "annotation_events_synchronized": updated_events,
             "unique_placeholders": pii_cleaner.registry.counts(),
         },
@@ -894,7 +953,7 @@ async def clean_project(
     write_json(manifest_path, manifest)
     print(
         f"[{project.project_id}] DONE: {len(messages)} messages, "
-        f"{pii_changed} PII-cleaned, {len(completed)} paraphrased",
+        f"{pii_changed} PII-cleaned after rewrite, {len(rewrite_candidates)} paraphrased",
         flush=True,
     )
     return manifest
@@ -915,14 +974,18 @@ def dry_run_project(project: ProjectFiles, config: CleanConfig) -> dict[str, Any
     return {
         "project_id": project.project_id,
         "messages": len(messages),
-        "pii_changed": pii_changed,
-        "sender_ids": pii_cleaner.registry.counts().get("SENDER_ID", 0),
+        "input_messages_with_pii_candidates": pii_changed,
+        "input_sender_ids": pii_cleaner.registry.counts().get("SENDER_ID", 0),
         "would_paraphrase": rewrite_count,
-        "placeholders": pii_cleaner.registry.counts(),
+        "input_placeholder_candidates": pii_cleaner.registry.counts(),
     }
 
 
 async def main_async(args: argparse.Namespace) -> int:
+    print(
+        f"PII Clean v{CLEANING_VERSION} | source={Path(__file__).resolve()}",
+        flush=True,
+    )
     wanted_ids = set(args.project_id) if args.project_id else None
     try:
         projects = discover_projects(args.source_root, wanted_ids)
