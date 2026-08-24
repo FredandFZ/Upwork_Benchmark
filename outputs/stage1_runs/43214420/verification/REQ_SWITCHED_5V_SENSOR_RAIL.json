@@ -8,30 +8,12 @@
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "INTRODUCE",
-        "value_updates": {
-          "boost_enable_gpio": "GPIO3",
-          "enable_behavior": "Software-controlled on/off; EN must not be tied HIGH"
-        },
-        "scope_updates": {
-          "persistence": "PROJECT_PERSISTENT",
-          "components": [
-            "POWER",
-            "MCU"
-          ],
-          "contexts": [
-            "LOW_POWER_OPERATION"
-          ]
-        },
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         19
       ],
-      "decision_note": "The client explicitly requires GPIO control of boost EN, but this source does not establish the modular-board context.",
+      "decision_note": "The client explicitly requires GPIO-controlled boost enable and prohibits tying EN high.",
       "confidence": "HIGH"
     },
     {
@@ -46,7 +28,7 @@
         25,
         27
       ],
-      "decision_note": "The client explicitly adds a 100 kΩ pull-down to the MT3608 EN pin.",
+      "decision_note": "The client identifies the MT3608 and adds a 100 kΩ pull-down to its EN pin.",
       "confidence": "HIGH"
     },
     {
@@ -55,31 +37,13 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "MODIFY",
-        "value_updates": {
-          "rail_voltage": "5V",
-          "powered_loads": [
-            "Sensors requiring 5V"
-          ]
-        },
-        "scope_updates": {
-          "persistence": null,
-          "components": null,
-          "contexts": [
-            "SENSOR_POWER"
-          ]
-        },
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
-        19,
         29,
         30
       ],
-      "decision_note": "The source establishes the 5V sensor load context but does not newly establish the other repeated contexts.",
+      "decision_note": "The client confirms that the switched boost rail powers sensors requiring 5V.",
       "confidence": "HIGH"
     },
     {
@@ -94,7 +58,22 @@
         30,
         31
       ],
-      "decision_note": "The tightly coupled follow-up specifies that the 5V sensors operate periodically rather than continuously.",
+      "decision_note": "The immediately preceding context resolves the statement as periodic rather than continuous operation of the 5V sensors.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 263,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        261,
+        263
+      ],
+      "decision_note": "The client explicitly specifies the MT3608 rail rating and its intended 5V loads.",
       "confidence": "HIGH"
     },
     {
@@ -109,7 +88,7 @@
         279,
         281
       ],
-      "decision_note": "The client proposes switching the entire shared 5V rail to eliminate LED standby current.",
+      "decision_note": "The client establishes whole-rail GPIO shutdown for the then-shared sensor and LED loads.",
       "confidence": "HIGH"
     },
     {
@@ -125,7 +104,23 @@
         290,
         291
       ],
-      "decision_note": "The client explicitly changes 5V_EN from GPIO3 to GPIO5 after identifying the boot-pin conflict.",
+      "decision_note": "The client replaces GPIO3 with GPIO5 for 5V_EN after identifying GPIO3 as unsuitable.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 374,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        372,
+        373,
+        374
+      ],
+      "decision_note": "The client explicitly decides that the addressable LEDs are to be powered from the 5V rail at this point.",
       "confidence": "HIGH"
     },
     {
@@ -134,12 +129,39 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "control_topology": "Separate power control for LEDs and sensors",
+          "sensor_rail_control": "Independent from LED power control"
+        },
+        "value_removals": [
+          "shared_rail_loads",
+          "shutdown_behavior"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
         425
       ],
-      "decision_note": "The client explicitly establishes separate power control for LEDs and sensors.",
+      "decision_note": "Separate controls invalidate the prior shared-load and whole-rail shutdown semantics, but this message does not yet establish that LEDs moved off 5V or narrow the rail scope.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 444,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        444
+      ],
+      "decision_note": "The client explicitly moves the LEDs from 5V to 3.3V, leaving the 5V rail for the identified sensors.",
       "confidence": "HIGH"
     },
     {
@@ -154,7 +176,7 @@
         450,
         452
       ],
-      "decision_note": "Target-specific implementation claim that the main-board design already connects 5V_EN to GPIO5.",
+      "decision_note": "Target-specific implementation claim that the main-board design already uses GPIO5 for 5V_EN.",
       "confidence": "HIGH"
     }
   ],

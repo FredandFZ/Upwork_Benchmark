@@ -25,6 +25,7 @@ from .impact import (
     build_impact_cases,
     impact_case_filename,
     impact_decisions_to_patches,
+    reconcile_redundant_value_removals,
     resolve_source_event_ids,
     source_ref_key,
 )
@@ -47,6 +48,23 @@ from .validation import (
     validate_intermediate_events,
     validate_stage1_annotation,
 )
+
+
+EXCLUDED_NO_REQUIREMENTS = "EXCLUDED_NO_REQUIREMENTS"
+
+
+def remove_final_annotation_files(project: ProjectSource) -> list[Path]:
+    """Remove only the public and run-local final annotations for one project."""
+    removed: list[Path] = []
+    candidates = (
+        project.output_path,
+        project.run_dir / "final" / project.output_path.name,
+    )
+    for path in candidates:
+        if path.is_file():
+            path.unlink()
+            removed.append(path)
+    return removed
 
 
 class Stage1Pipeline:
@@ -121,20 +139,29 @@ class Stage1Pipeline:
                 metrics = self._metrics(annotation, [], 0, {"edits": 0, "deletions": 0}, [])
             else:
                 annotation, metrics = await self._run_multipass(project)
-            project.output_path.parent.mkdir(parents=True, exist_ok=True)
-            write_json(project.output_path, annotation)
+            requirements = annotation.get("requirements")
+            if not isinstance(requirements, list):
+                raise ValueError("Final annotation requirements must be an array")
+            excluded = not requirements
+            if excluded:
+                remove_final_annotation_files(project)
+            else:
+                project.output_path.parent.mkdir(parents=True, exist_ok=True)
+                write_json(project.output_path, annotation)
             summary = summarize_calls(self.call_log_path, project.project_id)
-            write_json(
-                metadata_path,
-                {
-                    **base_metadata,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "status": "DONE",
-                    **summary,
-                    "calibration": metrics,
-                    "final_output": str(project.output_path),
-                },
-            )
+            final_metadata = {
+                **base_metadata,
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+                "status": EXCLUDED_NO_REQUIREMENTS if excluded else "DONE",
+                **summary,
+                "calibration": metrics,
+                "final_output": None if excluded else str(project.output_path),
+            }
+            if excluded:
+                final_metadata["exclusion_reason"] = (
+                    "No Requirements remained after the final lifecycle-length filter."
+                )
+            write_json(metadata_path, final_metadata)
             return annotation
         except Exception as exc:
             write_json(
@@ -1157,6 +1184,7 @@ class Stage1Pipeline:
         processed_pairs: set[tuple[tuple[str, str, str, int], str]] = set()
         records: list[dict[str, Any]] = []
         round_summaries: list[dict[str, Any]] = []
+        removal_reconciliations: list[dict[str, Any]] = []
 
         for round_number in range(1, self.config.max_impact_audit_rounds + 1):
             all_cases = build_impact_cases(
@@ -1228,6 +1256,11 @@ class Stage1Pipeline:
                         raise ValueError("Impact decisions contain an inapplicable HIGH-confidence patch")
                     trial = apply_audit_patches(inventory, events, patches)
                     trial_events = self._sort_events(trial.events, normalized)
+                    trial_events, _ = reconcile_redundant_value_removals(
+                        trial_events,
+                        normalized,
+                        requirement_ids=trial.affected_requirements,
+                    )
                     for requirement_events in trial_events.values():
                         canonicalize_event_payload_fields(requirement_events)
                         canonicalize_event_source_texts(requirement_events, normalized)
@@ -1288,6 +1321,11 @@ class Stage1Pipeline:
                 human_review.extend(local_review)
                 applied = apply_audit_patches(inventory, events, patches)
                 trial_events = self._sort_events(applied.events, normalized)
+                trial_events, local_reconciliations = reconcile_redundant_value_removals(
+                    trial_events,
+                    normalized,
+                    requirement_ids=applied.affected_requirements,
+                )
                 try:
                     for requirement_events in trial_events.values():
                         canonicalize_event_payload_fields(requirement_events)
@@ -1318,6 +1356,7 @@ class Stage1Pipeline:
                 applied_patch_count += applied.applied_count
                 affected_all.update(applied.affected_requirements)
                 human_review.extend(applied.human_review)
+                removal_reconciliations.extend(local_reconciliations)
                 records.append(
                     {
                         "round": round_number,
@@ -1328,6 +1367,7 @@ class Stage1Pipeline:
                         ],
                         "decisions": deepcopy(decisions),
                         "applied_patch_count": applied.applied_count,
+                        "value_removal_reconciliations": deepcopy(local_reconciliations),
                     }
                 )
 
@@ -1389,6 +1429,7 @@ class Stage1Pipeline:
             "decision_count": decision_count,
             "applied_patch_count": applied_patch_count,
             "affected_requirement_ids": sorted(affected_all),
+            "value_removal_reconciliations": removal_reconciliations,
             "records": records,
         }
         return events, human_review, applied_patch_count, decision_count, affected_all, report
@@ -1742,6 +1783,10 @@ class Stage1Pipeline:
             "applied_patch_count": int(first.get("applied_patch_count", 0))
             + int(second.get("applied_patch_count", 0)),
             "affected_requirement_ids": sorted(affected),
+            "value_removal_reconciliations": deepcopy(
+                first.get("value_removal_reconciliations", [])
+            )
+            + deepcopy(second.get("value_removal_reconciliations", [])),
             "records": deepcopy(first.get("records", [])) + deepcopy(second.get("records", [])),
         }
 

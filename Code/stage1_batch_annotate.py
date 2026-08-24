@@ -6,13 +6,14 @@ import argparse
 import asyncio
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
 
 from stage1.api_client import Stage1ApiClient
 from stage1.config import ANNOTATION_MODEL, FORCE_STAGES, REASONING_EFFORT, PipelineConfig
-from stage1.pipeline import Stage1Pipeline
+from stage1.pipeline import EXCLUDED_NO_REQUIREMENTS, Stage1Pipeline, remove_final_annotation_files
 from stage1.preprocessing import discover_projects
 from stage1.reporting import annotation_statistics, write_statistics
 from stage1.storage import read_json, write_json
@@ -165,6 +166,9 @@ async def main_async(args: argparse.Namespace) -> int:
             print(f"Unknown project ID(s): {', '.join(sorted(missing))}", file=sys.stderr)
             return 2
 
+    if not args.dry_run:
+        exclude_existing_empty_outputs(discovered, args.annotation_mode)
+
     selective_force = bool(args.force_stage or args.force_requirement or args.upgrade_existing_annotation)
     projects = discovered
     if not args.overwrite and not selective_force:
@@ -259,11 +263,18 @@ async def main_async(args: argparse.Namespace) -> int:
                     print(f"[{project.project_id}] pipeline FAILED: {exc}", flush=True)
                     return project.project_id, None, str(exc)
                 _, requirement_count, event_count = annotation_statistics(project.project_id, annotation)
-                print(
-                    f"[{project.project_id}] annotation DONE: {requirement_count} requirements, "
-                    f"{event_count} events -> {project.output_path}",
-                    flush=True,
-                )
+                if requirement_count == 0:
+                    print(
+                        f"[{project.project_id}] project EXCLUDED: 0 requirements; "
+                        "no final annotation written",
+                        flush=True,
+                    )
+                else:
+                    print(
+                        f"[{project.project_id}] annotation DONE: {requirement_count} requirements, "
+                        f"{event_count} events -> {project.output_path}",
+                        flush=True,
+                    )
                 return project.project_id, annotation, None
 
         results = await asyncio.gather(*(run_project(project) for project in projects))
@@ -273,7 +284,15 @@ async def main_async(args: argparse.Namespace) -> int:
             failures.append({"project_id": project_id, "error": error})
     totals = write_statistics(args.stats_file, args.output_dir)
     print(f"Statistics updated: {totals[0]} projects, {totals[1]} requirements, {totals[2]} events -> {args.stats_file}")
-    print(f"Completed: {len(results) - len(failures)}/{len(results)}")
+    excluded_count = sum(
+        1
+        for _, annotation, error in results
+        if error is None and isinstance(annotation, dict) and not annotation.get("requirements")
+    )
+    print(
+        f"Completed: {len(results) - len(failures)}/{len(results)}; "
+        f"excluded with 0 requirements: {excluded_count}"
+    )
     failure_path = args.output_dir / "stage1_batch_failures.json"
     if failures:
         write_json(failure_path, {"failures": failures})
@@ -282,18 +301,66 @@ async def main_async(args: argparse.Namespace) -> int:
     return 0
 
 
+def exclude_existing_empty_outputs(projects, annotation_mode: str) -> list[str]:
+    """Remove stale zero-Requirement final files and preserve a resumable exclusion marker."""
+    excluded: list[str] = []
+    for project in projects:
+        if not project.output_path.is_file():
+            continue
+        try:
+            annotation = read_json(project.output_path)
+        except (OSError, ValueError):
+            continue
+        requirements = annotation.get("requirements") if isinstance(annotation, dict) else None
+        if requirements != []:
+            continue
+
+        remove_final_annotation_files(project)
+        metadata_path = project.run_dir / "run_metadata.json"
+        try:
+            metadata = read_json(metadata_path) if metadata_path.is_file() else {}
+        except (OSError, ValueError):
+            metadata = {}
+        if not isinstance(metadata, dict):
+            metadata = {}
+        write_json(
+            metadata_path,
+            {
+                **metadata,
+                "project_id": project.project_id,
+                "annotation_mode": metadata.get("annotation_mode") or annotation_mode,
+                "status": EXCLUDED_NO_REQUIREMENTS,
+                "excluded_at": datetime.now(timezone.utc).isoformat(),
+                "exclusion_reason": "Final annotation contains no Requirements.",
+                "final_output": None,
+            },
+        )
+        excluded.append(project.project_id)
+        print(
+            f"[{project.project_id}] removed existing empty final annotation (0 requirements)",
+            flush=True,
+        )
+    return excluded
+
+
 def completed_for_mode(project, annotation_mode: str) -> bool:
+    metadata_path = project.run_dir / "run_metadata.json"
+    metadata = None
+    if metadata_path.is_file():
+        try:
+            metadata = read_json(metadata_path)
+        except (OSError, ValueError):
+            metadata = None
+    if (
+        isinstance(metadata, dict)
+        and metadata.get("status") == EXCLUDED_NO_REQUIREMENTS
+        and metadata.get("annotation_mode") == annotation_mode
+    ):
+        return True
     if not project.output_path.is_file():
         return False
     if annotation_mode == "single-pass":
         return True
-    metadata_path = project.run_dir / "run_metadata.json"
-    if not metadata_path.is_file():
-        return False
-    try:
-        metadata = read_json(metadata_path)
-    except (OSError, ValueError):
-        return False
     return (
         isinstance(metadata, dict)
         and metadata.get("status") == "DONE"

@@ -13,7 +13,7 @@
       "evidence_message_ids": [
         505
       ],
-      "decision_note": "The freelancer directly reports that the specified main-board dimensions cannot accommodate the required contents, creating a material layout conflict.",
+      "decision_note": "The freelancer identifies a material feasibility conflict between the required contents and the specified main-board dimensions.",
       "confidence": "HIGH"
     },
     {
@@ -27,7 +27,7 @@
       "evidence_message_ids": [
         506
       ],
-      "decision_note": "The client explicitly specifies main-board mounting orientation, top-edge connector placement, and alignment with the sensor board.",
+      "decision_note": "The client explicitly specifies board orientation and main-board connector placement and alignment.",
       "confidence": "HIGH"
     },
     {
@@ -42,7 +42,7 @@
         506,
         507
       ],
-      "decision_note": "The immediately preceding connector discussion resolves the reference, and the client requires minimizing inaccessible bottom-side connectors.",
+      "decision_note": "The client explicitly requires minimizing connectors on the inaccessible bottom side.",
       "confidence": "HIGH"
     },
     {
@@ -54,11 +54,9 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        506,
-        507,
         510
       ],
-      "decision_note": "The client explicitly identifies the main board, permits prototype dimension changes, and allows side placement for smaller connectors.",
+      "decision_note": "The client allows prototype dimension changes and specifies accessible placement for smaller connectors.",
       "confidence": "HIGH"
     },
     {
@@ -67,14 +65,21 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "unused_pin_hole_placement": "may be placed anywhere rather than around the ESP32"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
-        515,
-        523,
         528
       ],
-      "decision_note": "The client resolves the main-board routing concern by allowing unused-pin holes to be placed anywhere.",
+      "decision_note": "The placement clause affects mechanical layout; the requirement to break out unused pins belongs to the ESP32 breakout Requirement.",
       "confidence": "HIGH"
     },
     {
@@ -83,14 +88,22 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "board_dimensions": "70×50 mm",
+          "esp32_placement": "on the PCB edge"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
-        538,
-        540,
         543
       ],
-      "decision_note": "The client explicitly selects a 70×50 mm outline, retains individual JST connectors, and accepts ESP32 edge placement.",
+      "decision_note": "Board dimensions and ESP32 placement affect this layout; retaining individual JST connectors belongs to the modular interboard-interface Requirement.",
       "confidence": "HIGH"
     },
     {
@@ -103,11 +116,9 @@
       "replacement": null,
       "evidence_message_ids": [
         505,
-        536,
-        538,
         543
       ],
-      "decision_note": "After the original dimensions were found infeasible, the client supplies revised dimensions and directly asks the freelancer to proceed with resizing and rearrangement.",
+      "decision_note": "The client resolves the dimensional feasibility issue by specifying a larger 70×50 mm board and directing layout work to continue.",
       "confidence": "HIGH"
     },
     {
@@ -123,7 +134,30 @@
         556,
         557
       ],
-      "decision_note": "The client clarifies that the bottom connectors should be straight and point away from the board rather than use right-angle bodies.",
+      "decision_note": "The local exchange unambiguously identifies the bottom connectors, and the client replaces right-angle parts with straight outward-facing connectors.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "REMOVE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        842,
+        843,
+        844
+      ],
+      "decision_note": "The client confirms that the former three-board architecture has been replaced by one integrated board, eliminating the separate main-board layout Requirement.",
       "confidence": "HIGH"
     }
   ],

@@ -1,6 +1,6 @@
 {
   "benchmark": "ReqMemBench",
-  "annotation_version": "v0.5",
+  "annotation_version": "v0.6",
   "project": {
     "project_id": "43214420",
     "project_title": "PCB Design for ESP32 Project - Power, Main, and Sensor Boards",
@@ -99,6 +99,7 @@
             "boost_enable_gpio": "GPIO3",
             "enable_behavior": "Software-controlled on/off; EN must not be tied HIGH"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -124,6 +125,7 @@
             "boost_converter": "MT3608",
             "en_pull_down": "100 kΩ to GND"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -142,6 +144,7 @@
               "Sensors requiring 5V"
             ]
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -163,12 +166,34 @@
           "value_updates": {
             "operation_pattern": "Power the 5V sensors periodically rather than continuously"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
           "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E005",
+          "source_message": {
+            "message_id": 263,
+            "speaker": "client",
+            "text": "3.3V rail (AXP2101 DCDC1, 2A) — primary power source when power board is connected:\n\\- ESP32-S3 module\n\\- INA219\n\\- All I2C sensors (SCD41, BME280, ENS160) via sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — controlled by ESP32 GPIO3:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (if wired to 5V — depends on version)\n\n3.3V rail (ME6211A LDO, 1A) — only active when USB-C on main board connected WITHOUT power board:\n\\- Same 3.3V rail as above — Schottky diode OR-ing means whichever source is present wins. Used for standalone programming.\n\nBattery (3.7–4.2V) — feeds AXP2101 which then feeds everything above.\n\nSimple rule: in normal operation AXP2101 powers everything. The LDO only kicks in when programming without the power board connected."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "boost_converter_current_rating": "500mA",
+            "powered_loads": [
+              "SPS30 particulate sensor",
+              "ZE08-CH2O formaldehyde sensor",
+              "SK6812 LEDs when wired to 5V"
+            ]
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E006",
           "source_message": {
             "message_id": 281,
             "speaker": "client",
@@ -180,14 +205,25 @@
               "5V sensors",
               "Addressable LEDs"
             ],
-            "shutdown_behavior": "Disable the entire 5V rail when its loads are not needed to eliminate standby current"
+            "shutdown_behavior": "Disable the entire 5V rail when its loads are not needed to eliminate standby current",
+            "powered_loads": [
+              "SPS30 particulate sensor",
+              "ZE08-CH2O formaldehyde sensor",
+              "SK6812 LEDs"
+            ]
           },
-          "scope_updates": null,
+          "value_removals": null,
+          "scope_updates": {
+            "contexts": [
+              "SENSOR_POWER",
+              "ADDRESSABLE_LED"
+            ]
+          },
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E006",
+          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E007",
           "source_message": {
             "message_id": 291,
             "speaker": "client",
@@ -197,12 +233,33 @@
           "value_updates": {
             "boost_enable_gpio": "GPIO5"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E007",
+          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E008",
+          "source_message": {
+            "message_id": 374,
+            "speaker": "client",
+            "text": "The SK6812 minimum supply voltage is 3.5–3.7V so 3.3V is actually below spec, the LED might not light up reliably. Power it from 5V and use the 74AHCT1G125 level shifter (LCSC C151417) on the data line since at 5V the data threshold becomes 3.5V which is above what the ESP32 outputs. That's already in the design, so no changes needed just replace the IRLML2402 with the 74AHCT1G125."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "powered_loads": [
+              "SPS30 particulate sensor",
+              "ZE08-CH2O formaldehyde sensor",
+              "SK6812 LEDs"
+            ]
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E009",
           "source_message": {
             "message_id": 425,
             "speaker": "client",
@@ -213,12 +270,41 @@
             "control_topology": "Separate power control for LEDs and sensors",
             "sensor_rail_control": "Independent from LED power control"
           },
+          "value_removals": [
+            "shared_rail_loads",
+            "shutdown_behavior"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E008",
+          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E010",
+          "source_message": {
+            "message_id": 444,
+            "speaker": "client",
+            "text": "The LEDs are now powered from 3.3V instead of 5V. At 3.3V supply the SK6812 data threshold drops to 2.31V, which the ESP32 3.3V output satisfies directly, so no level shifter is needed. The tradeoff is that 3.3V is slightly below the SK6812 datasheet minimum (3.7V), but it works reliably at indicator brightness levels."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "powered_loads": [
+              "SPS30 particulate sensor",
+              "ZE08-CH2O formaldehyde sensor"
+            ]
+          },
+          "value_removals": null,
+          "scope_updates": {
+            "persistence": null,
+            "components": null,
+            "contexts": [
+              "SENSOR_POWER"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SWITCHED_5V_SENSOR_RAIL_E011",
           "source_message": {
             "message_id": 452,
             "speaker": "freelancer",
@@ -226,6 +312,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -252,6 +339,7 @@
             "usb_input_path": "VBUS connects through the AXP2101 RBFET to VMID",
             "vmid_vsys_topology": "VMID and VSYS are separate nets"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -277,8 +365,10 @@
           "event_type": "MODIFY",
           "value_updates": {
             "battery_input_voltage": "3.7–4.2V",
-            "normal_operation_power_path": "The battery feeds AXP2101, which powers the system in normal operation"
+            "normal_operation_power_path": "The battery feeds AXP2101, which powers the system in normal operation",
+            "power_board_connected_3v3_source": "AXP2101 DCDC1"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -294,6 +384,9 @@
           "value_updates": {
             "simultaneous_battery_charging_and_device_operation": true
           },
+          "value_removals": [
+            "power_board_connected_3v3_source"
+          ],
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -318,6 +411,7 @@
           "value_updates": {
             "usb_operation_without_battery": true
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -331,6 +425,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -359,6 +454,7 @@
             "voltage_compensation_reason": "compensate for the Schottky diode drop on the main board power OR-ing circuit",
             "required_regulation_condition": "keep the 3.3V rail at the correct voltage under all conditions"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -372,6 +468,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -382,28 +479,13 @@
         {
           "event_id": "REQ_DCDC1_3V3_REGULATION_E003",
           "source_message": {
-            "message_id": 1019,
-            "speaker": "client",
-            "text": "I have been bringing up the 3 integrated board samples. Power is good\non all of them: the 3.3V rail comes up (~3.3V) and the ESP32 runs. But\nthe native USB does not work at all. None of the boards enumerate on\nthe PC, in any mode (normal or forced download) and in both USB-C\norientations. A known-good dev board enumerates fine on the same cable\nand port, so it is not the cable."
-          },
-          "event_type": "RUNTIME_VERIFICATION",
-          "value_updates": null,
-          "scope_updates": null,
-          "ambiguity": null,
-          "execution": {
-            "status": "VERIFIED_WORKING",
-            "observed_behavior": "During basic bring-up of all three integrated-board samples, the 3.3V rail came up at approximately 3.3V and the ESP32 ran."
-          }
-        },
-        {
-          "event_id": "REQ_DCDC1_3V3_REGULATION_E004",
-          "source_message": {
             "message_id": 1046,
             "speaker": "client",
             "text": "Hi Dusko,\n\nUSB is fully working after the rework (U3 removed, data lines\nbridged), boards enumerate and flash fine. Here is how the power and\nAXP2101 behave after that, tested on both boards with identical\nresults:\n\n1\\. DCDC1 idles at 3.16V. The register is confirmed 3.3V (0x82 reads\n0x12), so the converter regulates 4 percent low.\n2\\. Any load transient collapses the rail: SPI flash erase (about\n150mA step) or WiFi TX burst (300-400mA) drops the 3.3V below\n2.5V and hard resets the ESP32. Brown-out detector disabled makes\nno difference, it is a true rail collapse. Adding 330uF external\ncapacitance does not help. The board cannot run standalone on USB.\n3\\. It works when powered from battery only (VSYS around 3.8V), but\nfails on 5V USB input. So it fails exactly when the buck actually\nhas to regulate, and survives near dropout.\n4\\. Writing DCDC1 to 3.4V over I2C helps a lot: boot, WiFi serving and\na full 1.9MB OTA write all pass. But the WiFi calibration surge at\nreboot still collapses it. Also strange: the 0x82 write was\nignored on several boots (readback stayed 0x12) and then latched\non a later boot. Other register writes verify fine, and the VBUS\ninput current limit default is 1.5A, so it is not input limiting.\n5\\. I replaced L3 with a larger 2.2uH inductor with much higher\nsaturation current. No change at all. The inductor is not the\nproblem, the original DFE252010F spec was fine anyway.\n6\\. During further testing, DCDC1 on board 2 degraded progressively\nand finally died: its output now measures about 265 ohm to GND\nwith everything disconnected, so the output stage is leaking.\n7\\. With an external 3.3V feed the whole board works perfectly for\nhours: boot, PSRAM, e-paper, WiFi, web UI, sensors. Everything\ndownstream is healthy.\n\nMy conclusion: the AXP2101 chips themselves are suspect (bad batch,\ncounterfeit, moisture damage at reflow, or parts with non-standard\nfactory programming). I asked the factory for the sourcing and lot\ncodes. One thing worth checking on your side: the local input\ndecoupling on the DCDC1 VIN pins in the layout, whether there is a\ncapacitor close to the pin or only the bulk group further away.\n\nDo you see any other explanation that fits all of this? Hi Dusko,\n\nUSB is fully working after the rework (U3 removed, data lines\nbridged), boards enumerate and flash fine. Here is how the power and\nAXP2101 behave after that, tested on both boards with identical\nresults:\n\n1\\. DCDC1 idles at 3.16V. The register is confirmed 3.3V (0x82 reads\n0x12), so the converter regulates 4 percent low.\n2\\. Any load transient collapses the rail: SPI flash erase (about\n150mA step) or WiFi TX burst (300-400mA) drops the 3.3V below\n2.5V and hard resets the ESP32. Brown-out detector disabled makes\nno difference, it is a true rail collapse. Adding 330uF external\ncapacitance does not help. The board cannot run standalone on USB.\n3\\. It works when powered from battery only (VSYS around 3.8V), but\nfails on 5V USB input. So it fails exactly when the buck actually\nhas to regulate, and survives near dropout.\n4\\. Writing DCDC1 to 3.4V over I2C helps a lot: boot, WiFi serving and\na full 1.9MB OTA write all pass. But the WiFi calibration surge at\nreboot still collapses it. Also strange: the 0x82 write was\nignored on several boots (readback stayed 0x12) and then latched\non a later boot. Other register writes verify fine, and the VBUS\ninput current limit default is 1.5A, so it is not input limiting.\n5\\. I replaced L3 with a larger 2.2uH inductor with much higher\nsaturation current. No change at all. The inductor is not the\nproblem, the original DFE252010F spec was fine anyway.\n6\\. During further testing, DCDC1 on board 2 degraded progressively\nand finally died: its output now measures about 265 ohm to GND\nwith everything disconnected, so the output stage is leaking.\n7\\. With an external 3.3V feed the whole board works perfectly for\nhours: boot, PSRAM, e-paper, WiFi, web UI, sensors. Everything\ndownstream is healthy.\n\nMy conclusion: the AXP2101 chips themselves are suspect (bad batch,\ncounterfeit, moisture damage at reflow, or parts with non-standard\nfactory programming). I asked the factory for the sourcing and lot\ncodes. One thing worth checking on your side: the local input\ndecoupling on the DCDC1 VIN pins in the layout, whether there is a\ncapacitor close to the pin or only the bulk group further away.\n\nDo you see any other explanation that fits all of this?"
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -412,7 +494,7 @@
           }
         },
         {
-          "event_id": "REQ_DCDC1_3V3_REGULATION_E005",
+          "event_id": "REQ_DCDC1_3V3_REGULATION_E004",
           "source_message": {
             "message_id": 1075,
             "speaker": "client",
@@ -420,6 +502,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -445,6 +528,7 @@
           "value_updates": {
             "ldo_load_requirement": "support sensor debugging rather than powering only the ESP32"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -473,6 +557,7 @@
             "source_selection": "Schottky diode OR-ing with the AXP2101 DCDC1 supply",
             "normal_operation_source": "AXP2101 DCDC1"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": [
@@ -497,6 +582,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -525,6 +611,7 @@
               "3.3V"
             ]
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -549,6 +636,7 @@
           "value_updates": {
             "three_v_three_measurement_coverage": "entire 3.3V rail current"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -567,6 +655,7 @@
               "5V"
             ]
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -583,6 +672,7 @@
             "three_v_three_monitor_position": "in series after the Schottky diodes",
             "three_v_three_measurement_coverage": "total downstream current for the ESP32 and sensor board"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -598,6 +688,7 @@
           "value_updates": {
             "monitoring_ic": "INA3221"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -617,6 +708,7 @@
               "spare_channel_count": 1
             }
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -624,12 +716,29 @@
         {
           "event_id": "REQ_POWER_RAIL_CURRENT_MONITORING_E007",
           "source_message": {
+            "message_id": 444,
+            "speaker": "client",
+            "text": "The LEDs are now powered from 3.3V instead of 5V. At 3.3V supply the SK6812 data threshold drops to 2.31V, which the ESP32 3.3V output satisfies directly, so no level shifter is needed. The tradeoff is that 3.3V is slightly below the SK6812 datasheet minimum (3.7V), but it works reliably at indicator brightness levels."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "three_v_three_measurement_coverage": "total downstream current for the ESP32, sensor board, and addressable LEDs"
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_POWER_RAIL_CURRENT_MONITORING_E008",
+          "source_message": {
             "message_id": 763,
             "speaker": "client",
             "text": "ok, that would be great if we can skip INA"
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -660,6 +769,7 @@
             "signal_connection": "AXP2101 PWRON",
             "control_behavior": "press to turn on and press to turn off"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -683,6 +793,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "SCOPE",
@@ -702,6 +813,7 @@
             "connector_board": "main board",
             "signal_connection": "J_PWR_SIG pin 4 PWRON line"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -722,6 +834,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -744,6 +857,7 @@
           "value_updates": {
             "exposed_pad_thermal_function": "Transfer heat from the AXP2101 through the PCB"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -767,6 +881,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -783,6 +898,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -801,6 +917,7 @@
           "value_updates": {
             "pre_reflow_handling": "Bake AXP2101 components before reflow during full production"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -828,6 +945,7 @@
             ],
             "minimum_power_trace_width": "≥1 mm"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -851,6 +969,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -871,6 +990,9 @@
             "required_copper_path": "Contiguous F.Cu/In2.Cu pours from the USB-C and battery connectors to the AXP2101 VBUS and BAT pins, without a thin-trace bottleneck in series",
             "stitching_via_requirement": "Sufficient stitching vias between F.Cu and In2.Cu, typically 3 or more for approximately 1.5 A"
           },
+          "value_removals": [
+            "minimum_power_trace_width"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -884,6 +1006,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -900,6 +1023,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -922,6 +1046,7 @@
           "value_updates": {
             "programming_interface": "USB-C"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -945,11 +1070,13 @@
           },
           "event_type": "MODIFY",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
             "contexts": [
-              "INTEGRATED_BOARD"
+              "INTEGRATED_BOARD",
+              "PROGRAMMING"
             ]
           },
           "ambiguity": null,
@@ -964,6 +1091,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -980,6 +1108,7 @@
           },
           "event_type": "RUNTIME_VERIFICATION",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -1005,6 +1134,7 @@
           "value_updates": {
             "module_model": "ESP32-S3-WROOM-1-N16R8"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -1027,6 +1157,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1046,6 +1177,7 @@
             "dedicated_breakout_holes": "required only for otherwise-unused ESP32 pins",
             "breakout_hole_placement": "flexible; holes may be placed anywhere on the board"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1059,6 +1191,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1076,6 +1209,7 @@
             "full_pin_access": true,
             "reuse_purpose": "generic ESP32-S3 base platform for other projects"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -1098,6 +1232,7 @@
           "value_updates": {
             "breakout_pitch_mm": 1.27
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1111,6 +1246,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1127,6 +1263,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -1143,6 +1280,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1156,6 +1294,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1172,11 +1311,11 @@
           },
           "event_type": "MODIFY",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
             "contexts": [
-              "MODULAR_MAIN_BOARD",
               "INTEGRATED_BOARD",
               "GENERIC_MCU_PLATFORM"
             ]
@@ -1193,6 +1332,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1215,6 +1355,7 @@
           "value_updates": {
             "assignment_policy": "Retain the current GPIO assignments unless an incompatibility is identified."
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -1237,6 +1378,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1253,6 +1395,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1281,6 +1424,7 @@
               "GPIO27"
             ]
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1294,6 +1438,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1307,6 +1452,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1324,9 +1470,12 @@
           "event_type": "MODIFY",
           "value_updates": {
             "signal_assignments": {
+              "5V_EN": "GPIO5",
+              "SCL0": "GPIO38",
               "SPI_MOSI": "GPIO33"
             }
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1340,6 +1489,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1353,6 +1503,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1370,6 +1521,8 @@
           "event_type": "MODIFY",
           "value_updates": {
             "signal_assignments": {
+              "5V_EN": "GPIO5",
+              "SCL0": "GPIO38",
               "SPI_MOSI": "GPIO47"
             },
             "free_gpio_candidates": [
@@ -1385,6 +1538,7 @@
             ],
             "conditional_gpio_range": "GPIO0–GPIO21 subject to strapping-pin caveats"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1398,6 +1552,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1411,6 +1566,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -1438,6 +1594,7 @@
             "bus_speed": "400 kHz",
             "pull_up_resistance": "2.2 kΩ"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -1464,6 +1621,7 @@
           "value_updates": {
             "pull_up_location": "MAIN_BOARD"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1482,6 +1640,7 @@
               "policy": "retain"
             }
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1501,6 +1660,7 @@
               "policy": "optional; remove if they make layout harder, otherwise keep"
             }
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1516,6 +1676,7 @@
           "value_updates": {
             "series_resistor_placement": "between the ESP32-S3 pins and the pull-ups and I2C devices"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1529,6 +1690,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -1567,6 +1729,7 @@
               }
             }
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -1591,6 +1754,7 @@
           "value_updates": {
             "control_mounting": "panel controls connected through board connectors"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1604,6 +1768,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1629,6 +1794,7 @@
             "connector_pin_1": "GND",
             "pressed_behavior": "short GPIO to GND"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -1649,6 +1815,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1662,77 +1829,13 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports connecting R16, R17, and R18 to 3.3V as the required pull-ups."
           }
-        }
-      ]
-    },
-    {
-      "requirement_id": "REQ_BOOT_RESET_CIRCUIT",
-      "title": "ESP32 BOOT and Reset Circuit",
-      "family_id": "MCU_AND_BUSES",
-      "events": [
-        {
-          "event_id": "REQ_BOOT_RESET_CIRCUIT_E001",
-          "source_message": {
-            "message_id": 315,
-            "speaker": "client",
-            "text": "Yes, that's correct. The main board has:\n\n\\- ESP32-S3-WROOM-1-N16R8 module\n\\- INA219 current monitor (on the 3.3V rail)\n\\- USB-C connector (programming port) + LDO for standalone operation\n\\- All the JST connectors (to power board, sensor board, display, PIR, touch, LEDs, buttons, reset)\n\\- Support passives: decoupling caps, pull-ups, series resistors, Schottky diodes, BOOT button\n\nNo sensors, no power management — those are on the other boards."
-          },
-          "event_type": "INTRODUCE",
-          "value_updates": {
-            "boot_control": "BOOT button required",
-            "reset_connection": "JST reset connection required"
-          },
-          "scope_updates": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "MCU",
-              "UI_CONTROLS"
-            ],
-            "contexts": [
-              "MODULAR_MAIN_BOARD",
-              "PROGRAMMING"
-            ]
-          },
-          "ambiguity": null,
-          "execution": null
-        },
-        {
-          "event_id": "REQ_BOOT_RESET_CIRCUIT_E002",
-          "source_message": {
-            "message_id": 320,
-            "speaker": "client",
-            "text": "Full list:\n\n\\- J\\_BTN3 — panel button, GPIO6\n\\- J\\_BTN4 — panel button, GPIO7\n\\- J\\_SW — panel slide switch, GPIO8\n\\- J\\_RESET — panel reset button, EN to GND\n\\- J\\_TOUCH — capacitive touch (TTP223), GPIO11\n\\- J\\_TOUCH2 — capacitive touch (TTP223), GPIO14\n\\- BOOT button — on-board only (development use, not panel-mounted)"
-          },
-          "event_type": "MODIFY",
-          "value_updates": {
-            "boot_control": "on-board BOOT button for development use, not panel-mounted",
-            "reset_connection": "J_RESET panel reset connection wired from EN to GND"
-          },
-          "scope_updates": null,
-          "ambiguity": null,
-          "execution": null
-        },
-        {
-          "event_id": "REQ_BOOT_RESET_CIRCUIT_E003",
-          "source_message": {
-            "message_id": 331,
-            "speaker": "client",
-            "text": "ok, plese use 1uF, I am not so good with details."
-          },
-          "event_type": "MODIFY",
-          "value_updates": {
-            "boot_pin_capacitance": "1uF",
-            "en_pin_capacitance": "1uF"
-          },
-          "scope_updates": null,
-          "ambiguity": null,
-          "execution": null
         }
       ]
     },
@@ -1753,6 +1856,7 @@
             "interboard_connector_family": "JST-GH",
             "connector_selection_reason": "compact interboard connections"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -1767,6 +1871,25 @@
         },
         {
           "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E002",
+          "source_message": {
+            "message_id": 100,
+            "speaker": "client",
+            "text": "so we could make power one even JST PH (to avoid double lines) and signal ones JST GH"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "interboard_connector_family": {
+              "power": "JST-PH",
+              "signal": "JST-GH"
+            }
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E003",
           "source_message": {
             "message_id": 101,
             "speaker": "client",
@@ -1800,21 +1923,9 @@
               ]
             }
           },
-          "scope_updates": null,
-          "ambiguity": null,
-          "execution": null
-        },
-        {
-          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E003",
-          "source_message": {
-            "message_id": 139,
-            "speaker": "client",
-            "text": "You can arrange the pins in whatever order works best for your layout, just make sure the main board connector matches. Tell me what order you prefer and I'll update the docs to reflect it."
-          },
-          "event_type": "MODIFY",
-          "value_updates": {
-            "power_connector_pin_order": "May be arranged to suit the layout, provided the matching main-board connector uses the same order"
-          },
+          "value_removals": [
+            "interboard_connector_family"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -1822,12 +1933,40 @@
         {
           "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E004",
           "source_message": {
+            "message_id": 139,
+            "speaker": "client",
+            "text": "You can arrange the pins in whatever order works best for your layout, just make sure the main board connector matches. Tell me what order you prefer and I'll update the docs to reflect it."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "power_to_main_power_connector": {
+              "designation": "J_PWR_POWER",
+              "type": "JST-PH 2.0mm",
+              "pin_count": 4,
+              "signals": [
+                "3V3",
+                "GND",
+                "5V",
+                "GND_5V_RETURN"
+              ],
+              "pin_order_constraint": "May be arranged to suit the layout, provided the matching main-board connector uses the same order"
+            }
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E005",
+          "source_message": {
             "message_id": 235,
             "speaker": "freelancer",
             "text": "Pin 1 is +5V"
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -1836,7 +1975,7 @@
           }
         },
         {
-          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E005",
+          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E006",
           "source_message": {
             "message_id": 347,
             "speaker": "client",
@@ -1844,6 +1983,18 @@
           },
           "event_type": "MODIFY",
           "value_updates": {
+            "power_to_main_power_connector": {
+              "designation": "J_PWR_PWR",
+              "type": "JST-PH 2.0mm",
+              "pin_count": 4,
+              "signals": [
+                "3V3",
+                "GND",
+                "5V",
+                "GND_5V_RETURN"
+              ],
+              "pin_order_constraint": "May be arranged to suit the layout, provided the matching main-board connector uses the same order"
+            },
             "board_power_topology": "power board → main board → sensor board",
             "main_board_power_distribution": {
               "input_connector": "J_PWR_PWR",
@@ -1851,6 +2002,7 @@
               "sensor_board_output_connector": "J_SENSOR_PWR"
             }
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -1865,7 +2017,7 @@
           "execution": null
         },
         {
-          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E006",
+          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E007",
           "source_message": {
             "message_id": 371,
             "speaker": "client",
@@ -1896,7 +2048,39 @@
               ]
             }
           },
+          "value_removals": null,
           "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_MODULAR_INTERBOARD_INTERFACE_E008",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "modular_interboard_interface_status": "removed by the integrated single-board design"
+          },
+          "value_removals": [
+            "connector_selection_reason",
+            "power_to_main_power_connector",
+            "power_to_main_signal_connector",
+            "board_power_topology",
+            "main_board_power_distribution",
+            "main_to_sensor_power_connector",
+            "main_to_sensor_signal_connector"
+          ],
+          "scope_updates": {
+            "persistence": null,
+            "components": null,
+            "contexts": [
+              "INTEGRATED_BOARD",
+              "INTERBOARD_CONNECTION"
+            ]
+          },
           "ambiguity": null,
           "execution": null
         }
@@ -1918,6 +2102,7 @@
           "value_updates": {
             "board_role": "provide connectors for sensors"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -1935,12 +2120,34 @@
         {
           "event_id": "REQ_SENSOR_MODULE_INTERFACES_E002",
           "source_message": {
+            "message_id": 263,
+            "speaker": "client",
+            "text": "3.3V rail (AXP2101 DCDC1, 2A) — primary power source when power board is connected:\n\\- ESP32-S3 module\n\\- INA219\n\\- All I2C sensors (SCD41, BME280, ENS160) via sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — controlled by ESP32 GPIO3:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (if wired to 5V — depends on version)\n\n3.3V rail (ME6211A LDO, 1A) — only active when USB-C on main board connected WITHOUT power board:\n\\- Same 3.3V rail as above — Schottky diode OR-ing means whichever source is present wins. Used for standalone programming.\n\nBattery (3.7–4.2V) — feeds AXP2101 which then feeds everything above.\n\nSimple rule: in normal operation AXP2101 powers everything. The LDO only kicks in when programming without the power board connected."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "i2c_sensor_modules": [
+              "SCD41",
+              "BME280",
+              "ENS160"
+            ],
+            "i2c_sensor_supply": "3.3V via the sensor board"
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SENSOR_MODULE_INTERFACES_E003",
+          "source_message": {
             "message_id": 369,
             "speaker": "freelancer",
             "text": "It is not entirely clear to me which connectors should be on that board"
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -1949,7 +2156,7 @@
           "execution": null
         },
         {
-          "event_id": "REQ_SENSOR_MODULE_INTERFACES_E003",
+          "event_id": "REQ_SENSOR_MODULE_INTERFACES_E004",
           "source_message": {
             "message_id": 371,
             "speaker": "client",
@@ -2003,6 +2210,13 @@
               {
                 "module": "SPS30",
                 "connector": "5-pin JST-ZH 1.5mm",
+                "pins": [
+                  "5V",
+                  "SDA0",
+                  "SCL0",
+                  "SEL→GND",
+                  "GND"
+                ],
                 "matches_supplied_cable": true
               },
               {
@@ -2031,12 +2245,13 @@
             ],
             "connector_count": 10
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_SENSOR_MODULE_INTERFACES_E004",
+          "event_id": "REQ_SENSOR_MODULE_INTERFACES_E005",
           "source_message": {
             "message_id": 371,
             "speaker": "client",
@@ -2044,7 +2259,36 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_SENSOR_MODULE_INTERFACES_E006",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "board_role": "provide connectors for external sensor modules on the integrated board",
+            "i2c_sensor_supply": "3.3V from the integrated board to the external I2C sensor modules",
+            "connector_placement": "flexible among the three proposed board sides"
+          },
+          "value_removals": [
+            "main_board_input_connectors",
+            "connector_count"
+          ],
+          "scope_updates": {
+            "persistence": null,
+            "components": null,
+            "contexts": [
+              "INTEGRATED_BOARD",
+              "SENSOR_MODULE_CONNECTIONS"
+            ]
+          },
           "ambiguity": null,
           "execution": null
         }
@@ -2066,6 +2310,7 @@
           "value_updates": {
             "sel_pin_connection": "GND"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2093,6 +2338,7 @@
             "sel_pin_connection": "hardwired_to_gnd_on_pcb",
             "required_operating_mode": "I2C"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2106,6 +2352,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -2129,6 +2376,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -2149,6 +2397,7 @@
             "on_board_level_shifter": "omit entirely",
             "future_5v_logic_sensor_support": "use a separate adapter board"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2173,6 +2422,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2196,6 +2446,7 @@
             "board_role": "small separate LED board",
             "addressable_led_count": 8
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2212,12 +2463,29 @@
         {
           "event_id": "REQ_LED_INDICATOR_BOARD_E002",
           "source_message": {
+            "message_id": 263,
+            "speaker": "client",
+            "text": "3.3V rail (AXP2101 DCDC1, 2A) — primary power source when power board is connected:\n\\- ESP32-S3 module\n\\- INA219\n\\- All I2C sensors (SCD41, BME280, ENS160) via sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — controlled by ESP32 GPIO3:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (if wired to 5V — depends on version)\n\n3.3V rail (ME6211A LDO, 1A) — only active when USB-C on main board connected WITHOUT power board:\n\\- Same 3.3V rail as above — Schottky diode OR-ing means whichever source is present wins. Used for standalone programming.\n\nBattery (3.7–4.2V) — feeds AXP2101 which then feeds everything above.\n\nSimple rule: in normal operation AXP2101 powers everything. The LDO only kicks in when programming without the power board connected."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "led_family": "SK6812"
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_LED_INDICATOR_BOARD_E003",
+          "source_message": {
             "message_id": 394,
             "speaker": "client",
             "text": "Perfect, regarding leds, I think we need lever shifter. Also, the LED board doc has C2890036 (SK6812 Mini-E, 3228 package). You shared C5142047 (SK6812SMINI-ER, 2835 package) which one are you planning to use exactly so I can update the documents?"
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -2226,7 +2494,7 @@
           "execution": null
         },
         {
-          "event_id": "REQ_LED_INDICATOR_BOARD_E003",
+          "event_id": "REQ_LED_INDICATOR_BOARD_E004",
           "source_message": {
             "message_id": 432,
             "speaker": "client",
@@ -2239,19 +2507,7 @@
             "led_package": "3228 (3.2×2.8mm), 4-pad SMD",
             "led_color_format": "RGBW"
           },
-          "scope_updates": null,
-          "ambiguity": null,
-          "execution": null
-        },
-        {
-          "event_id": "REQ_LED_INDICATOR_BOARD_E004",
-          "source_message": {
-            "message_id": 432,
-            "speaker": "client",
-            "text": "LCSC C5149201 — SK6812MINI-E by OPSCO Optoelectronics, 3228 package (3.2×2.8mm), 4-pad SMD, RGBW"
-          },
-          "event_type": "RESUME",
-          "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2259,28 +2515,13 @@
         {
           "event_id": "REQ_LED_INDICATOR_BOARD_E005",
           "source_message": {
-            "message_id": 477,
+            "message_id": 432,
             "speaker": "client",
-            "text": "regarding led board, seems that 3.3v and data are swapped pins compared to main board"
-          },
-          "event_type": "AMBIGUOUS",
-          "value_updates": null,
-          "scope_updates": null,
-          "ambiguity": {
-            "dimension": "VALUE",
-            "description": "The client suspects that the LED-board power and data connector pins do not match the main-board connector."
-          },
-          "execution": null
-        },
-        {
-          "event_id": "REQ_LED_INDICATOR_BOARD_E006",
-          "source_message": {
-            "message_id": 483,
-            "speaker": "client",
-            "text": "not sure how I got it wrong, I opened again now and it is 3.3V"
+            "text": "LCSC C5149201 — SK6812MINI-E by OPSCO Optoelectronics, 3228 package (3.2×2.8mm), 4-pad SMD, RGBW"
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2304,6 +2545,7 @@
             "external_backlight_required": true,
             "display_type": "e-paper"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2326,6 +2568,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -2354,6 +2597,7 @@
             "flyback_diode_required": false,
             "worst_case_current": "~70mA"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2367,6 +2611,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2394,6 +2639,7 @@
               "location": "corners"
             }
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2421,6 +2667,7 @@
             "mounting_hole_size": "M2.5",
             "aspect_ratio": "approximately 2:1 and not square"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2434,9 +2681,9 @@
           },
           "event_type": "MODIFY",
           "value_updates": {
-            "jst_connector_form": "L-shaped as in the first picture",
             "base_integration": "board must remain compatible with plugging into the base"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2452,27 +2699,15 @@
           "value_updates": {
             "enclosure_fit_orientation": "must fit vertically in the depicted 3D-printed base arrangement"
           },
+          "value_removals": [
+            "enclosure_orientation"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
           "event_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT_E005",
-          "source_message": {
-            "message_id": 124,
-            "speaker": "client",
-            "text": "perfect then lets do 4 layers, and what is the price if they include component assemply?"
-          },
-          "event_type": "MODIFY",
-          "value_updates": {
-            "pcb_layer_count": 4
-          },
-          "scope_updates": null,
-          "ambiguity": null,
-          "execution": null
-        },
-        {
-          "event_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT_E006",
           "source_message": {
             "message_id": 510,
             "speaker": "client",
@@ -2481,14 +2716,16 @@
           "event_type": "MODIFY",
           "value_updates": {
             "installed_board_orientation": "vertical",
-            "connector_access": "top access preferred, with side access acceptable for smaller connectors"
+            "connector_access": "top access preferred, with side access acceptable for smaller connectors",
+            "prototype_dimensions": "flexible"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT_E007",
+          "event_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT_E006",
           "source_message": {
             "message_id": 526,
             "speaker": "freelancer",
@@ -2496,12 +2733,27 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports that the current power board measures 40 × 30 mm."
           }
+        },
+        {
+          "event_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT_E007",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "REMOVE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
         }
       ]
     },
@@ -2519,6 +2771,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -2539,6 +2792,7 @@
             "high_pin_count_connector_placement": "long top edge, not the sides or bottom",
             "sensor_interboard_connector_alignment": "J_SENSOR_PWR and J_SENSOR_SIG aligned with the corresponding sensor-board connectors"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2564,6 +2818,7 @@
           "value_updates": {
             "bottom_side_connector_policy": "minimize connectors because the bottom side is difficult to access"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2580,6 +2835,7 @@
             "small_connector_placement": "top preferred for access, with side placement allowed for smaller connectors",
             "prototype_dimensions": "adjustable"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2595,6 +2851,7 @@
           "value_updates": {
             "unused_pin_hole_placement": "may be placed anywhere rather than around the ESP32"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2609,9 +2866,9 @@
           "event_type": "MODIFY",
           "value_updates": {
             "board_dimensions": "70×50 mm",
-            "connector_architecture": "retain individual JST connectors rather than consolidating them into one large connector",
             "esp32_placement": "on the PCB edge"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2625,6 +2882,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2640,6 +2898,21 @@
           "value_updates": {
             "bottom_connector_orientation": "use straight connectors pointing away from the board instead of right-angle connectors"
           },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_MAIN_BOARD_MECHANICAL_LAYOUT_E009",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "REMOVE",
+          "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2665,6 +2938,7 @@
             "interboard_connector_alignment": "J_SENSOR_PWR and J_SENSOR_SIG aligned with their matching main-board connectors along the top edge",
             "interboard_cable_routing": "short and straight"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2691,6 +2965,7 @@
           "value_updates": {
             "bottom_side_connector_placement": "minimize because the bottom side is difficult to access"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2707,6 +2982,7 @@
             "prototype_dimensions": "flexible",
             "connector_access": "top placement preferred, with side placement acceptable for smaller connectors"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2723,6 +2999,7 @@
             "bottom_connector_repositioning": "move upward",
             "moved_connector_orientation": "top-down"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2736,12 +3013,27 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports that the sensor-board layout was completed on a two-layer PCB."
           }
+        },
+        {
+          "event_id": "REQ_SENSOR_BOARD_MECHANICAL_LAYOUT_E006",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "REMOVE",
+          "value_updates": null,
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
         }
       ]
     },
@@ -2761,6 +3053,7 @@
           "value_updates": {
             "board_orientation": "vertical"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2786,6 +3079,9 @@
           "value_updates": {
             "orientation_constraint": "Horizontal orientation is also permitted if it provides an advantage."
           },
+          "value_removals": [
+            "board_orientation"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2799,9 +3095,11 @@
           },
           "event_type": "MODIFY",
           "value_updates": {
-            "orientation_selection": "Use whichever board orientation produces the cleanest connector layout.",
-            "enclosure_adaptation": "Fit the enclosure to the resulting board orientation."
+            "orientation_selection": "Use whichever board orientation produces the cleanest connector layout."
           },
+          "value_removals": [
+            "orientation_constraint"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2819,6 +3117,7 @@
             "display_connector_placement": "Group J_DISP_SPI, J_DISP_I2C, and J_DISP_LED on the edge closest to the display-flex route.",
             "esp32_antenna_placement": "Face the ESP32-S3 antenna end away from the battery and maintain at least 3 mm keepout."
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2834,6 +3133,7 @@
           "value_updates": {
             "connector_edge_flexibility": "Connectors may be placed across the proposed three board sides as needed."
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2857,6 +3157,7 @@
             "component_selection_policy": "Use standard, easily sourced components.",
             "availability_proxy": "Availability on AliExpress is an acceptable initial sourceability check."
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -2883,6 +3184,7 @@
             "usb_connector_cost_tolerance": "A premium connector is acceptable when compatible alternatives are available.",
             "usb_connector_availability": "Avoid a connector that may not remain continuously available."
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -2896,6 +3198,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -2914,6 +3217,7 @@
           "value_updates": {
             "interboard_connector_sourceability_strategy": "Replace the hard-to-source 13-pin interboard connector with a JST-PH power connector and JST-GH signal connectors."
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -2936,6 +3240,7 @@
           "value_updates": {
             "jlcpcb_extended_part_policy": "Review passive-component selections, including alternative package sizes, to reduce unnecessary JLCPCB Extended-part setup fees."
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -2957,6 +3262,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -2973,6 +3279,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -2989,6 +3296,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3005,6 +3313,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3023,6 +3332,7 @@
           "value_updates": {
             "integrated_board_component_policy": "For the integrated single-board redesign, minimize cost and use JLCPCB Basic components as much as possible while preserving functionality."
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -3047,6 +3357,23 @@
           "value_updates": {
             "development_board_connector_cost_exception": "Through-hole connectors are acceptable for development boards despite an additional assembly cost of approximately $4 per board."
           },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_COMPONENT_SOURCEABILITY_E012",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "MODIFY",
+          "value_updates": null,
+          "value_removals": [
+            "interboard_connector_sourceability_strategy"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3070,6 +3397,7 @@
             "lcsc_part_numbers_required_for_assembled_components": true,
             "bom_entries_must_match_design_specification": true
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "TASK_LOCAL",
             "components": [
@@ -3093,11 +3421,12 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
             "status": "FAILED",
-            "observed_behavior": "Client inspection found that capacitor entries C1-C18 lacked the LCSC part numbers needed for assembly and that several resistor and jumper entries did not match the supplied specification."
+            "observed_behavior": "Client inspection found that capacitor entries C1-C18 lacked the LCSC part numbers needed for JLCPCB assembly."
           }
         },
         {
@@ -3109,6 +3438,7 @@
           },
           "event_type": "DEFER",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3122,6 +3452,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3138,6 +3469,7 @@
             "r6_resistance": "270Ω",
             "r6_dnp": false
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3145,12 +3477,29 @@
         {
           "event_id": "REQ_ASSEMBLY_READY_BOM_E006",
           "source_message": {
+            "message_id": 374,
+            "speaker": "client",
+            "text": "The SK6812 minimum supply voltage is 3.5–3.7V so 3.3V is actually below spec, the LED might not light up reliably. Power it from 5V and use the 74AHCT1G125 level shifter (LCSC C151417) on the data line since at 5V the data threshold becomes 3.5V which is above what the ESP32 outputs. That's already in the design, so no changes needed just replace the IRLML2402 with the 74AHCT1G125."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "addressable_led_data_level_shifter_part": "74AHCT1G125 (LCSC C151417)"
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E007",
+          "source_message": {
             "message_id": 407,
             "speaker": "freelancer",
             "text": "In the first picture, 1u and 0.1u have the same part number"
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3159,7 +3508,63 @@
           }
         },
         {
-          "event_id": "REQ_ASSEMBLY_READY_BOM_E007",
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E008",
+          "source_message": {
+            "message_id": 432,
+            "speaker": "client",
+            "text": "LCSC C5149201 — SK6812MINI-E by OPSCO Optoelectronics, 3228 package (3.2×2.8mm), 4-pad SMD, RGBW"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "led_component_bom_entry": {
+              "lcsc_part_number": "C5149201",
+              "model": "SK6812MINI-E by OPSCO Optoelectronics",
+              "package": "3228 (3.2×2.8mm), 4-pad SMD",
+              "color_format": "RGBW"
+            }
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E009",
+          "source_message": {
+            "message_id": 444,
+            "speaker": "client",
+            "text": "The LEDs are now powered from 3.3V instead of 5V. At 3.3V supply the SK6812 data threshold drops to 2.31V, which the ESP32 3.3V output satisfies directly, so no level shifter is needed. The tradeoff is that 3.3V is slightly below the SK6812 datasheet minimum (3.7V), but it works reliably at indicator brightness levels."
+          },
+          "event_type": "MODIFY",
+          "value_updates": null,
+          "value_removals": [
+            "addressable_led_data_level_shifter_part"
+          ],
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E010",
+          "source_message": {
+            "message_id": 468,
+            "speaker": "client",
+            "text": "I updated the docs with new transistors."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "addressable_led_power_switching_transistors": [
+              "IRLML2402",
+              "IRLML6402"
+            ]
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E011",
           "source_message": {
             "message_id": 599,
             "speaker": "client",
@@ -3169,12 +3574,13 @@
           "value_updates": {
             "sensor_board_bom_required": true
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_ASSEMBLY_READY_BOM_E008",
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E012",
           "source_message": {
             "message_id": 599,
             "speaker": "client",
@@ -3182,6 +3588,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3190,7 +3597,48 @@
           }
         },
         {
-          "event_id": "REQ_ASSEMBLY_READY_BOM_E009",
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E013",
+          "source_message": {
+            "message_id": 802,
+            "speaker": "client",
+            "text": "Hi Dusko — quick context on J\\_DISP\\_LED:\n\nThe e-paper has no built-in light, so we're adding an external LED behind it as a backlight. I haven't picked the final LED yet (testing a 5V COB strip first, may switch to a 3.3V frontlight module later), so the circuit needs to cover both.\n\nPlease populate for this build:\n\\- BSS138 (low-side switch, GPIO42 PWM controls brightness)\n\\- 10kΩ gate resistor + 10kΩ gate pull-down (keeps LED off during boot)\n\\- 5V jumper on Pin 1 — leave the 3V3 jumper footprint empty\n\\- 4.7µF X5R 0603 cap from Pin 1 to GND (PWM ripple decoupling)\n\\- Series resistor footprint: leave DNP (LED strip self-limits)\n\\- No flyback diode — LED is resistive, not inductive\n\nWorst-case current is ~70mA (5W/m strip × 67mm cut), well inside BSS138's 200mA rating.\n\nThe 3V3 jumper + DNP series R footprint exist only as fallback for a future bare-LED option — costs nothing to leave them empty now.\n\nFull spec is in <http://pcb-integrated-v2.md|pcb-integrated-v2.md> under the J\\_DISP\\_LED rows / pinout / Critical Routing."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "j_disp_led_current_build_population": {
+              "bss138_low_side_switch": "populate",
+              "gate_resistor": "populate 10kΩ",
+              "gate_pull_down": "populate 10kΩ",
+              "pin_1_5v_jumper": "populate",
+              "pin_1_3v3_jumper": "leave footprint empty",
+              "decoupling_capacitor": "populate 4.7µF X5R 0603 from Pin 1 to GND",
+              "series_resistor": "DNP",
+              "flyback_diode": "not required"
+            }
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E014",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "MODIFY",
+          "value_updates": null,
+          "value_removals": [
+            "sensor_board_bom_required"
+          ],
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E015",
           "source_message": {
             "message_id": 898,
             "speaker": "freelancer",
@@ -3198,6 +3646,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3206,7 +3655,7 @@
           }
         },
         {
-          "event_id": "REQ_ASSEMBLY_READY_BOM_E010",
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E016",
           "source_message": {
             "message_id": 929,
             "speaker": "client",
@@ -3214,6 +3663,7 @@
           },
           "event_type": "RUNTIME_VERIFICATION",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3222,7 +3672,7 @@
           }
         },
         {
-          "event_id": "REQ_ASSEMBLY_READY_BOM_E011",
+          "event_id": "REQ_ASSEMBLY_READY_BOM_E017",
           "source_message": {
             "message_id": 1007,
             "speaker": "client",
@@ -3230,6 +3680,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3261,6 +3712,7 @@
             ],
             "board": "sensor board"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "TASK_LOCAL",
             "components": [
@@ -3286,6 +3738,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3302,12 +3755,41 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
             "status": "FAILED",
             "observed_behavior": "The client reports that one of the checked boards had no production exports."
           }
+        },
+        {
+          "event_id": "REQ_PRODUCTION_FILE_PACKAGE_E004",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "separate_sensor_board_production_package_required": false
+          },
+          "value_removals": [
+            "required_files",
+            "board"
+          ],
+          "scope_updates": {
+            "persistence": null,
+            "components": null,
+            "contexts": [
+              "INTEGRATED_BOARD",
+              "PRODUCTION_HANDOFF",
+              "PCB_FABRICATION",
+              "PCB_ASSEMBLY"
+            ]
+          },
+          "ambiguity": null,
+          "execution": null
         }
       ]
     },
@@ -3325,6 +3807,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3341,6 +3824,7 @@
           },
           "event_type": "RUNTIME_VERIFICATION",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3363,6 +3847,7 @@
               "TS-1088-AR02016.step"
             ]
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3376,6 +3861,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3392,6 +3878,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3410,6 +3897,7 @@
           "value_updates": {
             "model_reference_path_policy": "Use project-relative ${KIPRJMOD}/libs/easyeda/easyeda.3dshapes/... paths instead of absolute machine-local paths."
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3425,6 +3913,7 @@
           "value_updates": {
             "kicad_library_variable_compatibility": "Library references must remain compatible with KiCad 9 rather than relying on the KiCad 8-only ${KICAD8_3RD_PARTY} variable."
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3447,6 +3936,7 @@
           "value_updates": {
             "assembly_order_review": "select suitable assembly settings and determine the price and component availability"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "TASK_LOCAL",
             "components": [
@@ -3464,6 +3954,22 @@
         {
           "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E002",
           "source_message": {
+            "message_id": 401,
+            "speaker": "client",
+            "text": "Also there are a lot of Extended components which is $3 setup fee, so I have to pay $44 just for setup even resistors and capaticors. Please check the image.\nMaybe we use non standard for the size 0603 vs 0805 or something like that? I mean for AXP I expected it, for caps and resistors is weird. What do you think?"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "extended_part_setup_fee_review": "Include JLCPCB Extended-part setup fees in the assembly-price review and identify avoidable fees from passive-component selections, including by reviewing alternative package sizes such as 0603 versus 0805."
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E003",
+          "source_message": {
             "message_id": 410,
             "speaker": "client",
             "text": "I think when we finish everything only way to do this is that you help me order, as otherwise I will most probably order something wrong :)"
@@ -3472,12 +3978,13 @@
           "value_updates": {
             "ordering_assistance": "help the client complete the manufacturer order after the boards are finished"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E003",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E004",
           "source_message": {
             "message_id": 616,
             "speaker": "client",
@@ -3487,12 +3994,13 @@
           "value_updates": {
             "order_setup_check": "add the completed boards to JLCPCB and check for ordering issues"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E004",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E005",
           "source_message": {
             "message_id": 640,
             "speaker": "client",
@@ -3502,12 +4010,13 @@
           "value_updates": {
             "account_setup_method": "add the boards to the client's JLCPCB account through an email invitation"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E005",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E006",
           "source_message": {
             "message_id": 646,
             "speaker": "freelancer",
@@ -3515,6 +4024,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3523,7 +4033,7 @@
           }
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E006",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E007",
           "source_message": {
             "message_id": 664,
             "speaker": "freelancer",
@@ -3531,6 +4041,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3539,7 +4050,7 @@
           }
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E007",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E008",
           "source_message": {
             "message_id": 675,
             "speaker": "freelancer",
@@ -3547,6 +4058,7 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3555,7 +4067,7 @@
           }
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E008",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E009",
           "source_message": {
             "message_id": 686,
             "speaker": "client",
@@ -3565,12 +4077,13 @@
           "value_updates": {
             "sensor_board_order_sequence": "wait for the missing parts, then add the Sensor board and order all boards together"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E009",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E010",
           "source_message": {
             "message_id": 687,
             "speaker": "freelancer",
@@ -3578,15 +4091,16 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
             "status": "CLAIMED_WORKING",
-            "observed_behavior": "The freelancer reports that the out-of-stock components have been added to the parts cart."
+            "observed_behavior": "The freelancer reports that the out-of-stock components are in the cart."
           }
         },
         {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E010",
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E011",
           "source_message": {
             "message_id": 708,
             "speaker": "client",
@@ -3594,31 +4108,32 @@
           },
           "event_type": "RUNTIME_FAILURE",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
             "status": "FAILED",
-            "observed_behavior": "The main-board setup in JLCPCB still reports two missing components after the client proceeds through the configuration steps."
-          }
-        },
-        {
-          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E011",
-          "source_message": {
-            "message_id": 734,
-            "speaker": "freelancer",
-            "text": "Finished"
-          },
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "value_updates": null,
-          "scope_updates": null,
-          "ambiguity": null,
-          "execution": {
-            "status": "CLAIMED_WORKING",
-            "observed_behavior": "The freelancer reports completing the requested connector additions in the JLCPCB setup."
+            "observed_behavior": "The JLCPCB board setup still reports two missing components after the client proceeds through the configuration steps."
           }
         },
         {
           "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E012",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "MODIFY",
+          "value_updates": null,
+          "value_removals": [
+            "sensor_board_order_sequence"
+          ],
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_MANUFACTURING_ORDER_SETUP_E013",
           "source_message": {
             "message_id": 899,
             "speaker": "client",
@@ -3628,6 +4143,7 @@
           "value_updates": {
             "current_board_setup": "add the current board to JLCPCB for order and component-availability review"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3652,6 +4168,7 @@
             "directly_integrated_sensor_module_count": 3,
             "sensor_mounting": "sensor modules mounted directly on the board"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -3675,6 +4192,7 @@
           },
           "event_type": "DEFER",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3688,6 +4206,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "LIFECYCLE",
@@ -3725,6 +4244,7 @@
             "air_outtake_location": "top",
             "led_light_transmission": "Semi-transparent plexiglass strip or a grid pattern"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -3748,6 +4268,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -3767,6 +4288,7 @@
             "assembly_requirement": "Easy to assemble",
             "component_retention_requirement": "All components remain secured in place if the device is dropped"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3782,6 +4304,65 @@
           "value_updates": {
             "board_orientation_dependency": "Fit the enclosure to the finalized board orientation and connector layout"
           },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_DEVICE_ENCLOSURE_E005",
+          "source_message": {
+            "message_id": 842,
+            "speaker": "client",
+            "text": "some constraints I can think of:\n\nConstraints regardless of orientation:\n\\- J\\_BAT on a short edge (battery sits alongside PCB)\n\\- USB-C on a short edge (user-facing)\n\\- Display connectors (J\\_DISP\\_SPI / J\\_DISP\\_I2C / J\\_DISP\\_LED) grouped together on the edge closest to where the display flex will route\n\\- ESP32-S3 antenna end facing away from battery, ≥3mm keepout"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "battery_and_board_arrangement": "Battery sits alongside the PCB, with J_BAT on a short edge."
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_DEVICE_ENCLOSURE_E006",
+          "source_message": {
+            "message_id": 843,
+            "speaker": "client",
+            "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "contained_hardware": [
+              "one integrated board",
+              "18650 battery",
+              "sensors",
+              "buttons",
+              "LEDs"
+            ],
+            "base_mounted_hardware": [
+              "integrated board",
+              "battery"
+            ]
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_DEVICE_ENCLOSURE_E007",
+          "source_message": {
+            "message_id": 860,
+            "speaker": "client",
+            "text": "Thanks for sharing, everything looks good, I can see only one potential issue. The connector above usb, probably battery since is is L shape and usb must go through case opening then we will not be able to plug the battery cable in it as case will get in the way."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "battery_connector_accessibility": "The enclosure must not obstruct battery-cable insertion when USB-C passes through the case opening."
+          },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3802,6 +4383,7 @@
           },
           "event_type": "IMPLEMENTATION_CLAIM",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": {
@@ -3827,6 +4409,7 @@
               "NTC"
             ]
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3842,6 +4425,7 @@
           "value_updates": {
             "mounting_type": "SMD"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3855,6 +4439,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -3881,6 +4466,7 @@
             "placement": "next to the board JST connector",
             "connector_orientation": "L-shaped"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -3907,6 +4493,7 @@
             "mounting_hole_clearance": "must not cover mounting holes",
             "connector_spacing": "retain a small gap between the adjacent connectors"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3922,6 +4509,7 @@
           "value_updates": {
             "placement": "on the back, opposite the USB-C connector"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3937,6 +4525,7 @@
           "value_updates": {
             "placement": "on a short edge with the battery alongside the PCB"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": null,
             "components": null,
@@ -3959,6 +4548,7 @@
           "value_updates": {
             "enclosure_accessibility": "battery connector placement must permit battery-cable insertion when USB-C passes through the case opening"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3981,6 +4571,7 @@
           "value_updates": {
             "led_supply_voltage": "3.3V"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -3994,10 +4585,11 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
-            "description": "The selected LED datasheet minimum conflicts with the intended 3.3V supply, leaving the supply and data-level solution unresolved."
+            "description": "The freelancer's cited 3.7–5.5V operating range conflicts with the client's intended 3.3V LED supply."
           },
           "execution": null
         },
@@ -4013,6 +4605,7 @@
             "led_supply_voltage": "5V",
             "data_level_shifter_required": true
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4026,6 +4619,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4039,6 +4633,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -4059,6 +4654,7 @@
             "data_level_shifter_required": true,
             "data_level_shifter_part": "74AHCT1G125 (LCSC C151417)"
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4072,6 +4668,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4085,6 +4682,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -4104,8 +4702,12 @@
             "led_supply_voltage": "3.3V",
             "data_drive": "Direct ESP32 3.3V output",
             "data_level_shifter_required": false,
-            "accepted_operating_condition": "Indicator brightness levels"
+            "accepted_operating_condition": "Indicator brightness levels",
+            "supply_voltage_tradeoff": "3.3V is below the SK6812 datasheet minimum of 3.7V but is accepted for reliable operation at indicator brightness levels"
           },
+          "value_removals": [
+            "data_level_shifter_part"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4119,6 +4721,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4143,6 +4746,7 @@
             "control_gpio": "GPIO3",
             "standby_current_target": "zero"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -4160,6 +4764,22 @@
         {
           "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E002",
           "source_message": {
+            "message_id": 291,
+            "speaker": "client",
+            "text": "Sorry, GPIO3 was from my original ESP32 design — mistake on my side. For 5V_EN you can use GPIO5. Also I realized GPIO22, 23, 25, 27 are not exposed on the WROOM-1 module, so I need to reassign SCL0 (GPIO22→38), SPI MOSI (GPIO23→26). I&#39;ll update the docs and send you the full updated GPIO table."
+          },
+          "event_type": "MODIFY",
+          "value_updates": {
+            "control_gpio": "GPIO5"
+          },
+          "value_removals": null,
+          "scope_updates": null,
+          "ambiguity": null,
+          "execution": null
+        },
+        {
+          "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E003",
+          "source_message": {
             "message_id": 425,
             "speaker": "client",
             "text": "I added separate control for led vs sensors so we might not need shifter"
@@ -4168,12 +4788,15 @@
           "value_updates": {
             "control_architecture": "LED power is controlled separately from sensor power"
           },
+          "value_removals": [
+            "control_gpio"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E003",
+          "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E004",
           "source_message": {
             "message_id": 459,
             "speaker": "freelancer",
@@ -4181,6 +4804,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -4189,7 +4813,7 @@
           "execution": null
         },
         {
-          "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E004",
+          "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E005",
           "source_message": {
             "message_id": 468,
             "speaker": "client",
@@ -4203,12 +4827,13 @@
               "IRLML6402"
             ]
           },
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
         },
         {
-          "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E005",
+          "event_id": "REQ_ADDRESSABLE_LED_STANDBY_SWITCHING_E006",
           "source_message": {
             "message_id": 468,
             "speaker": "client",
@@ -4216,6 +4841,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4240,6 +4866,7 @@
             "local_capacitor_max_distance_from_3v3_pin": "2 mm",
             "bulk_capacitor_placement": "C19 (10 µF) may remain at its existing position"
           },
+          "value_removals": null,
           "scope_updates": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
@@ -4264,6 +4891,7 @@
           },
           "event_type": "AMBIGUOUS",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": {
             "dimension": "VALUE",
@@ -4282,6 +4910,9 @@
           "value_updates": {
             "decoupling_capacitor_placement": "Leave C18 (0.1 µF) and C19 (10 µF) at their existing positions"
           },
+          "value_removals": [
+            "local_capacitor_max_distance_from_3v3_pin"
+          ],
           "scope_updates": null,
           "ambiguity": null,
           "execution": null
@@ -4295,6 +4926,7 @@
           },
           "event_type": "RESUME",
           "value_updates": null,
+          "value_removals": null,
           "scope_updates": null,
           "ambiguity": null,
           "execution": null

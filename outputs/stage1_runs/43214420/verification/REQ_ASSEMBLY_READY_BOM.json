@@ -13,7 +13,7 @@
       "evidence_message_ids": [
         146
       ],
-      "decision_note": "The client explicitly requires assembly part numbers and BOM entries consistent with the design specification.",
+      "decision_note": "The client establishes that the BOM must include assembly part numbers and remain consistent with the design specification.",
       "confidence": "HIGH"
     },
     {
@@ -22,12 +22,22 @@
         "event_type": "RUNTIME_FAILURE",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Client inspection found that capacitor entries C1-C18 lacked the LCSC part numbers needed for JLCPCB assembly."
+        }
+      },
       "evidence_message_ids": [
         146
       ],
-      "decision_note": "First concrete BOM inspection failure: required LCSC numbers were missing and entries appeared inconsistent with the specification.",
+      "decision_note": "This is the first concrete BOM failure, but the resistor questions do not establish that those entries were erroneous.",
       "confidence": "HIGH"
     },
     {
@@ -39,25 +49,9 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        147,
         149
       ],
       "decision_note": "The client explicitly postpones the BOM update until schematic and PCB review is complete.",
-      "confidence": "HIGH"
-    },
-    {
-      "event_locator": {
-        "message_id": 155,
-        "event_type": "RUNTIME_FAILURE",
-        "occurrence": 1
-      },
-      "verdict": "DELETE",
-      "replacement": null,
-      "evidence_message_ids": [
-        155,
-        159
-      ],
-      "decision_note": "The source raises an unresolved question about R6 rather than establishing a confirmed BOM failure or expected DNP value.",
       "confidence": "HIGH"
     },
     {
@@ -69,12 +63,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        195,
-        196,
         217,
         218
       ],
-      "decision_note": "After completing board review, the client requests the finished BOM and the freelancer confirms work will continue.",
+      "decision_note": "The client requests the latest BOM and the freelancer confirms that completion work will resume.",
       "confidence": "HIGH"
     },
     {
@@ -88,7 +80,35 @@
       "evidence_message_ids": [
         249
       ],
-      "decision_note": "The client explicitly changes R6 to 270Ω and removes its DNP designation.",
+      "decision_note": "The client changes R6's resistance and assembly population status, which the assembly BOM must encode.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 374,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        374
+      ],
+      "decision_note": "The client specifies an exact replacement component and LCSC number for the assembled design.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 401,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        401
+      ],
+      "decision_note": "This is a cost and component-sourceability review request better owned by REQ_COMPONENT_SOURCEABILITY, not a BOM-content modification.",
       "confidence": "HIGH"
     },
     {
@@ -100,12 +120,56 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        401,
         402,
         407
       ],
-      "decision_note": "Distinct BOM failure: inspection found different capacitor values assigned the same part number.",
+      "decision_note": "This is a distinct BOM failure: different capacitor values were assigned the same part number.",
       "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 432,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        431,
+        432,
+        433
+      ],
+      "decision_note": "The client supplies the exact LCSC part, model, package, and LED format required for the BOM entry.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 444,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        444
+      ],
+      "decision_note": "The switch to direct 3.3V logic makes the previously tracked level-shifter BOM attribute obsolete; the removed key exists before this Event.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 468,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        466,
+        468
+      ],
+      "decision_note": "The client confirms that the authoritative documents were updated with the two transistor parts identified in the immediate context.",
+      "confidence": "MEDIUM"
     },
     {
       "event_locator": {
@@ -134,24 +198,39 @@
         599,
         600
       ],
-      "decision_note": "Distinct board-specific failure: the sensor-board folder contained the power-board BOM.",
+      "decision_note": "This is a distinct artifact failure: the sensor-board folder contained the power-board BOM instead of its own BOM.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
-        "message_id": 607,
-        "event_type": "IMPLEMENTATION_CLAIM",
+        "message_id": 802,
+        "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "DELETE",
+      "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        599,
-        600,
-        605,
-        607
+        800,
+        802
       ],
-      "decision_note": "The generic statement about all required files does not identify the BOM in its source text and cannot be broadly propagated from supporting context.",
+      "decision_note": "The client gives explicit populate, empty-footprint, and DNP instructions that the assembly BOM must encode for the current build.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        841,
+        842,
+        843,
+        844
+      ],
+      "decision_note": "The confirmed consolidation to one board makes the separate sensor-board BOM requirement obsolete; the removed key exists before this Event.",
       "confidence": "HIGH"
     },
     {
@@ -166,7 +245,7 @@
         896,
         898
       ],
-      "decision_note": "Target-specific implementation claim: the freelancer explicitly states that the BOM contains everything.",
+      "decision_note": "This is a target-specific implementation claim that the BOM contains everything, while preserving the separate sourcing caveat.",
       "confidence": "HIGH"
     },
     {
@@ -178,12 +257,11 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        926,
         927,
         928,
         929
       ],
-      "decision_note": "First concrete verification: the client opens the latest main-board BOM, checks listed components and recent fixes, and confirms completeness.",
+      "decision_note": "This is the first concrete verification: the client opened the latest BOM and confirmed the listed components and fixes were present.",
       "confidence": "HIGH"
     },
     {
@@ -198,7 +276,7 @@
         1006,
         1007
       ],
-      "decision_note": "Post-verification manufacturing evidence identifies a distinct header-pin mismatch in the BOM.",
+      "decision_note": "This adds a distinct post-verification manufacturing-path finding: two header-pin entries mismatched the assembled parts.",
       "confidence": "HIGH"
     }
   ],

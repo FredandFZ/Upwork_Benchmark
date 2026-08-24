@@ -14,7 +14,7 @@
         314,
         315
       ],
-      "decision_note": "The client explicitly specifies the ESP32-S3-WROOM-1-N16R8 for the main board.",
+      "decision_note": "The client explicitly specifies the ESP32-S3-WROOM-1-N16R8 module for the main board.",
       "confidence": "HIGH"
     },
     {
@@ -26,13 +26,12 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        515,
-        519,
         521,
-        523
+        523,
+        528
       ],
-      "decision_note": "The freelancer reports a material routing conflict caused by the requested ESP32 breakout holes.",
-      "confidence": "HIGH"
+      "decision_note": "The freelancer raises a material routing conflict concerning the required breakout holes.",
+      "confidence": "MEDIUM"
     },
     {
       "event_locator": {
@@ -43,11 +42,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        515,
         523,
         528
       ],
-      "decision_note": "The client limits dedicated holes to unused pins and permits flexible placement.",
+      "decision_note": "The client clarifies which pins require dedicated holes and permits flexible hole placement.",
       "confidence": "HIGH"
     },
     {
@@ -62,7 +60,7 @@
         523,
         528
       ],
-      "decision_note": "The client resolves the breakout-hole arrangement conflict with an actionable clarification.",
+      "decision_note": "The client supplies a concrete placement clarification addressing the breakout-hole uncertainty.",
       "confidence": "HIGH"
     },
     {
@@ -74,11 +72,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        543,
         544,
         546
       ],
-      "decision_note": "The client explicitly makes through-hole full-pin access a hard requirement for reusable platform use.",
+      "decision_note": "The client explicitly makes through-hole full-pin access a hard requirement for reuse as a generic ESP32-S3 platform.",
       "confidence": "HIGH"
     },
     {
@@ -93,7 +90,7 @@
         546,
         547
       ],
-      "decision_note": "The tightly coupled correction explicitly sets the proposed breakout pitch to 1.27 mm.",
+      "decision_note": "The client corrects the proposed breakout pitch to 1.27 mm.",
       "confidence": "HIGH"
     },
     {
@@ -107,7 +104,7 @@
       "evidence_message_ids": [
         599
       ],
-      "decision_note": "The client raises a material uncertainty about whether the 40-pin breakout omits required GPIOs.",
+      "decision_note": "The client raises a material uncertainty about whether the 40-pin breakout omits GPIOs from the selected module.",
       "confidence": "HIGH"
     },
     {
@@ -122,7 +119,7 @@
         599,
         603
       ],
-      "decision_note": "Target-specific implementation claim: the freelancer states that all module pins are connected to through-hole pins.",
+      "decision_note": "Target-specific implementation claim that all 40 module pins are connected to through-hole pins.",
       "confidence": "HIGH"
     },
     {
@@ -134,13 +131,11 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        599,
-        603,
         609,
         610,
         611
       ],
-      "decision_note": "The client resolves the 44-versus-40-pin confusion by confirming that the actual module has 40 pins.",
+      "decision_note": "The client resolves the pin-count uncertainty by distinguishing the 40-pin module from a 44-pin development board.",
       "confidence": "HIGH"
     },
     {
@@ -155,7 +150,7 @@
         828,
         829
       ],
-      "decision_note": "The immediately coupled messages identify a material conflict between the PDF's 2.54 mm pitch and the earlier 1.27 mm agreement.",
+      "decision_note": "The freelancer identifies a material conflict between the integrated-board PDF's 2.54 mm pitch and the earlier 1.27 mm agreement.",
       "confidence": "HIGH"
     },
     {
@@ -164,14 +159,28 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "GENERIC_MCU_PLATFORM"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
         828,
         829,
         830
       ],
-      "decision_note": "The client confirms that the integrated-board PDF used a stale separate-board specification and will be corrected.",
+      "decision_note": "The client identifies the separate main-board specification as obsolete; the breakout requirement now applies to the integrated board while retaining its generic-platform purpose.",
       "confidence": "HIGH"
     },
     {
@@ -187,9 +196,53 @@
         829,
         830
       ],
-      "decision_note": "The client resolves the pitch conflict by identifying the PDF value as outdated.",
+      "decision_note": "The client confirms that the conflicting PDF is outdated and will be corrected to the prior pitch decision.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        841,
+        842,
+        843,
+        844
+      ],
+      "decision_note": "The message addresses connector placement and general one-board architecture, adding no target-specific scope change beyond message 830.",
       "confidence": "HIGH"
     }
   ],
-  "missing_event_candidates": []
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 611,
+        "speaker": "client",
+        "text": "that&#39;s why it has 44, but actual module is 40"
+      },
+      "supporting_message_ids": [
+        609,
+        610
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "module_pin_count": 40
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null,
+      "evidence_message_ids": [
+        609,
+        610,
+        611
+      ],
+      "decision_note": "Before resuming the Requirement, the client establishes the selected module's actual pin count as 40.",
+      "confidence": "HIGH"
+    }
+  ]
 }

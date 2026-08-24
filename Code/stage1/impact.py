@@ -73,6 +73,121 @@ def impact_case_filename(case: dict[str, Any]) -> str:
     return safe_filename(f"{requirement_id}_{message_id}_{event_type}_{occurrence}.json")
 
 
+def reconcile_redundant_value_removals(
+    events_by_requirement: dict[str, list[dict[str, Any]]],
+    normalized: dict[str, Any],
+    *,
+    requirement_ids: set[str] | None = None,
+) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
+    """Remove only later, provably redundant attribute removals.
+
+    Impact propagation can insert an earlier Event that deletes an attribute
+    which a pre-existing later Event also deletes.  The earlier deletion is the
+    first effective state transition, so the later removal becomes a no-op.
+
+    A removal of an attribute that has never existed is deliberately preserved;
+    the ordinary Stage 1 validator must still reject it.  Reintroduced
+    attributes are present again and therefore remain valid removal targets.
+    """
+    _, message_order = message_index(normalized)
+    reconciled = deepcopy(events_by_requirement)
+    records: list[dict[str, Any]] = []
+
+    for requirement_id, requirement_events in reconciled.items():
+        if requirement_ids is not None and requirement_id not in requirement_ids:
+            continue
+        indexed = list(enumerate(requirement_events))
+        indexed.sort(
+            key=lambda pair: (
+                message_order.get(
+                    id_key(pair[1].get("source_message", {}).get("message_id")),
+                    len(message_order),
+                ),
+                pair[0],
+            )
+        )
+        ordered_events = [event for _, event in indexed]
+        current_attributes: set[str] = set()
+        ever_seen: set[str] = set()
+        last_removal_message: dict[str, Any] = {}
+        kept_events: list[dict[str, Any]] = []
+
+        for event in ordered_events:
+            removals = event.get("value_removals")
+            removed_as_redundant: list[str] = []
+            earlier_removals: list[dict[str, Any]] = []
+            if (
+                isinstance(removals, list)
+                and all(isinstance(attribute, str) for attribute in removals)
+                and len(removals) == len(set(removals))
+            ):
+                retained_removals: list[str] = []
+                for attribute in removals:
+                    if not isinstance(attribute, str):
+                        retained_removals.append(attribute)
+                    elif attribute in current_attributes:
+                        retained_removals.append(attribute)
+                    elif attribute in ever_seen and attribute in last_removal_message:
+                        removed_as_redundant.append(attribute)
+                        earlier_removals.append(
+                            {
+                                "attribute": attribute,
+                                "message_id": last_removal_message[attribute],
+                            }
+                        )
+                    else:
+                        # Preserve never-established removals so validation fails
+                        # instead of silently laundering an invalid model output.
+                        retained_removals.append(attribute)
+                if removed_as_redundant:
+                    event["value_removals"] = retained_removals or None
+
+            effective_removals = event.get("value_removals")
+            if isinstance(effective_removals, list):
+                for attribute in effective_removals:
+                    if isinstance(attribute, str) and attribute in current_attributes:
+                        current_attributes.remove(attribute)
+                        last_removal_message[attribute] = event.get("source_message", {}).get(
+                            "message_id"
+                        )
+
+            updates = event.get("value_updates")
+            if isinstance(updates, dict):
+                for attribute in updates:
+                    current_attributes.add(attribute)
+                    ever_seen.add(attribute)
+                    last_removal_message.pop(attribute, None)
+
+            event_removed_as_noop = bool(
+                removed_as_redundant
+                and event.get("event_type") == "MODIFY"
+                and event.get("value_updates") is None
+                and event.get("value_removals") is None
+                and event.get("scope_updates") is None
+            )
+            if not event_removed_as_noop:
+                kept_events.append(event)
+
+            if removed_as_redundant:
+                records.append(
+                    {
+                        "requirement_id": requirement_id,
+                        "event_message_id": event.get("source_message", {}).get("message_id"),
+                        "removed_redundant_value_removals": removed_as_redundant,
+                        "earlier_removals": earlier_removals,
+                        "event_removed_as_noop": event_removed_as_noop,
+                        "reason": (
+                            "The attributes were already removed by an earlier Event and were not "
+                            "reintroduced before this Event."
+                        ),
+                    }
+                )
+
+        reconciled[requirement_id] = kept_events
+
+    return reconciled, records
+
+
 def _empty_state() -> dict[str, Any]:
     return {
         "attributes": {},

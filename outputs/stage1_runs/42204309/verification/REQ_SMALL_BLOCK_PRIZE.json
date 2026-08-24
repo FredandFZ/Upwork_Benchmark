@@ -8,29 +8,12 @@
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "INTRODUCE",
-        "value_updates": {
-          "winner_count": 5,
-          "prize_amount_per_winner_usd": 500,
-          "eligible_population": "affiliates of the current small block"
-        },
-        "scope_updates": {
-          "persistence": "PROJECT_PERSISTENT",
-          "components": null,
-          "contexts": [
-            "SMALL_BLOCK",
-            "PRIZE_SYSTEM"
-          ]
-        },
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         8
       ],
-      "decision_note": "The client explicitly establishes the small-block prize rules, but the source does not establish specific technical components.",
+      "decision_note": "The client explicitly establishes the Small Block prize count, amount, eligible affiliates, and ticket-weighted chances.",
       "confidence": "HIGH"
     },
     {
@@ -44,7 +27,7 @@
       "evidence_message_ids": [
         21
       ],
-      "decision_note": "The client explicitly defines the small-block pool trigger and eligible ticket population.",
+      "decision_note": "The client explicitly sets the Small Block pool trigger and limits each draw to newly issued Small Block Tickets; the updated top-level fields leave no stale conflicting key.",
       "confidence": "HIGH"
     },
     {
@@ -58,8 +41,33 @@
       "evidence_message_ids": [
         158
       ],
-      "decision_note": "The client explicitly changes the small-block winner count and draw trigger to every 100 sales.",
+      "decision_note": "The client changes the Small Block mechanism to one winner every 100 sales; replacing the complete draw_trigger attribute requires no separate key removal.",
       "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "eligible_population": "Small Block Ticket holders represented in the new active contract; old-contract NFTs are excluded from the active prize system.",
+          "draw_contract_scope": "Small Block draws restart under the new active contract without carrying over old-contract draw state."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The client accepts the immediately preceding new-contract proposal, but the update should be limited to excluding old-contract NFTs and restarting draws rather than asserting unsupported ticket details.",
+      "confidence": "MEDIUM"
     }
   ],
   "missing_event_candidates": []

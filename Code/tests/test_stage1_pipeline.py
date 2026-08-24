@@ -11,10 +11,15 @@ from Code.stage1.assembler import assemble_stage1_annotation
 from Code.stage1.config import PipelineConfig, ProjectSource
 from Code.stage1.context import requirement_context
 from Code.stage1.filtering import filter_short_requirements
-from Code.stage1.impact import build_impact_cases, impact_decisions_to_patches
-from Code.stage1.pipeline import Stage1Pipeline
+from Code.stage1.impact import (
+    build_impact_cases,
+    impact_decisions_to_patches,
+    reconcile_redundant_value_removals,
+)
+from Code.stage1.pipeline import EXCLUDED_NO_REQUIREMENTS, Stage1Pipeline
 from Code.stage1.patching import apply_audit_patches, apply_verification, has_valid_requirement_ids
 from Code.stage1.preprocessing import preprocess_project
+from Code.stage1.reporting import write_statistics
 from Code.stage1.storage import sha256_text
 from Code.stage1.validation import (
     Stage1ValidationError,
@@ -432,6 +437,152 @@ class CrossRequirementImpactTests(unittest.TestCase):
             ["big_block_ticket_counter_visible"],
         )
         self.assertEqual(report["applied_patch_count"], 1)
+
+
+class ValueRemovalReconciliationTests(unittest.TestCase):
+    @staticmethod
+    def _normalized(*message_ids: int) -> dict[str, Any]:
+        return {
+            "project_id": "P",
+            "project_title": "P",
+            "project_metadata": {},
+            "messages": [
+                {
+                    "message_id": message_id,
+                    "speaker": "client",
+                    "text": f"Message {message_id}",
+                    "created_ts": f"2026-01-{index:02d}",
+                    "original_index": index - 1,
+                }
+                for index, message_id in enumerate(message_ids, start=1)
+            ],
+        }
+
+    @staticmethod
+    def _event(
+        message_id: int,
+        event_type: str,
+        *,
+        updates: dict[str, Any] | None = None,
+        removals: list[str] | None = None,
+        scope: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return {
+            "source_message": {
+                "message_id": message_id,
+                "speaker": "client",
+                "text": f"Message {message_id}",
+            },
+            "supporting_message_ids": [],
+            "event_type": event_type,
+            "value_updates": updates,
+            "value_removals": removals,
+            "scope_updates": scope,
+            "ambiguity": None,
+            "execution": None,
+        }
+
+    def test_later_duplicate_removals_are_trimmed_after_earlier_impact_event(self) -> None:
+        normalized = self._normalized(195, 197, 202)
+        events = {
+            "REQ_SHARED_SIGNATURE_TERMINAL": [
+                self._event(
+                    195,
+                    "INTRODUCE",
+                    updates={
+                        "experimental_control": "Option B",
+                        "softened_variant": "Softer terminal",
+                        "comparison_variant": "Option C",
+                    },
+                ),
+                self._event(
+                    197,
+                    "MODIFY",
+                    updates={"height_study_options": ["1%", "2%", "3%"]},
+                    removals=["softened_variant", "comparison_variant"],
+                ),
+                self._event(
+                    202,
+                    "MODIFY",
+                    updates={"terminal_language": "Softer, not calligraphic"},
+                    removals=[
+                        "experimental_control",
+                        "softened_variant",
+                        "comparison_variant",
+                    ],
+                ),
+            ]
+        }
+
+        reconciled, records = reconcile_redundant_value_removals(events, normalized)
+
+        later = reconciled["REQ_SHARED_SIGNATURE_TERMINAL"][2]
+        self.assertEqual(later["value_removals"], ["experimental_control"])
+        self.assertEqual(
+            records[0]["removed_redundant_value_removals"],
+            ["softened_variant", "comparison_variant"],
+        )
+        self.assertEqual(
+            {item["message_id"] for item in records[0]["earlier_removals"]},
+            {197},
+        )
+        self.assertFalse(records[0]["event_removed_as_noop"])
+        validate_intermediate_events(
+            reconciled["REQ_SHARED_SIGNATURE_TERMINAL"],
+            normalized,
+        )
+
+    def test_never_established_removal_is_not_silently_reconciled(self) -> None:
+        normalized = self._normalized(1, 2)
+        events = {
+            "REQ_A": [
+                self._event(1, "INTRODUCE", updates={"known": True}),
+                self._event(2, "MODIFY", removals=["invented_attribute"]),
+            ]
+        }
+
+        reconciled, records = reconcile_redundant_value_removals(events, normalized)
+
+        self.assertEqual(reconciled["REQ_A"][1]["value_removals"], ["invented_attribute"])
+        self.assertEqual(records, [])
+        with self.assertRaisesRegex(Stage1ValidationError, "invented_attribute"):
+            validate_intermediate_events(reconciled["REQ_A"], normalized)
+
+    def test_reintroduced_attribute_can_be_removed_again(self) -> None:
+        normalized = self._normalized(1, 2, 3, 4)
+        events = {
+            "REQ_A": [
+                self._event(1, "INTRODUCE", updates={"mode": "A"}),
+                self._event(2, "MODIFY", removals=["mode"]),
+                self._event(3, "MODIFY", updates={"mode": "B"}),
+                self._event(4, "MODIFY", removals=["mode"]),
+            ]
+        }
+
+        reconciled, records = reconcile_redundant_value_removals(events, normalized)
+
+        self.assertEqual(records, [])
+        self.assertEqual(reconciled["REQ_A"][3]["value_removals"], ["mode"])
+        validate_intermediate_events(reconciled["REQ_A"], normalized)
+
+    def test_modify_with_only_redundant_removals_is_removed_as_noop(self) -> None:
+        normalized = self._normalized(1, 2, 3)
+        events = {
+            "REQ_A": [
+                self._event(1, "INTRODUCE", updates={"mode": "A"}),
+                self._event(2, "MODIFY", removals=["mode"]),
+                self._event(3, "MODIFY", removals=["mode"]),
+            ]
+        }
+
+        reconciled, records = reconcile_redundant_value_removals(events, normalized)
+
+        self.assertEqual(
+            [event["source_message"]["message_id"] for event in reconciled["REQ_A"]],
+            [1, 2],
+        )
+        self.assertTrue(records[0]["event_removed_as_noop"])
+        validate_intermediate_events(reconciled["REQ_A"], normalized)
 
 
 class IncrementalUpgradeTests(unittest.TestCase):
@@ -1009,6 +1160,61 @@ class ResumePipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("verifier calibration v2", api.verification_user_messages[-1])
         self.assertIn("audit_review_items", api.verification_user_messages[-1])
         self.assertIn("Confirm that the source entails this target.", api.verification_user_messages[-1])
+
+
+class FinalOutputFilteringTests(unittest.IsolatedAsyncioTestCase):
+    async def test_zero_requirement_project_has_no_final_annotation(self) -> None:
+        class EmptyResultPipeline(Stage1Pipeline):
+            async def _run_multipass(self, project: ProjectSource) -> tuple[dict[str, Any], dict[str, Any]]:
+                annotation = valid_annotation()
+                annotation["requirement_families"] = []
+                annotation["requirements"] = []
+                return annotation, {"requirements": 0, "events": 0}
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            output_path = root / "outputs" / "P1_stage1_annotation.json"
+            run_dir = root / "runs" / "P1"
+            staged_path = run_dir / "final" / output_path.name
+            output_path.parent.mkdir(parents=True)
+            staged_path.parent.mkdir(parents=True)
+            output_path.write_text("stale public output", encoding="utf-8")
+            staged_path.write_text("stale run-local output", encoding="utf-8")
+            project = ProjectSource("P1", root / "P1", root / "chat.json", output_path, run_dir)
+            config = PipelineConfig(
+                prompt_path=root / "prompt.md",
+                output_dir=output_path.parent,
+                run_root=run_dir.parent,
+                model="fake-model",
+            )
+            pipeline = EmptyResultPipeline(None, config, "test prompt", root / "calls.jsonl")
+
+            annotation = await pipeline.run(project)
+            metadata = json.loads((run_dir / "run_metadata.json").read_text(encoding="utf-8"))
+
+            self.assertEqual(annotation["requirements"], [])
+            self.assertFalse(output_path.exists())
+            self.assertFalse(staged_path.exists())
+            self.assertEqual(metadata["status"], EXCLUDED_NO_REQUIREMENTS)
+            self.assertIsNone(metadata["final_output"])
+            self.assertIn("No Requirements remained", metadata["exclusion_reason"])
+
+    async def test_statistics_excludes_zero_requirement_annotation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            output_dir = root / "annotations"
+            output_dir.mkdir()
+            annotation = valid_annotation()
+            annotation["requirement_families"] = []
+            annotation["requirements"] = []
+            (output_dir / "P1_stage1_annotation.json").write_text(
+                json.dumps(annotation),
+                encoding="utf-8",
+            )
+
+            totals = write_statistics(root / "statistics.csv", output_dir)
+
+            self.assertEqual(totals, (0, 0, 0))
 
 
 if __name__ == "__main__":

@@ -649,6 +649,22 @@ outputs/stage1_logs/failed_responses/
 
 ## Token controls
 
+### Final zero-Requirement project filter
+
+After the last lifecycle-length filter and final assembly, the pipeline checks the
+final `requirements` array. If it is empty, the project is excluded from the
+published Stage 1 dataset:
+
+- no `<project_id>_stage1_annotation.json` is retained in `outputs/stage1_annotations/`;
+- no run-local final copy is retained in `outputs/stage1_runs/<project_id>/final/`;
+- the project is not counted by `stage1_requirement_event_statistics.csv`;
+- `run_metadata.json.status` is set to `EXCLUDED_NO_REQUIREMENTS`, so the default
+  `--resume` workflow does not spend API tokens annotating the same empty project again.
+
+The remaining run checkpoints and `run_metadata.json` are diagnostic/resume state,
+not published annotations. At the start of a non-dry run, the same rule also removes
+legacy final annotation files whose `requirements` array is already empty.
+
 - `--event-context-mode filtered` is the default. It uses anchors and evidence topic hints instead of sending almost the complete transcript for every Requirement.
 - `--max-requirement-context-messages 160` caps the focused raw-message context while preserving anchors and chronological coverage.
 - `--min-requirement-events 3` removes short lifecycles before Audit, Verification, and final assembly.

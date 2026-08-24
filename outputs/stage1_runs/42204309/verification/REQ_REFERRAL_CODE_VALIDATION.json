@@ -13,7 +13,7 @@
       "evidence_message_ids": [
         291
       ],
-      "decision_note": "The client explicitly requires referral codes to correspond to already minted NFTs and prohibits future-number self-referrals.",
+      "decision_note": "The client explicitly requires referral codes to belong to already minted NFTs and prohibits future-mint self-referral.",
       "confidence": "HIGH"
     },
     {
@@ -27,7 +27,7 @@
       "evidence_message_ids": [
         291
       ],
-      "decision_note": "First concrete failure: code 5 was incorrectly presented as valid despite the already-minted-NFT rule.",
+      "decision_note": "First concrete failure: unminted referral code 5 was presented as valid.",
       "confidence": "HIGH"
     },
     {
@@ -41,7 +41,7 @@
       "evidence_message_ids": [
         310
       ],
-      "decision_note": "Target-specific implementation claim: the message explicitly enumerates referral validation behavior and reports all listed fixes live.",
+      "decision_note": "Target-specific post-failure claim that the listed referral-validation fixes are live.",
       "confidence": "HIGH"
     },
     {
@@ -56,8 +56,23 @@
         310,
         313
       ],
-      "decision_note": "First concrete post-fix verification of the invalid-code path: the client confirms the invalid-code response appeared.",
+      "decision_note": "First concrete post-fix verification that the tested invalid-code path produced the invalid-code response.",
       "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The client accepts excluding old-contract NFTs from the rebuilt system, narrowing eligible referral codes to the active contract; no prior key becomes obsolete.",
+      "confidence": "MEDIUM"
     },
     {
       "event_locator": {
@@ -65,13 +80,12 @@
         "event_type": "RUNTIME_VERIFICATION",
         "occurrence": 1
       },
-      "verdict": "KEEP",
+      "verdict": "DELETE",
       "replacement": null,
       "evidence_message_ids": [
-        563,
         569
       ],
-      "decision_note": "Distinct valid-code path: the client reports a completed mint using referral code 3.",
+      "decision_note": "The mint used code 3, but the source does not establish that code 3 belonged to an already minted eligible NFT, so correct validation is not verified.",
       "confidence": "HIGH"
     }
   ],

@@ -13,7 +13,7 @@
       "evidence_message_ids": [
         210
       ],
-      "decision_note": "The client explicitly requires commissions and referral tickets to appear in the owner's dashboard.",
+      "decision_note": "The client explicitly requires dashboard display of earned commissions and NFT-linked prize tickets.",
       "confidence": "HIGH"
     },
     {
@@ -27,7 +27,7 @@
       "evidence_message_ids": [
         441
       ],
-      "decision_note": "First concrete failure showing zero referral tickets, referrals, and earnings despite qualifying activity.",
+      "decision_note": "First concrete failure showing zero referral, ticket, and earnings accounting in the dashboard.",
       "confidence": "HIGH"
     },
     {
@@ -41,7 +41,22 @@
       "evidence_message_ids": [
         492
       ],
-      "decision_note": "Target-specific implementation claim that referral, ticket, earnings, and per-NFT accounting were corrected.",
+      "decision_note": "Target-specific implementation claim that referral, ticket, earnings, and per-NFT data were corrected.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The client unambiguously accepts excluding old-contract NFTs from the active system data.",
       "confidence": "HIGH"
     },
     {
@@ -55,7 +70,7 @@
       "evidence_message_ids": [
         595
       ],
-      "decision_note": "The client establishes the expected primary-mint accounting total and explicitly excludes secondary-market sales.",
+      "decision_note": "The client establishes that eligible primary mints, including random assignments, must register commissions and tickets.",
       "confidence": "HIGH"
     },
     {
@@ -69,7 +84,7 @@
       "evidence_message_ids": [
         599
       ],
-      "decision_note": "Distinct no-code path failure showing that only four of seven expected tickets and commissions were recorded.",
+      "decision_note": "First quantified failure of accounting for the no-referral-code path.",
       "confidence": "HIGH"
     },
     {
@@ -83,7 +98,7 @@
       "evidence_message_ids": [
         605
       ],
-      "decision_note": "Target-specific claim that missing historical ticket and commission records were backfilled.",
+      "decision_note": "Target-specific claim that missing historical tickets and commissions were backfilled.",
       "confidence": "HIGH"
     },
     {
@@ -95,10 +110,9 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        605,
         608
       ],
-      "decision_note": "Post-fix persistence: the leaderboard remained at four tickets and commissions after the claimed backfill.",
+      "decision_note": "Post-claim persistence: the leaderboard totals remained unchanged after the claimed backfill.",
       "confidence": "HIGH"
     },
     {
@@ -112,7 +126,7 @@
       "evidence_message_ids": [
         672
       ],
-      "decision_note": "The client explicitly requires coded and randomly assigned rewards to be accounted for on both the leaderboard and NFT attributes, with tickets paired to commissions.",
+      "decision_note": "The client explicitly defines accounting surfaces, ticket-commission pairing, and the then-required historical backfill.",
       "confidence": "HIGH"
     },
     {
@@ -126,7 +140,7 @@
       "evidence_message_ids": [
         672
       ],
-      "decision_note": "Distinct partial outcome: coded accounting and recent random tickets worked, while no-code commissions, historical tickets, and ticket-commission consistency still failed.",
+      "decision_note": "Distinct partial outcome: coded accounting worked, while no-code commissions, historical tickets, and ticket-commission pairing remained incorrect.",
       "confidence": "HIGH"
     },
     {
@@ -135,14 +149,24 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "historical_backfill_required": false,
+          "prospective_accounting_accuracy_required": true
+        },
+        "value_removals": [
+          "historical_random_reward_backfill"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
-        672,
-        673,
         674
       ],
-      "decision_note": "The client explicitly waives historical backfilling while retaining prospective accounting accuracy.",
+      "decision_note": "The client drops the prior backfill obligation while retaining prospective accuracy, so the obsolete backfill directive must be removed.",
       "confidence": "HIGH"
     },
     {
@@ -151,14 +175,14 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "DELETE",
+      "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
         682,
         683,
         684
       ],
-      "decision_note": "The accepted first-mint exception governs whether a reward is awarded, not the accurate representation of awarded rewards owned by this Requirement.",
+      "decision_note": "The client unambiguously accepts the one-time first-mint accounting exception.",
       "confidence": "HIGH"
     },
     {
@@ -170,10 +194,9 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        679,
         686
       ],
-      "decision_note": "Target-specific implementation claim that temporary backend logic was added to reflect commissions and tickets correctly.",
+      "decision_note": "Target-specific implementation claim for backend logic reflecting commissions and tickets.",
       "confidence": "HIGH"
     },
     {
@@ -185,11 +208,9 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        686,
-        687,
         688
       ],
-      "decision_note": "Post-fix partial failure: leaderboard and NFT-page totals were correct, but NFT attributes remained inconsistent.",
+      "decision_note": "Post-fix partial failure: leaderboard totals worked, but NFT reward attributes remained stale.",
       "confidence": "HIGH"
     },
     {
@@ -201,28 +222,33 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        688,
         691
       ],
-      "decision_note": "Target-specific implementation claim that NFT attributes were changed to use the leaderboard's live on-chain data source.",
-      "confidence": "HIGH"
-    },
-    {
-      "event_locator": {
-        "message_id": 692,
-        "event_type": "RUNTIME_VERIFICATION",
-        "occurrence": 1
-      },
-      "verdict": "DELETE",
-      "replacement": null,
-      "evidence_message_ids": [
-        690,
-        691,
-        692
-      ],
-      "decision_note": "The generic approval contains no source-primary target proposition or concrete observed result; supporting context supplies all verification meaning.",
+      "decision_note": "Target-specific implementation claim addressing the stale NFT accounting attributes.",
       "confidence": "HIGH"
     }
   ],
-  "missing_event_candidates": []
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 692,
+        "speaker": "client",
+        "text": "Yes! Thats perfect!"
+      },
+      "supporting_message_ids": [
+        688,
+        690,
+        691
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirmed that the corrected NFT referral, ticket, and earnings attributes displayed properly after the metadata-source change."
+      }
+    }
+  ]
 }

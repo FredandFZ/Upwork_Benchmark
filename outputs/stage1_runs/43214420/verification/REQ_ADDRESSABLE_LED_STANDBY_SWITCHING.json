@@ -8,33 +8,29 @@
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "INTRODUCE",
-        "value_updates": {
-          "power_cutoff_behavior": "Cut LED power when the LEDs are not needed",
-          "control_gpio": "GPIO3",
-          "standby_current_target": "zero"
-        },
-        "scope_updates": {
-          "persistence": "PROJECT_PERSISTENT",
-          "components": [
-            "LED",
-            "POWER",
-            "MCU"
-          ],
-          "contexts": [
-            "ADDRESSABLE_LED"
-          ]
-        },
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         279,
         281
       ],
-      "decision_note": "The client explicitly proposes GPIO3-controlled LED rail cutoff; the original board and status-lighting contexts are not established by this evidence.",
+      "decision_note": "The client explicitly requires GPIO-controlled LED rail cutoff to eliminate standby current.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        289,
+        290,
+        291
+      ],
+      "decision_note": "The client explicitly replaces GPIO3 with GPIO5 for 5V_EN; no obsolete attribute remains after updating control_gpio.",
       "confidence": "HIGH"
     },
     {
@@ -48,7 +44,7 @@
       "evidence_message_ids": [
         425
       ],
-      "decision_note": "The client explicitly changes the design to control LED and sensor power separately.",
+      "decision_note": "Separate LED and sensor control replaces the prior shared-control architecture, making the earlier target-specific control_gpio assignment stale.",
       "confidence": "HIGH"
     },
     {
@@ -60,12 +56,12 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        456,
         458,
         459,
-        460
+        460,
+        461
       ],
-      "decision_note": "The freelancer identifies a material mismatch between ground-side switching and the intended 3.3V supply switching topology.",
+      "decision_note": "The freelancer identifies a material mismatch between low-side ground switching and switching the intended LED supply, requiring clarification.",
       "confidence": "HIGH"
     },
     {
@@ -77,12 +73,12 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        459,
         460,
-        465,
         466,
         468
       ],
-      "decision_note": "The client reports updating the documentation with the newly proposed complementary MOSFET pair.",
+      "decision_note": "The bounded FET discussion resolves 'new transistors' to the proposed N-channel and P-channel topology; no existing top-level key becomes stale.",
       "confidence": "HIGH"
     },
     {
@@ -94,11 +90,12 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        459,
         460,
         466,
         468
       ],
-      "decision_note": "The documented transistor update resolves the preceding switching-topology conflict.",
+      "decision_note": "The client's documented transistor update resolves the switching-topology clarification and returns the Requirement to active execution.",
       "confidence": "HIGH"
     }
   ],

@@ -45,9 +45,12 @@ def write_statistics(stats_path: Path, output_dir: Path) -> tuple[int, int, int]
             project = annotation.get("project", {})
             project_id = project.get("project_id") if isinstance(project, dict) else None
             project_id = project_id or annotation_path.name.removesuffix("_stage1_annotation.json")
-            project_rows, _, _ = annotation_statistics(str(project_id), annotation)
+            project_rows, requirement_count, _ = annotation_statistics(str(project_id), annotation)
         except (OSError, ValueError) as exc:
             print(f"[statistics skipped] {annotation_path.name}: {exc}", flush=True)
+            continue
+        if requirement_count == 0:
+            print(f"[statistics excluded] {annotation_path.name}: 0 requirements", flush=True)
             continue
         rows.extend(project_rows)
         projects += 1

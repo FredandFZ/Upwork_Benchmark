@@ -8,30 +8,12 @@
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "INTRODUCE",
-        "value_updates": {
-          "valve_mechanism": "clean open/close mechanism",
-          "closed_valve_behavior": "no dripping",
-          "flow_behavior": "smooth and controlled"
-        },
-        "scope_updates": {
-          "persistence": "PROJECT_PERSISTENT",
-          "components": [
-            "FLUID_SYSTEM"
-          ],
-          "contexts": [
-            "DISPENSING"
-          ]
-        },
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         31
       ],
-      "decision_note": "The source introduces controlled, drip-free dispensing, but does not support electrical, control-interface, or live-event scope.",
+      "decision_note": "The client explicitly requires controlled open/close operation, no dripping, and smooth flow.",
       "confidence": "HIGH"
     },
     {
@@ -45,7 +27,7 @@
       "evidence_message_ids": [
         32
       ],
-      "decision_note": "The client refines the mechanism to a simple valve or tap and specifies acceptable flow-rate behavior.",
+      "decision_note": "The client clarifies the valve form and acceptable flow behavior without creating stale attributes.",
       "confidence": "HIGH"
     },
     {
@@ -59,7 +41,23 @@
       "evidence_message_ids": [
         50
       ],
-      "decision_note": "The client requests gravity-based dispensing to preserve matcha consistency.",
+      "decision_note": "The client requests gravity-based dispensing to preserve matcha consistency; existing valve constraints remain compatible.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "event_locator": {
+        "message_id": 53,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        51,
+        52,
+        53
+      ],
+      "decision_note": "The immediate acceptance concerns custom spout fabrication and appearance; it does not clearly establish the proposed solenoid and button mechanics.",
       "confidence": "HIGH"
     },
     {
@@ -68,12 +66,47 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "valve_mechanism": "solenoid-controlled valve",
+          "operation_sequence": "mix → open → pour",
+          "flow_behavior": "clean, controlled, and seamless without sputtering"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
         61
       ],
-      "decision_note": "The client explicitly selects the solenoid approach and specifies seamless, controlled, non-sputtering flow.",
+      "decision_note": "The source confirms the solenoid mechanism and flow sequence; the already-established consistency constraint need not be rewritten.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 81,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "valve_opening_behavior": "smooth rather than abrupt",
+          "dispensing_splash_behavior": "no splashing"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        81
+      ],
+      "decision_note": "The source adds smooth valve opening and splash prevention without replacing the previously established no-sputtering flow constraint.",
       "confidence": "HIGH"
     },
     {
@@ -85,10 +118,9 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        140,
         143
       ],
-      "decision_note": "The source specifically approves a press-to-dispense button, with message 140 resolving the referenced control.",
+      "decision_note": "The client explicitly accepts press-to-dispense button interaction.",
       "confidence": "HIGH"
     }
   ],

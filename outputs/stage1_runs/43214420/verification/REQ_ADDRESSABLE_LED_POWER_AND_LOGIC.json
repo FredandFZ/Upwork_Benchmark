@@ -8,21 +8,14 @@
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "INTRODUCE",
-        "value_updates": {
-          "led_supply_voltage": "3.3V"
-        },
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         270,
+        271,
         272
       ],
-      "decision_note": "The direct reply establishes the intended 3.3V LED supply, but the broad component and context scope is not supported by this exchange.",
+      "decision_note": "In direct response to the LED-supply question, the client establishes the intended 3.3V supply.",
       "confidence": "HIGH"
     },
     {
@@ -34,12 +27,26 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        270,
         272,
         274,
         275
       ],
-      "decision_note": "The datasheet voltage range materially conflicts with the intended 3.3V supply and raises a related level-shifting question.",
+      "decision_note": "The cited datasheet range materially conflicts with the client-established 3.3V supply and affects level shifting.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 281,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        279,
+        281
+      ],
+      "decision_note": "The message proposes separately inventoried standby rail switching and only implies, rather than establishes, a 5V LED-supply change.",
       "confidence": "HIGH"
     },
     {
@@ -51,9 +58,11 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        274,
+        275,
         284
       ],
-      "decision_note": "The client explicitly selects 5V LED power and requires a data-level shifter.",
+      "decision_note": "The client explicitly selects the 5V supply and requires level shifting; updating the existing voltage key needs no removal.",
       "confidence": "HIGH"
     },
     {
@@ -69,7 +78,7 @@
         275,
         284
       ],
-      "decision_note": "The client's explicit 5V and level-shifter decision resolves the preceding material uncertainty.",
+      "decision_note": "The explicit 5V and level-shifter decision resolves the preceding value ambiguity and returns the Requirement to active status.",
       "confidence": "HIGH"
     },
     {
@@ -85,7 +94,7 @@
         372,
         373
       ],
-      "decision_note": "The client explicitly reopens the LED supply and level-shifter decision pending confirmation of the selected variant's voltage range.",
+      "decision_note": "The client explicitly reopens the supply-voltage and level-shifter decision pending the selected LED variant's voltage range.",
       "confidence": "HIGH"
     },
     {
@@ -97,9 +106,11 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        372,
+        373,
         374
       ],
-      "decision_note": "The client explicitly confirms 5V supply and specifies the 74AHCT1G125 level shifter.",
+      "decision_note": "The client confirms 5V operation and identifies the required level-shifter part; no previously stored key becomes obsolete.",
       "confidence": "HIGH"
     },
     {
@@ -114,7 +125,7 @@
         372,
         374
       ],
-      "decision_note": "The confirmed voltage and level-shifter decision resolves the uncertainty introduced at message 372.",
+      "decision_note": "The confirmed supply and level-shifter selection resolves the preceding value ambiguity.",
       "confidence": "HIGH"
     },
     {
@@ -126,10 +137,11 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        394,
-        425
+        424,
+        425,
+        426
       ],
-      "decision_note": "The client explicitly questions whether the previously required LED level shifter remains necessary.",
+      "decision_note": "The client materially reopens whether the established data-level shifter remains necessary.",
       "confidence": "HIGH"
     },
     {
@@ -141,9 +153,12 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        425,
+        442,
+        443,
         444
       ],
-      "decision_note": "The client explicitly changes the LEDs to 3.3V supply, direct ESP32 data drive, and no level shifter under the stated operating condition.",
+      "decision_note": "The client explicitly changes to 3.3V direct data drive; removing the previously stored level-shifter part prevents stale contradictory state.",
       "confidence": "HIGH"
     },
     {
@@ -158,7 +173,7 @@
         425,
         444
       ],
-      "decision_note": "The explicit 3.3V direct-drive decision resolves the outstanding level-shifter uncertainty.",
+      "decision_note": "The direct-drive decision resolves the open level-shifter ambiguity and resumes the Requirement.",
       "confidence": "HIGH"
     }
   ],

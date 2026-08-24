@@ -83,6 +83,35 @@
             "REQ_SMALL_BLOCK_PRIZE_E002",
             "REQ_SMALL_BLOCK_PRIZE_E003"
           ]
+        },
+        {
+          "state_id": "REQ_SMALL_BLOCK_PRIZE_S004",
+          "attributes": {
+            "winner_count": 1,
+            "prize_amount_per_winner_usd": 500,
+            "eligible_population": "Small Block Ticket holders represented in the new active contract; old-contract NFTs are excluded from the active prize system.",
+            "draw_trigger": {
+              "basis": "SALES_COUNT",
+              "threshold": 100
+            },
+            "draw_contract_scope": "Small Block draws restart under the new active contract without carrying over old-contract draw state."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": null,
+            "contexts": [
+              "SMALL_BLOCK",
+              "PRIZE_SYSTEM"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_SMALL_BLOCK_PRIZE_E001",
+            "REQ_SMALL_BLOCK_PRIZE_E003",
+            "REQ_SMALL_BLOCK_PRIZE_E004"
+          ]
         }
       ],
       "edges": [
@@ -108,6 +137,14 @@
           "event_id": "REQ_SMALL_BLOCK_PRIZE_E003",
           "event_type": "MODIFY",
           "source_message_id": 158,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_SMALL_BLOCK_PRIZE_S003",
+          "to_state_id": "REQ_SMALL_BLOCK_PRIZE_S004",
+          "event_id": "REQ_SMALL_BLOCK_PRIZE_E004",
+          "event_type": "MODIFY",
+          "source_message_id": 539,
           "value_removals": null
         }
       ]
@@ -146,8 +183,12 @@
           "state_id": "REQ_BIG_BLOCK_PRIZE_S002",
           "attributes": {
             "winner_count": 5,
-            "prize_amount_per_winner": "$10,000",
-            "draw_condition": "every 50,000 sales"
+            "prize_amount_per_winner": "$20,000",
+            "draw_trigger": {
+              "basis": "PRIZE_POOL_BALANCE",
+              "threshold_usd": 100000
+            },
+            "eligible_population": "holders of Big Block Tickets issued since the previous big-block draw"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -174,39 +215,11 @@
           "attributes": {
             "winner_count": 5,
             "prize_amount_per_winner": "$10,000",
-            "draw_condition": "every 50,000 sales"
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT",
-              "BACKEND",
-              "FRONTEND"
-            ],
-            "contexts": [
-              "BIG_BLOCK",
-              "PRIZE_SYSTEM"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": {
-            "status": "CLAIMED_WORKING",
-            "observed_behavior": "Freelancer reports implementing the Big Block tweak with a $50,000 trigger and five $10,000 winners.",
-            "source_event_id": "REQ_BIG_BLOCK_PRIZE_E003"
-          },
-          "supporting_event_ids": [
-            "REQ_BIG_BLOCK_PRIZE_E001",
-            "REQ_BIG_BLOCK_PRIZE_E002",
-            "REQ_BIG_BLOCK_PRIZE_E003"
-          ]
-        },
-        {
-          "state_id": "REQ_BIG_BLOCK_PRIZE_S004",
-          "attributes": {
-            "winner_count": 1,
-            "prize_amount_per_winner": "$10,000",
-            "draw_condition": "every 10,000 sales"
+            "draw_trigger": {
+              "basis": "SALES_COUNT",
+              "threshold_sales": 50000
+            },
+            "eligible_population": "holders of Big Block Tickets issued since the previous big-block draw"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -226,6 +239,43 @@
           "supporting_event_ids": [
             "REQ_BIG_BLOCK_PRIZE_E001",
             "REQ_BIG_BLOCK_PRIZE_E002",
+            "REQ_BIG_BLOCK_PRIZE_E003"
+          ]
+        },
+        {
+          "state_id": "REQ_BIG_BLOCK_PRIZE_S004",
+          "attributes": {
+            "winner_count": 5,
+            "prize_amount_per_winner": "$10,000",
+            "draw_trigger": {
+              "basis": "SALES_COUNT",
+              "threshold_sales": 50000
+            },
+            "eligible_population": "holders of Big Block Tickets issued since the previous big-block draw"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "BACKEND",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "BIG_BLOCK",
+              "PRIZE_SYSTEM"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports implementing the Big Block tweak with a $50,000 trigger and five $10,000 winners.",
+            "source_event_id": "REQ_BIG_BLOCK_PRIZE_E004"
+          },
+          "supporting_event_ids": [
+            "REQ_BIG_BLOCK_PRIZE_E001",
+            "REQ_BIG_BLOCK_PRIZE_E002",
+            "REQ_BIG_BLOCK_PRIZE_E003",
             "REQ_BIG_BLOCK_PRIZE_E004"
           ]
         },
@@ -234,7 +284,44 @@
           "attributes": {
             "winner_count": 1,
             "prize_amount_per_winner": "$10,000",
-            "draw_condition": "every 10,000 sales"
+            "draw_trigger": {
+              "basis": "SALES_COUNT",
+              "threshold_sales": 10000
+            },
+            "eligible_population": "holders of Big Block Tickets issued since the previous big-block draw"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "BACKEND",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "BIG_BLOCK",
+              "PRIZE_SYSTEM"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_BIG_BLOCK_PRIZE_E001",
+            "REQ_BIG_BLOCK_PRIZE_E002",
+            "REQ_BIG_BLOCK_PRIZE_E003",
+            "REQ_BIG_BLOCK_PRIZE_E005"
+          ]
+        },
+        {
+          "state_id": "REQ_BIG_BLOCK_PRIZE_S006",
+          "attributes": {
+            "winner_count": 1,
+            "prize_amount_per_winner": "$10,000",
+            "draw_trigger": {
+              "basis": "SALES_COUNT",
+              "threshold_sales": 10000
+            },
+            "eligible_population": "holders of Big Block Tickets issued since the previous big-block draw"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -254,8 +341,9 @@
           "supporting_event_ids": [
             "REQ_BIG_BLOCK_PRIZE_E001",
             "REQ_BIG_BLOCK_PRIZE_E002",
-            "REQ_BIG_BLOCK_PRIZE_E004",
-            "REQ_BIG_BLOCK_PRIZE_E005"
+            "REQ_BIG_BLOCK_PRIZE_E003",
+            "REQ_BIG_BLOCK_PRIZE_E005",
+            "REQ_BIG_BLOCK_PRIZE_E006"
           ]
         }
       ],
@@ -273,29 +361,37 @@
           "to_state_id": "REQ_BIG_BLOCK_PRIZE_S002",
           "event_id": "REQ_BIG_BLOCK_PRIZE_E002",
           "event_type": "MODIFY",
-          "source_message_id": 123,
+          "source_message_id": 21,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_BIG_BLOCK_PRIZE_S002",
           "to_state_id": "REQ_BIG_BLOCK_PRIZE_S003",
           "event_id": "REQ_BIG_BLOCK_PRIZE_E003",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 125,
+          "event_type": "MODIFY",
+          "source_message_id": 123,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_BIG_BLOCK_PRIZE_S003",
           "to_state_id": "REQ_BIG_BLOCK_PRIZE_S004",
           "event_id": "REQ_BIG_BLOCK_PRIZE_E004",
-          "event_type": "MODIFY",
-          "source_message_id": 158,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "source_message_id": 125,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_BIG_BLOCK_PRIZE_S004",
           "to_state_id": "REQ_BIG_BLOCK_PRIZE_S005",
           "event_id": "REQ_BIG_BLOCK_PRIZE_E005",
+          "event_type": "MODIFY",
+          "source_message_id": 158,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_BIG_BLOCK_PRIZE_S005",
+          "to_state_id": "REQ_BIG_BLOCK_PRIZE_S006",
+          "event_id": "REQ_BIG_BLOCK_PRIZE_E006",
           "event_type": "REMOVE",
           "source_message_id": 195,
           "value_removals": null
@@ -366,11 +462,8 @@
             "ticket_counters": [
               "small_block"
             ],
-            "counter_independence": "Small Block and Big Block tickets use independent counters.",
             "small_block_eligibility_window": "Tickets issued since the previous Small Block draw.",
             "small_block_post_draw_action": "Burn or reset all Small Block tickets to 0.",
-            "big_block_eligibility_window": "Tickets issued since the previous Big Block draw.",
-            "big_block_post_draw_action": "Burn or reset all Big Block tickets to 0.",
             "big_block_ticket_lifecycle": "removed"
           },
           "scope": {
@@ -388,6 +481,36 @@
             "REQ_PRIZE_TICKET_LIFECYCLE_E001",
             "REQ_PRIZE_TICKET_LIFECYCLE_E002",
             "REQ_PRIZE_TICKET_LIFECYCLE_E003"
+          ]
+        },
+        {
+          "state_id": "REQ_PRIZE_TICKET_LIFECYCLE_S004",
+          "attributes": {
+            "winning_chance_rule": "More tickets earned gives the holder more chances to win.",
+            "ticket_counters": [
+              "small_block"
+            ],
+            "small_block_eligibility_window": "Tickets issued since the previous Small Block draw.",
+            "small_block_post_draw_action": "Burn or reset all Small Block tickets to 0.",
+            "big_block_ticket_lifecycle": "removed",
+            "contract_ticket_scope": "Prize-ticket counters and draws restart under the new active contract; old-contract NFTs and their tickets are excluded from the active draw system."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": null,
+            "contexts": [
+              "PRIZE_TICKETS",
+              "SMALL_BLOCK"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PRIZE_TICKET_LIFECYCLE_E001",
+            "REQ_PRIZE_TICKET_LIFECYCLE_E002",
+            "REQ_PRIZE_TICKET_LIFECYCLE_E003",
+            "REQ_PRIZE_TICKET_LIFECYCLE_E004"
           ]
         }
       ],
@@ -414,6 +537,18 @@
           "event_id": "REQ_PRIZE_TICKET_LIFECYCLE_E003",
           "event_type": "MODIFY",
           "source_message_id": 195,
+          "value_removals": [
+            "counter_independence",
+            "big_block_eligibility_window",
+            "big_block_post_draw_action"
+          ]
+        },
+        {
+          "from_state_id": "REQ_PRIZE_TICKET_LIFECYCLE_S003",
+          "to_state_id": "REQ_PRIZE_TICKET_LIFECYCLE_S004",
+          "event_id": "REQ_PRIZE_TICKET_LIFECYCLE_E004",
+          "event_type": "MODIFY",
+          "source_message_id": 539,
           "value_removals": null
         }
       ]
@@ -448,7 +583,29 @@
           "state_id": "REQ_PRIZE_WINNER_SELECTION_S002",
           "attributes": {
             "selection_method": "random selection",
-            "eligible_winners": "affiliates of the applicable prize block",
+            "eligible_winners": "holders of the applicable block's tickets issued since the previous draw for that block",
+            "ticket_weighting": "more earned tickets increase the chance of winning"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": null,
+            "contexts": [
+              "PRIZE_SYSTEM"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PRIZE_WINNER_SELECTION_E001",
+            "REQ_PRIZE_WINNER_SELECTION_E002"
+          ]
+        },
+        {
+          "state_id": "REQ_PRIZE_WINNER_SELECTION_S003",
+          "attributes": {
+            "selection_method": "random selection",
+            "eligible_winners": "holders of the applicable block's tickets issued since the previous draw for that block",
             "ticket_weighting": "more earned tickets increase the chance of winning"
           },
           "scope": {
@@ -463,18 +620,19 @@
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports that VRF is in place and functioning as part of the smart-contract system on Base testnet.",
-            "source_event_id": "REQ_PRIZE_WINNER_SELECTION_E002"
+            "source_event_id": "REQ_PRIZE_WINNER_SELECTION_E003"
           },
           "supporting_event_ids": [
             "REQ_PRIZE_WINNER_SELECTION_E001",
-            "REQ_PRIZE_WINNER_SELECTION_E002"
+            "REQ_PRIZE_WINNER_SELECTION_E002",
+            "REQ_PRIZE_WINNER_SELECTION_E003"
           ]
         },
         {
-          "state_id": "REQ_PRIZE_WINNER_SELECTION_S003",
+          "state_id": "REQ_PRIZE_WINNER_SELECTION_S004",
           "attributes": {
             "selection_method": "random selection",
-            "eligible_winners": "affiliates of the applicable prize block",
+            "eligible_winners": "holders of the applicable block's tickets issued since the previous draw for that block",
             "ticket_weighting": "more earned tickets increase the chance of winning",
             "randomness_provider": "Chainlink VRF",
             "selection_execution": "fully on-chain",
@@ -496,7 +654,103 @@
           "execution": null,
           "supporting_event_ids": [
             "REQ_PRIZE_WINNER_SELECTION_E001",
-            "REQ_PRIZE_WINNER_SELECTION_E003"
+            "REQ_PRIZE_WINNER_SELECTION_E002",
+            "REQ_PRIZE_WINNER_SELECTION_E004"
+          ]
+        },
+        {
+          "state_id": "REQ_PRIZE_WINNER_SELECTION_S005",
+          "attributes": {
+            "selection_method": "random selection",
+            "eligible_winners": "holders of Small Block Tickets issued since the previous Small Block draw",
+            "ticket_weighting": "more earned tickets increase the chance of winning",
+            "randomness_provider": "Chainlink VRF",
+            "selection_execution": "fully on-chain",
+            "fairness": "provably fair",
+            "verification_method": "Basescan"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIZE_SYSTEM",
+              "CHAINLINK_VRF"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PRIZE_WINNER_SELECTION_E001",
+            "REQ_PRIZE_WINNER_SELECTION_E004",
+            "REQ_PRIZE_WINNER_SELECTION_E005"
+          ]
+        },
+        {
+          "state_id": "REQ_PRIZE_WINNER_SELECTION_S006",
+          "attributes": {
+            "selection_method": "random selection",
+            "eligible_winners": "holders of Small Block Tickets issued since the previous Small Block draw",
+            "ticket_weighting": "more earned tickets increase the chance of winning",
+            "randomness_provider": "Chainlink VRF",
+            "selection_execution": "fully on-chain",
+            "fairness": "provably fair",
+            "verification_method": "Basescan",
+            "winner_count_per_draw": 1
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIZE_SYSTEM",
+              "CHAINLINK_VRF"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PRIZE_WINNER_SELECTION_E001",
+            "REQ_PRIZE_WINNER_SELECTION_E004",
+            "REQ_PRIZE_WINNER_SELECTION_E005",
+            "REQ_PRIZE_WINNER_SELECTION_E006"
+          ]
+        },
+        {
+          "state_id": "REQ_PRIZE_WINNER_SELECTION_S007",
+          "attributes": {
+            "selection_method": "random selection",
+            "eligible_winners": "Holders of applicable prize-draw tickets issued by the new active contract since the previous draw; old-contract NFTs and tickets are excluded.",
+            "ticket_weighting": "more earned tickets increase the chance of winning",
+            "randomness_provider": "Chainlink VRF",
+            "selection_execution": "fully on-chain",
+            "fairness": "provably fair",
+            "verification_method": "Basescan",
+            "winner_count_per_draw": 1,
+            "draw_contract_scope": "Prize draws restart under the new active contract without carrying forward old-contract draw or ticket state."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIZE_SYSTEM",
+              "CHAINLINK_VRF"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PRIZE_WINNER_SELECTION_E001",
+            "REQ_PRIZE_WINNER_SELECTION_E004",
+            "REQ_PRIZE_WINNER_SELECTION_E006",
+            "REQ_PRIZE_WINNER_SELECTION_E007"
           ]
         }
       ],
@@ -513,16 +767,48 @@
           "from_state_id": "REQ_PRIZE_WINNER_SELECTION_S001",
           "to_state_id": "REQ_PRIZE_WINNER_SELECTION_S002",
           "event_id": "REQ_PRIZE_WINNER_SELECTION_E002",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 27,
+          "event_type": "MODIFY",
+          "source_message_id": 21,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_PRIZE_WINNER_SELECTION_S002",
           "to_state_id": "REQ_PRIZE_WINNER_SELECTION_S003",
           "event_id": "REQ_PRIZE_WINNER_SELECTION_E003",
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "source_message_id": 27,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_PRIZE_WINNER_SELECTION_S003",
+          "to_state_id": "REQ_PRIZE_WINNER_SELECTION_S004",
+          "event_id": "REQ_PRIZE_WINNER_SELECTION_E004",
           "event_type": "MODIFY",
           "source_message_id": 143,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_PRIZE_WINNER_SELECTION_S004",
+          "to_state_id": "REQ_PRIZE_WINNER_SELECTION_S005",
+          "event_id": "REQ_PRIZE_WINNER_SELECTION_E005",
+          "event_type": "MODIFY",
+          "source_message_id": 195,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_PRIZE_WINNER_SELECTION_S005",
+          "to_state_id": "REQ_PRIZE_WINNER_SELECTION_S006",
+          "event_id": "REQ_PRIZE_WINNER_SELECTION_E006",
+          "event_type": "MODIFY",
+          "source_message_id": 210,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_PRIZE_WINNER_SELECTION_S006",
+          "to_state_id": "REQ_PRIZE_WINNER_SELECTION_S007",
+          "event_id": "REQ_PRIZE_WINNER_SELECTION_E007",
+          "event_type": "MODIFY",
+          "source_message_id": 539,
           "value_removals": null
         }
       ]
@@ -618,7 +904,6 @@
           "attributes": {
             "prize_payout_mode": "automatic transfer to the winner wallet",
             "winner_announcement_location": "Winners page",
-            "claim_interaction": "one-click claim on projectrebuild.xyz",
             "winner_notifications": [
               "Winners page",
               "email",
@@ -650,12 +935,12 @@
           "attributes": {
             "prize_payout_mode": "automatic transfer to the winner wallet",
             "winner_announcement_location": "Winners page",
-            "claim_interaction": "one-click claim on projectrebuild.xyz",
             "winner_notifications": [
               "Winners page",
               "email",
               "dashboard"
-            ]
+            ],
+            "winner_fiat_access_guidance": "Email winners step-by-step instructions for viewing or accessing the automatically transferred prize in fiat when needed, such as a link to a simple exchange guide."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -669,12 +954,7 @@
             ]
           },
           "lifecycle_status": "ACTIVE",
-          "ambiguity": {
-            "status": "OPEN",
-            "dimension": "VALUE",
-            "description": "The client again asks whether the $500 prize requires a claim button or is paid automatically.",
-            "source_event_id": "REQ_PRIZE_CLAIM_E006"
-          },
+          "ambiguity": null,
           "execution": null,
           "supporting_event_ids": [
             "REQ_PRIZE_CLAIM_E001",
@@ -688,12 +968,12 @@
           "attributes": {
             "prize_payout_mode": "automatic transfer to the winner wallet",
             "winner_announcement_location": "Winners page",
-            "claim_interaction": "one-click claim on projectrebuild.xyz",
             "winner_notifications": [
               "Winners page",
               "email",
               "dashboard"
-            ]
+            ],
+            "winner_fiat_access_guidance": "Email winners step-by-step instructions for viewing or accessing the automatically transferred prize in fiat when needed, such as a link to a simple exchange guide."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -711,19 +991,59 @@
             "status": "OPEN",
             "dimension": "VALUE",
             "description": "The client again asks whether the $500 prize requires a claim button or is paid automatically.",
-            "source_event_id": "REQ_PRIZE_CLAIM_E006"
-          },
-          "execution": {
-            "status": "CLAIMED_WORKING",
-            "observed_behavior": "Freelancer reports that the prize claim button is conditional and appears only when a prize can be claimed.",
             "source_event_id": "REQ_PRIZE_CLAIM_E007"
           },
+          "execution": null,
           "supporting_event_ids": [
             "REQ_PRIZE_CLAIM_E001",
             "REQ_PRIZE_CLAIM_E002",
             "REQ_PRIZE_CLAIM_E004",
             "REQ_PRIZE_CLAIM_E006",
             "REQ_PRIZE_CLAIM_E007"
+          ]
+        },
+        {
+          "state_id": "REQ_PRIZE_CLAIM_S007",
+          "attributes": {
+            "prize_payout_mode": "automatic transfer to the winner wallet",
+            "winner_announcement_location": "Winners page",
+            "winner_notifications": [
+              "Winners page",
+              "email",
+              "dashboard"
+            ],
+            "winner_fiat_access_guidance": "Email winners step-by-step instructions for viewing or accessing the automatically transferred prize in fiat when needed, such as a link to a simple exchange guide."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "FRONTEND",
+              "BACKEND"
+            ],
+            "contexts": [
+              "PRIZE_CLAIM"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "status": "OPEN",
+            "dimension": "VALUE",
+            "description": "The client again asks whether the $500 prize requires a claim button or is paid automatically.",
+            "source_event_id": "REQ_PRIZE_CLAIM_E007"
+          },
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports that the prize claim button is conditional and appears only when a prize can be claimed.",
+            "source_event_id": "REQ_PRIZE_CLAIM_E008"
+          },
+          "supporting_event_ids": [
+            "REQ_PRIZE_CLAIM_E001",
+            "REQ_PRIZE_CLAIM_E002",
+            "REQ_PRIZE_CLAIM_E004",
+            "REQ_PRIZE_CLAIM_E006",
+            "REQ_PRIZE_CLAIM_E007",
+            "REQ_PRIZE_CLAIM_E008"
           ]
         }
       ],
@@ -758,20 +1078,30 @@
           "event_id": "REQ_PRIZE_CLAIM_E004",
           "event_type": "MODIFY",
           "source_message_id": 184,
-          "value_removals": null
+          "value_removals": [
+            "claim_interaction"
+          ]
         },
         {
           "from_state_id": "REQ_PRIZE_CLAIM_S004",
           "to_state_id": "REQ_PRIZE_CLAIM_S005",
           "event_id": "REQ_PRIZE_CLAIM_E006",
-          "event_type": "AMBIGUOUS",
-          "source_message_id": 781,
+          "event_type": "MODIFY",
+          "source_message_id": 210,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_PRIZE_CLAIM_S005",
           "to_state_id": "REQ_PRIZE_CLAIM_S006",
           "event_id": "REQ_PRIZE_CLAIM_E007",
+          "event_type": "AMBIGUOUS",
+          "source_message_id": 781,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_PRIZE_CLAIM_S006",
+          "to_state_id": "REQ_PRIZE_CLAIM_S007",
+          "event_id": "REQ_PRIZE_CLAIM_E008",
           "event_type": "IMPLEMENTATION_CLAIM",
           "source_message_id": 784,
           "value_removals": null
@@ -857,28 +1187,31 @@
               "NFT_METADATA",
               "DASHBOARD",
               "CONFIRMATION_EMAIL_OPTIONAL"
-            ]
+            ],
+            "fiat_buyer_confirmation_email_referral_code": "The Transak fiat buyer's confirmation email contains the NFT mint number as the referral code.",
+            "transak_fiat_confirmation_email_contains_referral_code": true
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
               "SMART_CONTRACT",
               "BACKEND",
-              "FRONTEND"
+              "FRONTEND",
+              "EMAIL"
             ],
             "contexts": [
               "REFERRAL_MINT",
               "NFT_METADATA",
-              "DASHBOARD"
+              "DASHBOARD",
+              "MINT_CONFIRMATION",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
           "ambiguity": null,
-          "execution": {
-            "status": "FAILED",
-            "observed_behavior": "NFT #5 displayed the purchase referral code 3 as its Referral Code attribute instead of displaying its own mint or token number.",
-            "source_event_id": "REQ_NFT_REFERRAL_IDENTITY_E003"
-          },
+          "execution": null,
           "supporting_event_ids": [
             "REQ_NFT_REFERRAL_IDENTITY_E001",
             "REQ_NFT_REFERRAL_IDENTITY_E002",
@@ -888,26 +1221,125 @@
         {
           "state_id": "REQ_NFT_REFERRAL_IDENTITY_S004",
           "attributes": {
-            "referral_code_basis": "NFT mint number",
-            "referral_code_persistence": "permanent",
+            "referral_code_basis": "NFT mint number from the new active contract",
+            "referral_code_persistence": "Permanent for NFTs in the new active contract; old-contract NFT mint numbers are excluded from project systems.",
             "display_locations": [
               "NFT",
               "NFT_METADATA",
               "DASHBOARD",
               "CONFIRMATION_EMAIL_OPTIONAL"
-            ]
+            ],
+            "fiat_buyer_confirmation_email_referral_code": "The Transak fiat buyer's confirmation email contains the NFT mint number as the referral code.",
+            "transak_fiat_confirmation_email_contains_referral_code": true,
+            "active_contract_numbering": "Use mint numbers from the new active contract as referral codes, restarting at NFT #1; exclude old-contract NFT mint numbers from project systems."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
             "components": [
               "SMART_CONTRACT",
               "BACKEND",
-              "FRONTEND"
+              "FRONTEND",
+              "EMAIL"
             ],
             "contexts": [
               "REFERRAL_MINT",
               "NFT_METADATA",
-              "DASHBOARD"
+              "DASHBOARD",
+              "MINT_CONFIRMATION",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NFT_REFERRAL_IDENTITY_E001",
+            "REQ_NFT_REFERRAL_IDENTITY_E002",
+            "REQ_NFT_REFERRAL_IDENTITY_E003",
+            "REQ_NFT_REFERRAL_IDENTITY_E004"
+          ]
+        },
+        {
+          "state_id": "REQ_NFT_REFERRAL_IDENTITY_S005",
+          "attributes": {
+            "referral_code_basis": "NFT mint number from the new active contract",
+            "referral_code_persistence": "Permanent for NFTs in the new active contract; old-contract NFT mint numbers are excluded from project systems.",
+            "display_locations": [
+              "NFT",
+              "NFT_METADATA",
+              "DASHBOARD",
+              "CONFIRMATION_EMAIL_OPTIONAL"
+            ],
+            "fiat_buyer_confirmation_email_referral_code": "The Transak fiat buyer's confirmation email contains the NFT mint number as the referral code.",
+            "transak_fiat_confirmation_email_contains_referral_code": true,
+            "active_contract_numbering": "Use mint numbers from the new active contract as referral codes, restarting at NFT #1; exclude old-contract NFT mint numbers from project systems."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "BACKEND",
+              "FRONTEND",
+              "EMAIL"
+            ],
+            "contexts": [
+              "REFERRAL_MINT",
+              "NFT_METADATA",
+              "DASHBOARD",
+              "MINT_CONFIRMATION",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "NFT #5 displayed the purchase referral code 3 as its Referral Code attribute instead of displaying its own mint or token number.",
+            "source_event_id": "REQ_NFT_REFERRAL_IDENTITY_E005"
+          },
+          "supporting_event_ids": [
+            "REQ_NFT_REFERRAL_IDENTITY_E001",
+            "REQ_NFT_REFERRAL_IDENTITY_E002",
+            "REQ_NFT_REFERRAL_IDENTITY_E003",
+            "REQ_NFT_REFERRAL_IDENTITY_E004",
+            "REQ_NFT_REFERRAL_IDENTITY_E005"
+          ]
+        },
+        {
+          "state_id": "REQ_NFT_REFERRAL_IDENTITY_S006",
+          "attributes": {
+            "referral_code_basis": "NFT mint number from the new active contract",
+            "referral_code_persistence": "Permanent for NFTs in the new active contract; old-contract NFT mint numbers are excluded from project systems.",
+            "display_locations": [
+              "NFT",
+              "NFT_METADATA",
+              "DASHBOARD",
+              "CONFIRMATION_EMAIL_OPTIONAL"
+            ],
+            "fiat_buyer_confirmation_email_referral_code": "The Transak fiat buyer's confirmation email contains the NFT mint number as the referral code.",
+            "transak_fiat_confirmation_email_contains_referral_code": true,
+            "active_contract_numbering": "Use mint numbers from the new active contract as referral codes, restarting at NFT #1; exclude old-contract NFT mint numbers from project systems."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "BACKEND",
+              "FRONTEND",
+              "EMAIL"
+            ],
+            "contexts": [
+              "REFERRAL_MINT",
+              "NFT_METADATA",
+              "DASHBOARD",
+              "MINT_CONFIRMATION",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -915,12 +1347,14 @@
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports that each NFT's Referral Code now uses its own tokenId rather than the referral code used to purchase it.",
-            "source_event_id": "REQ_NFT_REFERRAL_IDENTITY_E004"
+            "source_event_id": "REQ_NFT_REFERRAL_IDENTITY_E006"
           },
           "supporting_event_ids": [
             "REQ_NFT_REFERRAL_IDENTITY_E001",
             "REQ_NFT_REFERRAL_IDENTITY_E002",
-            "REQ_NFT_REFERRAL_IDENTITY_E004"
+            "REQ_NFT_REFERRAL_IDENTITY_E003",
+            "REQ_NFT_REFERRAL_IDENTITY_E004",
+            "REQ_NFT_REFERRAL_IDENTITY_E006"
           ]
         }
       ],
@@ -945,14 +1379,30 @@
           "from_state_id": "REQ_NFT_REFERRAL_IDENTITY_S002",
           "to_state_id": "REQ_NFT_REFERRAL_IDENTITY_S003",
           "event_id": "REQ_NFT_REFERRAL_IDENTITY_E003",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 585,
+          "event_type": "MODIFY",
+          "source_message_id": 184,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NFT_REFERRAL_IDENTITY_S003",
           "to_state_id": "REQ_NFT_REFERRAL_IDENTITY_S004",
           "event_id": "REQ_NFT_REFERRAL_IDENTITY_E004",
+          "event_type": "MODIFY",
+          "source_message_id": 539,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_NFT_REFERRAL_IDENTITY_S004",
+          "to_state_id": "REQ_NFT_REFERRAL_IDENTITY_S005",
+          "event_id": "REQ_NFT_REFERRAL_IDENTITY_E005",
+          "event_type": "RUNTIME_FAILURE",
+          "source_message_id": 585,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_NFT_REFERRAL_IDENTITY_S005",
+          "to_state_id": "REQ_NFT_REFERRAL_IDENTITY_S006",
+          "event_id": "REQ_NFT_REFERRAL_IDENTITY_E006",
           "event_type": "IMPLEMENTATION_CLAIM",
           "source_message_id": 604,
           "value_removals": null
@@ -1078,7 +1528,7 @@
         {
           "state_id": "REQ_REFERRAL_CODE_VALIDATION_S005",
           "attributes": {
-            "valid_code_eligibility": "Only referral codes belonging to already minted NFTs are valid.",
+            "valid_code_eligibility": "Only referral codes belonging to NFTs already minted by the new active contract are valid; old-contract NFT mint numbers are invalid.",
             "self_referral_prevention": "A buyer's current or future mint number must not be accepted as its referral code."
           },
           "scope": {
@@ -1094,11 +1544,7 @@
           },
           "lifecycle_status": "ACTIVE",
           "ambiguity": null,
-          "execution": {
-            "status": "VERIFIED_WORKING",
-            "observed_behavior": "An existing referral code, code 3, was accepted during an executed mint that completed successfully.",
-            "source_event_id": "REQ_REFERRAL_CODE_VALIDATION_E005"
-          },
+          "execution": null,
           "supporting_event_ids": [
             "REQ_REFERRAL_CODE_VALIDATION_E001",
             "REQ_REFERRAL_CODE_VALIDATION_E005"
@@ -1142,8 +1588,8 @@
           "from_state_id": "REQ_REFERRAL_CODE_VALIDATION_S004",
           "to_state_id": "REQ_REFERRAL_CODE_VALIDATION_S005",
           "event_id": "REQ_REFERRAL_CODE_VALIDATION_E005",
-          "event_type": "RUNTIME_VERIFICATION",
-          "source_message_id": 569,
+          "event_type": "MODIFY",
+          "source_message_id": 539,
           "value_removals": null
         }
       ]
@@ -1180,7 +1626,7 @@
           "state_id": "REQ_CODED_REFERRAL_REWARD_S002",
           "attributes": {
             "commission_amount_per_successful_referral": "$5",
-            "prize_ticket_award_per_successful_referral": "1 ticket for the $500 prize draw"
+            "prize_ticket_award_per_successful_referral": "1 Small Block ticket"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -1204,7 +1650,7 @@
           "state_id": "REQ_CODED_REFERRAL_REWARD_S003",
           "attributes": {
             "commission_amount_per_successful_referral": "$5",
-            "prize_ticket_award_per_successful_referral": "1 ticket for the $500 prize draw"
+            "prize_ticket_award_per_successful_referral": "1 Small Block ticket"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -1244,7 +1690,7 @@
           "to_state_id": "REQ_CODED_REFERRAL_REWARD_S002",
           "event_id": "REQ_CODED_REFERRAL_REWARD_E002",
           "event_type": "MODIFY",
-          "source_message_id": 210,
+          "source_message_id": 195,
           "value_removals": null
         },
         {
@@ -1346,7 +1792,36 @@
           "state_id": "REQ_NO_CODE_RANDOM_REWARD_S004",
           "attributes": {
             "no_code_trigger": "mint without a referral code",
-            "ticket_award": "Small and Big Block prize tickets",
+            "ticket_award": "Small Block prize ticket",
+            "random_recipient_eligibility": "existing ticket holder",
+            "commission_amount": "$5"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "BACKEND"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIMARY_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_CODE_RANDOM_REWARD_E001",
+            "REQ_NO_CODE_RANDOM_REWARD_E002",
+            "REQ_NO_CODE_RANDOM_REWARD_E003",
+            "REQ_NO_CODE_RANDOM_REWARD_E004"
+          ]
+        },
+        {
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S005",
+          "attributes": {
+            "no_code_trigger": "mint without a referral code",
+            "ticket_award": "Small Block prize ticket",
             "random_recipient_eligibility": "already minted NFT holder",
             "commission_amount": "$5"
           },
@@ -1367,14 +1842,15 @@
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
             "REQ_NO_CODE_RANDOM_REWARD_E002",
-            "REQ_NO_CODE_RANDOM_REWARD_E004"
+            "REQ_NO_CODE_RANDOM_REWARD_E004",
+            "REQ_NO_CODE_RANDOM_REWARD_E005"
           ]
         },
         {
-          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S005",
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S006",
           "attributes": {
             "no_code_trigger": "mint without a referral code",
-            "ticket_award": "Small and Big Block prize tickets",
+            "ticket_award": "Small Block prize ticket",
             "random_recipient_eligibility": "already minted NFT holder",
             "commission_amount": "$5"
           },
@@ -1394,40 +1870,14 @@
             "status": "OPEN",
             "dimension": "VALUE",
             "description": "The destination and ticket treatment for the first no-code mint are unresolved because no prior NFT holder exists.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E005"
+            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E006"
           },
           "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
             "REQ_NO_CODE_RANDOM_REWARD_E002",
             "REQ_NO_CODE_RANDOM_REWARD_E004",
-            "REQ_NO_CODE_RANDOM_REWARD_E005"
-          ]
-        },
-        {
-          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S006",
-          "attributes": {
-            "no_code_trigger": "mint with no referral code or an invalid referral code",
-            "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
-            "commission_amount": "$5"
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT",
-              "BACKEND"
-            ],
-            "contexts": [
-              "NO_REFERRAL",
-              "PRIMARY_MINT"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": null,
-          "supporting_event_ids": [
-            "REQ_NO_CODE_RANDOM_REWARD_E001",
+            "REQ_NO_CODE_RANDOM_REWARD_E005",
             "REQ_NO_CODE_RANDOM_REWARD_E006"
           ]
         },
@@ -1452,14 +1902,9 @@
           },
           "lifecycle_status": "ACTIVE",
           "ambiguity": null,
-          "execution": {
-            "status": "CLAIMED_WORKING",
-            "observed_behavior": "Freelancer reports that the contract sends the first no-code commission to the founder and uses VRF to select an existing NFT for later no-code mints.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E007"
-          },
+          "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
             "REQ_NO_CODE_RANDOM_REWARD_E007"
           ]
         },
@@ -1486,12 +1931,12 @@
           "ambiguity": null,
           "execution": {
             "status": "CLAIMED_WORKING",
-            "observed_behavior": "Freelancer reports that the implemented first-mint path sends $5 to the founder and awards no ticket because no prior NFT exists.",
+            "observed_behavior": "Freelancer reports that the contract sends the first no-code commission to the founder and uses VRF to select an existing NFT for later no-code mints.",
             "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E008"
           },
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
             "REQ_NO_CODE_RANDOM_REWARD_E008"
           ]
         },
@@ -1517,13 +1962,13 @@
           "lifecycle_status": "ACTIVE",
           "ambiguity": null,
           "execution": {
-            "status": "FAILED",
-            "observed_behavior": "A completed USDC mint without a referral code generated no random ticket.",
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports that the implemented first-mint path sends $5 to the founder and awards no ticket because no prior NFT exists.",
             "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E009"
           },
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
             "REQ_NO_CODE_RANDOM_REWARD_E009"
           ]
         },
@@ -1532,7 +1977,7 @@
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5"
           },
           "scope": {
@@ -1547,21 +1992,11 @@
             ]
           },
           "lifecycle_status": "ACTIVE",
-          "ambiguity": {
-            "status": "OPEN",
-            "dimension": "VALUE",
-            "description": "The client leaves no-code ticket generation undecided while confirming that the $5 commission must be assigned randomly.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E010"
-          },
-          "execution": {
-            "status": "FAILED",
-            "observed_behavior": "A completed USDC mint without a referral code generated no random ticket.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E009"
-          },
+          "ambiguity": null,
+          "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
-            "REQ_NO_CODE_RANDOM_REWARD_E009",
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
             "REQ_NO_CODE_RANDOM_REWARD_E010"
           ]
         },
@@ -1570,7 +2005,7 @@
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5"
           },
           "scope": {
@@ -1589,16 +2024,12 @@
             "status": "OPEN",
             "dimension": "VALUE",
             "description": "The client leaves no-code ticket generation undecided while confirming that the $5 commission must be assigned randomly.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E010"
-          },
-          "execution": {
-            "status": "CLAIMED_WORKING",
-            "observed_behavior": "Freelancer claims no-code mints now generate a ticket and a randomly assigned commission.",
             "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E011"
           },
+          "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
             "REQ_NO_CODE_RANDOM_REWARD_E010",
             "REQ_NO_CODE_RANDOM_REWARD_E011"
           ]
@@ -1608,7 +2039,46 @@
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
+            "commission_amount": "$5"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "BACKEND"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIMARY_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "status": "OPEN",
+            "dimension": "VALUE",
+            "description": "The client leaves no-code ticket generation undecided while confirming that the $5 commission must be assigned randomly.",
+            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E011"
+          },
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer claims no-code mints now generate a ticket and a randomly assigned commission.",
+            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E012"
+          },
+          "supporting_event_ids": [
+            "REQ_NO_CODE_RANDOM_REWARD_E001",
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
+            "REQ_NO_CODE_RANDOM_REWARD_E010",
+            "REQ_NO_CODE_RANDOM_REWARD_E011",
+            "REQ_NO_CODE_RANDOM_REWARD_E012"
+          ]
+        },
+        {
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S013",
+          "attributes": {
+            "no_code_trigger": "mint with no referral code or an invalid referral code",
+            "ticket_award": "one $500 prize-draw ticket",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5",
             "award_frequency": "one commission and one ticket per primary mint",
             "secondary_market_sales_generate_reward": false
@@ -1629,16 +2099,17 @@
           "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
-            "REQ_NO_CODE_RANDOM_REWARD_E012"
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
+            "REQ_NO_CODE_RANDOM_REWARD_E010",
+            "REQ_NO_CODE_RANDOM_REWARD_E013"
           ]
         },
         {
-          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S013",
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S014",
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5",
             "award_frequency": "one commission and one ticket per primary mint",
             "secondary_market_sales_generate_reward": false
@@ -1659,22 +2130,23 @@
             "status": "OPEN",
             "dimension": "VALUE",
             "description": "The client again leaves ticket generation for no-code mints undecided while retaining the random-commission requirement.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E014"
+            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E015"
           },
           "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
-            "REQ_NO_CODE_RANDOM_REWARD_E012",
-            "REQ_NO_CODE_RANDOM_REWARD_E014"
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
+            "REQ_NO_CODE_RANDOM_REWARD_E010",
+            "REQ_NO_CODE_RANDOM_REWARD_E013",
+            "REQ_NO_CODE_RANDOM_REWARD_E015"
           ]
         },
         {
-          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S014",
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S015",
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5",
             "award_frequency": "one reward package per no-code primary mint",
             "secondary_market_sales_generate_reward": false,
@@ -1682,7 +2154,8 @@
               "commission": "$5",
               "ticket_count": 1
             },
-            "assignment_method": "random assignment to an NFT holder"
+            "assignment_method": "random assignment to an NFT holder",
+            "reward_recipient_pairing": "The ticket and its corresponding $5 commission must be assigned together to the same randomly selected NFT holder."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -1700,17 +2173,18 @@
           "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
-            "REQ_NO_CODE_RANDOM_REWARD_E012",
-            "REQ_NO_CODE_RANDOM_REWARD_E015"
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
+            "REQ_NO_CODE_RANDOM_REWARD_E010",
+            "REQ_NO_CODE_RANDOM_REWARD_E013",
+            "REQ_NO_CODE_RANDOM_REWARD_E016"
           ]
         },
         {
-          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S015",
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S016",
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5",
             "award_frequency": "one reward package per no-code primary mint",
             "secondary_market_sales_generate_reward": false,
@@ -1718,7 +2192,8 @@
               "commission": "$5",
               "ticket_count": 1
             },
-            "assignment_method": "random assignment to an NFT holder"
+            "assignment_method": "random assignment to an NFT holder",
+            "reward_recipient_pairing": "The ticket and its corresponding $5 commission must be assigned together to the same randomly selected NFT holder."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -1736,23 +2211,24 @@
             "status": "OPEN",
             "dimension": "VALUE",
             "description": "The freelancer proposes a first-mint exception that conflicts with the client's newly confirmed one-package-per-mint rule.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E017"
+            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E018"
           },
           "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
-            "REQ_NO_CODE_RANDOM_REWARD_E012",
-            "REQ_NO_CODE_RANDOM_REWARD_E015",
-            "REQ_NO_CODE_RANDOM_REWARD_E017"
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
+            "REQ_NO_CODE_RANDOM_REWARD_E010",
+            "REQ_NO_CODE_RANDOM_REWARD_E013",
+            "REQ_NO_CODE_RANDOM_REWARD_E016",
+            "REQ_NO_CODE_RANDOM_REWARD_E018"
           ]
         },
         {
-          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S016",
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S017",
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5",
             "award_frequency": "one reward package per no-code primary mint",
             "secondary_market_sales_generate_reward": false,
@@ -1761,6 +2237,7 @@
               "ticket_count": 1
             },
             "assignment_method": "random assignment to an NFT holder",
+            "reward_recipient_pairing": "The ticket and its corresponding $5 commission must be assigned together to the same randomly selected NFT holder.",
             "first_mint_exception": "No random ticket or $5 referral commission is awarded because no prior NFT exists"
           },
           "scope": {
@@ -1779,18 +2256,19 @@
           "execution": null,
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
-            "REQ_NO_CODE_RANDOM_REWARD_E012",
-            "REQ_NO_CODE_RANDOM_REWARD_E015",
-            "REQ_NO_CODE_RANDOM_REWARD_E018"
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
+            "REQ_NO_CODE_RANDOM_REWARD_E010",
+            "REQ_NO_CODE_RANDOM_REWARD_E013",
+            "REQ_NO_CODE_RANDOM_REWARD_E016",
+            "REQ_NO_CODE_RANDOM_REWARD_E019"
           ]
         },
         {
-          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S017",
+          "state_id": "REQ_NO_CODE_RANDOM_REWARD_S018",
           "attributes": {
             "no_code_trigger": "mint with no referral code or an invalid referral code",
             "ticket_award": "one $500 prize-draw ticket",
-            "random_recipient_eligibility": "existing NFT holder",
+            "random_recipient_eligibility": "Existing NFT holder in the new active contract; holders represented only by old-contract NFT copies are excluded.",
             "commission_amount": "$5",
             "award_frequency": "one reward package per no-code primary mint",
             "secondary_market_sales_generate_reward": false,
@@ -1799,6 +2277,7 @@
               "ticket_count": 1
             },
             "assignment_method": "random assignment to an NFT holder",
+            "reward_recipient_pairing": "The ticket and its corresponding $5 commission must be assigned together to the same randomly selected NFT holder.",
             "first_mint_exception": "No random ticket or $5 referral commission is awarded because no prior NFT exists"
           },
           "scope": {
@@ -1816,16 +2295,17 @@
           "ambiguity": null,
           "execution": {
             "status": "VERIFIED_WORKING",
-            "observed_behavior": "After a mobile no-code mint, the client confirmed from leaderboard totals that both the ticket and commission were distributed.",
-            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E020"
+            "observed_behavior": "The client confirmed from leaderboard totals that both the ticket and commission from the no-code mint were distributed.",
+            "source_event_id": "REQ_NO_CODE_RANDOM_REWARD_E021"
           },
           "supporting_event_ids": [
             "REQ_NO_CODE_RANDOM_REWARD_E001",
-            "REQ_NO_CODE_RANDOM_REWARD_E006",
-            "REQ_NO_CODE_RANDOM_REWARD_E012",
-            "REQ_NO_CODE_RANDOM_REWARD_E015",
-            "REQ_NO_CODE_RANDOM_REWARD_E018",
-            "REQ_NO_CODE_RANDOM_REWARD_E020"
+            "REQ_NO_CODE_RANDOM_REWARD_E007",
+            "REQ_NO_CODE_RANDOM_REWARD_E010",
+            "REQ_NO_CODE_RANDOM_REWARD_E013",
+            "REQ_NO_CODE_RANDOM_REWARD_E016",
+            "REQ_NO_CODE_RANDOM_REWARD_E019",
+            "REQ_NO_CODE_RANDOM_REWARD_E021"
           ]
         }
       ],
@@ -1859,14 +2339,14 @@
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S004",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E004",
           "event_type": "MODIFY",
-          "source_message_id": 288,
+          "source_message_id": 195,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S004",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S005",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E005",
-          "event_type": "AMBIGUOUS",
+          "event_type": "MODIFY",
           "source_message_id": 288,
           "value_removals": null
         },
@@ -1874,16 +2354,16 @@
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S005",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S006",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E006",
-          "event_type": "MODIFY",
-          "source_message_id": 305,
+          "event_type": "AMBIGUOUS",
+          "source_message_id": 288,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S006",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S007",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E007",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 308,
+          "event_type": "MODIFY",
+          "source_message_id": 305,
           "value_removals": null
         },
         {
@@ -1891,77 +2371,85 @@
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S008",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E008",
           "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 375,
+          "source_message_id": 308,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S008",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S009",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E009",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 579,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "source_message_id": 375,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S009",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S010",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E010",
-          "event_type": "AMBIGUOUS",
-          "source_message_id": 583,
+          "event_type": "MODIFY",
+          "source_message_id": 539,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S010",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S011",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E011",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 587,
+          "event_type": "AMBIGUOUS",
+          "source_message_id": 583,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S011",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S012",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E012",
-          "event_type": "MODIFY",
-          "source_message_id": 595,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "source_message_id": 587,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S012",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S013",
-          "event_id": "REQ_NO_CODE_RANDOM_REWARD_E014",
-          "event_type": "AMBIGUOUS",
-          "source_message_id": 631,
+          "event_id": "REQ_NO_CODE_RANDOM_REWARD_E013",
+          "event_type": "MODIFY",
+          "source_message_id": 595,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S013",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S014",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E015",
-          "event_type": "MODIFY",
-          "source_message_id": 672,
+          "event_type": "AMBIGUOUS",
+          "source_message_id": 631,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S014",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S015",
-          "event_id": "REQ_NO_CODE_RANDOM_REWARD_E017",
-          "event_type": "AMBIGUOUS",
-          "source_message_id": 682,
+          "event_id": "REQ_NO_CODE_RANDOM_REWARD_E016",
+          "event_type": "MODIFY",
+          "source_message_id": 672,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S015",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S016",
           "event_id": "REQ_NO_CODE_RANDOM_REWARD_E018",
-          "event_type": "MODIFY",
-          "source_message_id": 684,
+          "event_type": "AMBIGUOUS",
+          "source_message_id": 682,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S016",
           "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S017",
-          "event_id": "REQ_NO_CODE_RANDOM_REWARD_E020",
+          "event_id": "REQ_NO_CODE_RANDOM_REWARD_E019",
+          "event_type": "MODIFY",
+          "source_message_id": 684,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_NO_CODE_RANDOM_REWARD_S017",
+          "to_state_id": "REQ_NO_CODE_RANDOM_REWARD_S018",
+          "event_id": "REQ_NO_CODE_RANDOM_REWARD_E021",
           "event_type": "RUNTIME_VERIFICATION",
           "source_message_id": 732,
           "value_removals": null
@@ -2016,7 +2504,7 @@
           "ambiguity": null,
           "execution": {
             "status": "FAILED",
-            "observed_behavior": "The dashboard showed zero tickets, referrals, and earnings despite activity that should have produced referral reward data.",
+            "observed_behavior": "The dashboard displayed three owned NFTs and a $10 prize pool but showed zero tickets, zero referrals, and zero earnings.",
             "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E002"
           },
           "supporting_event_ids": [
@@ -2057,7 +2545,7 @@
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
-            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded."
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2082,7 +2570,37 @@
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
-            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded."
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
+            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND"
+            ],
+            "contexts": [
+              "DASHBOARD",
+              "REFERRAL_REWARDS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005"
+          ]
+        },
+        {
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S006",
+          "attributes": {
+            "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
+            "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
+            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2099,20 +2617,23 @@
           "execution": {
             "status": "FAILED",
             "observed_behavior": "Across seven mints, the account and leaderboard data recorded only four tickets and four commissions, with no-code rewards apparently absent from accounting.",
-            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E005"
+            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E006"
           },
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E005"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E006"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S006",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S007",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
-            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded."
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
+            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2129,20 +2650,23 @@
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports that missing historical ticket and commission data were backfilled to existing NFTs.",
-            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E006"
+            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E007"
           },
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E006"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E007"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S007",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S008",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
-            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded."
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
+            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2159,26 +2683,29 @@
           "execution": {
             "status": "FAILED",
             "observed_behavior": "After the claimed backfill, the leaderboard still showed only four tickets and four commissions.",
-            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E007"
+            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E008"
           },
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E007"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E008"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S008",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S009",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
             "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
-            "reward_path_accounting": "Account awarded tickets and $5 commissions whether they result from a coded referral or random assignment after a no-code mint.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting.",
             "required_accounting_surfaces": [
               "LEADERBOARD",
               "NFT_ATTRIBUTES"
             ],
-            "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT."
+            "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT.",
+            "historical_random_reward_backfill": "Backfill missing tickets and $5 commissions from prior no-code primary mints so historical accounting reflects one paired ticket and commission per mint."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2196,21 +2723,24 @@
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E008"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E009"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S009",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S010",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
             "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
-            "reward_path_accounting": "Account awarded tickets and $5 commissions whether they result from a coded referral or random assignment after a no-code mint.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting.",
             "required_accounting_surfaces": [
               "LEADERBOARD",
               "NFT_ATTRIBUTES"
             ],
-            "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT."
+            "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT.",
+            "historical_random_reward_backfill": "Backfill missing tickets and $5 commissions from prior no-code primary mints so historical accounting reflects one paired ticket and commission per mint."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2227,22 +2757,24 @@
           "execution": {
             "status": "FAILED",
             "observed_behavior": "Coded-referral accounting worked and recent random tickets appeared, but no-code commissions and historical random tickets remained absent; one NFT showed two tickets but only one $5 commission.",
-            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E009"
+            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E010"
           },
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E008",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E009"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E009",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E010"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S010",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S011",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
             "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
-            "reward_path_accounting": "Account awarded tickets and $5 commissions whether they result from a coded referral or random assignment after a no-code mint.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting.",
             "required_accounting_surfaces": [
               "LEADERBOARD",
               "NFT_ATTRIBUTES"
@@ -2267,24 +2799,66 @@
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E008",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E010"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E009",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E011"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S011",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S012",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
             "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
-            "reward_path_accounting": "Account awarded tickets and $5 commissions whether they result from a coded referral or random assignment after a no-code mint.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting.",
             "required_accounting_surfaces": [
               "LEADERBOARD",
               "NFT_ATTRIBUTES"
             ],
             "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT.",
             "historical_backfill_required": false,
-            "prospective_accounting_accuracy_required": true
+            "prospective_accounting_accuracy_required": true,
+            "first_mint_accounting_exception": "Exclude the first mint from expected referral-ticket and $5 commission totals because no prior NFT existed to receive the random reward."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND"
+            ],
+            "contexts": [
+              "DASHBOARD",
+              "REFERRAL_REWARDS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E009",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E011",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E012"
+          ]
+        },
+        {
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S013",
+          "attributes": {
+            "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
+            "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
+            "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting.",
+            "required_accounting_surfaces": [
+              "LEADERBOARD",
+              "NFT_ATTRIBUTES"
+            ],
+            "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT.",
+            "historical_backfill_required": false,
+            "prospective_accounting_accuracy_required": true,
+            "first_mint_accounting_exception": "Exclude the first mint from expected referral-ticket and $5 commission totals because no prior NFT existed to receive the random reward."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2301,30 +2875,34 @@
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports implementing temporary backend logic intended to reflect tickets and commissions correctly.",
-            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E011"
+            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E013"
           },
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E008",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E010",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E011"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E009",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E011",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E012",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E013"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S012",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S014",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
             "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
-            "reward_path_accounting": "Account awarded tickets and $5 commissions whether they result from a coded referral or random assignment after a no-code mint.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting.",
             "required_accounting_surfaces": [
               "LEADERBOARD",
               "NFT_ATTRIBUTES"
             ],
             "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT.",
             "historical_backfill_required": false,
-            "prospective_accounting_accuracy_required": true
+            "prospective_accounting_accuracy_required": true,
+            "first_mint_accounting_exception": "Exclude the first mint from expected referral-ticket and $5 commission totals because no prior NFT existed to receive the random reward."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2341,30 +2919,34 @@
           "execution": {
             "status": "FAILED",
             "observed_behavior": "Leaderboard and NFT-page totals were correct, but the NFT attributes remained stale, showing one referral and $5 instead of two referrals and $10.",
-            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E012"
+            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E014"
           },
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E008",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E010",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E012"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E009",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E011",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E012",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E014"
           ]
         },
         {
-          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S013",
+          "state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S015",
           "attributes": {
             "dashboard_commission_display": "Show referral commissions in the owner's dashboard as they are earned.",
             "dashboard_ticket_display": "Show prize tickets tied to the owner's NFT or mint number in the dashboard.",
+            "contract_data_scope": "Show referral reward and prize-ticket accounting from the new active contract and exclude data tied to old-contract NFT copies.",
             "primary_mint_accounting_rule": "Recorded referral commissions and tickets should correspond to eligible primary mints; secondary-market sales are excluded.",
-            "reward_path_accounting": "Account awarded tickets and $5 commissions whether they result from a coded referral or random assignment after a no-code mint.",
+            "random_reward_accounting_rule": "Commissions and tickets assigned at random for no-code or invalid-code primary mints must be registered in reward accounting.",
             "required_accounting_surfaces": [
               "LEADERBOARD",
               "NFT_ATTRIBUTES"
             ],
             "ticket_commission_pairing": "Each accounted referral ticket must have its corresponding $5 commission accounted to the same recipient NFT.",
             "historical_backfill_required": false,
-            "prospective_accounting_accuracy_required": true
+            "prospective_accounting_accuracy_required": true,
+            "first_mint_accounting_exception": "Exclude the first mint from expected referral-ticket and $5 commission totals because no prior NFT existed to receive the random reward."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2381,14 +2963,16 @@
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer reports changing NFT attributes to use the same live on-chain reward data source as the leaderboard.",
-            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E013"
+            "source_event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E015"
           },
           "supporting_event_ids": [
             "REQ_REFERRAL_REWARD_ACCOUNTING_E001",
             "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E008",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E010",
-            "REQ_REFERRAL_REWARD_ACCOUNTING_E013"
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E009",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E011",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E012",
+            "REQ_REFERRAL_REWARD_ACCOUNTING_E015"
           ]
         }
       ],
@@ -2422,46 +3006,46 @@
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S004",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E004",
           "event_type": "MODIFY",
-          "source_message_id": 595,
+          "source_message_id": 539,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S004",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S005",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E005",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 599,
+          "event_type": "MODIFY",
+          "source_message_id": 595,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S005",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S006",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E006",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 605,
+          "event_type": "RUNTIME_FAILURE",
+          "source_message_id": 599,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S006",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S007",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E007",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 608,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "source_message_id": 605,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S007",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S008",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E008",
-          "event_type": "MODIFY",
-          "source_message_id": 672,
+          "event_type": "RUNTIME_FAILURE",
+          "source_message_id": 608,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S008",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S009",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E009",
-          "event_type": "RUNTIME_FAILURE",
+          "event_type": "MODIFY",
           "source_message_id": 672,
           "value_removals": null
         },
@@ -2469,30 +3053,48 @@
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S009",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S010",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E010",
-          "event_type": "MODIFY",
-          "source_message_id": 674,
+          "event_type": "RUNTIME_FAILURE",
+          "source_message_id": 672,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S010",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S011",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E011",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 686,
-          "value_removals": null
+          "event_type": "MODIFY",
+          "source_message_id": 674,
+          "value_removals": [
+            "historical_random_reward_backfill"
+          ]
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S011",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S012",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E012",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 688,
+          "event_type": "MODIFY",
+          "source_message_id": 684,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S012",
           "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S013",
           "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E013",
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "source_message_id": 686,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S013",
+          "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S014",
+          "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E014",
+          "event_type": "RUNTIME_FAILURE",
+          "source_message_id": 688,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S014",
+          "to_state_id": "REQ_REFERRAL_REWARD_ACCOUNTING_S015",
+          "event_id": "REQ_REFERRAL_REWARD_ACCOUNTING_E015",
           "event_type": "IMPLEMENTATION_CLAIM",
           "source_message_id": 691,
           "value_removals": null
@@ -2562,7 +3164,6 @@
             "mint_price_usd": 15,
             "founder_share_per_primary_mint_usd": 5,
             "referral_commission_per_primary_mint_usd": 5,
-            "prize_pools_funded_from_primary_mints": true,
             "founder_share_fiat_fee_treatment": "applicable fiat fees reduce the founder's proceeds",
             "prize_pool_share_per_primary_mint_usd": 5,
             "active_prize_pool": "small_block_prize_pool"
@@ -2584,6 +3185,37 @@
             "REQ_MINT_REVENUE_ALLOCATION_E001",
             "REQ_MINT_REVENUE_ALLOCATION_E002",
             "REQ_MINT_REVENUE_ALLOCATION_E003"
+          ]
+        },
+        {
+          "state_id": "REQ_MINT_REVENUE_ALLOCATION_S004",
+          "attributes": {
+            "mint_price_usd": 15,
+            "founder_share_per_primary_mint_usd": 5,
+            "referral_commission_per_primary_mint_usd": 5,
+            "founder_share_fiat_fee_treatment": "applicable fiat fees reduce the founder's proceeds",
+            "prize_pool_share_per_primary_mint_usd": 5,
+            "active_prize_pool": "small_block_prize_pool",
+            "first_mint_referral_commission_exception": "No $5 referral commission is awarded on the first primary mint because no prior NFT holder exists."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIMARY_MINT",
+              "REVENUE_SPLIT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_MINT_REVENUE_ALLOCATION_E001",
+            "REQ_MINT_REVENUE_ALLOCATION_E002",
+            "REQ_MINT_REVENUE_ALLOCATION_E003",
+            "REQ_MINT_REVENUE_ALLOCATION_E004"
           ]
         }
       ],
@@ -2610,6 +3242,16 @@
           "event_id": "REQ_MINT_REVENUE_ALLOCATION_E003",
           "event_type": "MODIFY",
           "source_message_id": 195,
+          "value_removals": [
+            "prize_pools_funded_from_primary_mints"
+          ]
+        },
+        {
+          "from_state_id": "REQ_MINT_REVENUE_ALLOCATION_S003",
+          "to_state_id": "REQ_MINT_REVENUE_ALLOCATION_S004",
+          "event_id": "REQ_MINT_REVENUE_ALLOCATION_E004",
+          "event_type": "MODIFY",
+          "source_message_id": 684,
           "value_removals": null
         }
       ]
@@ -2643,7 +3285,7 @@
         {
           "state_id": "REQ_NFT_MINT_FULFILLMENT_S002",
           "attributes": {
-            "minted_asset": "novella memoir NFT ebook"
+            "minted_asset": "\"My Underdog Journey: To Own Goal\" memoir novella NFT ebook"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2656,11 +3298,7 @@
           },
           "lifecycle_status": "ACTIVE",
           "ambiguity": null,
-          "execution": {
-            "status": "FAILED",
-            "observed_behavior": "An ETH purchase transaction executed and took 0.0055 ETH, but the buyer received no NFT.",
-            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E002"
-          },
+          "execution": null,
           "supporting_event_ids": [
             "REQ_NFT_MINT_FULFILLMENT_E001",
             "REQ_NFT_MINT_FULFILLMENT_E002"
@@ -2669,7 +3307,8 @@
         {
           "state_id": "REQ_NFT_MINT_FULFILLMENT_S003",
           "attributes": {
-            "minted_asset": "novella memoir NFT ebook"
+            "minted_asset": "\"My Underdog Journey: To Own Goal\" memoir novella NFT ebook",
+            "fiat_mint_delivery": "Transak mints the NFT directly to the non-custodial wallet automatically created for the fiat buyer."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2677,7 +3316,69 @@
               "SMART_CONTRACT"
             ],
             "contexts": [
-              "PRIMARY_MINT"
+              "PRIMARY_MINT",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NFT_MINT_FULFILLMENT_E001",
+            "REQ_NFT_MINT_FULFILLMENT_E002",
+            "REQ_NFT_MINT_FULFILLMENT_E003"
+          ]
+        },
+        {
+          "state_id": "REQ_NFT_MINT_FULFILLMENT_S004",
+          "attributes": {
+            "minted_asset": "\"My Underdog Journey: To Own Goal\" memoir novella NFT ebook",
+            "fiat_mint_delivery": "Transak mints the NFT directly to the non-custodial wallet automatically created for the fiat buyer."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIMARY_MINT",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "An ETH purchase transaction executed and took 0.0055 ETH, but the buyer received no NFT.",
+            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E004"
+          },
+          "supporting_event_ids": [
+            "REQ_NFT_MINT_FULFILLMENT_E001",
+            "REQ_NFT_MINT_FULFILLMENT_E002",
+            "REQ_NFT_MINT_FULFILLMENT_E003",
+            "REQ_NFT_MINT_FULFILLMENT_E004"
+          ]
+        },
+        {
+          "state_id": "REQ_NFT_MINT_FULFILLMENT_S005",
+          "attributes": {
+            "minted_asset": "\"My Underdog Journey: To Own Goal\" memoir novella NFT ebook",
+            "fiat_mint_delivery": "Transak mints the NFT directly to the non-custodial wallet automatically created for the fiat buyer."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIMARY_MINT",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -2685,17 +3386,20 @@
           "execution": {
             "status": "VERIFIED_WORKING",
             "observed_behavior": "The client confirmed on BaseScan that they owned the NFTs, while the separate project dashboard still showed none.",
-            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E003"
+            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E005"
           },
           "supporting_event_ids": [
             "REQ_NFT_MINT_FULFILLMENT_E001",
-            "REQ_NFT_MINT_FULFILLMENT_E003"
+            "REQ_NFT_MINT_FULFILLMENT_E002",
+            "REQ_NFT_MINT_FULFILLMENT_E003",
+            "REQ_NFT_MINT_FULFILLMENT_E005"
           ]
         },
         {
-          "state_id": "REQ_NFT_MINT_FULFILLMENT_S004",
+          "state_id": "REQ_NFT_MINT_FULFILLMENT_S006",
           "attributes": {
-            "minted_asset": "novella memoir NFT ebook"
+            "minted_asset": "\"My Underdog Journey: To Own Goal\" memoir novella NFT ebook",
+            "fiat_mint_delivery": "Transak mints the NFT directly to the non-custodial wallet automatically created for the fiat buyer."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2703,7 +3407,10 @@
               "SMART_CONTRACT"
             ],
             "contexts": [
-              "PRIMARY_MINT"
+              "PRIMARY_MINT",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -2711,17 +3418,20 @@
           "execution": {
             "status": "VERIFIED_WORKING",
             "observed_behavior": "The freelancer reports executing a USDC NFT mint through the newly deployed contract.",
-            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E004"
+            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E006"
           },
           "supporting_event_ids": [
             "REQ_NFT_MINT_FULFILLMENT_E001",
-            "REQ_NFT_MINT_FULFILLMENT_E004"
+            "REQ_NFT_MINT_FULFILLMENT_E002",
+            "REQ_NFT_MINT_FULFILLMENT_E003",
+            "REQ_NFT_MINT_FULFILLMENT_E006"
           ]
         },
         {
-          "state_id": "REQ_NFT_MINT_FULFILLMENT_S005",
+          "state_id": "REQ_NFT_MINT_FULFILLMENT_S007",
           "attributes": {
-            "minted_asset": "novella memoir NFT ebook"
+            "minted_asset": "\"My Underdog Journey: To Own Goal\" memoir novella NFT ebook",
+            "fiat_mint_delivery": "Transak mints the NFT directly to the non-custodial wallet automatically created for the fiat buyer."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2729,7 +3439,10 @@
               "SMART_CONTRACT"
             ],
             "contexts": [
-              "PRIMARY_MINT"
+              "PRIMARY_MINT",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -2737,17 +3450,20 @@
           "execution": {
             "status": "VERIFIED_WORKING",
             "observed_behavior": "A referral-code purchase completed the mint successfully, and the resulting NFT was visible on the dashboard.",
-            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E005"
+            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E007"
           },
           "supporting_event_ids": [
             "REQ_NFT_MINT_FULFILLMENT_E001",
-            "REQ_NFT_MINT_FULFILLMENT_E005"
+            "REQ_NFT_MINT_FULFILLMENT_E002",
+            "REQ_NFT_MINT_FULFILLMENT_E003",
+            "REQ_NFT_MINT_FULFILLMENT_E007"
           ]
         },
         {
-          "state_id": "REQ_NFT_MINT_FULFILLMENT_S006",
+          "state_id": "REQ_NFT_MINT_FULFILLMENT_S008",
           "attributes": {
-            "minted_asset": "novella memoir NFT ebook"
+            "minted_asset": "\"My Underdog Journey: To Own Goal\" memoir novella NFT ebook",
+            "fiat_mint_delivery": "Transak mints the NFT directly to the non-custodial wallet automatically created for the fiat buyer."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -2755,7 +3471,10 @@
               "SMART_CONTRACT"
             ],
             "contexts": [
-              "PRIMARY_MINT"
+              "PRIMARY_MINT",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -2763,11 +3482,13 @@
           "execution": {
             "status": "VERIFIED_WORKING",
             "observed_behavior": "A no-referral purchase successfully minted the NFT even though the separate tip and reward-accounting behaviors failed.",
-            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E006"
+            "source_event_id": "REQ_NFT_MINT_FULFILLMENT_E008"
           },
           "supporting_event_ids": [
             "REQ_NFT_MINT_FULFILLMENT_E001",
-            "REQ_NFT_MINT_FULFILLMENT_E006"
+            "REQ_NFT_MINT_FULFILLMENT_E002",
+            "REQ_NFT_MINT_FULFILLMENT_E003",
+            "REQ_NFT_MINT_FULFILLMENT_E008"
           ]
         }
       ],
@@ -2784,24 +3505,24 @@
           "from_state_id": "REQ_NFT_MINT_FULFILLMENT_S001",
           "to_state_id": "REQ_NFT_MINT_FULFILLMENT_S002",
           "event_id": "REQ_NFT_MINT_FULFILLMENT_E002",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 341,
+          "event_type": "MODIFY",
+          "source_message_id": 146,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NFT_MINT_FULFILLMENT_S002",
           "to_state_id": "REQ_NFT_MINT_FULFILLMENT_S003",
           "event_id": "REQ_NFT_MINT_FULFILLMENT_E003",
-          "event_type": "RUNTIME_VERIFICATION",
-          "source_message_id": 404,
+          "event_type": "MODIFY",
+          "source_message_id": 184,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NFT_MINT_FULFILLMENT_S003",
           "to_state_id": "REQ_NFT_MINT_FULFILLMENT_S004",
           "event_id": "REQ_NFT_MINT_FULFILLMENT_E004",
-          "event_type": "RUNTIME_VERIFICATION",
-          "source_message_id": 501,
+          "event_type": "RUNTIME_FAILURE",
+          "source_message_id": 341,
           "value_removals": null
         },
         {
@@ -2809,13 +3530,29 @@
           "to_state_id": "REQ_NFT_MINT_FULFILLMENT_S005",
           "event_id": "REQ_NFT_MINT_FULFILLMENT_E005",
           "event_type": "RUNTIME_VERIFICATION",
-          "source_message_id": 569,
+          "source_message_id": 404,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_NFT_MINT_FULFILLMENT_S005",
           "to_state_id": "REQ_NFT_MINT_FULFILLMENT_S006",
           "event_id": "REQ_NFT_MINT_FULFILLMENT_E006",
+          "event_type": "RUNTIME_VERIFICATION",
+          "source_message_id": 501,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_NFT_MINT_FULFILLMENT_S006",
+          "to_state_id": "REQ_NFT_MINT_FULFILLMENT_S007",
+          "event_id": "REQ_NFT_MINT_FULFILLMENT_E007",
+          "event_type": "RUNTIME_VERIFICATION",
+          "source_message_id": 569,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_NFT_MINT_FULFILLMENT_S007",
+          "to_state_id": "REQ_NFT_MINT_FULFILLMENT_S008",
+          "event_id": "REQ_NFT_MINT_FULFILLMENT_E008",
           "event_type": "RUNTIME_VERIFICATION",
           "source_message_id": 622,
           "value_removals": null
@@ -3599,7 +4336,10 @@
               "Apple Pay",
               "Google Pay"
             ],
-            "preexisting_crypto_or_wallet_required": false
+            "preexisting_crypto_or_wallet_required": false,
+            "wallet_provisioning": "Transak automatically creates a non-custodial wallet for a non-crypto fiat buyer without requiring immediate seed-phrase setup.",
+            "wallet_purpose": "The automatically created wallet holds the buyer's NFT and receives commissions and prizes.",
+            "mint_delivery": "Transak converts the fiat payment to crypto and mints the NFT directly to the automatically created wallet."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -3614,7 +4354,7 @@
               "TRANSAK"
             ]
           },
-          "lifecycle_status": "DEFERRED",
+          "lifecycle_status": "ACTIVE",
           "ambiguity": null,
           "execution": null,
           "supporting_event_ids": [
@@ -3635,7 +4375,10 @@
               "Apple Pay",
               "Google Pay"
             ],
-            "preexisting_crypto_or_wallet_required": false
+            "preexisting_crypto_or_wallet_required": false,
+            "wallet_provisioning": "Transak automatically creates a non-custodial wallet for a non-crypto fiat buyer without requiring immediate seed-phrase setup.",
+            "wallet_purpose": "The automatically created wallet holds the buyer's NFT and receives commissions and prizes.",
+            "mint_delivery": "Transak converts the fiat payment to crypto and mints the NFT directly to the automatically created wallet."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -3650,13 +4393,14 @@
               "TRANSAK"
             ]
           },
-          "lifecycle_status": "ACTIVE",
+          "lifecycle_status": "DEFERRED",
           "ambiguity": null,
           "execution": null,
           "supporting_event_ids": [
             "REQ_FIAT_ONRAMP_E001",
             "REQ_FIAT_ONRAMP_E004",
             "REQ_FIAT_ONRAMP_E006",
+            "REQ_FIAT_ONRAMP_E007",
             "REQ_FIAT_ONRAMP_E008"
           ]
         },
@@ -3671,7 +4415,50 @@
               "Apple Pay",
               "Google Pay"
             ],
-            "preexisting_crypto_or_wallet_required": false
+            "preexisting_crypto_or_wallet_required": false,
+            "wallet_provisioning": "Transak automatically creates a non-custodial wallet for a non-crypto fiat buyer without requiring immediate seed-phrase setup.",
+            "wallet_purpose": "The automatically created wallet holds the buyer's NFT and receives commissions and prizes.",
+            "mint_delivery": "Transak converts the fiat payment to crypto and mints the NFT directly to the automatically created wallet."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "BACKEND",
+              "PAYMENT"
+            ],
+            "contexts": [
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_FIAT_ONRAMP_E001",
+            "REQ_FIAT_ONRAMP_E004",
+            "REQ_FIAT_ONRAMP_E006",
+            "REQ_FIAT_ONRAMP_E007",
+            "REQ_FIAT_ONRAMP_E009"
+          ]
+        },
+        {
+          "state_id": "REQ_FIAT_ONRAMP_S009",
+          "attributes": {
+            "provider": "Transak",
+            "payment_flow": "fiat to USDC",
+            "supported_buyer_profile": "non-crypto buyers",
+            "supported_payment_methods": [
+              "credit card",
+              "Apple Pay",
+              "Google Pay"
+            ],
+            "preexisting_crypto_or_wallet_required": false,
+            "wallet_provisioning": "Transak automatically creates a non-custodial wallet for a non-crypto fiat buyer without requiring immediate seed-phrase setup.",
+            "wallet_purpose": "The automatically created wallet holds the buyer's NFT and receives commissions and prizes.",
+            "mint_delivery": "Transak converts the fiat payment to crypto and mints the NFT directly to the automatically created wallet."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -3693,11 +4480,12 @@
             "REQ_FIAT_ONRAMP_E001",
             "REQ_FIAT_ONRAMP_E004",
             "REQ_FIAT_ONRAMP_E006",
-            "REQ_FIAT_ONRAMP_E009"
+            "REQ_FIAT_ONRAMP_E007",
+            "REQ_FIAT_ONRAMP_E010"
           ]
         },
         {
-          "state_id": "REQ_FIAT_ONRAMP_S009",
+          "state_id": "REQ_FIAT_ONRAMP_S010",
           "attributes": {
             "provider": "Transak",
             "payment_flow": "fiat to USDC",
@@ -3707,7 +4495,10 @@
               "Apple Pay",
               "Google Pay"
             ],
-            "preexisting_crypto_or_wallet_required": false
+            "preexisting_crypto_or_wallet_required": false,
+            "wallet_provisioning": "Transak automatically creates a non-custodial wallet for a non-crypto fiat buyer without requiring immediate seed-phrase setup.",
+            "wallet_purpose": "The automatically created wallet holds the buyer's NFT and receives commissions and prizes.",
+            "mint_delivery": "Transak converts the fiat payment to crypto and mints the NFT directly to the automatically created wallet."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -3727,18 +4518,19 @@
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer describes a current Transak card option that buys USDC and automatically mints the NFT.",
-            "source_event_id": "REQ_FIAT_ONRAMP_E010"
+            "source_event_id": "REQ_FIAT_ONRAMP_E011"
           },
           "supporting_event_ids": [
             "REQ_FIAT_ONRAMP_E001",
             "REQ_FIAT_ONRAMP_E004",
             "REQ_FIAT_ONRAMP_E006",
-            "REQ_FIAT_ONRAMP_E009",
-            "REQ_FIAT_ONRAMP_E010"
+            "REQ_FIAT_ONRAMP_E007",
+            "REQ_FIAT_ONRAMP_E010",
+            "REQ_FIAT_ONRAMP_E011"
           ]
         },
         {
-          "state_id": "REQ_FIAT_ONRAMP_S010",
+          "state_id": "REQ_FIAT_ONRAMP_S011",
           "attributes": {
             "provider": "Transak",
             "payment_flow": "fiat to USDC",
@@ -3748,7 +4540,10 @@
               "Apple Pay",
               "Google Pay"
             ],
-            "preexisting_crypto_or_wallet_required": false
+            "preexisting_crypto_or_wallet_required": false,
+            "wallet_provisioning": "Transak automatically creates a non-custodial wallet for a non-crypto fiat buyer without requiring immediate seed-phrase setup.",
+            "wallet_purpose": "The automatically created wallet holds the buyer's NFT and receives commissions and prizes.",
+            "mint_delivery": "Transak converts the fiat payment to crypto and mints the NFT directly to the automatically created wallet."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -3768,14 +4563,15 @@
           "execution": {
             "status": "CLAIMED_WORKING",
             "observed_behavior": "Freelancer describes a current Transak card option that buys USDC and automatically mints the NFT.",
-            "source_event_id": "REQ_FIAT_ONRAMP_E010"
+            "source_event_id": "REQ_FIAT_ONRAMP_E011"
           },
           "supporting_event_ids": [
             "REQ_FIAT_ONRAMP_E001",
             "REQ_FIAT_ONRAMP_E004",
             "REQ_FIAT_ONRAMP_E006",
-            "REQ_FIAT_ONRAMP_E010",
-            "REQ_FIAT_ONRAMP_E011"
+            "REQ_FIAT_ONRAMP_E007",
+            "REQ_FIAT_ONRAMP_E011",
+            "REQ_FIAT_ONRAMP_E012"
           ]
         }
       ],
@@ -3824,38 +4620,46 @@
           "from_state_id": "REQ_FIAT_ONRAMP_S005",
           "to_state_id": "REQ_FIAT_ONRAMP_S006",
           "event_id": "REQ_FIAT_ONRAMP_E007",
-          "event_type": "DEFER",
-          "source_message_id": 188,
+          "event_type": "MODIFY",
+          "source_message_id": 184,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_FIAT_ONRAMP_S006",
           "to_state_id": "REQ_FIAT_ONRAMP_S007",
           "event_id": "REQ_FIAT_ONRAMP_E008",
-          "event_type": "RESUME",
-          "source_message_id": 220,
+          "event_type": "DEFER",
+          "source_message_id": 188,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_FIAT_ONRAMP_S007",
           "to_state_id": "REQ_FIAT_ONRAMP_S008",
           "event_id": "REQ_FIAT_ONRAMP_E009",
-          "event_type": "DEFER",
-          "source_message_id": 225,
+          "event_type": "RESUME",
+          "source_message_id": 220,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_FIAT_ONRAMP_S008",
           "to_state_id": "REQ_FIAT_ONRAMP_S009",
           "event_id": "REQ_FIAT_ONRAMP_E010",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 323,
+          "event_type": "DEFER",
+          "source_message_id": 225,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_FIAT_ONRAMP_S009",
           "to_state_id": "REQ_FIAT_ONRAMP_S010",
           "event_id": "REQ_FIAT_ONRAMP_E011",
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "source_message_id": 323,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_FIAT_ONRAMP_S010",
+          "to_state_id": "REQ_FIAT_ONRAMP_S011",
+          "event_id": "REQ_FIAT_ONRAMP_E012",
           "event_type": "RESUME",
           "source_message_id": 787,
           "value_removals": null
@@ -5299,7 +6103,7 @@
         {
           "state_id": "REQ_NFT_CERTIFICATE_EMAIL_S002",
           "attributes": {
-            "confirmation_email_availability": "optional",
+            "confirmation_email_availability": "Required after a Transak fiat mint; otherwise optional where previously specified.",
             "confirmation_email_contents": [
               "mint_number_as_referral_code",
               "NFT_details",
@@ -5317,7 +6121,10 @@
             ],
             "contexts": [
               "MINT_CONFIRMATION",
-              "EBOOK_ACCESS"
+              "EBOOK_ACCESS",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -5331,7 +6138,7 @@
         {
           "state_id": "REQ_NFT_CERTIFICATE_EMAIL_S003",
           "attributes": {
-            "confirmation_email_availability": "optional",
+            "confirmation_email_availability": "Required after a Transak fiat mint; otherwise optional where previously specified.",
             "confirmation_email_contents": [
               "mint_number_as_referral_code",
               "NFT_details",
@@ -5349,7 +6156,10 @@
             ],
             "contexts": [
               "MINT_CONFIRMATION",
-              "EBOOK_ACCESS"
+              "EBOOK_ACCESS",
+              "FIAT_PAYMENT",
+              "NON_CRYPTO_BUYER",
+              "TRANSAK"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -6854,8 +7664,7 @@
               "UI_UX"
             ],
             "contexts": [
-              "BADGES",
-              "DASHBOARD"
+              "BADGES"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -6868,7 +7677,6 @@
         {
           "state_id": "REQ_BADGE_PRESENTATION_S002",
           "attributes": {
-            "badge_set": "Use all presented badge designs",
             "badge_icon_rule": "Avoid reusing the same icon for different badges",
             "growing_network_badge_icon": "Retain the sapling icon",
             "first_mint_badge": "Replace with First Referral badge"
@@ -6880,8 +7688,7 @@
               "UI_UX"
             ],
             "contexts": [
-              "BADGES",
-              "DASHBOARD"
+              "BADGES"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -6895,7 +7702,6 @@
         {
           "state_id": "REQ_BADGE_PRESENTATION_S003",
           "attributes": {
-            "badge_set": "Use all presented badge designs",
             "badge_icon_rule": "Avoid reusing the same icon for different badges",
             "growing_network_badge_icon": "Retain the sapling icon",
             "first_mint_badge": "Replace with First Referral badge"
@@ -6907,8 +7713,7 @@
               "UI_UX"
             ],
             "contexts": [
-              "BADGES",
-              "DASHBOARD"
+              "BADGES"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -6928,7 +7733,6 @@
         {
           "state_id": "REQ_BADGE_PRESENTATION_S004",
           "attributes": {
-            "badge_set": "Use all presented badge designs",
             "badge_icon_rule": "Avoid reusing the same icon for different badges",
             "growing_network_badge_icon": "Retain the sapling icon",
             "first_mint_badge": "Replace with First Referral badge"
@@ -6940,8 +7744,7 @@
               "UI_UX"
             ],
             "contexts": [
-              "BADGES",
-              "DASHBOARD"
+              "BADGES"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -6966,7 +7769,6 @@
         {
           "state_id": "REQ_BADGE_PRESENTATION_S005",
           "attributes": {
-            "badge_set": "Use all presented badge designs",
             "badge_icon_rule": "Avoid reusing the same icon for different badges",
             "growing_network_badge_icon": "Retain the sapling icon",
             "first_mint_badge": "Replace with First Referral badge",
@@ -6984,8 +7786,7 @@
               "UI_UX"
             ],
             "contexts": [
-              "BADGES",
-              "DASHBOARD"
+              "BADGES"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -7000,7 +7801,6 @@
         {
           "state_id": "REQ_BADGE_PRESENTATION_S006",
           "attributes": {
-            "badge_set": "Use all presented badge designs",
             "badge_icon_rule": "Avoid reusing the same icon for different badges",
             "growing_network_badge_icon": "Retain the sapling icon",
             "first_mint_badge": "Replace with First Referral badge",
@@ -7018,8 +7818,7 @@
               "UI_UX"
             ],
             "contexts": [
-              "BADGES",
-              "DASHBOARD"
+              "BADGES"
             ]
           },
           "lifecycle_status": "ACTIVE",
@@ -7052,7 +7851,9 @@
           "event_id": "REQ_BADGE_PRESENTATION_E002",
           "event_type": "MODIFY",
           "source_message_id": 114,
-          "value_removals": null
+          "value_removals": [
+            "badge_set"
+          ]
         },
         {
           "from_state_id": "REQ_BADGE_PRESENTATION_S002",
@@ -7199,7 +8000,6 @@
               "mechanics_summary",
               "mint_cta"
             ],
-            "hero_imagery": "integrate the book cover with the headline",
             "layout_direction": "restore the previous Project Rebuild top layout with subtitles",
             "headline_sizing": "avoid oversized text",
             "image_placement": "must not overlap the View Dashboard button"
@@ -7220,7 +8020,6 @@
           "execution": null,
           "supporting_event_ids": [
             "REQ_HERO_LAYOUT_E001",
-            "REQ_HERO_LAYOUT_E002",
             "REQ_HERO_LAYOUT_E004"
           ]
         }
@@ -7256,7 +8055,9 @@
           "event_id": "REQ_HERO_LAYOUT_E004",
           "event_type": "MODIFY",
           "source_message_id": 212,
-          "value_removals": null
+          "value_removals": [
+            "hero_imagery"
+          ]
         }
       ]
     },
@@ -7316,7 +8117,8 @@
           "state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S003",
           "attributes": {
             "placement": "any aesthetically suitable location on the landing page",
-            "size": "whatever fits the aesthetics"
+            "size": "whatever fits the aesthetics",
+            "crop_adjustment": "crop the supplied cover picture slightly"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -7341,7 +8143,8 @@
           "state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S004",
           "attributes": {
             "placement": "any aesthetically suitable location on the landing page",
-            "size": "whatever fits the aesthetics"
+            "size": "whatever fits the aesthetics",
+            "crop_adjustment": "crop the supplied cover picture slightly"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -7371,39 +8174,9 @@
           "state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S005",
           "attributes": {
             "placement": "any aesthetically suitable location on the landing page",
-            "size": "whatever fits the aesthetics"
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "FRONTEND",
-              "UI_UX"
-            ],
-            "contexts": [
-              "LANDING_PAGE",
-              "BOOK_COVER"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": {
-            "status": "FAILED",
-            "observed_behavior": "After an edit, the landing-page cover is much larger than desired and remains cut off.",
-            "source_event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E005"
-          },
-          "supporting_event_ids": [
-            "REQ_LANDING_BOOK_COVER_DISPLAY_E001",
-            "REQ_LANDING_BOOK_COVER_DISPLAY_E003",
-            "REQ_LANDING_BOOK_COVER_DISPLAY_E005"
-          ]
-        },
-        {
-          "state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S006",
-          "attributes": {
-            "placement": "any aesthetically suitable location on the landing page",
             "size": "whatever fits the aesthetics",
-            "size_preference": "small",
-            "fit": "show the full cover without cutting it off"
+            "crop_adjustment": "crop the supplied cover picture slightly",
+            "display_fit": "show the book cover in full"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -7422,6 +8195,39 @@
           "supporting_event_ids": [
             "REQ_LANDING_BOOK_COVER_DISPLAY_E001",
             "REQ_LANDING_BOOK_COVER_DISPLAY_E003",
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E005"
+          ]
+        },
+        {
+          "state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S006",
+          "attributes": {
+            "placement": "any aesthetically suitable location on the landing page",
+            "size": "whatever fits the aesthetics",
+            "crop_adjustment": "crop the supplied cover picture slightly",
+            "display_fit": "show the book cover in full"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "LANDING_PAGE",
+              "BOOK_COVER"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "After an edit, the landing-page cover is much larger than desired and remains cut off.",
+            "source_event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E006"
+          },
+          "supporting_event_ids": [
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E001",
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E003",
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E005",
             "REQ_LANDING_BOOK_COVER_DISPLAY_E006"
           ]
         },
@@ -7429,9 +8235,37 @@
           "state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S007",
           "attributes": {
             "placement": "any aesthetically suitable location on the landing page",
-            "size": "whatever fits the aesthetics",
-            "size_preference": "small",
-            "fit": "show the full cover without cutting it off"
+            "size": "small",
+            "crop_adjustment": "crop the supplied cover picture slightly",
+            "display_fit": "show the full cover without cutting it off"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "LANDING_PAGE",
+              "BOOK_COVER"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E001",
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E003",
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E007"
+          ]
+        },
+        {
+          "state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S008",
+          "attributes": {
+            "placement": "any aesthetically suitable location on the landing page",
+            "size": "small",
+            "crop_adjustment": "crop the supplied cover picture slightly",
+            "display_fit": "show the full cover without cutting it off"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -7449,13 +8283,13 @@
           "execution": {
             "status": "FAILED",
             "observed_behavior": "The full cover is now visible, but it remains larger than the requested aesthetically appropriate size.",
-            "source_event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E007"
+            "source_event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E008"
           },
           "supporting_event_ids": [
             "REQ_LANDING_BOOK_COVER_DISPLAY_E001",
             "REQ_LANDING_BOOK_COVER_DISPLAY_E003",
-            "REQ_LANDING_BOOK_COVER_DISPLAY_E006",
-            "REQ_LANDING_BOOK_COVER_DISPLAY_E007"
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E007",
+            "REQ_LANDING_BOOK_COVER_DISPLAY_E008"
           ]
         }
       ],
@@ -7496,15 +8330,15 @@
           "from_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S004",
           "to_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S005",
           "event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E005",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 273,
+          "event_type": "MODIFY",
+          "source_message_id": 248,
           "value_removals": null
         },
         {
           "from_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S005",
           "to_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S006",
           "event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E006",
-          "event_type": "MODIFY",
+          "event_type": "RUNTIME_FAILURE",
           "source_message_id": 273,
           "value_removals": null
         },
@@ -7512,6 +8346,14 @@
           "from_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S006",
           "to_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S007",
           "event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E007",
+          "event_type": "MODIFY",
+          "source_message_id": 273,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S007",
+          "to_state_id": "REQ_LANDING_BOOK_COVER_DISPLAY_S008",
+          "event_id": "REQ_LANDING_BOOK_COVER_DISPLAY_E008",
           "event_type": "RUNTIME_FAILURE",
           "source_message_id": 275,
           "value_removals": null
@@ -7913,7 +8755,8 @@
               "SECONDARY_SALE"
             ],
             "funding_duration": "every sale forever",
-            "primary_mint_prize_pool_allocation": "$5 per $15 mint"
+            "primary_mint_prize_pool_allocation": "$5 per $15 mint",
+            "active_prize_pool": "small_block_prize_pool"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -7944,7 +8787,8 @@
               "SECONDARY_SALE"
             ],
             "funding_duration": "every sale forever",
-            "primary_mint_prize_pool_allocation": "$5 per $15 mint"
+            "primary_mint_prize_pool_allocation": "$5 per $15 mint",
+            "active_prize_pool": "small_block_prize_pool"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -7980,7 +8824,8 @@
               "SECONDARY_SALE"
             ],
             "funding_duration": "every sale forever",
-            "primary_mint_prize_pool_allocation": "$5 per $15 mint"
+            "primary_mint_prize_pool_allocation": "$5 per $15 mint",
+            "active_prize_pool": "small_block_prize_pool"
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -8212,7 +9057,7 @@
             "prize_block_description": "Small Block awards 5 × $500 about every 500 mint or secondary sales; Big Block awards 5 × $10,000 about every 50,000 mint or secondary sales; pools are funded from every sale.",
             "winner_selection": "Chainlink VRF provides fully on-chain, provably fair winner selection verifiable on Basescan.",
             "prize_ticket_rules": "Each successful coded referral earns one entry in the current Small Block draw and one in the current Big Block draw; tickets expire after their block is drawn.",
-            "reward_claim": "Commissions are sent automatically to the wallet; prize wins are announced on the Winners page and claimed through the website.",
+            "reward_claim": "Commissions are sent automatically to the wallet; prize wins are announced on the Winners page and claimed with one click on projectrebuild.xyz.",
             "badge_description": "On-chain badges are awarded at referral milestones 2, 10, 50, and 100+, are currently cosmetic, and may have future utility.",
             "fiat_minting": "Transak supports card, Apple Pay, and Google Pay minting without requiring existing crypto or a wallet.",
             "wallet_participation": "A wallet is needed for affiliate commission payouts or later NFT trading.",
@@ -8247,7 +9092,7 @@
         {
           "state_id": "REQ_FAQ_MESSAGING_S002",
           "attributes": {
-            "project_description": "Describe Project Rebuild as the live FAMM proof of concept launching with the client's memoir on Base and potentially evolving into the community-owned BooksOnChain public-good platform.",
+            "project_description": "Describe Project Rebuild as the live FAMM proof of concept launching on Base with the client's raw memoir novella, \"My Underdog Journey: To Own Goal,\" and potentially evolving into the community-owned BooksOnChain public-good platform.",
             "buyer_earnings": "$5 instant referral commissions, Small and Big Block prize tickets, and a possible future BooksOnChain governance token.",
             "referral_operation": "Each NFT mint number is its permanent referral code; coded referrals earn $5 and current prize tickets, while a mint without a referral code sends the commission and tickets to a random existing NFT holder.",
             "referral_code_locations": [
@@ -8259,7 +9104,7 @@
             "prize_block_description": "Small Block awards 5 × $500 about every 500 mint or secondary sales; Big Block awards 5 × $10,000 about every 50,000 mint or secondary sales; pools are funded from every sale.",
             "winner_selection": "Chainlink VRF provides fully on-chain, provably fair winner selection verifiable on Basescan.",
             "prize_ticket_rules": "Each successful coded referral earns one current Small Block ticket and one current Big Block ticket; more tickets provide more chances, and tickets expire after their block is drawn.",
-            "reward_claim": "Commissions are sent automatically to the wallet; prize wins are announced on the Winners page and claimed through the website.",
+            "reward_claim": "Commissions are sent automatically to the wallet; prize wins are announced on the Winners page and claimed with one click on projectrebuild.xyz.",
             "badge_description": "On-chain badges are awarded at referral milestones 2, 10, 50, and 100+, are currently cosmetic, and may later unlock features such as token-gated chats or discounts.",
             "fiat_minting": "Transak supports card, Apple Pay, and Google Pay minting.",
             "wallet_participation": "A wallet is not required to mint with fiat but is required to receive commissions, hold prize tickets, or sell or trade the NFT.",
@@ -8296,7 +9141,7 @@
         {
           "state_id": "REQ_FAQ_MESSAGING_S003",
           "attributes": {
-            "project_description": "Describe Project Rebuild as the live FAMM proof of concept launching with the client's memoir on Base and potentially evolving into the community-owned BooksOnChain public-good platform.",
+            "project_description": "Describe Project Rebuild as the live FAMM proof of concept launching on Base with the client's raw memoir novella, \"My Underdog Journey: To Own Goal,\" and potentially evolving into the community-owned BooksOnChain public-good platform.",
             "buyer_earnings": "$5 instant referral commissions, Small and Big Block prize tickets, and a possible future BooksOnChain governance token.",
             "referral_operation": "Each NFT mint number is its permanent referral code; coded referrals earn $5 and current prize tickets, while a mint without a referral code sends the commission and tickets to a random existing NFT holder.",
             "referral_code_locations": [
@@ -8305,10 +9150,10 @@
               "dashboard",
               "optional confirmation email"
             ],
-            "prize_block_description": "Small Block awards 5 × $500 about every 500 mint or secondary sales; Big Block awards 5 × $10,000 about every 50,000 mint or secondary sales; pools are funded from every sale.",
+            "prize_block_description": "Small Block awards 1 × $500 every 100 mint or secondary sales; Big Block awards 1 × $10,000 every 10,000 mint or secondary sales; pools are funded from every sale.",
             "winner_selection": "Chainlink VRF provides fully on-chain, provably fair winner selection verifiable on Basescan.",
             "prize_ticket_rules": "Each successful coded referral earns one current Small Block ticket and one current Big Block ticket; more tickets provide more chances, and tickets expire after their block is drawn.",
-            "reward_claim": "Commissions are sent automatically to the wallet; prize wins are announced on the Winners page and claimed through the website.",
+            "reward_claim": "Commissions are sent automatically to the wallet; prize wins are announced on the Winners page and claimed with one click on projectrebuild.xyz.",
             "badge_description": "On-chain badges are awarded at referral milestones 2, 10, 50, and 100+, are currently cosmetic, and may later unlock features such as token-gated chats or discounts.",
             "fiat_minting": "Transak supports card, Apple Pay, and Google Pay minting.",
             "wallet_participation": "A wallet is not required to mint with fiat but is required to receive commissions, hold prize tickets, or sell or trade the NFT.",
@@ -8321,9 +9166,7 @@
               "X direct message to @ProjectRebuild",
               "will@projectrebuild.xyz"
             ],
-            "future_token_disclaimer": "State that any future governance-token allocation depends on FAMM proving successful and carries no guarantee of success or value.",
-            "fiat_buyer_reward_collection_faq": "Add a FAQ explaining that a $15 Transak fiat purchase automatically creates a non-custodial wallet, mints the NFT to it, emails the mint number, NFT details, and dashboard link, sends referral commissions and prizes to that wallet, and provides dashboard and email guidance for accessing rewards.",
-            "beginner_reward_collection_faq": "Add a beginner FAQ explaining automatic $5 commission payments, one on-chain $500-draw ticket per successful referral, dashboard visibility, Chainlink VRF draws every 100 sales, winner announcements by page and email, direct prize payment to the wallet, and ticket expiration after each draw."
+            "future_token_disclaimer": "State that any future governance-token allocation depends on FAMM proving successful and carries no guarantee of success or value."
           },
           "scope": {
             "persistence": "PROJECT_PERSISTENT",
@@ -8343,6 +9186,163 @@
             "REQ_FAQ_MESSAGING_E001",
             "REQ_FAQ_MESSAGING_E002",
             "REQ_FAQ_MESSAGING_E003"
+          ]
+        },
+        {
+          "state_id": "REQ_FAQ_MESSAGING_S004",
+          "attributes": {
+            "project_description": "Describe Project Rebuild as the live FAMM proof of concept launching on Base with the client's raw memoir novella, \"My Underdog Journey: To Own Goal,\" and potentially evolving into the community-owned BooksOnChain public-good platform.",
+            "buyer_earnings": "$5 instant referral commissions, Small and Big Block prize tickets, and a possible future BooksOnChain governance token.",
+            "referral_operation": "Each NFT mint number is its permanent referral code; coded referrals earn $5 and current prize tickets, while a mint without a referral code sends the commission and tickets to a random existing NFT holder.",
+            "referral_code_locations": [
+              "NFT",
+              "NFT metadata",
+              "dashboard",
+              "confirmation email required after a Transak fiat mint; otherwise optional"
+            ],
+            "prize_block_description": "$500 prize draws occur about every 100 sales and $10,000 prize draws about every 10,000 sales, using on-chain fair randomness.",
+            "winner_selection": "Chainlink VRF provides fully on-chain, provably fair winner selection verifiable on Basescan.",
+            "prize_ticket_rules": "Each successful coded referral earns one current Small Block ticket and one current Big Block ticket; more tickets provide more chances, and tickets expire after their block is drawn.",
+            "reward_claim": "Commissions appear automatically in the wallet, and prize winnings are transferred straight to the winner wallet; winners are announced on the Winners page and notified by email and dashboard.",
+            "badge_description": "On-chain badges are awarded at referral milestones 2, 10, 50, and 100+, are currently cosmetic, and may later unlock features such as token-gated chats or discounts.",
+            "fiat_minting": "Transak converts fiat to crypto, automatically creates a non-custodial wallet for the buyer, and mints the NFT directly to that wallet.",
+            "wallet_participation": "Fiat buyers need no preexisting wallet; Transak automatically creates a non-custodial wallet that holds the NFT and receives commissions and prizes, with reward access through the dashboard using the email link or SIWE.",
+            "blockchain": "Base, described as a fast, inexpensive, secure Ethereum L2.",
+            "fees": "Mint price is exactly $15 and secondary sales carry a visible $10 flat royalty.",
+            "nft_sale_transfer": "The buyer receives the book, mint number as referral code, earned badges, and active prize tickets; expired tickets remain expired.",
+            "referral_sharing": "Users can copy the full referral link or share the mint number from the dashboard.",
+            "anti_scam_explanation": "Explain that the model is single-level with verified source; the client earns $4 per sale minus fiat fees, and remaining revenue funds commissions and prize pools.",
+            "support_channels": [
+              "X direct message to @ProjectRebuild",
+              "will@projectrebuild.xyz"
+            ],
+            "future_token_disclaimer": "State that any future governance-token allocation depends on FAMM proving successful and carries no guarantee of success or value.",
+            "fiat_buyer_reward_collection": "Add a FAQ section explaining automatic wallet creation, email confirmation and dashboard access, automatic commission receipt, prize tickets, winner notifications, and direct prize transfer for non-crypto fiat buyers."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "LANDING_PAGE",
+              "FAQ"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_FAQ_MESSAGING_E001",
+            "REQ_FAQ_MESSAGING_E002",
+            "REQ_FAQ_MESSAGING_E004"
+          ]
+        },
+        {
+          "state_id": "REQ_FAQ_MESSAGING_S005",
+          "attributes": {
+            "project_description": "Describe Project Rebuild as the live FAMM proof of concept launching on Base with the client's raw memoir novella, \"My Underdog Journey: To Own Goal,\" and potentially evolving into the community-owned BooksOnChain public-good platform.",
+            "buyer_earnings": "$5 instant referral commissions, Small Block prize tickets, and a possible future BooksOnChain governance token.",
+            "referral_operation": "Each NFT mint number is its permanent referral code; coded referrals earn $5 and current prize tickets, while a mint without a referral code sends the commission and tickets to a random existing NFT holder.",
+            "referral_code_locations": [
+              "NFT",
+              "NFT metadata",
+              "dashboard",
+              "confirmation email required after a Transak fiat mint; otherwise optional"
+            ],
+            "prize_block_description": "Describe only the recurring $500 Small Block prizes and omit Big Block prizes; $5 from each $15 primary mint funds the remaining block prize pool.",
+            "winner_selection": "Chainlink VRF provides fully on-chain, provably fair winner selection verifiable on Basescan.",
+            "prize_ticket_rules": "Each successful coded referral earns a current Small Block ticket; more tickets provide more chances, and tickets expire after the Small Block draw.",
+            "reward_claim": "Commissions appear automatically in the wallet, and prize winnings are transferred straight to the winner wallet; winners are announced on the Winners page and notified by email and dashboard.",
+            "badge_description": "On-chain badges are awarded at referral milestones 2, 10, 50, and 100+, are currently cosmetic, and may later unlock features such as token-gated chats or discounts.",
+            "fiat_minting": "Transak converts fiat to crypto, automatically creates a non-custodial wallet for the buyer, and mints the NFT directly to that wallet.",
+            "wallet_participation": "Fiat buyers need no preexisting wallet; Transak automatically creates a non-custodial wallet that holds the NFT and receives commissions and prizes, with reward access through the dashboard using the email link or SIWE.",
+            "blockchain": "Base, described as a fast, inexpensive, secure Ethereum L2.",
+            "fees": "Mint price is exactly $15 and secondary sales carry a visible $10 flat royalty.",
+            "nft_sale_transfer": "The buyer receives the book, mint number as referral code, earned badges, and active prize tickets; expired tickets remain expired.",
+            "referral_sharing": "Users can copy the full referral link or share the mint number from the dashboard.",
+            "anti_scam_explanation": "Explain that the model is single-level with verified source and that each $15 primary mint is split into $5 for the client, $5 for the affiliate, and $5 for the remaining Small Block prize pool.",
+            "support_channels": [
+              "X direct message to @ProjectRebuild",
+              "will@projectrebuild.xyz"
+            ],
+            "future_token_disclaimer": "State that any future governance-token allocation depends on FAMM proving successful and carries no guarantee of success or value.",
+            "fiat_buyer_reward_collection": "Add a FAQ section explaining automatic wallet creation, email confirmation and dashboard access, automatic commission receipt, one current Small Block ticket per referral, $500 winner notifications, and direct $500 prize transfer for non-crypto fiat buyers."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "LANDING_PAGE",
+              "FAQ"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_FAQ_MESSAGING_E001",
+            "REQ_FAQ_MESSAGING_E002",
+            "REQ_FAQ_MESSAGING_E004",
+            "REQ_FAQ_MESSAGING_E005"
+          ]
+        },
+        {
+          "state_id": "REQ_FAQ_MESSAGING_S006",
+          "attributes": {
+            "project_description": "Describe Project Rebuild as the live FAMM proof of concept launching on Base with the client's raw memoir novella, \"My Underdog Journey: To Own Goal,\" and potentially evolving into the community-owned BooksOnChain public-good platform.",
+            "buyer_earnings": "$5 instant referral commissions, Small Block prize tickets, and a possible future BooksOnChain governance token.",
+            "referral_operation": "Each NFT mint number is its permanent referral code; coded referrals earn $5 and current prize tickets, while a mint without a referral code sends the commission and tickets to a random existing NFT holder.",
+            "referral_code_locations": [
+              "NFT",
+              "NFT metadata",
+              "dashboard",
+              "confirmation email required after a Transak fiat mint; otherwise optional"
+            ],
+            "prize_block_description": "Describe only the recurring $500 Small Block prizes and omit Big Block prizes; $5 from each $15 primary mint funds the remaining block prize pool.",
+            "winner_selection": "Chainlink VRF provides fully on-chain, provably fair winner selection verifiable on Basescan.",
+            "prize_ticket_rules": "Each successful coded referral earns a current Small Block ticket; more tickets provide more chances, and tickets expire after the Small Block draw.",
+            "reward_claim": "Commissions appear automatically in the wallet, and prize winnings are transferred straight to the winner wallet; winners are announced on the Winners page and notified by email and dashboard.",
+            "badge_description": "On-chain badges are awarded at referral milestones 2, 10, 50, and 100+, are currently cosmetic, and may later unlock features such as token-gated chats or discounts.",
+            "fiat_minting": "Transak converts fiat to crypto, automatically creates a non-custodial wallet for the buyer, and mints the NFT directly to that wallet.",
+            "wallet_participation": "Fiat buyers need no preexisting wallet; Transak automatically creates a non-custodial wallet that holds the NFT and receives commissions and prizes, with reward access through the dashboard using the email link or SIWE.",
+            "blockchain": "Base, described as a fast, inexpensive, secure Ethereum L2.",
+            "fees": "Mint price is exactly $15 and secondary sales carry a visible $10 flat royalty.",
+            "nft_sale_transfer": "The buyer receives the book, mint number as referral code, earned badges, and active prize tickets; expired tickets remain expired.",
+            "referral_sharing": "Users can copy the full referral link or share the mint number from the dashboard.",
+            "anti_scam_explanation": "Explain that the model is single-level with verified source and that each $15 primary mint is split into $5 for the client, $5 for the affiliate, and $5 for the remaining Small Block prize pool.",
+            "support_channels": [
+              "X direct message to @ProjectRebuild",
+              "will@projectrebuild.xyz"
+            ],
+            "future_token_disclaimer": "State that any future governance-token allocation depends on FAMM proving successful and carries no guarantee of success or value.",
+            "fiat_buyer_reward_collection": "Add a FAQ explaining that a $15 Transak fiat purchase automatically creates a non-custodial wallet, mints the NFT to it, emails the mint number, NFT details, and dashboard link, sends referral commissions and prizes to that wallet, and emails winners step-by-step instructions for viewing or accessing the transferred prize in fiat when needed, such as a link to a simple exchange guide.",
+            "beginner_reward_collection_faq": "Add a beginner FAQ explaining automatic $5 commission payments, one on-chain $500-draw ticket per successful referral, dashboard visibility, Chainlink VRF draws every 100 sales, winner announcements by page and email, direct prize payment to the wallet, and ticket expiration after each draw."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "LANDING_PAGE",
+              "FAQ"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_FAQ_MESSAGING_E001",
+            "REQ_FAQ_MESSAGING_E002",
+            "REQ_FAQ_MESSAGING_E004",
+            "REQ_FAQ_MESSAGING_E005",
+            "REQ_FAQ_MESSAGING_E006"
           ]
         }
       ],
@@ -8367,6 +9367,30 @@
           "from_state_id": "REQ_FAQ_MESSAGING_S002",
           "to_state_id": "REQ_FAQ_MESSAGING_S003",
           "event_id": "REQ_FAQ_MESSAGING_E003",
+          "event_type": "MODIFY",
+          "source_message_id": 158,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_FAQ_MESSAGING_S003",
+          "to_state_id": "REQ_FAQ_MESSAGING_S004",
+          "event_id": "REQ_FAQ_MESSAGING_E004",
+          "event_type": "MODIFY",
+          "source_message_id": 184,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_FAQ_MESSAGING_S004",
+          "to_state_id": "REQ_FAQ_MESSAGING_S005",
+          "event_id": "REQ_FAQ_MESSAGING_E005",
+          "event_type": "MODIFY",
+          "source_message_id": 195,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_FAQ_MESSAGING_S005",
+          "to_state_id": "REQ_FAQ_MESSAGING_S006",
+          "event_id": "REQ_FAQ_MESSAGING_E006",
           "event_type": "MODIFY",
           "source_message_id": 210,
           "value_removals": null
@@ -8435,7 +9459,6 @@
         {
           "state_id": "REQ_HERO_MESSAGING_S003",
           "attributes": {
-            "hero_headline": "Dropout multimillionaire to zero in one oversight. Now rebuilding, with an eBook model to free creators from Amazon's 70% cut.",
             "hero_subheadline": "\"My Underdog Journey: To Own Goal\" — Unlimited NFT book ⋅ $15 forever ⋅ Base.",
             "mechanics_tease": "Buy → own the book + get your referral link. Refer → unlimited, instant $5 + 1 entry to $500 random giveaway, every 100 sales.",
             "cta_label": "Mint eBook NFT for $15",
@@ -8491,7 +9514,9 @@
           "event_id": "REQ_HERO_MESSAGING_E003",
           "event_type": "MODIFY",
           "source_message_id": 212,
-          "value_removals": null
+          "value_removals": [
+            "hero_headline"
+          ]
         }
       ]
     },
@@ -8602,6 +9627,29 @@
             "REQ_PLATFORM_AGGREGATE_STATS_E001",
             "REQ_PLATFORM_AGGREGATE_STATS_E004"
           ]
+        },
+        {
+          "state_id": "REQ_PLATFORM_AGGREGATE_STATS_S005",
+          "attributes": {
+            "displayed_mint_count": "Reflect actual successful NFT mints from the new active contract, restarting from NFT #1 and excluding old-contract NFT copies."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "PLATFORM_STATS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PLATFORM_AGGREGATE_STATS_E001",
+            "REQ_PLATFORM_AGGREGATE_STATS_E005"
+          ]
         }
       ],
       "edges": [
@@ -8635,6 +9683,14 @@
           "event_id": "REQ_PLATFORM_AGGREGATE_STATS_E004",
           "event_type": "RUNTIME_FAILURE",
           "source_message_id": 496,
+          "value_removals": null
+        },
+        {
+          "from_state_id": "REQ_PLATFORM_AGGREGATE_STATS_S004",
+          "to_state_id": "REQ_PLATFORM_AGGREGATE_STATS_S005",
+          "event_id": "REQ_PLATFORM_AGGREGATE_STATS_E005",
+          "event_type": "MODIFY",
+          "source_message_id": 539,
           "value_removals": null
         }
       ]
@@ -8728,6 +9784,130 @@
             "REQ_PUBLIC_REFERRAL_STATS_E001",
             "REQ_PUBLIC_REFERRAL_STATS_E003"
           ]
+        },
+        {
+          "state_id": "REQ_PUBLIC_REFERRAL_STATS_S004",
+          "attributes": {
+            "authentication_required": false,
+            "public_statistics_surfaces": [
+              "leaderboards"
+            ],
+            "contract_data_scope": "Calculate public referral aggregate statistics only from activity tied to NFTs in the new active contract, excluding old-contract NFT copies and their referral data."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "API"
+            ],
+            "contexts": [
+              "LEADERBOARD",
+              "PUBLIC_REFERRAL_STATS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PUBLIC_REFERRAL_STATS_E001",
+            "REQ_PUBLIC_REFERRAL_STATS_E004"
+          ]
+        },
+        {
+          "state_id": "REQ_PUBLIC_REFERRAL_STATS_S005",
+          "attributes": {
+            "authentication_required": false,
+            "public_statistics_surfaces": [
+              "leaderboards"
+            ],
+            "contract_data_scope": "Calculate public referral aggregate statistics only from activity tied to NFTs in the new active contract, excluding old-contract NFT copies and their referral data.",
+            "leaderboard_reward_totals": "Leaderboard totals must include one ticket and one $5 commission for every primary mint, including rewards assigned randomly after a no-code mint.",
+            "leaderboard_ticket_commission_pairing": "Each ticket accounted on the leaderboard must have its corresponding $5 commission accounted to the same recipient NFT."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "API"
+            ],
+            "contexts": [
+              "LEADERBOARD",
+              "PUBLIC_REFERRAL_STATS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PUBLIC_REFERRAL_STATS_E001",
+            "REQ_PUBLIC_REFERRAL_STATS_E004",
+            "REQ_PUBLIC_REFERRAL_STATS_E005"
+          ]
+        },
+        {
+          "state_id": "REQ_PUBLIC_REFERRAL_STATS_S006",
+          "attributes": {
+            "authentication_required": false,
+            "public_statistics_surfaces": [
+              "leaderboards"
+            ],
+            "contract_data_scope": "Calculate public referral aggregate statistics only from activity tied to NFTs in the new active contract, excluding old-contract NFT copies and their referral data.",
+            "leaderboard_reward_totals": "Going forward, leaderboard totals must include one ticket and one $5 commission for every primary mint, including rewards assigned randomly after a no-code mint; missing historical entries do not need to be backfilled.",
+            "leaderboard_ticket_commission_pairing": "Each ticket accounted on the leaderboard must have its corresponding $5 commission accounted to the same recipient NFT.",
+            "historical_backfill_required": false,
+            "prospective_accounting_accuracy_required": true
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "API"
+            ],
+            "contexts": [
+              "LEADERBOARD",
+              "PUBLIC_REFERRAL_STATS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PUBLIC_REFERRAL_STATS_E001",
+            "REQ_PUBLIC_REFERRAL_STATS_E004",
+            "REQ_PUBLIC_REFERRAL_STATS_E005",
+            "REQ_PUBLIC_REFERRAL_STATS_E006"
+          ]
+        },
+        {
+          "state_id": "REQ_PUBLIC_REFERRAL_STATS_S007",
+          "attributes": {
+            "authentication_required": false,
+            "public_statistics_surfaces": [
+              "leaderboards"
+            ],
+            "contract_data_scope": "Calculate public referral aggregate statistics only from activity tied to NFTs in the new active contract, excluding old-contract NFT copies and their referral data.",
+            "leaderboard_reward_totals": "Leaderboard totals must include one ticket and one $5 commission for every primary mint except the first primary mint, which awards neither because no prior NFT holder exists.",
+            "leaderboard_ticket_commission_pairing": "Each ticket accounted on the leaderboard must have its corresponding $5 commission accounted to the same recipient NFT.",
+            "historical_backfill_required": false,
+            "prospective_accounting_accuracy_required": true
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "API"
+            ],
+            "contexts": [
+              "LEADERBOARD",
+              "PUBLIC_REFERRAL_STATS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PUBLIC_REFERRAL_STATS_E001",
+            "REQ_PUBLIC_REFERRAL_STATS_E004",
+            "REQ_PUBLIC_REFERRAL_STATS_E005",
+            "REQ_PUBLIC_REFERRAL_STATS_E006",
+            "REQ_PUBLIC_REFERRAL_STATS_E007"
+          ]
         }
       ],
       "edges": [
@@ -8754,219 +9934,37 @@
           "event_type": "IMPLEMENTATION_CLAIM",
           "source_message_id": 492,
           "value_removals": null
-        }
-      ]
-    },
-    {
-      "graph_id": "REQ_NFT_METADATA_ACCURACY_GRAPH",
-      "requirement_id": "REQ_NFT_METADATA_ACCURACY",
-      "family_id": "NFT_INFORMATION",
-      "nodes": [
-        {
-          "state_id": "REQ_NFT_METADATA_ACCURACY_S001",
-          "attributes": {
-            "small_block_ticket_counter_visible": true,
-            "big_block_ticket_counter_visible": true
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT"
-            ],
-            "contexts": [
-              "NFT_METADATA"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": null,
-          "supporting_event_ids": [
-            "REQ_NFT_METADATA_ACCURACY_E001"
-          ]
         },
         {
-          "state_id": "REQ_NFT_METADATA_ACCURACY_S002",
-          "attributes": {
-            "small_block_ticket_counter_visible": true,
-            "big_block_ticket_counter_visible": true
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT"
-            ],
-            "contexts": [
-              "NFT_METADATA"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": {
-            "status": "CLAIMED_WORKING",
-            "observed_behavior": "Freelancer reports that dynamic NFT metadata is implemented and functioning on the Base testnet.",
-            "source_event_id": "REQ_NFT_METADATA_ACCURACY_E002"
-          },
-          "supporting_event_ids": [
-            "REQ_NFT_METADATA_ACCURACY_E001",
-            "REQ_NFT_METADATA_ACCURACY_E002"
-          ]
-        },
-        {
-          "state_id": "REQ_NFT_METADATA_ACCURACY_S003",
-          "attributes": {
-            "small_block_ticket_counter_visible": true,
-            "big_block_ticket_counter_visible": true
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT"
-            ],
-            "contexts": [
-              "NFT_METADATA"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": {
-            "status": "VERIFIED_WORKING",
-            "observed_behavior": "A concrete check found that token #1's metadata and image assets resolved through the project API.",
-            "source_event_id": "REQ_NFT_METADATA_ACCURACY_E003"
-          },
-          "supporting_event_ids": [
-            "REQ_NFT_METADATA_ACCURACY_E001",
-            "REQ_NFT_METADATA_ACCURACY_E003"
-          ]
-        },
-        {
-          "state_id": "REQ_NFT_METADATA_ACCURACY_S004",
-          "attributes": {
-            "small_block_ticket_counter_visible": true,
-            "big_block_ticket_counter_visible": true
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT"
-            ],
-            "contexts": [
-              "NFT_METADATA"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": {
-            "status": "FAILED",
-            "observed_behavior": "NFT #5's metadata attributes remained at one referral and $5 earnings while the authoritative leaderboard and NFT summary showed two tickets, two referrals, and two $5 commissions.",
-            "source_event_id": "REQ_NFT_METADATA_ACCURACY_E004"
-          },
-          "supporting_event_ids": [
-            "REQ_NFT_METADATA_ACCURACY_E001",
-            "REQ_NFT_METADATA_ACCURACY_E004"
-          ]
-        },
-        {
-          "state_id": "REQ_NFT_METADATA_ACCURACY_S005",
-          "attributes": {
-            "small_block_ticket_counter_visible": true,
-            "big_block_ticket_counter_visible": true
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT"
-            ],
-            "contexts": [
-              "NFT_METADATA"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": {
-            "status": "CLAIMED_WORKING",
-            "observed_behavior": "Freelancer reports that the metadata service now builds NFT attributes from live on-chain metadata using the same source as the leaderboard.",
-            "source_event_id": "REQ_NFT_METADATA_ACCURACY_E005"
-          },
-          "supporting_event_ids": [
-            "REQ_NFT_METADATA_ACCURACY_E001",
-            "REQ_NFT_METADATA_ACCURACY_E005"
-          ]
-        },
-        {
-          "state_id": "REQ_NFT_METADATA_ACCURACY_S006",
-          "attributes": {
-            "small_block_ticket_counter_visible": true,
-            "big_block_ticket_counter_visible": true
-          },
-          "scope": {
-            "persistence": "PROJECT_PERSISTENT",
-            "components": [
-              "SMART_CONTRACT"
-            ],
-            "contexts": [
-              "NFT_METADATA"
-            ]
-          },
-          "lifecycle_status": "ACTIVE",
-          "ambiguity": null,
-          "execution": {
-            "status": "VERIFIED_WORKING",
-            "observed_behavior": "Client confirms after refreshing that the NFT metadata attributes are now correct.",
-            "source_event_id": "REQ_NFT_METADATA_ACCURACY_E006"
-          },
-          "supporting_event_ids": [
-            "REQ_NFT_METADATA_ACCURACY_E001",
-            "REQ_NFT_METADATA_ACCURACY_E006"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "from_state_id": null,
-          "to_state_id": "REQ_NFT_METADATA_ACCURACY_S001",
-          "event_id": "REQ_NFT_METADATA_ACCURACY_E001",
-          "event_type": "INTRODUCE",
-          "source_message_id": 21,
+          "from_state_id": "REQ_PUBLIC_REFERRAL_STATS_S003",
+          "to_state_id": "REQ_PUBLIC_REFERRAL_STATS_S004",
+          "event_id": "REQ_PUBLIC_REFERRAL_STATS_E004",
+          "event_type": "MODIFY",
+          "source_message_id": 539,
           "value_removals": null
         },
         {
-          "from_state_id": "REQ_NFT_METADATA_ACCURACY_S001",
-          "to_state_id": "REQ_NFT_METADATA_ACCURACY_S002",
-          "event_id": "REQ_NFT_METADATA_ACCURACY_E002",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 27,
+          "from_state_id": "REQ_PUBLIC_REFERRAL_STATS_S004",
+          "to_state_id": "REQ_PUBLIC_REFERRAL_STATS_S005",
+          "event_id": "REQ_PUBLIC_REFERRAL_STATS_E005",
+          "event_type": "MODIFY",
+          "source_message_id": 672,
           "value_removals": null
         },
         {
-          "from_state_id": "REQ_NFT_METADATA_ACCURACY_S002",
-          "to_state_id": "REQ_NFT_METADATA_ACCURACY_S003",
-          "event_id": "REQ_NFT_METADATA_ACCURACY_E003",
-          "event_type": "RUNTIME_VERIFICATION",
-          "source_message_id": 401,
+          "from_state_id": "REQ_PUBLIC_REFERRAL_STATS_S005",
+          "to_state_id": "REQ_PUBLIC_REFERRAL_STATS_S006",
+          "event_id": "REQ_PUBLIC_REFERRAL_STATS_E006",
+          "event_type": "MODIFY",
+          "source_message_id": 674,
           "value_removals": null
         },
         {
-          "from_state_id": "REQ_NFT_METADATA_ACCURACY_S003",
-          "to_state_id": "REQ_NFT_METADATA_ACCURACY_S004",
-          "event_id": "REQ_NFT_METADATA_ACCURACY_E004",
-          "event_type": "RUNTIME_FAILURE",
-          "source_message_id": 688,
-          "value_removals": null
-        },
-        {
-          "from_state_id": "REQ_NFT_METADATA_ACCURACY_S004",
-          "to_state_id": "REQ_NFT_METADATA_ACCURACY_S005",
-          "event_id": "REQ_NFT_METADATA_ACCURACY_E005",
-          "event_type": "IMPLEMENTATION_CLAIM",
-          "source_message_id": 691,
-          "value_removals": null
-        },
-        {
-          "from_state_id": "REQ_NFT_METADATA_ACCURACY_S005",
-          "to_state_id": "REQ_NFT_METADATA_ACCURACY_S006",
-          "event_id": "REQ_NFT_METADATA_ACCURACY_E006",
-          "event_type": "RUNTIME_VERIFICATION",
-          "source_message_id": 692,
+          "from_state_id": "REQ_PUBLIC_REFERRAL_STATS_S006",
+          "to_state_id": "REQ_PUBLIC_REFERRAL_STATS_S007",
+          "event_id": "REQ_PUBLIC_REFERRAL_STATS_E007",
+          "event_type": "MODIFY",
+          "source_message_id": 684,
           "value_removals": null
         }
       ]
