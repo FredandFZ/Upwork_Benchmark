@@ -1,0 +1,225 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_NFT_REWARD_METADATA_ACCURACY",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 21,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        21
+      ],
+      "decision_note": "The client requires NFT metadata to render separate Small Block and Big Block ticket counters plus permanent badges.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 143,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        143
+      ],
+      "decision_note": "The client specifies that the NFT mint number is the referral code rendered in its on-chain metadata.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 195,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        21,
+        195
+      ],
+      "decision_note": "Eliminating Big Blocks necessarily removes the existing Big Block ticket counter from NFT metadata.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 449,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        448,
+        449
+      ],
+      "decision_note": "First concrete failure showing inconsistent NFT-level earnings and ticket attributes.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 492,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        492
+      ],
+      "decision_note": "Target-specific implementation claim that NFT referral, ticket, and earnings details were corrected.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 585,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        585
+      ],
+      "decision_note": "First concrete failure of the NFT referral-code attribute, which displayed the purchase code instead of the NFT's own mint number.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 604,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        585,
+        590,
+        604
+      ],
+      "decision_note": "Target-specific implementation claim that the Referral Code attribute now uses the NFT's own token ID.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 607,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        604,
+        605,
+        606,
+        607
+      ],
+      "decision_note": "The generic confirmation follows a request to check multiple fixes and does not unambiguously identify the referral-code attribute.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        672
+      ],
+      "decision_note": "The client defines the NFT-attribute accounting rule for randomly assigned tickets and commissions, including the required one-ticket-to-one-commission relationship.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 674,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        672,
+        673,
+        674
+      ],
+      "decision_note": "The client removes the data-backfill acceptance condition while retaining correct NFT reward attributes for future activity.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 688,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        688
+      ],
+      "decision_note": "Post-fix evidence shows a distinct stale-metadata failure: NFT attributes disagreed with the correct leaderboard and detail values.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 691,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        688,
+        691
+      ],
+      "decision_note": "Target-specific implementation claim that NFT attributes now use live on-chain metadata as their authoritative source.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 692,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        688,
+        690,
+        691,
+        692
+      ],
+      "decision_note": "First concrete client confirmation after refreshing and checking the target-specific metadata-source fix.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 672,
+        "speaker": "client",
+        "text": "So far, we have done 12 mints, that should equal 12 tickets &amp; 12 x $5 commissions.\n\n**When there is no referral code used, there is still a ticket and commission**.\n\nRight now, **when a code is used**, it is correctly accounted for on the leaderboards/NFT attributes. Perfect.\n\nWhen there is **no referral code used**, the ticket and commission are randomly assigned.\n(B**ut they still need to be accounted for on the leaderboard/NFT attributes**.)\n\nI think since your last fix, (on the last 2 mints) the randomly assigned tickets have been accounted for on the leaderboard/NFT attributes. Great.\nBut they have not been backfilled to show the missing tickets.\n\nAnd the commissions (from these no code buys) are still not being accounted for on the leaderboard/NFT attributes.\n\nIn my screenshot you'll see i have an NFT with 2 tickets and only 1 x $5 commission - this should be impossible, as every ticket comes with a $5 commission.\n\nAnd on my leaderboard screenshot, you can count (from 12 total mints) 7 tickets and 5 x $5 commissions accounted for.\n12 mints should equal 12 tickets and 12 x $5 commissions, regardless of a referral code being used or not."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "An NFT displayed two tickets but only one $5 commission, showing that randomly assigned no-referral rewards were not fully reflected in its attributes."
+      },
+      "evidence_message_ids": [
+        672
+      ],
+      "decision_note": "Distinct no-referral execution path showing a concrete NFT-attribute accounting failure.",
+      "confidence": "HIGH"
+    }
+  ]
+}

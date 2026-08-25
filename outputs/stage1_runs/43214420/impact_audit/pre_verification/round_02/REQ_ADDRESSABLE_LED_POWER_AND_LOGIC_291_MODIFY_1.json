@@ -1,0 +1,130 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+    "message_id": 291,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event updates enable_gpio to GPIO5 but leaves led_standby_power_policy incorrectly referring to GPIO3.",
+      "new_event": {
+        "source_message": {
+          "message_id": 291,
+          "speaker": "client",
+          "text": "Sorry, GPIO3 was from my original ESP32 design — mistake on my side. For 5V_EN you can use GPIO5. Also I realized GPIO22, 23, 25, 27 are not exposed on the WROOM-1 module, so I need to reassign SCL0 (GPIO22→38), SPI MOSI (GPIO23→26). I&#39;ll update the docs and send you the full updated GPIO table."
+        },
+        "supporting_message_ids": [
+          289,
+          290
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "enable_gpio": "GPIO5",
+          "led_standby_power_policy": "Switch off the entire 5V rail through 5V_EN controlled by GPIO5 when the LEDs are not needed, reducing their standby current to zero"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_DAUGHTERBOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the GPIO controlling 5V_EN does not alter the daughterboard's LED count, form, selected part, or stated supply voltage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard interface carries the unchanged 5V_EN signal on pin 7; its connector assignment does not encode the ESP32 GPIO driving that signal.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO reassignment for the separate 5V boost-enable signal does not change DCDC1 voltage, capacity, or its 3.3V load coverage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The standalone USB 3.3V supply and source-selection behavior are independent of the 5V_EN GPIO reassignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision does not change USB data routing, enumeration, or standalone flashing behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The charge-status interface uses GPIO13 and its separate LED circuitry; changing 5V_EN from GPIO3 to GPIO5 does not alter this state.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The AXP2101 battery and system power-path behavior remains unchanged by reassignment of the separate boost-rail enable GPIO.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_GPIO_ASSIGNMENTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a same-message Event that records 5V_EN on GPIO5 together with the SCL0 and SPI MOSI reassignments, so no correction is needed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_CONNECTOR_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO changes do not affect the selected USB-C connector or its sourceability and substitution requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_MODULE_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already records WROOM-1 from the same message, and the GPIO reassignments do not change the selected module variant.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The battery connector family, pin functions, part, and unresolved pin-order issue are unrelated to the 5V_EN GPIO reassignment.",
+      "new_event": null
+    }
+  ]
+}

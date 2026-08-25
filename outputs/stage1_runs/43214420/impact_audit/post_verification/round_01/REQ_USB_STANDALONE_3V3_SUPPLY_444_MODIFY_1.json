@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+    "message_id": 444,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Moving the SK6812 LEDs to the 3.3V rail necessarily adds them to the loads powered by DCDC1 during normal power-board operation.",
+      "new_event": {
+        "source_message": {
+          "message_id": 444,
+          "speaker": "client",
+          "text": "The LEDs are now powered from 3.3V instead of 5V. At 3.3V supply the SK6812 data threshold drops to 2.31V, which the ESP32 3.3V output satisfies directly, so no level shifter is needed. The tradeoff is that 3.3V is slightly below the SK6812 datasheet minimum (3.7V), but it works reliably at indicator brightness levels."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "normal_operation_role": "Primary source for the ESP32-S3, INA219, downstream 3.3V sensors, I2C display, TTP223, AM312, and SK6812 addressable LEDs when the power board is connected"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-444 MODIFY already records the 3.3V supply, direct ESP32 data drive, accepted voltage constraint, and removal of the obsolete level-shifter part.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply change does not alter USB enumeration, data routing, connector selection, or programming-port behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-444 MODIFY already removes the LEDs from the 5V powered loads and deletes the obsolete LED standby-power policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard connectors still carry both 5V and the regulated 3.3V path; changing which rail powers the LEDs does not necessarily change the connector architecture or pin assignments.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Both the 3.3V and 5V rails remain monitored, and the existing 3.3V coverage already includes all downstream loads without enumerating individual devices.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_FANOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED rail decision does not change the sensor-board input connectors, sensor-module connectors, or connector count.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The AXP2101 remains the normal source for all system loads; moving the LEDs between downstream rails does not change that power-path requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply and data threshold decision does not affect I2C pull-ups, series resistors, bus speed, topology, or cable constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_MODULE_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Using the ESP32 3.3V output directly for LED data does not change the selected ESP32-S3 module or part number.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_DAUGHTERBOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The daughterboard's count, form, and selected LED part remain unchanged; its power and data-interface behavior is independently represented by the addressable-LED interface Requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SPS30_I2C_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SPS30 remains a 5V I2C-mode sensor with the same connector and pinout; the LED rail change does not affect it.",
+      "new_event": null
+    }
+  ]
+}

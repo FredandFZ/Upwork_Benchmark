@@ -1,0 +1,194 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_USDC_MINT_FLOW",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 294,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        294
+      ],
+      "decision_note": "The reported failed USDC mint establishes the expected software behavior that a wallet-funded USDC payment must complete an NFT mint.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 294,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        294
+      ],
+      "decision_note": "First concrete failure of wallet-funded USDC minting.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 310,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        309,
+        310
+      ],
+      "decision_note": "Target-specific implementation claim after the first failure: the production checklist explicitly says USDC minting should work and that the listed fixes are live.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 341,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        341
+      ],
+      "decision_note": "Post-claim failure showing that USDC approval executes but the required mint action does not follow.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 357,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        345,
+        357
+      ],
+      "decision_note": "Target-specific implementation claim that USDC approval now triggers automatic minting and success feedback only after mint.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 358,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357,
+        358
+      ],
+      "decision_note": "Post-fix persistence: approval succeeds and false success feedback appears, but no mint transaction occurs.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 361,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        358,
+        361
+      ],
+      "decision_note": "Target-specific implementation claim addressing the failed approval-to-mint transition and approval-only success state.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 364,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        361,
+        364
+      ],
+      "decision_note": "Post-fix persistence after the second targeted claim: no USDC is spent and no NFT is minted.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 401,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        377,
+        398,
+        401
+      ],
+      "decision_note": "First concrete on-chain verification that a USDC mint created an owned NFT token.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 501,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        494,
+        496,
+        499,
+        501
+      ],
+      "decision_note": "Distinct deployment path: the freelancer reports executing a successful USDC NFT mint through the newly deployed contract.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 569,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        546,
+        562,
+        569
+      ],
+      "decision_note": "Concrete client verification on the later deployment: the USDC mint completes, success feedback appears, and the NFT is visible on the dashboard.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "On approval for USDC spend (not minting) the 'successful mint' popup appeared, and stated mint number 2 (in this case i used referral code 2), see screenshot with the wallet popup in view.\nI cancelled the buy, checked and had no NFT.\nThen minted with referral code 3, no approve USDC sign happened, it went straight to mint and worked perfectly, popup appeared. NFT is visible on dashboard.\n\ndecrypting the book worked (i had to sign a transaction), but i am stuck on the cover page."
+      },
+      "supporting_message_ids": [
+        546,
+        562
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "On the newly deployed flow, USDC approval alone triggers a false successful-mint popup even though the purchase is cancelled and no NFT exists."
+      }
+    }
+  ]
+}

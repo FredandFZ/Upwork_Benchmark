@@ -1,0 +1,86 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+    "message_id": 750,
+    "event_type": "REMOVE",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 750,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The switchable 5V rail remains required on the integrated board, but its power and enable interboard routes become obsolete because the client explicitly eliminates interboard connectors.",
+      "new_event": {
+        "source_message": {
+          "message_id": 750,
+          "speaker": "client",
+          "text": "I was thinking, if you have time for a new project and are willing to do it, that we try to make as cheap as possible single board for this project. So everything will be on one board and from start we try to match JLCPCB Basica component (as much as possible). It will have much less connectors as there are no interboard connectors. Also if you have some idea on how to make something better/cheaper but have same functionality you can suggest. I can add it as new milestone to this project and we can agree on price. What do you think does it make sense?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "five_volt_interboard_route",
+          "enable_interboard_route"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "FIVE_VOLT_RAIL",
+            "SENSOR_POWER",
+            "LOW_POWER_OPERATION",
+            "INTEGRATED_BOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 750,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message modification correctly moves I2C conditioning to the integrated board, but it must also remove the obsolete connector-specific I2C route along with the interboard cable-length constraint.",
+      "new_event": {
+        "source_message": {
+          "message_id": 750,
+          "speaker": "client",
+          "text": "I was thinking, if you have time for a new project and are willing to do it, that we try to make as cheap as possible single board for this project. So everything will be on one board and from start we try to match JLCPCB Basica component (as much as possible). It will have much less connectors as there are no interboard connectors. Also if you have some idea on how to make something better/cheaper but have same functionality you can suggest. I can add it as new milestone to this project and we can agree on price. What do you think does it make sense?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "pull_up_board_location": "integrated board"
+        },
+        "value_removals": [
+          "interboard_cable_length_cm",
+          "i2c_data_interboard_route"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "I2C_BUS",
+            "INTEGRATED_BOARD",
+            "SENSOR_CONNECTIVITY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

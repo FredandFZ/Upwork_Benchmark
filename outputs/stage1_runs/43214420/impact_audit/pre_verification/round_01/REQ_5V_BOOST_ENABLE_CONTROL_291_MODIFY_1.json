@@ -1,0 +1,125 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+    "message_id": 291,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the 5V_EN GPIO does not alter the DCDC1 3.3V rail voltage, rating, or load role.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO reassignment does not change the AXP2101 battery input or normal system power path.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The charge-status interfaces and their GPIO13, CHGLED, D1, and R6 details are unaffected.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes controller GPIO assignments, not the battery connector or its unresolved pin order.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The battery-protection controller, thresholds, and protection components remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_THERMAL_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The NTC connector and AXP2101 thermal-monitoring behavior are unaffected by the GPIO changes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The current LED standby-power rule explicitly assigns shared 5V-rail control to GPIO3, so the client's reassignment of 5V_EN to GPIO5 necessarily updates that rule.",
+      "new_event": {
+        "source_message": {
+          "message_id": 291,
+          "speaker": "client",
+          "text": "Sorry, GPIO3 was from my original ESP32 design — mistake on my side. For 5V_EN you can use GPIO5. Also I realized GPIO22, 23, 25, 27 are not exposed on the WROOM-1 module, so I need to reassign SCL0 (GPIO22→38), SPI MOSI (GPIO23→26). I&#39;ll update the docs and send you the full updated GPIO table."
+        },
+        "supporting_message_ids": [
+          289,
+          290
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "standby_power_control": "Switch off the shared 5V rail through 5V_EN controlled by GPIO5 when the LEDs are not needed"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_GPIO_ASSIGNMENTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a complete same-message MODIFY recording 5V_EN on GPIO5, SCL0 on GPIO38, and SPI MOSI on GPIO26.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector pinout exposes the symbolic 5V_EN and SCL0 signals rather than their ESP32 GPIO assignments, so it remains valid unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PCB_LAYER_STACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Controller GPIO reassignment does not affect the power board's four-layer stack.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The standalone USB 3.3V supply path and source-selection behavior do not depend on the reassigned 5V_EN, SCL0, or SPI MOSI GPIOs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOARD_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO changes do not alter the number or functional separation of project boards.",
+      "new_event": null
+    }
+  ]
+}

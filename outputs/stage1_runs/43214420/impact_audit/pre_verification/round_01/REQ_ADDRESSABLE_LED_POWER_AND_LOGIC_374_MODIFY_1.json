@@ -1,0 +1,138 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+    "message_id": 374,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard interface already carries 5V, and the LED-specific supply and data-level-shifter decision does not change its connectors, pinouts, or board power chain.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns a 5V-powered LED and its data level shifter, not the standalone USB 3.3V regulator or its powered rail.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_DAUGHTERBOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The daughterboard remains an eight-addressable-LED board; its count, form, and board-level purpose are unchanged by the separately represented power and data-interface decision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Confirming that the SK6812 must use 5V does not change the DCDC1 3.3V rail voltage, rating, or normal-operation role.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The charge-status method remains the SK6812 chain on GPIO13, and the source does not alter the separate external charge-LED interface or its component values.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SPS30_I2C_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source's 5V decision applies to the SK6812 LEDs and does not change the SPS30 connector, supply, or I2C signals.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The monitored rails already include 5V, and confirming an LED as a 5V load does not necessarily change the monitor device, channels, or stated measurement coverage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client conclusively requires the SK6812 LEDs to be powered from 5V, so they become a definite load on the switchable 5V rail rather than the previously conditional LED load.",
+      "new_event": {
+        "source_message": {
+          "message_id": 374,
+          "speaker": "client",
+          "text": "The SK6812 minimum supply voltage is 3.5–3.7V so 3.3V is actually below spec, the LED might not light up reliably. Power it from 5V and use the 74AHCT1G125 level shifter (LCSC C151417) on the data line since at 5V the data threshold becomes 3.5V which is above what the ESP32 outputs. That's already in the design, so no changes needed just replace the IRLML2402 with the 74AHCT1G125."
+        },
+        "supporting_message_ids": [
+          372,
+          373
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_loads": [
+            "SPS30 particulate sensor",
+            "ZE08-CH2O formaldehyde sensor",
+            "SK6812 addressable LEDs"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "FIVE_VOLT_RAIL",
+            "SENSOR_POWER",
+            "LOW_POWER_OPERATION",
+            "ADDRESSABLE_LEDS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_FANOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply and level-shifter decision does not change the sensor-board input connectors, module connectors, or connector count.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_FORM_FACTOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Replacing the LED data-line component does not entail any change to power-board dimensions, orientation, mounting, or USB-C placement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change battery protection, cutoff voltages, or protection-component functions.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOM_ASSEMBLY_READINESS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Although the source names an LCSC part for the level shifter, it does not change the generic requirement for an assembly-ready power-board BOM or resolve the existing capacitor and unexplained-component issues.",
+      "new_event": null
+    }
+  ]
+}

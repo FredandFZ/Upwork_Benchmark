@@ -1,0 +1,211 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 19,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        14,
+        19
+      ],
+      "decision_note": "The client requires the boost EN input to use GPIO3 for programmatic rail switching rather than being tied high.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 27,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        25,
+        26,
+        27
+      ],
+      "decision_note": "The client specifies an MT3608 and a 100 kΩ pull-down that keeps its enable input low by default.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 30,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        29,
+        30
+      ],
+      "decision_note": "The client accepts the default-off enable behavior and identifies 5V sensors as the switched rail's loads.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 31,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        30,
+        31
+      ],
+      "decision_note": "The client specifies that the software-controlled 5V sensor rail is used periodically rather than continuously.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 101,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        101
+      ],
+      "decision_note": "The message defines legacy interboard connector pinouts, which belong to the dedicated interboard-interface Requirement rather than the boost-control Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 263,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "rated_output_current": "500 mA",
+          "powered_loads": [
+            "SPS30 particulate sensor",
+            "ZE08-CH2O formaldehyde sensor",
+            "SK6812 LEDs if wired to 5V"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        263
+      ],
+      "decision_note": "The client defines the MT3608 rail's 500 mA rating and explicitly lists two sensors plus conditionally 5V-powered SK6812 LEDs.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 281,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        279,
+        281
+      ],
+      "decision_note": "The client specifies switching off the 5V rail through its GPIO-controlled enable input to eliminate LED standby current.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        289,
+        290,
+        291
+      ],
+      "decision_note": "The client reassigns the 5V_EN control from the unsuitable GPIO3 boot-strapping pin to GPIO5 and updates the associated switching rule.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        425
+      ],
+      "decision_note": "The client states that LED power control is separated from sensor power control, changing the rail-coupling behavior.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "event_locator": {
+        "message_id": 444,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_loads": [
+            "SPS30 particulate sensor",
+            "ZE08-CH2O formaldehyde sensor"
+          ]
+        },
+        "value_removals": [
+          "led_standby_power_policy"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        444
+      ],
+      "decision_note": "Moving the addressable LEDs to 3.3V removes them and their standby-switching policy from the 5V rail; the proposed scope values do not change the existing scope.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 750,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        750
+      ],
+      "decision_note": "The single-board proposal does not specifically change the boost-control behavior, and the removed interboard-route keys only originated from the misrouted message 101 Event.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 802,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        802
+      ],
+      "decision_note": "The client adds a selectable 5V external e-paper backlight load and specifies its approximately 70 mA worst-case demand on the rail.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

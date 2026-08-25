@@ -6,6 +6,7 @@ import unittest
 from Code.PII_Clean import (
     DeterministicPiiCleaner,
     PiiCleanError,
+    align_whitespace_only_annotation_texts,
     apply_message_texts,
     assert_only_allowed_fields_changed,
     build_batches,
@@ -234,6 +235,33 @@ class RewriteValidationTests(unittest.TestCase):
 
 
 class AnnotationSyncTests(unittest.TestCase):
+    def test_whitespace_only_source_difference_is_aligned(self):
+        normalized = normalized_fixture()
+        annotation = annotation_fixture()
+        annotation["requirements"][0]["events"][0]["source_message"]["text"] = (
+            "Hi Bob,  email me at alice@example.com and use\nhttps://private.example/login."
+        )
+
+        aligned, repaired = align_whitespace_only_annotation_texts(annotation, normalized)
+
+        self.assertEqual(repaired, 1)
+        self.assertEqual(
+            aligned["requirements"][0]["events"][0]["source_message"]["text"],
+            normalized["messages"][0]["text"],
+        )
+        validate_stage1_annotation(aligned, normalized)
+
+    def test_substantive_source_difference_is_not_aligned(self):
+        normalized = normalized_fixture()
+        annotation = annotation_fixture()
+        annotation["requirements"][0]["events"][0]["source_message"]["text"] = "Different evidence."
+
+        aligned, repaired = align_whitespace_only_annotation_texts(annotation, normalized)
+
+        self.assertEqual(repaired, 0)
+        with self.assertRaisesRegex(ValueError, "source text differs"):
+            validate_stage1_annotation(aligned, normalized)
+
     def test_only_message_text_and_annotation_source_text_change(self):
         normalized = normalized_fixture()
         annotation = annotation_fixture()

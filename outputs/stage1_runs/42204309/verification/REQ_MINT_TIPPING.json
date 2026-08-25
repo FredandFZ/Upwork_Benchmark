@@ -1,0 +1,145 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_MINT_TIPPING",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 169,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        169
+      ],
+      "decision_note": "The client explicitly requests an optional tipping control on the minting page, establishing concrete frontend payment behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 182,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        181,
+        182
+      ],
+      "decision_note": "Initial target-specific implementation claim identifying the preset and custom tip controls added to the mint page.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 183,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        181,
+        182,
+        183
+      ],
+      "decision_note": "The client unambiguously accepts the immediately preceding preset and custom tip design, establishing concrete mint-page UI behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 615,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        615
+      ],
+      "decision_note": "First concrete tipping failure: a referral mint completed after selecting a $1 tip, but the tip did not work.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 633,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        622,
+        633
+      ],
+      "decision_note": "Post-failure target-specific claim explaining that tipping uses a separate USDC transfer and that canceling it prevents tip delivery.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 649,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        633,
+        649
+      ],
+      "decision_note": "The client establishes the separate post-mint tip transaction and requires UI copy warning buyers about that second transaction.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 664,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        657,
+        658,
+        664
+      ],
+      "decision_note": "Target-specific implementation claim for a distinct self-tip path: tipping is disabled when the payer is the configured founder wallet.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 666,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        665,
+        666
+      ],
+      "decision_note": "First concrete verification of actual tip delivery from another minting wallet: the client confirms receiving the $3 tip.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 622,
+        "speaker": "client",
+        "text": "I just minted using 'no referral code' and giving a '$1 tip'.\n\n\\- Tipping isn't working.\n\n\\- Tickets and commissions from 'no referral code' buys still aren't showing up on the leaderboard or in the NFT attributes\n\nalso, after i minted, another transaction (shown in screenshot) popped up, but i cancelled it and the mint worked fine.\nDo you know why this second transaction appeared, was that for the tip?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "On a no-referral mint with a selected $1 tip, the client reports that tipping did not work and that an unexpected follow-up transaction appeared and was canceled."
+      }
+    }
+  ]
+}

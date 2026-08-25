@@ -8,12 +8,29 @@
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "winner_count": 5,
+          "prize_amount_per_winner": "$500"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": null,
+          "contexts": [
+            "PRIZE_SYSTEM",
+            "SMALL_BLOCK"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
         8
       ],
-      "decision_note": "The client explicitly establishes the Small Block prize count, amount, eligible affiliates, and ticket-weighted chances.",
+      "decision_note": "The client introduces the recurring Small Block prize behavior with five $500 winners; the source does not establish the proposed component list.",
       "confidence": "HIGH"
     },
     {
@@ -27,7 +44,61 @@
       "evidence_message_ids": [
         21
       ],
-      "decision_note": "The client explicitly sets the Small Block pool trigger and limits each draw to newly issued Small Block Tickets; the updated top-level fields leave no stale conflicting key.",
+      "decision_note": "The client explicitly sets the Small Block pool to $2,500, triggers its draw at that pool amount, and states that secondary royalties fund the pools.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 27,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Freelancer reports that the prize-pool smart-contract functionality is operational on the Base testnet."
+        }
+      },
+      "evidence_message_ids": [
+        21,
+        27
+      ],
+      "decision_note": "This is the first implementation claim covering the specified prize-pool behavior, but it is not independent runtime verification and should not include VRF as part of this target.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 143,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "draw_condition": "approximately every 500 primary-mint or secondary sales",
+          "pool_funding_sources": [
+            "PRIMARY_MINT_SALES",
+            "SECONDARY_SALES"
+          ]
+        },
+        "value_removals": [
+          "secondary_royalties_contribute_to_pool"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        143
+      ],
+      "decision_note": "The client changes the draw trigger to approximately 500 sales and replaces the narrower royalty-funding flag with a complete list of primary and secondary sale funding sources.",
       "confidence": "HIGH"
     },
     {
@@ -41,33 +112,22 @@
       "evidence_message_ids": [
         158
       ],
-      "decision_note": "The client changes the Small Block mechanism to one winner every 100 sales; replacing the complete draw_trigger attribute requires no separate key removal.",
+      "decision_note": "The client explicitly changes the Small Block draw to one $500 winner every 100 sales.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
-        "message_id": 539,
+        "message_id": 195,
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "MODIFY",
-        "value_updates": {
-          "eligible_population": "Small Block Ticket holders represented in the new active contract; old-contract NFTs are excluded from the active prize system.",
-          "draw_contract_scope": "Small Block draws restart under the new active contract without carrying over old-contract draw state."
-        },
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
-        538,
-        539
+        195
       ],
-      "decision_note": "The client accepts the immediately preceding new-contract proposal, but the update should be limited to excluding old-contract NFTs and restarting draws rather than asserting unsupported ticket details.",
-      "confidence": "MEDIUM"
+      "decision_note": "The client explicitly assigns $5 from each $15 primary mint to the remaining block prize pool, changing the Small Block funding rule.",
+      "confidence": "HIGH"
     }
   ],
   "missing_event_candidates": []

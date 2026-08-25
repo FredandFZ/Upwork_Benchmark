@@ -1132,10 +1132,19 @@ class ResumePipelineTests(unittest.IsolatedAsyncioTestCase):
                 verification_addendum="verifier calibration v2",
             )
             fourth = await targeted_verifier_pipeline.run(project)
+            verifier_only_common_prompt_pipeline = Stage1Pipeline(
+                api,
+                config,
+                "updated verifier policy in common prompt",
+                root / "calls.jsonl",
+                verification_addendum="verifier calibration v2",
+            )
+            fifth = await verifier_only_common_prompt_pipeline.run(project)
             run_metadata = json.loads((project.run_dir / "run_metadata.json").read_text(encoding="utf-8"))
         self.assertEqual(first, second)
         self.assertEqual(second, third)
         self.assertEqual(third, fourth)
+        self.assertEqual(fourth, fifth)
         self.assertEqual(len(calls_after_first), 5)
         self.assertEqual(api.calls[:5], calls_after_first)
         self.assertEqual(
@@ -1143,11 +1152,15 @@ class ResumePipelineTests(unittest.IsolatedAsyncioTestCase):
             [
                 ("EVENT_VERIFICATION", "REQ_BUTTON_COLOR"),
                 ("EVENT_VERIFICATION", "REQ_BUTTON_COLOR"),
+                ("EVENT_VERIFICATION", "REQ_BUTTON_COLOR"),
             ],
         )
         self.assertEqual(first["requirements"][0]["events"][0]["event_id"], "REQ_BUTTON_COLOR_E001")
         self.assertEqual(len(first["requirements"]), 1)
-        self.assertEqual(run_metadata["prompt_sha256"], sha256_text("test prompt"))
+        self.assertEqual(
+            run_metadata["prompt_sha256"],
+            sha256_text("updated verifier policy in common prompt"),
+        )
         self.assertEqual(
             run_metadata["verification_addendum_sha256"],
             sha256_text("verifier calibration v2"),
@@ -1155,7 +1168,7 @@ class ResumePipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(api.audit_user_messages), 1)
         self.assertIn("<EVIDENCE_INDEX>", api.audit_user_messages[0])
         self.assertIn("event_extraction_findings", api.audit_user_messages[0])
-        self.assertEqual(len(api.verification_user_messages), 3)
+        self.assertEqual(len(api.verification_user_messages), 4)
         self.assertIn("<STAGE_INSTRUCTIONS>", api.verification_user_messages[-1])
         self.assertIn("verifier calibration v2", api.verification_user_messages[-1])
         self.assertIn("audit_review_items", api.verification_user_messages[-1])
@@ -1215,6 +1228,22 @@ class FinalOutputFilteringTests(unittest.IsolatedAsyncioTestCase):
             totals = write_statistics(root / "statistics.csv", output_dir)
 
             self.assertEqual(totals, (0, 0, 0))
+
+
+class ProductionPromptPolicyTests(unittest.TestCase):
+    def test_modify_implementation_relevance_gate_is_present(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        common_prompt = (root / "prompt" / "stage1_prompt_v2.md").read_text(encoding="utf-8-sig")
+        verifier_addendum = (
+            root / "prompt" / "stage1_event_verification_addendum.md"
+        ).read_text(encoding="utf-8-sig")
+
+        for text in (common_prompt, verifier_addendum):
+            self.assertIn("implementation-relevance", text)
+            self.assertIn("deadline", text.lower())
+            self.assertIn("account expires 10 days after registration", text)
+            self.assertIn("return `edit`", text.lower())
+            self.assertIn("return `delete`", text.lower())
 
 
 if __name__ == "__main__":

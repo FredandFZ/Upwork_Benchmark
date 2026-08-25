@@ -171,8 +171,20 @@ async def main_async(args: argparse.Namespace) -> int:
 
     selective_force = bool(args.force_stage or args.force_requirement or args.upgrade_existing_annotation)
     projects = discovered
-    if not args.overwrite and not selective_force:
-        projects = [project for project in projects if not completed_for_mode(project, args.annotation_mode)]
+    if not args.overwrite:
+        if selective_force:
+            # A batch force-stage rollout targets the currently published dataset,
+            # not projects without a final annotation (including zero-Requirement
+            # exclusions and unfinished runs). An explicit --project-id or
+            # --overwrite remains available when reprocessing one is intentional.
+            if wanted_ids is None:
+                projects = [
+                    project
+                    for project in projects
+                    if project.output_path.is_file()
+                ]
+        else:
+            projects = [project for project in projects if not completed_for_mode(project, args.annotation_mode)]
     if args.dry_run:
         print(
             f"Would process {len(projects)} project(s) in {args.annotation_mode} mode with "
@@ -366,8 +378,6 @@ def completed_for_mode(project, annotation_mode: str) -> bool:
         and metadata.get("status") == "DONE"
         and metadata.get("annotation_mode") == "multipass"
     )
-
-
 def main() -> int:
     args = parse_args()
     if os.name == "nt":

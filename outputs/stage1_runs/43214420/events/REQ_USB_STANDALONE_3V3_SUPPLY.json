@@ -1,0 +1,106 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 259,
+        "speaker": "client",
+        "text": "Actually I intended it for debugging, but I will not be able to debug sensors with that LDO, thanks for asking. So maybe use something like ME6211A33M5. What do you think?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "sensor_debugging_power_required": true
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB",
+          "POWER"
+        ],
+        "contexts": [
+          "SENSOR_DEBUGGING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 263,
+        "speaker": "client",
+        "text": "3.3V rail (AXP2101 DCDC1, 2A) — primary power source when power board is connected:\n\\- ESP32-S3 module\n\\- INA219\n\\- All I2C sensors (SCD41, BME280, ENS160) via sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — controlled by ESP32 GPIO3:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (if wired to 5V — depends on version)\n\n3.3V rail (ME6211A LDO, 1A) — only active when USB-C on main board connected WITHOUT power board:\n\\- Same 3.3V rail as above — Schottky diode OR-ing means whichever source is present wins. Used for standalone programming.\n\nBattery (3.7–4.2V) — feeds AXP2101 which then feeds everything above.\n\nSimple rule: in normal operation AXP2101 powers everything. The LDO only kicks in when programming without the power board connected."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "usb_auxiliary_regulator": "ME6211A LDO, 3.3V, 1A",
+        "activation_condition": "USB-C on the main board is connected without the power board",
+        "powered_rail": "complete 3.3V rail including the ESP32-S3, INA219, I2C sensors, I2C display, TTP223, and AM312 PIR",
+        "source_selection": "Schottky-diode OR-ing selects whichever 3.3V source is present",
+        "normal_operation_source": "AXP2101 DCDC1",
+        "standalone_programming_supported": true
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": [
+          "PCB",
+          "POWER",
+          "USB"
+        ],
+        "contexts": [
+          "STANDALONE_PROGRAMMING",
+          "USB_POWER",
+          "SENSOR_DEBUGGING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 362,
+        "speaker": "client",
+        "text": "A few things to check on the schematic:\n1\\. LD1117S33CTR is 800mA — we specified 1A. Is that enough for standalone USB mode?\n2\\. Shunt resistors are 0.01Ω — was that intentional? Gives 4mA resolution vs 0.4mA with 0.1Ω. 3. IRLML2402 for the SK6812 level shift — does it have a pull-up on the 5V side? SK6812 timing is tight (~300ns), want to make sure the edges are fast enough. Would 74AHCT1G125 be safer?"
+      },
+      "supporting_message_ids": [
+        263
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The schematic uses an 800mA LD1117S33CTR although the client says 1A was specified, leaving unresolved whether the lower-rated regulator is adequate for standalone USB mode."
+      },
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 989,
+      "suggested_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "description": "The abnormal and fluctuating L3 voltage concerns DCDC1 rail regulation rather than the standalone auxiliary USB regulator."
+    },
+    {
+      "message_id": 1019,
+      "suggested_requirement_id": "REQ_NATIVE_USB_INTERFACE",
+      "description": "The concrete failure is native USB non-enumeration; the reported 3.3V startup and ESP32 operation do not verify the complete standalone USB supply Requirement."
+    },
+    {
+      "message_id": 1046,
+      "suggested_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "description": "The standalone-on-USB failure is explicitly caused by DCDC1 voltage collapse on the integrated board and is better routed to the DCDC1 regulation Requirement."
+    },
+    {
+      "message_id": 1075,
+      "suggested_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "description": "The unsuccessful AXP2101 replacement is post-intervention persistence of the DCDC1 failure, not evidence about the auxiliary USB LDO."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

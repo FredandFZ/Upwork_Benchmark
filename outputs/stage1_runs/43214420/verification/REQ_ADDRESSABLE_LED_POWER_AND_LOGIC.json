@@ -4,8 +4,23 @@
   "verdicts": [
     {
       "event_locator": {
-        "message_id": 272,
+        "message_id": 59,
         "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        58,
+        59
+      ],
+      "decision_note": "The client establishes the SK6812 addressable chain on GPIO13 as the software-controlled charge-status output.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 272,
+        "event_type": "MODIFY",
         "occurrence": 1
       },
       "verdict": "KEEP",
@@ -15,8 +30,8 @@
         271,
         272
       ],
-      "decision_note": "In direct response to the LED-supply question, the client establishes the intended 3.3V supply.",
-      "confidence": "HIGH"
+      "decision_note": "Immediate context resolves the referenced LED as SK6812 Mini-E, and the client specifies its intended 3.3V supply.",
+      "confidence": "MEDIUM"
     },
     {
       "event_locator": {
@@ -28,10 +43,9 @@
       "replacement": null,
       "evidence_message_ids": [
         272,
-        274,
-        275
+        274
       ],
-      "decision_note": "The cited datasheet range materially conflicts with the client-established 3.3V supply and affects level shifting.",
+      "decision_note": "The cited 3.7–5.5V operating range materially conflicts with the client-confirmed 3.3V LED supply.",
       "confidence": "HIGH"
     },
     {
@@ -40,13 +54,13 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "DELETE",
+      "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
         279,
         281
       ],
-      "decision_note": "The message proposes separately inventoried standby rail switching and only implies, rather than establishes, a 5V LED-supply change.",
+      "decision_note": "The client specifies GPIO-controlled disconnection of the 5V LED rail to eliminate standby current.",
       "confidence": "HIGH"
     },
     {
@@ -60,9 +74,10 @@
       "evidence_message_ids": [
         274,
         275,
+        281,
         284
       ],
-      "decision_note": "The client explicitly selects the 5V supply and requires level shifting; updating the existing voltage key needs no removal.",
+      "decision_note": "The client selects the power-board 5V supply and requires logic-level shifting for the LED data line.",
       "confidence": "HIGH"
     },
     {
@@ -75,10 +90,40 @@
       "replacement": null,
       "evidence_message_ids": [
         274,
-        275,
         284
       ],
-      "decision_note": "The explicit 5V and level-shifter decision resolves the preceding value ambiguity and returns the Requirement to active status.",
+      "decision_note": "The explicit 5V and level-shifter decision resolves the earlier supply-voltage conflict.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        289,
+        290,
+        291
+      ],
+      "decision_note": "The client changes the executable 5V-enable control assignment from GPIO3 to GPIO5.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 315,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        314,
+        315
+      ],
+      "decision_note": "The client confirms that the main PCB provides a JST electrical interconnect to the external LEDs.",
       "confidence": "HIGH"
     },
     {
@@ -94,7 +139,7 @@
         372,
         373
       ],
-      "decision_note": "The client explicitly reopens the supply-voltage and level-shifter decision pending the selected LED variant's voltage range.",
+      "decision_note": "The LED operating voltage and resulting need for a data-level shifter remain materially unresolved.",
       "confidence": "HIGH"
     },
     {
@@ -110,7 +155,7 @@
         373,
         374
       ],
-      "decision_note": "The client confirms 5V operation and identifies the required level-shifter part; no previously stored key becomes obsolete.",
+      "decision_note": "The client selects 5V operation and the specified 74AHCT1G125 data-level shifter based on the electrical thresholds.",
       "confidence": "HIGH"
     },
     {
@@ -125,23 +170,54 @@
         372,
         374
       ],
-      "decision_note": "The confirmed supply and level-shifter selection resolves the preceding value ambiguity.",
+      "decision_note": "The definitive 5V and level-shifter selection resolves the preceding electrical-interface ambiguity.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
-        "message_id": 425,
+        "message_id": 394,
         "event_type": "AMBIGUOUS",
         "occurrence": 1
       },
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        424,
-        425,
-        426
+        376,
+        384,
+        394
       ],
-      "decision_note": "The client materially reopens whether the established data-level shifter remains necessary.",
+      "decision_note": "The exact LED part and package remain unresolved, materially affecting the documented PCB footprint and interface.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 425,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        380,
+        425
+      ],
+      "decision_note": "The client changes the PCB power-control behavior so LED power is switched independently from sensor power.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 432,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        429,
+        430,
+        432
+      ],
+      "decision_note": "The client selects the exact OPSCO SK6812MINI-E part, LCSC C5149201, for the PCB design.",
       "confidence": "HIGH"
     },
     {
@@ -154,28 +230,99 @@
       "replacement": null,
       "evidence_message_ids": [
         425,
-        442,
         443,
         444
       ],
-      "decision_note": "The client explicitly changes to 3.3V direct data drive; removing the previously stored level-shifter part prevents stale contradictory state.",
+      "decision_note": "The client changes the LED rail to 3.3V, specifies direct ESP32 data drive, accepts the below-datasheet operating constraint, and validly removes the previously established level-shifter part.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
-        "message_id": 444,
-        "event_type": "RESUME",
+        "message_id": 507,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        506,
+        507
+      ],
+      "decision_note": "The source gives a general board-placement preference and does not specifically entail placement of the LED connector; a board-layout Requirement is the better target.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 750,
+        "event_type": "MODIFY",
         "occurrence": 1
       },
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        425,
-        444
+        750,
+        751,
+        752
       ],
-      "decision_note": "The direct-drive decision resolves the open level-shifter ambiguity and resumes the Requirement.",
+      "decision_note": "The integrated-PCB architecture changes the LED-interface context and makes the prior main-board-specific interconnect attribute stale; pricing and milestone content are not encoded.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        841,
+        842,
+        843
+      ],
+      "decision_note": "The source approves flexible connector placement but does not establish the proposed JST LED-interconnect value; the observation belongs to integrated-board connector layout.",
       "confidence": "HIGH"
     }
   ],
-  "missing_event_candidates": []
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 425,
+        "speaker": "client",
+        "text": "I added separate control for led vs sensors so we might not need shifter"
+      },
+      "supporting_message_ids": [
+        380,
+        394,
+        426,
+        428
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "It is unresolved whether separate LED and sensor power control eliminates the previously required LED data-level shifter."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 444,
+        "speaker": "client",
+        "text": "The LEDs are now powered from 3.3V instead of 5V. At 3.3V supply the SK6812 data threshold drops to 2.31V, which the ESP32 3.3V output satisfies directly, so no level shifter is needed. The tradeoff is that 3.3V is slightly below the SK6812 datasheet minimum (3.7V), but it works reliably at indicator brightness levels."
+      },
+      "supporting_message_ids": [
+        425,
+        443
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ]
 }

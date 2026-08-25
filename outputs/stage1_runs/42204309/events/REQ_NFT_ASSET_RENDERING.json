@@ -1,0 +1,272 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NFT_ASSET_RENDERING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 226,
+        "speaker": "client",
+        "text": "awesome, ill send through the PDF today"
+      },
+      "supporting_message_ids": [
+        217,
+        224
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "metadata_ebook_link": "NFT metadata links to a gated viewer rather than directly to the PDF"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "NFT_METADATA",
+          "NFT_DETAIL"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, but there are bugs.\n\n**I tried to mint a couple times last night, with ETH in my wallet (no USDC), but it seems to have failed, yet, on <http://ProjectRebuild.xyz|ProjectRebuild.xyz> it says i have minted twice.**\n\nAlso, i used no referral code, so (not sure what should have happened to the commission and ticket on mint 1, as its mean to go to an already minted NFT holder... a one off edge case i hadn't thought of, but) mint 2 should have allocated the commission and ticket to mint 1 - (Maybe this is due to the mint not going through)\n\nAlso, when i click to view NFT from the dashboard, the book cover is too big and cut off, and (maybe because the mint didn't actually work) im not sure how to view the actual book.\n\nIll try minting now with USDC and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "nft_detail_cover_display": "Display the book cover at a suitable size without cropping it"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, but there are bugs.\n\n**I tried to mint a couple times last night, with ETH in my wallet (no USDC), but it seems to have failed, yet, on <http://ProjectRebuild.xyz|ProjectRebuild.xyz> it says i have minted twice.**\n\nAlso, i used no referral code, so (not sure what should have happened to the commission and ticket on mint 1, as its mean to go to an already minted NFT holder... a one off edge case i hadn't thought of, but) mint 2 should have allocated the commission and ticket to mint 1 - (Maybe this is due to the mint not going through)\n\nAlso, when i click to view NFT from the dashboard, the book cover is too big and cut off, and (maybe because the mint didn't actually work) im not sure how to view the actual book.\n\nIll try minting now with USDC and see what happens"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "On the dashboard NFT detail view, the book cover was oversized and cut off."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 310,
+        "speaker": "freelancer",
+        "text": "**Testing checklist**\n**Please test the following on production:**\n\n***1\\. Referral code validation***\n\\- Try an invalid code (*e.g., \"5\" when only 1-2 NFTs exist*) — should show invalid message\n\\- Try a valid code (*e.g., \"1\" if NFT #1 exists*) — should show a valid message\n\\- Try no code — should show \"No/Invalid referral code\" message\n\n***2\\. Minting***\n\\- Attempt a mint with USDC — should work\n\\- Check dashboard — only successful mints should appear\n\n***3\\. NFT detail page***\n\\- View an NFT detail page — book cover should display fully\n\\- As an owner, the \"*View Book*\" button should be visible\n\n***4\\. Badges***\n\\- Check dashboard badges section — should show 8 badges (Legend removed). Remember badges display is responsive, so the screen size determines it\n\nAll fixes are live and ready for testing."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the NFT detail cover and owner View Book controls are fixed, live, and ready for testing."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "I have fixed.\nHow to see it in your wallet/dashboard now:\n\\=&gt; Import NFT manually if needed:\n\\- contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n\\- token ID: 1\n\\- chain: Base Mainnet\n\nRefresh the dashboard; backend already has the token in DB (tokenId 1), so it should render with the new metadata/image and PDF link\n\n."
+      },
+      "supporting_message_ids": [
+        377
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports a fix intended to render token 1 with its metadata, image, and PDF link in the dashboard and wallet flow."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "In Rabby, once i deselect 'hide low-value NFTs' I could see the NFT but it still had no image or information. and i haven't been able to import it as a custom token.\n\nIll try to do an ETH buy now and see what happens"
+      },
+      "supporting_message_ids": [
+        388,
+        391,
+        392
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "wallet_nft_asset_display": "Display the NFT image and basic information in supported wallet NFT views"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "NFT_METADATA",
+          "NFT_DETAIL",
+          "WALLET_DISPLAY"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "In Rabby, once i deselect 'hide low-value NFTs' I could see the NFT but it still had no image or information. and i haven't been able to import it as a custom token.\n\nIll try to do an ETH buy now and see what happens"
+      },
+      "supporting_message_ids": [
+        388,
+        391,
+        392
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Rabby displayed the NFT only after hidden assets were revealed, but the NFT still had no image or information."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 396,
+        "speaker": "freelancer",
+        "text": "About importing: this is an ERC‑721 NFT, so you must “Import NFT” (not “Import token”) in your wallet’s NFT section, on Base Mainnet, using:\n\\- Contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n\\- Token ID: 1 (the minted token to 0x3b55868Dd2ebA28f97b3dB55a4cB706a078154B5)\n\\- If your wallet asks for both contract and token ID, fill both. If it only asks for a contract, switch to Base and use the contract above; then select/refresh NFTs.\nYou can verify the asset is live:\n\\- Metadata: <https://api.projectrebuild.xyz/metadata/1>\n\\- Image: <https://api.projectrebuild.xyz/images/1.png>\n\\- PDF: <https://api.projectrebuild.xyz/pdf/1>\n\nIf you still don’t see it:\n1) Confirm you’re on Base network.\n2) Use the NFT import flow (not token import).\n3) Manually enter contract + token ID.\n4) Refresh/force-reload the wallet’s NFT view."
+      },
+      "supporting_message_ids": [
+        391,
+        393
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that token 1's metadata, image, and PDF assets are live at their API endpoints and provides the ERC-721 wallet import procedure."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 401,
+        "speaker": "freelancer",
+        "text": "Findings\nYour ETH mint reverted (0x3af7…0855c on Base) because the on-chain swap router is set to 0x2626…e481, which isn’t the Uniswap V3 SwapRouter. The contract calls exactInputSingle there and it reverts, so every ETH mint will fail until the router is corrected on-chain.\n\nUSDC mint works;\n\\- token #1 exists and is owned by 0x3b55868Dd2ebA28f97b3dB55a4cB706a078154B5. Metadata and assets resolve:\n\\- Metadata: <https://api.projectrebuild.xyz/metadata/1>\n\\- Image: <https://api.projectrebuild.xyz/images/1.png>"
+      },
+      "supporting_message_ids": [
+        395,
+        398
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Freelancer's findings report that token 1 exists and that its metadata and image assets resolve through the API endpoints."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "NFTs are showing up on my dashboard now (images not showing when i click through). and when i click 'View Book' its not showing up"
+      },
+      "supporting_message_ids": [
+        404,
+        408
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "NFT records appeared on the dashboard, but their images did not render in the detail view and View Book did not display the ebook."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 423,
+        "speaker": "freelancer",
+        "text": "Please hard refresh the app:\n\\- Dashboard/NFT detail: images and “View Book” should work without XML errors.\n\\- Quick live ETH mint test now to confirm end-to-end (UI + on-chain) with the new router."
+      },
+      "supporting_message_ids": [
+        411,
+        418,
+        420
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that dashboard and NFT-detail images and View Book should now work without XML errors."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 377,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_STATE_ACCURACY",
+      "description": "The NFT was absent from the wallet and dashboard after a successful mint; this primarily concerns ownership indexing and dashboard visibility rather than asset rendering."
+    },
+    {
+      "message_id": 404,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_STATE_ACCURACY",
+      "description": "The source verifies on-chain ownership while reporting a zero dashboard count, which is a dashboard ownership-state issue."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_STATE_ACCURACY",
+      "description": "The reported regression is that owned NFTs disappeared from the dashboard, not that an indexed NFT's image or asset metadata failed to render."
+    },
+    {
+      "message_id": 569,
+      "suggested_requirement_id": "REQ_EBOOK_READER_NAVIGATION",
+      "description": "The book decrypted successfully but remained stuck on the cover page, which concerns reader navigation rather than NFT asset rendering."
+    },
+    {
+      "message_id": 585,
+      "suggested_requirement_id": "REQ_NFT_REWARD_METADATA_ACCURACY",
+      "description": "The incorrect referral-code attribute concerns structured NFT reward metadata rather than image or ebook-asset rendering."
+    },
+    {
+      "message_id": 624,
+      "suggested_requirement_id": "REQ_NFT_HOLDER_BOOK_GATING",
+      "description": "The missing Rainbow Wallet decryption transaction concerns NFT-holder authorization and decryption."
+    },
+    {
+      "message_id": 710,
+      "suggested_requirement_id": "REQ_NFT_HOLDER_BOOK_GATING",
+      "description": "Desktop access working while MetaMask mobile access fails concerns wallet-compatible ebook gating."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

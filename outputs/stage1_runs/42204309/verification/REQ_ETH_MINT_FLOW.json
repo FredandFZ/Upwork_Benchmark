@@ -1,0 +1,229 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_ETH_MINT_FLOW",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 330,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        325,
+        326,
+        327,
+        328,
+        330
+      ],
+      "decision_note": "The client unambiguously accepts adding the ETH mint payment path, requiring frontend and smart-contract behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 335,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        327,
+        328,
+        330,
+        335
+      ],
+      "decision_note": "Target-specific initial implementation claim; the bounded exchange resolves “it” to the accepted ETH payment implementation.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 341,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        341
+      ],
+      "decision_note": "First concrete ETH-path failure: the transaction took ETH but delivered no NFT.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 352,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        352
+      ],
+      "decision_note": "Distinct failure mode involving a failed ETH mint and mismatch between the displayed and requested ETH amounts.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 357,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        352,
+        357
+      ],
+      "decision_note": "Target-specific implementation claim addressing ETH price calculation, buffering, and swap execution after the pricing failure.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 359,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357,
+        359
+      ],
+      "decision_note": "Post-fix persistence: the ETH mint still failed immediately after the claimed pricing and swap correction.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 401,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        395,
+        401
+      ],
+      "decision_note": "Concrete on-chain diagnosis adds new lifecycle knowledge by identifying the incorrect swap-router address causing every ETH mint to revert.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 490,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        490
+      ],
+      "decision_note": "This repeats the established ETH transaction-failure state without a clearly evidenced intervening target-specific implementation transition or distinct failure mode.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 494,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        493,
+        494
+      ],
+      "decision_note": "Target-specific implementation claim that a redeployed contract changes ETH swap slippage behavior to address mint failures.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 504,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        497,
+        498,
+        499,
+        504
+      ],
+      "decision_note": "The client establishes an implementation acceptance constraint that buyers must not bear a $22-or-more net cost for a $15 NFT.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 517,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        515,
+        516,
+        517
+      ],
+      "decision_note": "The client unambiguously accepts the implemented refund rule that excess swap output is returned to the payer in USDC.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 530,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        529,
+        530
+      ],
+      "decision_note": "First concrete verification of the USDC-refund behavior through an executed ETH payment with a measured excess refund.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539
+      ],
+      "decision_note": "The client accepts the exact-output swap design, exact 15-USDC output, ETH refund of unused input, and transaction reversion on shortfall.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 571,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        546,
+        555,
+        571
+      ],
+      "decision_note": "First concrete post-redeployment verification that the ETH mint completed successfully without an approval transaction.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

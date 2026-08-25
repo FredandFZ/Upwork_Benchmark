@@ -1,0 +1,113 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_LEGACY_BOARD_CONNECTOR_ALIGNMENT",
+    "message_id": 843,
+    "event_type": "REMOVE",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already describes DCDC1 operation under the integrated-board architecture and contains no obsolete interboard connector or alignment attributes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The confirmed single-board architecture eliminates the separate-board 5V and enable interboard routes, while the switchable 5V rail itself remains required.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [
+          841,
+          844
+        ],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "five_volt_interboard_route",
+          "enable_interboard_route"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SPS30_I2C_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SPS30 connector is an external sensor connection, not a legacy connector between separate PCBs, so its interface remains valid unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board architecture makes the separate MAIN_BOARD and POWER_BOARD scope contexts obsolete, while the addressable and external charge-LED interfaces remain applicable on the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [
+          841,
+          844
+        ],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "CHARGE_STATUS",
+            "ADDRESSABLE_LED_CHAIN",
+            "EXTERNAL_CHARGE_LED",
+            "INTEGRATED_BOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "With only one integrated board remaining, the auxiliary USB regulator can no longer be described as residing on a separate main board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think they can, now that there is only one board + sensors/buttons/leds which are all easy to position I think there is no issue wherever you put them"
+        },
+        "supporting_message_ids": [
+          841,
+          844
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "usb_auxiliary_regulator_board": "integrated board"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

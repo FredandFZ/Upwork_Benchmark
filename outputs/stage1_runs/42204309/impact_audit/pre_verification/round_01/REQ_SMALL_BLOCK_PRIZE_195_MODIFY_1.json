@@ -1,0 +1,231 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+    "message_id": 195,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-195 MODIFY already replaces the reward components with the $5 commission and Small Block ticket, removing the obsolete Big Block ticket.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_REVENUE_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-195 MODIFY already records the $5 founder allocation, $5 prize-pool allocation, and Small-Block-only destination.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_SELECTION",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 195,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY narrows scope to Small Block but leaves obsolete Big Block eligibility in the current value state.",
+      "new_event": {
+        "source_message": {
+          "message_id": 195,
+          "speaker": "client",
+          "text": "Hey Joseph, id like to eliminate the big blocks and give that extra $1 to me, so it&#39;ll be:\n$15 buy, $5 to me,  $5 to affiliate,  $5 to block prize pool.\n\nIncreases my bottom line with minimal impact on sales.\nPlus it simplifies the game mechanics and marketing.\n\nGiveing myself and each community member an even split, as well as everyone getting an even shot at the never ending $500 prizes seems aligned with the projects ethos."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "selection_eligibility": {
+            "small_block": "Small Block Tickets issued since the previous Small Block draw"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "PRIZE_SYSTEM",
+            "SMALL_BLOCK",
+            "CHAINLINK_VRF"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Eliminating Big Blocks necessarily removes Big Block ticket issuance, its counter, eligibility window, and post-draw reset behavior while retaining the Small Block ticket lifecycle.",
+      "new_event": {
+        "source_message": {
+          "message_id": 195,
+          "speaker": "client",
+          "text": "Hey Joseph, id like to eliminate the big blocks and give that extra $1 to me, so it&#39;ll be:\n$15 buy, $5 to me,  $5 to affiliate,  $5 to block prize pool.\n\nIncreases my bottom line with minimal impact on sales.\nPlus it simplifies the game mechanics and marketing.\n\nGiveing myself and each community member an even split, as well as everyone getting an even shot at the never ending $500 prizes seems aligned with the projects ethos."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "ticket_award_per_referral_mint": {
+            "small_block": 1
+          },
+          "ticket_counters": [
+            "SMALL_BLOCK"
+          ]
+        },
+        "value_removals": [
+          "big_block_eligibility_window",
+          "big_block_post_draw_action"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The About page currently advertises Big Block tickets and prizes, which must be removed after the client eliminates Big Blocks.",
+      "new_event": {
+        "source_message": {
+          "message_id": 195,
+          "speaker": "client",
+          "text": "Hey Joseph, id like to eliminate the big blocks and give that extra $1 to me, so it&#39;ll be:\n$15 buy, $5 to me,  $5 to affiliate,  $5 to block prize pool.\n\nIncreases my bottom line with minimal impact on sales.\nPlus it simplifies the game mechanics and marketing.\n\nGiveing myself and each community member an even split, as well as everyone getting an even shot at the never ending $500 prizes seems aligned with the projects ethos."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "how_it_works_copy": {
+            "mint": "Purchase the ebook NFT for $15 USD; the mint number is the referral code.",
+            "referrals": "Sharing the mint number or link earns an instant $5 USD for each referred mint, with no limit or expiration; when no code is used, the commission and ticket go to a random existing ticket holder.",
+            "tickets": "Each referral gives a Small Block prize ticket for the current block, and more referrals provide more chances to win.",
+            "prizes": "Small Block provides recurring $500 prizes, with winners selected through Chainlink VRF.",
+            "reward_collection": "Commissions are sent automatically on-chain, while prize wins are announced on the Winners page and paid to the winner wallet."
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "After Big Blocks are eliminated, secondary-sale prize-pool proceeds can no longer retain BIG_BLOCK as a destination.",
+      "new_event": {
+        "source_message": {
+          "message_id": 195,
+          "speaker": "client",
+          "text": "Hey Joseph, id like to eliminate the big blocks and give that extra $1 to me, so it&#39;ll be:\n$15 buy, $5 to me,  $5 to affiliate,  $5 to block prize pool.\n\nIncreases my bottom line with minimal impact on sales.\nPlus it simplifies the game mechanics and marketing.\n\nGiveing myself and each community member an even split, as well as everyone getting an even shot at the never ending $500 prizes seems aligned with the projects ethos."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "prize_pool_destinations": [
+            "SMALL_BLOCK"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SITE_INFORMATIONAL_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The FAQ currently describes Big Block tickets, prizes, and dual prize pools, so its affected explanations must be revised to the Small-Block-only model.",
+      "new_event": {
+        "source_message": {
+          "message_id": 195,
+          "speaker": "client",
+          "text": "Hey Joseph, id like to eliminate the big blocks and give that extra $1 to me, so it&#39;ll be:\n$15 buy, $5 to me,  $5 to affiliate,  $5 to block prize pool.\n\nIncreases my bottom line with minimal impact on sales.\nPlus it simplifies the game mechanics and marketing.\n\nGiveing myself and each community member an even split, as well as everyone getting an even shot at the never ending $500 prizes seems aligned with the projects ethos."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "buyer_earnings_explanation": "Explain the $5 commission and Small Block prize tickets while stating that any future BooksOnChain governance-token allocation depends on FAMM succeeding and has no guarantee of success or value.",
+          "referral_explanation": "Explain that a mint number is the permanent referral code, successful referrals award $5 plus a Small Block ticket, and a no-code mint sends the commission and ticket to a random existing NFT holder.",
+          "prize_explanation": "Explain the recurring $500 Small Block prizes and that the prize pool is funded by project sales.",
+          "ticket_explanation": "Explain that referrals earn current-draw Small Block entries, that more tickets increase the chance of winning, and that tickets expire after the Small Block draw.",
+          "single_level_model_explanation": "Explain that the model is single-level and source-verified on Basescan, with each $15 primary mint allocating $5 to the founder, $5 to the affiliate, and $5 to the Small Block prize pool."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_COLLECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Eliminating Big Blocks does not change the automatic wallet-transfer collection method for the remaining Small Block prizes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REWARD_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-195 MODIFY already removes the obsolete big_block_ticket_counter_visible attribute.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_TRANSAK_FIAT_MINT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The prize-model and primary-mint allocation decision does not alter Transak provider, conversion, payment-method, or purchase-fulfillment behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MISSION_PAGE_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The Mission page currently advertises a Big Block prize, which is obsolete after the client eliminates Big Blocks.",
+      "new_event": {
+        "source_message": {
+          "message_id": 195,
+          "speaker": "client",
+          "text": "Hey Joseph, id like to eliminate the big blocks and give that extra $1 to me, so it&#39;ll be:\n$15 buy, $5 to me,  $5 to affiliate,  $5 to block prize pool.\n\nIncreases my bottom line with minimal impact on sales.\nPlus it simplifies the game mechanics and marketing.\n\nGiveing myself and each community member an even split, as well as everyone getting an even shot at the never ending $500 prizes seems aligned with the projects ethos."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "prize_pools_copy": "Small Block provides recurring $500 prizes, giving community members an ongoing fair chance to win through Chainlink VRF randomness."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_TIPPING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The revised base-mint allocation and removal of Big Blocks do not change the independently optional tipping behavior.",
+      "new_event": null
+    }
+  ]
+}

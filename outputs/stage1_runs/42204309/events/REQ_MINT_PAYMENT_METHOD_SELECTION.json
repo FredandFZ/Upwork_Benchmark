@@ -1,0 +1,184 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_MINT_PAYMENT_METHOD_SELECTION",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 321,
+        "speaker": "client",
+        "text": "If payment is ETH only (or USDC only), the customer needs to know what currency the payment is in.  \n\nBut if there is the option for either ETH or USDC, there needs to be a way to select."
+      },
+      "supporting_message_ids": [
+        316,
+        317,
+        318,
+        319,
+        320
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "single_currency_disclosure": "Show the payment currency when only one currency is available.",
+        "multi_currency_selection": "Provide a payment-currency selector when both ETH and USDC are available."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "ETH_PAYMENT",
+          "USDC_PAYMENT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 330,
+        "speaker": "client",
+        "text": "That would be great 👍"
+      },
+      "supporting_message_ids": [
+        326,
+        327,
+        328
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "enabled_wallet_payment_currencies": [
+          "ETH",
+          "USDC"
+        ],
+        "payment_currency_selector_enabled": true
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 335,
+        "speaker": "freelancer",
+        "text": "I have finished implementing it"
+      },
+      "supporting_message_ids": [
+        326,
+        327,
+        328,
+        330
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports completing the accepted ETH and USDC payment-selection option."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "Right now, 'View Book' still takes me to a blank page (see attached screenshot) and I can not select to pay in ETH - i can only select for USDC or Card (when card option should be the one I can not select, due to it not being implemented yet)"
+      },
+      "supporting_message_ids": [
+        284,
+        423
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "eth_option_enabled": true,
+        "card_option_enabled": false
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "PRIMARY_MINT",
+          "ETH_PAYMENT",
+          "USDC_PAYMENT",
+          "FIAT_PAYMENT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "Right now, 'View Book' still takes me to a blank page (see attached screenshot) and I can not select to pay in ETH - i can only select for USDC or Card (when card option should be the one I can not select, due to it not being implemented yet)"
+      },
+      "supporting_message_ids": [
+        423
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The mint interface did not offer the enabled ETH option and instead allowed selection of the unimplemented Card option alongside USDC."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 430,
+        "speaker": "client",
+        "text": "\\- My NFTs are no longer showing in the dashboard.\n\\- I can select to pay in ETH, but transaction failed.\n\nDashboard is still saying we are up to mint number 3, but that the prize pool is now empty, see screenshots"
+      },
+      "supporting_message_ids": [
+        423,
+        424,
+        426,
+        427
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Client confirms that ETH is now selectable as a payment option; the subsequent ETH transaction failure concerns the separate ETH execution flow."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 284,
+      "suggested_requirement_id": "REQ_TRANSAK_FIAT_MINT",
+      "description": "The decision to launch crypto-only and add fiat later primarily defers the Transak fiat capability."
+    },
+    {
+      "message_id": 424,
+      "suggested_requirement_id": "REQ_EBOOK_READER_NAVIGATION",
+      "description": "The blank View Book page is a separate ebook-reader runtime failure."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_ETH_MINT_FLOW",
+      "description": "The failed transaction after successfully selecting ETH belongs to the ETH mint execution flow."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_STATE_ACCURACY",
+      "description": "Missing dashboard NFTs and the incorrect mint count belong to dashboard state accuracy."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_PRIZE_POOL_STATISTICS_ACCURACY",
+      "description": "The unexpectedly empty prize-pool display belongs to prize-pool statistics accuracy."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

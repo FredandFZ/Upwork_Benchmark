@@ -414,8 +414,8 @@ Include software/product behaviors and constraints that can affect later impleme
 - data/state accuracy;
 - runtime constraints;
 - client-confirmed provider/technology choices;
-- temporary launch/milestone constraints;
-- task-local implementation obligations;
+- temporary launch/milestone constraints only when they directly change product or system behavior;
+- task-local implementation obligations only when they require a change to code, configuration, data, interfaces, infrastructure behavior, or an executable artifact;
 - requirements later deferred or removed;
 - meaningful execution evidence showing whether implementation satisfied a Requirement.
 
@@ -432,6 +432,39 @@ Exclude ordinary project traffic such as:
 - purely administrative/business messages that do not change software behavior.
 
 Do not force every client sentence into a Requirement.
+
+
+## 7.0.1 Implementation-relevance boundary
+
+ReqMemBench Stage 1 records **implementation-relevant Requirement lifecycle state**, not project-management state.
+
+`Implementation-relevant` does not mean that the source message must mention code. A fact is implementation-relevant when retaining it can change a future coding or system-maintenance decision, including:
+
+- software behavior or business logic enforced by the system;
+- UI/UX behavior or product copy rendered by the software;
+- validation, authentication, authorization, API, schema, data, or state semantics;
+- provider, protocol, algorithm, configuration, infrastructure, deployment, or runtime behavior;
+- an executable test/tooling artifact explicitly requested as a deliverable;
+- a concrete acceptance condition that determines whether the implemented behavior is correct.
+
+The following are not Requirement attributes or lifecycle changes by themselves:
+
+- freelancer or project delivery deadlines;
+- schedules, meetings, staffing, personal availability, or hand-off logistics;
+- budgets, invoices, milestone funding, contracts, or payment administration;
+- generic progress estimates, effort estimates, promises, reminders, or communication preferences.
+
+Distinguish product time semantics from project time management:
+
+```text
+"Finish this feature within 10 days."
+-> project delivery deadline; exclude the deadline
+
+"The account expires 10 days after registration."
+-> executable product behavior; retain the 10-day expiration rule
+```
+
+A mixed source message may support a coding-relevant Event while also containing project-management facts. Preserve only the implementation-relevant attributes. Never copy the administrative facts into `value_updates`, `value_removals`, or `scope_updates`.
 
 
 ## 7.1 Product Requirement vs. project/testing process
@@ -2115,6 +2148,23 @@ For an execution Event with verdict `KEEP`, `decision_note` must briefly state i
 This deletion bias applies to weak or redundant execution Events; it must not erase distinct, evidence-supported failures, fixes, verifications, paths, partial outcomes, or regressions.
 
 
+## 19.4.1 Mandatory implementation-relevance gate for INTRODUCE and MODIFY
+
+For every provisional `INTRODUCE` and especially every `MODIFY`, inspect each proposed `value_updates`, `value_removals`, and `scope_updates` entry separately.
+
+Retain an attribute only when it changes software behavior, system-enforced business logic, UI/UX behavior, product copy, data/state semantics, an API or schema, validation/authentication, a provider or protocol choice, configuration, infrastructure/deployment/runtime behavior, an executable artifact, or a concrete implementation acceptance condition.
+
+Exclude delivery deadlines, schedules, meetings, staffing, availability, budgets, invoices, contracts, payment administration, generic progress/effort estimates, hand-off logistics, and other project-management facts. A time value is implementation-relevant only when it controls system behavior such as expiration, timeout, retention, recurrence, delayed execution, or another executable temporal rule. A freelancer/project delivery deadline is not implementation-relevant.
+
+Apply these verdict rules:
+
+1. If the whole `INTRODUCE` or `MODIFY` is non-implementation-related, return `DELETE`.
+2. If the Event mixes implementation-relevant and project-management attributes, return `EDIT` and remove every non-implementation attribute from the replacement.
+3. For a `MODIFY`, if no `value_updates`, `value_removals`, or `scope_updates` remain after cleanup, return `DELETE` rather than emitting an empty replacement.
+4. Do not retain a project-management value merely because it was previously present in Requirement state. Attribute-level evidence and implementation relevance are both required.
+5. For `KEEP` or `EDIT`, `decision_note` must identify the concrete software behavior, artifact, configuration, data rule, interface, or acceptance condition affected. If no such effect can be stated from the source evidence, return `DELETE`.
+
+
 ## 19.5 Verification criteria
 
 Check:
@@ -2131,6 +2181,8 @@ Check:
 10. Is the Event duplicative of a neighboring Event without adding information?
 11. Does an execution Event add a distinct lifecycle state, transition, path, failure mode, post-fix result, or regression?
 12. Is a generic execution statement being routed only by proximity rather than target-entailing context?
+13. For every INTRODUCE/MODIFY attribute, is it implementation-relevant rather than project-management state?
+14. If a MODIFY mixes coding and non-coding facts, has the verdict used EDIT to remove only the non-coding attributes?
 
 ## 19.6 Output schema
 

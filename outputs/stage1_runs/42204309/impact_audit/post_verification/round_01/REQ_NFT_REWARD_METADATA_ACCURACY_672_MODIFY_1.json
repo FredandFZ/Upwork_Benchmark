@@ -1,0 +1,136 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_NFT_REWARD_METADATA_ACCURACY",
+    "message_id": 672,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_REWARD_ACCOUNTING_ACCURACY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY captures aggregate counts but omits the explicit rule that every accounted ticket must have a corresponding $5 commission.",
+      "new_event": {
+        "source_message": {
+          "message_id": 672,
+          "speaker": "client",
+          "text": "So far, we have done 12 mints, that should equal 12 tickets &amp; 12 x $5 commissions.\n\n**When there is no referral code used, there is still a ticket and commission**.\n\nRight now, **when a code is used**, it is correctly accounted for on the leaderboards/NFT attributes. Perfect.\n\nWhen there is **no referral code used**, the ticket and commission are randomly assigned.\n(B**ut they still need to be accounted for on the leaderboard/NFT attributes**.)\n\nI think since your last fix, (on the last 2 mints) the randomly assigned tickets have been accounted for on the leaderboard/NFT attributes. Great.\nBut they have not been backfilled to show the missing tickets.\n\nAnd the commissions (from these no code buys) are still not being accounted for on the leaderboard/NFT attributes.\n\nIn my screenshot you'll see i have an NFT with 2 tickets and only 1 x $5 commission - this should be impossible, as every ticket comes with a $5 commission.\n\nAnd on my leaderboard screenshot, you can count (from 12 total mints) 7 tickets and 5 x $5 commissions accounted for.\n12 mints should equal 12 tickets and 12 x $5 commissions, regardless of a referral code being used or not."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "expected_aggregate_rule": "Each mint must be represented by one ticket and one $5 commission in reward-accounting views, whether a referral code is used or the reward is randomly assigned.",
+          "ticket_commission_pairing_rule": "Every accounted ticket must have a corresponding $5 commission in reward-accounting views."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "DASHBOARD",
+            "LEADERBOARD",
+            "REFERRAL_MINT",
+            "NO_REFERRAL"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SITE_INFORMATIONAL_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source addresses runtime accounting in leaderboards and NFT attributes, not a required change to FAQ copy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BADGE_ACHIEVEMENTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Ticket and commission accounting does not change badge definitions, milestones, storage, or award behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_ASSET_RENDERING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Reward metadata accounting is independent of NFT image, ebook-link, and wallet asset rendering.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BADGE_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not affect the responsive arrangement of badges.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FIAT_BUYER_WALLET_ACCESS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes accounting visibility, not fiat-wallet provisioning, authentication, reward access, or cash-out guidance.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The About-page state already describes random no-code rewards, and the source does not request a copy change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already requires one randomly assigned $5 commission and Small Block ticket per no-referral primary mint; the source reports their missing accounting rather than changing allocation behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MISSION_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not direct any change to Mission-page messaging.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already requires one ticket per successful primary mint, including no-referral mints; the source concerns display and accounting rather than ticket issuance, eligibility, or expiration.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_HERO_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accounting clarification does not change landing-page hero copy or layout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns primary-mint ticket and commission accounting and does not change secondary-sale royalties or marketplace enforcement.",
+      "new_event": null
+    }
+  ]
+}

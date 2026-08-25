@@ -1,0 +1,166 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_PANEL_POWER_CONTROL",
+    "message_id": 439,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_PANEL_CONTROL_CONNECTORS",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 439,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event adds the relocated connector but omits its established J_PWR_BTN reference.",
+      "new_event": {
+        "source_message": {
+          "message_id": 439,
+          "speaker": "client",
+          "text": "No problem on the power board. Can you add a 2-pin JST-GH connector on the main board for a panel-mounted power button? PWRON already comes in on J\\_PWR\\_SIG pin 4, just need a connector that taps into that line so we can wire a button from the enclosure panel."
+        },
+        "supporting_message_ids": [
+          436,
+          438
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "control_connector_inventory": [
+            {
+              "connector": "J_BTN3",
+              "control": "panel button",
+              "signal": "GPIO6"
+            },
+            {
+              "connector": "J_BTN4",
+              "control": "panel button",
+              "signal": "GPIO7"
+            },
+            {
+              "connector": "J_SW",
+              "control": "panel slide switch",
+              "signal": "GPIO8"
+            },
+            {
+              "connector": "J_RESET",
+              "control": "panel reset button",
+              "signal": "EN to GND"
+            },
+            {
+              "connector": "J_TOUCH",
+              "control": "TTP223 capacitive touch",
+              "signal": "GPIO11"
+            },
+            {
+              "connector": "J_TOUCH2",
+              "control": "TTP223 capacitive touch",
+              "signal": "GPIO14"
+            },
+            {
+              "connector": "J_PWR_BTN",
+              "connector_type": "2-pin JST-GH",
+              "control": "panel-mounted power button",
+              "signal": "PWRON tapped from J_PWR_SIG pin 4"
+            }
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Relocating the panel power-button connector does not change DCDC1 voltage regulation or compensation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel power-button connector is independent of the battery-charge status interface.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector relocation does not change monitored rails, monitor placement, or measurement coverage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Tapping the AXP2101 PWRON signal does not alter the GPIO-controlled 5V boost enable behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision does not change battery electrical protection behavior or components.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_THERMAL_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision does not affect the battery NTC interface or thermal protection.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Adding an external PWRON button connection leaves the established battery and system power path unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel power-button connector is unrelated to the battery connector family, pin count, and pinout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source calls the existing connector J_PWR_SIG while the candidate state calls it J_PWR_SIGNAL; this may be shorthand or a reference rename, and the source does not resolve which interpretation is intended.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The PWRON button connector relocation does not change standalone USB power activation, regulation, or source selection.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The shared main-board location is incidental; the source does not change I2C pull-ups, series resistors, topology, or cable constraints.",
+      "new_event": null
+    }
+  ]
+}

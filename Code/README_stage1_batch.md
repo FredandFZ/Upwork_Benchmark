@@ -1,7 +1,9 @@
 # ReqMemBench Stage 1 batch annotation
 
 The default workflow uses `prompt/stage1_prompt_v2.md`, `gpt-5.6-sol`, and `high` reasoning.
-`EVENT_VERIFICATION` additionally uses `prompt/stage1_event_verification_addendum.md` for stricter source alignment and execution-event pruning.
+`EVENT_VERIFICATION` additionally uses `prompt/stage1_event_verification_addendum.md` for stricter source alignment, execution-event pruning, and attribute-level implementation-relevance checks on INTRODUCE/MODIFY Events. Project-management values such as delivery deadlines, schedules, budgets, staffing, and availability are deleted; executable temporal behavior such as timeout or expiration remains eligible.
+When rolling this verifier policy out to existing runs, `--force-stage event_verification` reuses upstream checkpoints even though the shared Prompt hash changed; the forced verifier receives the new common Prompt and addendum.
+A batch force-stage rollout skips projects already marked `EXCLUDED_NO_REQUIREMENTS`. Use an explicit `--project-id` or `--overwrite` only when intentionally reprocessing an excluded project.
 `CROSS_REQUIREMENT_IMPACT_AUDIT` uses `prompt/stage1_cross_requirement_impact_audit.md` to judge candidates across all Requirement families.
 Credentials are read only from `UPWORK_API_KEY` and `UPWORK_BUDGET_ID`.
 

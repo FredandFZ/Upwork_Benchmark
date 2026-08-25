@@ -783,6 +783,41 @@ def sync_annotation_texts(
     return cleaned, updated
 
 
+def align_whitespace_only_annotation_texts(
+    annotation: dict[str, Any], normalized: dict[str, Any]
+) -> tuple[dict[str, Any], int]:
+    """Repair source text only when it differs from the raw message by whitespace.
+
+    Stage 1 validation is intentionally strict.  PII cleaning can safely accept
+    whitespace-only drift because the annotation is synchronized from the
+    canonical message text later in this pipeline.  Any substantive mismatch is
+    left untouched so the normal Stage 1 validator still rejects it.
+    """
+    aligned = copy.deepcopy(annotation)
+    message_by_key = {
+        id_key(message["message_id"]): message for message in normalized.get("messages", [])
+    }
+    repaired = 0
+    for requirement in aligned.get("requirements", []):
+        for event in requirement.get("events", []):
+            source = event.get("source_message")
+            if not isinstance(source, dict):
+                continue
+            message = message_by_key.get(id_key(source.get("message_id")))
+            if message is None:
+                continue
+            source_text = source.get("text")
+            raw_text = message.get("text")
+            if not isinstance(source_text, str) or not isinstance(raw_text, str) or source_text == raw_text:
+                continue
+            source_normalized = " ".join(source_text.split())
+            raw_normalized = " ".join(raw_text.split())
+            if source_normalized == raw_normalized:
+                source["text"] = raw_text
+                repaired += 1
+    return aligned, repaired
+
+
 def _normalized_without_text(normalized: dict[str, Any]) -> dict[str, Any]:
     value = copy.deepcopy(normalized)
     for message in value.get("messages", []):
@@ -834,7 +869,16 @@ async def clean_project(
     original_normalized = read_json(project.normalized_path)
     original_annotation = read_json(project.annotation_path)
     messages = validate_normalized_messages(original_normalized, project.project_id)
+    original_annotation, whitespace_repairs = align_whitespace_only_annotation_texts(
+        original_annotation, original_normalized
+    )
     validate_stage1_annotation(original_annotation, original_normalized)
+    if whitespace_repairs:
+        print(
+            f"[{project.project_id}] aligned {whitespace_repairs} whitespace-only "
+            "annotation source text difference(s)",
+            flush=True,
+        )
     source_sha256 = source_signature(original_normalized)
     signature = run_signature(source_sha256, config)
 
@@ -940,6 +984,7 @@ async def clean_project(
             "sender_ids_replaced": pii_cleaner.registry.counts().get("SENDER_ID", 0),
             "short_messages_preserved_before_pii_replacement": short_preserved,
             "messages_paraphrased": len(rewrite_candidates),
+            "annotation_source_whitespace_repairs": whitespace_repairs,
             "annotation_events_synchronized": updated_events,
             "unique_placeholders": pii_cleaner.registry.counts(),
         },

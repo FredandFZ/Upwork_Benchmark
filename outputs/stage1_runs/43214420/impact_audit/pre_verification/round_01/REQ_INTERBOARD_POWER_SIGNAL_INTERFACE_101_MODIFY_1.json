@@ -1,0 +1,150 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+    "message_id": 101,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CONNECTOR_ACCESS",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "Replacing the singular interboard connector with separate power and signal connectors affects the mechanical layout, but the source does not establish whether the prior right-angle orientation applies to both new connectors or how they should be placed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_FORM_FACTOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector partition and pinout do not change the established enclosure orientation, mounting-hole rules, USB-C edge placement, or compactness goal.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "J_PWR_POWER is an interboard power connector, not the separate three-pin J_BAT battery connector; the battery connector specification remains unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Routing SDA0 and SCL0 through J_PWR_SIGNAL does not alter the existing cable-length, bus-speed, pull-up resistance, or pull-up-location requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard connector pinout does not change the selected SK6812 LED chain or its GPIO13 data connection.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the use of the main-board SK6812 chain on GPIO13 for charge-status display.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source necessarily establishes the interboard routes for the switchable 5V output, its return, and the 5V_EN control signal.",
+      "new_event": {
+        "source_message": {
+          "message_id": 101,
+          "speaker": "client",
+          "text": "J\\_PWR\\_POWER — JST-PH 2.0mm 4-pin:\nPin 1: 3V3\nPin 2: GND\nPin 3: 5V\nPin 4: GND (5V return)\n\nJ\\_PWR\\_SIGNAL — JST-GH 1.25mm 7-pin:\nPin 1: SDA0\nPin 2: SCL0\nPin 3: IRQ\nPin 4: PWRON\nPin 5: D+\nPin 6: D-\nPin 7: 5V\\_EN"
+        },
+        "supporting_message_ids": [
+          96,
+          100
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "five_volt_output_interboard_route": {
+            "connector_reference": "J_PWR_POWER",
+            "output_pin": "pin_3",
+            "output_signal": "5V",
+            "return_pin": "pin_4",
+            "return_signal": "GND (5V return)"
+          },
+          "enable_signal_interboard_route": {
+            "connector_reference": "J_PWR_SIGNAL",
+            "pin": "pin_7",
+            "signal": "5V_EN"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_THERMAL_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source specifies interboard connectors and does not change the J_BAT NTC terminal or AXP2101 thermal-protection behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_CONNECTOR_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Routing D+ and D- through an interboard signal connector does not change the selected external USB-C connector or its sourceability requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard connector decision does not alter the AXP2101 battery-protection controller or its overcharge and overdischarge thresholds.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source necessarily establishes that the native USB D+ and D- lines traverse J_PWR_SIGNAL on pins 5 and 6.",
+      "new_event": {
+        "source_message": {
+          "message_id": 101,
+          "speaker": "client",
+          "text": "J\\_PWR\\_POWER — JST-PH 2.0mm 4-pin:\nPin 1: 3V3\nPin 2: GND\nPin 3: 5V\nPin 4: GND (5V return)\n\nJ\\_PWR\\_SIGNAL — JST-GH 1.25mm 7-pin:\nPin 1: SDA0\nPin 2: SCL0\nPin 3: IRQ\nPin 4: PWRON\nPin 5: D+\nPin 6: D-\nPin 7: 5V\\_EN"
+        },
+        "supporting_message_ids": [
+          96,
+          100
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "usb_data_interboard_route": {
+            "connector_reference": "J_PWR_SIGNAL",
+            "d_plus_pin": "pin_5",
+            "d_minus_pin": "pin_6"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

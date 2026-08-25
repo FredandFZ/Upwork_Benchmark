@@ -1,0 +1,137 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+    "message_id": 281,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Moving the SK6812 LEDs to the switchable 5V rail necessarily removes them from DCDC1's documented 3.3V load coverage.",
+      "new_event": {
+        "source_message": {
+          "message_id": 281,
+          "speaker": "client",
+          "text": "Doesn&#39;t the 5V_EN pin solve this? We can cut the entire 5V rail via GPIO3 when LEDs are not needed, dropping standby current to zero."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "normal_operation_role": "Primary source for the ESP32-S3, INA219, downstream 3.3V sensors, I2C display, TTP223, and AM312 when the power board is connected"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_DAUGHTERBOARD",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client places the LEDs on the switchable 5V rail, replacing the daughterboard's previously recorded 3.3V supply.",
+      "new_event": {
+        "source_message": {
+          "message_id": 281,
+          "speaker": "client",
+          "text": "Doesn&#39;t the 5V_EN pin solve this? We can cut the entire 5V rail via GPIO3 when LEDs are not needed, dropping standby current to zero."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "supply_voltage": "5V"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already records the LEDs as 5V-rail loads and the GPIO3-controlled standby policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already changes the LED supply to 5V and records the 5V_EN standby-power control.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 5V LED-rail decision does not change USB data routing, enumeration, flashing, or connector sourceability.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Switching the LEDs through the downstream 5V rail does not change the AXP2101's role as the normal-operation system power source.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already records the operational function of the interboard 5V_EN signal.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED power-rail decision does not alter I2C pull-ups, conditioning, speed, cable constraints, or routing.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_GPIO_ASSIGNMENTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source uses the already established GPIO3 control and does not revise the general GPIO-assignment policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_MODULE_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 5V_EN control decision does not change the selected ESP32-S3 controller family.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_FANOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns LED standby power and does not change the sensor board's connector-fanout role.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOM_ASSEMBLY_READINESS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change BOM completion, component sourcing, population, or design-justification requirements.",
+      "new_event": null
+    }
+  ]
+}

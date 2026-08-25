@@ -1,0 +1,198 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_MINT_TIPPING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 169,
+        "speaker": "client",
+        "text": "Please add Tipping option on minting page"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "tipping_enabled": true,
+        "tipping_placement": "minting page",
+        "tipping_optional": true
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "TIPPING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 182,
+        "speaker": "freelancer",
+        "text": "I added to the minting page with preset amounts ($0, $1, $5, $10) and a custom tip option"
+      },
+      "supporting_message_ids": [
+        169,
+        181
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports adding preset $0, $1, $5, and $10 tip choices and a custom-tip option to the minting page."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 183,
+        "speaker": "client",
+        "text": "Thats great"
+      },
+      "supporting_message_ids": [
+        181,
+        182
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "preset_tip_amounts_usd": [
+          0,
+          1,
+          5,
+          10
+        ],
+        "custom_tip_allowed": true
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 615,
+        "speaker": "client",
+        "text": "I just (accidently) did 2 mints.\nThe first i referred to #5 with a $1 tip but the tip didn't work - 0x0eab3ba1e91f99ac6e86793487046e3632f735c6661abff6c8e33800abc6559e\n\nThe second, i did with no referral code, but still no ticket and commission are showing on the leaderboard for it - 0xfd5bd846b2543da486211a72fcecd178be8a3bee966b34823636648e897bf9ea"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A mint made with referral code #5 and a selected $1 tip completed without the tip working."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 633,
+        "speaker": "freelancer",
+        "text": "Why your tip “isn’t working.”\nTips in our app are a separate USDC transfer transaction from your wallet to founderWallet after mint. If you cancel that second tip transaction, the mint still succeeds (exactly what you observed), but the tip won’t be sent.\nAlso, right now the “auto” follow-up behavior is confusing: for no-referral mints, there can be a different “Step 2” tx (finalize random referral), which also can pop up."
+      },
+      "supporting_message_ids": [
+        622,
+        631
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the tip is implemented as a separate post-mint USDC transfer and is not sent if the buyer cancels that second transaction."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 649,
+        "speaker": "client",
+        "text": "okay, i just minted with 'no referral code' and a '$1 tip'.\n\nI had to execute 1 transaction to mint - 0xc92e17e9e7f26e6b4e03093ce35f6ed3d7fc135c8ee00bc77357eb082779f715\n\nAnd then another transaction immediately appeared for the tip - 0x887c21856bddc283cd444881931a1d14469cbbd49c2c2764e15855a9181af3b0\n\n(We will have to put a UI note so that buyers know the tip transaction will come immediately after the mint transaction.)\n\nAlso, Perhaps it was hidden behind the tip transaction, but i didn't see the 'mint successful' modal.\n\nAnd, on the leaderboard, there was no new commission and ticket counted."
+      },
+      "supporting_message_ids": [
+        633
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "tip_transaction_flow": "separate transaction immediately after the mint transaction",
+        "tip_transaction_ui_notice": "inform buyers that the tip requires an immediate second transaction after minting"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 664,
+        "speaker": "freelancer",
+        "text": "One more important note from your case\nYour “$1 tip” tx ended up as a self-transfer because the on-chain founderWallet is currently your wallet, so tipping yourself doesn’t move funds. I deployed a UI safeguard to disable tips in that case."
+      },
+      "supporting_message_ids": [
+        657,
+        658,
+        660
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports deploying a UI safeguard that disables tipping when the connected payer is also the configured founder wallet."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 666,
+        "speaker": "client",
+        "text": "yes, i received the $3"
+      },
+      "supporting_message_ids": [
+        665
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Client confirms receiving the $3 tip associated with the freelancer's mint, verifying successful tip delivery to the founder wallet."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 615,
+      "suggested_requirement_id": "REQ_REWARD_ACCOUNTING_ACCURACY",
+      "description": "The missing leaderboard commission and ticket from the second no-referral mint concern reward accounting rather than tipping."
+    },
+    {
+      "message_id": 622,
+      "suggested_requirement_id": "REQ_REWARD_ACCOUNTING_ACCURACY",
+      "description": "The unrecorded no-referral ticket and commission concern reward accounting; only the unclear follow-up transaction concerns tipping."
+    },
+    {
+      "message_id": 649,
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "The missing mint-success modal concerns mint feedback rather than tipping."
+    },
+    {
+      "message_id": 649,
+      "suggested_requirement_id": "REQ_REWARD_ACCOUNTING_ACCURACY",
+      "description": "The missing leaderboard commission and ticket concern reward accounting rather than tipping."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

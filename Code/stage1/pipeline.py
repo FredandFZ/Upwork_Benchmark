@@ -869,6 +869,13 @@ class Stage1Pipeline:
             if "consistency_audit" in force_stages:
                 comparable_existing.pop("max_audit_rounds", None)
                 comparable_signature.pop("max_audit_rounds", None)
+            if self.config.force_stages == {"event_verification"}:
+                # An explicitly verifier-only policy rollout may change the shared
+                # prompt text used by the verifier without invalidating upstream
+                # evidence/discovery/extraction checkpoints. The verifier itself is
+                # forced below, so it will consume the new common prompt.
+                comparable_existing.pop("prompt_sha256", None)
+                comparable_signature.pop("prompt_sha256", None)
             if not self._resume_signature_compatible(comparable_existing, comparable_signature):
                 raise ValueError(
                     "Checkpoint configuration/source changed. Use --no-resume for a clean semantic rerun, "

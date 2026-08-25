@@ -1,0 +1,135 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+    "message_id": 305,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already extends the random reward trigger from no referral code to no or invalid referral code; the recipient and reward components remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SITE_INFORMATIONAL_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source specifically changes referral-validation popup behavior and does not require corresponding FAQ content changes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Issuing a ticket for an invalid or absent referral code does not change the Small Block prize amount, funding, winner count, or draw condition.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_SELECTION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A prize-draw ticket allocated to a random existing NFT holder for a no/invalid referral must participate in winner selection, broadening eligibility beyond tickets earned through successful referrals.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "also, with the ' Valid referral number' popup:\n\\- Only already minted NFTs should be valid.\n\n\\- The message for a valid code should read: 'Valid referral code! $5 + $500 prize draw ticket to your selected referer.'\n\n\\- For an invalid/no code, a message should read: 'No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "selection_method": "Randomly select one eligible ticket holder from the applicable 100-sales block.",
+          "selection_eligibility": {
+            "small_block": "Tickets issued for the current 100-sales block, including successful-referral tickets and tickets randomly allocated to an existing NFT holder when no valid referral code is supplied."
+          }
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "PRIZE_SYSTEM",
+            "SMALL_BLOCK",
+            "CHAINLINK_VRF",
+            "NO_REFERRAL",
+            "INVALID_REFERRAL"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_COLLECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes ticket and commission allocation at mint time, not how a later prize winner receives or is notified about a prize.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REWARD_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing Small Block ticket counter can represent tickets from either referral path, and the source does not change metadata fields or the mint-number referral-code attribute.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_REVENUE_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The $15 allocation amounts and destinations remain unchanged; the source only determines which existing NFT holder receives the $5 commission and ticket when a valid referral is absent.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns primary-mint referral validation and reward routing and does not change secondary-sale royalties, enforcement, or pool funding.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source requests popup-specific validation and messaging; it does not direct a change to About-page copy, whose existing no-code statement remains valid.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MISSION_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not request Mission-page wording changes, and the existing statements about successful referrals and prize selection remain valid.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_HERO_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Referral-validation popup behavior does not alter the landing-page hero content or layout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_POOL_STATISTICS_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the draw interval or the live next-draw progress calculation.",
+      "new_event": null
+    }
+  ]
+}

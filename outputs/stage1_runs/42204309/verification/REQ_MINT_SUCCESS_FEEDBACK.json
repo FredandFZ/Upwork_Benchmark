@@ -1,0 +1,248 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 345,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        345
+      ],
+      "decision_note": "The client establishes the UI acceptance rule that mint-success feedback must appear only after an NFT is actually minted.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 345,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        345
+      ],
+      "decision_note": "First concrete failure: USDC approval triggered success feedback without an NFT mint.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 357,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357
+      ],
+      "decision_note": "Target-specific implementation claim that the USDC success modal now appears only after minting.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 358,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357,
+        358
+      ],
+      "decision_note": "Post-fix persistence: the same USDC approval-only false-success behavior remained after the claim.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 359,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        359
+      ],
+      "decision_note": "Distinct ETH path failure: a failed transaction incorrectly triggered mint-success feedback.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 360,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        360
+      ],
+      "decision_note": "Distinct UI trigger failure: referral-code editing displayed success feedback without a mint.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 361,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        358,
+        359,
+        360,
+        361
+      ],
+      "decision_note": "Target-specific implementation claim addressing receipt gating, stale state, referral-input triggers, and failed transactions.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 364,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        361,
+        364
+      ],
+      "decision_note": "Post-fix persistence: the USDC modal still reported success despite no mint or USDC expenditure.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 398,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        398
+      ],
+      "decision_note": "Distinct opposite failure mode: a completed USDC purchase produced mint-related effects but no success popup.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 598,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        598
+      ],
+      "decision_note": "New technical observation: the premature approval-stage modal also displayed the wrong token ID.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 609,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        598,
+        609
+      ],
+      "decision_note": "Target-specific implementation claim addressing both approval-stage gating and token-ID retrieval from the Mint event.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 610,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        609,
+        610
+      ],
+      "decision_note": "First concrete verification after the targeted fix: the client tested the immediately preceding modal-gating and token-ID changes.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 742,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "no_referral_success_message": "No referral code used. $5 commission + $500 prize draw ticket has gone to a My Underdog Journey: To Own Goal NFT holder at random.",
+          "no_referral_message_condition": "Use this message only for a no-referral mint after the random commission and ticket have been sent.",
+          "no_referral_book_title_formatting": "Display the book title in italics within the no-referral Mint Successful message."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "PRIMARY_MINT",
+            "NO_REFERRAL"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        738,
+        740,
+        742
+      ],
+      "decision_note": "The client defines no-referral-specific modal copy and explicitly requires the rendered book title to be italicized.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 746,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        742,
+        746
+      ],
+      "decision_note": "The client establishes separate referral-mint modal copy, changing the software's outcome-specific success messaging.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 750,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        738,
+        742,
+        746,
+        750
+      ],
+      "decision_note": "Target-specific implementation claim for separate referral/no-referral copy and finalization-gated no-referral success feedback.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

@@ -1,0 +1,229 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_TRANSAK_FIAT_MINT",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 72,
+        "speaker": "client",
+        "text": "For user authentication, let's go with a hybrid approach to keep it accessible for both crypto and non-crypto users (fiat on-ramp is key for virality):\n\\- Wallet auth (SIWE) for crypto paths—essential for mints/transfers.\n\\- Email-based auth for dashboard access (referrals, tickets, prizes)—ties to fiat users without wallets.\n\\- No auth for public APIs (e.g., leaderboards, pool values)—keeps it open and transparent.\n\nThis aligns with our lean MVP: non-crypto folks can mint via Stripe/email, crypto via wallet. Implement email as simple (e.g., magic links for low friction).\n\nFor email service, let's go with Brevo—I'll create the account and send credentials soon. If the paid Starter plan improves UX or deliverability, I'm fine with it (as long as it's worth the price).\n\nFor Stripe, I'll create a test account and share the details shortly—focus on fiat to USDC for now. Same as above: if a low-cost paid add-on boosts reliability/UX, let's discuss (free tier fine to start)."
+      },
+      "supporting_message_ids": [
+        71
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "fiat_on_ramp_provider": "Stripe",
+        "payment_conversion": "fiat_to_USDC",
+        "supported_buyer_type": "non_crypto_buyers"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "FIAT_PAYMENT",
+          "PRIMARY_MINT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 77,
+        "speaker": "client",
+        "text": "I just learned I cant use Stripe from Mauritius.. Could we go with Coinbase Commerce for fiat onramp instead?"
+      },
+      "supporting_message_ids": [
+        72
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "fiat_on_ramp_provider": "Coinbase Commerce"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 140,
+        "speaker": "freelancer",
+        "text": "I see one issue. Coinbase Commerce is NOT a true fiat/credit card payment processor - it's a cryptocurrency payment gateway. Users still need crypto to pay!\n\nLet me explain what's happening and provide real solutions:\nCoinbase Commerce requires users to:\n1\\. Have cryptocurrency (USDC, ETH, BTC, etc.)\n2\\. Send it from their wallet to complete payment\n3\\. It's NOT accepting credit cards directly\nThis means it's not suitable for true non-crypto users who don't have any cryptocurrency.\n\nReal Fiat On-Ramp Solutions\nFor TRUE credit card payments (Visa/Mastercard), you need different services:\n\nOption 1: Stripe + Crypto (Recommended)\nBest for: Direct card payments + automatic blockchain transactions\nPros:\n\\- Real credit card payments\n\\- Users never need crypto\n\\- Lower fees than crypto payments\n\\- Familiar checkout experience\n\nCons:\n\\- Requires Stripe account verification\n\\- 2.9% + $0.30 per transaction\n\nOption 2: Coinbase Pay (Different from Commerce)\nCoinbase Pay (not Commerce) supports:\n\\- Credit card payments\n\\- OAuth authentication\n\\- Fiat → crypto conversion\n\nPros:\n\\- Uses the Coinbase brand trust\n\\- Integrated fiat → crypto\n\nCons:\n\\- Requires a Coinbase account\n\\- User needs to buy crypto first\n\nOption 3: Third-Party Fiat Gateways\nServices that do true fiat → crypto:\n\\- MoonPay - Credit card → crypto widget\n\\- Ramp Network - Fiat on-ramp widget\n\\- Wyre - Fiat gateway (being sunset)\n\\- Transak - Global fiat on-ramp\n\nPros:\n\\- Real credit card payments\n\\- Pre-built widgets\n\\- Global coverage\n\nCons:\n\\- Higher fees (3-5%)\n\\- KYC requirements\n\\- User still sees crypto conversion"
+      },
+      "supporting_message_ids": [
+        77
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "Coinbase Commerce cannot satisfy the client-confirmed requirement for true fiat or credit-card purchasing by non-crypto users, so a suitable provider remains unresolved."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 142,
+        "speaker": "client",
+        "text": "TBH, a fiat onramp is probably unnecessary for this Project Rebuild proof of concept, but since its already in the quote, i think Transak is our best option"
+      },
+      "supporting_message_ids": [
+        140,
+        141
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "fiat_on_ramp_provider": "Transak"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 142,
+        "speaker": "client",
+        "text": "TBH, a fiat onramp is probably unnecessary for this Project Rebuild proof of concept, but since its already in the quote, i think Transak is our best option"
+      },
+      "supporting_message_ids": [
+        140,
+        141
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 143,
+        "speaker": "client",
+        "text": "What is Project Rebuild?\nProject Rebuild is my public mission to rebuild my family’s life after losing everything to a seed-phrase mistake.\nI’m selling my novella memoir as an unlimited mint NFT ebook, on Base, using my first-of-its-kind FAMM (Fully Autonomous Marketing Model).\nReaders can earn instant and unlimited commissions &amp; prizes by sharing it. If the model proves itself, this becomes BooksOnChain — a community-owned platform for every indie creator.\n\nHow do buyers earn money?\n1\\. $5 instant commission every time someone mints with your referral code\n2\\. Small &amp; Big Block prize tickets every time someone mints with your code\n3\\. Future BooksOnChain governance token (to buyers, affiliates, and tippers)\n\nHow do referrals work?\nEvery NFT’s mint number IS its permanent referral code.\nExamples that both work perfectly:\n→ Share your full link\n→ Or just say “use referral 423”\nWhen someone mints using your code → you instantly get $5 + Small &amp; Big Block prize tickets for the current blocks.\n\nWhere do I find my referral code?\nIt’s your mint number. You’ll see it:\n\\- On-chain in your NFT metadata\n\\- On your Dashboard after minting\n\\- In your confirmation email (optional)\n\n\\### What are Small Block and Big Block prizes?\nSmall Block: 5 × $500 drawn every ~500 sales (mint + secondary)\nBig Block: 5 × $10,000 drawn every ~50,000 sales (mint + secondary)\nPools funded from every sale forever.\n\n\\### How are winners selected?\nChainlink VRF — fully on-chain, provably fair, verifiable on Basescan.\n\n\\### What are Small &amp; Big Block prize tickets?\nOne-time entries into the current Small Block and current Big Block draws.\nYou earn them only by getting people to mint with your code (1 Small + 1 Big per successful referral).\nOnce the block is drawn, those tickets expire and new referrals count toward the next blocks.\n\n\\### How do I claim my rewards?\n\\- $5 commissions → sent automatically to your wallet\n\\- Prize wins → announced on the Winners page and claimed with one click here on <http://projectrebuild.xyz|projectrebuild.xyz>\n\n\\### What are badges?\nOn-chain badges added to your NFT for hitting referral milestones (2, 10, 50, 100+).\nCurrently cosmetic + leaderboard flex. In the future they may unlock token-gated chats, discounts, airdrops, DAO weight, etc.\n\n\\### Can I mint with fiat (credit card)?\nYes — Transak supports cards, Apple Pay, Google Pay. No crypto or wallet required.\n\n\\### Do I need a wallet to participate?\nOnly if you want affiliate commissions paid out or to trade the NFT later.\n\n\\### What blockchain is this on?\nBase (Ethereum L2) — fast, cheap, Coinbase-backed.\n\n\\### Are there any hidden fees?\nNo. Mint = exactly $15. Secondary sales carry a visible $10 flat royalty.\n\n\\### What happens if I sell my NFT?\nThe buyer gets the book, your original mint number (now their referral code), and any badges you earned. Expired prize tickets stay expired.\n\n\\### How do I share my referral link/code?\nDashboard → copy full link or just copy your mint number and tell people “use referral 423”.\n\n\\### Is this a scam or pyramid scheme?\nNo. Single-level only. Unlimited supply. Full source verified on Basescan. I earn exactly $4 on every sale forever — same cut on mints and every secondary sale.\n\n\\### How do I contact support?\nNo Discord yet (will launch once we have real traction).\nFor now:\nDM @ProjectRebuild on X\nor\nemail will@projectrebuild.xyz\nI answer personally and fast.\n\nStill have questions? DM @ProjectRebuild on X or email will@projectrebuild.xyz — happy to help.\n\nLoad these and you are done.\nSite is now surgically clean and impossible to misunderstand. Launch whenever you’re ready — I’m here the second it goes live."
+      },
+      "supporting_message_ids": [
+        142
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "supported_payment_methods": [
+          "CREDIT_CARD",
+          "APPLE_PAY",
+          "GOOGLE_PAY"
+        ],
+        "crypto_or_wallet_required_for_fiat_mint": false
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 184,
+        "speaker": "client",
+        "text": "As for viewing the ebook itself, how about we do:\nRead-only default (big button on email certificate (\"Read 'My Underdog Journey: To Own Goal' Now\") + optional download (small link \"Download PDF for Offline Reading\")\nAdd PDF.js viewer to dashboard/email link.\n\ncool?\n\nAlso need to add that FAQ,\n\nNew section to explain how non-crypto fiat buyers collect commissions and prizes. This is key for normies — they get a non-custodial wallet spun up behind the scenes (no seed phrase), but might not know how to access rewards.\nsomething like this,\n\n\"How Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\":\n\nIf you're buying with fiat (credit card, Apple Pay, etc.) and new to crypto, don't worry — the process is designed to be simple. When you mint the book for $15 via Transak, a non-custodial wallet is automatically created for you behind the scenes (no seed phrase needed). This wallet holds your NFT and receives any commissions or prizes.\n\nHere's how it works step by step:\nDuring the Purchase:\nTransak handles the fiat-to-crypto conversion and mints the NFT directly to a new wallet address for you.\nYou don't need to set up anything manually — it's seamless and non-custodial (you own the keys, but no complicated seed phrase to manage right away).\nYou'll get an email confirmation with your mint number (your referral code), NFT details, and a link to your dashboard on <http://projectrebuild.xyz|projectrebuild.xyz>.\n\nEarning Commissions ($5 per Referral):\nShare your referral code (e.g., \"use 8421\"). When someone mints with it, $5 is automatically sent to your wallet address.\nTo collect: Log into your dashboard on <http://projectrebuild.xyz|projectrebuild.xyz> (using the email link or SIWE with the wallet Transak created). Your commissions appear there instantly — no action needed. If needed, we'll guide you on exporting to a bank account or exchange (e.g., via Coinbase).\n\nEarning and Winning Prizes (Tickets for $500/$10,000 Draws):\nEach referral gives you tickets for the current prize draws. These are tied to your NFT/wallet automatically.\nDraws happen on-chain (every ~100 sales for $500, ~10,000 for $10,000) via fair randomness.\nWinners are announced on the Winners page and emailed to you.\n\nTo collect a prize: If you win, the amount ($500 or $10,000) is sent straight to your wallet.\nCheck your dashboard/email for notifications"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "purchase_fulfillment": "Transak handles fiat-to-crypto conversion and mints the NFT directly to the buyer"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 188,
+        "speaker": "client",
+        "text": "I am in the process of registering the business now (1 - 2 day wait), so Transak stuff will have to wait until then"
+      },
+      "supporting_message_ids": [
+        179
+      ],
+      "event_type": "DEFER",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 220,
+        "speaker": "client",
+        "text": "Company incorporation is finally complete, so we can now push ahead on Transakt are are free to start selling.\nThoughts on launching as crypto only and implementing Transakt in the coming weeks?"
+      },
+      "supporting_message_ids": [
+        188,
+        217
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 225,
+        "speaker": "client",
+        "text": "Transak on day 1 isn't overly important, as we will be targeting crypto users initially.\nSo I don't think we should let it slow down the launch, as long as we are still able to implement it soon.\n\n(Im trying to get Transak done now, but need to wait for the Mauritius incorporation website to be updated, and then will need to wait some days for Transak to tick it off)"
+      },
+      "supporting_message_ids": [
+        220,
+        223
+      ],
+      "event_type": "DEFER",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 323,
+        "speaker": "freelancer",
+        "text": "Payment methods for minting\n\nCurrent payment options:\n\n1\\. Mint with Wallet (USDC only)\n\\- Button: \"Mint with Wallet ($15.00)\"\n\\- Payment: USDC from the connected wallet\n\nProcess:\n\\=&gt; Connect wallet\n\\=&gt; Ensure USDC balance ≥ $15\n\\=&gt; Approve USDC spending\n\\=&gt; Mint NFT\n\n2\\. Pay with Card (via Transak)\n\\- Button: \"Pay with Card ($15.00)\"\n\\- Payment: Credit/debit card → Transak buys USDC → mints NFT\n\nProcess:\n\\=&gt; Enter email (if no wallet)\n\\=&gt; Click \"Pay with Card\"\n\\=&gt; Transak widget opens\n\\=&gt; Buy USDC with card\n\\=&gt;NFT is minted automatically"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports a current Pay with Card option in which the Transak widget buys USDC by credit or debit card and automatically mints the NFT."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 184,
+      "suggested_requirement_id": "REQ_FIAT_BUYER_WALLET_ACCESS",
+      "description": "The automatic non-custodial wallet creation and later dashboard or reward access described in this message belong to the separate fiat-buyer wallet Requirement."
+    },
+    {
+      "message_id": 424,
+      "suggested_requirement_id": "REQ_MINT_PAYMENT_METHOD_SELECTION",
+      "description": "The observed defect is that the unavailable Card option remains selectable while ETH is unavailable, which directly concerns payment-option presentation and enablement rather than executed Transak checkout."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

@@ -1,0 +1,125 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+    "message_id": 352,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-352 MODIFY already replaces INA219 with INA3221 in the standalone USB-powered rail description.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Replacing the 3.3V-rail current monitor does not change the 5V boost converter, its enable control, or its powered loads.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-352 MODIFY already records INA3221 as the current-monitor device, while both monitored rails remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The INA3221 selection does not alter the AXP2101 battery input or its role as the normal-operation power source.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The current interboard power-path description still names INA219 as the series monitor and must reflect its replacement by INA3221.",
+      "new_event": {
+        "source_message": {
+          "message_id": 352,
+          "speaker": "client",
+          "text": "yeah"
+        },
+        "supporting_message_ids": [
+          350,
+          351
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "sensor_board_three_volt_three_power_path": "The 3.3V rail forwarded through J_SENSOR_PWR is downstream of the Schottky diodes and INA3221."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The current LED requirement already uses the separate 5V supply path and is unaffected by replacing the 3.3V-rail current monitor.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The current-monitor substitution does not change the charge-status display or dedicated charge-LED interface.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The INA3221 selection does not change battery overcharge, overdischarge, short-circuit, or protection-component requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_THERMAL_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The current-monitor substitution does not affect the battery NTC connection or AXP2101 thermal-protection behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_DAUGHTERBOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source acceptance concerns the INA3221 current-monitor choice and does not establish a change to the LED daughterboard's part, count, form, or supply voltage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The INA3221 selection does not resolve or alter the battery connector family, pin functions, part number, or unresolved pin order.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Adding INA3221 as an I2C current monitor does not necessarily change the established bus speed, pull-ups, series resistors, topology, or interboard route.",
+      "new_event": null
+    }
+  ]
+}

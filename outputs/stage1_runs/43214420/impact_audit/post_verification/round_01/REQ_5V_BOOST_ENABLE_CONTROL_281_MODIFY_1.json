@@ -1,0 +1,144 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_5V_BOOST_ENABLE_CONTROL",
+    "message_id": 281,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_POWER_AND_LOGIC",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 281,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY captures the 5V supply and rail switching but omits the explicit zero-standby-current outcome.",
+      "new_event": {
+        "source_message": {
+          "message_id": 281,
+          "speaker": "client",
+          "text": "Doesn&#39;t the 5V_EN pin solve this? We can cut the entire 5V rail via GPIO3 when LEDs are not needed, dropping standby current to zero."
+        },
+        "supporting_message_ids": [
+          279
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "standby_power_control": "Switch off the entire 5V rail through 5V_EN controlled by GPIO3 when the LEDs are not needed, reducing standby current to zero",
+          "supply_voltage": "5V"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_DCDC1_RAIL_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The decision concerns the separately controlled 5V boost rail and does not alter DCDC1 regulation or its 3.3V loads.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_PATH",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Switching a downstream 5V rail does not change the AXP2101 battery input or its role as the normal system power source.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change how charge status is displayed or the dedicated charge-LED interface; it only defines power control for the addressable LEDs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_USB_STANDALONE_3V3_SUPPLY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate currently lists the SK6812 Mini-E LEDs as loads on the standalone 3.3V rail, while the source places the LEDs on the switchable 5V rail.",
+      "new_event": {
+        "source_message": {
+          "message_id": 281,
+          "speaker": "client",
+          "text": "Doesn&#39;t the 5V_EN pin solve this? We can cut the entire 5V rail via GPIO3 when LEDs are not needed, dropping standby current to zero."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_rail": "complete 3.3V rail including the ESP32-S3, INA219, I2C sensors, I2C display, TTP223, and AM312 PIR"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 5V rail control decision does not affect the battery connector type, pin functions, part number, or unresolved pin order.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change battery overcharge, overdischarge, short-circuit, or protection-component requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_THERMAL_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not affect the battery NTC terminal, connector, controller, or thermal-protection behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interface already carries 5V_EN, and the source does not change its connector, pin assignment, or pin-order policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_DAUGHTERBOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The source changes the shared addressable-LED power interface but does not change the daughterboard's LED count, selected part, addressability, or board form.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 5V LED-rail decision does not affect I2C pull-ups, series resistors, bus speed, or cable-length constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOARD_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Powering the LEDs from a switchable 5V rail does not change the number or identity of the project's separate boards.",
+      "new_event": null
+    }
+  ]
+}

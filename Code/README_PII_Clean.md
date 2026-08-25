@@ -74,6 +74,8 @@ outputs/stage1_pii_clean_annotations/<project_id>_stage1_annotation.json
 
 写入前会校验 Stage 1 schema，并确保每个标注事件仍按相同的 `message_id` 和 `speaker` 指向同步后的文本；其他标注字段不变。
 
+若输入标注的 `source_message.text` 与对应原始消息仅存在空格、换行或其他空白字符差异，脚本会先对齐为原始消息文本再继续；若存在任何实质内容差异，仍会立即报错。
+
 ## 模型与改写约束
 
 默认使用现有 Stage 1 配置中的 `gpt-5.6-sol` 与 `reasoning_effort=high`。每一批返回都必须：

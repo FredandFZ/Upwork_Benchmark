@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_INTERFACE",
+    "message_id": 543,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_LEGACY_MAIN_BOARD_LAYER_STACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Retaining individual JST connectors does not change the candidate's four-layer requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LEGACY_MAIN_BOARD_FORM_FACTOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The same message separately establishes the 70×50 mm outline, which is already represented; the connector-consolidation decision does not further change the form-factor state.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_ANTENNA_CLEARANCE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector-consolidation policy does not change the accepted ESP32 edge placement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LEGACY_BOARD_CONNECTOR_ALIGNMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Keeping individual connectors is compatible with the existing alignment and cable-routing rules but does not change their positions or access constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CONNECTOR_ACCESS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision concerns consolidation into a fan-out connector for enclosure wiring and does not change the power board's battery, interboard, or mounting-clearance rules.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOARD_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Retaining individual connectors does not change the number or functional separation of the project boards.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_FORM_FACTOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision does not change the power board's dimensions, orientation, mounting holes, or enclosure-fit constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PCB_LAYER_STACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector policy does not alter the power board's four-layer stack.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Keeping separate sensor cables does not establish a new cable length, bus speed, pull-up value, or series-resistor rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_FANOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client explicitly requires each sensor to retain its own JST connector and cable rather than replacing the per-sensor fanout with one consolidated connector.",
+      "new_event": {
+        "source_message": {
+          "message_id": 543,
+          "speaker": "client",
+          "text": "Based on my rough math: on a 70×50 board (3500mm²), components take about 1300mm² (~37% coverage) — that's well within normal PCB density and should route cleanly on 4 layers.\n\nI'd prefer to keep the individual JST connectors rather than consolidate to a 2x15+10p. The modular approach is important for the enclosure, each sensor has its own clean cable, and the boards slide into rails. A single big connector with a fan-out ribbon cable would make the wiring inside the enclosure very messy and hard to service.\nSince you already have all the components placed in KiCad, could you just resize the board outline to 70×50 and do a rough rearrangement? I'm not skilled in KiCad, it would take me hours to do what would take you minutes since you already have the full project open. I'd really appreciate if you could try the resize on your end.\n\nNoted about the ESP32 on the edge, that's fine."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "connector_consolidation_policy": "Retain the individual JST connectors and separate sensor cables; do not consolidate them into a 2x15+10p connector with a fan-out ribbon cable."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The decision does not change USB data signals, their existing interboard route, or standalone programming behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_CONTROL_CONNECTORS",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The rejected proposal referred broadly to all 1.25 mm connectors, but the client's rationale specifically discusses separate sensor cables; it is unclear whether the non-consolidation policy also necessarily applies to panel-control connectors.",
+      "new_event": null
+    }
+  ]
+}

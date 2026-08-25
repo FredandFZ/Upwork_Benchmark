@@ -1,0 +1,198 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_PRIZE_WINNER_SELECTION",
+    "message_id": 305,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing Event records ticket issuance for no/invalid referrals but leaves the entry unit, weighting language, and eligibility window restricted to successful-referral affiliates.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "also, with the ' Valid referral number' popup:\n\\- Only already minted NFTs should be valid.\n\n\\- The message for a valid code should read: 'Valid referral code! $5 + $500 prize draw ticket to your selected referer.'\n\n\\- For an invalid/no code, a message should read: 'No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "prize_entry_unit": "Small Block tickets issued to successful referrers or randomly allocated to an existing NFT holder for no-referral or invalid-referral mints",
+          "ticket_weighting_rule": "More tickets give an eligible ticket holder more chances to win",
+          "small_block_eligibility_window": "Tickets issued for the current 100-sales block, including successful-referral tickets and tickets randomly allocated to an existing NFT holder when no valid referral code is supplied",
+          "no_or_invalid_referral_mints_generate_ticket": true
+        },
+        "value_removals": [
+          "no_referral_mints_generate_ticket"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "PRIZE_SYSTEM",
+            "SMALL_BLOCK",
+            "REFERRAL_MINT",
+            "NO_REFERRAL",
+            "INVALID_REFERRAL"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The same-message Event adds invalid-referral allocation to the About copy but still describes the draw as limited to affiliates and omits randomly allocated tickets from its ticket explanation.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "also, with the ' Valid referral number' popup:\n\\- Only already minted NFTs should be valid.\n\n\\- The message for a valid code should read: 'Valid referral code! $5 + $500 prize draw ticket to your selected referer.'\n\n\\- For an invalid/no code, a message should read: 'No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "how_it_works_copy": {
+            "mint": "Purchase the ebook NFT for $15 USD; the mint number is the referral code.",
+            "referrals": "Sharing the mint number or link earns an instant $5 USD for each referred mint, with no limit or expiration; when no code or an invalid code is used, the commission and ticket go to a random existing NFT holder.",
+            "tickets": "Each successful referral gives the selected referrer one on-chain ticket for the current $500 draw, while a no-code or invalid-code mint allocates the ticket to a random existing NFT holder; more tickets provide more chances to win, and tickets expire after their draw.",
+            "prizes": "One eligible ticket holder from each 100-sales block wins $500 through a fair Chainlink VRF draw.",
+            "reward_collection": "Commissions and prizes are sent automatically to the user's wallet, with prize results and notifications available through the Winners page, dashboard, and email when available."
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SITE_INFORMATIONAL_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The FAQ still limits ticket issuance and winner wording to successful-referral affiliates, which is inconsistent with tickets allocated for no/invalid referrals.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "also, with the ' Valid referral number' popup:\n\\- Only already minted NFTs should be valid.\n\n\\- The message for a valid code should read: 'Valid referral code! $5 + $500 prize draw ticket to your selected referer.'\n\n\\- For an invalid/no code, a message should read: 'No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "referral_explanation": "Explain that a mint number is a valid referral code only after its NFT has already been minted; a valid code sends the $5 commission and one $500-draw ticket to the selected referrer, while no code or an invalid code sends them to a random existing NFT holder.",
+          "prize_explanation": "Explain the Small Block-only model as one $500 giveaway every 100 sales, with one eligible ticket holder selected from that 100-sale block through Chainlink VRF and more tickets providing more chances.",
+          "ticket_explanation": "Explain that a successful referral adds one on-chain ticket for the selected referrer, while a no-code or invalid-code mint allocates one ticket to a random existing NFT holder; tickets apply to the current $500 draw and expire after that draw."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Its existing message-305 MODIFY already expands the trigger to no-referral and invalid-referral mints, while the random existing-holder recipient and reward components remain valid unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Its existing message-305 MODIFY already records both popup messages and the no-referral and invalid-referral contexts; the established already-minted-NFT eligibility rule remains unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MISSION_PAGE_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The Mission page still says the winner must be an affiliate, but the source decision makes randomly allocated tickets held by existing NFT holders eligible for the draw.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "also, with the ' Valid referral number' popup:\n\\- Only already minted NFTs should be valid.\n\n\\- The message for a valid code should read: 'Valid referral code! $5 + $500 prize draw ticket to your selected referer.'\n\n\\- For an invalid/no code, a message should read: 'No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "prize_pools_copy": "One eligible ticket holder from each 100-sales block wins $500 through a fair Chainlink VRF draw; each successful referral gives the selected referrer one ticket, while a no-code or invalid-code mint allocates the ticket to a random existing NFT holder, and more tickets provide more chances to win."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_COLLECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing referral validity and ticket-recipient eligibility does not alter automatic prize transfer, its destination, or winner-notification channels.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision changes who receives and may hold tickets, not the prize amount, winner count, draw frequency, or pool funding rules.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Referral validation and no/invalid-referral ticket allocation do not change secondary-sale royalties, marketplace controls, or the rule that secondary sales create no referral tickets.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_REVENUE_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The $15 primary-mint allocation remains $5 each to the founder, commission recipient, and Small Block pool; only the recipient-selection path for the commission and ticket changes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REWARD_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing Small Block ticket counter can represent tickets from either referral path without changing the required metadata fields.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision concerns referral-validation popup text and reward allocation, not email delivery, email contents, or notification conditions.",
+      "new_event": null
+    }
+  ]
+}
