@@ -1,0 +1,141 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_MINT_RECORD_ACCURACY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, although I’ve found some bugs.\n\n**Last night, i attempted to mint a couple times while my wallet contained ETH but no USDC. The attempts appear to have failed, yet [URL_002] shows that i have minted twice.**\n\nI also didn’t enter a referral code. I’m unsure what should have happened to the commission and ticket for mint 1, since they’re meant to go to a holder of an already minted NFT. That’s a one-off edge case i hadn’t considered. However, mint 2 should have assigned the commission and ticket to mint 1. (Maybe that didn’t happen because the mint itself failed.)\n\nAlso, when i select the option to view the NFT from the dashboard, the book cover is oversized and gets cut off. I’m also not sure how to access the actual book, possibly because the mint didn’t really succeed.\n\nI’ll try minting with USDC now and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "authoritative_mint_recording_rule": "Only successful mint transactions are registered and counted as mints; failed attempts are excluded."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "MINT_RECORDING",
+          "TOTAL_SUPPLY"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, although I’ve found some bugs.\n\n**Last night, i attempted to mint a couple times while my wallet contained ETH but no USDC. The attempts appear to have failed, yet [URL_002] shows that i have minted twice.**\n\nI also didn’t enter a referral code. I’m unsure what should have happened to the commission and ticket for mint 1, since they’re meant to go to a holder of an already minted NFT. That’s a one-off edge case i hadn’t considered. However, mint 2 should have assigned the commission and ticket to mint 1. (Maybe that didn’t happen because the mint itself failed.)\n\nAlso, when i select the option to view the NFT from the dashboard, the book cover is oversized and gets cut off. I’m also not sure how to access the actual book, possibly because the mint didn’t really succeed.\n\nI’ll try minting with USDC now and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Two failed ETH mint attempts were nevertheless shown by the system as two completed mints."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 309,
+        "speaker": "freelancer",
+        "text": "I have applied several fixes. The primary problem was that unsuccessful mints caused by paying with ETH rather than USDC were still being recorded in the database. That has now been corrected, so only successful transactions will be registered by the system."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports correcting database registration so unsuccessful ETH mint attempts are no longer recorded and only successful transactions are registered."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 340,
+        "speaker": "client",
+        "text": "The site is functioning, and the false NFTs are no longer appearing on my dashboard. However:\n\nIt says we are already up to mint number 4, even though I have not received any payments, so I believe that is incorrect."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the recording fix, the system still reported mint number 4 even though the client had received no payments, indicating that the authoritative mint count remained incorrect."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 377,
+        "speaker": "client",
+        "text": "USDC Mint attempt sequence: Approval transaction executed → “Mint Successful” modal displayed → Mint transaction appeared → transaction executed → “Mint Successful” modal displayed. The NFT certificate is working, the mint was counted, and the pool contribution was made..... however, I can't locate the NFT in either my wallet or our dashboard.\nTransaction - 0x821207F44209Be7556fE30643a1EeD4BA6E6ce52"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A USDC mint transaction executed successfully, and the client observed that the mint was counted and its pool contribution was made."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "While approving the USDC spend (not during minting), the 'successful mint' popup showed up and stated mint number 2; in this case, I used referral code 2. See the screenshot with the wallet popup visible.\nI cancelled the buy, then checked and found that I had no NFT.\nAfter that, I minted using referral code 3. No USDC approval signing occurred; it went directly to minting and worked perfectly, and the popup appeared. The NFT is visible on the dashboard.\n\nDecrypting the book worked (I had to sign a transaction), but I cannot get past the cover page."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A purchase cancelled after USDC approval produced no NFT, while a subsequent completed mint created an NFT that appeared on the dashboard."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 312,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_INVENTORY_ACCURACY",
+      "description": "The continued display of two falsely owned NFTs is primarily dashboard-inventory presentation evidence rather than direct evidence of new authoritative mint records."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_INVENTORY_ACCURACY",
+      "description": "The disappearance of owned NFTs from the dashboard is an inventory-presentation failure; the other clauses concern ETH minting and public statistics."
+    },
+    {
+      "message_id": 441,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_INVENTORY_ACCURACY",
+      "description": "The discrepancy between three dashboard NFTs and total supply of two concerns dashboard inventory accuracy rather than proof that an unsuccessful transaction created an authoritative mint."
+    },
+    {
+      "message_id": 539,
+      "suggested_requirement_id": "REQ_CONTRACT_MIGRATION_STATE_POLICY",
+      "description": "The accepted reset of NFT numbering and exclusion of old-contract copies is a contract-migration state decision."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

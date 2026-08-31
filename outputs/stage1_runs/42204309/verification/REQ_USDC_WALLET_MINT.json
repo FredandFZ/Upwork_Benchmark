@@ -11,9 +11,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        294
+        294,
+        298
       ],
-      "decision_note": "The failure report establishes the implementation-relevant expectation that a USDC payment must complete an NFT mint.",
+      "decision_note": "The failure report and wallet clarification establish the software requirement for connected-wallet USDC payment to complete an NFT mint.",
       "confidence": "HIGH"
     },
     {
@@ -25,9 +26,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        294
+        294,
+        298
       ],
-      "decision_note": "First concrete failure of the USDC mint path.",
+      "decision_note": "First concrete failure of the connected-wallet USDC mint path.",
       "confidence": "HIGH"
     },
     {
@@ -41,7 +43,21 @@
       "evidence_message_ids": [
         310
       ],
-      "decision_note": "Target-specific implementation claim that the listed USDC mint fix is live and should succeed.",
+      "decision_note": "Target-specific implementation claim: the message explicitly lists successful USDC minting among the production fixes reported live.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 341,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        341
+      ],
+      "decision_note": "Adds the executable acceptance behavior that completed USDC approval must continue to the NFT mint; no prior attribute becomes obsolete.",
       "confidence": "HIGH"
     },
     {
@@ -55,7 +71,7 @@
       "evidence_message_ids": [
         341
       ],
-      "decision_note": "Post-claim persistence with a concrete failure mode: approval completes but the NFT mint cannot proceed.",
+      "decision_note": "Post-claim failure with a concrete mode: USDC approval completed but the flow stopped before minting.",
       "confidence": "HIGH"
     },
     {
@@ -69,7 +85,7 @@
       "evidence_message_ids": [
         357
       ],
-      "decision_note": "Target-specific claim that USDC approval now triggers automatic minting and completion-gated success feedback.",
+      "decision_note": "Target-specific implementation claim after failure: USDC approval is reported to trigger minting automatically.",
       "confidence": "HIGH"
     },
     {
@@ -81,9 +97,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        357,
         358
       ],
-      "decision_note": "Concrete post-claim failure showing approval-only success without execution of the NFT mint.",
+      "decision_note": "Concrete post-fix persistence: approval executed after the claim, but the NFT mint still did not execute.",
       "confidence": "HIGH"
     },
     {
@@ -95,9 +112,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        358,
         361
       ],
-      "decision_note": "Target-specific implementation claim addressing the observed approval-to-mint failure and receipt tracking.",
+      "decision_note": "New target-specific deployed-fix claim after the failed prior fix, explicitly addressing automatic minting after USDC approval.",
       "confidence": "HIGH"
     },
     {
@@ -109,23 +127,24 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        361,
         364
       ],
-      "decision_note": "Post-fix persistence: the flow reports success while spending no USDC and minting no NFT.",
+      "decision_note": "Post-fix persistence: the next USDC attempt spent no USDC and produced no NFT despite displaying success.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
-        "message_id": 401,
+        "message_id": 377,
         "event_type": "RUNTIME_VERIFICATION",
         "occurrence": 1
       },
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        401
+        377
       ],
-      "decision_note": "First concrete verification after the failures, supported by an identified minted token and buyer address.",
+      "decision_note": "First concrete verification after repeated fixes: USDC approval was followed by an executed mint transaction; the separate wallet/dashboard visibility problem does not negate this narrower flow result.",
       "confidence": "HIGH"
     },
     {
@@ -137,10 +156,10 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        494,
+        499,
         501
       ],
-      "decision_note": "Distinct contract environment: the freelancer reports executing a successful USDC NFT mint through the redeployed contract.",
+      "decision_note": "Distinct deployed-contract path: the freelancer reports executing a USDC NFT mint through the newly deployed contract.",
       "confidence": "HIGH"
     },
     {
@@ -152,11 +171,9 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        546,
-        555,
         569
       ],
-      "decision_note": "First concrete client verification after the later contract switch: the USDC mint completed and the NFT appeared on the dashboard.",
+      "decision_note": "Distinct existing-allowance path: the USDC flow proceeded directly to minting, completed successfully, and produced an NFT visible on the dashboard.",
       "confidence": "HIGH"
     }
   ],

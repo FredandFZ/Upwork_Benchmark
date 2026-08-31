@@ -225,17 +225,36 @@ Verification 发现的 missing Event candidate 不会直接加入结果，而是
 
 无法安全回放的转换会直接报一致性错误，不进行猜测或自动修补。输出为 `requirement_state_graph.json`。
 
-## Stage 2.2：Task 与 Gold State
+## Stage 2.2：LLM 选择目标时间与 Gold State
 
-Gold State 以 Client 消息为 Task 单位生成。包含 `INTRODUCE`、`MODIFY`、`DEFER`、`RESUME`、`REMOVE` 或 `AMBIGUOUS` Graph Edge 的 Client 消息可成为 Task；同一消息触发的所有 Requirement Event 必须归入同一个 Task。仅包含执行状态的消息默认不选为 Task。
+Stage 2.2 不再按 Event priority、时间段比例和随机种子抽样 Task，而是把目标时间选择与 Gold replay 分成两个边界清晰的过程：
 
-对每个 Task，从 State Graph 中确定性提取：
+```text
+规则生成 Candidate
+        |
+        v
+构建 Candidate 前的相关 Requirement State 与历史证据
+        |
+        v
+LLM 逐 Candidate 判断 Requirement Memory benchmark value
+        |
+        +--> 默认：coverage / deduplication --> 人工 ACCEPT / REJECT / ADD_BACK
+        |
+        +--> --auto-accept-ai：0-10 分数线以上全部直接接受
+        |
+        v
+selected_target_times.json
+        |
+        v
+State Graph 确定性回放 Pre/Post Gold
+```
 
-- `Pre-task Gold`：该消息发生前的完整项目 Requirement 状态快照；
-- `Post-task Gold`：该消息中的所有 Event 应用后的完整状态快照；
-- `affected_requirement_ids`：被当前 Task Event 直接影响的 Requirement；
-- `preserved_requirement_ids`：Pre-task 中存在但未被当前 Task 影响的 Requirement，其 State 引用在 Post-task 中保持不变。
+一个 Candidate 对应一条 Client message；同一消息触发的全部 Requirement Events 必须合并。主要候选包括 `MODIFY`、`REMOVE`、`DEFER`、`RESUME`、`AMBIGUOUS`，以及通过 `resolves_ambiguity_event_ids` 表达的 ambiguity resolution。当前 Stage 1 没有独立 `CLARIFY` / `RESOLVE` Event，Stage 2 只为 coverage 派生标签，不改写 Event schema。
 
-当前 Task 新引入的 Requirement 不出现在 Pre-task、出现在 Post-task；被移除的 Requirement 仍保留在快照中并体现其移除状态。同一消息若对同一 Requirement 产生多个有序 Event，Post-task 使用该消息最后一个 Event 的目标 State。
+LLM 每次只看到一个 Candidate Packet：当前 Task、triggered Events、受影响 Requirements 的 Pre-task States、此前 Event history 和对应原始 evidence messages。LLM 只判断历史依赖、Requirement 演化、重建风险、歧义决策价值、多 Requirement 价值和 history-sensitive error risk；它不重新标注 Requirement、不修改 State Graph，也不生成 Gold。
 
-生成结果必须通过状态链、Event 分组、前后快照完整性、affected/preserved 集合、INTRODUCE/REMOVE 行为及未来信息泄漏检查，最终写入 `gold_states.json`。
+`history_turn_count` 定义为 Candidate 前的有效消息数量，从 `normalized_project.messages` 的规范化顺序计算。它会一直保留到最终 target 和 Gold，但不参与 LLM 评分、coverage、去重或排序。
+
+默认模式中只有人工复核后的 target 才进入 Gold builder。显式使用 `--auto-accept-ai --score-threshold N` 时，程序按五个 `LOW/MEDIUM/HIGH` 维度确定性计算 0–10 分，并直接接受所有同时有效、history-sensitive、被 AI 推荐且达到分数线的时间点，不再要求 ACCEPT 文件。对每个 target，`Pre-task Gold` 是该消息发生前的完整项目 Requirement snapshot，`Post-task Gold` 是该消息中全部 Events 应用后的完整 snapshot；affected / preserved、INTRODUCE / REMOVE、same-message final State 和 future leakage 仍由确定性代码严格校验。
+
+新版 Pipeline 已在 `gold_state.py` 和 `stage2_generate_gold_state.py` 中实现。实现契约见 [`DESIGN_stage2_target_time_selection.md`](DESIGN_stage2_target_time_selection.md)，准备 Candidate、运行 LLM、人工复核、AI 自动接受与 finalize 命令见 [`README_stage2_gold_state.md`](README_stage2_gold_state.md)。

@@ -1,0 +1,158 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_NO_REFERRAL_TICKET",
+    "message_id": 595,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The FAQ already states that no-referral mints allocate a commission and Small Block ticket to a random existing NFT holder.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_TICKETS",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 595,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event captures one ticket per eligible primary mint but leaves ticket_recipient limited to referrers, omitting the confirmed random recipient path for no-referral mints.",
+      "new_event": {
+        "source_message": {
+          "message_id": 595,
+          "speaker": "client",
+          "text": "The number of commissions and tickets should equal the number of mints, excluding secondary market sales, but those issued at random do not appear to be registering."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "tickets_per_eligible_primary_mint": 1,
+          "ticket_recipient": "For referral-code primary mints, the referrer's NFT; for no-referral primary mints, a randomly selected existing NFT holder."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_TICKET_ACCOUNTING_VISIBILITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Its existing message-595 MODIFY already requires displayed totals to include one ticket per eligible primary mint, including randomly allocated no-referral tickets, while excluding secondary sales.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_VALIDATION_FEEDBACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source confirms allocation and accounting behavior but does not change the existing valid or no/invalid referral feedback text.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client establishes that every no-referral primary mint must generate one commission and that secondary-market sales do not generate such commissions; the first-mint recipient ambiguity remains separate.",
+      "new_event": {
+        "source_message": {
+          "message_id": 595,
+          "speaker": "client",
+          "text": "The number of commissions and tickets should equal the number of mints, excluding secondary market sales, but those issued at random do not appear to be registering."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "commissions_per_no_referral_primary_mint": 1,
+          "secondary_sales_generate_no_referral_commissions": false
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Confirmed randomly allocated no-referral tickets must participate in ticket-weighted eligibility, while the current state describes only referral-earned tickets.",
+      "new_event": {
+        "source_message": {
+          "message_id": 595,
+          "speaker": "client",
+          "text": "The number of commissions and tickets should equal the number of mints, excluding secondary market sales, but those issued at random do not appear to be registering."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "winner_eligibility": "Holders of eligible Small Block tickets in the applicable 100-sales block, including referral-earned tickets and randomly allocated no-referral tickets, with winning chances weighted by ticket count."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_VALIDITY_ENFORCEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Ticket and commission generation for no-referral mints does not alter which submitted referral codes are valid or the self-referral rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIMARY_MINT_REVENUE_SPLIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing revenue state already allocates a $5 commission per primary mint and excludes secondary sales from that primary-mint allocation; the source does not change the split.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The direct-referral commission remains one $5 payout triggered by use of a valid referral code; the source addresses missing random no-referral allocations instead.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SINGLE_LEVEL_REFERRALS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Per-mint commission and ticket accounting does not change the single-level referral depth.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY_VALIDATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the rule that an NFT's permanent referral code is its mint number.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_OFFERING_MODEL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Commission and ticket allocation does not change the NFT ebook asset type, unlimited supply, price, or edition identifier.",
+      "new_event": null
+    }
+  ]
+}

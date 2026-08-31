@@ -8,30 +8,31 @@
         "speaker": "client",
         "text": "For user authentication, we should use a hybrid model so the platform remains accessible to crypto and non-crypto users alike (the fiat on-ramp is crucial for virality):\n[ACCOUNT_001] Use wallet auth (SIWE) for crypto flows, since it is required for mints/transfers.\n[ACCOUNT_001] Use email-based auth to access the dashboard (referrals, tickets, prizes), connecting fiat users who do not have wallets.\n[ACCOUNT_001] Keep public APIs unauthenticated (e.g., leaderboards, pool values) so they stay open and transparent.\n\nThis fits our lean MVP: non-crypto users can mint through Stripe/email, while crypto users can do so through their wallet. Keep the email implementation simple, such as magic links for minimal friction.\n\nFor the email provider, we'll use Brevo—I’ll open the account and send the credentials soon. I’m okay with the paid Starter plan if it meaningfully improves UX or deliverability, provided it is worth the price.\n\nFor Stripe, I’ll set up a test account and share the details shortly—concentrate on fiat to USDC for now. As above, if an inexpensive paid add-on improves reliability/UX, we can discuss it; the free tier is fine initially."
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        69
+      ],
       "event_type": "INTRODUCE",
       "value_updates": {
-        "authentication_method": "email-based authentication using a simple flow such as magic links",
-        "access_target": "dashboard",
-        "supported_user_group": "fiat and non-wallet users",
-        "accessible_dashboard_areas": [
+        "dashboard_access_for": "fiat users who do not have wallets",
+        "dashboard_areas": [
           "referrals",
           "tickets",
           "prizes"
-        ]
+        ],
+        "email_authentication_method": "simple email authentication, such as magic links"
       },
       "value_removals": null,
       "scope_updates": {
         "persistence": "PROJECT_PERSISTENT",
         "components": [
           "AUTH",
+          "BACKEND",
           "EMAIL",
-          "FRONTEND",
-          "BACKEND"
+          "FRONTEND"
         ],
         "contexts": [
-          "EMAIL_AUTH",
-          "DASHBOARD_ACCESS"
+          "DASHBOARD_ACCESS",
+          "EMAIL_AUTH"
         ]
       },
       "ambiguity": null,
@@ -43,7 +44,9 @@
         "speaker": "client",
         "text": "I configured the email yesterday, and on my second purchase I received notifications for badges that I hadn't earned.\n\nI tried setting up my email again just now, but the confirmation email never came through, and it is now displaying this (See attached). Could it be because my email is already registered?"
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        444
+      ],
       "event_type": "RUNTIME_FAILURE",
       "value_updates": null,
       "value_removals": null,
@@ -51,7 +54,7 @@
       "ambiguity": null,
       "execution": {
         "status": "FAILED",
-        "observed_behavior": "After the client tried to set up the email again, the confirmation email did not arrive, potentially because the address was already registered."
+        "observed_behavior": "The client attempted to set up the dashboard email again, but the confirmation email did not arrive."
       }
     },
     {
@@ -71,7 +74,7 @@
       "ambiguity": null,
       "execution": {
         "status": "CLAIMED_WORKING",
-        "observed_behavior": "Freelancer states that email verification functions for email addresses that are already registered."
+        "observed_behavior": "The freelancer reports that email verification now functions for already-registered email addresses."
       }
     },
     {
@@ -80,7 +83,9 @@
         "speaker": "client",
         "text": "My dashboard continues to show that I have 3 NFTs, but:\n\nBadges: the first referral badge is checked.\nRead: I’m still seeing the same error message.\nDashboard earnings: $5\nEarnings after I click on NFT: $0\nTickets: 0\nReferral earnings: $5,000,000\nemail: shows as verified"
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        448
+      ],
       "event_type": "RUNTIME_VERIFICATION",
       "value_updates": null,
       "value_removals": null,
@@ -88,25 +93,25 @@
       "ambiguity": null,
       "execution": {
         "status": "VERIFIED_WORKING",
-        "observed_behavior": "Client reports that the registered email is shown as verified."
+        "observed_behavior": "After the email-verification fix claim, the client confirms that the dashboard shows the email as verified."
       }
     }
   ],
   "routing_warnings": [
     {
-      "message_id": 445,
+      "message_id": 86,
       "suggested_requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
-      "description": "The incorrect badge-notification emails in this message concern transactional notification accuracy rather than dashboard authentication."
+      "description": "This reports failed Brevo test-email delivery rather than dashboard email-authentication behavior."
     },
     {
-      "message_id": 624,
-      "suggested_requirement_id": "REQ_NFT_CERTIFICATE_EMAIL",
-      "description": "The missing option to receive an NFT certificate belongs to certificate-email delivery; the statement that the email is verified adds no new authentication transition."
+      "message_id": 89,
+      "suggested_requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+      "description": "This repeats the Brevo test-email delivery failure and belongs to transactional email delivery."
     },
     {
-      "message_id": 703,
-      "suggested_requirement_id": "REQ_WALLET_AUTHENTICATION",
-      "description": "The successful login is discussed in a mobile-wallet and Lit Protocol context and does not establish successful email authentication."
+      "message_id": 102,
+      "suggested_requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+      "description": "This claims that the Brevo sender and IP configuration was corrected, not that dashboard email authentication was implemented."
     }
   ],
   "missing_requirement_candidates": []

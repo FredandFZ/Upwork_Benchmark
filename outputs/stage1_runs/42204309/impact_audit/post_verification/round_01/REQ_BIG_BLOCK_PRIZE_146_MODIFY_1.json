@@ -8,75 +8,23 @@
   },
   "decisions": [
     {
-      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The winner-selection method does not change how announced prize winners claim their rewards.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "Chainlink VRF winner selection does not alter the source, permanence, or display locations of referral codes.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_PRIMARY_SALE_REVENUE_SPLIT",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The winner-selection method does not change primary-sale revenue allocations or prize-pool recipients.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_PROJECT_BRANDING",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The prize winner-selection method does not alter the current or conditional future project names.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_NO_CODE_COMMISSION_ALLOCATION",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "Randomly selecting an NFT holder for a no-code commission is a separate mechanism from selecting prize winners through Chainlink VRF.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_FAQ_CONTENT",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The candidate already has a same-message replacement of the complete FAQ, which includes the supplied Chainlink VRF winner-selection copy.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_FIAT_BUYER_REWARD_ACCESS",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The winner-selection method does not alter fiat users' authentication, dashboard access, or wallet requirements.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_NFT_TRANSFER_STATE",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "Chainlink VRF winner selection does not change which NFT-associated assets or ticket states transfer to a purchaser.",
-      "new_event": null
-    },
-    {
       "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
-      "decision": "ADD_EVENT",
+      "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The FAQ's shared winner-selection answer necessarily applies to both the Small Block and Big Block prize drawings, and the Small Block state has no matching message-146 Event.",
+      "reason": "No additional propagation is needed; the existing message-146 MODIFY already captures eligibility of secondary buyers holding transferred active Small Block tickets.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BIG_BLOCK_TICKETS",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 146,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "Big Block eligibility for secondary buyers necessarily entails that active Big Block tickets transfer with the NFT; the existing same-message MODIFY captures only the wallet requirement.",
       "new_event": {
         "source_message": {
           "message_id": 146,
@@ -86,7 +34,8 @@
         "supporting_message_ids": [],
         "event_type": "MODIFY",
         "value_updates": {
-          "winner_selection_method": "Chainlink VRF handles selection fully on-chain, making it provably fair and verifiable on Basescan."
+          "wallet_required_for_prize_ticket_holding": true,
+          "active_prize_tickets_transfer_to_secondary_buyer": true
         },
         "value_removals": null,
         "scope_updates": null,
@@ -95,19 +44,105 @@
       }
     },
     {
-      "candidate_requirement_id": "REQ_BADGE_AWARD_RULES",
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_TICKETS",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client states that a secondary buyer receives any active prize tickets with the NFT, necessarily adding transfer behavior to the Small Block ticket lifecycle.",
+      "new_event": {
+        "source_message": {
+          "message_id": 146,
+          "speaker": "client",
+          "text": "Adjust anything that needs changing, but the FAQ section is as follows:\n\nWhat exactly is Project Rebuild?\nProject Rebuild serves as the live proof-of-concept for FAMM (Fully Autonomous Marketing Model) — the first system enabling indie creators to sell unlimited NFT ebooks while paying readers real commissions + prizes for spreading them.\nIt is launching on Base with my raw memoir novella, \"My Underdog Journey: To Own Goal,\".\nIt is also my public mission to rebuild my family's life after a seed-phrase wipeout cost us millions.\nIf FAMM proves itself, Project Rebuild will develop into BooksOnChain — a community-owned public good platform available to every creator.\n\nIn what ways can buyers make money?\n1. Receive an instant $5 commission whenever someone mints using your referral code\n2. Get Small &amp; Big Block prize tickets each time someone mints with your code\n3. ***If FAMM is shown to be successful, and there is zero guarantee of success or value***, a future BooksOnChain governance token allocation will go to buyers, affiliates, and tippers of \"My Underdog Journey: To Own Goal,\".\n\nHow does the referral process work?\nFor every NFT, its mint number IS the permanent referral code.\nBoth of these examples work perfectly:\n→ Send your complete link\n→ Or simply tell someone, “use referral 423”\nAs soon as someone mints with your code, you instantly receive $5 + Small &amp; Big Block prize tickets for the current blocks.\n→ When no referral code is entered during minting, the commission and tickets go to a random existing NFT holder.\n\nWhere can I locate my referral code?\nYour referral code is your mint number, and it appears:\n- Directly on your NFT\n- Inside the NFT metadata\n- On your Dashboard once you have minted\n- In the confirmation email (optional)\n\nHow do Small Block and Big Block prizes work?\nSmall Block: 5 × $500 prizes are drawn every ~500 sales (mint + secondary)\nBig Block: 5 × $10,000 prizes are drawn every ~50,000 sales (mint + secondary)\nEvery sale continues funding the pools forever.\n\nWhat method is used to choose winners?\nChainlink VRF handles selection fully on-chain, making it provably fair and verifiable on Basescan.\n\nWhat do Small &amp; Big Block prize tickets represent?\nThey are entries into the current Small &amp; Big Block prize drawings.\nYou earn tickets by having people mint with your code (1 Small + 1 Big per successful referral).\nThe more tickets you hold, the more opportunities you have to win.\nAfter a block is drawn, its tickets expire, and new referrals apply toward the next blocks.\n\nHow can I collect my rewards?\n- $5 commissions → transferred automatically to your wallet\n- Prize wins → posted on the Winners page and claimable with one click here on [URL_009]\n\nWhat purpose do badges serve?\nOn-chain badges are added to your NFT when you reach referral milestones (2, 10, 50, 100+).\nFor now, they are cosmetic + leaderboard flex.\nIn the future, they may unlock any number of things, including token-gated chats, discounts, etc.\n\nCan I use fiat (credit card) to mint?\nYes — Transak accepts cards, Apple Pay, and Google Pay.\n\nIs a wallet required to participate?\nNo, you do not need one when minting with fiat.\nHowever, you do need a wallet if you want to receive commissions, hold prize tickets, or later sell/trade the NFT.\n\nWhich blockchain does this use?\nBase (Ethereum L2) — secure, inexpensive, and fast.\n\nAre any fees hidden?\nNo. A mint costs exactly $15. Secondary sales include a visible flat royalty of $10.\n\nWhat occurs when I sell my NFT?\nThe new buyer receives the book, the mint number (which becomes their referral code), all earned badges, and any active prize tickets; expired tickets remain expired.\n\nHow can I distribute my referral link/code?\nFrom the Dashboard, copy the complete link, or copy only your mint number and tell people “use referral 423”.\n\nIs this a scam or a pyramid scheme?\nNo. It operates on a single-level only. The full source is verified on Basescan. I receive $4 from every sale forever (minus any fiat fees), and my cut is the same for mints and secondary sales. Everything else funds commissions and prize pools.\n\nHow can I reach support?\nThere is no Discord yet (it will launch once we have real traction).\nFor the time being:\nDM [HANDLE_001] on X\nor\nemail [EMAIL_002]\n\nIf you still have questions, DM [HANDLE_001] on X or email [EMAIL_002] — I’m happy to assist."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "active_prize_tickets_transfer_to_secondary_buyer": true
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The prize winner-selection method does not change badge triggers, thresholds, or award destination.",
+      "reason": "No additional propagation is needed; the existing message-146 FAQ update already explains active-ticket transfer to secondary buyers and current-draw ticket participation.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_VRF",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate's eligible population still says affiliates in the prize block, but the source establishes that current active-ticket holders, including secondary buyers receiving transferred tickets, participate in winner selection.",
+      "new_event": {
+        "source_message": {
+          "message_id": 146,
+          "speaker": "client",
+          "text": "Adjust anything that needs changing, but the FAQ section is as follows:\n\nWhat exactly is Project Rebuild?\nProject Rebuild serves as the live proof-of-concept for FAMM (Fully Autonomous Marketing Model) — the first system enabling indie creators to sell unlimited NFT ebooks while paying readers real commissions + prizes for spreading them.\nIt is launching on Base with my raw memoir novella, \"My Underdog Journey: To Own Goal,\".\nIt is also my public mission to rebuild my family's life after a seed-phrase wipeout cost us millions.\nIf FAMM proves itself, Project Rebuild will develop into BooksOnChain — a community-owned public good platform available to every creator.\n\nIn what ways can buyers make money?\n1. Receive an instant $5 commission whenever someone mints using your referral code\n2. Get Small &amp; Big Block prize tickets each time someone mints with your code\n3. ***If FAMM is shown to be successful, and there is zero guarantee of success or value***, a future BooksOnChain governance token allocation will go to buyers, affiliates, and tippers of \"My Underdog Journey: To Own Goal,\".\n\nHow does the referral process work?\nFor every NFT, its mint number IS the permanent referral code.\nBoth of these examples work perfectly:\n→ Send your complete link\n→ Or simply tell someone, “use referral 423”\nAs soon as someone mints with your code, you instantly receive $5 + Small &amp; Big Block prize tickets for the current blocks.\n→ When no referral code is entered during minting, the commission and tickets go to a random existing NFT holder.\n\nWhere can I locate my referral code?\nYour referral code is your mint number, and it appears:\n- Directly on your NFT\n- Inside the NFT metadata\n- On your Dashboard once you have minted\n- In the confirmation email (optional)\n\nHow do Small Block and Big Block prizes work?\nSmall Block: 5 × $500 prizes are drawn every ~500 sales (mint + secondary)\nBig Block: 5 × $10,000 prizes are drawn every ~50,000 sales (mint + secondary)\nEvery sale continues funding the pools forever.\n\nWhat method is used to choose winners?\nChainlink VRF handles selection fully on-chain, making it provably fair and verifiable on Basescan.\n\nWhat do Small &amp; Big Block prize tickets represent?\nThey are entries into the current Small &amp; Big Block prize drawings.\nYou earn tickets by having people mint with your code (1 Small + 1 Big per successful referral).\nThe more tickets you hold, the more opportunities you have to win.\nAfter a block is drawn, its tickets expire, and new referrals apply toward the next blocks.\n\nHow can I collect my rewards?\n- $5 commissions → transferred automatically to your wallet\n- Prize wins → posted on the Winners page and claimable with one click here on [URL_009]\n\nWhat purpose do badges serve?\nOn-chain badges are added to your NFT when you reach referral milestones (2, 10, 50, 100+).\nFor now, they are cosmetic + leaderboard flex.\nIn the future, they may unlock any number of things, including token-gated chats, discounts, etc.\n\nCan I use fiat (credit card) to mint?\nYes — Transak accepts cards, Apple Pay, and Google Pay.\n\nIs a wallet required to participate?\nNo, you do not need one when minting with fiat.\nHowever, you do need a wallet if you want to receive commissions, hold prize tickets, or later sell/trade the NFT.\n\nWhich blockchain does this use?\nBase (Ethereum L2) — secure, inexpensive, and fast.\n\nAre any fees hidden?\nNo. A mint costs exactly $15. Secondary sales include a visible flat royalty of $10.\n\nWhat occurs when I sell my NFT?\nThe new buyer receives the book, the mint number (which becomes their referral code), all earned badges, and any active prize tickets; expired tickets remain expired.\n\nHow can I distribute my referral link/code?\nFrom the Dashboard, copy the complete link, or copy only your mint number and tell people “use referral 423”.\n\nIs this a scam or a pyramid scheme?\nNo. It operates on a single-level only. The full source is verified on Basescan. I receive $4 from every sale forever (minus any fiat fees), and my cut is the same for mints and secondary sales. Everything else funds commissions and prize pools.\n\nHow can I reach support?\nThere is no Discord yet (it will launch once we have real traction).\nFor the time being:\nDM [HANDLE_001] on X\nor\nemail [EMAIL_002]\n\nIf you still have questions, DM [HANDLE_001] on X or email [EMAIL_002] — I’m happy to assist."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "eligible_population": "current holders of active prize tickets for the applicable Small or Big Block draw, including secondary buyers who receive active tickets with the NFT"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIMARY_MINT_REVENUE_SPLIT",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Chainlink VRF selection of prize winners does not alter the amount, trigger, recipient, timing, or destination of coded-referral commissions.",
+      "reason": "Changing Big Block winner eligibility does not alter primary-mint pricing, founder allocation, commissions, or prize-pool funding.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_PAYOUT_CLAIM",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The identity of eligible ticket holders changes, but the Winners-page announcement and winner-initiated one-click claim flow remain valid unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Big Block winner eligibility and active-ticket transfer do not change the amount, trigger, recipient, timing, or payout mode of referral commissions.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SECONDARY_SALE_STATE_TRANSFER",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "No additional propagation is needed; the existing message-146 MODIFY already records that active prize tickets transfer to the secondary buyer.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Transferred active tickets remain attached to the NFT, so the existing Small and Big ticket-counter metadata requirements remain valid without a value change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FIAT_BUYER_WALLET_PROVISIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "No additional propagation is needed; the existing message-146 MODIFY already records the wallet requirement for holding prize tickets.",
       "new_event": null
     },
     {
@@ -115,7 +150,7 @@
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The method used to select prize winners does not change secondary-sale royalty amounts, allocations, pool funding, or ticket generation.",
+      "reason": "The change to Big Block winner eligibility does not alter the flat royalty, its visibility, enforcement, founder allocation, or continuing prize-pool funding.",
       "new_event": null
     }
   ]

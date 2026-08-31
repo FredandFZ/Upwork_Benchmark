@@ -1,0 +1,182 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 146,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        146
+      ],
+      "decision_note": "The client establishes the $5 commission behavior that routes no-referral primary-mint commissions to a random existing NFT holder.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 288,
+        "event_type": "AMBIGUOUS",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        288
+      ],
+      "decision_note": "The client identifies a material unresolved recipient edge case for mint #1, when no existing NFT holder is available.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        305
+      ],
+      "decision_note": "The client expands the executable payout condition so an invalid referral code uses the same random-holder commission allocation as no code.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 308,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        307,
+        308
+      ],
+      "decision_note": "First target-specific implementation claim describing founder routing for mint #1 and random existing-holder routing for later no-referral mints.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 581,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        579,
+        581
+      ],
+      "decision_note": "First concrete runtime failure showing that a completed no-referral mint did not award its commission to a random holder.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 583,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        583
+      ],
+      "decision_note": "The client explicitly rejects founder-default payout routing and requires no-referral commissions to be distributed randomly among existing holders.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 587,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        587
+      ],
+      "decision_note": "Target-specific post-failure implementation claim that no-referral mints now generate a randomly allocated commission.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 595,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        595
+      ],
+      "decision_note": "The source concerns registration of random commissions in aggregate accounting, which belongs to Commission Accounting Accuracy rather than recipient allocation.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        672
+      ],
+      "decision_note": "The client establishes the executable rule that each completed no-referral primary mint issues one $5 commission.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 684,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "allocation_condition": "A primary mint after mint #1 is completed with no referral code or an invalid referral code.",
+          "commission_issuance_rate": "One randomly allocated $5 commission per completed no-referral primary mint after mint #1.",
+          "first_mint_random_commission_allocation_required": false
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        682,
+        684
+      ],
+      "decision_note": "The accepted first-mint exception changes payout eligibility; the edit narrows the prior all-mints allocation condition so it does not conflict with that exception.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 688,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        687,
+        688
+      ],
+      "decision_note": "The client unambiguously accepts the implementation rule that processRandomReferral credits the randomly selected token with the $5 commission.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "message_id": 595,
+      "suggested_requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "description": "The requirement that randomly issued commissions register in commission totals is misrouted and should be checked against the Commission Accounting Accuracy lifecycle."
+    }
+  ]
+}

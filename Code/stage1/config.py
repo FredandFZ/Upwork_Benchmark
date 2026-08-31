@@ -13,6 +13,7 @@ RUN_MODES = (
     "CONSISTENCY_AUDIT",
     "CROSS_REQUIREMENT_IMPACT_AUDIT",
     "EVENT_VERIFICATION",
+    "AMBIGUITY_LINKING",
 )
 FORCE_STAGES = {
     "evidence_scan",
@@ -21,6 +22,7 @@ FORCE_STAGES = {
     "consistency_audit",
     "cross_requirement_impact_audit",
     "event_verification",
+    "ambiguity_linking",
     "assembly",
 }
 
@@ -42,9 +44,11 @@ class PipelineConfig:
     verification_addendum_path: Path | None = None
     impact_audit_addendum_path: Path | None = None
     value_removal_addendum_path: Path | None = None
+    ambiguity_linking_prompt_path: Path | None = None
     upgrade_existing_annotation_path: Path | None = None
     model: str = ANNOTATION_MODEL
     reasoning_effort: str = REASONING_EFFORT
+    consistency_reasoning_effort: str | None = None
     annotation_mode: str = "multipass"
     resume: bool = True
     force_stages: set[str] = field(default_factory=set)
@@ -64,6 +68,16 @@ class PipelineConfig:
             raise ValueError("annotation_mode must be 'multipass' or 'single-pass'")
         if self.reasoning_effort not in {"low", "medium", "high", "xhigh", "max"}:
             raise ValueError("reasoning_effort must be low, medium, high, xhigh, or max")
+        if self.consistency_reasoning_effort is not None and self.consistency_reasoning_effort not in {
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+        }:
+            raise ValueError(
+                "consistency_reasoning_effort must be low, medium, high, xhigh, max, or null"
+            )
         unknown = self.force_stages.difference(FORCE_STAGES)
         if unknown:
             raise ValueError(f"Unknown force stage(s): {', '.join(sorted(unknown))}")
@@ -95,6 +109,7 @@ class PipelineConfig:
             "consistency_audit",
             "cross_requirement_impact_audit",
             "event_verification",
+            "ambiguity_linking",
             "assembly",
         ]
         if not self.force_stages:

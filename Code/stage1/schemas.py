@@ -238,3 +238,41 @@ def validate_event_verification(data: dict[str, Any], requirement_id: str, event
     if len(received) != len(set(received)) or set(received) != expected:
         raise PassSchemaError("Verifier must return exactly one verdict for every provisional Event")
     _list(data.get("missing_event_candidates"), "missing_event_candidates")
+
+
+def validate_ambiguity_linking(data: dict[str, Any], requirement_id: str) -> None:
+    """Validate response shape; semantic link safety is checked during apply."""
+    _run_mode(data, "AMBIGUITY_LINKING")
+    if data.get("requirement_id") != requirement_id:
+        raise PassSchemaError("AMBIGUITY_LINKING returned the wrong requirement_id")
+    for index, decision_value in enumerate(_list(data.get("decisions"), "decisions")):
+        decision = _dict(decision_value, f"decisions[{index}]")
+        ambiguity_event_id = decision.get("ambiguity_event_id")
+        if not isinstance(ambiguity_event_id, str) or not ambiguity_event_id:
+            raise PassSchemaError("ambiguity_event_id must be a non-empty string")
+        affected_paths = _list(decision.get("affected_state_paths"), "affected_state_paths")
+        if not affected_paths or any(not isinstance(path, str) or not path for path in affected_paths):
+            raise PassSchemaError("affected_state_paths must be a non-empty string array")
+        status = decision.get("resolution_status")
+        if status not in {"RESOLVED", "UNRESOLVED"}:
+            raise PassSchemaError("resolution_status must be RESOLVED or UNRESOLVED")
+        resolver_event_id = decision.get("resolver_event_id")
+        if status == "RESOLVED":
+            if not isinstance(resolver_event_id, str) or not resolver_event_id:
+                raise PassSchemaError("RESOLVED decision requires resolver_event_id")
+        elif resolver_event_id is not None:
+            raise PassSchemaError("UNRESOLVED decision resolver_event_id must be null")
+        intermediate_ids = _list(
+            decision.get("non_resolving_intermediate_event_ids"),
+            "non_resolving_intermediate_event_ids",
+        )
+        if any(not isinstance(event_id, str) or not event_id for event_id in intermediate_ids):
+            raise PassSchemaError(
+                "non_resolving_intermediate_event_ids must contain non-empty strings"
+            )
+        if len(intermediate_ids) != len(set(intermediate_ids)):
+            raise PassSchemaError("non_resolving_intermediate_event_ids must not contain duplicates")
+        if not isinstance(decision.get("decision_note"), str) or not decision.get("decision_note"):
+            raise PassSchemaError("decision_note must be a non-empty string")
+        if decision.get("confidence") not in CONFIDENCE:
+            raise PassSchemaError("Unsupported ambiguity-linking confidence")

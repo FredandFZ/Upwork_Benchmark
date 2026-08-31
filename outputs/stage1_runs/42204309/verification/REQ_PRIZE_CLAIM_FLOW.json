@@ -13,7 +13,7 @@
       "evidence_message_ids": [
         21
       ],
-      "decision_note": "The client explicitly retains manual prize claiming as an implementation-relevant smart-contract behavior.",
+      "decision_note": "The client explicitly preserves manual prize claiming, establishing implementation behavior for the prize-collection flow.",
       "confidence": "HIGH"
     },
     {
@@ -27,21 +27,7 @@
       "evidence_message_ids": [
         143
       ],
-      "decision_note": "The client changes prize collection to a one-click interaction on the Winners page and supplies its claim URL.",
-      "confidence": "HIGH"
-    },
-    {
-      "event_locator": {
-        "message_id": 146,
-        "event_type": "MODIFY",
-        "occurrence": 1
-      },
-      "verdict": "KEEP",
-      "replacement": null,
-      "evidence_message_ids": [
-        146
-      ],
-      "decision_note": "The approved FAQ replaces the one-click prize-claim link with a new product URL.",
+      "decision_note": "The client requires prize wins to be posted on the Winners page and made claimable through a one-click action.",
       "confidence": "HIGH"
     },
     {
@@ -55,7 +41,7 @@
       "evidence_message_ids": [
         156
       ],
-      "decision_note": "The client leaves the implemented prize-collection behavior unresolved between automatic delivery and a claim button.",
+      "decision_note": "The client explicitly leaves automatic prize delivery versus a claim-button flow unresolved.",
       "confidence": "HIGH"
     },
     {
@@ -64,28 +50,26 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "MODIFY",
-        "value_updates": {
-          "prize_collection_method": "automatic_wallet_transfer",
-          "prize_payment_destination": "winner_wallet",
-          "winner_announcement_channels": [
-            "WINNERS_PAGE",
-            "DASHBOARD"
-          ]
-        },
-        "value_removals": [
-          "claim_page_url"
-        ],
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         184
       ],
-      "decision_note": "The client replaces one-click claiming with automatic wallet delivery and winner visibility on the Winners page and dashboard; email notification belongs to the separate winner-email Requirement.",
+      "decision_note": "The client specifies automatic direct wallet delivery for prizes, replacing the prior manual claim mode; all removed claim keys exist in the replayed state.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 184,
+        "event_type": "RESUME",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        184
+      ],
+      "decision_note": "The automatic direct-transfer decision resolves the preceding claim-versus-automatic ambiguity.",
       "confidence": "HIGH"
     },
     {
@@ -94,12 +78,26 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "DELETE",
+      "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
         210
       ],
-      "decision_note": "The only new rule is conditional winner email notification, which belongs to REQ_PRIZE_WINNER_EMAIL_NOTIFICATION; the claim-flow fields merely repeat existing behavior.",
+      "decision_note": "The client adds an executable payout-timing rule requiring the winner's prize to reach the wallet immediately.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 781,
+        "event_type": "AMBIGUOUS",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        781
+      ],
+      "decision_note": "The client materially reopens whether the $500 prize uses a claim button or automatic delivery.",
       "confidence": "HIGH"
     },
     {
@@ -116,7 +114,7 @@
         783,
         784
       ],
-      "decision_note": "Target-specific implementation claim: the freelancer reports that the claim button is conditionally displayed only during the applicable period.",
+      "decision_note": "This is the first target-specific implementation claim after the reopened ambiguity: the claim button is reported as conditionally visible during the relevant period.",
       "confidence": "HIGH"
     },
     {
@@ -128,28 +126,33 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        781,
         782,
+        783,
         784,
         785
       ],
-      "decision_note": "The client accepts the one-click claim interaction and its conditional visibility, replacing the previously specified automatic collection method.",
+      "decision_note": "The client's unambiguous acceptance switches the software back to a winner-initiated conditional claim button; the removed automatic-delivery keys exist and do not overlap the updates.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 785,
+        "event_type": "RESUME",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        781,
+        782,
+        783,
+        784,
+        785
+      ],
+      "decision_note": "The accepted conditional claim-button behavior resolves the preceding lifecycle ambiguity.",
       "confidence": "HIGH"
     }
   ],
-  "missing_event_candidates": [
-    {
-      "message_ids": [
-        184
-      ],
-      "suggested_requirement_id": "REQ_PRIZE_WINNER_EMAIL_NOTIFICATION",
-      "description": "The source introduces email notification for prize winners and should be checked for an Event under the dedicated winner-email Requirement."
-    },
-    {
-      "message_ids": [
-        210
-      ],
-      "suggested_requirement_id": "REQ_PRIZE_WINNER_EMAIL_NOTIFICATION",
-      "description": "The source limits winner email notification to winners who supplied an email address and should be routed to the dedicated winner-email Requirement."
-    }
-  ]
+  "missing_event_candidates": []
 }

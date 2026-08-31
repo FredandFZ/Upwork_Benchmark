@@ -338,6 +338,13 @@ MODIFY(payment_provider = Transak)
 
 unless the client accepts Transak.
 
+A narrow exception applies when the freelancer is not introducing an independent
+product decision, but is immediately committing to a concrete lifecycle action
+originated by the client. In that case, the client message supplies authority,
+while the freelancer message may be the canonical Event source when its own text
+most explicitly identifies both the target Requirement and the lifecycle
+operation. This exception does not authorize unrelated freelancer preferences.
+
 The unresolved conflict should normally be:
 
 ```text
@@ -355,9 +362,79 @@ Freelancer: I suggest a contact form with name, email, category, and message.
 Client: Yeah, great idea.
 ```
 
-The client acceptance message may be the Event's `source_message`, while the accepted proposal may appear in intermediate `supporting_message_ids`.
+The client acceptance message may be the Event's `source_message` when that
+acceptance is necessary to turn a freelancer-originated suggestion into an
+authoritative product decision. The accepted proposal may then appear in
+intermediate `supporting_message_ids`.
 
 Do not treat generic praise such as `cool`, `thanks`, or `looks good` as acceptance when multiple proposals are unresolved.
+
+Do not use a later generic acknowledgement to replace an already sufficient,
+target-explicit Event source merely to prefer the client's speaker role.
+
+## 6.4.1 Canonical source selection among adjacent messages
+
+When several adjacent messages support the same Event, compare them before
+selecting `source_message`. Choose the message whose own text most directly and
+explicitly entails both:
+
+1. the target Requirement; and
+2. the semantic operation (`INTRODUCE`, `MODIFY`, `DEFER`, `RESUME`, `REMOVE`,
+   `AMBIGUOUS`, or the relevant execution observation).
+
+Apply these precedence rules:
+
+- Direct target-and-operation entailment takes priority over speaker authority
+  when client authority is already established by the immediately preceding
+  client-originated instruction, question, or concrete proposal.
+- A freelancer's immediate agreement or implementation commitment may be the
+  canonical lifecycle source when it explicitly states the client-originated
+  target and operation. Cite the client-originating message in
+  `supporting_message_ids` when needed.
+- A later generic acknowledgement such as `Cool`, `OK`, `sounds good`, `great`,
+  or `thanks` must not replace an earlier message that explicitly names the
+  target and states the operation.
+- A generic acknowledgement may be canonical only when it is necessary to make
+  a previously freelancer-originated proposal authoritative, the accepted
+  proposal is unique, and the supporting context resolves the target without
+  guessing.
+- Do not choose a later message merely because it is newer, is written by the
+  client, or is adjacent to the transition.
+- When the acknowledgement message immediately changes to unrelated topics, its
+  opening acknowledgement does not make that entire message the canonical
+  source for the earlier target-specific operation.
+
+Mandatory Aave calibration example:
+
+```text
+190 CLIENT:
+"Also, now that our pools are small, do you think we should remove the redundant Aave integration?"
+
+191 FREELANCER:
+"That works, so we'll remove the Aave integration entirely."
+
+192 CLIENT:
+"Cool." followed by phase payment, FAQ, Transak, testing, hero, or book-cover topics.
+```
+
+Correct annotation:
+
+```text
+event_type = REMOVE
+source_message_id = 191
+supporting_message_ids = [190]
+```
+
+Incorrect annotation:
+
+```text
+source_message_id = 192
+```
+
+Reason: message 191 explicitly entails both the Aave target and the REMOVE
+operation. Message 190 supplies client-originated authority. Message 192 is a
+generic acknowledgement and changes to unrelated subjects; it does not
+independently identify Aave or removal.
 
 ## 6.5 No hidden history
 
@@ -1545,6 +1622,9 @@ Before appending each Event:
 3. Confirm the semantic operation (`MODIFY`, `REMOVE`, failure, verification, etc.) is supported.
 4. Confirm no narrower Requirement in `CURRENT_INVENTORY` is a better target.
 5. Confirm the Event is not merely a duplicate of an already retained execution observation.
+6. Compare adjacent candidate messages and select the canonical source using
+   section 6.4.1. A generic client acknowledgement must not displace a prior
+   target-explicit operation merely because it is later or has client authority.
 
 If step 2 or 4 fails, do not keep the Event under the target Requirement.
 
@@ -2107,6 +2187,24 @@ and add the evidence as a missing/misrouted candidate when supported by the prov
 
 Do not rescue an Event by reinterpreting an unrelated source message.
 
+Verification must also compare the provisional source with adjacent candidate
+messages under section 6.4.1. Do not return `KEEP` when the provisional source
+is only a generic acknowledgement and a supplied earlier message explicitly
+states both the target Requirement and operation.
+
+For the mandatory Aave calibration chain in section 6.4.1:
+
+```text
+provisional REMOVE source = message 192
+candidate messages = 190, 191, 192
+```
+
+The verifier must not return `KEEP` for message 192. Message 191 is the correct
+canonical REMOVE source. If the verifier output contract cannot directly
+re-anchor `source_message`, return `DELETE` for the 192 Event and report a
+missing Event candidate anchored at 191 rather than preserving misaligned Gold
+evidence.
+
 ## 19.3 Verification priority: atomicity and partial success
 
 If an Event only makes sense because the target Requirement is overly broad, do not simply `KEEP` it.
@@ -2182,6 +2280,8 @@ Check:
 12. Is a generic execution statement being routed only by proximity rather than target-entailing context?
 13. For every INTRODUCE/MODIFY attribute, is it implementation-relevant rather than project-management state?
 14. If a MODIFY mixes coding and non-coding facts, has the verdict used EDIT to remove only the non-coding attributes?
+15. Among adjacent candidates, is this the message with the strongest direct
+    target-and-operation entailment, rather than a later generic acknowledgement?
 
 ## 19.6 Output schema
 

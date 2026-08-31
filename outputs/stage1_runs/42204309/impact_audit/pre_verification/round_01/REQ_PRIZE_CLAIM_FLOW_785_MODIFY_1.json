@@ -12,7 +12,7 @@
       "decision": "ADD_EVENT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The confirmed conditional one-click claim flow makes the FAQ statements that prizes are delivered directly to winners obsolete.",
+      "reason": "The current FAQ copy promises direct automatic wallet payout of prizes, which is incompatible with the confirmed winner-initiated conditional claim flow.",
       "new_event": {
         "source_message": {
           "message_id": 785,
@@ -20,30 +20,99 @@
           "text": "ahh, nice. so everything is finished?\nI suppose we'll need to wait until the 100th sale before we can test this one"
         },
         "supporting_message_ids": [
+          781,
           782,
+          783,
           784
         ],
         "event_type": "MODIFY",
         "value_updates": {
-          "faq_fiat_buyer_rewards_section": {
-            "heading": "How Can a Non-Crypto Fiat Buyer Receive Commissions and Prizes?",
-            "content_requirements": [
-              "Explain background creation of a non-custodial wallet without requiring a seed phrase initially.",
-              "Explain Transak conversion, NFT delivery, email confirmation, and dashboard access.",
-              "Explain automatic $5 commissions.",
-              "Explain one-ticket entry into the $500 drawing every 100 sales.",
-              "Explain winner notification and one-click prize collection through a claim button shown during the applicable claim period."
-            ]
-          },
-          "faq_beginner_rewards_section": {
-            "heading": "How Can Beginners Collect Their Commissions and Prizes?",
-            "content_requirements": [
-              "Explain automatic $5 referral commissions.",
-              "Explain automatic assignment and dashboard display of one ticket per completed referral.",
-              "Explain the automatic Chainlink VRF drawing every 100 sales.",
-              "Explain $500 winner notification through the dashboard and email and one-click collection through a claim button shown during the applicable claim period."
-            ]
-          }
+          "reward_delivery_copy": "The smart contract sends $5 commissions automatically; $500 winners are notified on the Winners page, dashboard, and by email when available, and collect the prize through a conditional claim button shown only when the prize is eligible to be claimed.",
+          "fiat_buyer_rewards_copy": "The fiat-buyer FAQ explains automatic seedless non-custodial wallet creation through Transak, email and dashboard access, automatic $5 commissions, one ticket per referral for the $500 drawing every 100 sales, winner-initiated prize collection through a conditional claim button shown only when the prize is eligible to be claimed, and dashboard/email guidance.",
+          "beginner_reward_collection_copy": "Add a beginner-focused FAQ explaining automatic $5 commission delivery, automatic on-chain ticket assignment and dashboard visibility, Chainlink VRF drawings every 100 sales, winner-initiated $500 prize collection through a conditional claim button shown only when eligible, notifications, and ticket expiration after each drawing."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_NOTIFICATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The claim-flow decision does not change the existing winner announcement or notification channels.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The About page currently says prize wins can be claimed whenever desired and broadly states that all payments are issued instantly; both descriptions must reflect the conditional winner-initiated claim flow.",
+      "new_event": {
+        "source_message": {
+          "message_id": 785,
+          "speaker": "client",
+          "text": "ahh, nice. so everything is finished?\nI suppose we'll need to wait until the 100th sale before we can test this one"
+        },
+        "supporting_message_ids": [
+          781,
+          782,
+          783,
+          784
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "process_items": [
+            {
+              "label": "Mint the ebook NFT",
+              "copy": "Buy your ebook NFT for $15 USD. The mint number you receive becomes your referral code."
+            },
+            {
+              "label": "Earn Through Referrals",
+              "copy": "Share either your mint number or your link. Whenever someone mints with it, you immediately earn $5 USD. There are no limits and no expiration. If no code is provided → the $5 + tickets are awarded to a random existing ticket holder."
+            },
+            {
+              "label": "Build Up Tickets",
+              "copy": "Every referral also awards you Small & Big Block prize tickets for the current blocks. More referrals = more tickets = greater chances."
+            },
+            {
+              "label": "Enter the Prize Draws",
+              "copy": "Small Block: 5 × $500 awarded every 500 sales. Big Block: 5 × $10,000 awarded every 50,000 sales. (Sales = mint + secondary) Chainlink VRF selects the winners randomly and fairly."
+            },
+            {
+              "label": "Receive Your Rewards",
+              "copy": "Commissions are delivered automatically on-chain. Prize wins are posted on the Winners page, and an eligible winner collects the prize through a conditional claim button shown only when the prize is eligible to be claimed."
+            }
+          ],
+          "key_feature_items": [
+            {
+              "label": "Reward Delivery",
+              "copy": "Smart contracts issue commissions automatically, while eligible prize winners collect their prize through a conditional claim button."
+            },
+            {
+              "label": "Fair Prize Selection",
+              "copy": "Chainlink VRF provides genuine randomness."
+            },
+            {
+              "label": "Yield Generation",
+              "copy": "Aave Integration enables the prize pools to accrue yield."
+            },
+            {
+              "label": "Gamification",
+              "copy": "Badges and leaderboards keep the experience fun and competitive."
+            },
+            {
+              "label": "Transparency",
+              "copy": "Every transaction and rule is on-chain and verifiable."
+            },
+            {
+              "label": "Low Fees",
+              "copy": "Base provides speed with minimal transaction costs."
+            }
+          ]
         },
         "value_removals": null,
         "scope_updates": null,
@@ -56,124 +125,71 @@
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The collection method and conditional claim-button visibility do not change the Small Block prize amount, winner count, funding, or draw trigger.",
+      "reason": "The source changes how a winner collects a prize, not the Small Block amount, trigger, eligibility, funding, or draw rules; the 100-sale trigger was already current.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_FIAT_BUYER_REWARD_ACCESS",
-      "decision": "ADD_EVENT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The candidate currently requires direct prize delivery, which is incompatible with the confirmed one-click claim method.",
-      "new_event": {
-        "source_message": {
-          "message_id": 785,
-          "speaker": "client",
-          "text": "ahh, nice. so everything is finished?\nI suppose we'll need to wait until the 100th sale before we can test this one"
-        },
-        "supporting_message_ids": [
-          782,
-          784
-        ],
-        "event_type": "MODIFY",
-        "value_updates": {
-          "prize_access_behavior": "Prize winnings are shown through dashboard alerts and notified by email when the winner supplied an email address; the winner collects the prize through a one-click claim button visible during the applicable claim period."
-        },
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": null
-      }
-    },
-    {
-      "candidate_requirement_id": "REQ_PRIZE_WINNER_EMAIL_NOTIFICATION",
+      "candidate_requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Conditional one-click prize collection does not change the requirement to notify winners by email or provide subsequent viewing or fiat-exit guidance.",
+      "reason": "Conditional prize claiming does not alter ticket issuance, counters, recipient crediting, or ticket-display consistency.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
-      "decision": "ADD_EVENT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The confirmed one-click claim flow resolves the page's reward-delivery ambiguity and invalidates its statement that smart contracts issue all payments instantly.",
-      "new_event": {
-        "source_message": {
-          "message_id": 785,
-          "speaker": "client",
-          "text": "ahh, nice. so everything is finished?\nI suppose we'll need to wait until the 100th sale before we can test this one"
-        },
-        "supporting_message_ids": [
-          782,
-          784
-        ],
-        "event_type": "MODIFY",
-        "value_updates": {
-          "process_reward_delivery_copy": "Commissions are delivered automatically on-chain. Prize wins are posted on the Winners page and collected through a one-click claim button visible during the applicable claim period.",
-          "feature_automatic_rewards_copy": "Smart contracts issue commissions automatically, while prize winners collect their prizes through the conditional one-click claim flow."
-        },
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": null
-      }
-    },
-    {
-      "candidate_requirement_id": "REQ_PRIMARY_SALE_REVENUE_SPLIT",
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The prize collection interface does not alter the primary-sale allocations or prize-pool recipient.",
+      "reason": "The source concerns prize collection only and leaves automatic $5 referral-commission payout unchanged.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_LANDING_BOOK_COVER",
+      "candidate_requirement_id": "REQ_NFT_DETAIL_BOOK_ACCESS_ACTION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Prize claim behavior has no effect on the landing-page book cover's placement, size, visibility, or overlap constraints.",
+      "reason": "The prize claim button is unrelated to the NFT-detail View Book action and its ownership-based visibility.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_MINT_SUCCESS_CONFIRMATION",
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source concerns collection of a won prize, not mint-success modal triggering, token IDs, or referral-ticket allocation messages.",
+      "reason": "Winner-initiated prize collection does not change VRF selection, eligible population, weighting, fairness, or verification.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "candidate_requirement_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The confirmed prize claim flow does not change automatic $5 commission delivery for code-based referrals.",
+      "reason": "The source changes post-draw prize collection rather than code-used ticket issuance or ticket lifecycle rules.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_NO_CODE_COMMISSION_ALLOCATION",
+      "candidate_requirement_id": "REQ_PUBLIC_PRIZE_POOL_STATISTICS",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source does not change random commission allocation for mints without a referral code.",
+      "reason": "The public pool values and next-draw sales counter remain valid under the conditional claim flow.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Prize collection behavior does not affect referral-code identity, permanence, or display.",
+      "reason": "The prize collection decision does not change no-referral ticket allocation, recipient selection, or the first-mint exception.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_WALLET_AUTHENTICATION",
+      "candidate_requirement_id": "REQ_LANDING_HERO_PRESENTATION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source establishes conditional claim-button behavior but does not change SIWE authentication or its applicable crypto flows.",
+      "reason": "The current hero attributes describe presentation, pricing, commissions, and draw promotion without asserting automatic prize delivery.",
       "new_event": null
     }
   ]

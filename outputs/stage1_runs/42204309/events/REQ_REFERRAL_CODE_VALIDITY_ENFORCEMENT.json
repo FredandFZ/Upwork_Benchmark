@@ -1,0 +1,93 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_REFERRAL_CODE_VALIDITY_ENFORCEMENT",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 291,
+        "speaker": "client",
+        "text": "The system is also treating '5' as a valid referral code, but **the only valid referral codes must be NFTs that have already been minted**. This is necessary to prevent self-referrals—for example, affiliate 54 tells me to buy, and im about to mint 543, so i enter 543 as the referral code to direct the commission and ticket to myself."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "valid_referral_code_condition": "code identifies an NFT minted before the current purchase",
+        "self_referral_allowed": false
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "REFERRAL_VALIDATION",
+          "PRIMARY_MINT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 291,
+        "speaker": "client",
+        "text": "The system is also treating '5' as a valid referral code, but **the only valid referral codes must be NFTs that have already been minted**. This is necessary to prevent self-referrals—for example, affiliate 54 tells me to buy, and im about to mint 543, so i enter 543 as the referral code to direct the commission and ticket to myself."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The system marked referral code 5 as valid even though it did not identify an NFT minted before the current purchase."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 308,
+        "speaker": "freelancer",
+        "text": "Contract edge-case behavior\n[ACCOUNT_001] For Mint #1 without a referral, the commission is sent to the founder because no NFTs exist yet\n[ACCOUNT_001] For Mint #2 without a referral, random selection through VRF is used, choosing from the existing NFTs (mint 1)\n[ACCOUNT_001] To prevent self-referrals, the contract verifies that referralCode &lt; tokenId, which stops users from using their own token ID"
+      },
+      "supporting_message_ids": [
+        291
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The freelancer reports that the contract now requires the referral code to be lower than the current token ID, preventing current-token and future-token self-referrals."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 313,
+      "suggested_requirement_id": "REQ_REFERRAL_VALIDATION_FEEDBACK",
+      "description": "The client's approval and wording change concern the displayed invalid-code message rather than independently verifying contract-level validity enforcement."
+    },
+    {
+      "message_id": 585,
+      "suggested_requirement_id": "REQ_REFERRAL_CODE_IDENTITY_VALIDATION",
+      "description": "The incorrect referral-code NFT attribute concerns each NFT's own code identity, not submitted-code validity enforcement."
+    },
+    {
+      "message_id": 590,
+      "suggested_requirement_id": "REQ_REFERRAL_CODE_IDENTITY_VALIDATION",
+      "description": "The requirement that an NFT display its own referral code concerns code identity and metadata."
+    },
+    {
+      "message_id": 604,
+      "suggested_requirement_id": "REQ_REFERRAL_CODE_IDENTITY_VALIDATION",
+      "description": "The implementation claim concerns the NFT attribute using its own tokenId rather than referral-code validity enforcement."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

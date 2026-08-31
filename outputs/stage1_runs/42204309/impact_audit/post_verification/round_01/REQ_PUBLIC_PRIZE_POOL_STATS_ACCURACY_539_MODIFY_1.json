@@ -1,0 +1,158 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_PUBLIC_PRIZE_POOL_STATS_ACCURACY",
+    "message_id": 539,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_PUBLIC_PLATFORM_STATS_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already sources mint statistics exclusively from the replacement contract and restarts numbering at #1.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PUBLIC_PRIZE_DRAW_COUNTDOWN",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already calculates the countdown from the replacement contract's new draw cycle and excludes old-contract progress.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DASHBOARD_NFT_INVENTORY_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already limits dashboard ownership data to successful mints from the replacement contract and excludes old-contract NFTs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PUBLIC_REFERRAL_STATS_ACCURACY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Excluding the old NFT contract from active systems necessarily requires public referral statistics to use referral records associated with the replacement contract.",
+      "new_event": {
+        "source_message": {
+          "message_id": 539,
+          "speaker": "client",
+          "text": "Hmmmmm... yes, I do think that&#39;d be the best approach.\nI&#39;m not particularly concerned about the copies lost in the old contract."
+        },
+        "supporting_message_ids": [
+          538
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "accuracy_rule": "The leaderboard referral count and home-page Top Referrals value must reflect referrals recorded by the replacement contract only and exclude referral state from the old contract."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_TICKET_ACCOUNTING_VISIBILITY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Starting fresh with new draws and excluding the old contract from active systems requires dashboard ticket accounting to exclude old-contract tickets.",
+      "new_event": {
+        "source_message": {
+          "message_id": 539,
+          "speaker": "client",
+          "text": "Hmmmmm... yes, I do think that&#39;d be the best approach.\nI&#39;m not particularly concerned about the copies lost in the old contract."
+        },
+        "supporting_message_ids": [
+          538
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "ticket_visibility": "Tickets awarded for completed referrals on the replacement contract are added to the holder's NFT and can be viewed in the dashboard; tickets from the old contract are excluded from the active system."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The migration changes which NFT contract is active but does not alter the replacement NFTs' metadata counters, permanent badges, or mint-number referral-code semantics.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_COUNT_VISIBILITY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Because the old NFT contract will not be used by active systems, dashboard referral counts must be sourced from replacement-contract referral activity.",
+      "new_event": {
+        "source_message": {
+          "message_id": 539,
+          "speaker": "client",
+          "text": "Hmmmmm... yes, I do think that&#39;d be the best approach.\nI&#39;m not particularly concerned about the copies lost in the old contract."
+        },
+        "supporting_message_ids": [
+          538
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "dashboard_referral_count_source": "Use referral data associated with the replacement contract only and exclude referral data associated with the old contract."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_REWARD_ACCOUNTING_VISIBILITY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The migration clearly excludes old-contract NFT and draw state, but it is unclear whether previously paid commission earnings should disappear from historical dashboard accounting or remain visible.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_MEDIA_RENDERING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the active contract and restarting its state does not change the requirement to render NFT images and covers correctly.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CONTRACT_MIGRATION_STATE_POLICY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 INTRODUCE already records the fresh replacement state, numbering restart, exclusion of the old contract, and absence of a legacy-copy migration obligation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accepted migration policy does not require any specific change to the About page's current product explanation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The FAQ's current descriptions of active NFTs, referral codes, and recurring prizes remain valid; the source does not require publishing contract-migration or legacy-copy details in the FAQ.",
+      "new_event": null
+    }
+  ]
+}

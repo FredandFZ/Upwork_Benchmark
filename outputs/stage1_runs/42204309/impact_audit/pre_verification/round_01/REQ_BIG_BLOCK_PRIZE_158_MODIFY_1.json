@@ -8,19 +8,34 @@
   },
   "decisions": [
     {
-      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
-      "decision": "NO_IMPACT",
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "ADD_EVENT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source also changes the Small Block prize, but a complete same-message MODIFY already records its new winner count, $500 draw amount, and 100-sale trigger.",
-      "new_event": null
+      "reason": "The FAQ still states that five Big Block prizes are drawn every 50,000 sales, which conflicts with the new one-prize-per-10,000-sales rule.",
+      "new_event": {
+        "source_message": {
+          "message_id": 158,
+          "speaker": "client",
+          "text": "I just thought of something.... I believe we should adjust the block prizes to\n- Small = 1 x $500 every 100 sales.\n- Big = 1 x $10,000 every 10,000 sales.\n\nThe same net $ amount would still be given away, but this would create a smoother, cleaner, clearer, and more consistent flow of winners"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "big_block_prize_copy": "One $10,000 prize is drawn every 10,000 sales, counting mints and secondary sales."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
     },
     {
       "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
       "decision": "ADD_EVENT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The About page currently displays the superseded Small and Big Block winner counts and draw frequencies, so its prize-draw copy must reflect the new rules.",
+      "reason": "The About page's prize-draw process still advertises five Big Block winners every 50,000 sales and must reflect the changed Big Block rule.",
       "new_event": {
         "source_message": {
           "message_id": 158,
@@ -30,7 +45,28 @@
         "supporting_message_ids": [],
         "event_type": "MODIFY",
         "value_updates": {
-          "process_prize_draw_copy": "Small Block awards 1 × $500 every 100 sales, Big Block awards 1 × $10,000 every 10,000 sales, sales include mints and secondary sales, and Chainlink VRF selects winners randomly and fairly."
+          "process_items": [
+            {
+              "label": "Mint the ebook NFT",
+              "copy": "Buy your ebook NFT for $15 USD. The mint number you receive becomes your referral code."
+            },
+            {
+              "label": "Earn Through Referrals",
+              "copy": "Share either your mint number or your link. Whenever someone mints with it, you immediately earn $5 USD. There are no limits and no expiration. If no code is provided → the $5 + tickets are awarded to a random existing ticket holder."
+            },
+            {
+              "label": "Build Up Tickets",
+              "copy": "Every referral also awards you Small & Big Block prize tickets for the current blocks. More referrals = more tickets = greater chances."
+            },
+            {
+              "label": "Enter the Prize Draws",
+              "copy": "Small Block: 5 × $500 awarded every 500 sales. Big Block: 1 × $10,000 awarded every 10,000 sales. (Sales = mint + secondary) Chainlink VRF selects the winners randomly and fairly."
+            },
+            {
+              "label": "Receive Your Rewards",
+              "copy": "Commissions are delivered automatically on-chain. Prize wins are posted on the Winners page and can be claimed with one click whenever you're ready."
+            }
+          ]
         },
         "value_removals": null,
         "scope_updates": null,
@@ -39,43 +75,27 @@
       }
     },
     {
-      "candidate_requirement_id": "REQ_MISSION_PAGE_CONTENT",
-      "decision": "ADD_EVENT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The Mission page explicitly displays both superseded prize schedules and must be updated to the newly specified winner counts and sales triggers.",
-      "new_event": {
-        "source_message": {
-          "message_id": 158,
-          "speaker": "client",
-          "text": "I just thought of something.... I believe we should adjust the block prizes to\n- Small = 1 x $500 every 100 sales.\n- Big = 1 x $10,000 every 10,000 sales.\n\nThe same net $ amount would still be given away, but this would create a smoother, cleaner, clearer, and more consistent flow of winners"
-        },
-        "supporting_message_ids": [],
-        "event_type": "MODIFY",
-        "value_updates": {
-          "small_block_prize_copy": "Small Block (1 × $500 every 100 sales)",
-          "big_block_prize_copy": "Big Block (1 × $10,000 every 10,000 sales)"
-        },
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": null
-      }
-    },
-    {
-      "candidate_requirement_id": "REQ_PRIZE_POOL_AAVE_YIELD",
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "At message 158, changing prize amounts and draw frequencies does not necessarily remove or modify Aave yield generation; the later message about Aave cannot be used for this source-time audit.",
+      "reason": "The source Big Block Event does not change the independently modeled Small Block mechanism; the message's Small Block clause already has its own same-message Event.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_PRIMARY_SALE_REVENUE_SPLIT",
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source changes prize distribution cadence while stating that the same net amount remains awarded; it does not change the per-sale allocation or pool recipients.",
+      "reason": "Changing the Big Block winner count and draw frequency does not alter the Chainlink VRF selection method, ticket weighting, fairness, or verification behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_NOTIFICATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The number and frequency of Big Block winners do not change the requirement to announce winners on the Winners page.",
       "new_event": null
     },
     {
@@ -83,55 +103,55 @@
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source changes winner counts, prize amounts, and sales triggers but does not decide whether prizes use automatic delivery or a claim flow.",
+      "reason": "The Big Block prize adjustment neither resolves the automatic-versus-manual delivery ambiguity nor changes the existing claim action or location.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "candidate_requirement_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The $5 code-based referral commission, its recipient, and its automatic payment behavior remain unchanged.",
+      "reason": "The source changes the Big Block draw size and trigger, not how tickets are issued, who receives them, or their draw-cycle behavior.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_NO_CODE_COMMISSION_ALLOCATION",
+      "candidate_requirement_id": "REQ_AAVE_PRIZE_POOL_YIELD",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source does not alter the random allocation of the $5 commission when a mint has no referral code.",
+      "reason": "Message 158 does not change or remove Aave yield generation; the later statement about Aave cannot be used at this source-event cutoff.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "candidate_requirement_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The new prize cadence does not change the flat secondary royalty, founder allocation, pool funding by royalties, or the rule that secondary sales do not generate referral tickets.",
+      "reason": "The mint price, founder share, referral commission, and prize-pool destinations remain unchanged; the client explicitly preserves the same net giveaway amount.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_NFT_TRANSFER_STATE",
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Changing prize schedules does not alter how the book, referral code, badges, or active and expired tickets behave when an NFT transfers.",
+      "reason": "Big Block tickets and their metadata counter remain in use, so changing the draw frequency and winner count does not alter the stored metadata attributes.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source does not change the NFT mint number's role, permanence, or display locations as a referral code.",
+      "reason": "The source does not change the no-referral trigger, random recipient selection, or allocation of Small and Big Block tickets.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_BADGE_AWARD_RULES",
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The prize-schedule adjustment does not modify badge triggers, thresholds, destination, or current function.",
+      "reason": "The Big Block prize adjustment does not change the $5 referral commission, its trigger, recipient, timing, or payout behavior.",
       "new_event": null
     }
   ]

@@ -8,19 +8,133 @@
   },
   "decisions": [
     {
-      "candidate_requirement_id": "REQ_NO_CODE_COMMISSION_ALLOCATION",
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source changes About-page reward-delivery copy and confirms the conditional prize-claim button; it does not change the no-code commission trigger, amount, random recipient selection, or first-mint exception.",
+      "reason": "The existing message-785 MODIFY already replaces the FAQ's direct-payout wording with the conditional winner-initiated claim flow.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_MINT_SUCCESS_CONFIRMATION",
-      "decision": "HUMAN_REVIEW",
+      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 785,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY establishes winner-initiated conditional claiming but leaves the incompatible immediate-after-winning delivery timing in state.",
+      "new_event": {
+        "source_message": {
+          "message_id": 785,
+          "speaker": "client",
+          "text": "ahh, nice. so everything is finished?\nI suppose we'll need to wait until the 100th sale before we can test this one"
+        },
+        "supporting_message_ids": [
+          781,
+          783,
+          784
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "prize_collection_mode": "winner_initiated_claim",
+          "claim_action": "conditional_claim_button",
+          "claim_visibility_condition": "shown_only_when_the_prize_is_eligible_to_be_claimed"
+        },
+        "value_removals": [
+          "prize_delivery_mode",
+          "prize_delivery_timing"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "PRIZE_CLAIM"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_MECHANICS_COPY",
+      "decision": "NO_IMPACT",
       "event_locator": null,
-      "confidence": "LOW",
-      "reason": "The local exchange concerns the conditional prize-claim button after the 100th sale, while the candidate attribute concerns a separate no-code random-referral finalization action. The new automatic-commission copy may imply that action is obsolete, but the source does not unambiguously decide the mint-success flow.",
+      "confidence": "HIGH",
+      "reason": "The landing mechanics copy describes referrals, commissions, tickets, and draw frequency but does not specify automatic prize delivery or a claim interaction.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MISSION_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The generic automated-payout language remains compatible with automatic commissions and smart-contract execution after an eligible winner initiates a claim.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing prize collection from direct delivery to a conditional claim does not alter the candidate's metadata counters, ticket associations, or accounting rules.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_HERO_PRESENTATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision does not change the hero's headline, CTA, layout, or visual-emphasis requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Prize claim behavior does not change ticket issuance, counting, display, reset, or consistency requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The conditional claim flow occurs after winner selection and does not alter Chainlink VRF, ticket weighting, eligible population, or selection execution.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_BOOK_COVER_PRESENTATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision has no effect on the landing-page cover's placement, size, crop, or visibility.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_NOTIFICATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source preserves notification through the Winners page, dashboard, and email when available; only the separate prize-collection mode changes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The conditional claim applies to the $500 prize, while the $5 referral commission remains automatic and immediate.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Waiting until the 100th sale to test the claim flow confirms the existing trigger context but does not change the Small Block prize amount, frequency, funding, or ticket rules.",
       "new_event": null
     }
   ]

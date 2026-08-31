@@ -9,7 +9,12 @@ from pathlib import Path
 from typing import Any
 
 from .api_client import summarize_calls
-from .assembler import assemble_stage1_annotation
+from .ambiguity import apply_ambiguity_links, ambiguity_requirement_ids
+from .assembler import (
+    assemble_stage1_annotation,
+    preallocate_event_ids,
+    sort_events_by_message_order,
+)
 from .config import PipelineConfig, ProjectSource
 from .context import (
     chunk_messages,
@@ -29,11 +34,17 @@ from .impact import (
     resolve_source_event_ids,
     source_ref_key,
 )
-from .patching import apply_audit_patches, apply_verification, has_valid_requirement_ids
+from .patching import (
+    ONTOLOGY_OPERATIONS,
+    apply_audit_patches,
+    apply_verification,
+    has_valid_requirement_ids,
+)
 from .preprocessing import message_index, preprocess_project
 from .prompt_builder import build_single_pass_messages, build_stage_messages
 from .schemas import (
     validate_consistency_audit,
+    validate_ambiguity_linking,
     validate_cross_requirement_impact_audit,
     validate_event_extraction,
     validate_event_verification,
@@ -51,6 +62,7 @@ from .validation import (
 
 
 EXCLUDED_NO_REQUIREMENTS = "EXCLUDED_NO_REQUIREMENTS"
+CONSISTENCY_AUDIT_APPLICATION_VERSION = "ontology_then_events_v1"
 
 
 def remove_final_annotation_files(project: ProjectSource) -> list[Path]:
@@ -78,6 +90,7 @@ class Stage1Pipeline:
         verification_addendum: str = "",
         impact_audit_addendum: str = "",
         value_removal_addendum: str = "",
+        ambiguity_linking_prompt: str = "",
     ) -> None:
         config.validate()
         self.api = api_client
@@ -87,6 +100,7 @@ class Stage1Pipeline:
         self.verification_addendum = verification_addendum
         self.impact_audit_addendum = impact_audit_addendum
         self.value_removal_addendum = value_removal_addendum
+        self.ambiguity_linking_prompt = ambiguity_linking_prompt
         self.call_log_path = call_log_path
 
     async def run(self, project: ProjectSource) -> dict[str, Any]:
@@ -97,6 +111,10 @@ class Stage1Pipeline:
             "project_id": project.project_id,
             "model": self.config.model,
             "reasoning_effort": self.config.reasoning_effort,
+            "consistency_reasoning_effort": (
+                self.config.consistency_reasoning_effort
+                or self.config.reasoning_effort
+            ),
             "annotation_mode": self.config.annotation_mode,
             "prompt_path": str(self.config.prompt_path),
             "prompt_version": self._prompt_version(),
@@ -119,6 +137,12 @@ class Stage1Pipeline:
                 else None
             ),
             "value_removal_addendum_sha256": sha256_text(self.value_removal_addendum),
+            "ambiguity_linking_prompt_path": (
+                str(self.config.ambiguity_linking_prompt_path)
+                if self.config.ambiguity_linking_prompt_path is not None
+                else None
+            ),
+            "ambiguity_linking_prompt_sha256": sha256_text(self.ambiguity_linking_prompt),
             "upgrade_existing_annotation_path": (
                 str(self.config.upgrade_existing_annotation_path)
                 if self.config.upgrade_existing_annotation_path is not None
@@ -223,6 +247,7 @@ class Stage1Pipeline:
                     "inventory": inventory,
                     "events": events,
                     "event_extraction_findings": extraction_findings,
+                    "application_version": CONSISTENCY_AUDIT_APPLICATION_VERSION,
                 },
                 ensure_ascii=False,
                 sort_keys=True,
@@ -270,6 +295,7 @@ class Stage1Pipeline:
                 audited_state_path,
                 {
                     "input_sha256": audit_input_hash,
+                    "application_version": CONSISTENCY_AUDIT_APPLICATION_VERSION,
                     "inventory": inventory,
                     "events": events,
                     "human_review": human_review,
@@ -435,9 +461,26 @@ class Stage1Pipeline:
                         "reason": "Low-confidence Requirement inventory item",
                     }
                 )
+
+        preallocated_events = preallocate_event_ids(normalized, verified_events)
+        linked_events, ambiguity_report, ambiguity_review, ambiguity_metrics = (
+            await self._ambiguity_linking(
+                project,
+                normalized,
+                inventory,
+                preallocated_events,
+                force_all=(
+                    "ambiguity_linking" in force_stages
+                    and not self.config.force_requirements
+                ),
+                force_ids=set(self.config.force_requirements),
+            )
+        )
+        human_review.extend(ambiguity_review)
+        write_json(project.run_dir / "ambiguity_linking.json", ambiguity_report)
         write_json(project.run_dir / "human_review.json", {"items": human_review})
 
-        annotation = assemble_stage1_annotation(normalized, inventory, verified_events)
+        annotation = assemble_stage1_annotation(normalized, inventory, linked_events)
         validate_stage1_annotation(annotation, normalized)
         impact_report = resolve_source_event_ids(impact_report, annotation)
         write_json(project.run_dir / "cross_requirement_impact_audit.json", impact_report)
@@ -451,6 +494,7 @@ class Stage1Pipeline:
             impact_patch_count=impact_patch_count,
             impact_decision_count=impact_decision_count,
         )
+        metrics["ambiguity_linking"] = ambiguity_metrics
         return annotation, metrics
 
     async def _run_incremental_upgrade(
@@ -572,9 +616,22 @@ class Stage1Pipeline:
         self._write_discarded_requirements(project, discarded_requirements)
         write_json(project.run_dir / "verified_events.json", verified_events)
         write_json(project.run_dir / "value_removal_audit.json", value_report)
+        preallocated_events = preallocate_event_ids(normalized, verified_events)
+        linked_events, ambiguity_report, ambiguity_review, ambiguity_metrics = (
+            await self._ambiguity_linking(
+                project,
+                normalized,
+                inventory,
+                preallocated_events,
+                force_all=not self.config.resume,
+                force_ids=set(),
+            )
+        )
+        human_review.extend(ambiguity_review)
+        write_json(project.run_dir / "ambiguity_linking.json", ambiguity_report)
         write_json(project.run_dir / "human_review.json", {"items": human_review})
 
-        annotation = assemble_stage1_annotation(normalized, inventory, verified_events)
+        annotation = assemble_stage1_annotation(normalized, inventory, linked_events)
         validate_stage1_annotation(annotation, normalized)
         impact_report = resolve_source_event_ids(impact_report, annotation)
         write_json(project.run_dir / "cross_requirement_impact_audit.json", impact_report)
@@ -594,6 +651,7 @@ class Stage1Pipeline:
             "cross_impact_affected_requirements": sorted(impact_affected),
             "verification_scope": sorted(affected.union(impact_affected)),
         }
+        metrics["ambiguity_linking"] = ambiguity_metrics
         return annotation, metrics
 
     @staticmethod
@@ -841,6 +899,7 @@ class Stage1Pipeline:
         signature = {
             "model": self.config.model,
             "reasoning_effort": self.config.reasoning_effort,
+            "consistency_reasoning_effort": self.config.consistency_reasoning_effort,
             "prompt_sha256": sha256_text(self.common_prompt),
             "normalized_sha256": sha256_text(json.dumps(normalized, ensure_ascii=False, sort_keys=True)),
             "evidence_chunk_size": self.config.evidence_chunk_size,
@@ -853,6 +912,7 @@ class Stage1Pipeline:
             "max_impact_audit_rounds": self.config.max_impact_audit_rounds,
             "max_impact_candidates_per_event": self.config.max_impact_candidates_per_event,
             "impact_audit_addendum_sha256": sha256_text(self.impact_audit_addendum),
+            "ambiguity_linking_prompt_sha256": sha256_text(self.ambiguity_linking_prompt),
         }
         if self.config.resume and path.is_file() and "evidence_scan" not in force_stages:
             existing = read_json(path)
@@ -876,6 +936,9 @@ class Stage1Pipeline:
                 # forced below, so it will consume the new common prompt.
                 comparable_existing.pop("prompt_sha256", None)
                 comparable_signature.pop("prompt_sha256", None)
+            if "ambiguity_linking" in force_stages:
+                comparable_existing.pop("ambiguity_linking_prompt_sha256", None)
+                comparable_signature.pop("ambiguity_linking_prompt_sha256", None)
             if not self._resume_signature_compatible(comparable_existing, comparable_signature):
                 raise ValueError(
                     "Checkpoint configuration/source changed. Use --no-resume for a clean semantic rerun, "
@@ -1127,37 +1190,59 @@ class Stage1Pipeline:
                 )
                 write_json(path, checkpoint)
                 write_json(meta_path, {"input_sha256": input_hash})
-            patch_count += len(checkpoint.get("patches", []))
-            applied = apply_audit_patches(inventory, events, checkpoint.get("patches", []))
-            inventory, events = applied.inventory, applied.events
+            patches = checkpoint.get("patches", [])
+            patch_count += len(patches)
+
+            # Apply ontology changes first. Re-extraction is necessary only for
+            # Requirements whose boundary was created or rebuilt by ADD/MERGE/SPLIT.
+            # Event-level patches must run *after* that re-extraction; otherwise a
+            # freshly extracted lifecycle can silently reintroduce an Event that the
+            # same audit round already deleted or edited.
+            ontology_patches = [
+                patch for patch in patches if patch.get("operation") in ONTOLOGY_OPERATIONS
+            ]
+            remaining_patches = [
+                patch for patch in patches if patch.get("operation") not in ONTOLOGY_OPERATIONS
+            ]
+            ontology_result = apply_audit_patches(inventory, events, ontology_patches)
+            inventory, events = ontology_result.inventory, ontology_result.events
+            human_review.extend(ontology_result.human_review)
+            boundary_affected = set(ontology_result.affected_requirements)
+
+            if ontology_result.boundary_changed and boundary_affected:
+                events = await self._event_extraction_all(
+                    project,
+                    normalized,
+                    evidence,
+                    inventory,
+                    events,
+                    force_all=False,
+                    force_ids=boundary_affected,
+                    only_ids=boundary_affected,
+                )
+
+            remaining_result = apply_audit_patches(inventory, events, remaining_patches)
+            inventory, events = remaining_result.inventory, remaining_result.events
             for requirement_events in events.values():
                 canonicalize_event_payload_fields(requirement_events)
                 canonicalize_event_source_texts(requirement_events, normalized)
-            human_review.extend(applied.human_review)
-            affected_all.update(applied.affected_requirements)
+            human_review.extend(remaining_result.human_review)
+            round_affected = boundary_affected.union(remaining_result.affected_requirements)
+            affected_all.update(round_affected)
+            applied_count = ontology_result.applied_count + remaining_result.applied_count
             print(
                 f"[{project.project_id}] CONSISTENCY_AUDIT round {round_number} done: "
-                f"{len(checkpoint.get('patches', []))} patches, {applied.applied_count} applied",
+                f"{len(patches)} patches, {applied_count} applied",
                 flush=True,
             )
-            if not applied.boundary_changed:
+            if not ontology_result.boundary_changed:
                 break
-            events = await self._event_extraction_all(
-                project,
-                normalized,
-                evidence,
-                inventory,
-                events,
-                force_all=False,
-                force_ids=applied.affected_requirements,
-                only_ids=applied.affected_requirements,
-            )
             if round_number == self.config.max_audit_rounds:
                 human_review.append(
                     {
                         "source": "CONSISTENCY_AUDIT",
                         "reason": "Requirement boundaries still changed in the final configured audit round.",
-                        "affected_requirement_ids": sorted(applied.affected_requirements),
+                        "affected_requirement_ids": sorted(boundary_affected),
                     }
                 )
         events = self._sort_events(events, normalized)
@@ -1575,6 +1660,147 @@ class Stage1Pipeline:
         write_json(project.run_dir / "verified_events.json", verified)
         return verified, counts, review
 
+    async def _ambiguity_linking(
+        self,
+        project: ProjectSource,
+        normalized: dict[str, Any],
+        inventory: dict[str, Any],
+        events: dict[str, list[dict[str, Any]]],
+        *,
+        force_all: bool,
+        force_ids: set[str],
+    ) -> tuple[
+        dict[str, list[dict[str, Any]]],
+        dict[str, Any],
+        list[dict[str, Any]],
+        dict[str, int],
+    ]:
+        target_ids = ambiguity_requirement_ids(events)
+        requirement_by_id = {
+            requirement.get("requirement_id"): requirement
+            for requirement in inventory.get("requirements", [])
+            if isinstance(requirement, dict)
+        }
+        requirements = [requirement_by_id[requirement_id] for requirement_id in target_ids]
+        if requirements and not self.ambiguity_linking_prompt.strip():
+            raise ValueError("AMBIGUITY_LINKING prompt is empty")
+
+        completed = 0
+
+        async def link(requirement: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+            nonlocal completed
+            requirement_id = requirement["requirement_id"]
+            requirement_events = events[requirement_id]
+            path = project.run_dir / "ambiguity_linking" / f"{safe_filename(requirement_id)}.json"
+            meta_path = path.with_suffix(".meta.json")
+            target_inventory = focused_inventory(
+                inventory,
+                requirement,
+                include_family_siblings=False,
+            )
+            prompt_hash = sha256_text(self.ambiguity_linking_prompt)
+            input_hash = sha256_text(
+                json.dumps(
+                    {
+                        "target_inventory": target_inventory,
+                        "events": requirement_events,
+                        "ambiguity_linking_prompt_sha256": prompt_hash,
+                    },
+                    ensure_ascii=False,
+                    sort_keys=True,
+                )
+            )
+            checkpoint = self._load_valid_checkpoint(
+                path,
+                force_all
+                or requirement_id in force_ids
+                or not self._checkpoint_hash_matches(meta_path, input_hash),
+                lambda value: validate_ambiguity_linking(value, requirement_id),
+            )
+            if checkpoint is None:
+                print(
+                    f"[{project.project_id}] AMBIGUITY_LINKING {requirement_id} started",
+                    flush=True,
+                )
+                checkpoint = await self.api.call(
+                    project_id=project.project_id,
+                    run_mode="AMBIGUITY_LINKING",
+                    target_requirement=requirement_id,
+                    messages=build_stage_messages(
+                        self.ambiguity_linking_prompt,
+                        "AMBIGUITY_LINKING",
+                        {
+                            "PROJECT_METADATA": self._project_metadata(normalized),
+                            "CURRENT_INVENTORY": target_inventory,
+                            "TARGET_REQUIREMENT": requirement,
+                            "CURRENT_EVENTS": {requirement_id: requirement_events},
+                            "LOCAL_CONTEXT": verification_context(
+                                normalized,
+                                requirement_events,
+                                self.config.context_window,
+                                self.config.max_requirement_context_messages,
+                            ),
+                        },
+                    ),
+                    validator=lambda value: validate_ambiguity_linking(value, requirement_id),
+                )
+                write_json(path, checkpoint)
+                write_json(
+                    meta_path,
+                    {
+                        "input_sha256": input_hash,
+                        "ambiguity_linking_prompt_sha256": prompt_hash,
+                    },
+                )
+            completed += 1
+            print(
+                f"[{project.project_id}] AMBIGUITY_LINKING {completed}/{len(requirements)} "
+                f"{requirement_id} done",
+                flush=True,
+            )
+            return requirement_id, checkpoint
+
+        checkpoints = dict(await asyncio.gather(*(link(requirement) for requirement in requirements)))
+        decisions_by_requirement = {
+            requirement_id: deepcopy(checkpoint.get("decisions", []))
+            for requirement_id, checkpoint in checkpoints.items()
+        }
+        application = apply_ambiguity_links(events, decisions_by_requirement)
+        report = {
+            "run_mode": "AMBIGUITY_LINKING",
+            "project_id": project.project_id,
+            "requirements": [
+                {
+                    "requirement_id": requirement_id,
+                    "decisions": decisions_by_requirement.get(requirement_id, []),
+                }
+                for requirement_id in target_ids
+            ],
+        }
+        ambiguity_count = sum(
+            1
+            for requirement_id in target_ids
+            for event in events[requirement_id]
+            if event.get("event_type") == "AMBIGUOUS"
+        )
+        resolver_event_count = sum(
+            1
+            for requirement_events in application.events.values()
+            for event in requirement_events
+            if event.get("resolves_ambiguity_event_ids")
+        )
+        metrics = {
+            "requirements_reviewed": len(target_ids),
+            "ambiguities_reviewed": ambiguity_count,
+            "ambiguities_resolved": application.resolved_ambiguity_count,
+            "resolver_events": resolver_event_count,
+            "applied_links": application.applied_link_count,
+            "human_review_items": len(application.human_review),
+        }
+        if not requirements:
+            print(f"[{project.project_id}] AMBIGUITY_LINKING skipped: no AMBIGUOUS Events", flush=True)
+        return application.events, report, application.human_review, metrics
+
     def _load_valid_checkpoint(self, path: Path, force: bool, validator: Any) -> dict[str, Any] | None:
         if force or not self.config.resume or not path.is_file():
             return None
@@ -1604,8 +1830,14 @@ class Stage1Pipeline:
             "max_requirement_context_messages",
             "min_requirement_events",
             "min_instance_events",
+            "ambiguity_linking_prompt_sha256",
         }
-        runtime_only = {"reasoning_effort", "min_requirement_events", "min_instance_events"}
+        runtime_only = {
+            "reasoning_effort",
+            "consistency_reasoning_effort",
+            "min_requirement_events",
+            "min_instance_events",
+        }
         for key, value in existing.items():
             if key in runtime_only:
                 continue
@@ -1737,18 +1969,7 @@ class Stage1Pipeline:
         events: dict[str, list[dict[str, Any]]],
         normalized: dict[str, Any],
     ) -> dict[str, list[dict[str, Any]]]:
-        _, order = message_index(normalized)
-        result: dict[str, list[dict[str, Any]]] = {}
-        for requirement_id, requirement_events in events.items():
-            indexed = list(enumerate(requirement_events))
-            indexed.sort(
-                key=lambda pair: (
-                    order.get(id_key(pair[1].get("source_message", {}).get("message_id")), len(order)),
-                    pair[0],
-                )
-            )
-            result[requirement_id] = [event for _, event in indexed]
-        return result
+        return sort_events_by_message_order(normalized, events)
 
     @staticmethod
     def _impact_material_signature(events: dict[str, list[dict[str, Any]]]) -> str:

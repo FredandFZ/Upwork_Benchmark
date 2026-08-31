@@ -15,6 +15,7 @@ EXECUTION_STATUS = {
     "RUNTIME_FAILURE": "FAILED",
     "RUNTIME_VERIFICATION": "VERIFIED_WORKING",
 }
+AMBIGUITY_RESOLVER_EVENT_TYPES = {"INTRODUCE", "MODIFY", "DEFER", "RESUME", "REMOVE"}
 CANONICAL_EVENT_FIELDS = {
     "event_id",
     "source_message",
@@ -24,6 +25,7 @@ CANONICAL_EVENT_FIELDS = {
     "scope_updates",
     "ambiguity",
     "execution",
+    "resolves_ambiguity_event_ids",
 }
 
 
@@ -65,8 +67,9 @@ def canonicalize_event_payload_fields(events: list[dict[str, Any]]) -> int:
     """Add newly introduced nullable fields to provisional/legacy Events.
 
     Intermediate checkpoints predate annotation v0.6 and may not contain
-    ``value_removals``.  Treat omission as null while ensuring every newly
-    generated final Event has the canonical field.
+    ``value_removals``. Treat omission as null. The later ID-preallocation step
+    separately adds ``resolves_ambiguity_event_ids`` so this final-only field
+    does not invalidate upstream semantic checkpoint hashes.
     """
     additions = 0
     for event in events:
@@ -137,6 +140,10 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
     family_counts = {family_id: 0 for family_id in family_ids}
     message_by_id, message_order = message_index(normalized)
     all_event_ids: set[str] = set()
+    all_event_types: dict[str, str] = {}
+    event_requirement: dict[str, str] = {}
+    event_positions: dict[str, int] = {}
+    ambiguity_resolvers: dict[str, str] = {}
     for requirement in requirements:
         requirement_id = requirement["requirement_id"]
         family_id = requirement.get("family_id")
@@ -150,6 +157,10 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
         previous_position = -1
         current_attributes: dict[str, Any] = {}
         for number, event in enumerate(events, start=1):
+            if isinstance(event, dict) and "resolves_ambiguity_event_ids" not in event:
+                # Backward-compatible load normalization. Absence never implies
+                # a heuristic resolution; it means the ambiguity remains OPEN.
+                event["resolves_ambiguity_event_ids"] = None
             if not isinstance(event, dict) or set(event) != CANONICAL_EVENT_FIELDS:
                 _error(f"{requirement_id} event {number} has non-canonical fields")
             expected_id = f"{requirement_id}_E{number:03d}"
@@ -158,6 +169,9 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
             if expected_id in all_event_ids:
                 _error(f"Duplicate event_id: {expected_id}")
             all_event_ids.add(expected_id)
+            all_event_types[expected_id] = str(event.get("event_type"))
+            event_requirement[expected_id] = requirement_id
+            event_positions[expected_id] = number
             source = event.get("source_message")
             if not isinstance(source, dict) or set(source) != {"message_id", "speaker", "text"}:
                 _error(f"{expected_id}.source_message must be an object")
@@ -185,6 +199,36 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
                 current_attributes.pop(attribute, None)
             for attribute, value in (event.get("value_updates") or {}).items():
                 current_attributes[attribute] = value
+            links = event.get("resolves_ambiguity_event_ids")
+            if links is not None:
+                if event.get("event_type") not in AMBIGUITY_RESOLVER_EVENT_TYPES:
+                    _error(f"{expected_id} has an unsupported ambiguity resolver Event type")
+                if not isinstance(links, list) or not links or any(
+                    not isinstance(target_id, str) or not target_id for target_id in links
+                ):
+                    _error(
+                        f"{expected_id}.resolves_ambiguity_event_ids must be null or a "
+                        "non-empty array of non-empty strings"
+                    )
+                if len(links) != len(set(links)):
+                    _error(f"{expected_id}.resolves_ambiguity_event_ids must not contain duplicates")
+                for target_id in links:
+                    if target_id not in all_event_ids:
+                        _error(
+                            f"{expected_id} references unknown or non-earlier ambiguity Event {target_id}"
+                        )
+                    if event_requirement[target_id] != requirement_id:
+                        _error(f"{expected_id} references another Requirement's ambiguity Event {target_id}")
+                    if event_positions[target_id] >= number:
+                        _error(f"{expected_id} must resolve an earlier AMBIGUOUS Event")
+                    if all_event_types[target_id] != "AMBIGUOUS":
+                        _error(f"{expected_id} resolution target {target_id} is not AMBIGUOUS")
+                    previous_resolver = ambiguity_resolvers.get(target_id)
+                    if previous_resolver is not None:
+                        _error(
+                            f"{target_id} is resolved more than once by {previous_resolver} and {expected_id}"
+                        )
+                    ambiguity_resolvers[target_id] = expected_id
     one_member = [family_id for family_id, count in family_counts.items() if count < 2]
     if one_member:
         _error(f"Meaningless one-member/empty Families remain: {', '.join(one_member)}")

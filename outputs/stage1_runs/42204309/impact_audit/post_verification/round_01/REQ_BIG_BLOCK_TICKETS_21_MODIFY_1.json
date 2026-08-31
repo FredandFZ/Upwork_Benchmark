@@ -1,0 +1,138 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_BIG_BLOCK_TICKETS",
+    "message_id": 21,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_TICKETS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-21 MODIFY already records the independently specified Small Block issuance, eligibility, reset, secondary-sale, and counter-independence rules.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-21 MODIFY already records the Small Block trigger, funding, recurrence, and winner-eligibility effects.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-21 INTRODUCE already records visibility of both ticket counters and the permanent badges.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 21,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing message-21 MODIFY captures the Big Block trigger and funding but omits the explicitly established winner-eligibility cohort.",
+      "new_event": {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "client",
+          "text": "Hey [FREELANCER_NAME_001],\nI have one final-final adjustment to the mechanics that should make everything cleaner and easier to code, without any strange half-expiring tickets.\nThis new rule replaces the earlier ticket lifespan description:\n→ Whenever someone mints using a referral code, the referrer immediately receives two distinct tickets on their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThe two counters operate completely independently.\nSmall Block ($2,500 pool → 5 × $500 draw):\nOnly Small Block Tickets issued after the previous small block are eligible for the draw.\nOnce the draw is complete, burn/reset every Small Block Ticket to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nOnly Big Block Tickets issued after the previous big block are eligible for the draw.\nOnce the draw is complete, burn/reset every Big Block Ticket to 0.\n\nThe result is:\nSmall blocks remain extremely fair and fresh because no old tickets carry over.\nBig blocks build up naturally, allowing people to watch their big block entries increase over weeks/months.\nMetadata becomes very simple: display only the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block activates as soon as the small pool = exactly $2,500, and the big block activates when the big pool = exactly $100,000. Secondary royalties continue to fund the pools but do not generate tickets.\nAll other mechanics remain unchanged, including the auto $5 commission, assigning a random ticket to an existing NFT when no referral is used, manual claim, etc.\nThis approach should be simpler both to implement and to explain to users.\nApologies for changing direction again — once you confirm that this is cleaner for you as well, we’re 100% locked.\n\nThanks man!"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "draw_trigger": {
+            "basis": "PRIZE_POOL_BALANCE",
+            "threshold_usd": 100000
+          },
+          "secondary_sale_royalties_fund_pool": true,
+          "winner_eligibility": "Only Big Block Tickets issued after the previous Big Block draw are eligible for the current draw."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKET",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client explicitly states that random ticket allocation when no referral is used remains unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Secondary royalties remain enabled and continue funding the prize pools; the no-ticket side effect belongs to the ticket-lifecycle Requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_PAYOUT_CLAIM",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly says manual claim remains unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIMARY_MINT_REVENUE_SPLIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly preserves the automatic $5 referral commission and does not change primary-mint revenue allocation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly states that the automatic $5 commission remains unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_VRF",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Big Block winner selection must now exclude Big Block Tickets issued before the previous Big Block draw, and no message-21 Event currently records that selection constraint.",
+      "new_event": {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "client",
+          "text": "Hey [FREELANCER_NAME_001],\nI have one final-final adjustment to the mechanics that should make everything cleaner and easier to code, without any strange half-expiring tickets.\nThis new rule replaces the earlier ticket lifespan description:\n→ Whenever someone mints using a referral code, the referrer immediately receives two distinct tickets on their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThe two counters operate completely independently.\nSmall Block ($2,500 pool → 5 × $500 draw):\nOnly Small Block Tickets issued after the previous small block are eligible for the draw.\nOnce the draw is complete, burn/reset every Small Block Ticket to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nOnly Big Block Tickets issued after the previous big block are eligible for the draw.\nOnce the draw is complete, burn/reset every Big Block Ticket to 0.\n\nThe result is:\nSmall blocks remain extremely fair and fresh because no old tickets carry over.\nBig blocks build up naturally, allowing people to watch their big block entries increase over weeks/months.\nMetadata becomes very simple: display only the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block activates as soon as the small pool = exactly $2,500, and the big block activates when the big pool = exactly $100,000. Secondary royalties continue to fund the pools but do not generate tickets.\nAll other mechanics remain unchanged, including the auto $5 commission, assigning a random ticket to an existing NFT when no referral is used, manual claim, etc.\nThis approach should be simpler both to implement and to explain to users.\nApologies for changing direction again — once you confirm that this is cleaner for you as well, we’re 100% locked.\n\nThanks man!"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "big_block_eligible_ticket_cohort": "Only Big Block Tickets issued after the previous Big Block draw are eligible for the Big Block draw."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PROJECT_BRANDING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The ticket-lifecycle adjustment has no effect on product naming or branding.",
+      "new_event": null
+    }
+  ]
+}

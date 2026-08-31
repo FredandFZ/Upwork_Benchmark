@@ -2,48 +2,132 @@
   "run_mode": "CONSISTENCY_AUDIT",
   "patches": [
     {
-      "operation": "ADD_REQUIREMENT",
-      "targets": {},
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_PRIZE_CLAIM_FLOW"
+      },
       "replacement": {
-        "requirement_id": "REQ_HOW_IT_WORKS_SECTION_CONTENT",
-        "title": "Landing-Page How It Works Section Content",
-        "family_id": "SITE_CONTENT_AND_COPY",
-        "definition": "The landing page must present the client-approved copy for the independently editable How It Works section.",
-        "anchor_message_ids": [
-          248
+        "requirements": [
+          {
+            "requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+            "title": "Prize Claim and Delivery Flow",
+            "family_id": "PRIZE_MECHANICS"
+          },
+          {
+            "requirement_id": "REQ_PRIZE_WINNER_NOTIFICATION",
+            "title": "Prize Winner Announcement and Notification",
+            "family_id": "PRIZE_MECHANICS"
+          }
         ]
       },
       "evidence_message_ids": [
-        248
+        143,
+        156,
+        184,
+        781,
+        782,
+        784,
+        785
       ],
-      "decision_note": "Message 248 independently modifies landing-page How It Works copy that is outside the hero, FAQ, About, and Mission Requirements.",
+      "decision_note": "Winner announcement and notification can change or fail independently from whether prize delivery is automatic or uses a conditional claim button.",
       "confidence": "HIGH"
     },
     {
       "operation": "SPLIT_REQUIREMENT",
       "targets": {
-        "requirement_id": "REQ_PAYMENT_METHOD_SELECTION"
+        "requirement_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION"
       },
       "replacement": {
         "requirements": [
           {
-            "requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
-            "title": "Payment Method Selection and Currency Disclosure",
-            "family_id": "MINT_PAYMENTS"
+            "requirement_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION",
+            "title": "NFT Detail Cover Presentation",
+            "family_id": "NFT_COLLECTION_AND_DATA"
           },
           {
-            "requirement_id": "REQ_PAYMENT_METHOD_AVAILABILITY",
-            "title": "Payment Method Availability Gating",
-            "family_id": "MINT_PAYMENTS"
+            "requirement_id": "REQ_NFT_DETAIL_BOOK_ACCESS_ACTION",
+            "title": "NFT Detail Book-Access Action",
+            "family_id": "NFT_COLLECTION_AND_DATA"
           }
         ]
       },
       "evidence_message_ids": [
-        321,
-        424,
-        430
+        288,
+        310,
+        313,
+        411,
+        424
       ],
-      "decision_note": "Selection of implemented currencies and disabling unavailable methods evolve independently: ETH selection was later verified while Card availability remained a separate rule.",
+      "decision_note": "Cover rendering and visibility of the owner-only View Book action are independently testable; the image later failed while action visibility had already been accepted.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_PUBLIC_MINT_AND_POOL_STATISTICS"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_PUBLIC_MINT_AND_POOL_STATISTICS",
+            "title": "Public Mint Statistics",
+            "family_id": "NFT_COLLECTION_AND_DATA"
+          },
+          {
+            "requirement_id": "REQ_PUBLIC_PRIZE_POOL_STATISTICS",
+            "title": "Public Prize Pool Statistics",
+            "family_id": "PRIZE_MECHANICS"
+          },
+          {
+            "requirement_id": "REQ_PUBLIC_REFERRAL_STATISTICS",
+            "title": "Public Referral Statistics",
+            "family_id": "REFERRAL_MECHANICS"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        210,
+        340,
+        430,
+        455,
+        496
+      ],
+      "decision_note": "Mint totals, prize-pool values and next-draw status, and public referral totals have separate values and failure trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_ETH_WALLET_MINT"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_ETH_WALLET_MINT",
+            "title": "ETH Wallet Mint Execution",
+            "family_id": "MINT_AND_PAYMENT"
+          },
+          {
+            "requirement_id": "REQ_ETH_EXCESS_REFUND",
+            "title": "ETH Exact-Output and Excess Refund",
+            "family_id": "MINT_AND_PAYMENT"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        341,
+        401,
+        493,
+        494,
+        519,
+        520,
+        530,
+        534,
+        536,
+        537,
+        571
+      ],
+      "decision_note": "ETH conversion and mint execution followed a separate trajectory from exact-output input handling, shortfall reversion, and the required excess-value refund currency.",
       "confidence": "HIGH"
     },
     {
@@ -55,18 +139,13 @@
         "requirements": [
           {
             "requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
-            "title": "Brevo Transactional Email Transport",
+            "title": "Transactional Email Transport",
             "family_id": null
           },
           {
-            "requirement_id": "REQ_PRIZE_WINNER_EMAIL_NOTIFICATION",
-            "title": "Prize Winner Email Notification",
-            "family_id": null
-          },
-          {
-            "requirement_id": "REQ_BADGE_EMAIL_NOTIFICATION_ACCURACY",
-            "title": "Accurate Badge Email Notifications",
-            "family_id": "BADGE_SYSTEM"
+            "requirement_id": "REQ_NFT_CERTIFICATE_EMAIL",
+            "title": "NFT Certificate Email",
+            "family_id": "BOOK_DELIVERY_AND_ACCESS"
           }
         ]
       },
@@ -75,213 +154,640 @@
         86,
         102,
         184,
-        210,
-        445
-      ],
-      "decision_note": "Brevo transport, prize-winner notification content and triggering, and badge-notification accuracy have different acceptance criteria and failure trajectories.",
-      "confidence": "HIGH"
-    },
-    {
-      "operation": "SPLIT_REQUIREMENT",
-      "targets": {
-        "requirement_id": "REQ_BADGE_AWARD_RULES"
-      },
-      "replacement": {
-        "requirements": [
-          {
-            "requirement_id": "REQ_BADGE_AWARD_RULES",
-            "title": "Achievement Badge Award Rules",
-            "family_id": "BADGE_SYSTEM"
-          },
-          {
-            "requirement_id": "REQ_BADGE_CATALOG",
-            "title": "Approved Achievement Badge Catalog",
-            "family_id": "BADGE_SYSTEM"
-          }
-        ]
-      },
-      "evidence_message_ids": [
-        111,
-        114,
-        143,
-        306,
-        310,
-        313,
+        398,
         445,
-        473
+        624
       ],
-      "decision_note": "Badge membership and icon choices changed independently from milestone-based award eligibility and incorrect award behavior.",
+      "decision_note": "General Brevo transport and sender configuration are distinct from the independently requested NFT certificate email, its contents, and its read/download actions.",
       "confidence": "HIGH"
     },
     {
-      "operation": "SPLIT_REQUIREMENT",
+      "operation": "EDIT_EVENT",
       "targets": {
-        "requirement_id": "REQ_NFT_REWARD_ATTRIBUTES"
+        "requirement_id": "REQ_EBOOK_READER_UX",
+        "event_locator": {
+          "message_id": 184,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
       },
       "replacement": {
-        "requirements": [
-          {
-            "requirement_id": "REQ_NFT_REWARD_ATTRIBUTES",
-            "title": "Accurate NFT Metadata Reward Attributes",
-            "family_id": "NFT_DATA_AND_PRESENTATION"
-          },
-          {
-            "requirement_id": "REQ_NFT_DETAIL_REWARD_SUMMARY",
-            "title": "Accurate NFT Detail Reward Summary",
-            "family_id": "NFT_DATA_AND_PRESENTATION"
-          }
-        ]
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "default_view_mode": "read-only",
+          "viewer_technology": "PDF.js",
+          "viewer_entry_points": [
+            "dashboard",
+            "email link"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "contexts": [
+            "BOOK_READER"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
       },
       "evidence_message_ids": [
-        455,
-        688,
-        691,
-        692
+        184
       ],
-      "decision_note": "Message 688 reports that the live NFT detail summary was correct while generated attributes remained stale, demonstrating independent projections and failure trajectories.",
+      "decision_note": "The reader Requirement owns read-only PDF.js viewing; the certificate's read button and offline-download link belong to the separate NFT certificate email Requirement.",
       "confidence": "HIGH"
     },
     {
-      "operation": "SPLIT_REQUIREMENT",
+      "operation": "EDIT_EVENT",
       "targets": {
-        "requirement_id": "REQ_NFT_ASSET_PRESENTATION"
+        "requirement_id": "REQ_LANDING_HERO_PRESENTATION",
+        "event_locator": {
+          "message_id": 210,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
       },
       "replacement": {
-        "requirements": [
-          {
-            "requirement_id": "REQ_NFT_ASSET_PRESENTATION",
-            "title": "NFT Asset Presentation in Wallets and Product Views",
-            "family_id": "NFT_DATA_AND_PRESENTATION"
-          },
-          {
-            "requirement_id": "REQ_NFT_ASSET_ENDPOINT_RESOLUTION",
-            "title": "NFT Metadata and Asset Endpoint Resolution",
-            "family_id": "NFT_DATA_AND_PRESENTATION"
-          }
-        ]
+        "event_type": "MODIFY",
+        "value_updates": {
+          "headline_text": "A dropout multimillionaire went to zero because of one oversight. Now rebuilding through an eBook model designed to free creators from Amazon's 70% cut.",
+          "subheadline_text": "“My Underdog Journey: To Own Goal” — an unlimited NFT book on Base, priced at $15 forever.",
+          "mechanics_tease_text": "Buy → own the book and receive your referral link. Refer → earn an instant $5 with no limit, plus 1 entry into a random $500 giveaway every 100 sales.",
+          "cta_text": "Mint the eBook NFT for $15",
+          "visual_emphasis": "Make the recurring $500 opportunity a prominent motivator in the hero copy."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
       },
       "evidence_message_ids": [
-        388,
-        393,
-        401,
-        411
+        210
       ],
-      "decision_note": "Direct metadata and image endpoints could resolve while supported-wallet and dashboard rendering still failed, establishing independently testable behaviors.",
+      "decision_note": "Book-cover placement is owned by the separate landing-page cover Requirement rather than the hero Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_LANDING_HERO_PRESENTATION",
+        "event_locator": {
+          "message_id": 212,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "headline_text": "Project Rebuild",
+          "layout_style": "Restore the earlier overall hero layout with subtitles, keeping the header uncluttered and avoiding oversized text or overlap with the dashboard button.",
+          "subtitle_and_copy_treatment": "Retain supporting subtitles, but allow wording to be adapted rather than matched character for character when exact wording would make the page cluttered, repetitive, or overly salesy.",
+          "visual_emphasis": "Boldly emphasize key selling points such as '$500 random giveaway every 100 sales' and '$5 unlimited, instant commission'."
+        },
+        "value_removals": [
+          "subheadline_text",
+          "mechanics_tease_text"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        212
+      ],
+      "decision_note": "After removing the misrouted book-cover attribute from message 210, book_cover_placement no longer exists in this Requirement and cannot be listed as a removal.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_LANDING_HERO_PRESENTATION",
+        "event_locator": {
+          "message_id": 212,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The client observed that oversized text made the landing-page hero header feel cluttered."
+        }
+      },
+      "evidence_message_ids": [
+        212
+      ],
+      "decision_note": "The cover-image overlap is separately represented under the landing-page book-cover Requirement; this Event should retain only the hero-specific clutter failure.",
       "confidence": "HIGH"
     },
     {
       "operation": "DELETE_EVENT",
       "targets": {
-        "requirement_id": "REQ_EBOOK_READER",
+        "requirement_id": "REQ_ABOUT_PAGE_CONTENT",
         "event_locator": {
-          "message_id": 423,
+          "message_id": 156,
+          "event_type": "AMBIGUOUS",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        156
+      ],
+      "decision_note": "The unresolved automatic-versus-claim prize question concerns prize delivery, not the About page, and is already represented under the prize claim Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MINT_PAYMENT_METHOD_PRESENTATION",
+        "event_locator": {
+          "message_id": 328,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        321,
+        328
+      ],
+      "decision_note": "The freelancer's future intention to include a choice neither changes the client-established Requirement nor reports completed implementation.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_TRANSAK_FIAT_MINT",
+        "event_locator": {
+          "message_id": 142,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        140,
+        142
+      ],
+      "decision_note": "Under v0.6 replay, the same-message provider MODIFY resolves the VALUE ambiguity; a separate RESUME is redundant.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+        "event_locator": {
+          "message_id": 684,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        682,
+        684
+      ],
+      "decision_note": "The same-message MODIFY resolves the first-mint exception under v0.6 replay, making the additional RESUME redundant.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+        "event_locator": {
+          "message_id": 587,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Freelancer reports that no-referral mints now generate a ticket for a random recipient."
+        }
+      },
+      "evidence_message_ids": [
+        587
+      ],
+      "decision_note": "Remove the non-schema value_remov field while retaining the target-specific post-failure implementation claim.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+        "event_locator": {
+          "message_id": 672,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        583,
+        672
+      ],
+      "decision_note": "The same-message MODIFY affirming ticket issuance resolves the applicable VALUE ambiguity under v0.6 replay.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+        "event_locator": {
+          "message_id": 684,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        682,
+        684
+      ],
+      "decision_note": "The same-message MODIFY accepts the first-mint exception and resolves the ambiguity under v0.6 replay.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+        "event_locator": {
+          "message_id": 688,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        682,
+        688
+      ],
+      "decision_note": "The message 688 MODIFY establishes the accepted first-mint accounting rule and resolves the VALUE ambiguity under v0.6 replay.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_EMAIL_DASHBOARD_AUTHENTICATION",
+        "event_locator": {
+          "message_id": 448,
           "event_type": "IMPLEMENTATION_CLAIM",
           "occurrence": 1
         }
       },
       "replacement": null,
       "evidence_message_ids": [
-        423
+        448
       ],
-      "decision_note": "The source asks the client to refresh and test behavior that should work; it does not explicitly claim that the reader fix was implemented or completed.",
+      "decision_note": "The source is framed as a request to test expected behavior and does not explicitly report that the email-authentication fix was implemented.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BADGE_AWARD_ACCURACY"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 398,
+          "speaker": "client",
+          "text": "I just completed a purchase using USDC:\nThe purchase succeeded in one transaction, although there was no 'mint successful' popup.\nI also received emails about:\n- new badge - 'Medal'\n- new badge - 'Hustler'\n- new badge - 'High Roller'\n- new badge - 'First Referral'\n- Referral earnings - Earnings $5, Total referrals 2\n\nHowever, 'first referral' is the only badge ticked on my dashboard, and the NFT is still not appearing."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The client received Medal, Hustler, and High Roller badge notifications even though only First Referral was shown as earned."
+        }
+      },
+      "evidence_message_ids": [
+        398
+      ],
+      "decision_note": "This is the earliest concrete observation that unearned badges generated notifications.",
       "confidence": "HIGH"
     },
     {
       "operation": "DELETE_EVENT",
       "targets": {
-        "requirement_id": "REQ_NFT_HOLDER_BOOK_GATING",
+        "requirement_id": "REQ_BADGE_AWARD_ACCURACY",
         "event_locator": {
-          "message_id": 707,
+          "message_id": 445,
           "event_type": "RUNTIME_FAILURE",
           "occurrence": 1
         }
       },
       "replacement": null,
       "evidence_message_ids": [
-        703,
-        706,
-        707
+        398,
+        445
       ],
-      "decision_note": "The reproduced issue is resolved by context to the mobile Lit and wallet handoff path and duplicates the existing mobile-access failure trajectory.",
+      "decision_note": "Message 445 repeats the same unearned-badge-notification failure already established at message 398 without an intervening badge fix or new failure mode.",
       "confidence": "HIGH"
     },
     {
       "operation": "DELETE_EVENT",
       "targets": {
-        "requirement_id": "REQ_NFT_HOLDER_BOOK_GATING",
+        "requirement_id": "REQ_BADGE_AWARD_ACCURACY",
         "event_locator": {
-          "message_id": 708,
+          "message_id": 448,
           "event_type": "IMPLEMENTATION_CLAIM",
           "occurrence": 1
         }
       },
       "replacement": null,
       "evidence_message_ids": [
-        703,
-        707,
-        708
+        448
       ],
-      "decision_note": "The generic issue-resolution claim belongs to the mobile ebook-access exchange and is already represented under that narrower Requirement.",
+      "decision_note": "The source asks the client to test an expected dashboard result but does not explicitly state that badge-award behavior was implemented or fixed.",
       "confidence": "HIGH"
     },
     {
       "operation": "DELETE_EVENT",
       "targets": {
-        "requirement_id": "REQ_ETH_WALLET_MINT",
+        "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
         "event_locator": {
-          "message_id": 530,
+          "message_id": 448,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        448
+      ],
+      "decision_note": "The source is a request to test expected read-page access, not an explicit target-specific implementation report.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+        "event_locator": {
+          "message_id": 449,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        411,
+        449
+      ],
+      "decision_note": "After removing the unsupported message 448 claim, this repeats the same owner read-page failure established at message 411 without a retained intervening fix.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+        "event_locator": {
+          "message_id": 461,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The Lit Protocol key-encryption flow reports an unsupported network."
+        }
+      },
+      "evidence_message_ids": [
+        460,
+        461
+      ],
+      "decision_note": "Remove the non-schema value_remov field while retaining the distinct unsupported-network failure.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CONTRACT_EVENT_INGESTION",
+        "event_locator": {
+          "message_id": 818,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        816,
+        817,
+        818
+      ],
+      "decision_note": "The client reports only that the webhook was created and immediately states that the required webhook secret has not been obtained; this does not support completion of end-to-end event ingestion.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+        "event_locator": {
+          "message_id": 449,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        449
+      ],
+      "decision_note": "The earnings inconsistency is already represented under the narrower commission-accounting Requirement and should not be duplicated under metadata.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+        "event_locator": {
+          "message_id": 585,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        585
+      ],
+      "decision_note": "The incorrect Referral Code attribute is already owned by the narrower NFT referral-code identity Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+        "event_locator": {
+          "message_id": 604,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        604
+      ],
+      "decision_note": "The tokenId referral-code fix is already represented under the narrower NFT referral-code identity Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+        "event_locator": {
+          "message_id": 688,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        688
+      ],
+      "decision_note": "The leaderboard and NFT header accounting were correct; only the stale NFT attributes failed, and that failure is represented under NFT metadata accuracy.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+        "event_locator": {
+          "message_id": 691,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        691
+      ],
+      "decision_note": "The source explicitly changes the metadata service and is already represented under NFT metadata accuracy rather than aggregate commission accounting.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+        "event_locator": {
+          "message_id": 692,
           "event_type": "RUNTIME_VERIFICATION",
           "occurrence": 1
         }
       },
       "replacement": null,
       "evidence_message_ids": [
-        529,
-        530
+        690,
+        691,
+        692
       ],
-      "decision_note": "The source verifies only an excess-USDC refund and does not establish successful NFT delivery or completion of the full ETH mint flow.",
+      "decision_note": "The confirmation resolves the metadata-attribute fix and is already represented under NFT metadata accuracy.",
       "confidence": "HIGH"
     },
     {
-      "operation": "DELETE_EVENT",
+      "operation": "EDIT_EVENT",
       "targets": {
-        "requirement_id": "REQ_DISCORD_COMMUNITY_SERVER",
+        "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
         "event_locator": {
-          "message_id": 779,
-          "event_type": "RUNTIME_VERIFICATION",
+          "message_id": 492,
+          "event_type": "IMPLEMENTATION_CLAIM",
           "occurrence": 1
         }
       },
-      "replacement": null,
+      "replacement": {
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Freelancer reports correcting aggregate Total Earnings to $5."
+        }
+      },
       "evidence_message_ids": [
-        777,
-        778,
-        779
+        492
       ],
-      "decision_note": "Successfully joining through an invitation verifies access only and does not verify the configured channel, onboarding, moderation, and support behavior of the full target Requirement.",
+      "decision_note": "Restrict this claim to the commission-specific aggregate result; per-NFT metadata details are represented separately.",
       "confidence": "HIGH"
     },
     {
-      "operation": "HUMAN_REVIEW",
-      "targets": {},
-      "replacement": null,
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+        "event_locator": {
+          "message_id": 492,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Freelancer reports correcting the aggregate Prize Draw Tickets count to 1."
+        }
+      },
       "evidence_message_ids": [
-        626,
-        627
+        492
       ],
-      "decision_note": "The exchange may create a material ambiguity about removing repeated book-access signing, but the supplied evidence does not establish an accepted change or safely resolvable final behavior.",
-      "confidence": "MEDIUM"
+      "decision_note": "Restrict this claim to the ticket-specific aggregate result and avoid duplicating the broader per-NFT details claim.",
+      "confidence": "HIGH"
     },
     {
-      "operation": "HUMAN_REVIEW",
-      "targets": {},
-      "replacement": null,
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY",
+        "event_locator": {
+          "message_id": 492,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Freelancer reports correcting the Total NFTs count to 2."
+        }
+      },
       "evidence_message_ids": [
-        797,
-        798
+        492
       ],
-      "decision_note": "The Super Admin dashboard is positively received, but it is unclear whether the client approved current implementation or only acknowledged a future proposal.",
-      "confidence": "LOW"
+      "decision_note": "Restrict this claim to the ownership-count result explicitly relevant to this Requirement.",
+      "confidence": "HIGH"
     }
   ]
 }

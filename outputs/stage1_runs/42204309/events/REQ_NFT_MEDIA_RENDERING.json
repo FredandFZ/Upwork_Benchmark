@@ -1,0 +1,213 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NFT_MEDIA_RENDERING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, although I’ve found some bugs.\n\n**Last night, i attempted to mint a couple times while my wallet contained ETH but no USDC. The attempts appear to have failed, yet [URL_002] shows that i have minted twice.**\n\nI also didn’t enter a referral code. I’m unsure what should have happened to the commission and ticket for mint 1, since they’re meant to go to a holder of an already minted NFT. That’s a one-off edge case i hadn’t considered. However, mint 2 should have assigned the commission and ticket to mint 1. (Maybe that didn’t happen because the mint itself failed.)\n\nAlso, when i select the option to view the NFT from the dashboard, the book cover is oversized and gets cut off. I’m also not sure how to access the actual book, possibly because the mint didn’t really succeed.\n\nI’ll try minting with USDC now and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "nft_cover_display": "Display the complete NFT book cover at an appropriate size without cropping."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "NFT_DETAILS",
+          "DASHBOARD"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Very cool, although I’ve found some bugs.\n\n**Last night, i attempted to mint a couple times while my wallet contained ETH but no USDC. The attempts appear to have failed, yet [URL_002] shows that i have minted twice.**\n\nI also didn’t enter a referral code. I’m unsure what should have happened to the commission and ticket for mint 1, since they’re meant to go to a holder of an already minted NFT. That’s a one-off edge case i hadn’t considered. However, mint 2 should have assigned the commission and ticket to mint 1. (Maybe that didn’t happen because the mint itself failed.)\n\nAlso, when i select the option to view the NFT from the dashboard, the book cover is oversized and gets cut off. I’m also not sure how to access the actual book, possibly because the mint didn’t really succeed.\n\nI’ll try minting with USDC now and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Opening the NFT from the dashboard showed an oversized book cover that was cut off."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 310,
+        "speaker": "freelancer",
+        "text": "**Checklist for testing**\n**Please verify the following in production:**\n\n***1\\. Validating referral codes***\n[ACCOUNT_001] Enter an invalid code (*e.g., \"5\" when only 1-2 NFTs exist*) — an invalid message should appear\n[ACCOUNT_001] Enter a valid code (*e.g., \"1\" if NFT #1 exists*) — a valid message should appear\n[ACCOUNT_001] Leave the code blank — the \"No/Invalid referral code\" message should appear\n\n***2\\. Minting***\n[ACCOUNT_001] Try minting with USDC — it should succeed\n[ACCOUNT_001] Review the dashboard — it should list only successful mints\n\n***3\\. NFT details page***\n[ACCOUNT_001] Open an NFT detail page — the complete book cover should be displayed\n[ACCOUNT_001] If you are the owner, the \"*View Book*\" button should appear\n\n***4\\. Badges***\n[ACCOUNT_001] Review the dashboard badges section — it should contain 8 badges (Legend removed). Keep in mind that the badge display is responsive, so it is determined by the screen size\n\nEvery fix is live and available for testing."
+      },
+      "supporting_message_ids": [
+        288
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the live NFT detail-page fix should display the complete book cover."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 313,
+        "speaker": "client",
+        "text": "1 - The invalid-code message looks great, but it needs one final wording change to: 'No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random'.\n\n2 - The first mint continues not to work, possibly because the commission and ticket are coded to be awarded to an existing NFT holder, but no such holder exists for the first mint.\n\n3 - The NFT size is good, and the 'View Book' button also looks good.\n\n4 - The badges look good, but they are currently arranged with 5 in the top row and 3 in the bottom row. If possible, please make it 4 on the top row and 4 on the bottom row."
+      },
+      "supporting_message_ids": [
+        310
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "After testing the NFT detail page, the client reports that the NFT image size is good."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "I’ve fixed it.\nTo view it in your wallet/dashboard now:\n\\=&gt; If necessary, import the NFT manually:\n[ACCOUNT_001] contract: 0x821207f44209be7556fe30643a1eed4ba6e6ce52\n[ACCOUNT_001] token ID: 1\n[ACCOUNT_001] chain: Base Mainnet\n\nRefresh the dashboard. The backend already contains the token in the DB (tokenId 1), so it should display with the new metadata/image and PDF link\n\n."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports a fix intended to display the NFT in the wallet or dashboard with its new metadata image."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "In Rabby, I was able to see the NFT after deselecting 'hide low-value NFTs', but it still showed no image or information. I also haven't managed to import it as a custom token.\n\nI'll try an ETH buy now and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "wallet_image_display": "Render the NFT image in supported wallet NFT views."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "NFT_DETAILS",
+          "DASHBOARD",
+          "WALLET_NFT_VIEW"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "In Rabby, I was able to see the NFT after deselecting 'hide low-value NFTs', but it still showed no image or information. I also haven't managed to import it as a custom token.\n\nI'll try an ETH buy now and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The NFT appeared in Rabby, but its image and information did not render."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "The NFTs are appearing on my dashboard now, but the images don’t show when I click through. Also, nothing appears when I click 'View Book'."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Dashboard NFTs appeared, but their images did not render when the client opened the NFT details."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 423,
+        "speaker": "freelancer",
+        "text": "Please perform a hard refresh of the app:\n[ACCOUNT_001] On Dashboard/NFT detail, the images and “View Book” should function without XML errors.\n[ACCOUNT_001] Run a quick live ETH mint test now to verify the complete end-to-end flow (UI + on-chain) with the new router."
+      },
+      "supporting_message_ids": [
+        411
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that dashboard and NFT-detail images should now function without XML errors after a hard refresh."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 210,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "description": "The request to place the book cover in the hero concerns landing-page presentation, not NFT media rendering."
+    },
+    {
+      "message_id": 212,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "description": "The cover cropping and placement feedback concerns the landing-page book cover."
+    },
+    {
+      "message_id": 213,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "description": "The cut-off cover is explicitly described as a landing-page issue."
+    },
+    {
+      "message_id": 215,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "description": "This implementation commitment responds to the landing-page cover issue."
+    },
+    {
+      "message_id": 217,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "description": "The instruction to show the cover in full refers to the outstanding landing-page adjustment."
+    },
+    {
+      "message_id": 248,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_DISPLAY",
+      "description": "The full-cover request is expressly an outstanding landing-page tweak."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

@@ -1,0 +1,69 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_BIG_BLOCK_TICKETS",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 8,
+        "speaker": "client",
+        "text": "I&#39;ve just spotted a bug in the gameification mechanics.\n\nWe need to remove &#39;top affiliate prizes&#39; and use this approach instead:\nSmall blocks - award 5 x $500 prizes to randomly selected affiliates of the block.\nBig blocks - award 5 x $20k prizes to randomly selected affiliates of the block.\n\nThe more &#39;tickets&#39; earned, the greater the chances of winning."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "ticket_weighting_rule": "More earned tickets increase the holder's chance of winning the Big Block draw."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "BIG_BLOCK",
+          "PRIZE_TICKETS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Hey [FREELANCER_NAME_001],\nI have one final-final adjustment to the mechanics that should make everything cleaner and easier to code, without any strange half-expiring tickets.\nThis new rule replaces the earlier ticket lifespan description:\n→ Whenever someone mints using a referral code, the referrer immediately receives two distinct tickets on their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThe two counters operate completely independently.\nSmall Block ($2,500 pool → 5 × $500 draw):\nOnly Small Block Tickets issued after the previous small block are eligible for the draw.\nOnce the draw is complete, burn/reset every Small Block Ticket to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nOnly Big Block Tickets issued after the previous big block are eligible for the draw.\nOnce the draw is complete, burn/reset every Big Block Ticket to 0.\n\nThe result is:\nSmall blocks remain extremely fair and fresh because no old tickets carry over.\nBig blocks build up naturally, allowing people to watch their big block entries increase over weeks/months.\nMetadata becomes very simple: display only the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block activates as soon as the small pool = exactly $2,500, and the big block activates when the big pool = exactly $100,000. Secondary royalties continue to fund the pools but do not generate tickets.\nAll other mechanics remain unchanged, including the auto $5 commission, assigning a random ticket to an existing NFT when no referral is used, manual claim, etc.\nThis approach should be simpler both to implement and to explain to users.\nApologies for changing direction again — once you confirm that this is cleaner for you as well, we’re 100% locked.\n\nThanks man!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "tickets_per_successful_referral": 1,
+        "ticket_recipient": "The NFT belonging to the referrer whose code was used.",
+        "counter_is_independent_from_small_block": true,
+        "eligible_ticket_cohort": "Big Block Tickets issued after the previous Big Block draw.",
+        "post_draw_reset_to_zero": true,
+        "secondary_sales_generate_tickets": false
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 195,
+        "speaker": "client",
+        "text": "Hey [FREELANCER_NAME_001], I’d like to remove the big blocks and redirect that extra $1 to me, making the split:\n$15 buy, $5 to me, $5 to affiliate, $5 to block prize pool.\n\nThis improves my bottom line while having minimal effect on sales.\nIt also makes the game mechanics and marketing simpler.\n\nAn even split between me and every community member, together with everyone having an equal chance at the never-ending $500 prizes, seems consistent with the project’s ethos."
+      },
+      "supporting_message_ids": [],
+      "event_type": "REMOVE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

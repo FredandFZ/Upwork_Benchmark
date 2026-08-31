@@ -1,0 +1,129 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+    "message_id": 684,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A complete same-message MODIFY already records that commissions are counted only for completed primary mints after mint #1 and preserves the secondary-sale exclusion.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A same-message MODIFY already records the accepted first-mint ticket exception while leaving the normal no-referral allocation rule unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 684,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY captures the first-mint exception but unnecessarily rewrites the allocation condition and drops the previously established invalid-referral path, which the source does not change.",
+      "new_event": {
+        "source_message": {
+          "message_id": 684,
+          "speaker": "client",
+          "text": "Yeah, that’s fine, since it’s a one-off and won’t have any impact going forward."
+        },
+        "supporting_message_ids": [
+          682
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "commission_issuance_rate": "One randomly allocated $5 commission per completed mint governed by the no-referral or invalid-referral allocation path after mint #1.",
+          "first_mint_random_commission_allocation_required": false
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The metadata rule requires counters to include tickets actually assigned to an NFT; accepting that mint #1 assigns no ticket does not alter that rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accepted exception concerns random allocation when no earlier NFT exists, not ticket issuance from a valid code-used mint.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client explicitly treats the first-mint exception as a one-off with no forward impact, so it does not necessarily require changing the future-facing FAQ copy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accepted historical first-mint exception does not necessarily change the About page's description of the normal ongoing no-referral allocation process.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The first-mint ticket-count exception does not change the Small Block prize amount, funding, draw interval, eligibility window, or reset behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change which referral codes are valid or the established normal-case validation feedback.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Accepting that no ticket is assigned when no earlier holder exists does not alter VRF selection among holders of tickets that were actually issued.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BADGE_CATALOG_AND_PRESENTATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The first-mint accounting exception is unrelated to the badge catalog, badge replacement, count, or layout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The ticket and commission exception for mint #1 does not change automatic delivery of prizes to winners.",
+      "new_event": null
+    }
+  ]
+}

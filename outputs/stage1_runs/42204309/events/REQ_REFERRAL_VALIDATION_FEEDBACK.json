@@ -11,8 +11,8 @@
       "supporting_message_ids": [],
       "event_type": "INTRODUCE",
       "value_updates": {
-        "valid_code_message": "Valid referral code! $5 + $500 prize draw ticket to your selected referer.",
-        "no_or_invalid_code_message": "No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random."
+        "valid_code_feedback": "Valid referral code! $5 + $500 prize draw ticket to your selected referer.",
+        "no_or_invalid_code_feedback": "No/Invalid referral code! $5 + $500 prize draw ticket to an existing NFT holder at random."
       },
       "value_removals": null,
       "scope_updates": {
@@ -23,7 +23,7 @@
         ],
         "contexts": [
           "REFERRAL_VALIDATION",
-          "MINT_PAGE"
+          "PRIMARY_MINT"
         ]
       },
       "ambiguity": null,
@@ -35,7 +35,9 @@
         "speaker": "freelancer",
         "text": "**Checklist for testing**\n**Please verify the following in production:**\n\n***1\\. Validating referral codes***\n[ACCOUNT_001] Enter an invalid code (*e.g., \"5\" when only 1-2 NFTs exist*) — an invalid message should appear\n[ACCOUNT_001] Enter a valid code (*e.g., \"1\" if NFT #1 exists*) — a valid message should appear\n[ACCOUNT_001] Leave the code blank — the \"No/Invalid referral code\" message should appear\n\n***2\\. Minting***\n[ACCOUNT_001] Try minting with USDC — it should succeed\n[ACCOUNT_001] Review the dashboard — it should list only successful mints\n\n***3\\. NFT details page***\n[ACCOUNT_001] Open an NFT detail page — the complete book cover should be displayed\n[ACCOUNT_001] If you are the owner, the \"*View Book*\" button should appear\n\n***4\\. Badges***\n[ACCOUNT_001] Review the dashboard badges section — it should contain 8 badges (Legend removed). Keep in mind that the badge display is responsive, so it is determined by the screen size\n\nEvery fix is live and available for testing."
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        305
+      ],
       "event_type": "IMPLEMENTATION_CLAIM",
       "value_updates": null,
       "value_removals": null,
@@ -43,7 +45,26 @@
       "ambiguity": null,
       "execution": {
         "status": "CLAIMED_WORKING",
-        "observed_behavior": "Freelancer reports that valid, invalid, and blank referral-code feedback is live in production."
+        "observed_behavior": "Freelancer reports that the valid, invalid, and blank referral-code feedback fixes are live in production."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 313,
+        "speaker": "client",
+        "text": "1 - The invalid-code message looks great, but it needs one final wording change to: 'No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random'.\n\n2 - The first mint continues not to work, possibly because the commission and ticket are coded to be awarded to an existing NFT holder, but no such holder exists for the first mint.\n\n3 - The NFT size is good, and the 'View Book' button also looks good.\n\n4 - The badges look good, but they are currently arranged with 5 in the top row and 3 in the bottom row. If possible, please make it 4 on the top row and 4 on the bottom row."
+      },
+      "supporting_message_ids": [
+        310
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Client confirms that the invalid-code feedback is displayed correctly, before requesting a final wording adjustment."
       }
     },
     {
@@ -55,7 +76,7 @@
       "supporting_message_ids": [],
       "event_type": "MODIFY",
       "value_updates": {
-        "no_or_invalid_code_message": "No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random"
+        "no_or_invalid_code_feedback": "No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random"
       },
       "value_removals": null,
       "scope_updates": null,
@@ -66,38 +87,28 @@
   "routing_warnings": [
     {
       "message_id": 291,
-      "suggested_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
-      "description": "The message defines which submitted referral codes are valid and reports incorrect acceptance, rather than specifying validation-result feedback copy."
-    },
-    {
-      "message_id": 303,
-      "suggested_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
-      "description": "The higher-than-current referral code being marked valid is a failure of the underlying validation rule."
+      "suggested_requirement_id": "REQ_REFERRAL_CODE_IDENTITY_VALIDATION",
+      "description": "The invalid acceptance of an unminted NFT number primarily concerns the underlying referral-code validity rule rather than the feedback copy."
     },
     {
       "message_id": 360,
-      "suggested_requirement_id": "REQ_MINT_SUCCESS_CONFIRMATION",
-      "description": "The stale Mint Successful popup triggered while editing a referral code concerns mint-success confirmation accuracy, not referral-validation feedback."
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "The stale Mint Successful popup triggered while editing a referral code concerns post-mint success-state accuracy, not pre-mint referral validation feedback."
     },
     {
       "message_id": 738,
-      "suggested_requirement_id": "REQ_MINT_SUCCESS_CONFIRMATION",
-      "description": "The requested no-referral wording is explicitly for the post-mint success modal."
-    },
-    {
-      "message_id": 742,
-      "suggested_requirement_id": "REQ_MINT_SUCCESS_CONFIRMATION",
-      "description": "The client requires separate post-mint success messages depending on whether a referral code was used."
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "This message changes post-transaction mint-success modal copy for a no-referral mint."
     },
     {
       "message_id": 746,
-      "suggested_requirement_id": "REQ_MINT_SUCCESS_CONFIRMATION",
-      "description": "The requested code-used wording belongs to the post-mint success modal rather than pre-mint validation feedback."
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "This message changes post-transaction mint-success modal copy for a referral mint."
     },
     {
       "message_id": 750,
-      "suggested_requirement_id": "REQ_MINT_SUCCESS_CONFIRMATION",
-      "description": "The implementation claim concerns referral-dependent Mint Successful modal timing and copy."
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "The implementation claim concerns post-mint success-modal timing and reward-routing copy rather than pre-mint validation feedback."
     }
   ],
   "missing_requirement_candidates": []

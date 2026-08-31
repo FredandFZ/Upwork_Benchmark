@@ -1,0 +1,116 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_SMALL_BLOCK_TICKETS",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 8,
+        "speaker": "client",
+        "text": "I&#39;ve just spotted a bug in the gameification mechanics.\n\nWe need to remove &#39;top affiliate prizes&#39; and use this approach instead:\nSmall blocks - award 5 x $500 prizes to randomly selected affiliates of the block.\nBig blocks - award 5 x $20k prizes to randomly selected affiliates of the block.\n\nThe more &#39;tickets&#39; earned, the greater the chances of winning."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "ticket_weighting_rule": "More tickets earned give an affiliate a greater chance of winning a Small Block prize."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "SMALL_BLOCK",
+          "PRIZE_TICKETS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Hey [FREELANCER_NAME_001],\nI have one final-final adjustment to the mechanics that should make everything cleaner and easier to code, without any strange half-expiring tickets.\nThis new rule replaces the earlier ticket lifespan description:\n→ Whenever someone mints using a referral code, the referrer immediately receives two distinct tickets on their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThe two counters operate completely independently.\nSmall Block ($2,500 pool → 5 × $500 draw):\nOnly Small Block Tickets issued after the previous small block are eligible for the draw.\nOnce the draw is complete, burn/reset every Small Block Ticket to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nOnly Big Block Tickets issued after the previous big block are eligible for the draw.\nOnce the draw is complete, burn/reset every Big Block Ticket to 0.\n\nThe result is:\nSmall blocks remain extremely fair and fresh because no old tickets carry over.\nBig blocks build up naturally, allowing people to watch their big block entries increase over weeks/months.\nMetadata becomes very simple: display only the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block activates as soon as the small pool = exactly $2,500, and the big block activates when the big pool = exactly $100,000. Secondary royalties continue to fund the pools but do not generate tickets.\nAll other mechanics remain unchanged, including the auto $5 commission, assigning a random ticket to an existing NFT when no referral is used, manual claim, etc.\nThis approach should be simpler both to implement and to explain to users.\nApologies for changing direction again — once you confirm that this is cleaner for you as well, we’re 100% locked.\n\nThanks man!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "tickets_per_referral_code_mint": 1,
+        "ticket_recipient": "The referrer's NFT",
+        "issuance_timing": "Immediately when a mint uses the referral code",
+        "eligibility_window": "Only Small Block tickets issued after the previous Small Block draw are eligible for the current draw",
+        "post_draw_action": "Burn or reset every Small Block ticket to 0 after the draw",
+        "ticket_carryover": false,
+        "secondary_sales_generate_tickets": false
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 581,
+        "speaker": "client",
+        "text": "Yes, the USDC minting succeeded, and my #4 mint now has $5 and a ticket.\n\nHowever, when we mint without a referral code, it appears that no ticket is generated and neither a ticket nor commission is awarded at random."
+      },
+      "supporting_message_ids": [
+        580
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirmed that a successful USDC mint using referral code #4 resulted in NFT #4 receiving a ticket."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 146,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_TICKET",
+      "description": "The random allocation of a ticket when no referral code is entered belongs to the independent no-referral ticket path."
+    },
+    {
+      "message_id": 146,
+      "suggested_requirement_id": "REQ_SECONDARY_SALE_STATE_TRANSFER",
+      "description": "The transfer of active prize tickets to an NFT's secondary purchaser belongs to the secondary-sale state-transfer Requirement."
+    },
+    {
+      "message_id": 195,
+      "suggested_requirement_id": "REQ_BIG_BLOCK_TICKETS",
+      "description": "Removing Big Blocks affects the independent Big Block ticket lifecycle rather than the continuing Small Block ticket lifecycle."
+    },
+    {
+      "message_id": 441,
+      "suggested_requirement_id": "REQ_REWARD_ACCOUNTING_VISIBILITY",
+      "description": "The dashboard's displayed zero-ticket count is a reward-accounting visibility issue and does not establish that the underlying ticket was not issued."
+    },
+    {
+      "message_id": 579,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_TICKET",
+      "description": "The missing ticket occurred specifically on a no-referral mint and belongs to the no-referral ticket allocation Requirement."
+    },
+    {
+      "message_id": 672,
+      "suggested_requirement_id": "REQ_REWARD_ACCOUNTING_VISIBILITY",
+      "description": "The unresolved ticket totals and missing backfill concern leaderboard and NFT-attribute accounting visibility."
+    },
+    {
+      "message_id": 724,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_TICKET",
+      "description": "The supplied context identifies this as successful verification of the no-referral ticket-and-commission path."
+    },
+    {
+      "message_id": 732,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_TICKET",
+      "description": "The leaderboard total is evidence that the random no-referral ticket and commission were distributed."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

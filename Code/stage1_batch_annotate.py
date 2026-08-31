@@ -59,6 +59,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=root / "prompt" / "stage1_prompt_single_pass.md",
     )
+    parser.add_argument(
+        "--ambiguity-linking-prompt-file",
+        type=Path,
+        default=root / "prompt" / "stage1_ambiguity_linking.md",
+        help="Independent prompt used only by AMBIGUITY_LINKING.",
+    )
     parser.add_argument("--output-dir", type=Path, default=root / "outputs" / "stage1_annotations")
     parser.add_argument("--run-root", type=Path, default=root / "outputs" / "stage1_runs")
     parser.add_argument(
@@ -87,6 +93,15 @@ def parse_args() -> argparse.Namespace:
         "--reasoning-effort",
         choices=("low", "medium", "high", "xhigh", "max"),
         default=REASONING_EFFORT,
+    )
+    parser.add_argument(
+        "--consistency-reasoning-effort",
+        choices=("low", "medium", "high", "xhigh", "max"),
+        default=None,
+        help=(
+            "Override reasoning effort only for CONSISTENCY_AUDIT calls. "
+            "When omitted, those calls inherit --reasoning-effort."
+        ),
     )
     parser.add_argument(
         "--max-concurrent-requests",
@@ -155,6 +170,9 @@ async def main_async(args: argparse.Namespace) -> int:
         impact_audit_addendum = args.impact_audit_addendum_file.read_text(encoding="utf-8-sig")
         value_removal_addendum = args.value_removal_addendum_file.read_text(encoding="utf-8-sig")
         single_prompt = args.single_pass_prompt_file.read_text(encoding="utf-8-sig")
+        ambiguity_linking_prompt = args.ambiguity_linking_prompt_file.read_text(
+            encoding="utf-8-sig"
+        )
     except OSError as exc:
         print(f"Cannot read prompt file: {exc}", file=sys.stderr)
         return 2
@@ -199,7 +217,8 @@ async def main_async(args: argparse.Namespace) -> int:
     if args.dry_run:
         print(
             f"Would process {len(projects)} project(s) in {args.annotation_mode} mode with "
-            f"{args.model} (reasoning={args.reasoning_effort}):"
+            f"{args.model} (reasoning={args.reasoning_effort}, "
+            f"consistency_reasoning={args.consistency_reasoning_effort or 'inherited'}):"
         )
         for project in projects:
             print(f"  {project.project_id}: {project.chat_path} -> {project.output_path}")
@@ -225,9 +244,11 @@ async def main_async(args: argparse.Namespace) -> int:
         verification_addendum_path=args.verification_addendum_file,
         impact_audit_addendum_path=args.impact_audit_addendum_file,
         value_removal_addendum_path=args.value_removal_addendum_file,
+        ambiguity_linking_prompt_path=args.ambiguity_linking_prompt_file,
         upgrade_existing_annotation_path=args.upgrade_existing_annotation,
         model=args.model,
         reasoning_effort=args.reasoning_effort,
+        consistency_reasoning_effort=args.consistency_reasoning_effort,
         annotation_mode=args.annotation_mode,
         resume=args.resume,
         force_stages=set(args.force_stage),
@@ -265,6 +286,11 @@ async def main_async(args: argparse.Namespace) -> int:
             max_concurrent_requests=args.max_concurrent_requests,
             log_path=call_log_path,
             failed_response_dir=args.log_dir / "failed_responses",
+            reasoning_effort_overrides=(
+                {"CONSISTENCY_AUDIT": args.consistency_reasoning_effort}
+                if args.consistency_reasoning_effort is not None
+                else None
+            ),
         )
         pipeline = Stage1Pipeline(
             api,
@@ -275,11 +301,18 @@ async def main_async(args: argparse.Namespace) -> int:
             verification_addendum,
             impact_audit_addendum,
             value_removal_addendum,
+            ambiguity_linking_prompt,
         )
 
         async def run_project(project):
             async with project_semaphore:
-                print(f"[{project.project_id}] pipeline started ({args.annotation_mode})", flush=True)
+                consistency_effort = args.consistency_reasoning_effort or args.reasoning_effort
+                print(
+                    f"[{project.project_id}] pipeline started ({args.annotation_mode}; "
+                    f"reasoning={args.reasoning_effort}; "
+                    f"CONSISTENCY_AUDIT={consistency_effort})",
+                    flush=True,
+                )
                 try:
                     annotation = await pipeline.run(project)
                 except Exception as exc:

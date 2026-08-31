@@ -8,43 +8,55 @@
   },
   "decisions": [
     {
-      "candidate_requirement_id": "REQ_MISSION_PAGE_CONTENT",
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "A complete same-message MODIFY already updates both Small and Big Block prize copy on the Mission page.",
+      "reason": "Changing the Block prize counts and draw intervals does not alter the $5 code-used referral commission.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "A complete same-message MODIFY already changes the winner count, pool amount per draw, and draw condition for the Small Block.",
+      "reason": "The source changes prize amounts, winner counts, and draw intervals but does not resolve or modify prize delivery and claim behavior.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "candidate_requirement_id": "REQ_AAVE_PRIZE_POOL_YIELD",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "A complete same-message MODIFY already changes the winner count, prize-pool total, and sales-count trigger for the Big Block.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_PROJECT_BRANDING",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "Changing block-prize amounts and draw frequency does not alter the current or conditional future project names.",
+      "reason": "Message 158 does not change or remove Aave yield integration; the later statement at message 159 cannot be propagated from this source Event.",
       "new_event": null
     },
     {
       "candidate_requirement_id": "REQ_FAQ_CONTENT",
-      "decision": "ADD_EVENT",
+      "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The approved FAQ still contains the superseded Small and Big Block figures, so its published prize copy must reflect the new parameters.",
+      "reason": "The existing message-158 MODIFY already updates both Small and Big Block prize descriptions to the new counts and intervals.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The number and frequency of prizes change, but ticket-weighted Chainlink VRF winner selection remains valid unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 158,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY captures the new winner count and interval but leaves the obsolete approximate-interval flag true even though the source specifies exactly every 10,000 sales.",
       "new_event": {
         "source_message": {
           "message_id": 158,
@@ -54,19 +66,9 @@
         "supporting_message_ids": [],
         "event_type": "MODIFY",
         "value_updates": {
-          "faq_baseline_copy": {
-            "directive": "Replace the prior FAQ with the complete revised FAQ Q&A previously supplied, with its block-prize figures updated to Small Block: 1 × $500 every 100 sales and Big Block: 1 × $10,000 every 10,000 sales.",
-            "notable_copy_revisions": [
-              "Add a zero-guarantee disclaimer to the future governance-token statement.",
-              "Explain that no-code mints send commission and tickets to a random existing NFT holder.",
-              "State that the referral code also appears directly on the NFT.",
-              "Clarify wallet requirements for fiat minting, commissions, prize tickets, and later trading.",
-              "State that active prize tickets transfer with a sold NFT.",
-              "Revise the founder-allocation and fiat-fee explanation.",
-              "Update the prize-claim link from [URL_002] to [URL_009].",
-              "Update the prize figures to Small Block: 1 × $500 every 100 sales and Big Block: 1 × $10,000 every 10,000 sales."
-            ]
-          }
+          "winner_count": 1,
+          "draw_trigger": "every 10,000 sales",
+          "sales_interval_is_approximate": false
         },
         "value_removals": null,
         "scope_updates": null,
@@ -75,59 +77,51 @@
       }
     },
     {
-      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source changes prize amounts and draw frequency but does not resolve or alter the claim-versus-automatic-delivery method.",
+      "reason": "The existing message-158 MODIFY fully captures the one-winner, $500-pool, exact 100-sales Small Block configuration.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "candidate_requirement_id": "REQ_NFT_RESALE_STATE_TRANSFER",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The $5 coded-referral commission and its delivery rules remain unchanged.",
+      "reason": "Changing prize counts and draw intervals does not alter transfer of active or expired ticket state upon NFT resale.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_PRIZE_POOL_AAVE_YIELD",
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source message changes prize parameters but does not itself remove or modify Aave yield integration.",
+      "reason": "The prize adjustment does not change referral-code identity, lifetime, sharing, display, or resale behavior.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_PRIMARY_SALE_REVENUE_SPLIT",
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The client states that the same net amount will still be given away, so the per-sale revenue allocation remains valid unchanged.",
+      "reason": "Both Small and Big Block ticket counters remain required; changing draw counts and intervals does not necessarily alter the listed metadata fields.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+      "candidate_requirement_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The source changes draw cadence and winner count but does not alter the secondary royalty amount, enforcement, funding role, or ticket-generation rule.",
+      "reason": "The source preserves the same net prize amount and does not change the mint price, founder share, referral commission, or active prize-pool destinations.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_NFT_TRANSFER_STATE",
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Changing block-prize parameters does not alter the transfer behavior of the book, referral code, badges, or active and expired tickets.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_FIAT_BUYER_REWARD_ACCESS",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The source does not change fiat-user dashboard access or wallet requirements for commissions and prize tickets.",
+      "reason": "The Block prize adjustment does not change allocation of the $5 no-referral commission to a random existing NFT holder.",
       "new_event": null
     }
   ]

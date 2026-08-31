@@ -1,0 +1,166 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+    "message_id": 672,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing Event captures ticket visibility and backfill but omits the explicit one-to-one consistency rule between issued tickets and $5 commissions.",
+      "new_event": {
+        "source_message": {
+          "message_id": 672,
+          "speaker": "client",
+          "text": "At this point, we have completed 12 mints, so that should amount to 12 tickets &amp; 12 x $5 commissions.\n\n**Even if no referral code is used, a ticket and commission are still issued**.\n\nCurrently, **when a code is used**, it is accurately reflected on the leaderboards/NFT attributes. Perfect.\n\nIf **no referral code is used**, the ticket and commission are assigned at random.\n(B**ut they must still be reflected on the leaderboard/NFT attributes**.)\n\nI believe that since your most recent fix, the randomly assigned tickets from the last 2 mints have been reflected on the leaderboard/NFT attributes. Great.\nHowever, the missing tickets have not been backfilled.\n\nThe commissions from these purchases without a code are also still not reflected on the leaderboard/NFT attributes.\n\nIn my screenshot, you will see that I have an NFT showing 2 tickets but only 1 x $5 commission. That should not be possible because each ticket includes a $5 commission.\n\nAlso, in my leaderboard screenshot, only 7 tickets and 5 x $5 commissions are accounted for out of 12 total mints.\nWhether or not a referral code is used, 12 mints should result in 12 tickets and 12 x $5 commissions."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "ticket_surface_consistency_rule": "Tickets awarded through both code-used and no-code mints must be reflected on leaderboards and NFT attributes.",
+          "historical_backfill_required": true,
+          "ticket_commission_consistency_rule": "Every issued ticket must correspond to one $5 commission, so ticket and commission counts must remain consistent across aggregate and per-NFT views."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing Event requires reward attributes and historical backfill but omits the explicit requirement that each NFT's ticket and $5 commission counts remain paired.",
+      "new_event": {
+        "source_message": {
+          "message_id": 672,
+          "speaker": "client",
+          "text": "At this point, we have completed 12 mints, so that should amount to 12 tickets &amp; 12 x $5 commissions.\n\n**Even if no referral code is used, a ticket and commission are still issued**.\n\nCurrently, **when a code is used**, it is accurately reflected on the leaderboards/NFT attributes. Perfect.\n\nIf **no referral code is used**, the ticket and commission are assigned at random.\n(B**ut they must still be reflected on the leaderboard/NFT attributes**.)\n\nI believe that since your most recent fix, the randomly assigned tickets from the last 2 mints have been reflected on the leaderboard/NFT attributes. Great.\nHowever, the missing tickets have not been backfilled.\n\nThe commissions from these purchases without a code are also still not reflected on the leaderboard/NFT attributes.\n\nIn my screenshot, you will see that I have an NFT showing 2 tickets but only 1 x $5 commission. That should not be possible because each ticket includes a $5 commission.\n\nAlso, in my leaderboard screenshot, only 7 tickets and 5 x $5 commissions are accounted for out of 12 total mints.\nWhether or not a referral code is used, 12 mints should result in 12 tickets and 12 x $5 commissions."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "reward_accounting_attributes": "Tickets and $5 commissions credited through either code-used or no-referral random allocation must be reflected in the NFT attributes",
+          "historical_reward_attribute_backfill_required": true,
+          "ticket_commission_attribute_consistency": "Each NFT's ticket count must have a matching $5 commission count; an NFT cannot show more issued tickets than corresponding commissions."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event already records one $5 commission for every primary mint, while random recipient selection was established earlier and remains unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The message clarifies accounting behavior during debugging but does not request a change to FAQ copy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event records one ticket per no-referral mint; its random-recipient and registration rules were already established.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Random allocation of no-referral tickets does not change the VRF draw method or eligibility rule; holders of such eligible tickets were already covered by the existing population definition.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source confirms that code-used commissions are already represented correctly and does not change their amount, trigger, recipient, destination, or timing.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accounting clarification does not instruct that the About page or its rendered process copy be revised.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Whether a code is used affects reward allocation and accounting, not the identity, lifetime, sharing, display, or resale behavior of an NFT's referral code.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source establishes that the $5 commission allocation applies to every completed primary mint, not only code-used mints, making the prior code-limited revenue attribute stale.",
+      "new_event": {
+        "source_message": {
+          "message_id": 672,
+          "speaker": "client",
+          "text": "At this point, we have completed 12 mints, so that should amount to 12 tickets &amp; 12 x $5 commissions.\n\n**Even if no referral code is used, a ticket and commission are still issued**.\n\nCurrently, **when a code is used**, it is accurately reflected on the leaderboards/NFT attributes. Perfect.\n\nIf **no referral code is used**, the ticket and commission are assigned at random.\n(B**ut they must still be reflected on the leaderboard/NFT attributes**.)\n\nI believe that since your most recent fix, the randomly assigned tickets from the last 2 mints have been reflected on the leaderboard/NFT attributes. Great.\nHowever, the missing tickets have not been backfilled.\n\nThe commissions from these purchases without a code are also still not reflected on the leaderboard/NFT attributes.\n\nIn my screenshot, you will see that I have an NFT showing 2 tickets but only 1 x $5 commission. That should not be possible because each ticket includes a $5 commission.\n\nAlso, in my leaderboard screenshot, only 7 tickets and 5 x $5 commissions are accounted for out of 12 total mints.\nWhether or not a referral code is used, 12 mints should result in 12 tickets and 12 x $5 commissions."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "commission_share_per_primary_sale_usd": 5
+        },
+        "value_removals": [
+          "referral_commission_per_code_used_mint_usd"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source reports code-used ticket issuance as already accurate and does not change its trigger, recipient, count, cycle, or exclusion of secondary sales.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns ticket and commission issuance and accounting, not the Small Block prize amount, draw frequency, eligibility window, funding, or reset behavior.",
+      "new_event": null
+    }
+  ]
+}

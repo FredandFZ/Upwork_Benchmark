@@ -30,6 +30,7 @@ EXECUTION_STATUS_BY_EVENT = {
 }
 SCOPE_FIELDS = ("persistence", "components", "contexts")
 AMBIGUITY_DIMENSIONS = {"VALUE", "SCOPE", "LIFECYCLE"}
+AMBIGUITY_RESOLVER_EVENT_TYPES = {"INTRODUCE", "MODIFY", "DEFER", "RESUME", "REMOVE"}
 
 
 class Stage2ReplayError(ValueError):
@@ -65,13 +66,12 @@ class _ReplayState:
         }
     )
     lifecycle_status: str | None = None
-    ambiguity: dict[str, Any] | None = None
+    open_ambiguities: dict[str, dict[str, Any]] = field(default_factory=dict)
     execution: dict[str, Any] | None = None
     attribute_sources: dict[str, str] = field(default_factory=dict)
     attribute_removal_sources: dict[str, str] = field(default_factory=dict)
     scope_sources: dict[str, str] = field(default_factory=dict)
     lifecycle_source: str | None = None
-    ambiguity_source: str | None = None
     execution_source: str | None = None
     # False means the visible history began after the Requirement may already
     # have existed.  In that case, removing an attribute absent from the
@@ -84,7 +84,8 @@ class _ReplayState:
         sources = set(self.attribute_sources.values())
         sources.update(self.attribute_removal_sources.values())
         sources.update(self.scope_sources.values())
-        for source in (self.lifecycle_source, self.ambiguity_source, self.execution_source):
+        sources.update(self.open_ambiguities)
+        for source in (self.lifecycle_source, self.execution_source):
             if source is not None:
                 sources.add(source)
         return sorted(sources, key=event_positions.__getitem__)
@@ -95,7 +96,7 @@ class _ReplayState:
             "attributes": deepcopy(self.attributes),
             "scope": deepcopy(self.scope),
             "lifecycle_status": self.lifecycle_status,
-            "ambiguity": deepcopy(self.ambiguity),
+            "ambiguity": deepcopy(self.open_ambiguities) or None,
             "execution": deepcopy(self.execution),
             "supporting_event_ids": self.supporting_event_ids(event_positions),
         }
@@ -103,7 +104,7 @@ class _ReplayState:
 
 def _validate_event(event: Any, requirement_id: str, number: int) -> dict[str, Any]:
     label = f"{requirement_id}.events[{number - 1}]"
-    event = _require_object(event, label)
+    event = deepcopy(_require_object(event, label))
     event_id = _non_empty_string(event.get("event_id"), f"{label}.event_id")
     event_type = event.get("event_type")
     if event_type not in EVENT_TYPES:
@@ -118,6 +119,24 @@ def _validate_event(event: Any, requirement_id: str, number: int) -> dict[str, A
     scope_updates = event.get("scope_updates")
     ambiguity = event.get("ambiguity")
     execution = event.get("execution")
+    resolution_ids = event.get("resolves_ambiguity_event_ids")
+    if resolution_ids is not None:
+        if not isinstance(resolution_ids, list) or not resolution_ids or any(
+            not isinstance(ambiguity_id, str) or not ambiguity_id
+            for ambiguity_id in resolution_ids
+        ):
+            raise Stage2ReplayError(
+                f"{event_id}.resolves_ambiguity_event_ids must be null or a non-empty string array"
+            )
+        if len(resolution_ids) != len(set(resolution_ids)):
+            raise Stage2ReplayError(
+                f"{event_id}.resolves_ambiguity_event_ids contains duplicates"
+            )
+        if event_type not in AMBIGUITY_RESOLVER_EVENT_TYPES:
+            raise Stage2ReplayError(
+                f"{event_id} has an unsupported ambiguity resolver Event type"
+            )
+    event["resolves_ambiguity_event_ids"] = resolution_ids
     if value_updates is not None and not isinstance(value_updates, dict):
         raise Stage2ReplayError(f"{event_id}.value_updates must be an object or null")
     if value_removals is not None:
@@ -180,27 +199,13 @@ def _validate_event(event: Any, requirement_id: str, number: int) -> dict[str, A
     return event
 
 
-def _scope_has_update(scope_updates: dict[str, Any] | None) -> bool:
-    return bool(scope_updates) and any(scope_updates.get(field) is not None for field in SCOPE_FIELDS)
-
-
-def _modify_resolves_ambiguity(
-    state: _ReplayState,
-    value_updates: dict[str, Any] | None,
-    value_removals: list[str] | None,
-    scope_updates: dict[str, Any] | None,
-) -> bool:
-    """Apply the guideline's dimension-aware ambiguity resolution rule."""
-    if state.ambiguity is None:
-        return False
-    dimension = state.ambiguity.get("dimension")
-    if dimension == "VALUE":
-        return bool(value_updates) or bool(value_removals)
-    if dimension == "SCOPE":
-        return _scope_has_update(scope_updates)
-    # A concrete change confirms that a lifecycle-ambiguous Requirement still
-    # exists.  Explicit lifecycle decisions are handled by DEFER/RESUME/REMOVE.
-    return bool(value_updates) or bool(value_removals) or _scope_has_update(scope_updates)
+def _close_linked_ambiguities(state: _ReplayState, event: dict[str, Any]) -> None:
+    for ambiguity_id in event.get("resolves_ambiguity_event_ids") or []:
+        if ambiguity_id not in state.open_ambiguities:
+            raise Stage2ReplayError(
+                f"{event['event_id']} cannot close ambiguity {ambiguity_id!r} because it is not OPEN"
+            )
+        del state.open_ambiguities[ambiguity_id]
 
 
 def _apply_event(
@@ -247,51 +252,45 @@ def _apply_event(
             state.baseline_complete = True
             if has_previous_state:
                 # Earlier observed-history Events remain represented by their
-                # own Nodes and Edges, but execution/ambiguity from an unknown
-                # pre-introduction baseline must not leak into the formally
-                # introduced Requirement version.
+                # own Nodes and Edges. Execution from an unknown pre-introduction
+                # baseline does not carry into the formally introduced version.
+                # Ambiguities close only through explicit Stage 1 links.
                 state.execution = None
                 state.execution_source = None
-                state.ambiguity = None
-                state.ambiguity_source = None
         else:
             # A Requirement change creates a new semantic version. Execution
             # evidence for the previous version must not be carried forward.
             state.execution = None
             state.execution_source = None
-            if _modify_resolves_ambiguity(state, value_updates, value_removals, scope_updates):
-                state.ambiguity = None
-                state.ambiguity_source = None
+        _close_linked_ambiguities(state, event)
         return
 
     if event_type == "DEFER":
         state.lifecycle_status = "DEFERRED"
         state.lifecycle_source = event_id
+        _close_linked_ambiguities(state, event)
         return
 
     if event_type == "RESUME":
         state.lifecycle_status = "ACTIVE"
         state.lifecycle_source = event_id
-        state.ambiguity = None
-        state.ambiguity_source = None
+        _close_linked_ambiguities(state, event)
         return
 
     if event_type == "REMOVE":
         state.lifecycle_status = "REMOVED"
         state.lifecycle_source = event_id
-        state.ambiguity = None
-        state.ambiguity_source = None
+        _close_linked_ambiguities(state, event)
         return
 
     if event_type == "AMBIGUOUS":
         ambiguity = event["ambiguity"]
-        state.ambiguity = {
+        state.open_ambiguities[event_id] = {
             "status": "OPEN",
             "dimension": ambiguity["dimension"],
             "description": ambiguity["description"],
             "source_event_id": event_id,
         }
-        state.ambiguity_source = event_id
         return
 
     execution = event["execution"]
@@ -317,6 +316,33 @@ def _build_requirement_graph(
             raise Stage2ReplayError(f"duplicate event_id: {event_id}")
         project_event_ids.add(event_id)
         validated_events.append(event)
+
+    local_event_positions = {
+        event["event_id"]: position for position, event in enumerate(validated_events)
+    }
+    local_event_by_id = {event["event_id"]: event for event in validated_events}
+    resolved_ambiguities: set[str] = set()
+    for resolver_position, event in enumerate(validated_events):
+        for ambiguity_id in event.get("resolves_ambiguity_event_ids") or []:
+            ambiguity_event = local_event_by_id.get(ambiguity_id)
+            if ambiguity_event is None:
+                raise Stage2ReplayError(
+                    f"{event['event_id']} references unknown or cross-Requirement ambiguity "
+                    f"Event {ambiguity_id!r}"
+                )
+            if local_event_positions[ambiguity_id] >= resolver_position:
+                raise Stage2ReplayError(
+                    f"{event['event_id']} must resolve an earlier AMBIGUOUS Event"
+                )
+            if ambiguity_event.get("event_type") != "AMBIGUOUS":
+                raise Stage2ReplayError(
+                    f"{event['event_id']} resolution target {ambiguity_id} is not AMBIGUOUS"
+                )
+            if ambiguity_id in resolved_ambiguities:
+                raise Stage2ReplayError(
+                    f"AMBIGUOUS Event {ambiguity_id} is resolved more than once"
+                )
+            resolved_ambiguities.add(ambiguity_id)
 
     # Preserve every Stage 1 Requirement and every valid Event.  When visible
     # history starts without INTRODUCE, replay begins from an incomplete,
@@ -352,21 +378,7 @@ def _build_requirement_graph(
     # The canonical Stage 1 assembler has already sorted Events by original
     # project-history position.  Array order is retained because message IDs
     # can be arbitrary strings, and same-message Events have an explicit order.
-    previous_modify_closed_ambiguity = False
     for event in replay_events:
-        # When MODIFY has already resolved the open ambiguity, an immediately
-        # following RESUME would produce no new semantic state. The Stage 1
-        # Event remains in the annotation, but is omitted from this state graph.
-        if (
-            event["event_type"] == "RESUME"
-            and previous_modify_closed_ambiguity
-            and state.lifecycle_status == "ACTIVE"
-            and state.ambiguity is None
-        ):
-            previous_modify_closed_ambiguity = False
-            continue
-
-        ambiguity_was_open = state.ambiguity is not None
         _apply_event(
             state,
             event,
@@ -375,11 +387,6 @@ def _build_requirement_graph(
         )
         if event["event_type"] == "INTRODUCE":
             introduction_seen = True
-        previous_modify_closed_ambiguity = (
-            event["event_type"] == "MODIFY"
-            and ambiguity_was_open
-            and state.ambiguity is None
-        )
         state_id = f"{requirement_id}_S{len(nodes) + 1:03d}"
         nodes.append(state.node(state_id, event_positions))
         edges.append(

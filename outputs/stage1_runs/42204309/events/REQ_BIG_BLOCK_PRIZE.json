@@ -12,21 +12,19 @@
       "event_type": "INTRODUCE",
       "value_updates": {
         "winner_count": 5,
-        "prize_amount_per_winner": "$20,000",
-        "winner_selection": "randomly selected affiliates of the block",
-        "ticket_weighting": "more tickets increase the chance of winning"
+        "prize_amount_per_winner": "$20,000"
       },
       "value_removals": null,
       "scope_updates": {
         "persistence": "PROJECT_PERSISTENT",
         "components": [
-          "SMART_CONTRACT",
           "BACKEND",
-          "FRONTEND"
+          "FRONTEND",
+          "SMART_CONTRACT"
         ],
         "contexts": [
-          "PRIZE_SYSTEM",
-          "BIG_BLOCK"
+          "BIG_BLOCK",
+          "PRIZE_SYSTEM"
         ]
       },
       "ambiguity": null,
@@ -38,33 +36,18 @@
         "speaker": "client",
         "text": "Hey [FREELANCER_NAME_001],\nI have one final-final adjustment to the mechanics that should make everything cleaner and easier to code, without any strange half-expiring tickets.\nThis new rule replaces the earlier ticket lifespan description:\n→ Whenever someone mints using a referral code, the referrer immediately receives two distinct tickets on their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThe two counters operate completely independently.\nSmall Block ($2,500 pool → 5 × $500 draw):\nOnly Small Block Tickets issued after the previous small block are eligible for the draw.\nOnce the draw is complete, burn/reset every Small Block Ticket to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nOnly Big Block Tickets issued after the previous big block are eligible for the draw.\nOnce the draw is complete, burn/reset every Big Block Ticket to 0.\n\nThe result is:\nSmall blocks remain extremely fair and fresh because no old tickets carry over.\nBig blocks build up naturally, allowing people to watch their big block entries increase over weeks/months.\nMetadata becomes very simple: display only the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block activates as soon as the small pool = exactly $2,500, and the big block activates when the big pool = exactly $100,000. Secondary royalties continue to fund the pools but do not generate tickets.\nAll other mechanics remain unchanged, including the auto $5 commission, assigning a random ticket to an existing NFT when no referral is used, manual claim, etc.\nThis approach should be simpler both to implement and to explain to users.\nApologies for changing direction again — once you confirm that this is cleaner for you as well, we’re 100% locked.\n\nThanks man!"
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        8
+      ],
       "event_type": "MODIFY",
       "value_updates": {
-        "tickets_per_successful_coded_referral": 1,
-        "ticket_counter_independence": "operates independently from the Small Block ticket counter",
-        "ticket_eligibility_window": "only Big Block tickets issued after the previous Big Block draw are eligible",
-        "ticket_reset_after_draw": 0,
-        "prize_pool_total": "$100,000",
-        "draw_trigger": {
-          "type": "POOL_BALANCE",
-          "operator": "EXACTLY_EQUALS",
-          "value": "$100,000"
-        },
-        "secondary_royalties_fund_pool": true,
-        "secondary_royalties_generate_tickets": false
+        "draw_trigger": "Big Block prize pool reaches exactly $100,000",
+        "ticket_eligibility_window": "Big Block tickets issued after the previous Big Block draw",
+        "post_draw_ticket_action": "burn/reset all Big Block tickets to 0",
+        "secondary_royalties_fund_pool": true
       },
       "value_removals": null,
-      "scope_updates": {
-        "persistence": null,
-        "components": [
-          "SMART_CONTRACT",
-          "BACKEND",
-          "FRONTEND",
-          "NFT_METADATA"
-        ],
-        "contexts": null
-      },
+      "scope_updates": null,
       "ambiguity": null,
       "execution": null
     },
@@ -78,11 +61,7 @@
       "event_type": "MODIFY",
       "value_updates": {
         "prize_amount_per_winner": "$10,000",
-        "prize_pool_total": "$50,000",
-        "draw_trigger": {
-          "type": "SALES_COUNT",
-          "value": 50000
-        }
+        "draw_trigger": "every 50,000 sales"
       },
       "value_removals": null,
       "scope_updates": null,
@@ -95,7 +74,9 @@
         "speaker": "freelancer",
         "text": "I&#39;ve applied the adjustment.\nThe big block now activates at $50,000 and selects 5 winners, with each one receiving $10,000."
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        123
+      ],
       "event_type": "IMPLEMENTATION_CLAIM",
       "value_updates": null,
       "value_removals": null,
@@ -103,8 +84,28 @@
       "ambiguity": null,
       "execution": {
         "status": "CLAIMED_WORKING",
-        "observed_behavior": "Freelancer reports applying the Big Block adjustment so the block activates at $50,000 and selects five winners receiving $10,000 each."
+        "observed_behavior": "Freelancer reports implementing the adjusted Big Block activation and five $10,000 prizes."
       }
+    },
+    {
+      "source_message": {
+        "message_id": 143,
+        "speaker": "client",
+        "text": "What does Project Rebuild involve?\nProject Rebuild is my public mission to restore my family’s life after we lost everything because of a seed-phrase mistake.\nI’m selling my novella memoir on Base as an unlimited-mint NFT ebook, powered by my first-of-its-kind FAMM (Fully Autonomous Marketing Model).\nBy sharing it, readers can earn instant, unlimited commissions &amp; prizes. If the model succeeds, it will become BooksOnChain — a community-owned platform serving every indie creator.\n\nHow can buyers make money?\n1. Receive an instant $5 commission whenever somebody mints with your referral code\n2. Earn Small &amp; Big Block prize tickets each time a person mints using your code\n3. Receive the future BooksOnChain governance token (for buyers, affiliates, and tippers)\n\nHow does the referral system operate?\nThe mint number of every NFT IS its permanent referral code.\nEither of these examples works perfectly:\n→ Share the complete link\n→ Or simply tell someone “use referral 423”\nWhen a person mints with your code, you immediately receive $5 + Small &amp; Big Block prize tickets for the current blocks.\n\nHow can I locate my referral code?\nYour referral code is your mint number. It will appear:\n- In your NFT metadata on-chain\n- On your Dashboard once you have minted\n- In your confirmation email (optional)\n\n### How do Small Block and Big Block prizes work?\nSmall Block: 5 × $500 are drawn every ~500 sales (mint + secondary)\nBig Block: 5 × $10,000 are drawn every ~50,000 sales (mint + secondary)\nEvery sale funds the pools forever.\n\n### How are the winners chosen?\nWinners are selected through Chainlink VRF — entirely on-chain, provably fair, and verifiable on Basescan.\n\n### What do Small &amp; Big Block prize tickets represent?\nThey are one-time entries for the current Small Block and current Big Block draws.\nYou receive them only when people mint through your code (1 Small + 1 Big for each successful referral).\nAfter the block is drawn, those tickets expire, and subsequent referrals apply to the next blocks.\n\n### How can I collect my rewards?\n- $5 commissions → transferred to your wallet automatically\n- Prize wins → posted on the Winners page and claimable with one click here on [URL_002]\n\n### What do badges mean?\nBadges are added to your NFT on-chain when you reach referral milestones (2, 10, 50, 100+).\nAt present, they are cosmetic + leaderboard flex only. Later, they may provide access to token-gated chats, discounts, airdrops, DAO weight, etc.\n\n### Can I use fiat (credit card) to mint?\nYes — Transak accepts cards, Apple Pay, and Google Pay. Neither crypto nor a wallet is required.\n\n### Is a wallet required to participate?\nOnly when you want affiliate commissions paid to you or intend to trade the NFT later.\n\n### Which blockchain does this use?\nBase (Ethereum L2) — fast, inexpensive, and Coinbase-backed.\n\n### Are hidden fees involved?\nNo. A mint costs exactly $15. Secondary sales include a clearly displayed flat $10 royalty.\n\n### What occurs when I sell my NFT?\nThe purchaser receives the book, your original mint number (which becomes their referral code), and all badges you earned. Any expired prize tickets remain expired.\n\n### How can I share my referral link/code?\nFrom the Dashboard → copy the complete link, or copy only your mint number and tell people “use referral 423”.\n\n### Is this a pyramid scheme or scam?\nNo. It is single-level only, the supply is unlimited, and the full source is verified on Basescan. I receive exactly $4 from every sale forever — the same cut from mints and every secondary sale.\n\n### How can I reach support?\nThere is no Discord yet (it will launch after we gain real traction).\nFor the moment:\nDM [HANDLE_001] on X\nor\nemail [EMAIL_002]\nI respond personally and quickly.\n\nIf you still have questions, DM [HANDLE_001] on X or email [EMAIL_002] — I’m happy to assist.\n\nLoad all of these and you are finished.\nThe site is now surgically clean, with no room for misunderstanding. Launch whenever you’re ready — I’ll be here the moment it goes live."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "sales_counted_toward_draw": [
+          "PRIMARY_MINT",
+          "SECONDARY_SALE"
+        ],
+        "primary_mints_fund_pool": true
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
     },
     {
       "source_message": {
@@ -116,11 +117,7 @@
       "event_type": "MODIFY",
       "value_updates": {
         "winner_count": 1,
-        "prize_pool_total": "$10,000",
-        "draw_trigger": {
-          "type": "SALES_COUNT",
-          "value": 10000
-        }
+        "draw_trigger": "every 10,000 sales"
       },
       "value_removals": null,
       "scope_updates": null,
@@ -142,17 +139,6 @@
       "execution": null
     }
   ],
-  "routing_warnings": [
-    {
-      "message_id": 781,
-      "suggested_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
-      "description": "The question concerns the post-win claim interaction for the remaining $500 prize rather than the removed Big Block mechanism."
-    },
-    {
-      "message_id": 782,
-      "suggested_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
-      "description": "The claim-button implementation statement belongs to the independent prize claim-flow Requirement."
-    }
-  ],
+  "routing_warnings": [],
   "missing_requirement_candidates": []
 }

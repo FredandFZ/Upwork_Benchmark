@@ -10,18 +10,107 @@ Credentials are read only from `UPWORK_API_KEY` and `UPWORK_BUDGET_ID`.
 
 Every Event contains `value_removals`; a MODIFY may delete obsolete top-level attributes before applying `value_updates`. After the global consistency audit, the pipeline replays provisional states at each material MODIFY/REMOVE, retrieves cross-Requirement candidates from title/current attributes/scope/history/family/shared entities, and asks the impact audit for `ADD_EVENT`, `EDIT_EVENT`, `NO_IMPACT`, or `HUMAN_REVIEW`. Only HIGH-confidence ADD/EDIT decisions are applied. By default, sparse Requirements are retained even when they contain fewer than three Events.
 
+## Explicit ambiguity linking
+
+The final Event schema also contains:
+
+```json
+"resolves_ambiguity_event_ids": null
+```
+
+An Event that resolves one or more earlier ambiguities contains their exact
+final Event IDs instead:
+
+```json
+"resolves_ambiguity_event_ids": [
+  "REQ_ABOUT_PAGE_CONTENT_E002"
+]
+```
+
+The pipeline order is:
+
+```text
+EVENT_VERIFICATION
+    -> apply KEEP / EDIT / DELETE
+    -> stable chronological sort
+    -> deterministic final Event-ID preallocation
+    -> AMBIGUITY_LINKING for Requirements that still contain AMBIGUOUS Events
+    -> apply valid HIGH-confidence links
+    -> final assembly and validation
+```
+
+`AMBIGUITY_LINKING` uses only the independent prompt
+`prompt/stage1_ambiguity_linking.md`; its rules are not appended to the shared
+Stage 1 prompt and therefore do not increase tokens for Evidence Scan,
+Discovery, Extraction, Audit, or Verification. It cannot edit Events,
+Requirement ontology, or source evidence. It only decides whether each
+`AMBIGUOUS` Event is `RESOLVED` by a particular later Event or remains
+`UNRESOLVED`.
+
+The linker is called once per Requirement containing at least one `AMBIGUOUS`
+Event. Requirements without ambiguity do not trigger a linking API request.
+The exact files are:
+
+```text
+stage1_runs/<project_id>/
+  ambiguity_linking.json
+  ambiguity_linking/
+    <requirement_id>.json
+    <requirement_id>.meta.json
+```
+
+- `ambiguity_linking/<requirement_id>.json` is the resumable raw model decision
+  checkpoint for one Requirement.
+- Its `.meta.json` stores the input and dedicated-prompt hashes used to decide
+  whether that checkpoint is reusable.
+- `ambiguity_linking.json` is the project-level human-readable aggregation of
+  every per-Requirement decision, including `affected_state_paths`, resolver,
+  non-resolving intermediate Events, decision note, and confidence.
+- The final annotation keeps only `resolves_ambiguity_event_ids`; the diagnostic
+  fields remain in `ambiguity_linking.json`.
+
+Automatic application requires every condition below:
+
+- `resolution_status` is `RESOLVED` and `confidence` is `HIGH`;
+- the ambiguity and resolver Events both exist in the same Requirement;
+- the target is an earlier `AMBIGUOUS` Event;
+- the resolver type is `INTRODUCE`, `MODIFY`, `DEFER`, `RESUME`, or `REMOVE`;
+- the same ambiguity is not resolved by multiple Events.
+
+`MEDIUM`, `LOW`, missing, duplicate, or semantically invalid link decisions are
+not applied. They are written to `human_review.json` with
+`source: "AMBIGUITY_LINKING"`, the target IDs, evidence message IDs, the raw
+linking decision, and a concrete rejection reason. A HIGH-confidence
+`UNRESOLVED` decision is retained in `ambiguity_linking.json` and leaves the
+ambiguity open without creating a review item.
+
+To rerun only this stage and reuse all earlier semantic checkpoints:
+
+```powershell
+python Code\stage1_batch_annotate.py --project-id 42204309 --force-stage ambiguity_linking --insecure
+```
+
+The ID-preallocation and final assembler use the same stable sorting function,
+so IDs seen by the linker are exactly the IDs written to the final annotation.
+Final validation rejects dangling, duplicate, future, cross-Requirement, or
+non-AMBIGUOUS references. Older Stage 1 Events missing the field are treated as
+`null`; Stage 2 keeps those ambiguities open and does not infer a resolver.
+
 New checkpoints and reports:
 
 ```text
 impact_audited_state.json
 impact_audit/<phase>/round_NN/*.json
 cross_requirement_impact_audit.json
+ambiguity_linking/<requirement_id>.json
+ambiguity_linking.json
 ```
 
 Relevant controls:
 
 ```text
 --force-stage cross_requirement_impact_audit
+--force-stage ambiguity_linking
 --max-impact-audit-rounds 2
 --max-impact-candidates-per-event 12
 ```
@@ -354,7 +443,24 @@ CHANGE_SESSION
 HUMAN_REVIEW
 ```
 
-代码按顺序应用 patches：
+代码按确定性的两阶段顺序应用 patches：
+
+```text
+1. 应用 Requirement ontology patches
+   ADD / MERGE / SPLIT / DELETE REQUIREMENT
+        ↓
+2. 只重新提取新增、合并或拆分后仍存在的 Requirements
+        ↓
+3. 在重提取结果上应用其余 patches
+   CHANGE_FAMILY / CHANGE_SESSION / ADD_EVENT / DELETE_EVENT / EDIT_EVENT / MOVE_EVENT
+```
+
+这条顺序很重要。例如同一轮同时新增一个 Requirement，并要求删除另一个
+Requirement 中的冗余 `RESUME` 时，边界重提取必须先完成，`DELETE_EVENT`
+随后才应用。否则重新提取可能把刚删除的 Event 再次生成，导致 Audit 原始输出
+正确，但 `audited_state.json` 和最终标注仍保留该 Event。
+
+自动应用规则保持不变：
 
 - HIGH-confidence、非 `HUMAN_REVIEW` 且结构有效的 patch 自动应用；
 - MEDIUM/LOW-confidence patch 不自动应用，进入 `human_review.json`；
@@ -364,7 +470,7 @@ HUMAN_REVIEW
 
 #### 边界变化后的重提取
 
-`ADD_REQUIREMENT`、`MERGE_REQUIREMENTS`、`SPLIT_REQUIREMENT` 或 `DELETE_REQUIREMENT` 会让 ontology boundary 发生变化。代码在完成当前轮 patch application 后，对受影响、仍存在的 Requirements 重新执行 Event Extraction。
+`ADD_REQUIREMENT`、`MERGE_REQUIREMENTS`、`SPLIT_REQUIREMENT` 或 `DELETE_REQUIREMENT` 会让 ontology boundary 发生变化。只有新增、合并或拆分后仍存在且需要重建 lifecycle 的 Requirements 会重新执行 Event Extraction。仅被 `ADD_EVENT`、`DELETE_EVENT`、`EDIT_EVENT`、`MOVE_EVENT`、`CHANGE_FAMILY` 或 `CHANGE_SESSION` 影响的 Requirement 不会因为同轮其他边界变化而被无关重提取。
 
 如果最后允许的一轮仍改变边界，代码增加：
 
@@ -663,7 +769,20 @@ legacy final annotation files whose `requirements` array is already empty.
 - Consistency Audit receives the retained inventory and Events plus aggregated routing warnings and missing-Requirement candidates from Event Extraction.
 - Target-specific Audit `HUMAN_REVIEW` items are passed into Event Verification and included in its checkpoint hash.
 - Verification checkpoints also depend on the target inventory and verification-addendum hash, so a verifier-only policy change does not require regenerating upstream stages.
-- Reasoning effort can be changed with `--reasoning-effort low|medium|high|xhigh`. It does not invalidate compatible semantic checkpoints.
+- `--reasoning-effort low|medium|high|xhigh|max` sets the global reasoning effort.
+- `--consistency-reasoning-effort low|medium|high|xhigh|max` overrides it only for `CONSISTENCY_AUDIT`; when omitted, Consistency Audit inherits the global value. Changing either setting does not invalidate compatible semantic checkpoints.
+
+For example, use `xhigh` in Evidence Scan, Requirement Discovery, Event Extraction,
+Cross-Requirement Impact Audit, Event Verification, and Ambiguity Linking, while
+using `high` for the larger Consistency Audit request:
+
+```powershell
+python Code\stage1_batch_annotate.py --project-id 42204309 --reasoning-effort xhigh --consistency-reasoning-effort high --insecure
+```
+
+The effective value is recorded per request in `outputs/stage1_logs/api_calls.jsonl`.
+The project-level `run_metadata.json` records both the global value and the
+effective Consistency Audit value. The startup line also prints both values.
 
 When a positive optional threshold is explicitly configured, discarded short lifecycles are retained for analysis at:
 
@@ -675,7 +794,8 @@ outputs/stage1_runs/<project_id>/discarded_requirements.json
 
 ```text
 --model gpt-5.6-sol
---reasoning-effort high
+--reasoning-effort low|medium|high|xhigh|max
+--consistency-reasoning-effort low|medium|high|xhigh|max
 --verification-addendum-file prompt/stage1_event_verification_addendum.md
 --max-concurrent-requests 4
 --project-concurrency 1
@@ -1047,7 +1167,19 @@ python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file pro
 | target is invalid | Requirement 已被前一个 patch 删除、合并或更名。 | 判断 patch 是否已过时；若仍需要，改为当前有效 target。 |
 | replacement is invalid | replacement 缺字段、类型错误或不符合 patch contract。 | 修复 Prompt/schema 或代码校验。 |
 
-修改 Audit Prompt 或 patch-application 代码后，从 Audit 开始：
+只修改 patch-application 代码后，直接用默认 resume 重建 Audit state 和下游结果：
+
+```powershell
+python Code\stage1_batch_annotate.py --project-id <project_id> --overwrite --insecure
+```
+
+Audit application 逻辑带有独立版本标识。版本变化会使 `audited_state.json`
+失效，但仍可复用输入一致的 `consistency_audit_round_N.json` 模型输出，因此不需要
+为了重新应用同一批 patches 再调用一次 Consistency Audit API。受 Audit state 改变
+影响的下游 Impact Audit、Verification、Ambiguity Linking 和 final assembly 会按各自
+checkpoint hash 决定复用或重跑。
+
+如果修改的是 Audit Prompt，或者希望模型重新生成 patches，则显式从 Audit 开始：
 
 ```powershell
 python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt.md --force-stage consistency_audit --insecure

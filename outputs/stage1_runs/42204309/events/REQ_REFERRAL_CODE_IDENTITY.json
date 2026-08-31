@@ -11,25 +11,30 @@
       "supporting_message_ids": [],
       "event_type": "INTRODUCE",
       "value_updates": {
-        "referral_code_source": "nft_mint_number",
-        "referral_code_permanence": "permanent",
-        "display_in_on_chain_metadata": true,
-        "display_on_dashboard_after_mint": true,
-        "display_in_confirmation_email": "optional"
+        "referral_code_basis": "Each NFT's mint number",
+        "referral_code_lifetime": "Permanent for that NFT",
+        "sharing_methods": [
+          "complete referral link",
+          "mint number"
+        ],
+        "display_surfaces": [
+          "NFT metadata on-chain",
+          "dashboard",
+          "confirmation email (optional)"
+        ],
+        "resale_behavior": "The NFT's original mint number becomes the purchaser's referral code"
       },
       "value_removals": null,
       "scope_updates": {
         "persistence": "PROJECT_PERSISTENT",
         "components": [
-          "SMART_CONTRACT",
           "BACKEND",
           "FRONTEND",
-          "NFT_METADATA",
-          "EMAIL"
+          "SMART_CONTRACT"
         ],
         "contexts": [
-          "REFERRAL_SYSTEM",
-          "NFT_IDENTITY"
+          "NFT_METADATA",
+          "REFERRAL_CODE"
         ]
       },
       "ambiguity": null,
@@ -44,7 +49,12 @@
       "supporting_message_ids": [],
       "event_type": "MODIFY",
       "value_updates": {
-        "display_directly_on_nft": true
+        "display_surfaces": [
+          "directly on the NFT",
+          "NFT metadata",
+          "dashboard",
+          "confirmation email (optional)"
+        ]
       },
       "value_removals": null,
       "scope_updates": null,
@@ -65,27 +75,8 @@
       "ambiguity": null,
       "execution": {
         "status": "FAILED",
-        "observed_behavior": "NFT mint #5 displayed referral code 3 from the purchase in its attributes instead of its own mint-number referral code."
+        "observed_behavior": "NFT #5's Referral Code attribute displayed code 3 used for its purchase instead of NFT #5's own mint number."
       }
-    },
-    {
-      "source_message": {
-        "message_id": 590,
-        "speaker": "client",
-        "text": "Each NFT’s attribute should be its own referral code rather than the referral code used to buy it."
-      },
-      "supporting_message_ids": [
-        585,
-        589
-      ],
-      "event_type": "MODIFY",
-      "value_updates": {
-        "nft_attribute_referral_code_source": "the NFT's own mint number, not the referral code used for purchase"
-      },
-      "value_removals": null,
-      "scope_updates": null,
-      "ambiguity": null,
-      "execution": null
     },
     {
       "source_message": {
@@ -101,15 +92,25 @@
       "ambiguity": null,
       "execution": {
         "status": "CLAIMED_WORKING",
-        "observed_behavior": "Freelancer reports that the NFT Referral Code now consistently uses the NFT's own tokenId instead of the code used during purchase."
+        "observed_behavior": "Freelancer reports that each NFT's Referral Code now consistently uses its own tokenId rather than the referral code used during purchase."
       }
     }
   ],
   "routing_warnings": [
     {
-      "message_id": 793,
-      "suggested_requirement_id": "REQ_MINT_ONE_OWNERSHIP_ASSIGNMENT",
-      "description": "The client requests transfer of mint and affiliate code #1 to a specific wallet; this changes ownership assignment rather than the general referral-code identity rule."
+      "message_id": 291,
+      "suggested_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+      "description": "This message concerns whether an entered referral code is valid and prevention of future-token self-referrals, not the NFT's own referral-code identity."
+    },
+    {
+      "message_id": 538,
+      "suggested_requirement_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY",
+      "description": "The proposed numbering restart and exclusion of old-contract NFTs are consequences of contract replacement rather than a change to the rule that each NFT uses its own token ID as its referral code."
+    },
+    {
+      "message_id": 691,
+      "suggested_requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "description": "The metadata-service change addresses referral, ticket, and earnings accounting attributes rather than the NFT Referral Code field."
     }
   ],
   "missing_requirement_candidates": []

@@ -1,105 +1,295 @@
-# ReqMemBench Task-centered Gold State
+# ReqMemBench Stage 2.2：LLM 选择目标时间与 Gold State
 
-This step deterministically derives task-centered benchmark artifacts from an
-existing Requirement State Graph. It does not call a model and does not reread
-the raw project data in `Datasets/`.
+> 状态：新版 Pipeline 已实现。旧的 position / priority / random sampler 已从
+> `Code/stage2/gold_state.py` 移除。离线测试和 `42204309 --prepare-only` 已验证；真实
+> LLM API 调用仍需配置凭据后显式运行。
 
-For the upgraded sample, the data flow is:
+新版 Stage 2.2 先从已标注的 Client task 中选择有 Requirement Memory benchmark
+价值的目标时间 \(t^*\)，再从 Requirement State Graph 确定性生成 Task 前后的 Gold
+State。详细函数、schema、校验、测试和迁移设计见
+[`DESIGN_stage2_target_time_selection.md`](DESIGN_stage2_target_time_selection.md)。
+
+## 新版数据流
 
 ```text
-outputs/stage1_upgrade_runs/42204309/normalized_project.json
+outputs/stage1_runs/<project_id>/normalized_project.json
         +
-outputs/stage2_v06/42204309/requirement_state_graph.json
+outputs/stage1_annotations/<project_id>_stage1_annotation.json
         +
-Code/config/stage2_gold_state.json
-        ->
-outputs/stage2_v06/42204309/gold_states.json
+outputs/stage2/<project_id>/requirement_state_graph.json
+        |
+        v
+规则生成 candidate_tasks.json
+        |
+        v
+candidate_contexts.json
+        |
+        v
+candidate_packets.jsonl
+        |
+        v  每个 Candidate 一次 LLM 评估
+candidate_llm_evaluations.jsonl
+        |
+        v
+recommended_candidates.json
+        |
+        +--> 默认模式：coverage + deduplication --> 人工 ACCEPT / REJECT / ADD_BACK
+        |
+        +--> --auto-accept-ai：0-10 分数线筛选，跳过人工复核
+        |
+        v
+selected_candidates_auto.json
+        |
+        v
+selected_target_times.json
+        |
+        v  确定性 State Graph replay
+gold_states.json
+gold_state_validation.json
 ```
 
-Run the requested sample:
+Stage 1 annotation 提供 Requirement 和完整 Event payload；`normalized_project.json`
+提供脱敏后的完整消息目录及稳定对话顺序；State Graph 提供 Candidate 前的 Requirement
+State 和最终 Gold replay。三份输入的 project / Event provenance 必须一致。
+
+Stage 2.2 不直接重读 `Datasets/` 中的原始聊天，不让 LLM 重新标注 Requirement、修改
+State Graph 或生成 Gold State。
+
+## Candidate 规则
+
+一个 Candidate 对应一条 Client message。同一 `source_message_id` 触发的所有
+Requirement Events 必须合并成一个 Candidate。
+
+主要候选包括：
+
+- `MODIFY`；
+- `REMOVE`；
+- `DEFER` / `RESUME`；
+- `AMBIGUOUS`；
+- 通过非空 `resolves_ambiguity_event_ids` 表达的 ambiguity resolution；
+- 与其他候选 Event 同消息、影响多个 Requirements，或发生在已有项目状态之后的
+  `INTRODUCE`。
+
+仅含 `IMPLEMENTATION_CLAIM`、`RUNTIME_FAILURE`、`RUNTIME_VERIFICATION` 的消息默认
+不进入候选。
+
+当前 Stage 1 schema 没有独立 `CLARIFY` / `RESOLVE` Event type。新版 selection
+只派生 clarification / resolution coverage tag，不改写原始 Event。
+
+## 历史长度定义
+
+一个 turn 是 `normalized_project.messages` 中的一条有效消息。消息顺序使用规范化数组
+顺序，并用 `original_index` 校验，不按 message ID 数值排序。
+
+```text
+conversation_turn_index = Candidate 的一基顺序位置
+history_turn_count       = Candidate 前的有效消息数量
+history_turn_count       = conversation_turn_index - 1
+```
+
+两个字段从 Candidate 一直保留到 `selected_target_times.json` 和 `gold_states.json`。
+它们只用于后续历史长度分层和数据分析，不参与 LLM 评分、coverage gain、去重优先级或
+Candidate 排序。
+
+## Candidate Packet
+
+LLM 每次只接收一个 Candidate Packet：
+
+```text
+Current Candidate Task
++ Triggered Events
++ affected Requirements 的 Pre-task States
++ affected Requirements 的历史 Event sequence
++ 这些历史 Event 对应的原始 evidence messages
++ history metadata
+```
+
+Packet 不包含完整 conversation 或完整 State Graph。Pre-task State 和历史 evidence
+必须严格早于 Candidate；当前 Task 单独提供，未来信息不得泄漏。
+
+## LLM 的唯一职责
+
+LLM 只判断 Candidate 是否具有 benchmark value，维度包括：
+
+- historical dependency；
+- requirement evolution；
+- reconstruction risk；
+- ambiguity / decision value；
+- multi-requirement value；
+- 忽略历史是否会导致不同且错误的结果。
+
+模型输出必须是通过严格 schema 校验的 JSON，包括 `valid_task`、五个
+`LOW/MEDIUM/HIGH` 维度、`history_sensitive`、`recommended`、
+`primary_rq_targets` 和 `reason`。`recommended: true` 必须同时满足
+`valid_task: true` 与 `history_sensitive: true`。
+
+程序还会从五个维度确定性计算 `ai_selection_score`：`LOW=0`、`MEDIUM=1`、
+`HIGH=2`，总分范围为 0–10。这个分数不是模型自由填写的额外字段，因此同一份合法
+evaluation 总能得到相同分数。
+
+无效响应按配置重试。重试后仍失败会停止该项目的 selection，不回退到旧随机抽样，
+也不会把 API 失败误记为不推荐。
+
+## Coverage、去重与人工复核
+
+Automatic selection 先保留有效且推荐的 Candidate，再覆盖实际存在的 Event / ambiguity
+pattern、single / multi-Requirement task 和 RQ opportunities。
+
+去重只自动合并 affected Requirements、Event / resolution tags、Pre-task lifecycle / open
+ambiguity pattern 完全相同的 Candidate。若设置 target 上限，使用可复算的 greedy
+set-cover；所有 tie-break 和 coverage gain 写入产物。历史长度和时间位置不参与选择。
+
+人工 Reviewer 使用 Candidate Packet 和 LLM reason 给出：
+
+```text
+ACCEPT
+REJECT
+ADD_BACK
+```
+
+人工文件名为 `target_time_human_review.json`，避免与 Stage 1 已有的
+`human_review.json` 混淆。`ADD_BACK` 只能引用已经构建 packet 且完成有效 LLM evaluation
+的 Candidate。最终只有 `ACCEPT` 和合法 `ADD_BACK` 进入
+`selected_target_times.json`。
+
+显式使用 `--auto-accept-ai` 时，流程改为信任 AI：Candidate 必须同时满足
+`valid_task=true`、`history_sensitive=true`、`recommended=true`，且总分不低于
+`--score-threshold`。所有满足条件的时间点都会进入最终结果，不执行 coverage 去重、
+greedy set-cover 或 `max_selected_targets` 上限，也不生成或读取 ACCEPT 文件。
+
+## Gold State 生成
+
+Gold builder 不再自行发现或抽样 Task，只消费最终 selected targets。
+
+对每个 target：
+
+- `Pre-task Gold` 是该消息发生前的完整项目 Requirement snapshot；
+- `Post-task Gold` 是该消息中全部 Events 应用后的完整 snapshot；
+- 当前消息的全部 Graph Events 必须属于同一个 Task；
+- `affected_requirement_ids` 只来自当前 Task Events；
+- `preserved_requirement_ids` 是 Pre-task Requirements 减去 affected Requirements；
+- 当前 Task 新 INTRODUCE 的 Requirement 不在 Pre、在 Post；
+- REMOVE 后的 Requirement 仍保留在 Post，并显示 `REMOVED`；
+- 同一 Requirement 在同一消息有多个 Event 时，Post 使用最后一个 Event 的 State。
+
+Gold 继续通过 State chain、Event grouping、完整 Pre/Post snapshot、affected / preserved、
+INTRODUCE / REMOVE、same-message final State 和 future leakage 校验。
+
+## API 与运行参数
+
+当前实现复用现有 `stage1.api_client.Stage1ApiClient` 的认证、并发、重试、JSON 解析、
+调用日志和失败响应机制，通过 Stage 2 adapter 使用
+`TARGET_TIME_EVALUATION` run mode；不复制 HTTP/JWT 实现。
+
+凭据仍只从环境变量读取：
+
+```powershell
+$env:UPWORK_API_KEY="..."
+$env:UPWORK_BUDGET_ID="..."
+```
+
+`Code/stage2_generate_gold_state.py` 是统一入口，负责 annotation、messages、prompt、
+LLM resume、AI 自动接受、human review 和 finalize 编排。`Code/config/stage2_gold_state.json` 已删除
+旧的 `event_priority`、`position_ratio` 和 `random_seed`，改为候选规则、RQ allowlist、
+LLM 参数与 `max_selected_targets`。
+
+### 1. 只准备 Candidate Packets
+
+此模式不需要 API 凭据：
 
 ```powershell
 python Code/stage2_generate_gold_state.py `
-  --state-graph outputs/stage2_v06/42204309/requirement_state_graph.json `
-  --stage1-source outputs/stage1_upgrade_runs/42204309/normalized_project.json `
-  --config Code/config/stage2_gold_state.json
+  --project-id 42204309 `
+  --prepare-only
 ```
 
-The command writes only `gold_states.json` and `gold_state_validation.json` to
-the State Graph directory (or `--output-dir`). It does not construct or write
-RQ evaluation instances.
+它会写出 `candidate_tasks.json`、`candidate_contexts.json`、
+`candidate_packets.jsonl` 和 `target_selection_run.json`。
 
-## Inputs and schema responsibilities
+### 2. 调用 LLM 并生成自动选择
 
-`requirement_state_graph.json` contains one linear graph per Requirement.
-`nodes` are complete Requirement States; ordered `edges` identify the Event,
-Event type, source message ID, and `from_state_id`/`to_state_id`. The graph is
-the sole source for Event grouping and State reconstruction.
+设置凭据后运行：
 
-The Stage 1 source is used only to recover the original Task message ID,
-speaker, and text; `normalized_project.json` is preferred because it retains
-the complete ordered message catalog. Supported forms are upgrade-run
-`normalized_project.json`, upgrade-run `verified_events.json`, and a canonical
-assembled Stage 1 annotation. The graph intentionally does not duplicate
-speaker or text. If no Stage 1 message source is available, graph-anchored Tasks
-are still generated with `speaker: null` and `text: null`; metadata is never
-invented.
+```powershell
+$env:UPWORK_API_KEY="..."
+$env:UPWORK_BUDGET_ID="..."
 
-The sample and design are consistent on graph replay, but the design's example
-shows Task metadata in Gold output even though the actual State Graph has no
-such fields. This is why a Stage 1/history source is normally supplied.
+python Code/stage2_generate_gold_state.py `
+  --project-id 42204309
+```
 
-Sample provenance note: the supplied graph is internally valid, but its Event
-sequence differs from each supplied Event-bearing Stage 1 artifact at 14 Event
-IDs (later insertions shifted IDs/types/messages in two Requirements). The
-builder conservatively treats the State Graph as the Gold replay source and
-uses `normalized_project.json` only for message metadata. Running
-`--audit-event-provenance` surfaces this mismatch and stops instead of silently
-repairing or guessing.
+每个 Candidate 使用 `prompt/t_selection_prompt.md` 单独评估。有效 evaluation 根据
+packet、prompt、model 和 reasoning effort fingerprint 断点复用；`--no-resume` 或
+`--force-evaluation` 可禁用复用。完成后写出：
 
-## Task selection
+```text
+candidate_llm_evaluations.jsonl
+recommended_candidates.json
+selected_candidates_auto.json
+target_time_human_review.template.json
+```
 
-Task discovery selects Client messages with at least one `INTRODUCE`, `MODIFY`,
-`DEFER`, `RESUME`, `REMOVE`, or `AMBIGUOUS` Graph Edge. All Graph Events from a
-selected message stay in one Task. Execution-only messages are excluded unless
-enabled in the config or with `--include-execution-only-tasks`.
+此时不会写正式 targets 或 Gold。
 
-`Code/config/stage2_gold_state.json` exposes Event priority, early/middle/late
-sampling ratios, execution-only inclusion, the per-project cap, and random
-seed. When the cap is `null`, all eligible Tasks are retained. With a cap,
-approximate position quotas are allocated across timeline thirds. Within each
-third, a Task's highest-priority Event type controls preference; seeded
-shuffling deterministically breaks equal-priority ties. Ratios are sampling
-guidelines and unused capacity is redistributed.
+### 3. 人工复核并 Finalize
 
-## Gold State retrieval
+复制 review template，逐项填写 `ACCEPT` / `REJECT` 和 reason；需要恢复其他已评估
+Candidate 时添加 `ADD_BACK`：
 
-For every Task, `gold_states.json` stores complete Project snapshots immediately
-before and through the Task. It stores State references only and deliberately
-does not persist derived Requirement transitions. Removed Requirements remain
-in snapshots; Requirements introduced by the current Task are absent before it
-and present afterward. If one Requirement has several ordered Events at the
-same message, Pre-task uses the last earlier State and Post-task uses the final
-same-message Event's `to_state_id`. `affected_requirement_ids` comes only from
-Task Events. `preserved_requirement_ids` is exactly the Pre-task Requirement
-set minus affected Requirements, and every preserved State reference is reused
-unchanged in Post-task Gold.
+```powershell
+Copy-Item `
+  outputs/stage2/42204309/target_time_human_review.template.json `
+  outputs/stage2/42204309/target_time_human_review.json
+```
 
-## Validation
+编辑完成后运行：
 
-Before Gold is written, validation checks graph chain/order consistency, State
-and Event references, exact Task Event grouping, exact affected/preserved sets,
-duplicate Requirement IDs, complete Pre/Post snapshots, final same-message
-State selection, INTRODUCE/REMOVE behavior, preserved State equality, and
-supporting-Event boundaries that prevent future leakage. Failures identify the
-project, target message, and Requirement where applicable.
+```powershell
+python Code/stage2_generate_gold_state.py `
+  --project-id 42204309 `
+  --finalize `
+  --human-review-file outputs/stage2/42204309/target_time_human_review.json
+```
 
-`gold_state_validation.json` reports snapshot, provenance, and leakage
-statistics. Optional `--audit-event-provenance` additionally requires
-the Graph's Event IDs, types, and source messages to match
-`<stage1-root>/<project_id>/verified_events.json` (or an explicit
-`--event-provenance-source`) exactly.
+Pipeline 校验 review、生成 `selected_target_times.json`，再确定性写出
+`gold_states.json` 和 `gold_state_validation.json`。如果输入、LLM response、人工决定、
+State snapshot 或 provenance 任一不合法，finalize 会失败关闭。
+当所有 evaluation fingerprint 均可从已有 JSONL 复用时，finalize 不需要重新访问网络；
+若有任何 Candidate 需要重新评估，则仍必须提供 API 凭据。
 
-Known limitation: without a retained global message-order table, opaque
-non-numeric message IDs cannot be ordered safely. The builder rejects them
-instead of guessing. Numeric IDs, including this sample's IDs, are supported.
+### 4. 直接接受 AI 选择并生成 Gold
+
+如果不需要人工 `ACCEPT / REJECT`，使用以下单条命令：
+
+```powershell
+python Code/stage2_generate_gold_state.py `
+  --project-id 42204309 `
+  --auto-accept-ai `
+  --score-threshold 7
+```
+
+分数线必须是 0–10 的整数，默认值是 7。`0` 表示接受所有满足三个 AI 布尔条件的
+推荐项；`10` 只接受五个维度全部为 `HIGH` 的推荐项。该模式在同一次运行中直接写出：
+
+```text
+selected_candidates_auto.json
+selected_target_times.json
+gold_states.json
+gold_state_validation.json
+target_selection_run.json
+```
+
+`selected_target_times.json` 会为每项记录 `selection_source: LLM_AUTO_ACCEPT`、
+`ai_selection_score`、`ai_score_threshold` 和 `human_review: SKIPPED`。自动模式保留已有
+evaluation 的 fingerprint resume 行为；如需强制重新调用 API，可同时使用
+`--force-evaluation`。
+
+## 测试要求
+
+单元和离线集成测试使用 fake LLM client，不调用真实 API。至少覆盖 Candidate 合并、
+非数字 message ID、history metadata、Pre-task boundary、ambiguity resolution、严格模型
+响应校验、resume fingerprint、coverage / dedup、人工决定和现有 Gold replay regression。
+
+测试套件本身不要求凭据或网络。当前 13 个 Stage 2 Gold/selection 测试与全仓库 92 个
+测试均已通过；`42204309 --prepare-only` 生成了 72 个 Candidate Packets。真实 API
+结果不在单元测试中伪造为生产输出。

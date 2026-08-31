@@ -1,0 +1,172 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+    "message_id": 595,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 595,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event captures the primary-mint count basis but omits the requirement that randomly assigned commissions register in commission totals.",
+      "new_event": {
+        "source_message": {
+          "message_id": 595,
+          "speaker": "client",
+          "text": "The number of commissions and tickets should equal the number of mints, excluding secondary market sales, but those issued at random do not appear to be registering."
+        },
+        "supporting_message_ids": [
+          592
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "commission_count_basis": "One commission must be accounted for per primary mint; secondary-market sales are excluded.",
+          "random_commission_accounting": "Commissions assigned at random for no-referral primary mints must be registered in commission totals."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "COMMISSION_ACCOUNTING",
+            "DASHBOARD",
+            "LEADERBOARD",
+            "NFT_DETAIL"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The FAQ already states that no-referral commissions and tickets are assigned randomly; the source changes accounting expectations and does not require a copy revision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client confirms that primary mints must produce accounted tickets and that randomly assigned tickets must register, resolving the candidate's uncertainty over no-referral ticket generation.",
+      "new_event": {
+        "source_message": {
+          "message_id": 595,
+          "speaker": "client",
+          "text": "The number of commissions and tickets should equal the number of mints, excluding secondary market sales, but those issued at random do not appear to be registering."
+        },
+        "supporting_message_ids": [
+          592
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "random_ticket_registration_rule": "A ticket assigned at random for a no-referral primary mint must be generated and registered in ticket totals."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "This Requirement already issues one Small Block ticket per code-used primary mint and excludes secondary sales; the reported random-ticket issue concerns the no-referral path.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Excluding secondary sales from commission and ticket issuance does not change whether secondary-sale proceeds fund the Small Block pool or count toward its draw trigger.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The commission and ticket accounting rule does not alter the VRF provider, eligible winner population, ticket weighting, or selection process.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Because NFT metadata exposes the Small Block ticket counter, a ticket randomly assigned to an NFT must register in that NFT's visible counter.",
+      "new_event": {
+        "source_message": {
+          "message_id": 595,
+          "speaker": "client",
+          "text": "The number of commissions and tickets should equal the number of mints, excluding secondary market sales, but those issued at random do not appear to be registering."
+        },
+        "supporting_message_ids": [
+          592
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "random_ticket_counter_registration": "The NFT metadata Small Block ticket counter must include each ticket assigned at random to that NFT for a primary mint."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Commission and ticket accounting does not change an NFT's mint-number referral identity, lifetime, sharing methods, display surfaces, or resale behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already requires random allocation of each no-referral commission; the source adds an accounting-registration rule owned by Commission Accounting Accuracy rather than changing allocation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change which referral codes are valid, self-referral prevention, or validation feedback copy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_RESALE_STATE_TRANSFER",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Excluding secondary sales from commission and ticket issuance does not change which NFT entitlements, badges, referral identity, or existing tickets transfer on resale.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accounting rule does not alter automatic prize delivery or reintroduce a manual claim interaction.",
+      "new_event": null
+    }
+  ]
+}

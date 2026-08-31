@@ -9,10 +9,14 @@
   "decisions": [
     {
       "candidate_requirement_id": "REQ_BIG_BLOCK_PRIZE",
-      "decision": "ADD_EVENT",
-      "event_locator": null,
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 143,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
       "confidence": "HIGH",
-      "reason": "The source explicitly clarifies that the Big Block draw occurs approximately every 50,000 qualifying primary-mint or secondary sales and that both sale types fund the pools.",
+      "reason": "The same source makes the Big Block interval approximate, while its existing same-message MODIFY captures counted sale types and primary-mint funding but omits that change.",
       "new_event": {
         "source_message": {
           "message_id": 143,
@@ -22,19 +26,12 @@
         "supporting_message_ids": [],
         "event_type": "MODIFY",
         "value_updates": {
-          "draw_trigger": {
-            "type": "SALES_COUNT",
-            "value": 50000,
-            "approximation": "approximately",
-            "qualifying_sales": [
-              "PRIMARY_MINT_SALES",
-              "SECONDARY_SALES"
-            ]
-          },
-          "pool_funding_sources": [
-            "PRIMARY_MINT_SALES",
-            "SECONDARY_SALES"
-          ]
+          "sales_counted_toward_draw": [
+            "PRIMARY_MINT",
+            "SECONDARY_SALE"
+          ],
+          "primary_mints_fund_pool": true,
+          "sales_interval_is_approximate": true
         },
         "value_removals": null,
         "scope_updates": null,
@@ -43,11 +40,51 @@
       }
     },
     {
-      "candidate_requirement_id": "REQ_PRIMARY_SALE_REVENUE_SPLIT",
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The revised Small Block draw condition does not change the established per-primary-sale allocations or prize-pool recipients.",
+      "reason": "The FAQ introduction from the same message already states the approximate Small Block interval, counted sale types, and pool-funding rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the Small Block draw cadence and counted sales does not alter referral-triggered ticket issuance or ticket quantities.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_VRF_WINNER_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The draw cadence and funding changes do not alter the independent VRF winner-selection method.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source change concerns Small Block cadence, counted sales, and pool funding, not allocation behavior for mints without referral codes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The separate Small and Big ticket counters and their post-draw resets remain valid under the revised Small Block cadence.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate's same-message introduction already routes primary-sale funds to both active prize pools; no price or allocation change is missing.",
       "new_event": null
     },
     {
@@ -55,15 +92,15 @@
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Secondary royalties already fund the prize pools, and the source does not change the royalty amount, founder allocation, or ticket-generation rule.",
+      "reason": "Counting secondary sales toward a prize draw does not change the independent flat $10 secondary royalty rule.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_PRIMARY_MINT_PRICE",
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The Small Block draw and funding clarification does not alter the $15 primary mint price or its no-hidden-fees condition.",
+      "reason": "The Small Block interval and funding changes do not alter which ticket counters, badges, or referral-code attribute appear in metadata.",
       "new_event": null
     },
     {
@@ -71,63 +108,23 @@
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "Changing the Small Block draw basis does not affect the one-click prize claim method, Winners page announcement, or claim URL.",
+      "reason": "The revised Small Block cadence does not change the manual one-click claim flow on the Winners page.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_NFT_TRANSFER_STATE",
+      "candidate_requirement_id": "REQ_PRIZE_WINNER_NOTIFICATION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The draw-condition change does not alter which book, referral code, badges, or expired-ticket state transfers with an NFT.",
+      "reason": "The source leaves the Winners page announcement channel unchanged.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_PRIMARY_NFT_MINT",
+      "candidate_requirement_id": "REQ_NFT_RESALE_STATE_TRANSFER",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The product remains an unlimited-mint NFT ebook; prize-pool draw timing does not change the primary mint mechanism.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The source preserves the immediate $5 coded-referral commission and does not change its recipient, trigger, frequency, or destination.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_NFT_REWARD_ATTRIBUTES",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The source retains both Small Block and Big Block ticket counters; changing the Small Block draw condition does not alter the required metadata counters.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_FAQ_CONTENT",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The candidate was introduced from this same source with a directive to publish the complete supplied FAQ, so the revised Small Block wording is already included.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The Small Block draw change does not alter the mint-number referral-code identity, permanence, or display locations.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_FIAT_BUYER_REWARD_ACCESS",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The source does not change fiat-user dashboard access or the wallet requirement for receiving affiliate commissions.",
+      "reason": "The revised Small Block cadence and funding rules do not alter resale transfer semantics or the rule that expired tickets remain expired.",
       "new_event": null
     }
   ]

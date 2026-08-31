@@ -14,6 +14,7 @@ def event(
     scope_updates=None,
     ambiguity=None,
     execution=None,
+    resolves_ambiguity_event_ids=None,
 ):
     return {
         "event_id": f"REQ_X_E{number:03d}",
@@ -28,6 +29,7 @@ def event(
         "scope_updates": scope_updates,
         "ambiguity": ambiguity,
         "execution": execution,
+        "resolves_ambiguity_event_ids": resolves_ambiguity_event_ids,
     }
 
 
@@ -69,7 +71,12 @@ class RequirementStateGraphTests(unittest.TestCase):
                 "RUNTIME_FAILURE",
                 execution={"status": "FAILED", "observed_behavior": "a failed"},
             ),
-            event(5, "MODIFY", value_updates={"a": 4}),
+            event(
+                5,
+                "MODIFY",
+                value_updates={"a": 4},
+                resolves_ambiguity_event_ids=["REQ_X_E003"],
+            ),
             event(6, "DEFER"),
             event(7, "RESUME"),
             event(8, "REMOVE"),
@@ -82,7 +89,10 @@ class RequirementStateGraphTests(unittest.TestCase):
         self.assertIsNone(graph["edges"][0]["from_state_id"])
         self.assertEqual(graph["edges"][1]["from_state_id"], "REQ_X_S001")
         ambiguous = graph["nodes"][2]
-        self.assertEqual(ambiguous["ambiguity"]["source_event_id"], "REQ_X_E003")
+        self.assertEqual(
+            ambiguous["ambiguity"]["REQ_X_E003"]["source_event_id"],
+            "REQ_X_E003",
+        )
         after_resolution = graph["nodes"][4]
         self.assertIsNone(after_resolution["ambiguity"])
         self.assertIsNone(after_resolution["execution"])
@@ -217,7 +227,7 @@ class RequirementStateGraphTests(unittest.TestCase):
         self.assertEqual(graph["nodes"][0]["attributes"], {})
         self.assertEqual(graph["nodes"][0]["supporting_event_ids"], ["REQ_X_E001"])
 
-    def test_resume_after_ambiguity_resolving_modify_is_not_a_state(self) -> None:
+    def test_only_explicit_link_closes_ambiguity_and_resume_is_retained(self) -> None:
         events = [
             event(1, "INTRODUCE", value_updates={"x": 1}),
             event(
@@ -225,7 +235,12 @@ class RequirementStateGraphTests(unittest.TestCase):
                 "AMBIGUOUS",
                 ambiguity={"dimension": "VALUE", "description": "x is unclear"},
             ),
-            event(3, "MODIFY", value_updates={"x": 2}),
+            event(
+                3,
+                "MODIFY",
+                value_updates={"x": 2},
+                resolves_ambiguity_event_ids=["REQ_X_E002"],
+            ),
             event(4, "RESUME"),
             event(
                 5,
@@ -238,13 +253,95 @@ class RequirementStateGraphTests(unittest.TestCase):
 
         self.assertEqual(
             [edge["event_id"] for edge in graph["edges"]],
-            ["REQ_X_E001", "REQ_X_E002", "REQ_X_E003", "REQ_X_E005"],
+            ["REQ_X_E001", "REQ_X_E002", "REQ_X_E003", "REQ_X_E004", "REQ_X_E005"],
         )
         self.assertEqual(
             [node["state_id"] for node in graph["nodes"]],
-            ["REQ_X_S001", "REQ_X_S002", "REQ_X_S003", "REQ_X_S004"],
+            ["REQ_X_S001", "REQ_X_S002", "REQ_X_S003", "REQ_X_S004", "REQ_X_S005"],
         )
-        self.assertEqual(graph["edges"][-1]["from_state_id"], "REQ_X_S003")
+        self.assertEqual(graph["edges"][-1]["from_state_id"], "REQ_X_S004")
+
+    def test_unlinked_intermediate_modify_keeps_ambiguity_open(self) -> None:
+        events = [
+            event(1, "INTRODUCE", value_updates={"delivery": "unclear"}),
+            event(
+                2,
+                "AMBIGUOUS",
+                ambiguity={"dimension": "VALUE", "description": "claim or transfer"},
+            ),
+            event(3, "MODIFY", value_updates={"prize_amount": 500}),
+            event(
+                4,
+                "MODIFY",
+                value_updates={"delivery": "automatic wallet transfer"},
+                resolves_ambiguity_event_ids=["REQ_X_E002"],
+            ),
+        ]
+
+        nodes = build_requirement_state_graph(annotation(events))["requirement_graphs"][0]["nodes"]
+
+        self.assertIn("REQ_X_E002", nodes[2]["ambiguity"])
+        self.assertIsNone(nodes[3]["ambiguity"])
+
+    def test_multiple_open_ambiguities_are_closed_individually(self) -> None:
+        events = [
+            event(1, "INTRODUCE", value_updates={"a": 1, "b": 1}),
+            event(2, "AMBIGUOUS", ambiguity={"dimension": "VALUE", "description": "a"}),
+            event(3, "AMBIGUOUS", ambiguity={"dimension": "VALUE", "description": "b"}),
+            event(
+                4,
+                "MODIFY",
+                value_updates={"a": 2},
+                resolves_ambiguity_event_ids=["REQ_X_E002"],
+            ),
+            event(
+                5,
+                "MODIFY",
+                value_updates={"b": 2},
+                resolves_ambiguity_event_ids=["REQ_X_E003"],
+            ),
+        ]
+
+        nodes = build_requirement_state_graph(annotation(events))["requirement_graphs"][0]["nodes"]
+
+        self.assertEqual(set(nodes[2]["ambiguity"]), {"REQ_X_E002", "REQ_X_E003"})
+        self.assertEqual(set(nodes[3]["ambiguity"]), {"REQ_X_E003"})
+        self.assertIsNone(nodes[4]["ambiguity"])
+
+    def test_invalid_ambiguity_link_is_rejected(self) -> None:
+        events = [
+            event(1, "INTRODUCE", value_updates={"a": 1}),
+            event(
+                2,
+                "MODIFY",
+                value_updates={"a": 2},
+                resolves_ambiguity_event_ids=["REQ_X_E999"],
+            ),
+        ]
+        with self.assertRaisesRegex(Stage2ReplayError, "unknown or cross-Requirement"):
+            build_requirement_state_graph(annotation(events))
+
+    def test_future_ambiguity_link_is_rejected(self) -> None:
+        events = [
+            event(
+                1,
+                "MODIFY",
+                value_updates={"a": 2},
+                resolves_ambiguity_event_ids=["REQ_X_E002"],
+            ),
+            event(2, "AMBIGUOUS", ambiguity={"dimension": "VALUE", "description": "a"}),
+        ]
+        with self.assertRaisesRegex(Stage2ReplayError, "earlier AMBIGUOUS"):
+            build_requirement_state_graph(annotation(events))
+
+    def test_same_ambiguity_cannot_be_resolved_twice(self) -> None:
+        events = [
+            event(1, "AMBIGUOUS", ambiguity={"dimension": "LIFECYCLE", "description": "keep it"}),
+            event(2, "RESUME", resolves_ambiguity_event_ids=["REQ_X_E001"]),
+            event(3, "REMOVE", resolves_ambiguity_event_ids=["REQ_X_E001"]),
+        ]
+        with self.assertRaisesRegex(Stage2ReplayError, "resolved more than once"):
+            build_requirement_state_graph(annotation(events))
 
     def test_event_after_remove_is_a_consistency_error(self) -> None:
         events = [

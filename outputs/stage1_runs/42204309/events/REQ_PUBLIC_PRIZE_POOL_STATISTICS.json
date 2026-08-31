@@ -1,0 +1,156 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_PUBLIC_PRIZE_POOL_STATISTICS",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 72,
+        "speaker": "client",
+        "text": "For user authentication, we should use a hybrid model so the platform remains accessible to crypto and non-crypto users alike (the fiat on-ramp is crucial for virality):\n[ACCOUNT_001] Use wallet auth (SIWE) for crypto flows, since it is required for mints/transfers.\n[ACCOUNT_001] Use email-based auth to access the dashboard (referrals, tickets, prizes), connecting fiat users who do not have wallets.\n[ACCOUNT_001] Keep public APIs unauthenticated (e.g., leaderboards, pool values) so they stay open and transparent.\n\nThis fits our lean MVP: non-crypto users can mint through Stripe/email, while crypto users can do so through their wallet. Keep the email implementation simple, such as magic links for minimal friction.\n\nFor the email provider, we'll use Brevo—I’ll open the account and send the credentials soon. I’m okay with the paid Starter plan if it meaningfully improves UX or deliverability, provided it is worth the price.\n\nFor Stripe, I’ll set up a test account and share the details shortly—concentrate on fiat to USDC for now. As above, if an inexpensive paid add-on improves reliability/UX, we can discuss it; the free tier is fine initially."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "public_prize_pool_values": "Publish prize-pool values openly through unauthenticated public APIs."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API"
+        ],
+        "contexts": [
+          "PRIZE_POOLS",
+          "PUBLIC_STATISTICS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 210,
+        "speaker": "client",
+        "text": "Hero copy: A dropout multimillionaire went to zero because of one oversight. Now rebuilding through an eBook model designed to free creators from Amazon's 70% cut.\n\nSupporting headline: “My Underdog Journey: To Own Goal” — an unlimited NFT book on Base, priced at $15 forever.\n\nMechanics preview: Buy → own the book and receive your referral link. Refer → earn an instant $5 with no limit, plus 1 entry into a random $500 giveaway every 100 sales.\n\nCTA text: Mint the eBook NFT for $15\n\nMake $500 Every 100 Sales Prominent: Revise all relevant copy so the frequency is the main motivator, using language such as “constant small shots at $500.”\n\nFor the prize area: “Win $500 every 100 sales — every referral earns 1 ticket, with a fair drawing through Chainlink VRF. More referrals mean more chances!”\n\nAlso include this in the mechanics preview: “Refer to receive an instant $5 and your chance at $500 every 100 sales.”\nThe experience should feel like an “ongoing roulette spin” for hustlers.\n\nAdd these FAQs:\nHow Can a Non-Crypto Fiat Buyer Receive Commissions and Prizes?\nIf you're new to crypto and paying with fiat, such as a credit card, Apple Pay, etc., don't worry — the flow is intended to be straightforward. When the book is minted for $15 through Transak, a non-custodial wallet is created automatically in the background, without requiring a seed phrase initially. That wallet stores the NFT and receives all commissions and prizes. The steps are below:\n\nAt Purchase:\nTransak converts the fiat into crypto and mints the NFT directly to a newly created wallet address. There is nothing for you to configure manually — the experience is seamless and non-custodial. You control the keys, without having to manage a complicated seed phrase right away.\nAn email confirmation will provide your mint number, which is also your referral code, along with the NFT information and a link to your dashboard at [URL_002].\n\nReceiving Commissions ($5 per Referral):\nShare your referral code, for example, “use 8421.” Whenever another person mints using it, $5 is transferred automatically to your wallet address.\nTo access it, sign in to the dashboard at [URL_002], either from the email link or through SIWE with the wallet created by Transak. The commissions appear immediately, with no additional action required.\n\nEarning and Receiving Prizes:\nEvery referral automatically provides a ticket for the active prize drawing, tied to your NFT and wallet.\nThe on-chain drawings award $500 every 100 sales using fair randomness. Winners are posted on the Winners page and notified by email.\nIf you win, the $500 goes directly to your wallet. Look at the dashboard for the notification; we'll also email step-by-step guidance for viewing it or claiming it in fiat if necessary, such as a link to a simple exchange guide. A seed phrase is not required; use the dashboard for access.\n\nHow Can Beginners Collect Their Commissions and Prizes?\nIf this is new to you, don't worry — the process is automatic and simple to monitor. Here is the step-by-step flow:\n\nReceiving Commissions ($5 per Referral):\nWhen another person mints the book with your referral code — your mint number shown in the dashboard or confirmation email — $5 is delivered to your wallet instantly. You do not have to take any action because the smart contract manages it.\n\nReceiving Prize Tickets:\nEach completed referral additionally awards 1 ticket for the $500 prize held every 100 sales. The ticket is added to your NFT automatically and can be viewed in the dashboard.\nNo action is necessary; each ticket is on-chain and associated with your mint number.\n\nWinning and Receiving Prizes:\nOnce a pool reaches its trigger every 100 sales, Chainlink VRF, a fair random system, runs the drawing automatically. Winners appear on the Winners page and are notified by email if they supplied one.\nA winner receives $500 in their wallet immediately. Check the dashboard for alerts; we'll send an email as well.\nTickets expire once their applicable drawing is complete, while new referrals award tickets for the following blocks.\n\nAdditional Copy Adjustments:\nMechanics List: Center every item on the frequent opportunities to win $500 and the accompanying $5 commission, reinforcing the idea of “cut middlemen, funnel savings.”\n\nPrize Section: Replace the current explanation that the pool reaches $500 every 100 sales and 1 winner is randomly chosen from all ticket holders through Chainlink VRF for provably fair randomness. The replacement should say: “**$500 every 100 sales!** 1 affiliate is chosen from that 100 sales block through Chainlink VRF for provably fair randomness. **More referrals = more chances to win!**” Make this the headline so it stands out when skimming.\n\nGeneral: Replace “revolutionary” with “aligned” or “fair” to reduce the hype and emphasize the ethos. Under the stats, add the tagline “Help the rebuild — share to earn.”\n\nVisual/UI Adjustments:\nPlace the book cover in the hero and integrate it with the headline.\nUse “Mint your eBook” / “Mint your eBook NFT.”\nLive Counters: Include “Next $500 Draw In: ~X Sales” to create urgency.\nMobile Test: Confirm that the stats and mechanics stack correctly without anything being cut off."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "next_draw_sales_counter": "Next $500 Draw In: ~X Sales"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": [
+          "API",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "LANDING_PAGE",
+          "PRIZE_POOLS",
+          "PUBLIC_STATISTICS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 211,
+        "speaker": "freelancer",
+        "text": "All of the changes are now complete; you can review them here: [URL_013]"
+      },
+      "supporting_message_ids": [
+        210
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the preceding requested changes, including the public next-draw sales counter, are complete and available for review."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 430,
+        "speaker": "client",
+        "text": "[ACCOUNT_001] My NFTs have stopped appearing in the dashboard.\n[ACCOUNT_001] I can choose ETH as the payment method, but the transaction failed.\n\nThe dashboard still says we have reached mint number 3, while also showing that the prize pool is now empty; see screenshots."
+      },
+      "supporting_message_ids": [
+        195
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The dashboard reports mint number 3 while incorrectly displaying the funded prize pool as empty."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 441,
+        "speaker": "client",
+        "text": "The dashboard now reports that I have 3 NFTs, while showing a total supply of 2.\n\nIt shows no badges, even though I should have the first referral badge.\n\nThe prize pool contains $10.\n\nIt also says I have 0 tickets, 0 referrals, and have earned $0."
+      },
+      "supporting_message_ids": [
+        195,
+        430
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "After the earlier empty-pool display, the dashboard shows a $10 prize-pool balance for a total supply of two."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 455,
+        "speaker": "client",
+        "text": "View book continues to give the same error.\n\nThe Dashboard is still displaying 3 NFTs and $5 in earnings on NFT1.\n\nThe Leaderboard lists 0 referrals.\n\nUnder Badges, the First referral badge is ticked.\n\nHowever, clicking through to the NFT displays 1 referral, 1 ticket, and 5,000,000 USDC in referral earnings.\n\nThe Home Page displays 2 mints and $10 in the prize pool, but Top Referrals remains at 0.\n\n(see attachment)"
+      },
+      "supporting_message_ids": [
+        195
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client reports that the public Home Page displays two mints and $10 in the prize pool."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 496,
+        "speaker": "client",
+        "text": "Landing page updates, the good:\nmy NFTs - 2\nreferrals - 1\ntickets - 1\nbadges - first referral is ticked\n\nLanding page updates, the bad:\nPrize pool - $5\nMy referral code - 10,001 (mint numbers begin at 10,000)\n\n(platform statistics)\nTotal mints - 1\n\nit also shows that we're now at mint number 4; did you mint one?\n\nAnd View Book is still showing the same error"
+      },
+      "supporting_message_ids": [
+        455
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the Home Page had displayed a $10 prize pool, the client categorizes the landing page's $5 prize-pool value as incorrect."
+      }
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

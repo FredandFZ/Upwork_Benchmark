@@ -1,0 +1,336 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 21,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "small_block_ticket_counter": "Display a separate current Small Block ticket counter and reset it to 0 after each Small Block draw.",
+          "big_block_ticket_counter": "Display a separate current Big Block ticket counter and reset it to 0 after each Big Block draw."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "NFT_METADATA",
+            "TICKET_ACCOUNTING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        21
+      ],
+      "decision_note": "The source explicitly replaces an earlier ticket rule, so MODIFY records the on-NFT Small and Big Block counters and their post-draw reset behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 195,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        21,
+        195
+      ],
+      "decision_note": "Removing Big Blocks makes the existing big_block_ticket_counter obsolete, so deleting that software-state attribute is necessary.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 210,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "dashboard_ticket_display": "Display each automatically awarded Small Block prize ticket on the holder's dashboard.",
+          "ticket_association": "Each ticket is associated with the holder's NFT, wallet, and mint number."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": [
+            "SMART_CONTRACT",
+            "FRONTEND"
+          ],
+          "contexts": [
+            "NFT_METADATA",
+            "DASHBOARD",
+            "TICKET_ACCOUNTING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        210
+      ],
+      "decision_note": "The source establishes dashboard display and per-NFT ticket association; ticket issuance itself belongs to the separate issuance Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        305
+      ],
+      "decision_note": "This source defines no-code or invalid-code ticket allocation and popup behavior, not accounting accuracy after a ticket is awarded.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 473,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        473
+      ],
+      "decision_note": "First concrete dashboard ticket-count failure: zero tickets were shown despite an existing referral.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 492,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        473,
+        492
+      ],
+      "decision_note": "Target-specific implementation claim after the dashboard failure, explicitly reporting one corrected prize-draw ticket.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 496,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        492,
+        496
+      ],
+      "decision_note": "First concrete post-claim verification: the client lists the displayed one-ticket count among the correct dashboard data.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 592,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        592
+      ],
+      "decision_note": "Concrete aggregate leaderboard regression: seven mints were associated with only four displayed tickets.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 595,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "aggregate_ticket_count_rule": "The number of accounted tickets equals the number of mints, excluding secondary-market sales.",
+          "random_ticket_accounting": "Tickets assigned at random for no-referral mints must be registered in ticket totals."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        592,
+        595
+      ],
+      "decision_note": "The source establishes the ticket-total acceptance rule and registration of random tickets, but does not support propagating the rule to every listed technical component and surface.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 605,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        599,
+        605
+      ],
+      "decision_note": "Target-specific backfill claim addressing missing ticket records for existing NFTs.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 608,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        605,
+        608
+      ],
+      "decision_note": "Post-claim persistence: the leaderboard still displayed only four tickets after the claimed backfill.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 636,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        634,
+        635,
+        636
+      ],
+      "decision_note": "The accepted option concerns the success-modal UX and manual random-referral finalization flow; it does not independently modify ticket-accounting accuracy.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 662,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        662
+      ],
+      "decision_note": "Distinct no-referral path failure: awarded tickets were absent from both the leaderboard and NFT attributes.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        672
+      ],
+      "decision_note": "The client establishes cross-surface ticket consistency and a concrete historical ticket-record backfill obligation.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 674,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        672,
+        674
+      ],
+      "decision_note": "The client removes the historical data-backfill obligation while retaining correct prospective ticket accounting; false is a meaningful current data-migration constraint.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 682,
+        "event_type": "AMBIGUOUS",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        672,
+        682
+      ],
+      "decision_note": "The freelancer's 11-ticket calculation materially conflicts with the client's stated 12-ticket accounting rule and requires client resolution.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 684,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        682,
+        684
+      ],
+      "decision_note": "The client unambiguously accepts the first-mint exception, changing the aggregate ticket-count acceptance rule to exclude mint number one.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 686,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        686
+      ],
+      "decision_note": "Target-specific implementation claim after the count-rule resolution, explicitly addressing whether tickets are reflected correctly.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 688,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        686,
+        687,
+        688
+      ],
+      "decision_note": "First concrete post-claim verification: the aggregate leaderboard showed 11 tickets and NFT #5 showed two tickets on both leaderboard and detail views.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

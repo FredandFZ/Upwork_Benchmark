@@ -7,6 +7,8 @@ import unittest
 from pathlib import Path
 from typing import Any
 
+from Code.stage1.ambiguity import apply_ambiguity_links
+from Code.stage1.api_client import Stage1ApiClient
 from Code.stage1.assembler import assemble_stage1_annotation
 from Code.stage1.config import PipelineConfig, ProjectSource
 from Code.stage1.context import requirement_context
@@ -146,6 +148,12 @@ class AssemblyAndValidationTests(unittest.TestCase):
         self.assertEqual(annotation["annotation_version"], "v0.6")
         self.assertTrue(
             all("value_removals" in item for item in annotation["requirements"][0]["events"])
+        )
+        self.assertTrue(
+            all(
+                "resolves_ambiguity_event_ids" in item
+                for item in annotation["requirements"][0]["events"]
+            )
         )
 
     def test_paraphrased_source_text_fails(self) -> None:
@@ -744,6 +752,80 @@ class CostControlTests(unittest.TestCase):
         self.assertLessEqual(len(candidates), 80)
 
 
+class ReasoningEffortOverrideTests(unittest.IsolatedAsyncioTestCase):
+    async def test_consistency_audit_uses_override_and_other_stages_use_global_effort(self) -> None:
+        class FakeResponse:
+            def __init__(self, payload: dict[str, Any]) -> None:
+                self.status_code = 200
+                self._payload = payload
+                self.text = json.dumps(payload)
+                self.headers: dict[str, str] = {}
+
+            def json(self) -> dict[str, Any]:
+                return self._payload
+
+        class FakeHttpClient:
+            def __init__(self) -> None:
+                self.llm_payloads: list[dict[str, Any]] = []
+
+            async def post(
+                self,
+                url: str,
+                *,
+                headers: dict[str, str],
+                json: dict[str, Any] | None = None,
+            ) -> FakeResponse:
+                if json is None:
+                    return FakeResponse({"token": "test-jwt"})
+                self.llm_payloads.append(json)
+                return FakeResponse(
+                    {
+                        "choices": [{"message": {"content": '{"ok": true}'}}],
+                        "usage": {"prompt_tokens": 10, "completion_tokens": 2},
+                    }
+                )
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            http_client = FakeHttpClient()
+            api = Stage1ApiClient(
+                http_client=http_client,  # type: ignore[arg-type]
+                api_key="key",
+                budget_id="budget",
+                model="gpt-5.6-sol",
+                reasoning_effort="xhigh",
+                retries=0,
+                max_concurrent_requests=1,
+                log_path=root / "api_calls.jsonl",
+                failed_response_dir=root / "failed_responses",
+                reasoning_effort_overrides={"CONSISTENCY_AUDIT": "high"},
+            )
+
+            await api.call(
+                project_id="P1",
+                run_mode="EVIDENCE_SCAN",
+                messages=[{"role": "user", "content": "scan"}],
+            )
+            await api.call(
+                project_id="P1",
+                run_mode="CONSISTENCY_AUDIT",
+                messages=[{"role": "user", "content": "audit"}],
+            )
+
+            self.assertEqual(
+                [payload["reasoning_effort"] for payload in http_client.llm_payloads],
+                ["xhigh", "high"],
+            )
+            log_rows = [
+                json.loads(line)
+                for line in (root / "api_calls.jsonl").read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(
+                [row["reasoning_effort"] for row in log_rows],
+                ["xhigh", "high"],
+            )
+
+
 class PatchingTests(unittest.TestCase):
     def test_only_high_confidence_audit_patch_is_applied(self) -> None:
         inventory = {
@@ -971,6 +1053,191 @@ class PatchingTests(unittest.TestCase):
         updated, counts, _ = apply_verification(events, verification)
         self.assertEqual([event["source_message"]["message_id"] for event in updated], [156])
         self.assertEqual(counts, {"edits": 0, "deletions": 1})
+
+
+class ConsistencyAuditOrderingTests(unittest.IsolatedAsyncioTestCase):
+    async def test_event_delete_runs_after_boundary_reextraction(self) -> None:
+        class AuditApi:
+            async def call(self, **kwargs: Any) -> dict[str, Any]:
+                result = {
+                    "run_mode": "CONSISTENCY_AUDIT",
+                    "patches": [
+                        {
+                            "operation": "ADD_REQUIREMENT",
+                            "targets": {},
+                            "replacement": {
+                                "requirement_id": "REQ_B",
+                                "title": "Requirement B",
+                                "family_id": None,
+                                "definition": "A newly discovered independent behavior.",
+                                "anchor_message_ids": [4],
+                            },
+                            "evidence_message_ids": [4],
+                            "decision_note": "Requirement B is independently testable.",
+                            "confidence": "HIGH",
+                        },
+                        {
+                            "operation": "DELETE_EVENT",
+                            "targets": {
+                                "requirement_id": "REQ_A",
+                                "event_locator": {
+                                    "message_id": 3,
+                                    "event_type": "RESUME",
+                                    "occurrence": 1,
+                                },
+                            },
+                            "replacement": None,
+                            "evidence_message_ids": [2, 3],
+                            "decision_note": "The same-message MODIFY already resolves the ambiguity.",
+                            "confidence": "HIGH",
+                        },
+                    ],
+                }
+                validator = kwargs.get("validator")
+                if validator:
+                    validator(result)
+                return result
+
+        class BoundaryReextractingPipeline(Stage1Pipeline):
+            reextract_only_ids: set[str] | None = None
+
+            async def _event_extraction_all(self, *args: Any, **kwargs: Any) -> dict[str, list[dict[str, Any]]]:
+                self.reextract_only_ids = set(kwargs["only_ids"])
+                current_events = json.loads(json.dumps(args[4]))
+                current_events["REQ_B"] = [
+                    {
+                        "source_message": {
+                            "message_id": 4,
+                            "speaker": "client",
+                            "text": "Add requirement B.",
+                        },
+                        "supporting_message_ids": [],
+                        "event_type": "INTRODUCE",
+                        "value_updates": {"enabled": True},
+                        "value_removals": None,
+                        "scope_updates": None,
+                        "ambiguity": None,
+                        "execution": None,
+                    }
+                ]
+                return current_events
+
+        normalized = {
+            "project_id": "P1",
+            "project_title": "Audit ordering",
+            "project_metadata": {},
+            "messages": [
+                {"message_id": 1, "speaker": "client", "text": "Add requirement A."},
+                {"message_id": 2, "speaker": "client", "text": "The value is unresolved."},
+                {"message_id": 3, "speaker": "client", "text": "Use the final value."},
+                {"message_id": 4, "speaker": "client", "text": "Add requirement B."},
+            ],
+        }
+        inventory = {
+            "sessions": [],
+            "requirement_families": [],
+            "requirements": [
+                {
+                    "requirement_id": "REQ_A",
+                    "title": "Requirement A",
+                    "family_id": None,
+                    "definition": "A configurable behavior.",
+                    "anchor_message_ids": [1],
+                }
+            ],
+        }
+        events = {
+            "REQ_A": [
+                {
+                    "source_message": {"message_id": 1, "speaker": "client", "text": "Add requirement A."},
+                    "supporting_message_ids": [],
+                    "event_type": "INTRODUCE",
+                    "value_updates": {"value": "initial"},
+                    "value_removals": None,
+                    "scope_updates": None,
+                    "ambiguity": None,
+                    "execution": None,
+                },
+                {
+                    "source_message": {
+                        "message_id": 2,
+                        "speaker": "client",
+                        "text": "The value is unresolved.",
+                    },
+                    "supporting_message_ids": [],
+                    "event_type": "AMBIGUOUS",
+                    "value_updates": None,
+                    "value_removals": None,
+                    "scope_updates": None,
+                    "ambiguity": {"dimension": "VALUE", "description": "The value is unresolved."},
+                    "execution": None,
+                },
+                {
+                    "source_message": {"message_id": 3, "speaker": "client", "text": "Use the final value."},
+                    "supporting_message_ids": [],
+                    "event_type": "MODIFY",
+                    "value_updates": {"value": "final"},
+                    "value_removals": None,
+                    "scope_updates": None,
+                    "ambiguity": None,
+                    "execution": None,
+                },
+                {
+                    "source_message": {"message_id": 3, "speaker": "client", "text": "Use the final value."},
+                    "supporting_message_ids": [2],
+                    "event_type": "RESUME",
+                    "value_updates": None,
+                    "value_removals": None,
+                    "scope_updates": None,
+                    "ambiguity": None,
+                    "execution": None,
+                },
+            ]
+        }
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            project_dir = root / "P1"
+            project_dir.mkdir()
+            run_dir = root / "runs" / "P1"
+            run_dir.mkdir(parents=True)
+            project = ProjectSource(
+                "P1",
+                project_dir,
+                project_dir / "chat_messages.json",
+                root / "outputs" / "P1_stage1_annotation.json",
+                run_dir,
+            )
+            config = PipelineConfig(
+                prompt_path=root / "prompt.md",
+                output_dir=root / "outputs",
+                run_root=root / "runs",
+                resume=False,
+                max_audit_rounds=1,
+            )
+            pipeline = BoundaryReextractingPipeline(
+                AuditApi(), config, "test prompt", root / "api_calls.jsonl"
+            )
+            updated_inventory, updated_events, _, patch_count, affected = (
+                await pipeline._audit_until_stable(
+                    project,
+                    normalized,
+                    {},
+                    inventory,
+                    events,
+                    force=True,
+                )
+            )
+
+        self.assertEqual(
+            {item["requirement_id"] for item in updated_inventory["requirements"]},
+            {"REQ_A", "REQ_B"},
+        )
+        self.assertEqual(pipeline.reextract_only_ids, {"REQ_B"})
+        self.assertNotIn("RESUME", [event["event_type"] for event in updated_events["REQ_A"]])
+        self.assertEqual([event["event_type"] for event in updated_events["REQ_B"]], ["INTRODUCE"])
+        self.assertEqual(patch_count, 2)
+        self.assertEqual(affected, {"REQ_A", "REQ_B"})
 
 
 class FakeApiClient:
@@ -1204,6 +1471,264 @@ class ResumePipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("verifier calibration v2", api.verification_user_messages[-1])
         self.assertIn("audit_review_items", api.verification_user_messages[-1])
         self.assertIn("Confirm that the source entails this target.", api.verification_user_messages[-1])
+
+
+class AmbiguityLinkingTests(unittest.TestCase):
+    @staticmethod
+    def _event(event_id: str, event_type: str) -> dict[str, Any]:
+        number = int(event_id.rsplit("E", 1)[1])
+        return {
+            "event_id": event_id,
+            "source_message": {
+                "message_id": number,
+                "speaker": "client",
+                "text": f"message {number}",
+            },
+            "event_type": event_type,
+            "value_updates": {"value": number} if event_type in {"INTRODUCE", "MODIFY"} else None,
+            "value_removals": None,
+            "scope_updates": None,
+            "ambiguity": (
+                {"dimension": "VALUE", "description": f"ambiguity {number}"}
+                if event_type == "AMBIGUOUS"
+                else None
+            ),
+            "execution": None,
+            "resolves_ambiguity_event_ids": None,
+        }
+
+    @staticmethod
+    def _decision(ambiguity_id: str, resolver_id: str | None, **overrides: Any) -> dict[str, Any]:
+        decision = {
+            "ambiguity_event_id": ambiguity_id,
+            "affected_state_paths": ["attributes.value"],
+            "resolution_status": "RESOLVED" if resolver_id else "UNRESOLVED",
+            "resolver_event_id": resolver_id,
+            "non_resolving_intermediate_event_ids": [],
+            "decision_note": "Explicit test decision.",
+            "confidence": "HIGH",
+        }
+        decision.update(overrides)
+        return decision
+
+    def test_about_page_intermediate_modify_does_not_close_ambiguity(self) -> None:
+        events = {
+            "REQ_ABOUT": [
+                self._event("REQ_ABOUT_E001", "INTRODUCE"),
+                self._event("REQ_ABOUT_E002", "AMBIGUOUS"),
+                self._event("REQ_ABOUT_E003", "MODIFY"),
+                self._event("REQ_ABOUT_E004", "MODIFY"),
+            ]
+        }
+        decision = self._decision("REQ_ABOUT_E002", "REQ_ABOUT_E004")
+        decision["non_resolving_intermediate_event_ids"] = ["REQ_ABOUT_E003"]
+
+        applied = apply_ambiguity_links(events, {"REQ_ABOUT": [decision]})
+
+        self.assertIsNone(applied.events["REQ_ABOUT"][2]["resolves_ambiguity_event_ids"])
+        self.assertEqual(
+            applied.events["REQ_ABOUT"][3]["resolves_ambiguity_event_ids"],
+            ["REQ_ABOUT_E002"],
+        )
+        self.assertEqual(applied.applied_link_count, 1)
+        self.assertEqual(applied.human_review, [])
+
+    def test_unresolved_ambiguity_remains_unlinked(self) -> None:
+        events = {
+            "REQ_X": [
+                self._event("REQ_X_E001", "AMBIGUOUS"),
+                self._event("REQ_X_E002", "MODIFY"),
+            ]
+        }
+        applied = apply_ambiguity_links(
+            events,
+            {"REQ_X": [self._decision("REQ_X_E001", None)]},
+        )
+
+        self.assertTrue(
+            all(event["resolves_ambiguity_event_ids"] is None for event in applied.events["REQ_X"])
+        )
+        self.assertEqual(applied.human_review, [])
+
+    def test_no_code_commission_message_636_stays_open_until_684(self) -> None:
+        ambiguity = self._event("REQ_COMMISSION_E001", "AMBIGUOUS")
+        intermediate = self._event("REQ_COMMISSION_E002", "MODIFY")
+        resolver = self._event("REQ_COMMISSION_E003", "MODIFY")
+        ambiguity["source_message"]["message_id"] = 620
+        intermediate["source_message"]["message_id"] = 636
+        resolver["source_message"]["message_id"] = 684
+        decision = self._decision("REQ_COMMISSION_E001", "REQ_COMMISSION_E003")
+        decision["non_resolving_intermediate_event_ids"] = ["REQ_COMMISSION_E002"]
+
+        applied = apply_ambiguity_links(
+            {"REQ_COMMISSION": [ambiguity, intermediate, resolver]},
+            {"REQ_COMMISSION": [decision]},
+        )
+
+        self.assertIsNone(
+            applied.events["REQ_COMMISSION"][1]["resolves_ambiguity_event_ids"]
+        )
+        self.assertEqual(
+            applied.events["REQ_COMMISSION"][2]["resolves_ambiguity_event_ids"],
+            ["REQ_COMMISSION_E001"],
+        )
+
+    def test_one_resolver_can_close_multiple_ambiguities(self) -> None:
+        events = {
+            "REQ_X": [
+                self._event("REQ_X_E001", "AMBIGUOUS"),
+                self._event("REQ_X_E002", "AMBIGUOUS"),
+                self._event("REQ_X_E003", "MODIFY"),
+            ]
+        }
+        applied = apply_ambiguity_links(
+            events,
+            {
+                "REQ_X": [
+                    self._decision("REQ_X_E001", "REQ_X_E003"),
+                    self._decision("REQ_X_E002", "REQ_X_E003"),
+                ]
+            },
+        )
+
+        self.assertEqual(
+            applied.events["REQ_X"][2]["resolves_ambiguity_event_ids"],
+            ["REQ_X_E001", "REQ_X_E002"],
+        )
+
+    def test_invalid_or_non_high_link_is_sent_to_human_review(self) -> None:
+        events = {
+            "REQ_X": [
+                self._event("REQ_X_E001", "AMBIGUOUS"),
+                self._event("REQ_X_E002", "MODIFY"),
+            ]
+        }
+        applied = apply_ambiguity_links(
+            events,
+            {
+                "REQ_X": [
+                    self._decision(
+                        "REQ_X_E001",
+                        "REQ_X_E002",
+                        confidence="MEDIUM",
+                    )
+                ]
+            },
+        )
+
+        self.assertIsNone(applied.events["REQ_X"][1]["resolves_ambiguity_event_ids"])
+        self.assertEqual(applied.human_review[0]["source"], "AMBIGUITY_LINKING")
+
+    def test_deleted_or_cross_requirement_resolver_is_not_applied(self) -> None:
+        events = {
+            "REQ_X": [self._event("REQ_X_E001", "AMBIGUOUS")],
+            "REQ_Y": [self._event("REQ_Y_E001", "MODIFY")],
+        }
+        applied = apply_ambiguity_links(
+            events,
+            {"REQ_X": [self._decision("REQ_X_E001", "REQ_Y_E001")]},
+        )
+
+        self.assertEqual(applied.applied_link_count, 0)
+        self.assertIn("same Requirement", applied.human_review[0]["reason"])
+
+
+class AmbiguityLinkingCheckpointTests(unittest.IsolatedAsyncioTestCase):
+    async def test_requirement_checkpoint_is_reused(self) -> None:
+        class LinkApi:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            async def call(self, **kwargs: Any) -> dict[str, Any]:
+                self.calls += 1
+                return {
+                    "run_mode": "AMBIGUITY_LINKING",
+                    "requirement_id": "REQ_X",
+                    "decisions": [
+                        {
+                            "ambiguity_event_id": "REQ_X_E001",
+                            "affected_state_paths": ["attributes.value"],
+                            "resolution_status": "RESOLVED",
+                            "resolver_event_id": "REQ_X_E002",
+                            "non_resolving_intermediate_event_ids": [],
+                            "decision_note": "E002 settles the value.",
+                            "confidence": "HIGH",
+                        }
+                    ],
+                }
+
+        normalized = {
+            "project_id": "P1",
+            "project_title": "P1",
+            "project_metadata": {},
+            "messages": [
+                {
+                    "message_id": number,
+                    "speaker": "client",
+                    "text": f"message {number}",
+                    "created_ts": f"2026-01-0{number}",
+                    "original_index": number - 1,
+                }
+                for number in (1, 2)
+            ],
+        }
+        inventory = {
+            "sessions": [],
+            "requirement_families": [],
+            "requirements": [{"requirement_id": "REQ_X", "title": "X", "family_id": None}],
+        }
+        events = {
+            "REQ_X": [
+                AmbiguityLinkingTests._event("REQ_X_E001", "AMBIGUOUS"),
+                AmbiguityLinkingTests._event("REQ_X_E002", "MODIFY"),
+            ]
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            project = ProjectSource(
+                "P1",
+                root / "P1",
+                root / "chat.json",
+                root / "out.json",
+                root / "run",
+            )
+            config = PipelineConfig(
+                prompt_path=root / "stage1.md",
+                output_dir=root,
+                run_root=root / "runs",
+            )
+            api = LinkApi()
+            pipeline = Stage1Pipeline(
+                api,
+                config,
+                "common",
+                root / "calls.jsonl",
+                ambiguity_linking_prompt="link prompt",
+            )
+
+            first = await pipeline._ambiguity_linking(
+                project,
+                normalized,
+                inventory,
+                events,
+                force_all=False,
+                force_ids=set(),
+            )
+            second = await pipeline._ambiguity_linking(
+                project,
+                normalized,
+                inventory,
+                events,
+                force_all=False,
+                force_ids=set(),
+            )
+
+        self.assertEqual(api.calls, 1)
+        self.assertEqual(first[0], second[0])
+        self.assertEqual(
+            first[0]["REQ_X"][1]["resolves_ambiguity_event_ids"],
+            ["REQ_X_E001"],
+        )
 
 
 class FinalOutputFilteringTests(unittest.IsolatedAsyncioTestCase):

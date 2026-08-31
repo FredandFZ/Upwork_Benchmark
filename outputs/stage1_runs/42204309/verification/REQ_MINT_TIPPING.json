@@ -13,7 +13,7 @@
       "evidence_message_ids": [
         169
       ],
-      "decision_note": "The client explicitly requires an optional tipping control on the mint-page UI.",
+      "decision_note": "The client explicitly requests a tipping option in the mint-page UI.",
       "confidence": "HIGH"
     },
     {
@@ -27,7 +27,7 @@
       "evidence_message_ids": [
         182
       ],
-      "decision_note": "First target-specific implementation claim for preset and custom mint-tip controls.",
+      "decision_note": "Target-specific initial implementation claim for preset and custom tip controls.",
       "confidence": "HIGH"
     },
     {
@@ -42,7 +42,7 @@
         182,
         183
       ],
-      "decision_note": "The immediate client reply accepts the concrete preset amounts and custom-tip UI proposed in message 182.",
+      "decision_note": "The client unambiguously accepts the proposed preset tip amounts and custom-tip UI.",
       "confidence": "HIGH"
     },
     {
@@ -56,7 +56,21 @@
       "evidence_message_ids": [
         615
       ],
-      "decision_note": "First concrete failure report for a selected $1 tip during an executed mint.",
+      "decision_note": "First concrete failure showing that a selected $1 tip was not processed during a completed referral mint.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 622,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        622
+      ],
+      "decision_note": "Distinct no-referral execution path adds the unexpected separate tip transaction and canceled-transfer observation.",
       "confidence": "HIGH"
     },
     {
@@ -71,7 +85,23 @@
         635,
         636
       ],
-      "decision_note": "The client accepts a success-modal tip button that initiates the separate tip transaction without an automatic transaction prompt.",
+      "decision_note": "The client accepts an optional separate tip transaction exposed through the success modal without an automatic prompt.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 649,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        635,
+        636,
+        649
+      ],
+      "decision_note": "Post-modification test shows that the tip transaction still appeared automatically instead of using the accepted manual modal interaction.",
       "confidence": "HIGH"
     },
     {
@@ -80,12 +110,21 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "tip_transaction_disclosure": "show a UI note informing buyers that the tip uses a separate transaction immediately after the mint transaction"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
         649
       ],
-      "decision_note": "The client explicitly requires UI notice that the tip uses an immediate transaction following the mint transaction.",
+      "decision_note": "The client requests a buyer-facing UI disclosure, but does not authorize replacing the accepted manual, non-automatic interaction with an automatic prompt.",
       "confidence": "HIGH"
     },
     {
@@ -99,7 +138,7 @@
       "evidence_message_ids": [
         664
       ],
-      "decision_note": "Target-specific implementation claim for the distinct founder-wallet self-tipping safeguard.",
+      "decision_note": "Target-specific implementation claim adds a UI safeguard against founder-wallet self-tips.",
       "confidence": "HIGH"
     },
     {
@@ -114,32 +153,9 @@
         665,
         666
       ],
-      "decision_note": "First concrete verification that a tip from a separate minting wallet reached the intended recipient.",
+      "decision_note": "First concrete verification that a tested $3 tip transfer reached the intended recipient.",
       "confidence": "HIGH"
     }
   ],
-  "missing_event_candidates": [
-    {
-      "source_message": {
-        "message_id": 660,
-        "speaker": "client",
-        "text": "The tip went through, but the UI needs a note explaining that the tip is sent in an immediate second transaction.\nWithout that, people might think they are about to purchase a second copy."
-      },
-      "supporting_message_ids": [
-        657,
-        658
-      ],
-      "event_type": "RUNTIME_VERIFICATION",
-      "value_updates": null,
-      "value_removals": null,
-      "scope_updates": null,
-      "ambiguity": null,
-      "execution": {
-        "status": "VERIFIED_WORKING",
-        "observed_behavior": "Client confirms that the selected tip transaction executed on the founder-wallet path, while identifying the remaining explanatory-UI issue."
-      },
-      "decision_note": "Concrete correction of the earlier failure report on the founder-wallet path; distinct from the later verification of receipt by another wallet.",
-      "confidence": "HIGH"
-    }
-  ]
+  "missing_event_candidates": []
 }

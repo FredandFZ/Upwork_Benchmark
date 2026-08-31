@@ -11,20 +11,18 @@
       "supporting_message_ids": [],
       "event_type": "INTRODUCE",
       "value_updates": {
-        "tipping_enabled": true,
-        "tipping_optional": true,
-        "placement": "minting page"
+        "tipping_option_enabled": true,
+        "tipping_ui_location": "minting page"
       },
       "value_removals": null,
       "scope_updates": {
         "persistence": "PROJECT_PERSISTENT",
         "components": [
           "FRONTEND",
-          "PAYMENT",
-          "UI_UX"
+          "PAYMENT"
         ],
         "contexts": [
-          "PRIMARY_MINT",
+          "MINT_PAGE",
           "TIPPING"
         ]
       },
@@ -37,9 +35,7 @@
         "speaker": "freelancer",
         "text": "I updated the minting page to include preset amounts ($0, $1, $5, $10), along with an option for a custom tip."
       },
-      "supporting_message_ids": [
-        169
-      ],
+      "supporting_message_ids": [],
       "event_type": "IMPLEMENTATION_CLAIM",
       "value_updates": null,
       "value_removals": null,
@@ -47,7 +43,7 @@
       "ambiguity": null,
       "execution": {
         "status": "CLAIMED_WORKING",
-        "observed_behavior": "Freelancer reports adding $0, $1, $5, and $10 tip presets and a custom-tip option to the minting page."
+        "observed_behavior": "Freelancer reports implementing preset tip amounts of $0, $1, $5, and $10 plus a custom-tip option on the minting page."
       }
     },
     {
@@ -88,7 +84,64 @@
       "ambiguity": null,
       "execution": {
         "status": "FAILED",
-        "observed_behavior": "A completed mint included a $1 tip, but the client reports that the tip did not work."
+        "observed_behavior": "A completed mint using referral code #5 and a selected $1 tip did not process the tip."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 622,
+        "speaker": "client",
+        "text": "I just completed a mint using 'no referral code' and adding a '$1 tip'.\n\n[ACCOUNT_001] Tipping still isn't working.\n\n[ACCOUNT_001] Tickets and commissions from 'no referral code' purchases are still not appearing on the leaderboard or in the NFT attributes.\n\nAlso, after I minted, a second transaction popped up (shown in the screenshot). I cancelled it, but the mint still worked fine.\nDo you know why that second transaction appeared? Was it for the tip?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "On a no-referral mint with a selected $1 tip, the mint succeeded but the tip did not; an unexpected second transaction appeared and was canceled."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 636,
+        "speaker": "client",
+        "text": "Option A (recommended) sounds good 👍"
+      },
+      "supporting_message_ids": [
+        635
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "tip_transfer_mode": "separate transaction",
+        "tip_transaction_interaction": "optional manual action in the mint-success modal with no automatic transaction prompt"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 649,
+        "speaker": "client",
+        "text": "okay, i completed a mint using 'no referral code' with a '$1 tip'.\n\nThe mint required me to execute 1 transaction - 0xc92e17e9e7f26e6b4e03093ce35f6ed3d7fc135c8ee00bc77357eb082779f715\n\nImmediately afterward, another transaction appeared for the tip - 0x887c21856bddc283cd444881931a1d14469cbbd49c2c2764e15855a9181af3b0\n\n(We will need to add a UI note informing buyers that the tip transaction comes immediately after the mint transaction.)\n\nAlso, it may have been obscured by the tip transaction, but i did not see the 'mint successful' modal.\n\nAnd there was no new commission or ticket counted on the leaderboard."
+      },
+      "supporting_message_ids": [
+        635,
+        636,
+        648
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A separate tip transaction opened immediately after the mint instead of being presented through the accepted manual, non-automatic success-modal interaction."
       }
     },
     {
@@ -97,11 +150,14 @@
         "speaker": "client",
         "text": "okay, i completed a mint using 'no referral code' with a '$1 tip'.\n\nThe mint required me to execute 1 transaction - 0xc92e17e9e7f26e6b4e03093ce35f6ed3d7fc135c8ee00bc77357eb082779f715\n\nImmediately afterward, another transaction appeared for the tip - 0x887c21856bddc283cd444881931a1d14469cbbd49c2c2764e15855a9181af3b0\n\n(We will need to add a UI note informing buyers that the tip transaction comes immediately after the mint transaction.)\n\nAlso, it may have been obscured by the tip transaction, but i did not see the 'mint successful' modal.\n\nAnd there was no new commission or ticket counted on the leaderboard."
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        635,
+        636
+      ],
       "event_type": "MODIFY",
       "value_updates": {
-        "tip_transaction_execution": "separate transaction immediately after the mint transaction",
-        "tip_transaction_ui_notice": "Inform buyers that the immediate post-mint transaction is for the tip."
+        "tip_transaction_interaction": "immediate separate follow-up transaction after mint",
+        "tip_transaction_disclosure": "show a UI note informing buyers that the immediate follow-up transaction sends the tip"
       },
       "value_removals": null,
       "scope_updates": null,
@@ -114,10 +170,7 @@
         "speaker": "freelancer",
         "text": "Another important detail from your case:\nYour “$1 tip” tx became a self-transfer because the on-chain founderWallet is currently your wallet, meaning that tipping yourself does not move any funds. I deployed a UI safeguard that disables tips when this situation occurs."
       },
-      "supporting_message_ids": [
-        657,
-        658
-      ],
+      "supporting_message_ids": [],
       "event_type": "IMPLEMENTATION_CLAIM",
       "value_updates": null,
       "value_removals": null,
@@ -125,7 +178,7 @@
       "ambiguity": null,
       "execution": {
         "status": "CLAIMED_WORKING",
-        "observed_behavior": "Freelancer reports deploying a UI safeguard that disables tipping when the connected wallet is the on-chain founder wallet, preventing a self-transfer tip."
+        "observed_behavior": "Freelancer reports deploying a UI safeguard that disables tipping when the buyer wallet is also the configured founder wallet, preventing a no-op self-transfer."
       }
     },
     {
@@ -144,10 +197,46 @@
       "ambiguity": null,
       "execution": {
         "status": "VERIFIED_WORKING",
-        "observed_behavior": "Client confirms receiving the $3 tip from the freelancer's mint."
+        "observed_behavior": "Client confirms receipt of the $3 tip sent from the freelancer's mint."
       }
     }
   ],
-  "routing_warnings": [],
+  "routing_warnings": [
+    {
+      "message_id": 615,
+      "suggested_requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+      "description": "The missing no-referral ticket on the leaderboard concerns ticket accounting rather than tipping."
+    },
+    {
+      "message_id": 615,
+      "suggested_requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "description": "The missing no-referral commission on the leaderboard concerns commission accounting rather than tipping."
+    },
+    {
+      "message_id": 622,
+      "suggested_requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+      "description": "The missing no-referral ticket in leaderboard and NFT attributes belongs to ticket accounting."
+    },
+    {
+      "message_id": 622,
+      "suggested_requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "description": "The missing no-referral commission in leaderboard and NFT attributes belongs to commission accounting."
+    },
+    {
+      "message_id": 649,
+      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
+      "description": "The missing mint-success modal is independently relevant to mint success feedback."
+    },
+    {
+      "message_id": 649,
+      "suggested_requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+      "description": "The uncounted no-referral ticket belongs to ticket accounting."
+    },
+    {
+      "message_id": 649,
+      "suggested_requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "description": "The uncounted no-referral commission belongs to commission accounting."
+    }
+  ],
   "missing_requirement_candidates": []
 }

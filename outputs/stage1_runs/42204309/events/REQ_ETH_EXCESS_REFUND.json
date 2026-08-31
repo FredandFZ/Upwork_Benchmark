@@ -1,0 +1,100 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_ETH_EXCESS_REFUND",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 516,
+        "speaker": "freelancer",
+        "text": "Q1: If minting costs $15, do people unknowingly pay $22?\nA: No. They receive a refund! The process is:\nThe user sends ~0.0072 ETH (~$22)\nThe contract swaps it for ~$22 USDC\nThe contract spends $15 USDC on minting\nThe contract returns ~$7 USDC to the user\n\nI already implemented this in the contract (lines 265-269):\n// Refund excess USDC if any\nif (usdcReceived &gt; MINT\\_PRICE) {\nuint256 excess = usdcReceived - MINT\\_PRICE;\nrequire(usdc.transfer(msg.sender, excess), \"Excess refund failed\");\n}"
+      },
+      "supporting_message_ids": [
+        515
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the contract swaps the full submitted ETH amount to USDC, uses 15 USDC for the mint, and refunds excess USDC to the payer."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 517,
+        "speaker": "client",
+        "text": "Cool  👍"
+      },
+      "supporting_message_ids": [
+        516
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "mint_price_usdc": 15,
+        "eth_swap_input_behavior": "swap the full submitted ETH amount to USDC",
+        "excess_refund_asset": "USDC",
+        "excess_refund_rule": "return USDC received above the 15 USDC mint price to the payer"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PAYMENT",
+          "SMART_CONTRACT"
+        ],
+        "contexts": [
+          "ETH_PAYMENT",
+          "PRIMARY_MINT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 530,
+        "speaker": "freelancer",
+        "text": "I spent 0.0071022 ETH and received a refund of 7.48635 USDC"
+      },
+      "supporting_message_ids": [
+        529
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A live ETH mint used 0.0071022 ETH and returned 7.48635 USDC as the excess refund."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 537,
+        "speaker": "freelancer",
+        "text": "I can build it and make the change. It&#39;s not a big task for me."
+      },
+      "supporting_message_ids": [
+        534,
+        536
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "eth_swap_method": "Uniswap V3 exactOutputSingle",
+        "eth_swap_input_behavior": "consume only the ETH required to obtain exactly 15 USDC",
+        "excess_refund_asset": "ETH",
+        "excess_refund_rule": "unwrap and return the unspent ETH balance to the payer",
+        "shortfall_behavior": "revert when 15 USDC cannot be obtained within the submitted ETH amount"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

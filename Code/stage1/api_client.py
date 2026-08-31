@@ -33,12 +33,14 @@ class Stage1ApiClient:
         max_concurrent_requests: int,
         log_path: Path,
         failed_response_dir: Path,
+        reasoning_effort_overrides: dict[str, str] | None = None,
     ) -> None:
         self.http_client = http_client
         self.api_key = api_key
         self.budget_id = budget_id
         self.model = model
         self.reasoning_effort = reasoning_effort
+        self.reasoning_effort_overrides = dict(reasoning_effort_overrides or {})
         self.retries = retries
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
         self.log_path = log_path
@@ -80,6 +82,7 @@ class Stage1ApiClient:
         validator: Callable[[dict[str, Any]], None] | None = None,
         failed_response_redactor: Callable[[str], str] | None = None,
     ) -> dict[str, Any]:
+        effective_reasoning_effort = self.reasoning_effort_for(run_mode)
         last_error: Exception | None = None
         raw_content = ""
         for attempt in range(self.retries + 1):
@@ -100,7 +103,7 @@ class Stage1ApiClient:
                         },
                         json={
                             "model": self.model,
-                            "reasoning_effort": self.reasoning_effort,
+                            "reasoning_effort": effective_reasoning_effort,
                             "messages": messages,
                         },
                     )
@@ -127,7 +130,16 @@ class Stage1ApiClient:
                     validator(result)
                 status = "success"
                 await self._log_call(
-                    project_id, run_mode, target_requirement, started, status, attempt, usage, request_id, None
+                    project_id,
+                    run_mode,
+                    target_requirement,
+                    started,
+                    status,
+                    attempt,
+                    usage,
+                    request_id,
+                    None,
+                    effective_reasoning_effort,
                 )
                 return result
             except (_RetryableError, httpx.HTTPError, json.JSONDecodeError, ValueError, ApiError) as exc:
@@ -147,7 +159,16 @@ class Stage1ApiClient:
                     project_id, run_mode, target_requirement, attempt, raw_content, error_text
                 )
                 await self._log_call(
-                    project_id, run_mode, target_requirement, started, status, attempt, usage, request_id, error_text
+                    project_id,
+                    run_mode,
+                    target_requirement,
+                    started,
+                    status,
+                    attempt,
+                    usage,
+                    request_id,
+                    error_text,
+                    effective_reasoning_effort,
                 )
                 retryable = isinstance(exc, (_RetryableError, httpx.HTTPError, json.JSONDecodeError, ValueError))
                 if not retryable or attempt >= self.retries:
@@ -160,6 +181,10 @@ class Stage1ApiClient:
             f"{f': {last_error}' if last_error and str(last_error) else ''}"
         )
 
+    def reasoning_effort_for(self, run_mode: str) -> str:
+        """Return the effective reasoning effort for one API run mode."""
+        return self.reasoning_effort_overrides.get(run_mode, self.reasoning_effort)
+
     async def _log_call(
         self,
         project_id: str,
@@ -171,6 +196,7 @@ class Stage1ApiClient:
         usage: dict[str, Any],
         request_id: str | None,
         error: str | None,
+        reasoning_effort: str,
     ) -> None:
         input_tokens = usage.get("prompt_tokens", usage.get("input_tokens"))
         output_tokens = usage.get("completion_tokens", usage.get("output_tokens"))
@@ -179,7 +205,7 @@ class Stage1ApiClient:
             "run_mode": run_mode,
             "target_requirement": target_requirement,
             "model": self.model,
-            "reasoning_effort": self.reasoning_effort,
+            "reasoning_effort": reasoning_effort,
             "timestamp": started.isoformat(),
             "success": status == "success",
             "retry_count": retry_count,
