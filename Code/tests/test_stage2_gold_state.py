@@ -274,6 +274,34 @@ class GoldStateTests(unittest.TestCase):
             [1, 2],
         )
 
+    def test_late_introduce_preserves_observed_pre_task_state(self) -> None:
+        stage1 = annotation(
+            requirement(
+                "REQ_A",
+                [
+                    event(
+                        "REQ_A",
+                        1,
+                        1,
+                        "RUNTIME_FAILURE",
+                        execution={"status": "FAILED", "observed_behavior": "failed"},
+                    ),
+                    event("REQ_A", 2, 2, "INTRODUCE", value_updates={"a": 1}),
+                ],
+            )
+        )
+
+        graph = build_requirement_state_graph(stage1)
+        gold = build_gold_states(stage1, graph)
+        target = task(gold, 2)
+
+        self.assertIn("REQ_A", snapshot_map(target, "pre_task_gold_state"))
+        self.assertIn("REQ_A", snapshot_map(target, "post_task_gold_state"))
+        self.assertEqual(
+            snapshot_map(target, "post_task_gold_state")["REQ_A"],
+            "REQ_A_S002",
+        )
+
     def test_graph_only_source_marks_metadata_unavailable(self) -> None:
         stage1 = annotation(
             requirement(

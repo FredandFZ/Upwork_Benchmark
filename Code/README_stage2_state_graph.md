@@ -36,7 +36,26 @@ Replay behavior:
   patching. A null scope dimension means “not updated”. Because a modification
   creates a new Requirement version, it also resets execution to null.
 - Lifecycle, ambiguity, and execution are independent state dimensions.
-- A Requirement with no `INTRODUCE` Event is omitted from the State Graph.
+- Every Stage 1 Requirement receives one Requirement Graph. Stage 2 never
+  removes a Requirement merely because `INTRODUCE` is absent.
+- A lifecycle whose first Event is `INTRODUCE` uses
+  `initialization_mode: "EXPLICIT_INTRODUCE"` and replays normally from that
+  Event.
+- If visible history begins with `MODIFY`, lifecycle, ambiguity, or execution
+  evidence, replay begins at that first observable Event with
+  `initialization_mode: "OBSERVED_HISTORY"`. Unknown attributes, scope, and
+  lifecycle remain empty or null until evidence establishes them; the builder
+  does not invent an `INTRODUCE` Event or a complete initial implementation.
+- If `INTRODUCE` appears later, all earlier Events remain as State Nodes and
+  Edges. The later `INTRODUCE` establishes the formal ACTIVE baseline and
+  clears execution/ambiguity inherited from the incomplete pre-introduction
+  observation.
+- A Requirement with no Events is retained as an empty graph with
+  `initialization_mode: "NO_EVENTS"`, `nodes: []`, and `edges: []`.
+- During an incomplete observed baseline, a `value_removals` entry may establish
+  that an attribute is currently absent even when its earlier value was outside
+  the visible history. Once an explicit baseline exists, removing an already
+  absent attribute remains a consistency error.
 - If a `MODIFY` closes an open ambiguity, an immediately following `RESUME`
   that would not change lifecycle or ambiguity is not emitted as a duplicate
   State Node or Edge.
@@ -45,3 +64,23 @@ Replay behavior:
   graph's edges.
 - Transitions that cannot be replayed safely (for example, an Event after
   `REMOVE`) stop generation with a consistency error.
+
+Each Requirement Graph therefore includes:
+
+```json
+{
+  "graph_id": "REQ_X_GRAPH",
+  "requirement_id": "REQ_X",
+  "title": "Requirement title",
+  "family_id": null,
+  "initialization_mode": "EXPLICIT_INTRODUCE | OBSERVED_HISTORY | NO_EVENTS",
+  "has_explicit_introduce": true,
+  "nodes": [],
+  "edges": []
+}
+```
+
+The number of `requirement_graphs` in a successfully generated project is
+always equal to the number of Requirements in its Stage 1 annotation. This
+preserves incomplete Requirements for later initial-code-environment
+simulation instead of silently dropping them.

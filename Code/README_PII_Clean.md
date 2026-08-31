@@ -1,134 +1,114 @@
-# Stage 1 PII 清洗与消息改写
+# Dataset 项目 PII 清洗
 
-`PII_Clean.py` 为已完成 Stage 1 标注的项目创建可共享的脱敏副本。默认输入是
-`outputs/stage1_runs`；脚本不会原地修改该目录。
-
-## 处理流程（v2.0）
-
-```text
-原始 normalized_project.json
-        |
-        +-- 1. 长消息：GPT-5.6 Sol 语义等价改写
-        |      短确认消息（如 ok、thank you、I know）保留原句
-        |
-        +-- 2. 对每一条“改写后/保留后”的消息重新扫描 PII
-        |      本地确定性替换为项目内稳定的占位符
-        |
-        +-- 3. 按 message_id 回写 normalized_project.json
-        |
-        +-- 4. 按 message_id 同步最终标注的 source_message.text
-```
-
-第一阶段只改写句式和措辞，不做脱敏。Prompt 要求模型逐字保留已有的姓名、邮箱、URL、账号、密码、电话和账号句柄；第二阶段才以改写后的实际文本为准逐段检查并替换。这使 PII 检查覆盖模型实际返回的每一段文字，而不是只覆盖改写前的原文。
-
-## PII 替换
-
-同一个项目中，同一敏感值始终得到同一个占位符，例如：
-
-| 类型 | 占位符示例 |
-|---|---|
-| 邮箱 | `[EMAIL_001]` |
-| URL | `[URL_001]` |
-| 账号 | `[ACCOUNT_001]` |
-| 密码 | `[PASSWORD_001]` |
-| 电话 | `[PHONE_001]` |
-| @ 句柄 | `[HANDLE_001]` |
-| 姓名 | `[CLIENT_NAME_001]`、`[FREELANCER_NAME_001]`、`[PERSON_NAME_001]` |
-| sender_id | `[SENDER_ID_001]` |
-
-姓名会从常见的问候、致谢和签名格式中识别。对于这些规则无法识别的姓名，使用 `--extra-name` 明确指定。账号与密码也会在项目范围内复用同一映射，例如某条消息单独给出密码、另一条消息再次引用时，两处都会得到相同的 `[PASSWORD_###]`。
-
-## 隐私边界与失败恢复
-
-这个顺序意味着第一阶段会把原始消息发送给配置的 Stage 1 Upwork LLM 服务；请只在获得数据授权的受信任环境中运行。
-
-脚本不会把含 PII 的第一阶段改写结果写入 `rewrite_checkpoint.json`，也不会产生这种检查点。若 LLM 阶段中途失败，重新运行该项目会从第一批重新开始；失败响应会被直接省略而非保存。完成后的输出、manifest 和 API 调用日志不记录原始敏感值。
-
-旧版 `rewrite_checkpoint.json`（如存在）会被 v2.0 忽略，不会自动删除。
+`PII_Clean.py` 遍历 `Datasets/project` 中的项目，对每个项目的
+`chat_messages.json` 逐条执行消息改写与 PII 清洗，然后将项目副本写入
+`Datasets/PII_clean_project`。
 
 ## 输入与输出
 
-输入项目必须同时包含：
+默认输入：
 
 ```text
-outputs/stage1_runs/<project_id>/
-├── normalized_project.json
-└── final/<project_id>_stage1_annotation.json
+Datasets/project/<project_id>/
+├── chat_messages.json
+├── job.txt
+├── job_metadata.csv
+├── milestones.json
+└── deliverables/...
 ```
 
-输出写入：
+默认输出：
 
 ```text
-outputs/stage1_pii_clean_runs/<project_id>/
-├── normalized_project.json
-├── final/<project_id>_stage1_annotation.json
-└── pii_clean_manifest.json
-
-outputs/stage1_pii_clean_annotations/<project_id>_stage1_annotation.json
+Datasets/PII_clean_project/<project_id>/
+├── chat_messages.json          # 已清洗
+├── job.txt                     # 原样复制
+├── job_metadata.csv            # 原样复制
+├── milestones.json             # 原样复制
+└── deliverables/...            # 原样复制
 ```
 
-只有以下字段允许变化：
+程序只允许修改 `chat_messages.json` 内的：
 
-- `normalized_project.json` 中的 `messages[].text` 与 `messages[].sender_id`
-- 最终标注中 `requirements[].events[].source_message.text`
+- `message`：语义等价改写后进行 PII 替换；
+- `sender_id`：替换为项目内稳定的 `[SENDER_ID_###]`。
 
-写入前会校验 Stage 1 schema，并确保每个标注事件仍按相同的 `message_id` 和 `speaker` 指向同步后的文本；其他标注字段不变。
+`created_ts`、`message_user_type` 和其他字段保持不变。项目中的其他文件与目录直接复制，不做内容修改。注意：因此 `PII_clean_project` 中除 `chat_messages.json` 外的文件并不保证已脱敏。
 
-若输入标注的 `source_message.text` 与对应原始消息仅存在空格、换行或其他空白字符差异，脚本会先对齐为原始消息文本再继续；若存在任何实质内容差异，仍会立即报错。
+运行 manifest 保存在 `Datasets/PII_clean_project/_manifests`，API 日志保存在
+`Datasets/PII_clean_project/_logs`，不会加入各项目目录。
 
-## 模型与改写约束
+## 核心流程
 
-默认使用现有 Stage 1 配置中的 `gpt-5.6-sol` 与 `reasoning_effort=high`。每一批返回都必须：
+```text
+chat_messages.json
+        |
+        +-- 1. 为每条聊天分配仅供运行时使用的行号
+        |      不会向输出 JSON 新增 message_id
+        |
+        +-- 2. 长消息由 GPT-5.6 Sol 做语义等价改写
+        |      短确认消息保留原文
+        |
+        +-- 3. 基于改写后的完整项目聊天重新识别 PII
+        |      邮箱、URL、账号、密码、电话、@句柄、姓名、sender_id
+        |
+        +-- 4. 确定性替换并写回 message / sender_id
+        |
+        +-- 5. 复制项目的其他文件，写入 PII_clean_project
+```
 
-- 与输入一一对应，且 `message_id` 的 JSON 类型不变；
-- 改写长消息而非总结、拆分或合并；
-- 保留意图、条件、否定、不确定性、时间顺序和标注相关事实；
-- 保留数值、金额、日期、版本、文件名、技术标识符和已有占位符；
-- 保留原有 PII 的字面值，禁止在第一阶段自行脱敏、编造或省略。
+同一项目内，相同敏感值使用相同占位符，例如 `[EMAIL_001]`、`[URL_001]`、
+`[ACCOUNT_001]`、`[PASSWORD_001]` 和 `[CLIENT_NAME_001]`。无法通过问候、致谢或
+签名规则识别的姓名可通过 `--extra-name` 补充。
 
-## 运行
+第一阶段会将原始消息发送到现有 Stage 1 Upwork LLM 服务；请只在已获得数据授权的受信任环境中运行。含原始 PII 的模型返回不会写入 checkpoint，失败响应也会被省略。
 
-先进行不写文件、不调用 API 的预检查：
+## 运行命令
+
+只做本地预检查，不调用 API、不写输出：
 
 ```powershell
 python .\Code\PII_Clean.py --dry-run
 ```
 
-处理一个项目：
+处理全部项目：
 
 ```powershell
-python .\Code\PII_Clean.py --project-id 37923084
+python .\Code\PII_Clean.py --insecure
 ```
 
-在受信任的 staging 自签名证书环境中，可额外使用 `--insecure`：
+只处理一个项目：
 
 ```powershell
-python .\Code\PII_Clean.py --project-id 37923084 --insecure
+python .\Code\PII_Clean.py `
+  --project-id 42204309 `
+  --reasoning-effort xhigh `
+  --max-batch-messages 5 `
+  --insecure `
+  --no-resume `
+  --overwrite
 ```
 
-环境变量与 Stage 1 相同：
+明确指定输入和输出：
+
+```powershell
+python .\Code\PII_Clean.py `
+  --source-root .\Datasets\project `
+  --output-root .\Datasets\PII_clean_project `
+  --insecure
+```
+
+环境变量：
 
 ```powershell
 $env:UPWORK_API_KEY = "..."
 $env:UPWORK_BUDGET_ID = "..."
 ```
 
-默认会跳过签名相同且已完成的项目。使用 `--no-resume --overwrite` 强制重新生成：
-
-```powershell
-python .\Code\PII_Clean.py --project-id 37923084 --insecure --no-resume --overwrite
-```
-
-补充无法通过规则自动识别的姓名：
-
-```powershell
-python .\Code\PII_Clean.py --project-id 37923084 --extra-name "Alice Smith"
-```
+`--resume` 默认开启，会跳过输入、模型、Prompt 和参数签名均未变化且已完成的项目。使用 `--no-resume --overwrite` 强制重新生成。
 
 ## 测试
 
 ```powershell
-python -m unittest discover -s Code\tests -v
+python -m unittest Code.tests.test_pii_clean -v
 ```
-
-PII 单元测试覆盖确定性替换、改写后扫描、短消息保留、LLM 返回约束、分批和标注同步。

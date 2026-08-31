@@ -6,22 +6,25 @@
       "source_message": {
         "message_id": 291,
         "speaker": "client",
-        "text": "It's also coming up with '5' as a valid referral code, but **valid referral codes must only be already minted NFTs** (to stop people from self-referring, example, affiliate 54 tells me to buy, im about to mint 543, so i use 543 as referral code to send the commission and ticket to myself"
+        "text": "The system is also treating '5' as a valid referral code, but **the only valid referral codes must be NFTs that have already been minted**. This is necessary to prevent self-referrals—for example, affiliate 54 tells me to buy, and im about to mint 543, so i enter 543 as the referral code to direct the commission and ticket to myself."
       },
       "supporting_message_ids": [],
       "event_type": "INTRODUCE",
       "value_updates": {
-        "eligibility_rule": "A referral code must identify an NFT already minted before the current mint."
+        "valid_referral_code_condition": "The code must identify an NFT minted before the current mint.",
+        "self_referral_prevention": "Current or future mint numbers must not be accepted as referral codes."
       },
       "value_removals": null,
       "scope_updates": {
         "persistence": "PROJECT_PERSISTENT",
         "components": [
-          "SMART_CONTRACT",
-          "FRONTEND"
+          "FRONTEND",
+          "BACKEND",
+          "SMART_CONTRACT"
         ],
         "contexts": [
-          "REFERRAL_MINT"
+          "REFERRAL_VALIDATION",
+          "PRIMARY_MINT"
         ]
       },
       "ambiguity": null,
@@ -31,7 +34,7 @@
       "source_message": {
         "message_id": 291,
         "speaker": "client",
-        "text": "It's also coming up with '5' as a valid referral code, but **valid referral codes must only be already minted NFTs** (to stop people from self-referring, example, affiliate 54 tells me to buy, im about to mint 543, so i use 543 as referral code to send the commission and ticket to myself"
+        "text": "The system is also treating '5' as a valid referral code, but **the only valid referral codes must be NFTs that have already been minted**. This is necessary to prevent self-referrals—for example, affiliate 54 tells me to buy, and im about to mint 543, so i enter 543 as the referral code to direct the commission and ticket to myself."
       },
       "supporting_message_ids": [],
       "event_type": "RUNTIME_FAILURE",
@@ -41,16 +44,17 @@
       "ambiguity": null,
       "execution": {
         "status": "FAILED",
-        "observed_behavior": "An unminted NFT number was presented as a valid referral code, allowing a prospective buyer to enter the number being minted."
+        "observed_behavior": "The system accepted referral code 5 even though the corresponding NFT had not already been minted."
       }
     },
     {
       "source_message": {
         "message_id": 308,
         "speaker": "freelancer",
-        "text": "Contract edge case\n\\- Mint #1 with no referral: commission goes to founder (no existing NFTs)\n\\- Mint #2 with no referral: uses random selection via VRF, which will select from existing NFTs (mint 1)\n\\- Self-referral prevention: contract checks referralCode &lt; tokenId, so users can't use their own token ID"
+        "text": "Contract edge-case behavior\n[ACCOUNT_001] For Mint #1 without a referral, the commission is sent to the founder because no NFTs exist yet\n[ACCOUNT_001] For Mint #2 without a referral, random selection through VRF is used, choosing from the existing NFTs (mint 1)\n[ACCOUNT_001] To prevent self-referrals, the contract verifies that referralCode &lt; tokenId, which stops users from using their own token ID"
       },
       "supporting_message_ids": [
+        291,
         307
       ],
       "event_type": "IMPLEMENTATION_CLAIM",
@@ -60,17 +64,16 @@
       "ambiguity": null,
       "execution": {
         "status": "CLAIMED_WORKING",
-        "observed_behavior": "Freelancer reports that the contract prevents self-referral by requiring the referral code to be lower than the token ID being minted."
+        "observed_behavior": "The freelancer reports that the contract checks referralCode < tokenId to reject current or future token IDs and prevent the described self-referral."
       }
     },
     {
       "source_message": {
         "message_id": 313,
         "speaker": "client",
-        "text": "1 - Invalid code message is great, but needs one more reword to 'No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random'.\n\n2 - First mint still not working (possibly due to commission and ticket coded to go to an existing NFT holder, which for the first mint doesn't exist)\n\n3 - NFT sizing is good. and 'View Book' botton looks good too.\n\n4 - Badges are good, but right now has 5 on the top row and 3 on the bottom row, if possible, change to 4 on top row and 4 on bottom row."
+        "text": "1 - The invalid-code message looks great, but it needs one final wording change to: 'No/Invalid referral code! $5 + $500 prize draw ticket will go to an existing NFT holder at random'.\n\n2 - The first mint continues not to work, possibly because the commission and ticket are coded to be awarded to an existing NFT holder, but no such holder exists for the first mint.\n\n3 - The NFT size is good, and the 'View Book' button also looks good.\n\n4 - The badges look good, but they are currently arranged with 5 in the top row and 3 in the bottom row. If possible, please make it 4 on the top row and 4 on the bottom row."
       },
       "supporting_message_ids": [
-        305,
         310
       ],
       "event_type": "RUNTIME_VERIFICATION",
@@ -80,16 +83,19 @@
       "ambiguity": null,
       "execution": {
         "status": "VERIFIED_WORKING",
-        "observed_behavior": "Client confirms that an invalid referral code is now recognized and produces the invalid-code message."
+        "observed_behavior": "After testing the invalid-code case, the client confirms that the interface correctly produced the invalid-code result."
       }
     },
     {
       "source_message": {
         "message_id": 569,
         "speaker": "client",
-        "text": "On approval for USDC spend (not minting) the 'successful mint' popup appeared, and stated mint number 2 (in this case i used referral code 2), see screenshot with the wallet popup in view.\nI cancelled the buy, checked and had no NFT.\nThen minted with referral code 3, no approve USDC sign happened, it went straight to mint and worked perfectly, popup appeared. NFT is visible on dashboard.\n\ndecrypting the book worked (i had to sign a transaction), but i am stuck on the cover page."
+        "text": "While approving the USDC spend (not during minting), the 'successful mint' popup showed up and stated mint number 2; in this case, I used referral code 2. See the screenshot with the wallet popup visible.\nI cancelled the buy, then checked and found that I had no NFT.\nAfter that, I minted using referral code 3. No USDC approval signing occurred; it went directly to minting and worked perfectly, and the popup appeared. The NFT is visible on the dashboard.\n\nDecrypting the book worked (I had to sign a transaction), but I cannot get past the cover page."
       },
-      "supporting_message_ids": [],
+      "supporting_message_ids": [
+        557,
+        563
+      ],
       "event_type": "RUNTIME_VERIFICATION",
       "value_updates": null,
       "value_removals": null,
@@ -97,30 +103,20 @@
       "ambiguity": null,
       "execution": {
         "status": "VERIFIED_WORKING",
-        "observed_behavior": "A mint using the existing referral code 3 completed successfully, confirming the valid-code path was accepted."
+        "observed_behavior": "A mint using existing referral code 3 was accepted and completed successfully, verifying the valid-code path."
       }
     }
   ],
   "routing_warnings": [
     {
       "message_id": 305,
-      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
-      "description": "The referral-code eligibility rule is a restatement, while the newly specified valid and invalid popup wording changes the feedback Requirement."
+      "suggested_requirement_id": "REQ_REFERRAL_VALIDATION_FEEDBACK",
+      "description": "The requested valid and invalid referral popup wording belongs to the separate validation-feedback Requirement; the underlying validity rule merely repeats the existing condition."
     },
     {
-      "message_id": 360,
-      "suggested_requirement_id": "REQ_MINT_SUCCESS_FEEDBACK",
-      "description": "The premature success popup triggered by entering or deleting a referral code concerns mint-success feedback rather than referral-code eligibility."
-    },
-    {
-      "message_id": 590,
-      "suggested_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
-      "description": "This message specifies that an NFT attribute must contain the NFT's own referral code rather than changing referral-code eligibility validation."
-    },
-    {
-      "message_id": 604,
-      "suggested_requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
-      "description": "The implementation claim concerns an NFT's referral-code identity and metadata, not eligibility validation."
+      "message_id": 313,
+      "suggested_requirement_id": "REQ_REFERRAL_VALIDATION_FEEDBACK",
+      "description": "The requested final wording change for the invalid-code message belongs to the validation-feedback Requirement, while only the observed invalid classification supports this target."
     }
   ],
   "missing_requirement_candidates": []

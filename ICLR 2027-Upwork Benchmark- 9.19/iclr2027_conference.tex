@@ -6,6 +6,9 @@
 
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
 
 
 \title{ReqMemBench: Benchmarking Temporal Requirement-State Reconstruction for Coding Agents}
@@ -21,6 +24,8 @@
 \newcommand{\fix}{\marginpar{FIX}}
 \newcommand{\new}{\marginpar{NEW}}
 \newcommand{\placeholder}[1]{\emph{[#1]}}
+\newcommand{\matrixselectioncells}{-- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & --}
+\newcommand{\matrixresultcells}{\phantom{0.00} & \phantom{0.00} & \phantom{0.00} & \phantom{0.00} & \phantom{0.00} & \phantom{0.00} & \phantom{0.00} & \phantom{0.00} & \phantom{0.00}}
 
 % \iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
 \begin{document}
@@ -347,24 +352,219 @@ Task & Count, affected requirements, position, preceding history length & \place
 
 This section should establish that the experimental design separates general coding ability, access to historical evidence, requirement-state reasoning, and downstream action. All controlled conditions should use the same agent scaffold, tool permissions, and resource budgets, varying only the explicitly defined independent variable---most importantly, access to project history.
 
+\iffalse
+\begin{table}[t]
+\caption{ReqMemBench experimental matrix across agent frameworks, backbone models, history-length strata, research questions, and input conditions. C1: No History; C2: Full History; C3: Oracle Relevant History. RQ1 is evaluated only under C2.}
+\label{tab:main_experiment_matrix}
+\begin{center}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}ll*{18}{c}@{}}
+\toprule
+\multirow{3}{*}{Difficulty} & \multirow{3}{*}{Research question}
+& \multicolumn{9}{c}{Codex}
+& \multicolumn{9}{c}{Claude Code} \\
+\cmidrule(lr){3-11}\cmidrule(lr){12-20}
+&
+& \multicolumn{3}{c}{GPT-5.6-SOL}
+& \multicolumn{3}{c}{GPT-5.6-Terra}
+& \multicolumn{3}{c}{GPT-5.5}
+& \multicolumn{3}{c}{Claude Opus 5}
+& \multicolumn{3}{c}{Claude Sonnet 5}
+& \multicolumn{3}{c}{Claude Haiku 4.5} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+\cmidrule(lr){12-14}\cmidrule(lr){15-17}\cmidrule(lr){18-20}
+&
+& C1 & C2 & C3
+& C1 & C2 & C3
+& C1 & C2 & C3
+& C1 & C2 & C3
+& C1 & C2 & C3
+& C1 & C2 & C3 \\
+\midrule
+\multirow{4}{*}{Short (0--25)}
+& RQ1 Selection
+& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & --
+& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- \\
+& RQ2 Reconstruction
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+& RQ3 Clarify
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+& RQ4 Execution
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+\addlinespace
+\multirow{4}{*}{Medium (26--50)}
+& RQ1 Selection
+& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & --
+& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- \\
+& RQ2 Reconstruction
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+& RQ3 Clarify
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+& RQ4 Execution
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+\addlinespace
+\multirow{4}{*}{Long ($>50$)}
+& RQ1 Selection
+& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & --
+& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- \\
+& RQ2 Reconstruction
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+& RQ3 Clarify
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+& RQ4 Execution
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
+& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
+\bottomrule
+\end{tabular}%
+}
+\end{center}
+\end{table}
+\fi
+
+\begin{table}[t]
+\caption{ReqMemBench experimental matrix across agent frameworks, backbone models, history-length strata, research questions, and input conditions. C1: No History; C2: Full History; C3: Oracle Relevant History. RQ1 is evaluated only under C2. The two panels preserve the full experimental matrix while retaining readable body text.}
+\label{tab:main_experiment_matrix}
+\centering
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.32}
+\begin{tabular}{@{}ll*{9}{c}@{}}
+\toprule
+\multirow{3}{*}{Difficulty} & \multirow{3}{*}{Research question}
+& \multicolumn{9}{c}{Codex} \\
+\cmidrule(lr){3-11}
+&
+& \multicolumn{3}{c}{\shortstack{GPT-5.6\\SOL}}
+& \multicolumn{3}{c}{\shortstack{GPT-5.6\\Terra}}
+& \multicolumn{3}{c}{GPT-5.5} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+& & C1 & C2 & C3 & C1 & C2 & C3 & C1 & C2 & C3 \\
+\midrule
+\multirow{4}{*}{\shortstack{Short\\(0--25)}} & RQ1 Select. & \matrixselectioncells \\
+& RQ2 Recon. & \matrixresultcells \\
+& RQ3 Clarify & \matrixresultcells \\
+& RQ4 Execute & \matrixresultcells \\
+\addlinespace[3pt]
+\multirow{4}{*}{\shortstack{Medium\\(26--50)}} & RQ1 Select. & \matrixselectioncells \\
+& RQ2 Recon. & \matrixresultcells \\
+& RQ3 Clarify & \matrixresultcells \\
+& RQ4 Execute & \matrixresultcells \\
+\addlinespace[3pt]
+\multirow{4}{*}{\shortstack{Long\\($>50$)}} & RQ1 Select. & \matrixselectioncells \\
+& RQ2 Recon. & \matrixresultcells \\
+& RQ3 Clarify & \matrixresultcells \\
+& RQ4 Execute & \matrixresultcells \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.8em}
+
+\begin{tabular}{@{}ll*{9}{c}@{}}
+\toprule
+\multirow{3}{*}{Difficulty} & \multirow{3}{*}{Research question}
+& \multicolumn{9}{c}{Claude Code} \\
+\cmidrule(lr){3-11}
+&
+& \multicolumn{3}{c}{\shortstack{Claude\\Opus 5}}
+& \multicolumn{3}{c}{\shortstack{Claude\\Sonnet 5}}
+& \multicolumn{3}{c}{\shortstack{Claude\\Haiku 4.5}} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+& & C1 & C2 & C3 & C1 & C2 & C3 & C1 & C2 & C3 \\
+\midrule
+\multirow{4}{*}{\shortstack{Short\\(0--25)}} & RQ1 Select. & \matrixselectioncells \\
+& RQ2 Recon. & \matrixresultcells \\
+& RQ3 Clarify & \matrixresultcells \\
+& RQ4 Execute & \matrixresultcells \\
+\addlinespace[3pt]
+\multirow{4}{*}{\shortstack{Medium\\(26--50)}} & RQ1 Select. & \matrixselectioncells \\
+& RQ2 Recon. & \matrixresultcells \\
+& RQ3 Clarify & \matrixresultcells \\
+& RQ4 Execute & \matrixresultcells \\
+\addlinespace[3pt]
+\multirow{4}{*}{\shortstack{Long\\($>50$)}} & RQ1 Select. & \matrixselectioncells \\
+& RQ2 Recon. & \matrixresultcells \\
+& RQ3 Clarify & \matrixresultcells \\
+& RQ4 Execute & \matrixresultcells \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:main_experiment_matrix} crosses five experimental dimensions: history difficulty, research question, coding-agent framework, backbone model, and controlled input condition. The two stacked panels group results first by agent framework, then by backbone model, and finally by input condition. Rows stratify instances by the number of conversation turns before the target task and by the requirement-management capability being evaluated. Empty cells reserve locations for future measurements. Dashes mark combinations that are not applicable: RQ1 requires access to the full project history and is therefore evaluated only under C2.
+
 \subsection{Research Questions}
 
-Organize the experiments around three top-level research questions:
+Organize the experiments around four top-level research questions that follow the requirement-management pipeline from evidence selection to code execution:
 \begin{itemize}
-    \item \textbf{RQ1: Requirement-state reconstruction.} Can current coding agents accurately reconstruct the valid requirement state of an ongoing software project at an arbitrary intermediate time? Diagnostic dimensions are relevant-requirement selection, current value, lifecycle, scope, ambiguity, and execution.
-    \item \textbf{RQ2: History access and reasoning bottlenecks.} When agents use project history, do failures arise from accessing the wrong evidence or from failing to reconcile evidence into the correct current state?
-    \item \textbf{RQ3: From state understanding to correct action.} Does accurate requirement-state reconstruction translate into correct downstream development actions?
+    \item \textbf{RQ1: Selection.} Can an agent identify the historical requirements and evidence relevant to the target task from the full project history?
+    \item \textbf{RQ2: State Reconstruction.} Can an agent reconcile requirement evolution and recover the currently valid requirement state at the takeover point?
+    \item \textbf{RQ3: Memory-or-Clarify.} Can an agent determine whether the available project memory resolves the task or whether unresolved ambiguity requires clarification?
+    \item \textbf{RQ4: Requirement-to-Code.} Can an agent translate the correct requirement state into an appropriate development action and, where execution is supported, a correct code change?
 \end{itemize}
 
 \subsection{History Conditions}
 
-Use three controlled input conditions for RQ2:
+Use three controlled input conditions:
 \begin{itemize}
-    \item \textbf{No History:} $C+q$. This condition measures how much performance is supported by the current code and task alone.
-    \item \textbf{Full History:} $H+C+q$. This condition represents the realistic takeover setting and includes relevant, stale, and irrelevant information.
-    \item \textbf{Oracle Relevant History:} $H_{\mathrm{oracle}}+C+q$. This condition supplies only human-verified relevant history, largely removing retrieval and context-management burden while retaining temporal reconciliation and state reasoning.
+    \item \textbf{C1---No History:}
+    \[
+    I_{\mathrm{C1}}(t^*)=C_{t^{*-}}+q_{t^*}.
+    \]
+    This condition measures how much performance is supported by the current code and task alone.
+    \item \textbf{C2---Full History:}
+    \[
+    I_{\mathrm{C2}}(t^*)=H_{<t^*}+C_{t^{*-}}+q_{t^*}.
+    \]
+    This condition represents the realistic takeover setting and includes relevant, stale, and irrelevant information.
+    \item \textbf{C3---Oracle Relevant History:}
+    \[
+    I_{\mathrm{C3}}(t^*)=H^{\mathrm{rel}}_{<t^*}+C_{t^{*-}}+q_{t^*}.
+    \]
+    This condition supplies only human-verified relevant history, largely removing selection and retrieval burden while retaining temporal reconciliation and state reasoning.
 \end{itemize}
-The Oracle--Full gap diagnoses evidence-access and context-management limitations. Errors that remain in the Oracle condition indicate difficulties with state reconciliation or temporal reasoning. The agent scaffold must remain fixed across conditions.
+RQ1 is defined only for C2: C1 contains no historical context to select, while C3 has already resolved selection by providing oracle-relevant history. For RQ2--RQ4, the C2--C1 difference estimates the benefit of project history, while the C3--C2 difference diagnoses losses associated with full-history selection, retrieval, and context management. Errors that remain under C3 indicate difficulties with state reconciliation, clarification decisions, or execution. The agent scaffold must remain fixed across conditions.
 
 \subsection{Models and Coding Agents}
 
@@ -372,26 +572,30 @@ Report every evaluated model and version, the agent harness, context window, ava
 
 \subsection{Metrics}
 
-Define the state reconstruction score over six dimensions:
+For RQ1, report relevant-requirement and evidence-selection precision, recall, and F1 under C2. Define the RQ2 state reconstruction score over six dimensions:
 \[
 S_{\mathrm{state}}=
 f(S_{\mathrm{selection}},S_{\mathrm{value}},S_{\mathrm{lifecycle}},
 S_{\mathrm{scope}},S_{\mathrm{ambiguity}},S_{\mathrm{execution}}).
 \]
-Compute dimension scores at the requirement level, aggregate them at the task level, and use project-level macro averaging so that projects with more requirements or more annotated fields do not receive disproportionate weight. Evaluate action correctness across implement, modify, remove, preserve, and clarify. For executable repositories, additionally report test success, regressions, and task-specific correctness. \placeholder{Specify matching rules, partial credit, macro-averaging equations, confidence intervals, and significance tests.}
+Compute state-dimension scores at the requirement level, aggregate them at the task level, and use project-level macro averaging so that projects with more requirements or more annotated fields do not receive disproportionate weight. For RQ3, report the accuracy and class-conditional performance of the memory-versus-clarify decision, including unsupported autonomous decisions and unnecessary clarification requests. For RQ4, evaluate action correctness across implement, modify, remove, preserve, and clarify; for executable repositories, additionally report test success, regressions, and task-specific correctness. Report all metrics by history-length stratum and input condition where applicable. \placeholder{Specify matching rules, partial credit, macro-averaging equations, confidence intervals, and significance tests.}
 
 \section{Results}
 \label{sec:results}
 
-Organize this section directly around the three research questions rather than using generic ``main results'' and ``additional results'' headings. Each subsection should begin with a one-sentence answer to its RQ, present the primary table or figure, and then explain the most important differences, failure dimensions, and statistical uncertainty. The current outline reserves result locations without presupposing the findings.
+Organize this section directly around the four research questions rather than using generic ``main results'' and ``additional results'' headings. Each subsection should begin with a one-sentence answer to its RQ, present the primary table or figure, and then explain the most important differences, failure dimensions, and statistical uncertainty. The current outline reserves result locations without presupposing the findings.
 
-\subsection{RQ1: Can Agents Recover the Current Requirement State?}
+\subsection{RQ1: Can Agents Select the Relevant Historical Requirements?}
 
-Report overall state-reconstruction performance and performance on all six state dimensions. Answer how well current agents perform, which state dimension is most difficult, and where the largest differences between models or agents arise. Table~\ref{tab:rq1} is the primary result table. \placeholder{Insert the first concrete finding at the start of this subsection.}
+Evaluate requirement and evidence selection under C2 Full History for each agent--model configuration and history-length stratum. Report selection precision, recall, and the task- or project-level aggregate defined in Section~\ref{sec:experiments}. Analyze whether selection quality degrades from short to medium and long project histories. \placeholder{Insert the RQ1 selection results and the first concrete finding.}
+
+\subsection{RQ2: Can Agents Reconstruct the Current Requirement State?}
+
+Report overall state-reconstruction performance and performance on all six state dimensions under C1, C2, and C3. Answer how well current agents perform, which state dimension is most difficult, where the largest differences between models or agents arise, and how history difficulty changes these conclusions. Table~\ref{tab:rq2} is the primary state-reconstruction result table. \placeholder{Insert the main RQ2 finding at the start of this subsection.}
 
 \begin{table}[t]
-\caption{RQ1 requirement-state reconstruction results. Report project-level macro averages with uncertainty estimates.}
-\label{tab:rq1}
+\caption{RQ2 requirement-state reconstruction results. Report project-level macro averages with uncertainty estimates.}
+\label{tab:rq2}
 \begin{center}
 \begin{tabular}{lrrrrrrr}
 \hline
@@ -404,19 +608,21 @@ Model & Overall & Select. & Value & Life. & Scope & Ambig. & Exec. \\
 \end{center}
 \end{table}
 
-\subsection{RQ2: Does More Project History Actually Help?}
+Compare C1 No History, C2 Full History, and C3 Oracle Relevant History within the RQ2 analysis. $\mathrm{C3}>\mathrm{C2}>\mathrm{C1}$ indicates that history is useful but selection or retrieval remains a bottleneck. $\mathrm{C3}>\mathrm{C1}>\mathrm{C2}$ indicates that unfiltered history may harm the agent. $\mathrm{C3}\approx\mathrm{C2}\ll100\%$ indicates that temporal state reasoning, rather than retrieval, is the dominant limitation. \placeholder{Insert the central C1--C2--C3 comparison and select the interpretation supported by the data.}
 
-Compare No History, Full History, and Oracle Relevant History. Interpret the results in terms of three possible patterns. $\mathrm{Oracle}>\mathrm{Full}>\mathrm{No}$ indicates that history is useful but retrieval remains a bottleneck. $\mathrm{Oracle}>\mathrm{No}>\mathrm{Full}$ indicates that unfiltered history may harm the agent. $\mathrm{Oracle}\approx\mathrm{Full}\ll100\%$ indicates that temporal state reasoning, rather than retrieval, is the dominant limitation. \placeholder{Insert the central No-History versus Full-History versus Oracle-History figure and select the interpretation supported by the data.}
+\subsection{RQ3: Can Agents Decide When to Use Memory or Clarify?}
 
-\subsection{RQ3: Does State Understanding Predict Correct Action?}
+Evaluate whether the agent correctly proceeds from available project memory or requests clarification when ambiguity remains open. Break down accuracy by ambiguity type, history-length stratum, and input condition. Distinguish unsupported autonomous decisions from unnecessary clarification requests, and test whether C3 reduces selection errors without eliminating genuine ambiguity. \placeholder{Insert the RQ3 decision results and representative cases.}
 
-Analyze the relationship between state accuracy and action accuracy, with particular attention to
+\subsection{RQ4: Can Agents Translate Requirements into Correct Code?}
+
+Analyze the relationship between state accuracy and downstream action or code accuracy, with particular attention to
 \[
 P(\mathrm{ActionCorrect}\mid\mathrm{StateCorrect})
 \quad\text{versus}\quad
 P(\mathrm{ActionCorrect}\mid\mathrm{StateWrong}).
 \]
-Identify which state errors most often propagate into action or coding errors, and analyze both ``incorrect state but accidentally correct action'' and ``correct state but incorrect execution'' cases. This analysis tests whether $G_P(t)$ is a meaningful bridge between project memory and coding outcomes rather than an artificial intermediate variable. \placeholder{Insert the state-accuracy versus action-success figure.}
+Identify which state errors most often propagate into action or coding errors, and analyze both ``incorrect state but accidentally correct action'' and ``correct state but incorrect execution'' cases. This analysis tests whether $G_P(t)$ is a meaningful bridge between project memory and coding outcomes rather than an artificial intermediate variable. \placeholder{Insert the RQ4 state-accuracy versus action-success figure.}
 
 \section{Analysis and Discussion}
 \label{sec:analysis}

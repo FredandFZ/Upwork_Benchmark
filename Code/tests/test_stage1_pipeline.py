@@ -656,7 +656,7 @@ class CostControlTests(unittest.TestCase):
             )
         )
 
-    def test_short_requirements_are_removed_before_downstream_stages(self) -> None:
+    def test_positive_optional_threshold_removes_short_requirements(self) -> None:
         inventory = {
             "sessions": [],
             "requirement_families": [{"family_id": "F", "title": "Family"}],
@@ -674,6 +674,37 @@ class CostControlTests(unittest.TestCase):
         self.assertEqual(discarded[0]["event_count"], 2)
         self.assertIsNone(filtered_inventory["requirements"][0]["family_id"])
         self.assertEqual(filtered_inventory["requirement_families"], [])
+
+    def test_default_zero_threshold_retains_zero_one_and_two_event_requirements(self) -> None:
+        inventory = {
+            "sessions": [],
+            "requirement_families": [{"family_id": "F", "title": "Family"}],
+            "requirements": [
+                {"requirement_id": "REQ_ZERO", "title": "Zero", "family_id": "F"},
+                {"requirement_id": "REQ_ONE", "title": "One", "family_id": "F"},
+                {"requirement_id": "REQ_TWO", "title": "Two", "family_id": "F"},
+            ],
+        }
+        events = {"REQ_ZERO": [], "REQ_ONE": [{}], "REQ_TWO": [{}, {}]}
+
+        filtered_inventory, filtered_events, discarded = filter_short_requirements(
+            inventory, events, 0, "EVENT_VERIFICATION"
+        )
+
+        self.assertEqual(
+            [item["requirement_id"] for item in filtered_inventory["requirements"]],
+            ["REQ_ZERO", "REQ_ONE", "REQ_TWO"],
+        )
+        self.assertEqual(set(filtered_events), {"REQ_ZERO", "REQ_ONE", "REQ_TWO"})
+        self.assertEqual(discarded, [])
+        self.assertEqual(
+            PipelineConfig(
+                prompt_path=Path("prompt.md"),
+                output_dir=Path("outputs"),
+                run_root=Path("runs"),
+            ).min_requirement_events,
+            0,
+        )
 
     def test_requirement_context_is_bounded_and_keeps_lifecycle_ends(self) -> None:
         messages = [
@@ -1233,7 +1264,7 @@ class FinalOutputFilteringTests(unittest.IsolatedAsyncioTestCase):
 class ProductionPromptPolicyTests(unittest.TestCase):
     def test_modify_implementation_relevance_gate_is_present(self) -> None:
         root = Path(__file__).resolve().parents[2]
-        common_prompt = (root / "prompt" / "stage1_prompt_v2.md").read_text(encoding="utf-8-sig")
+        common_prompt = (root / "prompt" / "stage1_prompt.md").read_text(encoding="utf-8-sig")
         verifier_addendum = (
             root / "prompt" / "stage1_event_verification_addendum.md"
         ).read_text(encoding="utf-8-sig")
@@ -1244,6 +1275,14 @@ class ProductionPromptPolicyTests(unittest.TestCase):
             self.assertIn("account expires 10 days after registration", text)
             self.assertIn("return `edit`", text.lower())
             self.assertIn("return `delete`", text.lower())
+
+    def test_sparse_lifecycle_retention_is_present_in_production_prompt(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        common_prompt = (root / "prompt" / "stage1_prompt.md").read_text(encoding="utf-8-sig")
+
+        self.assertIn("Sparse lifecycle retention rule", common_prompt)
+        self.assertIn("Requirements with 0, 1, or 2 valid Events remain", common_prompt)
+        self.assertIn("defaults `--min-requirement-events` to `0`", common_prompt)
 
 
 if __name__ == "__main__":

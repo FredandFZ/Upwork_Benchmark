@@ -4,33 +4,32 @@
   "verdicts": [
     {
       "event_locator": {
-        "message_id": 226,
+        "message_id": 217,
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        217,
-        224,
-        226
+        217
       ],
-      "decision_note": "The client unambiguously accepts the proposed Lit-encrypted, NFT-ownership-gated ebook viewer behavior.",
+      "decision_note": "The client establishes NFT-ownership verification and gated ebook access as required software behavior.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
-        "message_id": 240,
+        "message_id": 226,
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "DELETE",
+      "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        240
+        224,
+        226
       ],
-      "decision_note": "The source concerns the NFT contract standard and royalty enforcement, not a change to ebook ownership verification.",
-      "confidence": "HIGH"
+      "decision_note": "The client accepts the immediately preceding Lit Protocol proposal for encrypted, ownership-gated PDF display.",
+      "confidence": "MEDIUM"
     },
     {
       "event_locator": {
@@ -44,7 +43,7 @@
         460,
         461
       ],
-      "decision_note": "First concrete failure of the Lit encryption path: the required key-protection operation returned an unsupported-network error.",
+      "decision_note": "First concrete failure of the Lit key-encryption path: the configured network was reported as unsupported.",
       "confidence": "HIGH"
     },
     {
@@ -59,7 +58,22 @@
         461,
         462
       ],
-      "decision_note": "Target-specific implementation claim that the Lit network configuration was changed from cayenne to datil.",
+      "decision_note": "Target-specific implementation claim replacing the obsolete Lit network configuration with datil for Base Mainnet.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 463,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        462,
+        463
+      ],
+      "decision_note": "Post-fix persistence: the unsupported-network failure remained after the claimed Lit configuration fix.",
       "confidence": "HIGH"
     },
     {
@@ -75,7 +89,7 @@
         559,
         560
       ],
-      "decision_note": "First concrete verification of the unauthorized-access path: a user without a valid NFT was denied ebook access.",
+      "decision_note": "First concrete verification that the access-control behavior denies the ebook page to a wallet without a valid NFT.",
       "confidence": "HIGH"
     },
     {
@@ -89,23 +103,24 @@
       "evidence_message_ids": [
         569
       ],
-      "decision_note": "First concrete verification of the holder-access path: after minting, the client signed the request and decrypted the ebook.",
+      "decision_note": "Distinct positive-path verification: an NFT holder successfully signed and decrypted the ebook; the separate cover-navigation failure does not negate gating success.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
-        "message_id": 624,
+        "message_id": 706,
         "event_type": "RUNTIME_FAILURE",
         "occurrence": 1
       },
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        623,
-        624
+        703,
+        706,
+        707
       ],
-      "decision_note": "Distinct mobile-wallet failure: Rainbow Wallet opened but did not receive the signing request required to decrypt the ebook.",
-      "confidence": "HIGH"
+      "decision_note": "Distinct later failure mode: the Lit-backed ebook access attempt encountered a network rate-limit error after earlier successful decryption.",
+      "confidence": "MEDIUM"
     },
     {
       "event_locator": {
@@ -116,12 +131,11 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        703,
         706,
         707,
         708
       ],
-      "decision_note": "Target-specific implementation claim addressing the reproduced Lit access failure by fixing the Lit payment issue.",
+      "decision_note": "Target-specific implementation claim that the Lit access failure was resolved by addressing the Lit payment issue.",
       "confidence": "HIGH"
     },
     {
@@ -137,47 +151,9 @@
         709,
         710
       ],
-      "decision_note": "First concrete post-fix verification that the Lit-gated ebook access path worked on the client's computer.",
-      "confidence": "HIGH"
-    },
-    {
-      "event_locator": {
-        "message_id": 710,
-        "event_type": "RUNTIME_FAILURE",
-        "occurrence": 1
-      },
-      "verdict": "KEEP",
-      "replacement": null,
-      "evidence_message_ids": [
-        708,
-        709,
-        710
-      ],
-      "decision_note": "Post-fix persistence on a distinct path: ebook access still failed through MetaMask Mobile while desktop access worked.",
+      "decision_note": "First concrete post-fix verification that the Lit-backed ebook access flow worked on desktop; the mobile failure belongs to the separate mobile-access Requirement.",
       "confidence": "HIGH"
     }
   ],
-  "missing_event_candidates": [
-    {
-      "source_message": {
-        "message_id": 463,
-        "speaker": "client",
-        "text": "still unsupported network. Ill give it a few minutes and try again"
-      },
-      "supporting_message_ids": [
-        460,
-        461,
-        462
-      ],
-      "event_type": "RUNTIME_FAILURE",
-      "value_updates": null,
-      "value_removals": null,
-      "scope_updates": null,
-      "ambiguity": null,
-      "execution": {
-        "status": "FAILED",
-        "observed_behavior": "Immediately after the claimed Lit network-name fix, the encryption operation still returned the unsupported-network error."
-      }
-    }
-  ]
+  "missing_event_candidates": []
 }

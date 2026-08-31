@@ -1,0 +1,167 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_ETH_WALLET_MINT",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 330,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        324,
+        325,
+        326,
+        327,
+        328,
+        330
+      ],
+      "decision_note": "The client unambiguously accepts adding ETH wallet payment to the primary mint, requiring frontend, contract, and payment-flow behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 341,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        341
+      ],
+      "decision_note": "First concrete ETH mint failure: ETH was deducted but no NFT was delivered.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 352,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        352
+      ],
+      "decision_note": "Distinct failure mode: the transaction failed while requesting more ETH than the mint page displayed.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 357,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357
+      ],
+      "decision_note": "Target-specific implementation claim introducing dynamic ETH pricing, a transaction buffer, and the swap path after earlier failures.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 365,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        361,
+        364,
+        365
+      ],
+      "decision_note": "Post-claim persistence: a new ETH mint attempt produced the concrete simulation-failed result.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 401,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        395,
+        401
+      ],
+      "decision_note": "Materially new failure knowledge identifies the incorrect on-chain swap-router configuration causing executed ETH mints to revert.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 493,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        409,
+        418,
+        490,
+        493
+      ],
+      "decision_note": "Distinct post-router-change failure mode: the ETH-to-USDC swap exceeded the configured slippage tolerance.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 494,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        493,
+        494
+      ],
+      "decision_note": "Target-specific post-failure implementation claim reports redeployment with configurable swap slippage; it does not assert runtime verification.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 516,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        515,
+        516
+      ],
+      "decision_note": "Distinct target-specific claim describes the implemented contract behavior for spending 15 USDC and refunding excess swap proceeds in USDC.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539
+      ],
+      "decision_note": "The client accepts the exact-output contract flow targeting 15 USDC and refunding excess in ETH; these are implementation-relevant swap and refund behaviors, with no prior value-state keys requiring removal.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

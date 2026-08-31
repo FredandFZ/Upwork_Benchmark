@@ -1,4 +1,4 @@
-# EVENT_VERIFICATION v0.6 addendum
+# EVENT_VERIFICATION addendum
 
 In addition to evidence alignment, replay each Requirement through the provisional Event.
 

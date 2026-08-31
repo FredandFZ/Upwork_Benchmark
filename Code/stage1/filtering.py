@@ -10,7 +10,7 @@ def filter_short_requirements(
     minimum_events: int,
     discarded_after: str,
 ) -> tuple[dict[str, Any], dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
-    """Remove Requirements whose current lifecycle is shorter than the benchmark minimum."""
+    """Apply an optional lifecycle minimum; zero retains every Requirement."""
     retained_requirements: list[dict[str, Any]] = []
     discarded: list[dict[str, Any]] = []
     retained_events: dict[str, list[dict[str, Any]]] = {}

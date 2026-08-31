@@ -1,0 +1,128 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_REFERRAL_LEADERBOARD_ACCURACY",
+    "message_id": 672,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_NFT_REWARD_ATTRIBUTES",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client explicitly requires every completed mint's ticket and $5 commission to appear in the recipient NFT's attributes; the resulting one-ticket-per-mint rule also makes the legacy Small/Big ticket-counter attribute obsolete.",
+      "new_event": {
+        "source_message": {
+          "message_id": 672,
+          "speaker": "client",
+          "text": "At this point, we have completed 12 mints, so that should amount to 12 tickets &amp; 12 x $5 commissions.\n\n**Even if no referral code is used, a ticket and commission are still issued**.\n\nCurrently, **when a code is used**, it is accurately reflected on the leaderboards/NFT attributes. Perfect.\n\nIf **no referral code is used**, the ticket and commission are assigned at random.\n(B**ut they must still be reflected on the leaderboard/NFT attributes**.)\n\nI believe that since your most recent fix, the randomly assigned tickets from the last 2 mints have been reflected on the leaderboard/NFT attributes. Great.\nHowever, the missing tickets have not been backfilled.\n\nThe commissions from these purchases without a code are also still not reflected on the leaderboard/NFT attributes.\n\nIn my screenshot, you will see that I have an NFT showing 2 tickets but only 1 x $5 commission. That should not be possible because each ticket includes a $5 commission.\n\nAlso, in my leaderboard screenshot, only 7 tickets and 5 x $5 commissions are accounted for out of 12 total mints.\nWhether or not a referral code is used, 12 mints should result in 12 tickets and 12 x $5 commissions."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "metadata_reward_counters": [
+            "tickets",
+            "commissions"
+          ],
+          "ticket_and_commission_attribute_accounting": "Each completed mint must be reflected in the recipient NFT's attributes as one ticket and one $5 commission, credited to the code-selected NFT when a referral code is used or to the randomly selected NFT when no referral code is used."
+        },
+        "value_removals": [
+          "metadata_ticket_counters"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PLATFORM_AGGREGATE_STATS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The reported count of 12 completed mints is context for reward accounting and does not change the existing requirement that public mint statistics match completed mints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DASHBOARD_REWARD_SUMMARY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source specifically requires representation on the leaderboard and NFT attributes, not the dashboard reward summary, whose existing display requirements remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_DETAIL_REWARD_SUMMARY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already requires accurate reward values, while the source specifically identifies NFT attributes and does not necessarily change the separate NFT detail-view requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DASHBOARD_NFT_LISTING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Ticket and commission attribution does not change which successfully minted NFTs must appear in the user's dashboard listing.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FIAT_BUYER_REWARD_ACCESS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns reward issuance regardless of referral-code use and does not alter fiat-user wallet provisioning, authentication, notification, or reward-access behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The one-ticket-per-completed-mint rule conflicts with the page's legacy Small/Big ticket copy, but the source does not explicitly request an About-page revision or provide enough current draw details to replace all affected copy safely.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_CODE_COMMISSION_ALLOCATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already requires a $5 commission for each successful no-code mint to be assigned randomly; the source confirms that rule but does not resolve the separate first-mint edge case.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_ASSET_PRESENTATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Reward-accounting accuracy does not change NFT cover, image, metadata-asset rendering, or wallet presentation behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The retained FAQ requirements already cover one ticket and one $5 commission and preserve the approved no-code random-allocation explanation; the source does not explicitly request further FAQ copy changes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_TRANSFER_STATE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Issuance and display of tickets and commissions at mint time do not alter the state transferred when an NFT is sold.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_ASSET_ENDPOINT_RESOLUTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Reward attribution and accounting do not change whether NFT metadata, image, or asset endpoints resolve successfully.",
+      "new_event": null
+    }
+  ]
+}

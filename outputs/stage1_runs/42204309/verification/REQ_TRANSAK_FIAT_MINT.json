@@ -8,13 +8,33 @@
         "event_type": "INTRODUCE",
         "occurrence": 1
       },
-      "verdict": "KEEP",
-      "replacement": null,
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "payment_provider": "Stripe",
+          "conversion_asset": "USDC",
+          "target_buyer_segment": "non-crypto users"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "BACKEND",
+            "PAYMENT"
+          ],
+          "contexts": [
+            "FIAT_PAYMENT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
       "evidence_message_ids": [
-        71,
         72
       ],
-      "decision_note": "The client establishes a Stripe-based fiat-to-USDC mint path for non-crypto buyers.",
+      "decision_note": "The client establishes a Stripe-based fiat-to-USDC mint for non-crypto users; the unrelated public-API clause does not place this integration in the API component.",
       "confidence": "HIGH"
     },
     {
@@ -26,11 +46,12 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
+        72,
         77,
         78
       ],
-      "decision_note": "The client requests replacing Stripe with Coinbase Commerce as the fiat on-ramp provider, and the immediately following response confirms implementation of that choice.",
-      "confidence": "MEDIUM"
+      "decision_note": "The client requests replacing Stripe with Coinbase Commerce for the fiat on-ramp, and the immediately following implementation response resolves the request as actionable.",
+      "confidence": "HIGH"
     },
     {
       "event_locator": {
@@ -44,7 +65,7 @@
         77,
         140
       ],
-      "decision_note": "The freelancer identifies that Coinbase Commerce cannot provide the required card-based purchasing path for non-crypto buyers, creating a material provider conflict.",
+      "decision_note": "The freelancer identifies a material provider conflict: Coinbase Commerce cannot satisfy the client-confirmed direct-card flow for non-crypto buyers.",
       "confidence": "HIGH"
     },
     {
@@ -60,7 +81,7 @@
         141,
         142
       ],
-      "decision_note": "The client selects Transak as the provider for the fiat on-ramp, replacing the incompatible Coinbase Commerce choice.",
+      "decision_note": "The client selects Transak as the fiat on-ramp provider, changing the integration configuration without leaving stale provider attributes.",
       "confidence": "HIGH"
     },
     {
@@ -76,7 +97,7 @@
         141,
         142
       ],
-      "decision_note": "The client resolves the provider conflict by choosing Transak, allowing the fiat-integration requirement to leave clarification.",
+      "decision_note": "The client's Transak selection resolves the material provider ambiguity and returns the requirement from CLARIFY to ACTIVE.",
       "confidence": "HIGH"
     },
     {
@@ -90,7 +111,7 @@
       "evidence_message_ids": [
         143
       ],
-      "decision_note": "The client specifies that the Transak mint path supports cards, Apple Pay, and Google Pay without requiring the buyer to possess crypto or an existing wallet.",
+      "decision_note": "The client specifies supported fiat checkout methods and the acceptance condition that buyers need neither preexisting crypto nor a preexisting wallet.",
       "confidence": "HIGH"
     },
     {
@@ -99,21 +120,12 @@
         "event_type": "MODIFY",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "MODIFY",
-        "value_updates": {
-          "purchase_fulfillment": "Transak handles fiat-to-crypto conversion and mints the NFT for the buyer."
-        },
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": null
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         184
       ],
-      "decision_note": "The source defines Transak conversion and NFT fulfillment, but automatic embedded-wallet provisioning belongs to the separate fiat-buyer wallet requirement.",
+      "decision_note": "The client specifies the post-payment behavior: Transak converts fiat to crypto and the NFT is minted to the provisioned buyer wallet.",
       "confidence": "HIGH"
     },
     {
@@ -125,57 +137,25 @@
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        179,
         188
       ],
-      "decision_note": "The client explicitly postpones Transak integration until the business-registration prerequisite is completed.",
-      "confidence": "HIGH"
-    },
-    {
-      "event_locator": {
-        "message_id": 210,
-        "event_type": "MODIFY",
-        "occurrence": 1
-      },
-      "verdict": "DELETE",
-      "replacement": null,
-      "evidence_message_ids": [
-        184,
-        210
-      ],
-      "decision_note": "The message repeats the already established Transak conversion-and-mint description without materially changing the integration behavior.",
-      "confidence": "HIGH"
-    },
-    {
-      "event_locator": {
-        "message_id": 220,
-        "event_type": "RESUME",
-        "occurrence": 1
-      },
-      "verdict": "DELETE",
-      "replacement": null,
-      "evidence_message_ids": [
-        220,
-        223,
-        225
-      ],
-      "decision_note": "The client reports that incorporation is complete but asks whether Transak should remain delayed; the message does not establish an activation decision.",
+      "decision_note": "The client explicitly defers implementation of the Transak integration pending completion of business registration.",
       "confidence": "HIGH"
     },
     {
       "event_locator": {
         "message_id": 225,
-        "event_type": "DEFER",
+        "event_type": "MODIFY",
         "occurrence": 1
       },
       "verdict": "KEEP",
       "replacement": null,
       "evidence_message_ids": [
-        220,
+        217,
         223,
         225
       ],
-      "decision_note": "The client confirms a crypto-only initial launch while retaining Transak for later implementation.",
+      "decision_note": "The client changes the product rollout condition so Transak may be unavailable at initial launch and added in the post-launch product phase.",
       "confidence": "HIGH"
     },
     {
@@ -189,7 +169,7 @@
       "evidence_message_ids": [
         323
       ],
-      "decision_note": "Target-specific implementation claim: the freelancer reports a current Transak card option that buys USDC and automatically mints the NFT.",
+      "decision_note": "This is the first target-specific implementation claim that the Transak card option, widget, USDC purchase, and automatic NFT mint flow are currently available.",
       "confidence": "HIGH"
     }
   ],

@@ -54,7 +54,7 @@ class PipelineConfig:
     context_window: int = 2
     event_context_mode: str = "filtered"
     max_requirement_context_messages: int = 160
-    min_requirement_events: int = 3
+    min_requirement_events: int = 0
     max_audit_rounds: int = 1
     max_impact_audit_rounds: int = 2
     max_impact_candidates_per_event: int = 12
@@ -62,8 +62,8 @@ class PipelineConfig:
     def validate(self) -> None:
         if self.annotation_mode not in {"multipass", "single-pass"}:
             raise ValueError("annotation_mode must be 'multipass' or 'single-pass'")
-        if self.reasoning_effort not in {"low", "medium", "high", "xhigh"}:
-            raise ValueError("reasoning_effort must be low, medium, high, or xhigh")
+        if self.reasoning_effort not in {"low", "medium", "high", "xhigh", "max"}:
+            raise ValueError("reasoning_effort must be low, medium, high, xhigh, or max")
         unknown = self.force_stages.difference(FORCE_STAGES)
         if unknown:
             raise ValueError(f"Unknown force stage(s): {', '.join(sorted(unknown))}")
@@ -77,8 +77,8 @@ class PipelineConfig:
             raise ValueError("event_context_mode must be 'filtered' or 'full_history'")
         if self.max_requirement_context_messages < 1:
             raise ValueError("max_requirement_context_messages must be >= 1")
-        if self.min_requirement_events < 1:
-            raise ValueError("min_requirement_events must be >= 1")
+        if self.min_requirement_events < 0:
+            raise ValueError("min_requirement_events must be >= 0")
         if self.max_audit_rounds < 1:
             raise ValueError("max_audit_rounds must be >= 1")
         if self.max_impact_audit_rounds < 1:

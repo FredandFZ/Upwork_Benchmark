@@ -73,6 +73,11 @@ class _ReplayState:
     lifecycle_source: str | None = None
     ambiguity_source: str | None = None
     execution_source: str | None = None
+    # False means the visible history began after the Requirement may already
+    # have existed.  In that case, removing an attribute absent from the
+    # observed state is still replayable: the Event establishes its current
+    # absence even though its earlier value was outside the dataset window.
+    baseline_complete: bool = False
 
     def supporting_event_ids(self, event_positions: dict[str, int]) -> list[str]:
         """Return only Events that still directly establish the current state."""
@@ -198,14 +203,20 @@ def _modify_resolves_ambiguity(
     return bool(value_updates) or bool(value_removals) or _scope_has_update(scope_updates)
 
 
-def _apply_event(state: _ReplayState, event: dict[str, Any], has_previous_state: bool) -> None:
+def _apply_event(
+    state: _ReplayState,
+    event: dict[str, Any],
+    *,
+    introduction_seen: bool,
+    has_previous_state: bool,
+) -> None:
     event_id = event["event_id"]
     event_type = event["event_type"]
 
     if state.lifecycle_status == "REMOVED":
         raise Stage2ReplayError(f"{event_id} occurs after the Requirement was REMOVED")
-    if event_type == "INTRODUCE" and has_previous_state:
-        raise Stage2ReplayError(f"{event_id} INTRODUCE is not the first observable Event")
+    if event_type == "INTRODUCE" and introduction_seen:
+        raise Stage2ReplayError(f"{event_id} is a duplicate INTRODUCE Event")
 
     if event_type in {"INTRODUCE", "MODIFY"}:
         value_updates = event.get("value_updates")
@@ -213,10 +224,11 @@ def _apply_event(state: _ReplayState, event: dict[str, Any], has_previous_state:
         scope_updates = event.get("scope_updates")
         for key in value_removals or []:
             if key not in state.attributes:
-                raise Stage2ReplayError(
-                    f"{event_id}.value_removals references absent attribute {key!r}"
-                )
-            state.attributes.pop(key)
+                if state.baseline_complete or key in state.attribute_removal_sources:
+                    raise Stage2ReplayError(
+                        f"{event_id}.value_removals references absent attribute {key!r}"
+                    )
+            state.attributes.pop(key, None)
             state.attribute_sources.pop(key, None)
             state.attribute_removal_sources[key] = event_id
         for key, value in (value_updates or {}).items():
@@ -232,6 +244,16 @@ def _apply_event(state: _ReplayState, event: dict[str, Any], has_previous_state:
         if event_type == "INTRODUCE":
             state.lifecycle_status = "ACTIVE"
             state.lifecycle_source = event_id
+            state.baseline_complete = True
+            if has_previous_state:
+                # Earlier observed-history Events remain represented by their
+                # own Nodes and Edges, but execution/ambiguity from an unknown
+                # pre-introduction baseline must not leak into the formally
+                # introduced Requirement version.
+                state.execution = None
+                state.execution_source = None
+                state.ambiguity = None
+                state.ambiguity_source = None
         else:
             # A Requirement change creates a new semantic version. Execution
             # evidence for the previous version must not be carried forward.
@@ -296,20 +318,42 @@ def _build_requirement_graph(
         project_event_ids.add(event_id)
         validated_events.append(event)
 
+    # Preserve every Stage 1 Requirement and every valid Event.  When visible
+    # history starts without INTRODUCE, replay begins from an incomplete,
+    # observed baseline: unknown attributes/scope/lifecycle remain empty/null
+    # until an Event establishes them.  A later INTRODUCE is a formal baseline
+    # transition, not a reason to discard the earlier observations.
+    replay_events = validated_events
+    introduce_positions = [
+        index
+        for index, event in enumerate(replay_events)
+        if event["event_type"] == "INTRODUCE"
+    ]
+    if len(introduce_positions) > 1:
+        duplicate = replay_events[introduce_positions[1]]["event_id"]
+        raise Stage2ReplayError(f"{duplicate} is a duplicate INTRODUCE Event")
+    if not replay_events:
+        initialization_mode = "NO_EVENTS"
+    elif introduce_positions == [0]:
+        initialization_mode = "EXPLICIT_INTRODUCE"
+    else:
+        initialization_mode = "OBSERVED_HISTORY"
+
     event_positions = {
         event["event_id"]: position
-        for position, event in enumerate(validated_events)
+        for position, event in enumerate(replay_events)
     }
     state = _ReplayState()
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
     previous_state_id: str | None = None
+    introduction_seen = False
 
     # The canonical Stage 1 assembler has already sorted Events by original
     # project-history position.  Array order is retained because message IDs
     # can be arbitrary strings, and same-message Events have an explicit order.
     previous_modify_closed_ambiguity = False
-    for event in validated_events:
+    for event in replay_events:
         # When MODIFY has already resolved the open ambiguity, an immediately
         # following RESUME would produce no new semantic state. The Stage 1
         # Event remains in the annotation, but is omitted from this state graph.
@@ -323,7 +367,14 @@ def _build_requirement_graph(
             continue
 
         ambiguity_was_open = state.ambiguity is not None
-        _apply_event(state, event, has_previous_state=bool(nodes))
+        _apply_event(
+            state,
+            event,
+            introduction_seen=introduction_seen,
+            has_previous_state=bool(nodes),
+        )
+        if event["event_type"] == "INTRODUCE":
+            introduction_seen = True
         previous_modify_closed_ambiguity = (
             event["event_type"] == "MODIFY"
             and ambiguity_was_open
@@ -346,7 +397,10 @@ def _build_requirement_graph(
     return {
         "graph_id": f"{requirement_id}_GRAPH",
         "requirement_id": requirement_id,
+        "title": requirement.get("title"),
         "family_id": requirement.get("family_id"),
+        "initialization_mode": initialization_mode,
+        "has_explicit_introduce": bool(introduce_positions),
         "nodes": nodes,
         "edges": edges,
     }
@@ -379,12 +433,6 @@ def build_requirement_state_graph(annotation: dict[str, Any]) -> dict[str, Any]:
         if requirement_id in requirement_ids:
             raise Stage2ReplayError(f"duplicate requirement_id: {requirement_id}")
         requirement_ids.add(requirement_id)
-        events = _require_array(requirement.get("events"), f"{requirement_id}.events")
-        if not any(
-            isinstance(event, dict) and event.get("event_type") == "INTRODUCE"
-            for event in events
-        ):
-            continue
         requirement_graphs.append(_build_requirement_graph(requirement, project_event_ids))
 
     return {

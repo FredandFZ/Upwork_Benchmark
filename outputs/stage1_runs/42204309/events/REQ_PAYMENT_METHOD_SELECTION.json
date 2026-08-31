@@ -1,0 +1,146 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 312,
+        "speaker": "client",
+        "text": "Most of the changes look great, but minting still is not functioning.\n\nWhen I attempt to mint, there is no option to select payment in ETH/USDC/etc, even though my wallet contains both ETH and USDC, and the first mint continues to fail...\n\nMy dashboard also continues to say that I own 2 NFTs, but clicking 'read' for these false NFTs does not lead anywhere."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The connected wallet contained both ETH and USDC, but the mint interface provided no payment-currency selection."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 321,
+        "speaker": "client",
+        "text": "When payment supports only ETH (or only USDC), the customer must be informed which currency the payment uses.\n\nHowever, if both ETH and USDC are available as alternatives, there must be a way to choose between them."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "single_currency_disclosure": "When only one payment currency is supported, inform the customer which currency the payment uses.",
+        "multiple_currency_selection": "When both ETH and USDC are available, allow the customer to choose between them."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "MINT_PAGE",
+          "PAYMENT_SELECTION"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 330,
+        "speaker": "client",
+        "text": "That would be great 👍"
+      },
+      "supporting_message_ids": [
+        326,
+        327,
+        328
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "selectable_wallet_payment_currencies": [
+          "ETH",
+          "USDC"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "At the moment, 'View Book' still opens a blank page for me (see the attached screenshot), and I cannot choose to pay in ETH—I can only select USDC or Card. Card, however, should be the option I cannot select because it has not been implemented yet."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The mint interface offered USDC and Card but did not allow the client to select the accepted ETH payment option."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 430,
+        "speaker": "client",
+        "text": "[ACCOUNT_001] My NFTs have stopped appearing in the dashboard.\n[ACCOUNT_001] I can choose ETH as the payment method, but the transaction failed.\n\nThe dashboard still says we have reached mint number 3, while also showing that the prize pool is now empty; see screenshots."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client was able to choose ETH as the payment method in the mint interface."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 312,
+      "suggested_requirement_id": "REQ_PRIMARY_NFT_MINT",
+      "description": "The continued failure of the first mint concerns primary mint execution rather than payment-method selection."
+    },
+    {
+      "message_id": 312,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_LISTING",
+      "description": "The two false NFT ownership records concern dashboard listing accuracy."
+    },
+    {
+      "message_id": 424,
+      "suggested_requirement_id": "REQ_PAYMENT_METHOD_AVAILABILITY",
+      "description": "Card remaining selectable despite not being implemented concerns availability gating rather than selection among implemented currencies."
+    },
+    {
+      "message_id": 424,
+      "suggested_requirement_id": "REQ_EBOOK_READER",
+      "description": "The blank View Book page concerns the ebook reader."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The failed transaction after selecting ETH concerns execution of the ETH mint flow."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_DASHBOARD_NFT_LISTING",
+      "description": "NFTs disappearing from the dashboard concerns dashboard listing accuracy."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_PLATFORM_AGGREGATE_STATS",
+      "description": "The inconsistent mint number and empty prize-pool display concern aggregate statistics."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

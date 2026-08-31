@@ -1,0 +1,127 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_DASHBOARD_REWARD_SUMMARY",
+    "message_id": 631,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_DASHBOARD_NFT_LISTING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns display of randomly assigned tickets and commissions, not whether successfully minted NFTs appear in the ownership listing.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_DETAIL_REWARD_SUMMARY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly targets the dashboard and NFT attributes, not the reward summary shown in the NFT detail view.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_ASSET_PRESENTATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Displaying randomly assigned rewards does not change NFT image, cover, metadata-image, or wallet asset presentation behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REWARD_ATTRIBUTES",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The source refines the existing broad no-code reward-attribute rule: randomly assigned commissions must appear in NFT attributes, while a ticket must appear only if one is actually generated and assigned.",
+      "new_event": {
+        "source_message": {
+          "message_id": 631,
+          "speaker": "client",
+          "text": "Or is a ticket not being generated at all?\n\n[ACCOUNT_001] It may be fine as is if a 'no code buy' does not generate a ticket (we would only need to adjust some UI notes slightly).\nHowever, if a ticket is generated and sent out randomly but does not show on the dashboard, that will need to be fixed.\n[ACCOUNT_001] Any commission sent out randomly also needs to be displayed on the dashboard/attributes.\n\nA no code buy with a $1 tip - 0x8101c6876c85a890325f0515b97426c915f4de5807e64180f4fcb96594acc6cf\n\n(If 'tips' are processed through a second transaction immediately after mint, that explains why the tip did not work, and a UI note will be required for this)"
+        },
+        "supporting_message_ids": [
+          629
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "random_no_code_ticket_attribute_display": "If a no-code purchase generates and randomly assigns a ticket, that ticket must appear in the recipient NFT attributes; no ticket display is required when no ticket is generated.",
+          "random_no_code_commission_attribute_display": "Any commission randomly assigned from a no-code purchase must appear in the recipient NFT attributes."
+        },
+        "value_removals": [
+          "random_no_code_rewards_must_appear_in_nft_attributes"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_LEADERBOARD_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source identifies dashboard and NFT-attribute display requirements but does not require a change to leaderboard totals or referral counts.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PLATFORM_AGGREGATE_STATS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Random recipient reward display does not change public mint, prize-pool, referral, or next-draw aggregate statistics.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The current About-page copy promises that no-code purchases award both commission and tickets, while the source conditionally accepts generating no ticket and says UI notes may need adjustment; the final behavior and exact copy revision remain unresolved.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_ASSET_ENDPOINT_RESOLUTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change metadata, image, or asset endpoint resolution.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FIAT_BUYER_REWARD_ACCESS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns rewards randomly assigned to an existing NFT holder after a no-code purchase, not the fiat buyer's provisioned wallet, authentication, or reward-access flow.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_BOOK_COVER",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not affect landing-page book-cover placement, size, cropping, or visibility.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BADGE_EMAIL_NOTIFICATION_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Displaying randomly assigned commissions and tickets does not change eligibility for badge email notifications.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The approved FAQ states that no-code mints award both commission and tickets, but the source conditionally accepts no ticket generation and anticipates UI-note changes; a definitive implementation finding or client copy decision is needed before revising the FAQ.",
+      "new_event": null
+    }
+  ]
+}

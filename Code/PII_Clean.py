@@ -1,10 +1,8 @@
-"""Deterministically de-identify and paraphrase Stage 1 chat messages.
+"""Paraphrase and de-identify raw dataset ``chat_messages.json`` files.
 
-The script is intentionally a post-processing step.  It reads completed Stage 1
-runs, writes a separate cleaned run tree, and updates final annotation
-``source_message.text`` values by ``message_id``.  Existing Stage 1 checkpoints
-are not copied because they describe the pre-cleaning evidence and must not be
-resumed against the rewritten transcript.
+Each project is copied from ``Datasets/project`` to
+``Datasets/PII_clean_project``.  Only ``chat_messages.json`` content is changed;
+all other project files are copied unchanged.
 """
 
 from __future__ import annotations
@@ -15,6 +13,7 @@ import copy
 import json
 import os
 import re
+import shutil
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -36,7 +35,7 @@ except ModuleNotFoundError:  # ``python -m Code.PII_Clean`` and unit tests
     from Code.stage1.validation import validate_stage1_annotation
 
 
-CLEANING_VERSION = "2.0"
+CLEANING_VERSION = "3.1"
 RUN_MODE = "PII_CLEAN_REWRITE"
 PLACEHOLDER_RE = re.compile(
     r"\[(?:EMAIL|URL|ACCOUNT|PASSWORD|PHONE|HANDLE|SENDER_ID|CLIENT_NAME|FREELANCER_NAME|PERSON_NAME)_\d{3,}\]"
@@ -58,6 +57,7 @@ INLINE_CREDENTIAL_RE = re.compile(
 NUMBER_TOKEN_RE = re.compile(
     r"(?<!\w)(?:[$€£¥]\s*)?\d+(?:[.,:/-]\d+)*(?:%|[A-Za-z]{1,4})?(?!\w)"
 )
+HTML_NUMERIC_ENTITY_RE = re.compile(r"&#(?:x[0-9A-F]+|\d+);", re.IGNORECASE)
 PROTECTED_LITERAL_RE = re.compile(
     r"(?<!\w)(?:"
     r"v?\d+(?:\.\d+){1,}|"
@@ -188,14 +188,12 @@ class PiiLeakError(ValueError):
 class ProjectFiles:
     project_id: str
     project_dir: Path
-    normalized_path: Path
-    annotation_path: Path
+    chat_path: Path
 
 
 @dataclass(frozen=True)
 class CleanConfig:
     output_root: Path
-    annotation_output_dir: Path
     model: str
     reasoning_effort: str
     short_message_max_words: int
@@ -516,29 +514,25 @@ def repo_root() -> Path:
 def parse_args() -> argparse.Namespace:
     root = repo_root()
     parser = argparse.ArgumentParser(
-        description="De-identify and semantically paraphrase completed Stage 1 projects."
+        description="Paraphrase and de-identify raw dataset project chat messages."
     )
     parser.add_argument(
         "--source-root",
         type=Path,
-        default=root / "outputs" / "stage1_runs",
-        help="Directory containing <project_id>/normalized_project.json and final annotations.",
+        default=root / "Datasets" / "project",
+        help="Directory containing <project_id>/chat_messages.json.",
     )
     parser.add_argument(
         "--output-root",
         type=Path,
-        default=root / "outputs" / "stage1_pii_clean_runs",
-    )
-    parser.add_argument(
-        "--annotation-output-dir",
-        type=Path,
-        default=root / "outputs" / "stage1_pii_clean_annotations",
+        default=root / "Datasets" / "PII_clean_project",
+        help="Destination root for copied projects with cleaned chat_messages.json files.",
     )
     parser.add_argument("--project-id", action="append", help="Repeat to select multiple project IDs.")
     parser.add_argument("--model", default=ANNOTATION_MODEL)
     parser.add_argument(
         "--reasoning-effort",
-        choices=("low", "medium", "high", "xhigh"),
+        choices=("low", "medium", "high", "xhigh", "max"),
         default=REASONING_EFFORT,
     )
     parser.add_argument("--short-message-max-words", type=int, default=5)
@@ -574,22 +568,42 @@ def parse_args() -> argparse.Namespace:
 
 def discover_projects(source_root: Path, wanted_ids: set[str] | None = None) -> list[ProjectFiles]:
     if not source_root.is_dir():
-        raise PiiCleanError(f"Stage 1 source root does not exist: {source_root}")
+        raise PiiCleanError(f"Dataset project root does not exist: {source_root}")
     projects: list[ProjectFiles] = []
     for project_dir in sorted((path for path in source_root.iterdir() if path.is_dir()), key=lambda path: path.name):
         project_id = project_dir.name
         if wanted_ids is not None and project_id not in wanted_ids:
             continue
-        normalized_path = project_dir / "normalized_project.json"
-        annotation_path = project_dir / "final" / f"{project_id}_stage1_annotation.json"
-        if not normalized_path.is_file() or not annotation_path.is_file():
+        chat_path = project_dir / "chat_messages.json"
+        if not chat_path.is_file():
             continue
-        projects.append(ProjectFiles(project_id, project_dir, normalized_path, annotation_path))
+        projects.append(ProjectFiles(project_id, project_dir, chat_path))
     if wanted_ids is not None:
         missing = wanted_ids.difference(project.project_id for project in projects)
         if missing:
-            raise PiiCleanError(f"Unknown or incomplete project ID(s): {', '.join(sorted(missing))}")
+            raise PiiCleanError(f"Unknown project ID(s) or missing chat_messages.json: {', '.join(sorted(missing))}")
     return projects
+
+
+def validate_and_adapt_chat_messages(chat: Any, project_id: str) -> list[dict[str, Any]]:
+    """Validate raw chat rows and adapt them to the internal message schema."""
+    if not isinstance(chat, list):
+        raise PiiCleanError(f"{project_id}: chat_messages.json must contain a JSON list")
+    adapted: list[dict[str, Any]] = []
+    for index, row in enumerate(chat):
+        if not isinstance(row, dict):
+            raise PiiCleanError(f"{project_id}: chat row {index} must be an object")
+        if not isinstance(row.get("message"), str):
+            raise PiiCleanError(f"{project_id}: chat row {index} needs a string message field")
+        adapted.append(
+            {
+                "message_id": index + 1,
+                "speaker": row.get("message_user_type"),
+                "text": row["message"],
+                "sender_id": row.get("sender_id"),
+            }
+        )
+    return adapted
 
 
 def validate_normalized_messages(normalized: dict[str, Any], project_id: str) -> list[dict[str, Any]]:
@@ -642,7 +656,12 @@ def build_batches(
 
 
 def protected_numbers(text: str) -> Counter[str]:
-    return Counter(match.group(0) for match in NUMBER_TOKEN_RE.finditer(text))
+    # Numeric HTML entities such as ``&#39;`` encode punctuation rather than
+    # business numbers. Models may safely render them as literal characters.
+    without_entities = HTML_NUMERIC_ENTITY_RE.sub(
+        lambda match: " " * len(match.group(0)), text
+    )
+    return Counter(match.group(0) for match in NUMBER_TOKEN_RE.finditer(without_entities))
 
 
 def protected_literals(text: str) -> Counter[str]:
@@ -727,8 +746,8 @@ async def rewrite_batch(
     return validate_rewrite_response(payload, batch)
 
 
-def source_signature(normalized: dict[str, Any]) -> str:
-    return sha256_text(json.dumps(normalized, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
+def source_signature(value: Any) -> str:
+    return sha256_text(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
 
 
 def run_signature(source_sha256: str, config: CleanConfig) -> dict[str, Any]:
@@ -851,14 +870,60 @@ def assert_only_allowed_fields_changed(
 
 def output_is_current(
     manifest_path: Path,
-    normalized_output: Path,
-    annotation_output: Path,
+    chat_output: Path,
     signature: dict[str, Any],
 ) -> bool:
-    if not (manifest_path.is_file() and normalized_output.is_file() and annotation_output.is_file()):
+    if not (manifest_path.is_file() and chat_output.is_file()):
         return False
     manifest = read_json(manifest_path)
     return isinstance(manifest, dict) and manifest.get("status") == "DONE" and manifest.get("signature") == signature
+
+
+def build_cleaned_chat(
+    original_chat: list[dict[str, Any]],
+    final_texts: dict[str, str],
+    pii_cleaner: DeterministicPiiCleaner,
+) -> list[dict[str, Any]]:
+    """Apply cleaned text and sender IDs without changing any other chat field."""
+    cleaned = copy.deepcopy(original_chat)
+    for index, row in enumerate(cleaned, start=1):
+        key = id_key(index)
+        if key not in final_texts:
+            raise PiiCleanError(f"No cleaned text for chat row {index}")
+        row["message"] = final_texts[key]
+        if row.get("sender_id") is not None:
+            row["sender_id"] = pii_cleaner.registry.token("SENDER_ID", str(row["sender_id"]))
+    return cleaned
+
+
+def _chat_without_cleaned_fields(chat: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    value = copy.deepcopy(chat)
+    for row in value:
+        if "message" in row:
+            row["message"] = "<MESSAGE>"
+        if "sender_id" in row:
+            row["sender_id"] = "<SENDER_ID>"
+    return value
+
+
+def assert_only_chat_fields_changed(
+    original_chat: list[dict[str, Any]], cleaned_chat: list[dict[str, Any]]
+) -> None:
+    if _chat_without_cleaned_fields(original_chat) != _chat_without_cleaned_fields(cleaned_chat):
+        raise PiiCleanError("chat_messages.json changed outside message or sender_id fields")
+
+
+def copy_project_except_chat(project: ProjectFiles, project_output: Path) -> None:
+    """Copy all project content except the raw chat file itself."""
+    project_output.mkdir(parents=True, exist_ok=True)
+    for source in project.project_dir.iterdir():
+        if source.name == "chat_messages.json":
+            continue
+        destination = project_output / source.name
+        if source.is_dir():
+            shutil.copytree(source, destination, dirs_exist_ok=True, copy_function=shutil.copy2)
+        else:
+            shutil.copy2(source, destination)
 
 
 async def clean_project(
@@ -866,30 +931,17 @@ async def clean_project(
     api: Stage1ApiClient,
     config: CleanConfig,
 ) -> dict[str, Any]:
-    original_normalized = read_json(project.normalized_path)
-    original_annotation = read_json(project.annotation_path)
-    messages = validate_normalized_messages(original_normalized, project.project_id)
-    original_annotation, whitespace_repairs = align_whitespace_only_annotation_texts(
-        original_annotation, original_normalized
-    )
-    validate_stage1_annotation(original_annotation, original_normalized)
-    if whitespace_repairs:
-        print(
-            f"[{project.project_id}] aligned {whitespace_repairs} whitespace-only "
-            "annotation source text difference(s)",
-            flush=True,
-        )
-    source_sha256 = source_signature(original_normalized)
+    original_chat = read_json(project.chat_path)
+    messages = validate_and_adapt_chat_messages(original_chat, project.project_id)
+    source_sha256 = source_signature(original_chat)
     signature = run_signature(source_sha256, config)
 
     project_output = config.output_root / project.project_id
-    normalized_output = project_output / "normalized_project.json"
-    annotation_output = project_output / "final" / f"{project.project_id}_stage1_annotation.json"
-    public_annotation_output = config.annotation_output_dir / f"{project.project_id}_stage1_annotation.json"
-    manifest_path = project_output / "pii_clean_manifest.json"
+    chat_output = project_output / "chat_messages.json"
+    manifest_path = config.output_root / "_manifests" / f"{project.project_id}.json"
 
     if config.resume and not config.overwrite and output_is_current(
-        manifest_path, normalized_output, annotation_output, signature
+        manifest_path, chat_output, signature
     ):
         print(f"[{project.project_id}] already clean; skipped", flush=True)
         return {"project_id": project.project_id, "status": "SKIPPED"}
@@ -951,49 +1003,27 @@ async def clean_project(
         if sanitized != message["text"]:
             pii_changed += 1
 
-    cleaned_normalized = apply_message_texts(original_normalized, final_texts, pii_cleaner)
-    cleaned_annotation, updated_events = sync_annotation_texts(original_annotation, cleaned_normalized)
-    assert_only_allowed_fields_changed(
-        original_normalized,
-        cleaned_normalized,
-        original_annotation,
-        cleaned_annotation,
-    )
-    validate_stage1_annotation(cleaned_annotation, cleaned_normalized)
+    cleaned_chat = build_cleaned_chat(original_chat, final_texts, pii_cleaner)
+    assert_only_chat_fields_changed(original_chat, cleaned_chat)
 
-    write_json(normalized_output, cleaned_normalized)
-    write_json(annotation_output, cleaned_annotation)
-    write_json(public_annotation_output, cleaned_annotation)
+    copy_project_except_chat(project, project_output)
+    write_json(chat_output, cleaned_chat)
     manifest = {
         "status": "DONE",
         "project_id": project.project_id,
         "completed_at": datetime.now(timezone.utc).isoformat(),
         "signature": signature,
-        "source": {
-            "normalized_project": str(project.normalized_path),
-            "stage1_annotation": str(project.annotation_path),
-        },
-        "outputs": {
-            "normalized_project": str(normalized_output),
-            "stage1_annotation": str(annotation_output),
-            "annotation_mirror": str(public_annotation_output),
-        },
+        "source": {"chat_messages": str(project.chat_path)},
+        "outputs": {"project_dir": str(project_output), "chat_messages": str(chat_output)},
         "counts": {
             "messages": len(messages),
             "messages_with_pii_replaced_after_rewrite": pii_changed,
             "sender_ids_replaced": pii_cleaner.registry.counts().get("SENDER_ID", 0),
             "short_messages_preserved_before_pii_replacement": short_preserved,
             "messages_paraphrased": len(rewrite_candidates),
-            "annotation_source_whitespace_repairs": whitespace_repairs,
-            "annotation_events_synchronized": updated_events,
             "unique_placeholders": pii_cleaner.registry.counts(),
         },
-        "output_sha256": {
-            "normalized_project": source_signature(cleaned_normalized),
-            "stage1_annotation": sha256_text(
-                json.dumps(cleaned_annotation, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-            ),
-        },
+        "output_sha256": {"chat_messages": source_signature(cleaned_chat)},
     }
     write_json(manifest_path, manifest)
     print(
@@ -1005,8 +1035,8 @@ async def clean_project(
 
 
 def dry_run_project(project: ProjectFiles, config: CleanConfig) -> dict[str, Any]:
-    normalized = read_json(project.normalized_path)
-    messages = validate_normalized_messages(normalized, project.project_id)
+    original_chat = read_json(project.chat_path)
+    messages = validate_and_adapt_chat_messages(original_chat, project.project_id)
     pii_cleaner = DeterministicPiiCleaner(messages, config.extra_names)
     pii_changed = 0
     rewrite_count = 0
@@ -1014,7 +1044,7 @@ def dry_run_project(project: ProjectFiles, config: CleanConfig) -> dict[str, Any
         sanitized = pii_cleaner.sanitize_message(message)
         if sanitized != message["text"]:
             pii_changed += 1
-        if should_rewrite(sanitized, config.short_message_max_words):
+        if should_rewrite(message["text"], config.short_message_max_words):
             rewrite_count += 1
     return {
         "project_id": project.project_id,
@@ -1038,12 +1068,11 @@ async def main_async(args: argparse.Namespace) -> int:
         print(str(exc), file=sys.stderr)
         return 2
     if not projects:
-        print("No complete Stage 1 projects found.", file=sys.stderr)
+        print("No projects containing chat_messages.json found.", file=sys.stderr)
         return 2
 
     config = CleanConfig(
         output_root=args.output_root,
-        annotation_output_dir=args.annotation_output_dir,
         model=args.model,
         reasoning_effort=args.reasoning_effort,
         short_message_max_words=args.short_message_max_words,

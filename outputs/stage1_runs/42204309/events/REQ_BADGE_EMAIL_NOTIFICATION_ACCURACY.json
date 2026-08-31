@@ -1,0 +1,62 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_BADGE_EMAIL_NOTIFICATION_ACCURACY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 398,
+        "speaker": "client",
+        "text": "I just completed a purchase using USDC:\nThe purchase succeeded in one transaction, although there was no 'mint successful' popup.\nI also received emails about:\n- new badge - 'Medal'\n- new badge - 'Hustler'\n- new badge - 'High Roller'\n- new badge - 'First Referral'\n- Referral earnings - Earnings $5, Total referrals 2\n\nHowever, 'first referral' is the only badge ticked on my dashboard, and the NFT is still not appearing."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "notification_eligibility": "Badge email notifications must be sent only for badges the recipient has actually earned."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "EMAIL"
+        ],
+        "contexts": [
+          "BADGES",
+          "EMAIL_NOTIFICATIONS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 398,
+        "speaker": "client",
+        "text": "I just completed a purchase using USDC:\nThe purchase succeeded in one transaction, although there was no 'mint successful' popup.\nI also received emails about:\n- new badge - 'Medal'\n- new badge - 'Hustler'\n- new badge - 'High Roller'\n- new badge - 'First Referral'\n- Referral earnings - Earnings $5, Total referrals 2\n\nHowever, 'first referral' is the only badge ticked on my dashboard, and the NFT is still not appearing."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After a USDC purchase, the client received new-badge emails for Medal, Hustler, High Roller, and First Referral, while only First Referral appeared earned on the dashboard."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 445,
+      "suggested_requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+      "description": "The missing confirmation-email clause concerns transactional email delivery; its repeated report of unearned badge notifications adds no new badge-notification failure state beyond message 398."
+    },
+    {
+      "message_id": 476,
+      "suggested_requirement_id": "REQ_BADGE_AWARD_RULES",
+      "description": "The message attributes excessive badge triggering to erroneous earnings data but does not specifically claim that badge email notification accuracy was fixed."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

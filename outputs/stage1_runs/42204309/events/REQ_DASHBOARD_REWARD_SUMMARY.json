@@ -1,0 +1,177 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_DASHBOARD_REWARD_SUMMARY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 72,
+        "speaker": "client",
+        "text": "For user authentication, we should use a hybrid model so the platform remains accessible to crypto and non-crypto users alike (the fiat on-ramp is crucial for virality):\n[ACCOUNT_001] Use wallet auth (SIWE) for crypto flows, since it is required for mints/transfers.\n[ACCOUNT_001] Use email-based auth to access the dashboard (referrals, tickets, prizes), connecting fiat users who do not have wallets.\n[ACCOUNT_001] Keep public APIs unauthenticated (e.g., leaderboards, pool values) so they stay open and transparent.\n\nThis fits our lean MVP: non-crypto users can mint through Stripe/email, while crypto users can do so through their wallet. Keep the email implementation simple, such as magic links for minimal friction.\n\nFor the email provider, we'll use Brevo—I’ll open the account and send the credentials soon. I’m okay with the paid Starter plan if it meaningfully improves UX or deliverability, provided it is worth the price.\n\nFor Stripe, I’ll set up a test account and share the details shortly—concentrate on fiat to USDC for now. As above, if an inexpensive paid add-on improves reliability/UX, we can discuss it; the free tier is fine initially."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "displayed_reward_data": [
+          "referrals",
+          "tickets",
+          "prizes"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "DASHBOARD",
+          "REWARD_STATE"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 441,
+        "speaker": "client",
+        "text": "The dashboard now reports that I have 3 NFTs, while showing a total supply of 2.\n\nIt shows no badges, even though I should have the first referral badge.\n\nThe prize pool contains $10.\n\nIt also says I have 0 tickets, 0 referrals, and have earned $0."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The dashboard showed no earned badges and reported 0 tickets, 0 referrals, and $0 earnings despite the user's existing referral reward state."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 448,
+        "speaker": "freelancer",
+        "text": "Could you test the following now:\n\nDashboard: displays 1 referral, $5.00 in earnings, and the First Referral badge\nRead page: can be accessed by NFT owners\nEmail: verification functions for emails that are already registered\nStats: referral and earnings data is accurate"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The freelancer presents the dashboard as displaying 1 referral, $5.00 in earnings, and the First Referral badge, and asks the client to test it."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 449,
+        "speaker": "client",
+        "text": "My dashboard continues to show that I have 3 NFTs, but:\n\nBadges: the first referral badge is checked.\nRead: I’m still seeing the same error message.\nDashboard earnings: $5\nEarnings after I click on NFT: $0\nTickets: 0\nReferral earnings: $5,000,000\nemail: shows as verified"
+      },
+      "supporting_message_ids": [
+        448
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the claimed update, the First Referral badge and $5 dashboard earnings appeared, but the dashboard still reported 0 tickets."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 473,
+        "speaker": "client",
+        "text": "a few additional things have changed on the dashboard...\n[ACCOUNT_001] I now have far too many badges selected\n[ACCOUNT_001] 0 tickets (2 NFTs, $10 in the prize pool, &amp; 1 referral)\n[ACCOUNT_001] total earnings of $5,000,000"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The dashboard selected too many badges, showed 0 tickets despite an existing referral, and displayed total earnings of $5,000,000."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 492,
+        "speaker": "freelancer",
+        "text": "I have corrected this too:\n3\\. The Data Is Now Entirely Accurate:\nTotal NFTs: 2\nTotal Referrals: 1\nPrize Draw Tickets: 1\nTotal Earnings: $5\nNFT Details: Everything is accurate (referrals, tickets, and earnings for each NFT)"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The freelancer reports correcting the dashboard data to 1 referral, 1 prize-draw ticket, and $5 total earnings."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 496,
+        "speaker": "client",
+        "text": "Landing page updates, the good:\nmy NFTs - 2\nreferrals - 1\ntickets - 1\nbadges - first referral is ticked\n\nLanding page updates, the bad:\nPrize pool - $5\nMy referral code - 10,001 (mint numbers begin at 10,000)\n\n(platform statistics)\nTotal mints - 1\n\nit also shows that we're now at mint number 4; did you mint one?\n\nAnd View Book is still showing the same error"
+      },
+      "supporting_message_ids": [
+        492
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirms that the personal reward summary shows 1 referral, 1 ticket, and the First Referral badge; the separately reported prize-pool, referral-code, platform-statistics, and reader issues remained outside this verification."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 631,
+        "speaker": "client",
+        "text": "Or is a ticket not being generated at all?\n\n[ACCOUNT_001] It may be fine as is if a 'no code buy' does not generate a ticket (we would only need to adjust some UI notes slightly).\nHowever, if a ticket is generated and sent out randomly but does not show on the dashboard, that will need to be fixed.\n[ACCOUNT_001] Any commission sent out randomly also needs to be displayed on the dashboard/attributes.\n\nA no code buy with a $1 tip - 0x8101c6876c85a890325f0515b97426c915f4de5807e64180f4fcb96594acc6cf\n\n(If 'tips' are processed through a second transaction immediately after mint, that explains why the tip did not work, and a UI note will be required for this)"
+      },
+      "supporting_message_ids": [
+        629
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "randomly_assigned_commission_display": "Randomly assigned commissions must be displayed on the recipient's dashboard."
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 579,
+      "suggested_requirement_id": "REQ_NO_CODE_COMMISSION_ALLOCATION",
+      "description": "The missing ticket and commission after a no-code purchase primarily concern whether random rewards were generated and allocated, rather than the dashboard summary itself."
+    },
+    {
+      "message_id": 672,
+      "suggested_requirement_id": "REQ_REFERRAL_LEADERBOARD_ACCURACY",
+      "description": "This message explicitly requires code-based and randomly assigned reward totals to be reflected on the leaderboard; its NFT-attribute clauses also belong to REQ_NFT_REWARD_ATTRIBUTES."
+    },
+    {
+      "message_id": 688,
+      "suggested_requirement_id": "REQ_NFT_REWARD_ATTRIBUTES",
+      "description": "The remaining failure concerns stale referrals and earnings in an individual NFT's attributes after the leaderboard values were verified."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

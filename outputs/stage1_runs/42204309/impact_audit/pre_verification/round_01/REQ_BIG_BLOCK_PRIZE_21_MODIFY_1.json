@@ -9,66 +9,76 @@
   "decisions": [
     {
       "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 21,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
       "confidence": "HIGH",
-      "reason": "The Big Block pool target and trigger do not change the independent Small Block mechanism; the same message's Small Block and royalty rules are already represented.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The ticket issuance, separate counters, eligibility windows, resets, and no-secondary-sale-ticket rule from this message are already represented; the Big Block pool target adds no further ticket-lifecycle change.",
-      "new_event": null
+      "reason": "The existing same-message MODIFY captures the Small Block pool trigger but omits the newly established ticket issuance, independent counter, eligibility window, reset rule, and prohibition on royalty-generated tickets.",
+      "new_event": {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "client",
+          "text": "Hey [FREELANCER_NAME_001],\nI have one final-final adjustment to the mechanics that should make everything cleaner and easier to code, without any strange half-expiring tickets.\nThis new rule replaces the earlier ticket lifespan description:\n→ Whenever someone mints using a referral code, the referrer immediately receives two distinct tickets on their NFT:\n+1 Small Block Ticket\n+1 Big Block Ticket\n\nThe two counters operate completely independently.\nSmall Block ($2,500 pool → 5 × $500 draw):\nOnly Small Block Tickets issued after the previous small block are eligible for the draw.\nOnce the draw is complete, burn/reset every Small Block Ticket to 0.\nBig Block ($100,000 pool → 5 × $20,000 draw):\nOnly Big Block Tickets issued after the previous big block are eligible for the draw.\nOnce the draw is complete, burn/reset every Big Block Ticket to 0.\n\nThe result is:\nSmall blocks remain extremely fair and fresh because no old tickets carry over.\nBig blocks build up naturally, allowing people to watch their big block entries increase over weeks/months.\nMetadata becomes very simple: display only the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block activates as soon as the small pool = exactly $2,500, and the big block activates when the big pool = exactly $100,000. Secondary royalties continue to fund the pools but do not generate tickets.\nAll other mechanics remain unchanged, including the auto $5 commission, assigning a random ticket to an existing NFT when no referral is used, manual claim, etc.\nThis approach should be simpler both to implement and to explain to users.\nApologies for changing direction again — once you confirm that this is cleaner for you as well, we’re 100% locked.\n\nThanks man!"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "pool_amount_per_draw": "$2,500",
+          "draw_condition": "Small Block pool reaches exactly $2,500",
+          "secondary_royalties_contribute_to_pool": true,
+          "tickets_per_successful_coded_referral": 1,
+          "ticket_counter_independence": "operates independently from the Big Block ticket counter",
+          "ticket_eligibility_window": "only Small Block tickets issued after the previous Small Block draw are eligible",
+          "ticket_reset_after_draw": 0,
+          "secondary_royalties_generate_tickets": false
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
     },
     {
       "candidate_requirement_id": "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The same-message Requirement state already records that secondary royalties fund both prize pools without creating referral tickets.",
+      "reason": "The source's royalty effects are already fully represented by the candidate's same-message INTRODUCE: royalties fund the prize pools and secondary sales do not generate referral tickets.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_PRIZE_WINNER_SELECTION",
+      "candidate_requirement_id": "REQ_NFT_REWARD_ATTRIBUTES",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The Big Block pool target and trigger do not alter random winner selection or ticket weighting, and the revised Big Block eligibility window is already represented.",
+      "reason": "The metadata effect of displaying separate Small Block and Big Block counters is already represented by the candidate's same-message INTRODUCE.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_PRIZE_COLLECTION",
+      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The message explicitly says manual claim remains identical, so the Big Block pool change does not modify the collection flow.",
+      "reason": "The client explicitly states that the automatic $5 commission remains unchanged, so the Big Block adjustment does not alter this candidate's state.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_NFT_REWARD_METADATA_ACCURACY",
+      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The metadata requirement already reflects the two ticket counters and permanent badges; changing the Big Block pool target does not alter those displayed fields.",
+      "reason": "The client explicitly states that manual claim remains unchanged, so no candidate state change is required.",
       "new_event": null
     },
     {
-      "candidate_requirement_id": "REQ_NO_REFERRAL_RANDOM_REWARD",
+      "candidate_requirement_id": "REQ_PROJECT_BRANDING",
       "decision": "NO_IMPACT",
       "event_locator": null,
       "confidence": "HIGH",
-      "reason": "The client states that the random ticket for a mint without a referral remains identical, so no candidate state change is entailed.",
-      "new_event": null
-    },
-    {
-      "candidate_requirement_id": "REQ_DIRECT_REFERRAL_COMMISSION",
-      "decision": "NO_IMPACT",
-      "event_locator": null,
-      "confidence": "HIGH",
-      "reason": "The client states that the automatic $5 commission remains identical, so the Big Block pool change does not modify commission payout behavior.",
+      "reason": "The source decision concerns prize and ticket mechanics and does not change project naming or future branding conditions.",
       "new_event": null
     }
   ]

@@ -132,7 +132,7 @@ class RequirementStateGraphTests(unittest.TestCase):
         )
         self.assertEqual(node["supporting_event_ids"], ["REQ_X_E001", "REQ_X_E002"])
 
-    def test_requirement_without_introduce_is_removed(self) -> None:
+    def test_requirement_without_introduce_is_replayed_from_observed_history(self) -> None:
         events = [
             event(
                 1,
@@ -144,7 +144,78 @@ class RequirementStateGraphTests(unittest.TestCase):
             )
         ]
         graphs = build_requirement_state_graph(annotation(events))["requirement_graphs"]
-        self.assertEqual(graphs, [])
+        self.assertEqual(len(graphs), 1)
+        self.assertEqual(graphs[0]["initialization_mode"], "OBSERVED_HISTORY")
+        self.assertFalse(graphs[0]["has_explicit_introduce"])
+        self.assertEqual([edge["event_id"] for edge in graphs[0]["edges"]], ["REQ_X_E001"])
+        self.assertIsNone(graphs[0]["nodes"][0]["lifecycle_status"])
+        self.assertEqual(
+            graphs[0]["nodes"][0]["execution"],
+            {
+                "status": "CLAIMED_WORKING",
+                "observed_behavior": "reported complete",
+                "source_event_id": "REQ_X_E001",
+            },
+        )
+
+    def test_runtime_evidence_before_introduce_is_replayed_as_observed_history(self) -> None:
+        events = [
+            event(
+                1,
+                "RUNTIME_FAILURE",
+                execution={"status": "FAILED", "observed_behavior": "old deployment failed"},
+            ),
+            event(
+                2,
+                "IMPLEMENTATION_CLAIM",
+                execution={"status": "CLAIMED_WORKING", "observed_behavior": "fix reported"},
+            ),
+            event(3, "INTRODUCE", value_updates={"active_contract": "replacement"}),
+            event(
+                4,
+                "RUNTIME_VERIFICATION",
+                execution={"status": "VERIFIED_WORKING", "observed_behavior": "replacement works"},
+            ),
+        ]
+
+        graph = build_requirement_state_graph(annotation(events))["requirement_graphs"][0]
+
+        self.assertEqual(
+            [edge["event_id"] for edge in graph["edges"]],
+            ["REQ_X_E001", "REQ_X_E002", "REQ_X_E003", "REQ_X_E004"],
+        )
+        self.assertEqual(graph["initialization_mode"], "OBSERVED_HISTORY")
+        self.assertTrue(graph["has_explicit_introduce"])
+        self.assertEqual(graph["nodes"][2]["attributes"], {"active_contract": "replacement"})
+        self.assertIsNone(graph["nodes"][2]["execution"])
+        self.assertEqual(graph["nodes"][-1]["execution"]["source_event_id"], "REQ_X_E004")
+
+    def test_requirement_without_events_is_preserved_as_empty_graph(self) -> None:
+        graph = build_requirement_state_graph(annotation([]))["requirement_graphs"][0]
+
+        self.assertEqual(graph["requirement_id"], "REQ_X")
+        self.assertEqual(graph["title"], "X")
+        self.assertEqual(graph["initialization_mode"], "NO_EVENTS")
+        self.assertFalse(graph["has_explicit_introduce"])
+        self.assertEqual(graph["nodes"], [])
+        self.assertEqual(graph["edges"], [])
+
+    def test_modify_without_introduce_establishes_observed_attributes(self) -> None:
+        events = [event(1, "MODIFY", value_updates={"counter": 3})]
+
+        graph = build_requirement_state_graph(annotation(events))["requirement_graphs"][0]
+
+        self.assertEqual(graph["nodes"][0]["attributes"], {"counter": 3})
+        self.assertIsNone(graph["nodes"][0]["lifecycle_status"])
+        self.assertEqual(graph["nodes"][0]["supporting_event_ids"], ["REQ_X_E001"])
+
+    def test_unknown_baseline_allows_first_observed_attribute_removal(self) -> None:
+        events = [event(1, "MODIFY", value_removals=["legacy_counter"])]
+
+        graph = build_requirement_state_graph(annotation(events))["requirement_graphs"][0]
+
+        self.assertEqual(graph["nodes"][0]["attributes"], {})
+        self.assertEqual(graph["nodes"][0]["supporting_event_ids"], ["REQ_X_E001"])
 
     def test_resume_after_ambiguity_resolving_modify_is_not_a_state(self) -> None:
         events = [

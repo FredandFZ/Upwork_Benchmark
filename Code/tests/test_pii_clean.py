@@ -1,17 +1,25 @@
 from __future__ import annotations
 
 import copy
+import tempfile
 import unittest
+from pathlib import Path
 
 from Code.PII_Clean import (
     DeterministicPiiCleaner,
     PiiCleanError,
+    ProjectFiles,
     align_whitespace_only_annotation_texts,
     apply_message_texts,
     assert_only_allowed_fields_changed,
+    assert_only_chat_fields_changed,
     build_batches,
+    build_cleaned_chat,
+    copy_project_except_chat,
+    protected_numbers,
     should_rewrite,
     sync_annotation_texts,
+    validate_and_adapt_chat_messages,
     validate_rewrite_response,
 )
 from Code.stage1.validation import validate_stage1_annotation
@@ -154,7 +162,88 @@ class PiiReplacementTests(unittest.TestCase):
         )
 
 
+class RawDatasetChatTests(unittest.TestCase):
+    def test_adapts_and_cleans_only_allowed_chat_fields(self):
+        chat = [
+            {
+                "created_ts": "2026-01-01",
+                "message": "Hi Bob, email alice@example.com before tomorrow morning.",
+                "message_user_type": "client",
+                "sender_id": "sender-123",
+                "custom": {"keep": True},
+            },
+            {
+                "created_ts": "2026-01-02",
+                "message": "Thank you!",
+                "message_user_type": "freelancer",
+                "sender_id": "sender-456",
+            },
+        ]
+        adapted = validate_and_adapt_chat_messages(chat, "P1")
+        cleaner = DeterministicPiiCleaner(adapted)
+        texts = {
+            "1": cleaner.sanitize_message(adapted[0]),
+            "2": cleaner.sanitize_message(adapted[1]),
+        }
+
+        cleaned = build_cleaned_chat(chat, texts, cleaner)
+        assert_only_chat_fields_changed(chat, cleaned)
+
+        self.assertEqual(cleaned[0]["created_ts"], chat[0]["created_ts"])
+        self.assertEqual(cleaned[0]["message_user_type"], chat[0]["message_user_type"])
+        self.assertEqual(cleaned[0]["custom"], {"keep": True})
+        self.assertIn("[EMAIL_001]", cleaned[0]["message"])
+        self.assertEqual(cleaned[0]["sender_id"], "[SENDER_ID_001]")
+        self.assertNotIn("message_id", cleaned[0])
+
+    def test_rejects_chat_without_string_message(self):
+        with self.assertRaisesRegex(PiiCleanError, "string message"):
+            validate_and_adapt_chat_messages([{"message": None}], "P1")
+
+    def test_copies_other_project_files_but_not_raw_chat(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source" / "P1"
+            output = root / "output" / "P1"
+            (source / "deliverables").mkdir(parents=True)
+            (source / "chat_messages.json").write_text("RAW CHAT", encoding="utf-8")
+            (source / "job.txt").write_text("unchanged", encoding="utf-8")
+            (source / "deliverables" / "file.txt").write_text("artifact", encoding="utf-8")
+
+            project = ProjectFiles("P1", source, source / "chat_messages.json")
+            copy_project_except_chat(project, output)
+
+            self.assertFalse((output / "chat_messages.json").exists())
+            self.assertEqual((output / "job.txt").read_text(encoding="utf-8"), "unchanged")
+            self.assertEqual(
+                (output / "deliverables" / "file.txt").read_text(encoding="utf-8"),
+                "artifact",
+            )
+
+
 class RewriteValidationTests(unittest.TestCase):
+    def test_numeric_html_entities_are_not_business_numbers(self):
+        self.assertEqual(protected_numbers("I&#39;m ready in 2 days."), {"2": 1})
+        inputs = [
+            {
+                "message_id": 2,
+                "speaker": "freelancer",
+                "text": "I&#39;m ready and I&#39;ll send it in 2 days.",
+            }
+        ]
+        result = validate_rewrite_response(
+            {
+                "rewrites": [
+                    {
+                        "message_id": 2,
+                        "text": "I'm ready, and I'll deliver it in 2 days.",
+                    }
+                ]
+            },
+            inputs,
+        )
+        self.assertIn("2 days", result["2"])
+
     def test_requires_placeholders_and_numbers_to_remain_exact(self):
         inputs = [
             {

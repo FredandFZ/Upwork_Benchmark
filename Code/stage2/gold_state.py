@@ -936,7 +936,10 @@ def validate_gold_states(
                     )
             for item in edge_refs:
                 requirement_id = item.requirement_id
-                if item.edge.get("event_type") == "INTRODUCE":
+                if (
+                    item.edge.get("event_type") == "INTRODUCE"
+                    and item.edge.get("from_state_id") is None
+                ):
                     if requirement_id in pre_map or requirement_id not in post_map:
                         errors.append(
                             f"{label} mishandles newly introduced {requirement_id}"

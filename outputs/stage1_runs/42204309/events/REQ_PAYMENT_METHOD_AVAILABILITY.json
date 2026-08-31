@@ -1,0 +1,93 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_PAYMENT_METHOD_AVAILABILITY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 284,
+        "speaker": "client",
+        "text": "I think we should add it later. It’s fine to go live as 'crypto only', with fiat payments coming in ~1 week."
+      },
+      "supporting_message_ids": [
+        283
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "launch_payment_mode": "crypto_only",
+        "fiat_payment_availability": "unavailable_until_added_after_launch"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "MILESTONE_LOCAL",
+        "components": [
+          "FRONTEND",
+          "PAYMENT",
+          "UI_UX"
+        ],
+        "contexts": [
+          "MINT_PAGE",
+          "PAYMENT_SELECTION",
+          "CRYPTO_ONLY_LAUNCH"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "At the moment, 'View Book' still opens a blank page for me (see the attached screenshot), and I cannot choose to pay in ETH—I can only select USDC or Card. Card, however, should be the option I cannot select because it has not been implemented yet."
+      },
+      "supporting_message_ids": [
+        284,
+        330
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "eth_payment_selectable": true,
+        "card_payment_selectable": false,
+        "unavailable_method_behavior": "must_not_be_selectable"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "At the moment, 'View Book' still opens a blank page for me (see the attached screenshot), and I cannot choose to pay in ETH—I can only select USDC or Card. Card, however, should be the option I cannot select because it has not been implemented yet."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "ETH was unavailable for selection while the unimplemented Card payment method was selectable."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 312,
+      "suggested_requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+      "description": "The absence of a payment-choice interface concerns selection among payment alternatives rather than gating an explicitly unavailable method."
+    },
+    {
+      "message_id": 335,
+      "suggested_requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+      "description": "The bounded context identifies implementation of the ETH option and payment selector, not the rule disabling unimplemented methods."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The reported ETH transaction failure belongs to the ETH mint execution flow; ETH being selectable alone does not verify unavailable-method gating."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

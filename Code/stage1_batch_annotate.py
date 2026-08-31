@@ -26,11 +26,15 @@ def repo_root() -> Path:
 def parse_args() -> argparse.Namespace:
     root = repo_root()
     parser = argparse.ArgumentParser(description="Run ReqMemBench Stage 1 annotation.")
-    parser.add_argument("--dataset-root", type=Path, default=root / "Datasets")
+    parser.add_argument(
+        "--dataset-root",
+        type=Path,
+        default=root / "Datasets" / "PII_clean_project",
+    )
     parser.add_argument(
         "--prompt-file",
         type=Path,
-        default=root / "prompt" / "stage1_prompt_v2.md",
+        default=root / "prompt" / "stage1_prompt.md",
     )
     parser.add_argument(
         "--verification-addendum-file",
@@ -53,7 +57,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--single-pass-prompt-file",
         type=Path,
-        default=root / "prompt" / "stage1_prompt_single_pass_v0.6.md",
+        default=root / "prompt" / "stage1_prompt_single_pass.md",
     )
     parser.add_argument("--output-dir", type=Path, default=root / "outputs" / "stage1_annotations")
     parser.add_argument("--run-root", type=Path, default=root / "outputs" / "stage1_runs")
@@ -68,7 +72,7 @@ def parse_args() -> argparse.Namespace:
         "--upgrade-existing-annotation",
         type=Path,
         help=(
-            "Incrementally upgrade one existing Stage 1 annotation to v0.6 without rerunning "
+            "Incrementally upgrade one existing Stage 1 annotation without rerunning "
             "Evidence Scan, Requirement Discovery, or Event Extraction."
         ),
     )
@@ -79,7 +83,11 @@ def parse_args() -> argparse.Namespace:
         help="Multi-pass is the recommended/default workflow.",
     )
     parser.add_argument("--model", default=ANNOTATION_MODEL)
-    parser.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh"), default=REASONING_EFFORT)
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=("low", "medium", "high", "xhigh", "max"),
+        default=REASONING_EFFORT,
+    )
     parser.add_argument(
         "--max-concurrent-requests",
         "--concurrency",
@@ -108,8 +116,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--min-requirement-events",
         type=int,
-        default=3,
-        help="Remove Requirements with shorter lifecycles before downstream stages and final output (default: 3).",
+        default=0,
+        help=(
+            "Optional lifecycle-length filter. The default 0 retains Requirements "
+            "with any Event count, including zero."
+        ),
     )
     parser.add_argument("--max-audit-rounds", type=int, default=1)
     parser.add_argument("--max-impact-audit-rounds", type=int, default=2)

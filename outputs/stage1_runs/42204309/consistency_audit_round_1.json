@@ -2,297 +2,263 @@
   "run_mode": "CONSISTENCY_AUDIT",
   "patches": [
     {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_HOW_IT_WORKS_SECTION_CONTENT",
+        "title": "Landing-Page How It Works Section Content",
+        "family_id": "SITE_CONTENT_AND_COPY",
+        "definition": "The landing page must present the client-approved copy for the independently editable How It Works section.",
+        "anchor_message_ids": [
+          248
+        ]
+      },
+      "evidence_message_ids": [
+        248
+      ],
+      "decision_note": "Message 248 independently modifies landing-page How It Works copy that is outside the hero, FAQ, About, and Mission Requirements.",
+      "confidence": "HIGH"
+    },
+    {
       "operation": "SPLIT_REQUIREMENT",
       "targets": {
-        "requirement_id": "REQ_SITE_INFORMATIONAL_CONTENT"
+        "requirement_id": "REQ_PAYMENT_METHOD_SELECTION"
       },
       "replacement": {
         "requirements": [
           {
-            "requirement_id": "REQ_SITE_INFORMATIONAL_CONTENT",
-            "title": "FAQ Content",
-            "family_id": "SITE_PRESENTATION"
+            "requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+            "title": "Payment Method Selection and Currency Disclosure",
+            "family_id": "MINT_PAYMENTS"
           },
           {
-            "requirement_id": "REQ_ABOUT_PAGE_CONTENT",
-            "title": "About Page Content",
-            "family_id": "SITE_PRESENTATION"
-          },
-          {
-            "requirement_id": "REQ_MISSION_PAGE_CONTENT",
-            "title": "Mission Page Content",
-            "family_id": "SITE_PRESENTATION"
+            "requirement_id": "REQ_PAYMENT_METHOD_AVAILABILITY",
+            "title": "Payment Method Availability Gating",
+            "family_id": "MINT_PAYMENTS"
           }
         ]
       },
       "evidence_message_ids": [
-        143,
-        146,
-        156,
-        157,
+        321,
+        424,
+        430
+      ],
+      "decision_note": "Selection of implemented currencies and disabling unavailable methods evolve independently: ETH selection was later verified while Card availability remained a separate rule.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+            "title": "Brevo Transactional Email Transport",
+            "family_id": null
+          },
+          {
+            "requirement_id": "REQ_PRIZE_WINNER_EMAIL_NOTIFICATION",
+            "title": "Prize Winner Email Notification",
+            "family_id": null
+          },
+          {
+            "requirement_id": "REQ_BADGE_EMAIL_NOTIFICATION_ACCURACY",
+            "title": "Accurate Badge Email Notifications",
+            "family_id": "BADGE_SYSTEM"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        72,
+        86,
+        102,
         184,
-        210
-      ],
-      "decision_note": "FAQ, About, and Mission content receive independent client-authored changes and can be implemented or revised separately.",
-      "confidence": "HIGH"
-    },
-    {
-      "operation": "SPLIT_REQUIREMENT",
-      "targets": {
-        "requirement_id": "REQ_REFERRAL_CODE_IDENTITY"
-      },
-      "replacement": {
-        "requirements": [
-          {
-            "requirement_id": "REQ_REFERRAL_CODE_IDENTITY",
-            "title": "Referral Code Identity",
-            "family_id": "REFERRAL_ENGINE"
-          },
-          {
-            "requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
-            "title": "Referral Code Eligibility Validation",
-            "family_id": "REFERRAL_ENGINE"
-          }
-        ]
-      },
-      "evidence_message_ids": [
-        143,
-        291,
-        305,
-        310,
-        313
-      ],
-      "decision_note": "An NFT's permanent tokenId-based code identity and validation that a submitted code references an already minted NFT are independently testable behaviors.",
-      "confidence": "HIGH"
-    },
-    {
-      "operation": "SPLIT_REQUIREMENT",
-      "targets": {
-        "requirement_id": "REQ_DASHBOARD_NFT_STATE_ACCURACY"
-      },
-      "replacement": {
-        "requirements": [
-          {
-            "requirement_id": "REQ_DASHBOARD_NFT_STATE_ACCURACY",
-            "title": "Dashboard Owned NFT Visibility",
-            "family_id": null
-          },
-          {
-            "requirement_id": "REQ_DASHBOARD_NFT_COUNT_ACCURACY",
-            "title": "Dashboard NFT Count and Supply Accuracy",
-            "family_id": null
-          }
-        ]
-      },
-      "evidence_message_ids": [
-        288,
-        309,
-        312,
-        340,
-        377,
-        404,
-        430,
-        441,
-        492,
-        496
-      ],
-      "decision_note": "Owned-NFT indexing has a separate failure and recovery trajectory from token numbering, owned counts, and total-supply consistency.",
-      "confidence": "HIGH"
-    },
-    {
-      "operation": "SPLIT_REQUIREMENT",
-      "targets": {
-        "requirement_id": "REQ_PRIZE_POOL_STATISTICS_ACCURACY"
-      },
-      "replacement": {
-        "requirements": [
-          {
-            "requirement_id": "REQ_PRIZE_POOL_STATISTICS_ACCURACY",
-            "title": "Prize Pool and Draw Progress Accuracy",
-            "family_id": null
-          },
-          {
-            "requirement_id": "REQ_PLATFORM_MINT_STATISTICS_ACCURACY",
-            "title": "Public Platform Mint Statistics Accuracy",
-            "family_id": null
-          }
-        ]
-      },
-      "evidence_message_ids": [
         210,
-        340,
-        377,
-        430,
-        441,
-        496
-      ],
-      "decision_note": "Prize-pool value and draw progress can fail independently from public total-mint, current-mint-number, and supply statistics.",
-      "confidence": "HIGH"
-    },
-    {
-      "operation": "DELETE_EVENT",
-      "targets": {
-        "requirement_id": "REQ_BASE_NETWORK_DEPLOYMENT",
-        "event_locator": {
-          "message_id": 343,
-          "event_type": "RUNTIME_FAILURE",
-          "occurrence": 1
-        }
-      },
-      "replacement": null,
-      "evidence_message_ids": [
-        343
-      ],
-      "decision_note": "The wrong-contract and default-Anvil deployment failure is already owned by contract-upgrade data continuity and does not show that the Base network constraint failed.",
-      "confidence": "HIGH"
-    },
-    {
-      "operation": "DELETE_EVENT",
-      "targets": {
-        "requirement_id": "REQ_BADGE_ACHIEVEMENTS",
-        "event_locator": {
-          "message_id": 398,
-          "event_type": "RUNTIME_FAILURE",
-          "occurrence": 1
-        }
-      },
-      "replacement": null,
-      "evidence_message_ids": [
-        398
-      ],
-      "decision_note": "The dashboard showed the correct earned badge; the defect was that transactional emails announced unearned badges, which is already represented under email delivery.",
-      "confidence": "HIGH"
-    },
-    {
-      "operation": "DELETE_EVENT",
-      "targets": {
-        "requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
-        "event_locator": {
-          "message_id": 445,
-          "event_type": "RUNTIME_FAILURE",
-          "occurrence": 1
-        }
-      },
-      "replacement": null,
-      "evidence_message_ids": [
         445
       ],
-      "decision_note": "The missing confirmation for an already registered email belongs to the narrower email-authentication trajectory and is already represented there.",
+      "decision_note": "Brevo transport, prize-winner notification content and triggering, and badge-notification accuracy have different acceptance criteria and failure trajectories.",
       "confidence": "HIGH"
     },
     {
-      "operation": "EDIT_EVENT",
+      "operation": "SPLIT_REQUIREMENT",
       "targets": {
-        "requirement_id": "REQ_USDC_MINT_FLOW",
-        "event_locator": {
-          "message_id": 377,
-          "event_type": "RUNTIME_FAILURE",
-          "occurrence": 1
-        }
+        "requirement_id": "REQ_BADGE_AWARD_RULES"
       },
       "replacement": {
-        "event_type": "RUNTIME_VERIFICATION",
-        "value_updates": null,
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": {
-          "status": "VERIFIED_WORKING",
-          "observed_behavior": "The USDC approval was followed by a mint transaction that executed successfully, counted the mint, produced the NFT certificate, and contributed to the prize pool."
-        }
+        "requirements": [
+          {
+            "requirement_id": "REQ_BADGE_AWARD_RULES",
+            "title": "Achievement Badge Award Rules",
+            "family_id": "BADGE_SYSTEM"
+          },
+          {
+            "requirement_id": "REQ_BADGE_CATALOG",
+            "title": "Approved Achievement Badge Catalog",
+            "family_id": "BADGE_SYSTEM"
+          }
+        ]
       },
       "evidence_message_ids": [
-        377
+        111,
+        114,
+        143,
+        306,
+        310,
+        313,
+        445,
+        473
       ],
-      "decision_note": "The source verifies successful USDC mint execution; its premature modal and missing dashboard visibility concern separate feedback and dashboard Requirements.",
+      "decision_note": "Badge membership and icon choices changed independently from milestone-based award eligibility and incorrect award behavior.",
       "confidence": "HIGH"
     },
     {
-      "operation": "EDIT_EVENT",
+      "operation": "SPLIT_REQUIREMENT",
       "targets": {
-        "requirement_id": "REQ_USDC_MINT_FLOW",
-        "event_locator": {
-          "message_id": 569,
-          "event_type": "RUNTIME_FAILURE",
-          "occurrence": 1
-        }
+        "requirement_id": "REQ_NFT_REWARD_ATTRIBUTES"
       },
       "replacement": {
-        "event_type": "RUNTIME_VERIFICATION",
-        "value_updates": null,
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": {
-          "status": "VERIFIED_WORKING",
-          "observed_behavior": "Using an existing USDC approval, the later mint proceeded directly to the mint transaction, completed successfully, displayed its popup, and appeared on the dashboard."
-        }
+        "requirements": [
+          {
+            "requirement_id": "REQ_NFT_REWARD_ATTRIBUTES",
+            "title": "Accurate NFT Metadata Reward Attributes",
+            "family_id": "NFT_DATA_AND_PRESENTATION"
+          },
+          {
+            "requirement_id": "REQ_NFT_DETAIL_REWARD_SUMMARY",
+            "title": "Accurate NFT Detail Reward Summary",
+            "family_id": "NFT_DATA_AND_PRESENTATION"
+          }
+        ]
       },
       "evidence_message_ids": [
-        569
+        455,
+        688,
+        691,
+        692
       ],
-      "decision_note": "The source contains concrete successful USDC mint execution; the approval-stage false popup is separately represented by the mint-feedback trajectory.",
+      "decision_note": "Message 688 reports that the live NFT detail summary was correct while generated attributes remained stale, demonstrating independent projections and failure trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_ASSET_PRESENTATION"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_NFT_ASSET_PRESENTATION",
+            "title": "NFT Asset Presentation in Wallets and Product Views",
+            "family_id": "NFT_DATA_AND_PRESENTATION"
+          },
+          {
+            "requirement_id": "REQ_NFT_ASSET_ENDPOINT_RESOLUTION",
+            "title": "NFT Metadata and Asset Endpoint Resolution",
+            "family_id": "NFT_DATA_AND_PRESENTATION"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        388,
+        393,
+        401,
+        411
+      ],
+      "decision_note": "Direct metadata and image endpoints could resolve while supported-wallet and dashboard rendering still failed, establishing independently testable behaviors.",
       "confidence": "HIGH"
     },
     {
       "operation": "DELETE_EVENT",
       "targets": {
-        "requirement_id": "REQ_USDC_MINT_FLOW",
+        "requirement_id": "REQ_EBOOK_READER",
         "event_locator": {
-          "message_id": 609,
+          "message_id": 423,
           "event_type": "IMPLEMENTATION_CLAIM",
           "occurrence": 1
         }
       },
       "replacement": null,
       "evidence_message_ids": [
-        609
+        423
       ],
-      "decision_note": "This claim concerns success-modal suppression and correct token-ID feedback, and is already owned by REQ_MINT_SUCCESS_FEEDBACK.",
+      "decision_note": "The source asks the client to refresh and test behavior that should work; it does not explicitly claim that the reader fix was implemented or completed.",
       "confidence": "HIGH"
     },
     {
       "operation": "DELETE_EVENT",
       "targets": {
-        "requirement_id": "REQ_USDC_MINT_FLOW",
+        "requirement_id": "REQ_NFT_HOLDER_BOOK_GATING",
         "event_locator": {
-          "message_id": 610,
+          "message_id": 707,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        703,
+        706,
+        707
+      ],
+      "decision_note": "The reproduced issue is resolved by context to the mobile Lit and wallet handoff path and duplicates the existing mobile-access failure trajectory.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_NFT_HOLDER_BOOK_GATING",
+        "event_locator": {
+          "message_id": 708,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        703,
+        707,
+        708
+      ],
+      "decision_note": "The generic issue-resolution claim belongs to the mobile ebook-access exchange and is already represented under that narrower Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ETH_WALLET_MINT",
+        "event_locator": {
+          "message_id": 530,
           "event_type": "RUNTIME_VERIFICATION",
           "occurrence": 1
         }
       },
       "replacement": null,
       "evidence_message_ids": [
-        610
+        529,
+        530
       ],
-      "decision_note": "The approval verifies the immediately preceding success-modal and token-ID fix and is already represented under REQ_MINT_SUCCESS_FEEDBACK.",
+      "decision_note": "The source verifies only an excess-USDC refund and does not establish successful NFT delivery or completion of the full ETH mint flow.",
       "confidence": "HIGH"
     },
     {
-      "operation": "EDIT_EVENT",
+      "operation": "DELETE_EVENT",
       "targets": {
-        "requirement_id": "REQ_DASHBOARD_NFT_STATE_ACCURACY",
+        "requirement_id": "REQ_DISCORD_COMMUNITY_SERVER",
         "event_locator": {
-          "message_id": 388,
-          "event_type": "IMPLEMENTATION_CLAIM",
+          "message_id": 779,
+          "event_type": "RUNTIME_VERIFICATION",
           "occurrence": 1
         }
       },
-      "replacement": {
-        "event_type": "IMPLEMENTATION_CLAIM",
-        "value_updates": null,
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": {
-          "status": "CLAIMED_WORKING",
-          "observed_behavior": "Freelancer reports fixing the missing token and says token ID 1 is stored in the backend and should render on the dashboard."
-        }
-      },
+      "replacement": null,
       "evidence_message_ids": [
-        388
+        777,
+        778,
+        779
       ],
-      "decision_note": "Retain the target-specific dashboard claim while removing the noncanonical duplicate field named value_remov.",
+      "decision_note": "Successfully joining through an invitation verifies access only and does not verify the configured channel, onboarding, moderation, and support behavior of the full target Requirement.",
       "confidence": "HIGH"
     },
     {
@@ -300,24 +266,11 @@
       "targets": {},
       "replacement": null,
       "evidence_message_ids": [
-        190,
-        191,
-        192
+        626,
+        627
       ],
-      "decision_note": "The Aave REMOVE uses a generic 'cool' source message; review the preceding exchange to confirm that it unambiguously accepts removal rather than merely acknowledging another topic.",
-      "confidence": "LOW"
-    },
-    {
-      "operation": "HUMAN_REVIEW",
-      "targets": {},
-      "replacement": null,
-      "evidence_message_ids": [
-        184,
-        217,
-        224
-      ],
-      "decision_note": "It remains unclear whether optional offline PDF download survives the later encrypted Lit Protocol gating decision.",
-      "confidence": "LOW"
+      "decision_note": "The exchange may create a material ambiguity about removing repeated book-access signing, but the supplied evidence does not establish an accepted change or safely resolvable final behavior.",
+      "confidence": "MEDIUM"
     },
     {
       "operation": "HUMAN_REVIEW",
@@ -325,23 +278,10 @@
       "replacement": null,
       "evidence_message_ids": [
         797,
-        798,
-        801
+        798
       ],
-      "decision_note": "Determine whether the accepted Super Admin proposal requires an implemented control panel or only a design-document deliverable.",
+      "decision_note": "The Super Admin dashboard is positively received, but it is unclear whether the client approved current implementation or only acknowledged a future proposal.",
       "confidence": "LOW"
-    },
-    {
-      "operation": "HUMAN_REVIEW",
-      "targets": {},
-      "replacement": null,
-      "evidence_message_ids": [
-        184,
-        210,
-        323
-      ],
-      "decision_note": "The desired fiat-buyer wallet experience is clear, but the evidence does not establish whether Transak can provide the specified automatic non-custodial wallet and access flow.",
-      "confidence": "MEDIUM"
     }
   ]
 }

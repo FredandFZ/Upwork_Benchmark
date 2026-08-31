@@ -13,7 +13,7 @@
       "evidence_message_ids": [
         291
       ],
-      "decision_note": "The client establishes the system-enforced rule that only previously minted NFT numbers are eligible referral codes.",
+      "decision_note": "The client establishes the implementation-relevant validation rule that only previously minted NFT identifiers are accepted, preventing current or future mint numbers from being used for self-referral.",
       "confidence": "HIGH"
     },
     {
@@ -22,36 +22,12 @@
         "event_type": "RUNTIME_FAILURE",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "RUNTIME_FAILURE",
-        "value_updates": null,
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": {
-          "status": "FAILED",
-          "observed_behavior": "The interface presented referral code '5' as valid even though only already-minted NFT numbers should be accepted."
-        }
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         291
       ],
-      "decision_note": "First concrete failure of referral-code eligibility validation; the revised observation avoids implying that self-referral was actually completed.",
-      "confidence": "HIGH"
-    },
-    {
-      "event_locator": {
-        "message_id": 305,
-        "event_type": "MODIFY",
-        "occurrence": 1
-      },
-      "verdict": "DELETE",
-      "replacement": null,
-      "evidence_message_ids": [
-        305
-      ],
-      "decision_note": "The eligibility clause repeats the existing rule without changing it, while the new popup copy belongs to referral feedback rather than eligibility validation.",
+      "decision_note": "First concrete failure: the system accepted referral code 5 despite the client identifying it as ineligible under the previously minted-NFT rule.",
       "confidence": "HIGH"
     },
     {
@@ -65,7 +41,7 @@
       "evidence_message_ids": [
         308
       ],
-      "decision_note": "Target-specific implementation claim: the freelancer reports a contract check requiring the referral code to precede the token being minted.",
+      "decision_note": "Target-specific implementation claim after the failure: the freelancer reports a contract check requiring referralCode to be less than the current tokenId.",
       "confidence": "HIGH"
     },
     {
@@ -74,24 +50,14 @@
         "event_type": "RUNTIME_VERIFICATION",
         "occurrence": 1
       },
-      "verdict": "EDIT",
-      "replacement": {
-        "event_type": "RUNTIME_VERIFICATION",
-        "value_updates": null,
-        "value_removals": null,
-        "scope_updates": null,
-        "ambiguity": null,
-        "execution": {
-          "status": "VERIFIED_WORKING",
-          "observed_behavior": "The client reports that the invalid-code message is displayed correctly, apart from a requested wording change."
-        }
-      },
+      "verdict": "KEEP",
+      "replacement": null,
       "evidence_message_ids": [
         310,
         313
       ],
-      "decision_note": "First concrete post-claim verification of the invalid-referral path; the revised observation preserves the outstanding copy change.",
-      "confidence": "HIGH"
+      "decision_note": "First concrete post-claim verification of the invalid-referral rejection path: after the specified production test, the client confirms that the invalid-code result appeared; the requested wording change belongs to the separate feedback Requirement.",
+      "confidence": "MEDIUM"
     }
   ],
   "missing_event_candidates": []

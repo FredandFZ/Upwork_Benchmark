@@ -1,4 +1,4 @@
-# Incremental v0.5 -> v0.6 value-removal audit
+# Incremental value-removal audit
 
 This is a migration-only `CONSISTENCY_AUDIT`. The Requirement inventory and existing Event set are frozen. Do not add, delete, move, split, merge, rename, or reclassify Requirements or Events.
 

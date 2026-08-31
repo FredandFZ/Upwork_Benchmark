@@ -1,13 +1,14 @@
 # ReqMemBench Stage 1 batch annotation
 
-The default workflow uses `prompt/stage1_prompt_v2.md`, `gpt-5.6-sol`, and `high` reasoning.
+The default workflow reads projects from `Datasets/PII_clean_project/` and uses
+`prompt/stage1_prompt.md`, `gpt-5.6-sol`, and `high` reasoning.
 `EVENT_VERIFICATION` additionally uses `prompt/stage1_event_verification_addendum.md` for stricter source alignment, execution-event pruning, and attribute-level implementation-relevance checks on INTRODUCE/MODIFY Events. Project-management values such as delivery deadlines, schedules, budgets, staffing, and availability are deleted; executable temporal behavior such as timeout or expiration remains eligible.
 When rolling this verifier policy out to existing runs, `--force-stage event_verification` reuses upstream checkpoints even though the shared Prompt hash changed; the forced verifier receives the new common Prompt and addendum.
 A batch force-stage rollout skips projects already marked `EXCLUDED_NO_REQUIREMENTS`. Use an explicit `--project-id` or `--overwrite` only when intentionally reprocessing an excluded project.
 `CROSS_REQUIREMENT_IMPACT_AUDIT` uses `prompt/stage1_cross_requirement_impact_audit.md` to judge candidates across all Requirement families.
 Credentials are read only from `UPWORK_API_KEY` and `UPWORK_BUDGET_ID`.
 
-The current output schema is annotation `v0.6`. Every Event contains `value_removals`; a MODIFY may delete obsolete top-level attributes before applying `value_updates`. After the global consistency audit, the pipeline replays provisional states at each material MODIFY/REMOVE, retrieves cross-Requirement candidates from title/current attributes/scope/history/family/shared entities, and asks the impact audit for `ADD_EVENT`, `EDIT_EVENT`, `NO_IMPACT`, or `HUMAN_REVIEW`. Only HIGH-confidence ADD/EDIT decisions are applied. The minimum-lifecycle filter now runs after this audit so a short Requirement is not discarded before it can receive a necessary propagated Event.
+Every Event contains `value_removals`; a MODIFY may delete obsolete top-level attributes before applying `value_updates`. After the global consistency audit, the pipeline replays provisional states at each material MODIFY/REMOVE, retrieves cross-Requirement candidates from title/current attributes/scope/history/family/shared entities, and asks the impact audit for `ADD_EVENT`, `EDIT_EVENT`, `NO_IMPACT`, or `HUMAN_REVIEW`. Only HIGH-confidence ADD/EDIT decisions are applied. By default, sparse Requirements are retained even when they contain fewer than three Events.
 
 New checkpoints and reports:
 
@@ -25,17 +26,16 @@ Relevant controls:
 --max-impact-candidates-per-event 12
 ```
 
-Incrementally upgrade one existing v0.5/v0.6 annotation instead of rerunning the
-full Stage 1 pipeline:
+Incrementally audit one existing annotation instead of rerunning the full Stage 1 pipeline:
 
 ```powershell
 & 'D:\Python_env\Miniconda\python.exe' Code\stage1_batch_annotate.py `
-  --dataset-root 'Pilot Benchmark' `
+  --dataset-root 'Datasets\PII_clean_project' `
   --project-id 42204309 `
   --upgrade-existing-annotation 'outputs\stage1_annotations\42204309_stage1_annotation.json' `
-  --output-dir 'outputs\stage1_annotations_v06' `
-  --run-root 'outputs\stage1_upgrade_runs' `
-  --stats-file 'outputs\stage1_annotations_v06\statistics.csv' `
+  --output-dir 'outputs\stage1_annotations' `
+  --run-root 'outputs\stage1_runs' `
+  --stats-file 'outputs\stage1_requirement_event_statistics.csv' `
   --insecure
 ```
 
@@ -43,9 +43,9 @@ This mode freezes and reuses the existing Requirement inventory and Events. It
 skips `EVIDENCE_SCAN`, `REQUIREMENT_DISCOVERY`, `EVENT_EXTRACTION`, and the old
 general `CONSISTENCY_AUDIT`. It runs only the migration-specific
 `VALUE_REMOVAL_AUDIT`, `CROSS_REQUIREMENT_IMPACT_AUDIT`, verification for
-Requirements actually changed by those audits, deterministic v0.6 assembly,
-and validation. The separate output directory above preserves the original
-annotation for comparison. Checkpoints are resumable by default.
+Requirements actually changed by those audits, deterministic final assembly,
+and validation. If the existing annotation must be preserved for comparison,
+archive it before running this command. Checkpoints are resumable by default.
 
 Run one project in resumable multi-pass mode:
 
@@ -73,14 +73,14 @@ This reuses Evidence Scan, Requirement Discovery, Event Extraction, and Consiste
 - Event 必须逐 Requirement 对齐证据，不能在一次超大生成中混合路由；
 - 全局 Audit 需要看到所有 Requirement 和 Events 才能发现 overlap、漏标和错路由；
 - Verification 需要回到单个 Requirement 和原始消息，独立判断每个 provisional Event；
-- 最终 JSON 的排序、ID、短 lifecycle 过滤和 Schema 校验应由确定性代码完成，而不是交给模型自由生成。
+- 最终 JSON 的排序、ID、默认稀疏 lifecycle 保留处理和 Schema 校验应由确定性代码完成，而不是交给模型自由生成。
 
 Stage 1 只生成 Sessions、Requirement Families、Requirements 和 Requirement Events。它不构建 Stage 2 的 Current State、State Graph、evaluation instances 或 benchmark answers。
 
 ### 一张图看完整数据流
 
 ```text
-Datasets/<project_id>/
+Datasets/PII_clean_project/<project_id>/
         |
         v
 [0. Project discovery + deterministic preprocessing]
@@ -110,11 +110,6 @@ Datasets/<project_id>/
         +--> event_extraction_findings.json
         |
         v
-[Lifecycle filter #1: event_count < 3]
-        |
-        +--> discarded_requirements.json
-        |
-        v
 [4. CONSISTENCY_AUDIT]  每轮一次全项目 LLM 调用
         |
         +--> consistency_audit_round_N.json
@@ -122,9 +117,6 @@ Datasets/<project_id>/
         +--> boundary changed? re-extract affected Requirements
         +--> audited_state.json
         +--> Audit human-review items
-        |
-        v
-[Lifecycle filter #2: event_count < 3]
         |
         v
 [5. EVENT_VERIFICATION]  每个保留 Requirement 一次 LLM 调用
@@ -135,7 +127,9 @@ Datasets/<project_id>/
         +--> missing_event_candidates -> human_review.json
         |
         v
-[Lifecycle filter #3: event_count < 3]
+[Optional lifecycle filter: only when --min-requirement-events > 0]
+        |
+        +--> discarded_requirements.json
         |
         v
 [6. Deterministic final assembly + validation]
@@ -153,7 +147,7 @@ Datasets/<project_id>/
 
 这一阶段不调用 LLM。
 
-程序从 `--dataset-root`（默认 `Datasets/`）发现项目，找到聊天记录和项目元数据，然后执行确定性预处理：
+程序从 `--dataset-root`（默认 `Datasets/PII_clean_project/`）发现项目，找到聊天记录和项目元数据，然后执行确定性预处理：
 
 - 规范化 project ID、标题和输入路径；
 - 规范化消息 ID；
@@ -290,25 +284,21 @@ events/<requirement_id>.json
 - 验证 speaker、message ID、时间顺序和 Event payload；
 - 汇总 warnings/candidates 到 `event_extraction_findings.json`。
 
-### Lifecycle filter：为什么执行三次
+### Lifecycle retention：默认保留稀疏 Requirement
 
-当前 benchmark 只保留至少 `--min-requirement-events 3` 个有效 Events 的 Requirement。这个过滤器在三个位置执行：
+当前 benchmark 默认使用 `--min-requirement-events 0`，不会因为 Event 数量较少而删除 Requirement。具有 0、1、2 个有效 Events 的 Requirement 都会保留，并进入 Verification 和最终 Stage 1 annotation。
 
-| 时点 | 原因 |
-|---|---|
-| Extraction 后 | 尽早阻止 0–2 Event Requirement 进入高成本全局 Audit 和 Verification。 |
-| Audit 后 | Audit 的删除、移动、拆分或重提取可能改变 lifecycle 长度。 |
-| Verification 后 | Verifier 的 DELETE 可能使原本合格的 Requirement 降到 3 以下。 |
+Pipeline 仍在 Cross-Requirement Impact Audit 后和 Verification 后调用统一的 lifecycle 处理函数，因为它还负责根据最终保留的 Requirement 重建 Family。默认阈值为 0 时，该函数不淘汰任何 Requirement。
 
-被淘汰的 Requirement 和当时的 Events 会写入 `discarded_requirements.json`，不会静默丢失。
+`--min-requirement-events` 仍作为显式实验参数保留。只有手动设置为大于 0 的值时，短 lifecycle 才会被写入 `discarded_requirements.json` 并从最终结果排除。
 
 过滤器还会清理无意义的一成员 Family：
 
 - 一个 Family 少于两个保留 Requirements 时，该 Family 被移除；
 - 原成员的 `family_id` 被设为 `null`；
-- Requirement 本身只要满足最短 lifecycle，仍可作为 standalone Requirement 保留。
+- Requirement 无论 Event 数量多少，都可作为 standalone Requirement 保留。
 
-模型不能为了达到 3 Events 而合并 Requirement、发明 Event、重复 Event 或保留弱证据。
+模型不能为了增加 Event 数量而合并 Requirement、发明 Event、重复 Event 或保留弱证据。
 
 ### 阶段 4：`CONSISTENCY_AUDIT`
 
@@ -465,7 +455,7 @@ Verifier 还可以输出 `missing_event_candidates`，但 Pipeline 不会自动 
 
 最终验证包括：
 
-- benchmark/version/project ID；
+- benchmark/project ID；
 - Session、Family、Requirement ID 唯一且非空；
 - Family 引用存在；
 - Event ID 连续且全局唯一；
@@ -576,7 +566,7 @@ successful_calls ≈ C + 1 + R + A + R_changed + V
 - `R`：Discovery 得到的 Requirements 数；
 - `A`：实际执行的 Audit rounds；
 - `R_changed`：Audit 边界变化后重新提取的 Requirement 次数；
-- `V`：Audit 后、最短 lifecycle 过滤后保留的 Requirements 数。
+- `V`：Audit 后进入 Verification 的 Requirements 数；默认阈值 0 时包含稀疏 Requirements。
 
 重试会增加 `total_attempts`，但不增加成功调用公式中的 stage count。
 
@@ -592,7 +582,7 @@ successful_calls ≈ C + 1 + R + A + R_changed + V
 ```text
 --event-context-mode filtered
 --max-requirement-context-messages 160
---min-requirement-events 3
+--min-requirement-events 0
 --max-audit-rounds 1
 --max-concurrent-requests 4
 ```
@@ -643,7 +633,7 @@ outputs/stage1_logs/failed_responses/
 | 每 Requirement Extraction | 有 | 无 |
 | Consistency Audit | 有 | 无 |
 | Event Verification | 有 | 无 |
-| 三次最短 lifecycle 过滤 | 有 | 无 |
+| 稀疏 lifecycle 默认保留与可选阈值处理 | 有 | 无 |
 | `human_review.json` 汇总 | 有 | 无完整 multi-pass review |
 | Checkpoint 粒度 | 细，可局部续跑 | 粗 |
 | API 调用 | 多 | 通常 1 |
@@ -669,13 +659,13 @@ legacy final annotation files whose `requirements` array is already empty.
 
 - `--event-context-mode filtered` is the default. It uses anchors and evidence topic hints instead of sending almost the complete transcript for every Requirement.
 - `--max-requirement-context-messages 160` caps the focused raw-message context while preserving anchors and chronological coverage.
-- `--min-requirement-events 3` removes short lifecycles before Audit, Verification, and final assembly.
+- `--min-requirement-events 0` is the default and retains Requirements with 0, 1, or 2 Events. Set a positive value only for an explicit filtering experiment.
 - Consistency Audit receives the retained inventory and Events plus aggregated routing warnings and missing-Requirement candidates from Event Extraction.
 - Target-specific Audit `HUMAN_REVIEW` items are passed into Event Verification and included in its checkpoint hash.
 - Verification checkpoints also depend on the target inventory and verification-addendum hash, so a verifier-only policy change does not require regenerating upstream stages.
 - Reasoning effort can be changed with `--reasoning-effort low|medium|high|xhigh`. It does not invalidate compatible semantic checkpoints.
 
-Discarded short lifecycles are retained for analysis at:
+When a positive optional threshold is explicitly configured, discarded short lifecycles are retained for analysis at:
 
 ```text
 outputs/stage1_runs/<project_id>/discarded_requirements.json
@@ -694,7 +684,7 @@ outputs/stage1_runs/<project_id>/discarded_requirements.json
 --context-window 2
 --event-context-mode filtered|full_history
 --max-requirement-context-messages 160
---min-requirement-events 3
+--min-requirement-events 0
 --max-audit-rounds 1
 --retries 3
 --timeout 900
@@ -737,9 +727,9 @@ outputs/
 | 路径 | 作用 | 是否属于最终结果 |
 |---|---|---|
 | `evidence_chunks/` | Evidence Scan 分块结果。长聊天记录会被拆成多个 chunk，每个文件保存该分块识别出的候选证据。 | 否，属于上游检查点。 |
-| `events/` | Event Extraction 的逐 Requirement 原始结果，通常一个 Requirement 一个 JSON。包含暂定 Events、`routing_warnings` 和 `missing_requirement_candidates`。这里可能仍包含之后因少于 3 个 Events 而被淘汰的 Requirement。 | 否，属于审计前的中间结果。 |
+| `events/` | Event Extraction 的逐 Requirement 原始结果，通常一个 Requirement 一个 JSON。包含暂定 Events、`routing_warnings` 和 `missing_requirement_candidates`。默认配置下，稀疏 Requirement 不会仅因 Event 较少而被淘汰。 | 否，属于审计前的中间结果。 |
 | `verification/` | Event Verification 的逐 Requirement 判定结果。每个普通 JSON 保存 `KEEP`、`EDIT`、`DELETE` verdict；对应的 `.meta.json` 保存输入哈希、verification addendum 哈希等检查点信息。 | 否，应用 verdict 后的汇总结果见 `verified_events.json`。 |
-| `final/` | 通过 Audit、Verification、最短生命周期过滤和最终 Schema 校验后生成的标准 Stage 1 JSON。成功完成后，同一文件还会复制到 `outputs/stage1_annotations/`。 | 是。 |
+| `final/` | 通过 Audit、Verification、默认稀疏 lifecycle 保留处理和最终 Schema 校验后生成的标准 Stage 1 JSON。成功完成后，同一文件还会复制到 `outputs/stage1_annotations/`。 | 是。 |
 
 ### 根目录 JSON 文件
 
@@ -753,10 +743,10 @@ outputs/
 | `consistency_audit_round_N.json` | 第 N 轮 Consistency Audit 的模型原始输出，主要内容是结构化 patches，例如 `ADD_REQUIREMENT`、`SPLIT_REQUIREMENT`、`MOVE_EVENT`、`DELETE_EVENT` 和 `HUMAN_REVIEW`。它不等于已经应用后的状态。 | 检查模型在每轮 Audit 建议了哪些修改。 |
 | `consistency_audit_round_N.meta.json` | 对应 Audit 轮次的检查点元数据，主要记录输入内容的 SHA-256。输入发生变化时，代码据此判断该轮是否必须重新请求模型。 | 仅用于恢复和失效判断，不包含标注语义。 |
 | `audited_state.json` | 代码依次应用高置信度 Audit patches 后的 inventory、Events、待人工复核项和 patch 数量，是进入 Event Verification 前的主要检查点。 | 检查 Audit 建议是否真正应用、Requirement 是否重复，以及 Event 在 Verification 前的状态。 |
-| `discarded_requirements.json` | 因有效 Event 数量少于 `--min-requirement-events` 而被排除的 Requirement。保存淘汰阶段、Event 数量、原因和当时的 Events。 | 这些不是解析错误；它们只是未达到后续实例构建的最短 lifecycle 要求。 |
+| `discarded_requirements.json` | 仅当显式设置正数 `--min-requirement-events` 时，保存因 Event 数量低于该实验阈值而排除的 Requirement。默认值 0 时通常为空。 | 用于兼容可选过滤实验；不是默认 Stage 1 淘汰规则。 |
 | `verified_events.json` | 对每个保留 Requirement 应用 Event Verification 的 `EDIT` 和 `DELETE` 后得到的 Events 映射。 | 对比 `events/` 可判断 verifier 实际删除或修改了什么。 |
 | `human_review.json` | 汇总流水线无法或不应自动决定的问题。详见下一节。 | 完成 Gold 验收前应检查。 |
-| `run_metadata.json` | 当前运行状态和统计信息，包括项目 ID、模型、reasoning effort、Prompt 路径/版本/哈希、开始/完成/失败时间、错误、API 调用次数、token 使用量和最终 calibration 指标。调用与 token 数据按当前项目日志汇总，续跑时可能包含累计值。 | 判断任务是否真正完成、使用了哪个 Prompt，以及最近一次失败的原因。 |
+| `run_metadata.json` | 当前运行状态和统计信息，包括项目 ID、模型、reasoning effort、Prompt 路径/哈希、开始/完成/失败时间、错误、API 调用次数、token 使用量和最终 calibration 指标。调用与 token 数据按当前项目日志汇总，续跑时可能包含累计值。 | 判断任务是否真正完成、使用了哪个 Prompt，以及最近一次失败的原因。 |
 
 ## `human_review.json` 详解
 
@@ -954,9 +944,9 @@ missing candidate 可能是真漏标，也可能是重复或错路由。例如�
 
 ## Human review 的详细处理流程
 
-### 第 1 步：保存当前可比较版本
+### 第 1 步：保存当前可比较结果
 
-在修改 Prompt、代码或强制重跑前，先把当前 `outputs/stage1_runs/<project_id>/` 和最终 JSON 归档。强制重跑会更新 checkpoint；没有旧版本就很难确认问题是否真正改善。
+在修改 Prompt、代码或强制重跑前，先把当前 `outputs/stage1_runs/<project_id>/` 和最终 JSON 归档。强制重跑会更新 checkpoint；没有旧结果就很难确认问题是否真正改善。
 
 至少保留：
 
@@ -1009,7 +999,7 @@ final/<project_id>_stage1_annotation.json
 2. 从 Requirement Discovery 开始强制重跑：
 
 ```powershell
-python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt_v2.md --force-stage requirement_discovery --insecure
+python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt.md --force-stage requirement_discovery --insecure
 ```
 
 它会复用 Evidence Scan，但重新生成 Discovery、Event Extraction、Audit、Verification 和 final。
@@ -1017,7 +1007,7 @@ python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file pro
 如果修改了主 Prompt 文件，Prompt 哈希会变化，旧 semantic checkpoints 不再兼容。此时应归档旧结果后执行干净重跑：
 
 ```powershell
-python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt_v2.md --no-resume --insecure
+python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt.md --no-resume --insecure
 ```
 
 #### B. Requirement 正确，但 Event Extraction 漏标、错类型或错路由
@@ -1034,12 +1024,12 @@ python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file pro
 2. event type 是否正确；
 3. 是否已经存在于同一 Requirement；
 4. 是否已经由另一个更窄的 Requirement 拥有；
-5. 添加后是否只是为了达到 3-Event 门槛。
+5. 添加后是否只是为了人为增加 lifecycle 长度。
 
 确认需要修正后，对目标 Requirement 从 Extraction 开始重跑：
 
 ```powershell
-python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt_v2.md --force-stage event_extraction --force-requirement REQ_TARGET --insecure
+python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt.md --force-stage event_extraction --force-requirement REQ_TARGET --insecure
 ```
 
 该命令复用 Evidence Scan 和 Requirement Discovery；目标 Requirement 会重新 Extraction，之后 Audit 和 Verification 会重新执行。
@@ -1060,7 +1050,7 @@ python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file pro
 修改 Audit Prompt 或 patch-application 代码后，从 Audit 开始：
 
 ```powershell
-python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt_v2.md --force-stage consistency_audit --insecure
+python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt.md --force-stage consistency_audit --insecure
 ```
 
 它复用 Evidence Scan、Discovery 和已有 Extraction，重新执行 Audit 以及后续 Verification/final。
@@ -1072,14 +1062,14 @@ python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file pro
 1. 只检查 `affected_requirement_ids`，不要把整个项目全部人工重标。
 2. 对比 `requirement_discovery.json` 与 `audited_state.json`，确认新增/拆分/合并后的定义是否更原子。
 3. 检查受影响 Requirement 的 Events 是否已经重新提取。
-4. 检查是否仍有 overlap、同一 message 跨 broad/narrow Requirement 重复，或新 Requirement 少于 3 个有效 Events。
+4. 检查是否仍有 overlap、同一 message 跨 broad/narrow Requirement 重复；新 Requirement 即使只有 0–2 个有效 Events 也应保留。
 5. 如果结构已合理，将它视为“最后一轮发生变化”的信息提示，不需要为了消除 warning 强行修改。
 6. 如果结构仍不稳定，可对该项目使用两轮 Audit 做完整重跑。
 
 `--max-audit-rounds` 属于 checkpoint 配置。把已有项目从 1 改为 2 时不能安全混用旧 semantic checkpoints，应先归档，再执行干净重跑：
 
 ```powershell
-python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt_v2.md --max-audit-rounds 2 --no-resume --insecure
+python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt.md --max-audit-rounds 2 --no-resume --insecure
 ```
 
 #### E. 只有 verifier verdict 需要重做
@@ -1089,7 +1079,7 @@ python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file pro
 修改 verification addendum 后，可以只重跑一个 Requirement：
 
 ```powershell
-python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt_v2.md --force-stage event_verification --force-requirement REQ_TARGET --insecure
+python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file prompt\stage1_prompt.md --force-stage event_verification --force-requirement REQ_TARGET --insecure
 ```
 
 这会复用 Evidence Scan、Discovery、Extraction 和 Audit，只重新验证目标 Requirement 并重新组装 final。
@@ -1098,13 +1088,13 @@ python Code\stage1_batch_annotate.py --project-id <project_id> --prompt-file pro
 
 修改和重跑完成后，至少检查：
 
-1. `run_metadata.json.status == "DONE"`，且使用了预期 Prompt/version/hash。
+1. `run_metadata.json.status == "DONE"`，且使用了预期 Prompt 路径和哈希。
 2. 新的 `human_review.json` 中，原问题是否消失；若仍存在，`decision_note` 或 `application_error` 是否发生变化。
 3. `audited_state.json` 中 Requirement ID 非空且唯一。
 4. `verified_events.json` 中目标 Event 是否存在于正确 Requirement，event type 和 source message 是否正确。
 5. `final/<project_id>_stage1_annotation.json` 与 `outputs/stage1_annotations/<project_id>_stage1_annotation.json` 是否一致。
 6. Event 的 `source_message.text` 是否与 `normalized_project.json` 完全一致。
-7. 修正后的 Requirement 是否因少于 3 个 Events 被写入 `discarded_requirements.json`。
+7. 确认默认阈值 0 下，修正后的稀疏 Requirement 没有被写入 `discarded_requirements.json`。
 8. 没有为了保留 Requirement 而制造、重复或错误路由 Event。
 
 ### 当前人工修改机制的限制
