@@ -195,6 +195,14 @@ class TargetSelectionTests(unittest.TestCase):
     def test_legacy_sampler_config_is_rejected(self) -> None:
         with self.assertRaisesRegex(TaskGoldError, "legacy Task sampler"):
             TargetSelectionConfig.from_mapping({"random_seed": 42})
+        self.assertEqual(
+            TargetSelectionConfig.from_mapping({}).allowed_rq_targets,
+            ("RQ1", "RQ2", "RQ3", "RQ4"),
+        )
+        with self.assertRaisesRegex(TaskGoldError, "RQ1-RQ4"):
+            TargetSelectionConfig.from_mapping(
+                {"allowed_rq_targets": ["RQ1", "RQ5"]}
+            )
 
     def test_candidate_groups_all_same_message_events_and_counts_history(self) -> None:
         stage1 = annotation(
@@ -355,6 +363,12 @@ class TargetSelectionTests(unittest.TestCase):
             validate_llm_evaluation(invalid, packet, self.config)
         invalid = dict(valid, recommended=True, history_sensitive=False)
         with self.assertRaisesRegex(TaskGoldError, "recommended=true"):
+            validate_llm_evaluation(invalid, packet, self.config)
+        invalid = dict(valid, primary_rq_targets=["RQ5"])
+        with self.assertRaisesRegex(TaskGoldError, "configured RQ IDs"):
+            validate_llm_evaluation(invalid, packet, self.config)
+        invalid = dict(valid, primary_rq_targets=[])
+        with self.assertRaisesRegex(TaskGoldError, "primary_rq_target"):
             validate_llm_evaluation(invalid, packet, self.config)
 
     def test_coverage_deduplicates_exact_challenge(self) -> None:

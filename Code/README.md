@@ -247,11 +247,20 @@ selected_target_times.json
         |
         v
 State Graph 确定性回放 Pre/Post Gold
+        |
+        v
+outputs/stage2/<project_id>/gold_states.json
 ```
+
+目录中仅 `requirement_state_graph.json` 和最终 `gold_states.json` 位于项目根部；
+`selected_target_times.json` 及全部 Candidate、evaluation、threshold、review、run report
+和 validation 产物统一放在 `target_time_selection/` 子目录。
 
 一个 Candidate 对应一条 Client message；同一消息触发的全部 Requirement Events 必须合并。主要候选包括 `MODIFY`、`REMOVE`、`DEFER`、`RESUME`、`AMBIGUOUS`，以及通过 `resolves_ambiguity_event_ids` 表达的 ambiguity resolution。当前 Stage 1 没有独立 `CLARIFY` / `RESOLVE` Event，Stage 2 只为 coverage 派生标签，不改写 Event schema。
 
 LLM 每次只看到一个 Candidate Packet：当前 Task、triggered Events、受影响 Requirements 的 Pre-task States、此前 Event history 和对应原始 evidence messages。LLM 只判断历史依赖、Requirement 演化、重建风险、歧义决策价值、多 Requirement 价值和 history-sensitive error risk；它不重新标注 Requirement、不修改 State Graph，也不生成 Gold。
+
+Candidate 的 `primary_rq_targets` 严格采用 `Constuction_guideline/ReqMemBench_RP_V2.md` 的四阶段定义：RQ1 Select relevant Requirements、RQ2 Reconstruct current Requirement State、RQ3 Decide whether to act or clarify、RQ4 Execute the reconstructed State in code。
 
 `history_turn_count` 定义为 Candidate 前的有效消息数量，从 `normalized_project.messages` 的规范化顺序计算。它会一直保留到最终 target 和 Gold，但不参与 LLM 评分、coverage、去重或排序。
 
@@ -259,4 +268,4 @@ LLM 每次只看到一个 Candidate Packet：当前 Task、triggered Events、�
 
 为便于选择 threshold，每次完成 evaluation 后还会生成 threshold 5–10 按 `[0,50)`、`[50,100)`、`[100,+∞)` history turns 分桶的 JSON 与 Markdown 统计表。已有 evaluation 时可用 `--threshold-report-only` 在本地快速重建表格，不调用 LLM。
 
-新版 Pipeline 已在 `gold_state.py` 和 `stage2_generate_gold_state.py` 中实现。实现契约见 [`DESIGN_stage2_target_time_selection.md`](DESIGN_stage2_target_time_selection.md)；只准备、只 evaluation、离线 threshold 报告、人工 finalize、AI 自动接受和强制重评等命令集中列在 [`README_stage2_gold_state.md` 的“完整命令速查”](README_stage2_gold_state.md#完整命令速查)。
+新版 Pipeline 已在 `gold_state.py` 和 `stage2_generate_gold_state.py` 中实现。实现契约见 [`DESIGN_stage2_target_time_selection.md`](../Constuction_guideline/DESIGN_stage2_target_time_selection.md)；只准备、只 evaluation、离线 threshold 报告、人工 finalize、AI 自动接受和强制重评等命令集中列在 [`README_stage2_gold_state.md` 的“完整命令速查”](insturctions/README_stage2_gold_state.md#完整命令速查)。

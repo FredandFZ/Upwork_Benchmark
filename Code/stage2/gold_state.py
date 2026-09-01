@@ -45,7 +45,7 @@ EVALUATION_DIMENSIONS = (
 MAX_AI_SELECTION_SCORE = len(EVALUATION_DIMENSIONS) * max(
     EVALUATION_LEVEL_RANK.values()
 )
-DEFAULT_ALLOWED_RQ_TARGETS = ("RQ1", "RQ2", "RQ3", "RQ4", "RQ5")
+DEFAULT_ALLOWED_RQ_TARGETS = ("RQ1", "RQ2", "RQ3", "RQ4")
 TARGET_SELECTION_SCHEMA_VERSION = "target-selection-v1"
 PACKET_SCHEMA_VERSION = "target-candidate-packet-v1"
 SELECTED_TARGETS_SCHEMA_VERSION = "selected-target-times-v1"
@@ -130,6 +130,13 @@ class TargetSelectionConfig:
         ):
             raise TaskGoldError(
                 "selection_config.allowed_rq_targets must be a non-empty unique string array"
+            )
+        unsupported_rqs = sorted(set(allowed_rqs).difference(DEFAULT_ALLOWED_RQ_TARGETS))
+        if unsupported_rqs:
+            raise TaskGoldError(
+                "selection_config.allowed_rq_targets must be a subset of the "
+                "ReqMemBench RP V2 RQs (RQ1-RQ4); unsupported="
+                + ", ".join(unsupported_rqs)
             )
         bool_fields = {
             "include_introduce_candidates": raw.get("include_introduce_candidates", True),
@@ -1263,6 +1270,10 @@ def validate_llm_evaluation(
     ):
         raise TaskGoldError(
             "recommended=true requires valid_task=true and history_sensitive=true"
+        )
+    if evaluation["recommended"] and not rq_targets:
+        raise TaskGoldError(
+            "recommended=true requires at least one primary_rq_target"
         )
 
 

@@ -63,13 +63,33 @@ has a large history.
 
 ## RQ targets
 
-Choose zero or more unique IDs from:
+Use the four authoritative Research Questions in
+`Constuction_guideline/ReqMemBench_RP_V2.md`. Choose zero or more unique IDs
+from:
 
-- `RQ1`: Relevant History Selection;
-- `RQ2`: Scope Validity and Persistence;
-- `RQ3`: Requirement Validity and State Resolution;
-- `RQ4`: Memory-or-Clarify Decision;
-- `RQ5`: Requirement-to-Code Outcome.
+- `RQ1` — Relevant Requirement Selection: the agent must identify which
+  historical Requirements and evidence are relevant to the current Task while
+  excluding irrelevant project history.
+- `RQ2` — Current Requirement State Reconstruction: the agent must reconstruct
+  what is currently valid, including scope, persistence, lifecycle, updates,
+  overrides, removals, temporal validity, and conflict resolution. The former
+  separate scope/persistence and validity/state questions are both part of
+  this single RQ2.
+- `RQ3` — Memory-or-Clarify Decision: the agent must determine whether the
+  historical evidence is sufficient to act or whether a material unresolved
+  ambiguity requires clarification.
+- `RQ4` — Requirement-to-Code Execution: the agent must faithfully translate
+  the reconstructed Requirement State into a verifiable implementation in the
+  current codebase.
+
+Select an RQ only when the Candidate concretely exercises that capability.
+Do not use RQ3 merely for an obsolete, overridden, removed, or conflicting
+Requirement whose current state can be reconstructed; those are RQ2. Use RQ3
+only when evidence sufficiency changes the correct decision between acting and
+asking the Client. Use RQ4 only when the Candidate calls for an implementation
+or code change whose outcome can be checked against the reconstructed State.
+
+Every recommended Candidate must have at least one `primary_rq_target`.
 
 ## Required response
 
@@ -88,11 +108,11 @@ these fields and no additional fields:
   "multi_requirement_value": "LOW",
   "history_sensitive": true,
   "recommended": true,
-  "primary_rq_targets": ["RQ1", "RQ2"],
+  "primary_rq_targets": ["RQ1", "RQ2", "RQ4"],
   "reason": "A concise evidence-grounded explanation of the selection decision."
 }
 ```
 
 The response will be rejected if IDs change, fields are missing or added,
-enums are invalid, or `recommended` is true while `valid_task` or
-`history_sensitive` is false.
+enums are invalid, an RQ is outside RQ1-RQ4, or `recommended` is true while
+`valid_task` or `history_sensitive` is false or `primary_rq_targets` is empty.

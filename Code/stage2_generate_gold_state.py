@@ -25,6 +25,7 @@ from stage2.gold_state import (
     build_gold_states,
     build_statistics,
     build_threshold_selection_statistics,
+    evaluation_fingerprint,
     evaluate_candidate_packets,
     finalize_ai_selected_targets,
     finalize_selected_targets,
@@ -35,6 +36,9 @@ from stage2.gold_state import (
     select_recommended_candidates,
     validate_gold_states,
 )
+
+
+TARGET_TIME_SELECTION_DIRNAME = "target_time_selection"
 
 
 def read_json(path: Path) -> Any:
@@ -78,6 +82,37 @@ def write_threshold_statistics(
     return json_path, markdown_path, markdown
 
 
+def current_fingerprinted_evaluations(
+    packets: list[dict[str, Any]],
+    evaluations: list[dict[str, Any]],
+    prompt: str,
+    config: TargetSelectionConfig,
+) -> list[dict[str, Any]]:
+    """Return current cached rows, rejecting stale prompt/packet/model semantics."""
+    latest_by_id: dict[str, dict[str, Any]] = {}
+    for row in evaluations:
+        candidate_id = row.get("candidate_id")
+        if isinstance(candidate_id, str) and candidate_id:
+            latest_by_id[candidate_id] = row
+    current: list[dict[str, Any]] = []
+    for packet in packets:
+        candidate_id = packet["candidate_id"]
+        row = latest_by_id.get(candidate_id)
+        if row is None:
+            raise TaskGoldError(
+                f"no existing LLM evaluation for {candidate_id}; "
+                "run target-time evaluation first"
+            )
+        expected = evaluation_fingerprint(packet, prompt, config)
+        if row.get("_evaluation_metadata") != expected:
+            raise TaskGoldError(
+                f"existing LLM evaluation for {candidate_id} has a stale "
+                "packet/prompt/model fingerprint; rerun target-time evaluation"
+            )
+        current.append(row)
+    return current
+
+
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -115,7 +150,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        help="Output directory; defaults to outputs/stage2/<project_id>.",
+        help=(
+            "Project output directory; defaults to outputs/stage2/<project_id>. "
+            "gold_states.json is written here and selection-process artifacts "
+            "are written under target_time_selection/."
+        ),
     )
     parser.add_argument(
         "--prompt",
@@ -342,6 +381,7 @@ async def async_main(args: argparse.Namespace) -> int:
     project_id, annotation_path, messages_path, graph_path, output_dir = _resolve_paths(
         args
     )
+    selection_dir = output_dir / TARGET_TIME_SELECTION_DIRNAME
     annotation = read_json(annotation_path)
     normalized_project = read_json(messages_path)
     state_graph = read_json(graph_path)
@@ -350,7 +390,7 @@ async def async_main(args: argparse.Namespace) -> int:
     candidate_tasks = generate_candidate_tasks(
         annotation, normalized_project, state_graph, config
     )
-    write_json(output_dir / "candidate_tasks.json", candidate_tasks)
+    write_json(selection_dir / "candidate_tasks.json", candidate_tasks)
 
     run_report: dict[str, Any] = {
         "project_id": project_id,
@@ -361,10 +401,16 @@ async def async_main(args: argparse.Namespace) -> int:
             "prompt": str(args.prompt),
             "config": str(args.config),
         },
+        "output_layout": {
+            "project_dir": str(output_dir),
+            "requirement_state_graph": str(graph_path),
+            "gold_states": str(output_dir / "gold_states.json"),
+            "target_time_selection_dir": str(selection_dir),
+        },
         "candidate_count": len(candidate_tasks["candidates"]),
         "status": "PREPARED",
     }
-    evaluation_path = output_dir / "candidate_llm_evaluations.jsonl"
+    evaluation_path = selection_dir / "candidate_llm_evaluations.jsonl"
     if args.threshold_report_only:
         evaluations = read_jsonl(evaluation_path)
         if not evaluations:
@@ -372,11 +418,19 @@ async def async_main(args: argparse.Namespace) -> int:
                 f"no existing LLM evaluations at {evaluation_path}; "
                 "run target-time evaluation first"
             )
+        report_contexts = build_candidate_contexts(
+            candidate_tasks, annotation, normalized_project, state_graph
+        )
+        report_packets = build_candidate_packets(candidate_tasks, report_contexts)
+        report_prompt = args.prompt.read_text(encoding="utf-8-sig")
+        evaluations = current_fingerprinted_evaluations(
+            report_packets, evaluations, report_prompt, config
+        )
         threshold_statistics = build_threshold_selection_statistics(
             candidate_tasks, evaluations, config
         )
         json_path, markdown_path, markdown = write_threshold_statistics(
-            output_dir, threshold_statistics
+            selection_dir, threshold_statistics
         )
         print(markdown.rstrip())
         print(f"Threshold statistics written to {json_path} and {markdown_path}")
@@ -386,11 +440,14 @@ async def async_main(args: argparse.Namespace) -> int:
         candidate_tasks, annotation, normalized_project, state_graph
     )
     packets = build_candidate_packets(candidate_tasks, candidate_contexts)
-    write_json(output_dir / "candidate_contexts.json", candidate_contexts)
-    write_jsonl(output_dir / "candidate_packets.jsonl", packets)
+    write_json(selection_dir / "candidate_contexts.json", candidate_contexts)
+    write_jsonl(selection_dir / "candidate_packets.jsonl", packets)
     if args.prepare_only:
-        write_json(output_dir / "target_selection_run.json", run_report)
-        print(f"{project_id}: prepared {len(packets)} Candidate packets -> {output_dir}")
+        write_json(selection_dir / "target_selection_run.json", run_report)
+        print(
+            f"{project_id}: prepared {len(packets)} Candidate packets -> "
+            f"{selection_dir}"
+        )
         return 0
 
     prompt = args.prompt.read_text(encoding="utf-8-sig")
@@ -445,7 +502,7 @@ async def async_main(args: argparse.Namespace) -> int:
         candidate_tasks, evaluations, config
     )
     threshold_json_path, threshold_markdown_path, _ = write_threshold_statistics(
-        output_dir, threshold_statistics
+        selection_dir, threshold_statistics
     )
     recommended = select_recommended_candidates(candidate_tasks, evaluations, config)
     if args.auto_accept_ai:
@@ -459,8 +516,8 @@ async def async_main(args: argparse.Namespace) -> int:
         auto_selection = apply_coverage_and_deduplication(
             recommended, candidate_contexts, config
         )
-    write_json(output_dir / "recommended_candidates.json", recommended)
-    write_json(output_dir / "selected_candidates_auto.json", auto_selection)
+    write_json(selection_dir / "recommended_candidates.json", recommended)
+    write_json(selection_dir / "selected_candidates_auto.json", auto_selection)
     run_report.update(
         {
             "evaluated_candidate_count": len(evaluations),
@@ -490,11 +547,11 @@ async def async_main(args: argparse.Namespace) -> int:
             auto_selection, candidate_tasks, evaluations, config
         )
     else:
-        review_template_path = output_dir / "target_time_human_review.template.json"
+        review_template_path = selection_dir / "target_time_human_review.template.json"
         write_json(review_template_path, _review_template(auto_selection))
         if not args.finalize:
             run_report["status"] = "AWAITING_HUMAN_REVIEW"
-            write_json(output_dir / "target_selection_run.json", run_report)
+            write_json(selection_dir / "target_selection_run.json", run_report)
             print(
                 f"{project_id}: {len(packets)} evaluated, "
                 f"{len(auto_selection['selected_candidates'])} auto-selected; "
@@ -525,9 +582,9 @@ async def async_main(args: argparse.Namespace) -> int:
         "artifact_validation": {"status": "PASSED", "gold_state_errors": []},
         "statistics": statistics,
     }
-    write_json(output_dir / "selected_target_times.json", selected_targets)
+    write_json(selection_dir / "selected_target_times.json", selected_targets)
     write_json(output_dir / "gold_states.json", gold_states)
-    write_json(output_dir / "gold_state_validation.json", validation_report)
+    write_json(selection_dir / "gold_state_validation.json", validation_report)
     run_report.update(
         {
             "final_selected_target_count": len(
@@ -536,7 +593,7 @@ async def async_main(args: argparse.Namespace) -> int:
             "status": "PASSED",
         }
     )
-    write_json(output_dir / "target_selection_run.json", run_report)
+    write_json(selection_dir / "target_selection_run.json", run_report)
     print(
         f"{project_id}: finalized {statistics['generated_task_gold_states']} "
         f"selected Task Gold States"

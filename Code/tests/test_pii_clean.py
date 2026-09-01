@@ -16,6 +16,7 @@ from Code.PII_Clean import (
     build_batches,
     build_cleaned_chat,
     copy_project_except_chat,
+    load_manual_rewrites,
     protected_numbers,
     should_rewrite,
     sync_annotation_texts,
@@ -222,6 +223,21 @@ class RawDatasetChatTests(unittest.TestCase):
 
 
 class RewriteValidationTests(unittest.TestCase):
+    def test_loads_source_guarded_manual_rewrite(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "manual.json"
+            path.write_text(
+                '{"rewrites":[{"project_id":"P1","message_id":7,'
+                '"source_sha256":"' + ("a" * 64) + '",'
+                '"text":"A reviewed semantic rewrite."}]}',
+                encoding="utf-8",
+            )
+            rewrites = load_manual_rewrites(path)
+
+        self.assertEqual(len(rewrites), 1)
+        self.assertEqual(rewrites[0].project_id, "P1")
+        self.assertEqual(rewrites[0].message_id, 7)
+
     def test_numeric_html_entities_are_not_business_numbers(self):
         self.assertEqual(protected_numbers("I&#39;m ready in 2 days."), {"2": 1})
         inputs = [

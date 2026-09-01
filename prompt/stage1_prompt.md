@@ -26,7 +26,7 @@ You must **not** directly construct:
 - Current Requirement State;
 - Requirement State Graph;
 - Derived Current Gold State;
-- RQ1–RQ5 evaluation instances;
+- RP V2 RQ1–RQ4 evaluation instances;
 - benchmark questions;
 - evaluation metrics;
 - model answers.

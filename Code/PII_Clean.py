@@ -192,6 +192,16 @@ class ProjectFiles:
 
 
 @dataclass(frozen=True)
+class ManualRewrite:
+    """A reviewed rewrite guarded by the SHA-256 of its exact source text."""
+
+    project_id: str
+    message_id: Any
+    source_sha256: str
+    text: str
+
+
+@dataclass(frozen=True)
 class CleanConfig:
     output_root: Path
     model: str
@@ -202,6 +212,7 @@ class CleanConfig:
     resume: bool
     overwrite: bool
     extra_names: tuple[str, ...]
+    manual_rewrites: tuple[ManualRewrite, ...]
 
 
 class PlaceholderRegistry:
@@ -552,6 +563,14 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help="Additional person name to replace; repeat for multiple names.",
     )
+    parser.add_argument(
+        "--manual-rewrites",
+        type=Path,
+        help=(
+            "Optional reviewed-rewrite JSON file. Each entry must include project_id, "
+            "message_id, source_sha256, and text. Source hashes prevent stale rewrites."
+        ),
+    )
     args = parser.parse_args()
     if args.short_message_max_words < 0:
         parser.error("--short-message-max-words must be >= 0")
@@ -564,6 +583,49 @@ def parse_args() -> argparse.Namespace:
     if args.source_root.resolve() == args.output_root.resolve():
         parser.error("--output-root must differ from --source-root; in-place cleaning is intentionally disabled")
     return args
+
+
+def load_manual_rewrites(path: Path | None) -> tuple[ManualRewrite, ...]:
+    if path is None:
+        return ()
+    payload = read_json(path)
+    entries = payload.get("rewrites") if isinstance(payload, dict) else None
+    if not isinstance(entries, list):
+        raise PiiCleanError(f"{path}: expected an object containing a rewrites list")
+
+    rewrites: list[ManualRewrite] = []
+    seen: set[tuple[str, str]] = set()
+    required = {"project_id", "message_id", "source_sha256", "text"}
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict) or set(entry) != required:
+            raise PiiCleanError(
+                f"{path}: rewrites[{index}] must contain exactly {', '.join(sorted(required))}"
+            )
+        project_id = entry["project_id"]
+        source_hash = entry["source_sha256"]
+        text = entry["text"]
+        if not isinstance(project_id, str) or not project_id.strip():
+            raise PiiCleanError(f"{path}: rewrites[{index}].project_id must be a non-empty string")
+        if not isinstance(source_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", source_hash):
+            raise PiiCleanError(f"{path}: rewrites[{index}].source_sha256 must be lowercase SHA-256")
+        if not isinstance(text, str) or not text.strip():
+            raise PiiCleanError(f"{path}: rewrites[{index}].text must be non-empty")
+        key = (project_id, id_key(entry["message_id"]))
+        if key in seen:
+            raise PiiCleanError(
+                f"{path}: duplicate manual rewrite for project {project_id}, "
+                f"message_id {entry['message_id']!r}"
+            )
+        seen.add(key)
+        rewrites.append(
+            ManualRewrite(
+                project_id=project_id,
+                message_id=entry["message_id"],
+                source_sha256=source_hash,
+                text=text,
+            )
+        )
+    return tuple(rewrites)
 
 
 def discover_projects(source_root: Path, wanted_ids: set[str] | None = None) -> list[ProjectFiles]:
@@ -751,7 +813,7 @@ def source_signature(value: Any) -> str:
 
 
 def run_signature(source_sha256: str, config: CleanConfig) -> dict[str, Any]:
-    return {
+    signature = {
         "cleaning_version": CLEANING_VERSION,
         "source_sha256": source_sha256,
         "model": config.model,
@@ -762,6 +824,24 @@ def run_signature(source_sha256: str, config: CleanConfig) -> dict[str, Any]:
         ),
         "prompt_sha256": sha256_text(SYSTEM_PROMPT),
     }
+    if config.manual_rewrites:
+        signature["manual_rewrites_sha256"] = sha256_text(
+            json.dumps(
+                [
+                    {
+                        "project_id": rewrite.project_id,
+                        "message_id": rewrite.message_id,
+                        "source_sha256": rewrite.source_sha256,
+                        "text": rewrite.text,
+                    }
+                    for rewrite in config.manual_rewrites
+                ],
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        )
+    return signature
 
 
 def apply_message_texts(
@@ -950,10 +1030,51 @@ async def clean_project(
     # responses are never persisted: a failed batch starts over on rerun.
     rewritten_by_key: dict[str, str] = {}
     rewrite_candidates: list[dict[str, Any]] = []
+    project_manual_rewrites = {
+        id_key(rewrite.message_id): rewrite
+        for rewrite in config.manual_rewrites
+        if rewrite.project_id == project.project_id
+    }
+    source_message_keys = {id_key(message["message_id"]) for message in messages}
+    unknown_manual_keys = set(project_manual_rewrites).difference(source_message_keys)
+    if unknown_manual_keys:
+        raise PiiCleanError(
+            f"{project.project_id}: manual rewrite references unknown message_id(s): "
+            f"{', '.join(sorted(unknown_manual_keys))}"
+        )
+    manual_rewrite_count = 0
     short_preserved = 0
     for message in messages:
         key = id_key(message["message_id"])
         rewritten_by_key[key] = message["text"]
+        manual_rewrite = project_manual_rewrites.get(key)
+        if manual_rewrite is not None:
+            if not should_rewrite(message["text"], config.short_message_max_words):
+                raise PiiCleanError(
+                    f"{project.project_id}: manual rewrite targets non-rewrite message_id "
+                    f"{message['message_id']!r}"
+                )
+            actual_source_hash = sha256_text(message["text"])
+            if actual_source_hash != manual_rewrite.source_sha256:
+                raise PiiCleanError(
+                    f"{project.project_id}: stale manual rewrite source hash for message_id "
+                    f"{message['message_id']!r}"
+                )
+            rewritten_by_key.update(
+                validate_rewrite_response(
+                    {
+                        "rewrites": [
+                            {
+                                "message_id": message["message_id"],
+                                "text": manual_rewrite.text,
+                            }
+                        ]
+                    },
+                    [message],
+                )
+            )
+            manual_rewrite_count += 1
+            continue
         if should_rewrite(message["text"], config.short_message_max_words):
             rewrite_candidates.append(
                 {
@@ -1020,7 +1141,8 @@ async def clean_project(
             "messages_with_pii_replaced_after_rewrite": pii_changed,
             "sender_ids_replaced": pii_cleaner.registry.counts().get("SENDER_ID", 0),
             "short_messages_preserved_before_pii_replacement": short_preserved,
-            "messages_paraphrased": len(rewrite_candidates),
+            "messages_paraphrased": len(rewrite_candidates) + manual_rewrite_count,
+            "messages_manually_rewritten": manual_rewrite_count,
             "unique_placeholders": pii_cleaner.registry.counts(),
         },
         "output_sha256": {"chat_messages": source_signature(cleaned_chat)},
@@ -1028,7 +1150,9 @@ async def clean_project(
     write_json(manifest_path, manifest)
     print(
         f"[{project.project_id}] DONE: {len(messages)} messages, "
-        f"{pii_changed} PII-cleaned after rewrite, {len(rewrite_candidates)} paraphrased",
+        f"{pii_changed} PII-cleaned after rewrite, "
+        f"{len(rewrite_candidates) + manual_rewrite_count} paraphrased "
+        f"({manual_rewrite_count} manual)",
         flush=True,
     )
     return manifest
@@ -1071,6 +1195,12 @@ async def main_async(args: argparse.Namespace) -> int:
         print("No projects containing chat_messages.json found.", file=sys.stderr)
         return 2
 
+    try:
+        manual_rewrites = load_manual_rewrites(args.manual_rewrites)
+    except (OSError, ValueError, PiiCleanError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
     config = CleanConfig(
         output_root=args.output_root,
         model=args.model,
@@ -1081,6 +1211,7 @@ async def main_async(args: argparse.Namespace) -> int:
         resume=args.resume,
         overwrite=args.overwrite,
         extra_names=tuple(args.extra_name),
+        manual_rewrites=manual_rewrites,
     )
 
     if args.dry_run:
