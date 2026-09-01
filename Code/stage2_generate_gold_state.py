@@ -24,11 +24,13 @@ from stage2.gold_state import (
     build_candidate_packets,
     build_gold_states,
     build_statistics,
+    build_threshold_selection_statistics,
     evaluate_candidate_packets,
     finalize_ai_selected_targets,
     finalize_selected_targets,
     generate_candidate_tasks,
     load_selection_config,
+    render_threshold_selection_markdown,
     select_ai_candidates_by_score,
     select_recommended_candidates,
     validate_gold_states,
@@ -56,6 +58,24 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(value, encoding="utf-8")
+    temporary.replace(path)
+
+
+def write_threshold_statistics(
+    output_dir: Path, statistics: dict[str, Any]
+) -> tuple[Path, Path, str]:
+    json_path = output_dir / "threshold_selection_statistics.json"
+    markdown_path = output_dir / "threshold_selection_statistics.md"
+    markdown = render_threshold_selection_markdown(statistics)
+    write_json(json_path, statistics)
+    write_text(markdown_path, markdown)
+    return json_path, markdown_path, markdown
 
 
 def repo_root() -> Path:
@@ -132,6 +152,14 @@ def parse_args() -> argparse.Namespace:
         help="Write Candidate/Context/Packet artifacts without calling the LLM API.",
     )
     parser.add_argument(
+        "--threshold-report-only",
+        action="store_true",
+        help=(
+            "Read existing candidate_llm_evaluations.jsonl and generate the "
+            "threshold 5-10 turn-length table without calling the LLM API."
+        ),
+    )
+    parser.add_argument(
         "--no-resume",
         dest="resume",
         action="store_false",
@@ -182,16 +210,28 @@ def parse_args() -> argparse.Namespace:
         parser.error(
             "provide --project-id, or provide --annotation, --messages, and --state-graph"
         )
-    if args.prepare_only and (args.finalize or args.auto_accept_ai):
+    if args.prepare_only and (
+        args.finalize or args.auto_accept_ai or args.threshold_report_only
+    ):
         parser.error(
-            "--prepare-only cannot be combined with --finalize or --auto-accept-ai"
+            "--prepare-only cannot be combined with --finalize, --auto-accept-ai, "
+            "or --threshold-report-only"
         )
-    if args.finalize and args.auto_accept_ai:
-        parser.error("--finalize and --auto-accept-ai are mutually exclusive")
+    if args.finalize and (args.auto_accept_ai or args.threshold_report_only):
+        parser.error(
+            "--finalize cannot be combined with --auto-accept-ai or "
+            "--threshold-report-only"
+        )
+    if args.auto_accept_ai and args.threshold_report_only:
+        parser.error(
+            "--auto-accept-ai and --threshold-report-only are mutually exclusive"
+        )
     if args.finalize and args.human_review_file is None:
         parser.error("--finalize requires --human-review-file")
     if args.auto_accept_ai and args.human_review_file is not None:
         parser.error("--auto-accept-ai does not use --human-review-file")
+    if args.threshold_report_only and args.human_review_file is not None:
+        parser.error("--threshold-report-only does not use --human-review-file")
     if not 0 <= args.score_threshold <= MAX_AI_SELECTION_SCORE:
         parser.error(
             f"--score-threshold must be from 0 to {MAX_AI_SELECTION_SCORE}"
@@ -310,13 +350,7 @@ async def async_main(args: argparse.Namespace) -> int:
     candidate_tasks = generate_candidate_tasks(
         annotation, normalized_project, state_graph, config
     )
-    candidate_contexts = build_candidate_contexts(
-        candidate_tasks, annotation, normalized_project, state_graph
-    )
-    packets = build_candidate_packets(candidate_tasks, candidate_contexts)
     write_json(output_dir / "candidate_tasks.json", candidate_tasks)
-    write_json(output_dir / "candidate_contexts.json", candidate_contexts)
-    write_jsonl(output_dir / "candidate_packets.jsonl", packets)
 
     run_report: dict[str, Any] = {
         "project_id": project_id,
@@ -327,9 +361,33 @@ async def async_main(args: argparse.Namespace) -> int:
             "prompt": str(args.prompt),
             "config": str(args.config),
         },
-        "candidate_count": len(packets),
+        "candidate_count": len(candidate_tasks["candidates"]),
         "status": "PREPARED",
     }
+    evaluation_path = output_dir / "candidate_llm_evaluations.jsonl"
+    if args.threshold_report_only:
+        evaluations = read_jsonl(evaluation_path)
+        if not evaluations:
+            raise TaskGoldError(
+                f"no existing LLM evaluations at {evaluation_path}; "
+                "run target-time evaluation first"
+            )
+        threshold_statistics = build_threshold_selection_statistics(
+            candidate_tasks, evaluations, config
+        )
+        json_path, markdown_path, markdown = write_threshold_statistics(
+            output_dir, threshold_statistics
+        )
+        print(markdown.rstrip())
+        print(f"Threshold statistics written to {json_path} and {markdown_path}")
+        return 0
+
+    candidate_contexts = build_candidate_contexts(
+        candidate_tasks, annotation, normalized_project, state_graph
+    )
+    packets = build_candidate_packets(candidate_tasks, candidate_contexts)
+    write_json(output_dir / "candidate_contexts.json", candidate_contexts)
+    write_jsonl(output_dir / "candidate_packets.jsonl", packets)
     if args.prepare_only:
         write_json(output_dir / "target_selection_run.json", run_report)
         print(f"{project_id}: prepared {len(packets)} Candidate packets -> {output_dir}")
@@ -346,7 +404,6 @@ async def async_main(args: argparse.Namespace) -> int:
         )
         if not value
     ]
-    evaluation_path = output_dir / "candidate_llm_evaluations.jsonl"
     existing = read_jsonl(evaluation_path) if args.resume else []
     if not args.resume:
         write_jsonl(evaluation_path, [])
@@ -384,6 +441,12 @@ async def async_main(args: argparse.Namespace) -> int:
             )
     # Compact duplicate/obsolete resume rows into the current packet order.
     write_jsonl(evaluation_path, evaluations)
+    threshold_statistics = build_threshold_selection_statistics(
+        candidate_tasks, evaluations, config
+    )
+    threshold_json_path, threshold_markdown_path, _ = write_threshold_statistics(
+        output_dir, threshold_statistics
+    )
     recommended = select_recommended_candidates(candidate_tasks, evaluations, config)
     if args.auto_accept_ai:
         auto_selection = select_ai_candidates_by_score(
@@ -409,6 +472,11 @@ async def async_main(args: argparse.Namespace) -> int:
             ),
             "model": config.model,
             "reasoning_effort": config.reasoning_effort,
+            "threshold_statistics": {
+                "json": str(threshold_json_path),
+                "markdown": str(threshold_markdown_path),
+                "thresholds": [row["score_threshold"] for row in threshold_statistics["rows"]],
+            },
             "selection_mode": (
                 "AI_SCORE_THRESHOLD"
                 if args.auto_accept_ai

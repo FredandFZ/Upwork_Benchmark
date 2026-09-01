@@ -49,6 +49,7 @@ DEFAULT_ALLOWED_RQ_TARGETS = ("RQ1", "RQ2", "RQ3", "RQ4", "RQ5")
 TARGET_SELECTION_SCHEMA_VERSION = "target-selection-v1"
 PACKET_SCHEMA_VERSION = "target-candidate-packet-v1"
 SELECTED_TARGETS_SCHEMA_VERSION = "selected-target-times-v1"
+THRESHOLD_STATISTICS_SCHEMA_VERSION = "threshold-selection-statistics-v1"
 GOLD_SCHEMA_VERSION = "task-gold-v2"
 
 
@@ -1513,6 +1514,168 @@ def select_ai_candidates_by_score(
         "selected_candidates": selected,
         "selection_trace": trace,
     }
+
+
+def build_threshold_selection_statistics(
+    candidates: dict[str, Any],
+    evaluations: Iterable[dict[str, Any]],
+    config: TargetSelectionConfig,
+    thresholds: Iterable[int] = range(5, 11),
+) -> dict[str, Any]:
+    """Count AI-auto-accepted targets by score threshold and history length."""
+    threshold_values = list(thresholds)
+    if not threshold_values or len(set(threshold_values)) != len(threshold_values):
+        raise TaskGoldError("threshold statistics requires unique score thresholds")
+    for threshold in threshold_values:
+        _validate_ai_score_threshold(threshold)
+    threshold_values.sort()
+
+    candidate_rows = _require_array(
+        candidates.get("candidates"), "candidate_tasks.candidates"
+    )
+    candidates_by_id: dict[str, dict[str, Any]] = {}
+    for raw_candidate in candidate_rows:
+        candidate = _require_object(raw_candidate, "candidate")
+        candidate_id = _require_string(
+            candidate.get("candidate_id"), "candidate.candidate_id"
+        )
+        if candidate_id in candidates_by_id:
+            raise TaskGoldError(f"duplicate Candidate {candidate_id}")
+        history_turn_count = candidate.get("history_turn_count")
+        if (
+            isinstance(history_turn_count, bool)
+            or not isinstance(history_turn_count, int)
+            or history_turn_count < 0
+        ):
+            raise TaskGoldError(
+                f"Candidate {candidate_id} has an invalid history_turn_count"
+            )
+        candidates_by_id[candidate_id] = candidate
+
+    evaluations_by_id: dict[str, dict[str, Any]] = {}
+    for raw_evaluation in evaluations:
+        evaluation = _require_object(raw_evaluation, "LLM evaluation")
+        candidate_id = _require_string(
+            evaluation.get("candidate_id"), "evaluation.candidate_id"
+        )
+        if candidate_id in evaluations_by_id:
+            raise TaskGoldError(f"duplicate LLM evaluation for {candidate_id}")
+        evaluations_by_id[candidate_id] = evaluation
+    if set(evaluations_by_id) != set(candidates_by_id):
+        missing = sorted(set(candidates_by_id).difference(evaluations_by_id))
+        unknown = sorted(set(evaluations_by_id).difference(candidates_by_id))
+        raise TaskGoldError(
+            f"Candidate/evaluation IDs do not match; missing={missing}, unknown={unknown}"
+        )
+
+    eligible: list[tuple[int, int]] = []
+    for candidate_id, candidate in candidates_by_id.items():
+        payload = _evaluation_payload(evaluations_by_id[candidate_id])
+        packet_stub = {
+            "candidate_id": candidate_id,
+            "candidate_task": {"message_id": candidate.get("message_id")},
+        }
+        validate_llm_evaluation(payload, packet_stub, config)
+        if (
+            payload["valid_task"]
+            and payload["history_sensitive"]
+            and payload["recommended"]
+        ):
+            eligible.append(
+                (
+                    calculate_ai_selection_score(payload),
+                    candidate["history_turn_count"],
+                )
+            )
+
+    rows: list[dict[str, int]] = []
+    for threshold in threshold_values:
+        counts = {
+            "history_turns_0_to_49": 0,
+            "history_turns_50_to_99": 0,
+            "history_turns_100_plus": 0,
+        }
+        for score, history_turn_count in eligible:
+            if score < threshold:
+                continue
+            if history_turn_count < 50:
+                counts["history_turns_0_to_49"] += 1
+            elif history_turn_count < 100:
+                counts["history_turns_50_to_99"] += 1
+            else:
+                counts["history_turns_100_plus"] += 1
+        rows.append(
+            {
+                "score_threshold": threshold,
+                **counts,
+                "total_selected": sum(counts.values()),
+            }
+        )
+
+    return {
+        "schema_version": THRESHOLD_STATISTICS_SCHEMA_VERSION,
+        "project_id": str(candidates.get("project_id")),
+        "input_fingerprint": deepcopy(candidates.get("input_fingerprint")),
+        "score_rule": {
+            "levels": deepcopy(EVALUATION_LEVEL_RANK),
+            "dimensions": list(EVALUATION_DIMENSIONS),
+            "minimum_score": 0,
+            "maximum_score": MAX_AI_SELECTION_SCORE,
+            "selected_when": (
+                "valid_task && history_sensitive && recommended && "
+                "ai_selection_score >= score_threshold"
+            ),
+        },
+        "history_turn_buckets": [
+            {
+                "column": "history_turns_0_to_49",
+                "label": "0-50 turns",
+                "minimum_inclusive": 0,
+                "maximum_exclusive": 50,
+            },
+            {
+                "column": "history_turns_50_to_99",
+                "label": "50-100 turns",
+                "minimum_inclusive": 50,
+                "maximum_exclusive": 100,
+            },
+            {
+                "column": "history_turns_100_plus",
+                "label": "100+ turns",
+                "minimum_inclusive": 100,
+                "maximum_exclusive": None,
+            },
+        ],
+        "evaluated_candidate_count": len(candidate_rows),
+        "eligible_ai_recommendation_count": len(eligible),
+        "rows": rows,
+    }
+
+
+def render_threshold_selection_markdown(statistics: dict[str, Any]) -> str:
+    """Render threshold statistics as a compact human-readable Markdown table."""
+    rows = _require_array(statistics.get("rows"), "threshold statistics.rows")
+    lines = [
+        "# AI threshold selection statistics",
+        "",
+        f"Project: `{statistics.get('project_id')}`",
+        "",
+        (
+            "Only valid, history-sensitive AI recommendations are counted. "
+            "Buckets use [0,50), [50,100), and [100,+infinity) boundaries."
+        ),
+        "",
+        "| Score threshold (>=) | 0-50 turns | 50-100 turns | 100+ turns | Total |",
+        "|---:|---:|---:|---:|---:|",
+    ]
+    for raw_row in rows:
+        row = _require_object(raw_row, "threshold statistics row")
+        lines.append(
+            "| {score_threshold} | {history_turns_0_to_49} | "
+            "{history_turns_50_to_99} | {history_turns_100_plus} | "
+            "{total_selected} |".format(**row)
+        )
+    return "\n".join(lines) + "\n"
 
 
 def _coverage_tags(candidate: dict[str, Any]) -> set[str]:

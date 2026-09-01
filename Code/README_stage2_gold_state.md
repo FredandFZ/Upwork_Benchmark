@@ -193,6 +193,109 @@ LLM resume、AI 自动接受、human review 和 finalize 编排。`Code/config/s
 旧的 `event_priority`、`position_ratio` 和 `random_seed`，改为候选规则、RQ allowlist、
 LLM 参数与 `max_selected_targets`。
 
+### 完整命令速查
+
+以下命令均在仓库根目录 `D:\Python_workplace\Upwork\Upwork_Benchmark` 下执行。PowerShell
+可以先设置两个本地变量：
+
+```powershell
+$py = 'D:\Python_env\Miniconda\python.exe'
+$projectId = '42204309'
+```
+
+| 功能 | 是否调用 LLM | 是否生成最终 Gold |
+|---|---|---|
+| 只准备 Candidate Packets | 否 | 否 |
+| 只完成 evaluation 并生成 threshold 表 | 是；已有相同 fingerprint 时复用 | 否 |
+| 用已有 evaluation 重建 threshold 表 | 否 | 否 |
+| 按 threshold 自动接受 AI 选择 | 首次需要；以后可复用 | 是 |
+| 人工 ACCEPT / REJECT 后 finalize | evaluation 缺失或失效时才调用 | 是 |
+| 强制重新 evaluation | 是 | 否，除非同时使用自动接受模式 |
+
+只准备 Candidate，不调用 LLM：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId `
+  --prepare-only
+```
+
+只进行 evaluation，不输入 threshold、不生成最终 Gold；同时自动生成 threshold 5–10
+统计表：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId
+```
+
+已有 evaluation 后，仅本地重建并打印 threshold 表，不调用 LLM：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId `
+  --threshold-report-only
+```
+
+选定 threshold 后，跳过人工审核并直接生成最终 Gold：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId `
+  --auto-accept-ai `
+  --score-threshold 7
+```
+
+人工审核模式先复制模板：
+
+```powershell
+Copy-Item `
+  "outputs\stage2\$projectId\target_time_human_review.template.json" `
+  "outputs\stage2\$projectId\target_time_human_review.json"
+```
+
+填写全部 `ACCEPT` / `REJECT` / `ADD_BACK` 和 reason 后 finalize：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId `
+  --finalize `
+  --human-review-file "outputs\stage2\$projectId\target_time_human_review.json"
+```
+
+强制重新调用 LLM 评估所有 Candidate：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId `
+  --force-evaluation
+```
+
+`--force-evaluation` 保留旧 JSONL，成功后再压缩为最新结果；`--no-resume` 会先清空当前
+evaluation JSONL，再从头评估。通常优先使用 `--force-evaluation`。例如：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId `
+  --no-resume
+```
+
+常用附加参数可以组合到需要调用 LLM 的命令中：
+
+```powershell
+& $py Code\stage2_generate_gold_state.py `
+  --project-id $projectId `
+  --model gpt-5.6-sol `
+  --reasoning-effort high `
+  --max-concurrent-requests 4 `
+  --retries 3 `
+  --timeout 900
+```
+
+其他可选参数包括 `--output-dir`、`--annotation`、`--messages`、`--state-graph`、
+`--config`、`--prompt`、`--max-selected-targets` 和
+`--include-execution-only-tasks`。`--insecure` 会关闭 TLS 证书校验，只应在明确需要的
+受控环境中使用。
+
 ### 1. 只准备 Candidate Packets
 
 此模式不需要 API 凭据：
@@ -224,6 +327,8 @@ packet、prompt、model 和 reasoning effort fingerprint 断点复用；`--no-re
 
 ```text
 candidate_llm_evaluations.jsonl
+threshold_selection_statistics.json
+threshold_selection_statistics.md
 recommended_candidates.json
 selected_candidates_auto.json
 target_time_human_review.template.json
@@ -284,12 +389,48 @@ target_selection_run.json
 evaluation 的 fingerprint resume 行为；如需强制重新调用 API，可同时使用
 `--force-evaluation`。
 
+### 5. 查看 threshold 5–10 的选择数量
+
+每次完成 Candidate LLM evaluation 后，Pipeline 会自动生成：
+
+```text
+outputs/stage2/<project_id>/threshold_selection_statistics.json
+outputs/stage2/<project_id>/threshold_selection_statistics.md
+```
+
+Markdown 表格结构如下：
+
+| Score threshold (`>=`) | 0–50 turns | 50–100 turns | 100+ turns | Total |
+|---:|---:|---:|---:|---:|
+| 5 | ... | ... | ... | ... |
+| 6 | ... | ... | ... | ... |
+| 7 | ... | ... | ... | ... |
+| 8 | ... | ... | ... | ... |
+| 9 | ... | ... | ... | ... |
+| 10 | ... | ... | ... | ... |
+
+三个 history bucket 使用无重叠的半开区间：`[0,50)`、`[50,100)`、`[100,+∞)`。
+每一行统计所有同时满足 `valid_task=true`、`history_sensitive=true`、
+`recommended=true` 且分数不低于该 threshold 的时间点，因此可直接用于选择
+`--score-threshold`。
+
+如果 evaluation 已经存在，只想重新生成并在终端查看表格，执行：
+
+```powershell
+python Code/stage2_generate_gold_state.py `
+  --project-id 42204309 `
+  --threshold-report-only
+```
+
+该命令只读取 `candidate_llm_evaluations.jsonl` 并执行本地计数，不读取 API 凭据、
+不调用 LLM，也不改写 Gold State。通常在很短时间内完成。
+
 ## 测试要求
 
 单元和离线集成测试使用 fake LLM client，不调用真实 API。至少覆盖 Candidate 合并、
 非数字 message ID、history metadata、Pre-task boundary、ambiguity resolution、严格模型
 响应校验、resume fingerprint、coverage / dedup、人工决定和现有 Gold replay regression。
 
-测试套件本身不要求凭据或网络。当前 13 个 Stage 2 Gold/selection 测试与全仓库 92 个
+测试套件本身不要求凭据或网络。当前 14 个 Stage 2 Gold/selection 测试与全仓库 93 个
 测试均已通过；`42204309 --prepare-only` 生成了 72 个 Candidate Packets。真实 API
 结果不在单元测试中伪造为生产输出。

@@ -11,11 +11,13 @@ from Code.stage2.gold_state import (
     build_candidate_contexts,
     build_candidate_packets,
     build_gold_states,
+    build_threshold_selection_statistics,
     calculate_ai_selection_score,
     evaluate_candidate_packets,
     finalize_ai_selected_targets,
     finalize_selected_targets,
     generate_candidate_tasks,
+    render_threshold_selection_markdown,
     select_ai_candidates_by_score,
     select_recommended_candidates,
     validate_gold_states,
@@ -482,6 +484,71 @@ class TargetSelectionTests(unittest.TestCase):
             select_ai_candidates_by_score(
                 candidates, evaluations, self.config, score_threshold=11
             )
+
+    def test_threshold_statistics_split_history_boundaries(self) -> None:
+        history_lengths = (49, 50, 99, 100)
+        rows = [
+            {
+                "candidate_id": f"C{number}",
+                "message_id": number,
+                "conversation_turn_index": history_length + 1,
+                "history_turn_count": history_length,
+                "speaker": "client",
+                "text": f"candidate {number}",
+                "event_ids": [f"REQ_{number}_E001"],
+                "requirement_ids": [f"REQ_{number}"],
+                "event_types": ["MODIFY"],
+                "coverage_tags": ["MODIFY", "SINGLE_REQUIREMENT"],
+                "introduce_only": False,
+            }
+            for number, history_length in enumerate(history_lengths, start=1)
+        ]
+        candidates = {"project_id": "P1", "candidates": rows}
+        evaluations = [
+            evaluation(
+                rows[0],
+                ambiguity_decision_value="HIGH",
+                multi_requirement_value="HIGH",
+            ),
+            evaluation(
+                rows[1],
+                ambiguity_decision_value="HIGH",
+                multi_requirement_value="MEDIUM",
+            ),
+            evaluation(
+                rows[2],
+                ambiguity_decision_value="HIGH",
+                multi_requirement_value="LOW",
+            ),
+            evaluation(
+                rows[3],
+                ambiguity_decision_value="MEDIUM",
+                multi_requirement_value="LOW",
+            ),
+        ]
+
+        statistics = build_threshold_selection_statistics(
+            candidates, evaluations, self.config
+        )
+        rows_by_threshold = {
+            row["score_threshold"]: row for row in statistics["rows"]
+        }
+        self.assertEqual(
+            rows_by_threshold[5],
+            {
+                "score_threshold": 5,
+                "history_turns_0_to_49": 1,
+                "history_turns_50_to_99": 2,
+                "history_turns_100_plus": 1,
+                "total_selected": 4,
+            },
+        )
+        self.assertEqual(rows_by_threshold[8]["total_selected"], 3)
+        self.assertEqual(rows_by_threshold[9]["history_turns_50_to_99"], 1)
+        self.assertEqual(rows_by_threshold[10]["history_turns_0_to_49"], 1)
+        self.assertEqual(rows_by_threshold[10]["total_selected"], 1)
+        markdown = render_threshold_selection_markdown(statistics)
+        self.assertIn("| 10 | 1 | 0 | 0 | 1 |", markdown)
 
 
 class AsyncEvaluationTests(unittest.IsolatedAsyncioTestCase):

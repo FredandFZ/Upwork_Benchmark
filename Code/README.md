@@ -257,4 +257,6 @@ LLM 每次只看到一个 Candidate Packet：当前 Task、triggered Events、�
 
 默认模式中只有人工复核后的 target 才进入 Gold builder。显式使用 `--auto-accept-ai --score-threshold N` 时，程序按五个 `LOW/MEDIUM/HIGH` 维度确定性计算 0–10 分，并直接接受所有同时有效、history-sensitive、被 AI 推荐且达到分数线的时间点，不再要求 ACCEPT 文件。对每个 target，`Pre-task Gold` 是该消息发生前的完整项目 Requirement snapshot，`Post-task Gold` 是该消息中全部 Events 应用后的完整 snapshot；affected / preserved、INTRODUCE / REMOVE、same-message final State 和 future leakage 仍由确定性代码严格校验。
 
-新版 Pipeline 已在 `gold_state.py` 和 `stage2_generate_gold_state.py` 中实现。实现契约见 [`DESIGN_stage2_target_time_selection.md`](DESIGN_stage2_target_time_selection.md)，准备 Candidate、运行 LLM、人工复核、AI 自动接受与 finalize 命令见 [`README_stage2_gold_state.md`](README_stage2_gold_state.md)。
+为便于选择 threshold，每次完成 evaluation 后还会生成 threshold 5–10 按 `[0,50)`、`[50,100)`、`[100,+∞)` history turns 分桶的 JSON 与 Markdown 统计表。已有 evaluation 时可用 `--threshold-report-only` 在本地快速重建表格，不调用 LLM。
+
+新版 Pipeline 已在 `gold_state.py` 和 `stage2_generate_gold_state.py` 中实现。实现契约见 [`DESIGN_stage2_target_time_selection.md`](DESIGN_stage2_target_time_selection.md)；只准备、只 evaluation、离线 threshold 报告、人工 finalize、AI 自动接受和强制重评等命令集中列在 [`README_stage2_gold_state.md` 的“完整命令速查”](README_stage2_gold_state.md#完整命令速查)。

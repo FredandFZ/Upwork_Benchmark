@@ -138,6 +138,9 @@ candidate_packets.jsonl
         v  one validated LLM call per packet
 candidate_llm_evaluations.jsonl
         |
+        +--> threshold_selection_statistics.json / .md
+        |    (threshold 5-10 x history-turn buckets; local calculation only)
+        |
         v
 recommended_candidates.json
         |
@@ -300,6 +303,20 @@ history_sensitive == true
 
 输出合并 Candidate 元数据与完整 LLM evaluation。此阶段不使用
 `history_turn_count` 做阈值或排序。
+
+### 4.5.1 Threshold 选择统计
+
+每次获得完整 evaluation 集合后，代码为 threshold 5、6、7、8、9、10 统计自动接受
+数量，并按 `history_turn_count` 分为 `[0,50)`、`[50,100)`、`[100,+∞)` 三个互斥
+bucket。每行同时给出三个 bucket 和总数。计数条件与 AI 自动接受一致：
+
+```text
+valid_task && history_sensitive && recommended && score >= threshold
+```
+
+输出为 `threshold_selection_statistics.json` 和便于直接阅读的
+`threshold_selection_statistics.md`。统计函数只读取 Candidate 与已有 evaluation，不能
+发起 API 调用。`--threshold-report-only` 用于离线重新生成并把表格打印到终端。
 
 ### 4.6 `selected_candidates_auto.json`
 
@@ -495,6 +512,8 @@ async def evaluate_candidate_packets(
 
 def select_recommended_candidates(...) -> dict[str, Any]: ...
 def calculate_ai_selection_score(...) -> int: ...
+def build_threshold_selection_statistics(...) -> dict[str, Any]: ...
+def render_threshold_selection_markdown(...) -> str: ...
 def select_ai_candidates_by_score(...) -> dict[str, Any]: ...
 def apply_coverage_and_deduplication(...) -> dict[str, Any]: ...
 def finalize_ai_selected_targets(...) -> dict[str, Any]: ...
@@ -542,6 +561,7 @@ Stage 1 保留兼容导入。
 --force-evaluation
 --human-review-file
 --prepare-only
+--threshold-report-only
 --finalize
 --auto-accept-ai
 --score-threshold
@@ -660,9 +680,10 @@ INTRODUCE / REMOVE、same-message final State 和 future leakage 校验，并新
 6. Coverage / dedup：完全相同 fingerprint、不同 ambiguity pattern、上限不足、稳定 tie-break。
 7. Human review：ACCEPT、REJECT、ADD_BACK、未知/重复/缺失决定。
 8. AI auto-accept：0–10 分数、阈值边界、全部达标项、非推荐项排除和跳过 review。
-9. Gold regression：复用当前 `test_stage2_gold_state.py` 的 snapshot 与 provenance cases，
+9. Threshold report：5–10 各行、49/50/99/100 turn 边界、总数和 Markdown 渲染。
+10. Gold regression：复用当前 `test_stage2_gold_state.py` 的 snapshot 与 provenance cases，
    将输入改为 selected targets。
-10. CLI integration：fake API client 完整跑出全部中间产物和 final Gold。
+11. CLI integration：fake API client 完整跑出全部中间产物和 final Gold。
 
 ## 11. 实施顺序与完成标准
 
@@ -686,6 +707,6 @@ INTRODUCE / REMOVE、same-message final State 和 future leakage 校验，并新
 - 选择阶段不把历史长度作为价值信号；
 - Gold State 完全由已验证 State Graph 确定性回放；
 - 全部单元测试和离线端到端测试通过；
-- 全仓库 92 个测试通过；
+- 全仓库 93 个测试通过；
 - `42204309 --prepare-only` 成功生成 72 个 Candidate Packets；
 - 真实 LLM API selection 保留为需要显式凭据的生产运行步骤。
