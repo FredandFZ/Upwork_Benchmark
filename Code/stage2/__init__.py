@@ -1,4 +1,4 @@
-"""Requirement replay, LLM target selection, and deterministic Gold construction."""
+"""Requirement replay, Task Gold construction, and RQ instance materialization."""
 
 from .state_graph import Stage2ReplayError, build_requirement_state_graph
 from .gold_state import (
@@ -24,17 +24,29 @@ from .gold_state import (
     validate_selection_inputs,
     validate_gold_states,
 )
+from .rq_instances import (
+    RQInstanceError,
+    build_project_manifest,
+    build_rq_indexes,
+    build_rq_instances,
+    difficulty_from_turns,
+    validate_rq_instance,
+)
 
 __all__ = [
     "Stage2ReplayError",
     "TaskGoldError",
     "TargetSelectionConfig",
+    "RQInstanceError",
     "apply_coverage_and_deduplication",
     "audit_event_provenance",
     "build_candidate_contexts",
     "build_candidate_packets",
     "build_gold_states",
     "build_requirement_state_graph",
+    "build_project_manifest",
+    "build_rq_indexes",
+    "build_rq_instances",
     "build_statistics",
     "build_threshold_selection_statistics",
     "calculate_ai_selection_score",
@@ -42,6 +54,7 @@ __all__ = [
     "finalize_ai_selected_targets",
     "finalize_selected_targets",
     "generate_candidate_tasks",
+    "difficulty_from_turns",
     "load_selection_config",
     "render_threshold_selection_markdown",
     "select_ai_candidates_by_score",
@@ -49,4 +62,5 @@ __all__ = [
     "validate_llm_evaluation",
     "validate_selection_inputs",
     "validate_gold_states",
+    "validate_rq_instance",
 ]

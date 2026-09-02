@@ -1,6 +1,6 @@
 # ReqMemBench 整体标注流程
 
-ReqMemBench 的标注分为三个主要阶段：先从项目聊天中识别 Requirement 及其生命周期 Event，再将 Event 回放为 Requirement State Graph，最后以 Client 消息为 Task 生成任务前后的 Gold State。
+ReqMemBench 的构造流程分为四个主要阶段：先从项目聊天中识别 Requirement 及其生命周期 Event，再将 Event 回放为 Requirement State Graph，以 Client 消息为 Task 生成任务前后的 Gold State，最后物化 RQ1–RQ4 问题实例。
 
 ```text
 项目聊天与元数据
@@ -13,6 +13,9 @@ Stage 2.1：Requirement State Graph 构建
         |
         v
 Stage 2.2：Task 选择与 Gold State 生成
+        |
+        v
+Stage 2.3：RQ1–RQ4 实例生成
 ```
 
 ## Stage 1：Requirement 与 Event 标注
@@ -252,7 +255,7 @@ State Graph 确定性回放 Pre/Post Gold
 outputs/stage2/<project_id>/gold_states.json
 ```
 
-目录中仅 `requirement_state_graph.json` 和最终 `gold_states.json` 位于项目根部；
+在仅完成 Stage 2.2 时，`requirement_state_graph.json` 和最终 `gold_states.json` 位于项目根部；
 `selected_target_times.json` 及全部 Candidate、evaluation、threshold、review、run report
 和 validation 产物统一放在 `target_time_selection/` 子目录。
 
@@ -269,3 +272,13 @@ Candidate 的 `primary_rq_targets` 严格采用 `Constuction_guideline/ReqMemBen
 为便于选择 threshold，每次完成 evaluation 后还会生成 threshold 5–10 按 `[0,50)`、`[50,100)`、`[100,+∞)` history turns 分桶的 JSON 与 Markdown 统计表。已有 evaluation 时可用 `--threshold-report-only` 在本地快速重建表格，不调用 LLM。
 
 新版 Pipeline 已在 `gold_state.py` 和 `stage2_generate_gold_state.py` 中实现。实现契约见 [`DESIGN_stage2_target_time_selection.md`](../Constuction_guideline/DESIGN_stage2_target_time_selection.md)；只准备、只 evaluation、离线 threshold 报告、人工 finalize、AI 自动接受和强制重评等命令集中列在 [`README_stage2_gold_state.md` 的“完整命令速查”](insturctions/README_stage2_gold_state.md#完整命令速查)。
+
+## Stage 2.3：RQ1–RQ4 实例生成
+
+这一阶段把每个最终 target 按 `primary_rq_targets` 物化到项目目录下的 `RQ1/`、
+`RQ2/`、`RQ3/`、`RQ4/`。每个实例保留顶层 `turns`、完整 pre-task history pool、
+C1/C2/C3 消息选择器、RQ-specific response contract 和 researcher-side
+`construction_gold`。RQ4 只引用并安全校验 `pre_repo.zip`，不会在构造阶段解压。
+
+生成器只负责实例设计，不运行 Agent 或评分。命令、字段说明、目录结构和注意事项见
+[`README_stage2_rq_instances.md`](insturctions/README_stage2_rq_instances.md)。

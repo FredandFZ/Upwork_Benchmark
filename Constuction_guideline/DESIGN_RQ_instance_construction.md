@@ -703,6 +703,7 @@ public tests 只用于确认环境完整性，不能把目标常量、预期接�
   "project_id": "42204309",
   "target_id": "42204309_T003",
   "target_message_id": 158,
+  "turns": 157,
   "history_turn_count": 157,
   "target_task": {
     "speaker": "client",
@@ -757,37 +758,31 @@ public tests 只用于确认环境完整性，不能把目标常量、预期接�
 
 ## 12. 目录布局
 
-推荐输出：
+当前实例构造阶段按项目直接输出四个 RQ 文件夹。`private/public` 的运行时拆分留给后续
+evaluation runner；现阶段每个 JSON 都是 researcher-side construction record，不能原样
+交给 Agent：
 
 ```text
-outputs/rq_instances/<project_id>/
-├── project_manifest.json
-├── private/
-│   └── <target_id>/
-│       ├── core_instance.json
-│       ├── relevance_gold.json
-│       ├── rq_gold.json
-│       ├── acceptance_criteria.json
-│       ├── oracle_history_manifest.json
-│       └── validators/
-├── public/
-│   └── <target_id>/
-│       ├── task.json
-│       ├── repository.zip
-│       ├── C1/history.jsonl
-│       ├── C2/history.jsonl
-│       ├── C3/history.jsonl
-│       ├── C1/run_manifest.json
-│       ├── C2/run_manifest.json
-│       └── C3/run_manifest.json
-└── reports/
-    ├── construction_validation.json
-    ├── leakage_report.json
-    ├── eligibility_statistics.json
-    └── human_review_summary.json
+outputs/stage2/<project_id>/
+├── rq_instance_manifest.json
+├── RQ1/
+│   ├── index.json
+│   └── <target_id>_RQ1.json
+├── RQ2/
+│   ├── index.json
+│   └── <target_id>_RQ2.json
+├── RQ3/
+│   ├── index.json
+│   └── <target_id>_RQ3.json
+└── RQ4/
+    ├── index.json
+    └── <target_id>_RQ4.json
 ```
 
-`private/` 不得进入 Agent workspace。`public/` 中的三个 condition 可以引用同一个 repository blob，避免重复存储，但运行时必须在独立干净 workspace 中解压。
+顶层 `turns` 与 `history_turn_count` 同值，均表示 target 前的规范化消息数量；保留
+`turns` 用于后续难度分类。实例内的 `construction_gold`、内部 Requirement/Event/State ID
+与 source provenance 不得进入 Agent workspace。三个 condition 引用同一个 history pool
+和 repository blob；RQ4 运行时必须在独立干净 workspace 中解压。
 
 ---
 

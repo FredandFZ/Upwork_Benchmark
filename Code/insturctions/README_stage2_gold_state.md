@@ -50,8 +50,9 @@ outputs/stage2/<project_id>/target_time_selection/gold_state_validation.json
 
 ## 输出目录布局
 
-项目根目录只保留 Requirement Graph 与最终 Gold State；所有目标时间选择过程文件放在
-独立子目录中：
+仅看 Stage 2.2 的产物时，项目根目录放置 Requirement Graph 与最终 Gold State；所有目标
+时间选择过程文件放在独立子目录中。后续 Stage 2.3 还会在同一项目根目录加入
+`RQ1/`–`RQ4/` 和 `rq_instance_manifest.json`：
 
 ```text
 outputs/stage2/<project_id>/
