@@ -40,32 +40,7 @@ Stage 1 的规范化和 PII 边界。
 `event_id`、`event_type`、`source_message_id` 不一致时，Pipeline 必须停止并报告
 provenance 错误，不选择其中一份静默覆盖另一份。
 
-### 2.2 当前实现中保留与替换的部分
-
-`gold_state.py` 中以下能力继续保留，并调整为接受已经选定的 target：
-
-- `_GraphIndex` 的 State / Edge 引用校验；
-- Event provenance audit；
-- Pre-task exclusive snapshot 与 Post-task inclusive snapshot；
-- 同一消息的多 Requirement / 多 Event 分组；
-- affected / preserved Requirement 推导；
-- INTRODUCE、REMOVE、future leakage 和完整快照校验；
-- `gold_states.json` 与 `gold_state_validation.json` 生成。
-
-以下旧选择逻辑被删除，不作为 LLM 失败时的 fallback：
-
-- `TaskSelectionConfig.event_priority`；
-- `TaskSelectionConfig.position_ratio`；
-- `_candidate_position_bucket()`；
-- `_position_quotas()`；
-- `sample_target_tasks()` 中按早、中、晚配额的抽样；
-- `random_seed` 和随机 tie-breaking。
-
-`build_gold_states()` 不再自行发现和抽样 Task。它只接收已经完成默认人工复核或显式
-AI 自动接受的
-`selected_target_times`，然后确定性构建 Gold State。
-
-### 2.3 当前 Event schema 的适配
+### 2.2 当前 Event schema 的适配
 
 当前 Stage 1 合法 Event 类型为：
 
@@ -460,279 +435,113 @@ set-cover 或 `max_selected_targets` 限制，因为其语义是保留分数线�
 - 同一 Requirement 在同一消息有多个 Event 时，Post 使用最后一个 Event 的
   `to_state_id`。
 
-`gold_states.json` 在现有 Task Gold record 上新增 `target_id`、
-`conversation_turn_index`、`history_turn_count` 和 selection provenance，但 State 引用
-结构保持兼容：
+### 5.1 `gold_states.json` 的规范 schema
+
+`gold_states.json` 必须与 `Code/stage2/gold_state.py::build_gold_states()` 生成的
+`task-gold-v2` 完全一致。以下不是省略字段的示意图，而是规范的顶层、Task Gold record、
+boundary 和 State reference 层级；数组中的对象可以重复任意次，但对象字段不得改名或
+改变嵌套位置：
 
 ```json
 {
-  "task_gold_id": "42204309_T001_GOLD",
-  "target_id": "42204309_T001",
-  "history_turn_count": 36,
-  "target_task": {},
-  "task_event_ids": [],
-  "affected_requirement_ids": [],
-  "preserved_requirement_ids": [],
-  "pre_task_gold_state": {},
-  "post_task_gold_state": {}
+  "schema_version": "task-gold-v2",
+  "project_id": "42204309",
+  "task_gold_states": [
+    {
+      "task_gold_id": "42204309_T001_GOLD",
+      "target_id": "42204309_T001",
+      "candidate_id": "42204309_CANDIDATE_MSG_114",
+      "conversation_turn_index": 114,
+      "history_turn_count": 113,
+      "selection_source": "LLM_AUTO_ACCEPT",
+      "primary_rq_targets": ["RQ1", "RQ2", "RQ3", "RQ4"],
+      "ai_selection_score": 8,
+      "ai_score_threshold": 7,
+      "target_task": {
+        "source_message_id": 114,
+        "speaker": "client",
+        "text": "..."
+      },
+      "task_event_ids": [
+        "REQ_BADGE_CATALOG_AND_PRESENTATION_E003",
+        "REQ_BADGE_AWARD_ACCURACY_E001"
+      ],
+      "affected_requirement_ids": [
+        "REQ_BADGE_CATALOG_AND_PRESENTATION",
+        "REQ_BADGE_AWARD_ACCURACY"
+      ],
+      "preserved_requirement_ids": [
+        "REQ_PROJECT_BRANDING",
+        "REQ_WALLET_AUTHENTICATION"
+      ],
+      "pre_task_gold_state": {
+        "boundary": {
+          "before_message_id": 114
+        },
+        "requirement_states": [
+          {
+            "requirement_id": "REQ_PROJECT_BRANDING",
+            "state_id": "REQ_PROJECT_BRANDING_S002"
+          },
+          {
+            "requirement_id": "REQ_BADGE_CATALOG_AND_PRESENTATION",
+            "state_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_S002"
+          }
+        ]
+      },
+      "post_task_gold_state": {
+        "boundary": {
+          "through_message_id": 114
+        },
+        "requirement_states": [
+          {
+            "requirement_id": "REQ_PROJECT_BRANDING",
+            "state_id": "REQ_PROJECT_BRANDING_S002"
+          },
+          {
+            "requirement_id": "REQ_BADGE_CATALOG_AND_PRESENTATION",
+            "state_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_S003"
+          }
+        ]
+      }
+    }
+  ]
 }
 ```
 
-## 6. Python 接口
+上例为控制篇幅只列出部分 State references；实际 `pre_task_gold_state.requirement_states`
+和 `post_task_gold_state.requirement_states` 必须是对应边界的完整项目快照，不得只保存
+affected Requirements。
 
-`gold_state.py` 保持“纯数据变换 + 校验”为主；网络调用通过注入的 client 完成。当前
-公开接口如下：
+字段契约如下：
 
-文件责任划分：
+| 路径 | 类型 | 必填 | 约束 |
+|---|---|---|---|
+| `schema_version` | string | 是 | 固定为 `task-gold-v2` |
+| `project_id` | string | 是 | 与 selected targets、normalized project、State Graph 一致 |
+| `task_gold_states` | array<object> | 是 | 每个最终 selected target 恰好一条，顺序与 target 顺序一致 |
+| `task_gold_states[].task_gold_id` | string | 是 | 固定为 `<target_id>_GOLD`，文件内唯一 |
+| `task_gold_states[].target_id` | string | 是 | 对应一个最终 selected target，文件内唯一 |
+| `task_gold_states[].candidate_id` | string | 是 | 必须与 selected target 完全一致 |
+| `task_gold_states[].conversation_turn_index` | integer | 是 | 一基 target 位置 |
+| `task_gold_states[].history_turn_count` | integer | 是 | 等于 `conversation_turn_index - 1` |
+| `task_gold_states[].selection_source` | string enum | 是 | `LLM_PLUS_HUMAN`、`HUMAN_ADD_BACK` 或 `LLM_AUTO_ACCEPT` |
+| `task_gold_states[].primary_rq_targets` | array<string> | 是 | 只允许唯一的 `RQ1`–`RQ4` 值，并与 selected target 一致 |
+| `task_gold_states[].ai_selection_score` | integer \| null | 是 | AI 自动接受时为 0–10；人工模式为 `null` |
+| `task_gold_states[].ai_score_threshold` | integer \| null | 是 | AI 自动接受时为 0–10 且不得高于 score；人工模式为 `null` |
+| `task_gold_states[].target_task` | object | 是 | 固定包含 `source_message_id`、`speaker`、`text` |
+| `task_gold_states[].task_event_ids` | array<string> | 是 | 等于 target message 在 State Graph 中的完整有序 Event 集合 |
+| `task_gold_states[].affected_requirement_ids` | array<string> | 是 | 从 `task_event_ids` 的 owner Requirements 稳定去重得到 |
+| `task_gold_states[].preserved_requirement_ids` | array<string> | 是 | Pre-task Requirement 集合减去 affected 集合 |
+| `task_gold_states[].pre_task_gold_state.boundary.before_message_id` | string \| integer | 是 | 与 `target_task.source_message_id` 相同，语义为 exclusive boundary |
+| `task_gold_states[].post_task_gold_state.boundary.through_message_id` | string \| integer | 是 | 与 `target_task.source_message_id` 相同，语义为 inclusive boundary |
+| `*.requirement_states[]` | object | 是 | 每项只含 `requirement_id` 和 `state_id`，二者必须在 State Graph 中正确关联 |
 
-| 文件 | 责任 |
-|---|---|
-| `Code/stage2/gold_state.py` | index、Candidate / Context / Packet 变换、LLM response 校验、coverage / dedup、review finalize、Gold replay 与校验；不直接读取环境变量或创建 HTTP client |
-| `Code/stage2_generate_gold_state.py` | CLI、默认路径、JSON / JSONL 原子读写、API client 生命周期、resume orchestration 和阶段状态报告 |
-| `prompt/t_selection_prompt.md` | LLM 角色、评估维度、历史长度禁用规则和唯一允许的 JSON response schema |
-| `Code/config/stage2_gold_state.json` | Candidate、RQ allowlist、LLM runtime 与 selection cap 配置 |
-| `Code/tests/test_stage2_gold_state.py` | 纯函数、fake client、选择与 Gold regression 测试 |
+`build_gold_states()` 会始终写出上述全部字段。人工复核路径虽然没有 AI 分数，也必须保留
+`ai_selection_score` 和 `ai_score_threshold` 两个键并写为 JSON `null`；不得因值为空而
+删除字段。`requirement_transitions` 不属于 `task-gold-v2`，不得写入 Task Gold record。
 
-这样 `gold_state.py` 的测试不依赖凭据、网络或真实输出目录；CLI 负责把各个确定性阶段
-和注入的 LLM client 串接起来。
+## 6. 运行与实现文档
 
-```python
-def validate_selection_inputs(
-    annotation: dict[str, Any],
-    normalized_project: dict[str, Any],
-    state_graph: dict[str, Any],
-) -> None: ...
-
-def generate_candidate_tasks(
-    annotation: dict[str, Any],
-    normalized_project: dict[str, Any],
-    state_graph: dict[str, Any],
-    config: TargetSelectionConfig,
-) -> dict[str, Any]: ...
-
-def build_candidate_contexts(
-    candidates: dict[str, Any],
-    annotation: dict[str, Any],
-    normalized_project: dict[str, Any],
-    state_graph: dict[str, Any],
-) -> dict[str, Any]: ...
-
-def build_candidate_packets(
-    candidates: dict[str, Any],
-    contexts: dict[str, Any],
-) -> list[dict[str, Any]]: ...
-
-def validate_llm_evaluation(
-    evaluation: dict[str, Any],
-    packet: dict[str, Any],
-    config: TargetSelectionConfig,
-) -> None: ...
-
-async def evaluate_candidate_packets(
-    packets: list[dict[str, Any]],
-    *,
-    api: LLMClientProtocol,
-    prompt: str,
-    config: TargetSelectionConfig,
-) -> list[dict[str, Any]]: ...
-
-def select_recommended_candidates(...) -> dict[str, Any]: ...
-def calculate_ai_selection_score(...) -> int: ...
-def build_threshold_selection_statistics(...) -> dict[str, Any]: ...
-def render_threshold_selection_markdown(...) -> str: ...
-def select_ai_candidates_by_score(...) -> dict[str, Any]: ...
-def apply_coverage_and_deduplication(...) -> dict[str, Any]: ...
-def finalize_ai_selected_targets(...) -> dict[str, Any]: ...
-def finalize_selected_targets(...) -> dict[str, Any]: ...
-
-def build_gold_states(
-    selected_targets: dict[str, Any],
-    normalized_project: dict[str, Any],
-    state_graph: dict[str, Any],
-) -> dict[str, Any]: ...
-```
-
-内部实现包括：
-
-- `_MessageIndex`：message ID、全局顺序、speaker、text；
-- `_AnnotationIndex`：Requirement / Event / source / resolution link；
-- `_GraphIndex`：State、Edge、snapshot；
-- `TargetSelectionConfig`：候选规则、RQ allowlist、LLM 与 coverage 上限；
-- `LLMClientProtocol`：让测试使用 fake client，不发真实 API 请求。
-
-现有 `stage1.api_client.Stage1ApiClient` 提供认证、并发限制、重试、JSON 解析、调用
-日志和失败响应保存。当前通过注入方式复用它，`run_mode` 使用
-`TARGET_TIME_EVALUATION`，日志写入 `outputs/stage2_logs/api_calls.jsonl`。不要复制一套
-HTTP/JWT 逻辑。后续如需重命名，可把它无行为变化地提取为共享 `LLMApiClient`，并为
-Stage 1 保留兼容导入。
-
-## 7. CLI 与配置设计
-
-`Code/stage2_generate_gold_state.py` 是 async pipeline 入口。主要参数：
-
-```text
---project-id
---annotation
---messages
---state-graph
---prompt
---config
---output-dir
---model
---reasoning-effort
---max-concurrent-requests
---retries
---timeout
---no-resume
---force-evaluation
---human-review-file
---prepare-only
---threshold-report-only
---finalize
---auto-accept-ai
---score-threshold
---include-execution-only-tasks
-```
-
-默认路径与当前仓库实际目录一致。凭据继续只从环境变量读取：
-
-```text
-UPWORK_API_KEY
-UPWORK_BUDGET_ID
-```
-
-`Code/config/stage2_gold_state.json` 的当前 schema：
-
-```json
-{
-  "candidate_event_types": [
-    "MODIFY",
-    "REMOVE",
-    "DEFER",
-    "RESUME",
-    "AMBIGUOUS"
-  ],
-  "include_introduce_candidates": true,
-  "include_execution_only_tasks": false,
-  "allowed_rq_targets": ["RQ1", "RQ2", "RQ3", "RQ4"],
-  "max_selected_targets": null,
-  "model": "gpt-5.6-sol",
-  "reasoning_effort": "high",
-  "max_concurrent_requests": 4,
-  "retries": 3,
-  "timeout_seconds": 900
-}
-```
-
-旧配置中的 `event_priority`、`position_ratio` 和 `random_seed` 应被拒绝并给出迁移错误，
-不能静默忽略。
-
-## 8. Resume、fingerprint 与失败处理
-
-每次 LLM evaluation 保存：
-
-```text
-candidate_id
-packet_sha256
-prompt_sha256
-model
-reasoning_effort
-response
-usage
-request_id
-```
-
-默认 resume 只复用 fingerprint 与 model 参数都一致、且已通过 schema 校验的结果；
-`--no-resume` 会禁用复用。
-Packet、prompt、model 或 reasoning effort 任一变化时必须重新评估。
-
-失败策略：
-
-- 单个请求按现有 API client 的 retry policy 重试；
-- 中断后保留已验证 JSONL 行并可 resume；
-- 有 Candidate 最终没有有效 evaluation 时，停止 automatic selection；
-- Human review 不完整时，可生成 review packet，但不能生成 final targets / Gold；
-- 输入 provenance、future leakage 或 Gold validation 失败时，不写成功状态的最终文件。
-
-## 9. 校验清单
-
-### 9.1 输入与 Candidate
-
-- 三份输入 project ID 一致；
-- normalized message ID 唯一，`original_index` 唯一且有序；
-- 每个 Stage 1 Event 引用真实消息；
-- Stage 1 与 Graph Event provenance 一致；
-- Candidate 是 Client message；
-- Candidate 包含同消息全部 Events，且没有重复 Event / Requirement ID；
-- `history_turn_count == conversation_turn_index - 1`。
-
-### 9.2 Context 与 Packet
-
-- Pre-state 的 supporting Events 全部早于 target；
-- Requirement history 不含当前或未来 Event；
-- historical evidence messages 不晚于 target，且不重复；
-- 当前 task 只在 `candidate_task` 出现一次；
-- Packet 大小和 reason 长度受配置限制。
-
-### 9.3 LLM 与选择
-
-- 一 Candidate 恰好一条有效 evaluation；
-- 枚举、布尔、RP V2 RQ1–RQ4 allowlist 和 ID 回显严格合法；
-- 自动推荐条件可复算；
-- AI 总分和分数线筛选可复算，自动接受集合必须完整；
-- 去重 fingerprint、coverage gain、tie-break 都被记录；
-- rank 不读取 `history_turn_count` 或 conversation position；
-- review 决定完整、唯一且只引用已知 Candidate。
-
-### 9.4 Gold
-
-保留现有 `validate_gold_states()` 的状态链、完整快照、Event 分组、affected / preserved、
-INTRODUCE / REMOVE、same-message final State 和 future leakage 校验，并新增：
-
-- 每个 Task Gold 必须引用一个最终 selected target；
-- target 的 message / Event / Requirement / history metadata 与选择产物完全一致；
-- 不得为被拒绝、未复核且未通过显式 AI 自动接受的 Candidate 生成 Gold。
-
-## 10. 测试策略
-
-测试不得依赖真实 LLM API。
-
-1. Candidate generation：单/多 Requirement、同消息多 Event、纯 INTRODUCE、纯 execution、
-   非 Client message、opaque message ID。
-2. History metadata：首条消息、消息空洞、非数字 ID、`original_index` 不连续但顺序合法。
-3. Context boundary：INTRODUCE 无 Pre-state、同消息多 Event、resolution link、未来消息泄漏。
-4. LLM validator：缺字段、额外字段、错误 enum、ID 不匹配、推荐逻辑矛盾。
-5. Resume：fingerprint 命中、prompt / packet / model 改变后的失效。
-6. Coverage / dedup：完全相同 fingerprint、不同 ambiguity pattern、上限不足、稳定 tie-break。
-7. Human review：ACCEPT、REJECT、ADD_BACK、未知/重复/缺失决定。
-8. AI auto-accept：0–10 分数、阈值边界、全部达标项、非推荐项排除和跳过 review。
-9. Threshold report：5–10 各行、49/50/99/100 turn 边界、总数和 Markdown 渲染。
-10. Gold regression：复用当前 `test_stage2_gold_state.py` 的 snapshot 与 provenance cases，
-   将输入改为 selected targets。
-11. CLI integration：fake API client 完整跑出全部中间产物和 final Gold。
-
-## 11. 实施顺序与完成标准
-
-实现按以下顺序完成：
-
-1. 引入 message / annotation / graph 三个 index，并消除按数值 message ID 排序的限制；
-2. 实现 Candidate、Context、Packet 及其校验；
-3. 添加 prompt 和严格 LLM response validator，用 fake client 完成测试；
-4. 接入现有 API client、并发、retry、日志和 resume；
-5. 实现推荐过滤、coverage / dedup 和 human review finalize；
-6. 让 Gold builder 只消费 `selected_target_times.json`；
-7. 迁移 CLI、配置和现有测试；
-8. 用 `42204309` 做离线 artifact validation，再进行经授权的真实 API smoke test。
-
-完成状态：
-
-- 旧的 position / priority / random sampler 不再参与选择；
-- 每个最终 target 都能追踪到 Candidate packet、有效 LLM evaluation，以及 human review
-  或显式 AI 自动接受记录；
-- `history_turn_count` 从 Candidate 一直无损保留到 Gold；
-- 选择阶段不把历史长度作为价值信号；
-- Gold State 完全由已验证 State Graph 确定性回放；
-- 全部单元测试和离线端到端测试通过；
-- 全仓库 93 个测试通过；
-- `42204309 --prepare-only` 成功生成 72 个 Candidate Packets；
-- 真实 LLM API selection 保留为需要显式凭据的生产运行步骤。
+Python 接口、CLI、配置、断点恢复、失败处理、校验、测试及实施验收说明统一维护在
+[`Code/insturctions/README_stage2_gold_state.md`](../Code/insturctions/README_stage2_gold_state.md)。

@@ -1,0 +1,86 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_POWER_DECOUPLING_LAYOUT",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 871,
+        "speaker": "client",
+        "text": "Regarding the AXP2101 / MT3608 decoupling distances, the AXP2101 caps are positioned 1.5–4.5 mm from the QFN edge, while the MT3608 output caps C4/C5 are 3–4.5 mm away from the package edge. It should work, but the placement is not as tight as in the typical reference. Is there a layout constraint causing this, or can they be moved closer?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "converter_capacitor_placement": "Place the AXP2101 decoupling capacitors and MT3608 output capacitors closer to their packages where layout constraints permit, using the tighter typical-reference placement as the goal."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "PCB_LAYOUT"
+        ],
+        "contexts": [
+          "SWITCHING_POWER"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 1046,
+        "speaker": "client",
+        "text": "Hi [FREELANCER_NAME_001],\n\nFollowing the rework, USB is now completely functional (U3 removed and the data lines bridged); both boards enumerate and flash correctly. I then tested the power behavior and the AXP2101 on both boards, and the results were identical:\n\n1\\. At idle, DCDC1 outputs 3.16V. The register setting is verified as 3.3V (0x82 reads 0x12), meaning the converter is regulating 4 percent below the target.\n2\\. Every load transient causes the rail to collapse. A SPI flash erase (about a 150mA step) or a WiFi TX burst (300-400mA) pulls the 3.3V rail below 2.5V and hard-resets the ESP32. Disabling the brown-out detector changes nothing, confirming that this is an actual rail collapse. An additional 330uF of external capacitance also has no effect. The board therefore cannot operate standalone from USB.\n3\\. Battery-only power works (VSYS around 3.8V), while a 5V USB input does not. In other words, failure occurs precisely when the buck must regulate, whereas operation near dropout succeeds.\n4\\. Programming DCDC1 to 3.4V through I2C improves things significantly: booting, WiFi serving, and a complete 1.9MB OTA write all succeed. However, the WiFi calibration surge during reboot still makes the rail collapse. There is another unusual issue: on several boots, the 0x82 write was disregarded and the readback remained 0x12, but it latched on a later boot. Writes to other registers verify correctly, and the default VBUS input current limit is 1.5A, so input limiting is not responsible.\n5\\. I swapped L3 for a physically larger 2.2uH inductor with a substantially higher saturation-current rating, but this produced no change whatsoever. The inductor is not at fault, and the original DFE252010F specification was adequate in any case.\n6\\. With continued testing, DCDC1 on board 2 deteriorated gradually and eventually failed completely. With everything disconnected, its output now measures about 265 ohm to GND, indicating leakage in the output stage.\n7\\. Supplying an external 3.3V allows the entire board to run flawlessly for hours, including boot, PSRAM, e-paper, WiFi, web UI, and sensors. All downstream circuitry is healthy.\n\nI therefore suspect the AXP2101 chips themselves, potentially because of a bad batch, counterfeit parts, moisture damage during reflow, or non-standard factory programming. I have requested the sourcing information and lot codes from the factory. On your side, one item worth reviewing is the local input decoupling for the DCDC1 VIN pins in the layout: specifically, whether a capacitor is positioned close to the pin or whether there is only the more distant bulk group.\n\nCan you think of another explanation consistent with all these observations? Hi [FREELANCER_NAME_001],\n\nFollowing the rework, USB is now completely functional (U3 removed and the data lines bridged); both boards enumerate and flash correctly. I then tested the power behavior and the AXP2101 on both boards, and the results were identical:\n\n1\\. At idle, DCDC1 outputs 3.16V. The register setting is verified as 3.3V (0x82 reads 0x12), meaning the converter is regulating 4 percent below the target.\n2\\. Every load transient causes the rail to collapse. A SPI flash erase (about a 150mA step) or a WiFi TX burst (300-400mA) pulls the 3.3V rail below 2.5V and hard-resets the ESP32. Disabling the brown-out detector changes nothing, confirming that this is an actual rail collapse. An additional 330uF of external capacitance also has no effect. The board therefore cannot operate standalone from USB.\n3\\. Battery-only power works (VSYS around 3.8V), while a 5V USB input does not. In other words, failure occurs precisely when the buck must regulate, whereas operation near dropout succeeds.\n4\\. Programming DCDC1 to 3.4V through I2C improves things significantly: booting, WiFi serving, and a complete 1.9MB OTA write all succeed. However, the WiFi calibration surge during reboot still makes the rail collapse. There is another unusual issue: on several boots, the 0x82 write was disregarded and the readback remained 0x12, but it latched on a later boot. Writes to other registers verify correctly, and the default VBUS input current limit is 1.5A, so input limiting is not responsible.\n5\\. I swapped L3 for a physically larger 2.2uH inductor with a substantially higher saturation-current rating, but this produced no change whatsoever. The inductor is not at fault, and the original DFE252010F specification was adequate in any case.\n6\\. With continued testing, DCDC1 on board 2 deteriorated gradually and eventually failed completely. With everything disconnected, its output now measures about 265 ohm to GND, indicating leakage in the output stage.\n7\\. Supplying an external 3.3V allows the entire board to run flawlessly for hours, including boot, PSRAM, e-paper, WiFi, web UI, and sensors. All downstream circuitry is healthy.\n\nI therefore suspect the AXP2101 chips themselves, potentially because of a bad batch, counterfeit parts, moisture damage during reflow, or non-standard factory programming. I have requested the sourcing information and lot codes from the factory. On your side, one item worth reviewing is the local input decoupling for the DCDC1 VIN pins in the layout: specifically, whether a capacitor is positioned close to the pin or whether there is only the more distant bulk group.\n\nCan you think of another explanation consistent with all these observations?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "dcdc1_vin_local_decoupling": "Provide local input decoupling close to the DCDC1 VIN pins rather than relying only on a more distant bulk capacitor group."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "SWITCHING_POWER",
+          "LOAD_TRANSIENTS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 1047,
+        "speaker": "freelancer",
+        "text": "Hi [CLIENT_NAME_003],\nApologies for responding late.\nRegarding the decoupling capacitors, they are configured properly and connected to the required pins."
+      },
+      "supporting_message_ids": [
+        1046
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the decoupling capacitors are properly configured and connected to the required pins."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 1046,
+      "suggested_requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+      "description": "The concrete undervoltage, load-transient collapse, and progressive DCDC1 failure observations belong to DCDC1 output regulation; they do not establish that the decoupling layout itself failed."
+    },
+    {
+      "message_id": 1066,
+      "suggested_requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+      "description": "The reported progressive DCDC1 degradation and external-supply workaround concern regulator behavior rather than a confirmed decoupling-layout failure."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

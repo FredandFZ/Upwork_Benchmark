@@ -1,0 +1,107 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_KICAD_PROJECT_PORTABILITY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 930,
+        "speaker": "client",
+        "text": "Hi [FREELANCER_NAME_001], several components were absent from the 3D viewer when I opened the integrated board because some 3D models reference libraries available only on your machine. Could you send these three files to me?\n\nUSB4215-03-A.stp (from your Vucko.3dshapes) — for USB1\nQ\\_SOT-23.step (from the JLCPCB plugin library) — for Q3\nTS-1088-AR02016.step (from the JLCPCB plugin library) — for S1\n\nAfter receiving them, [CLIENT_NAME_001] place them in the project’s libs/easyeda/easyeda.3dshapes/ folder. Thanks!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "required_3d_model_files": [
+          "USB4215-03-A.stp",
+          "Q_SOT-23.step",
+          "TS-1088-AR02016.step"
+        ],
+        "project_3d_model_directory": "libs/easyeda/easyeda.3dshapes/"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "PCB_FILES",
+          "TOOLING"
+        ],
+        "contexts": [
+          "KICAD_PROJECT",
+          "CROSS_PLATFORM_USE"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 930,
+        "speaker": "client",
+        "text": "Hi [FREELANCER_NAME_001], several components were absent from the 3D viewer when I opened the integrated board because some 3D models reference libraries available only on your machine. Could you send these three files to me?\n\nUSB4215-03-A.stp (from your Vucko.3dshapes) — for USB1\nQ\\_SOT-23.step (from the JLCPCB plugin library) — for Q3\nTS-1088-AR02016.step (from the JLCPCB plugin library) — for S1\n\nAfter receiving them, [CLIENT_NAME_001] place them in the project’s libs/easyeda/easyeda.3dshapes/ folder. Thanks!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Several integrated-board components were absent from the 3D viewer because their model files referenced libraries available only on the freelancer's machine."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 934,
+        "speaker": "client",
+        "text": "Also, FYI: when I opened the integrated board on my Linux machine, I found several absolute Windows paths and references to libraries that exist locally on your machine but not mine, which caused most components to be absent from the 3D viewer. I fixed this on my side. There were 12 hard-coded Windows paths like D:/KiCAD Projekti/Upwork/[CLIENT_NAME_003] Cicak/Radni/IoT\\_Environmental\\_Monitoring\\_Device\\_All/libs/easyeda/easyeda.3dshapes/... — I changed them to ${KIPRJMOD}/libs/easyeda/easyeda.3dshapes/... so they are relative. Because the files themselves are under libs/, this works across machines.\n\nHandling this myself is not a problem; I only wanted to make you aware of it."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "On Linux, 12 hard-coded Windows and machine-local library paths caused most integrated-board components to be absent from the 3D viewer."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 934,
+        "speaker": "client",
+        "text": "Also, FYI: when I opened the integrated board on my Linux machine, I found several absolute Windows paths and references to libraries that exist locally on your machine but not mine, which caused most components to be absent from the 3D viewer. I fixed this on my side. There were 12 hard-coded Windows paths like D:/KiCAD Projekti/Upwork/[CLIENT_NAME_003] Cicak/Radni/IoT\\_Environmental\\_Monitoring\\_Device\\_All/libs/easyeda/easyeda.3dshapes/... — I changed them to ${KIPRJMOD}/libs/easyeda/easyeda.3dshapes/... so they are relative. Because the files themselves are under libs/, this works across machines.\n\nHandling this myself is not a problem; I only wanted to make you aware of it."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "model_reference_strategy": "Use ${KIPRJMOD}/libs/easyeda/easyeda.3dshapes/... project-relative references instead of absolute or machine-local paths."
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 935,
+        "speaker": "client",
+        "text": "Yes. Also, ${KICAD8\\_3RD\\_PARTY} is the path variable for KiCad 8, while KiCad 9 uses ${KICAD9\\_3RD\\_PARTY}. Therefore, even if the JLCPCB plugin is installed on a machine, those references would still fail in KiCad 9."
+      },
+      "supporting_message_ids": [
+        934
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "kicad_version_compatibility": "Packaged model references must not depend on KiCad-version-specific third-party path variables that fail when moving between KiCad 8 and KiCad 9."
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ESP32_GPIO_MAPPING",
+    "message_id": 291,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector pinout uses logical signal names SCL0 and 5V_EN; remapping those signals at the ESP32 does not change their connector positions or labels.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO remapping does not change the separate interboard power connector or its matching-pin-order rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Moving SCL0 to another MCU GPIO does not change the retained I2C speed, cable length, pull-ups, or series-resistor conditioning.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_PROGRAMMING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes 5V_EN, SCL0, and SPI MOSI GPIO assignments but does not change the USB D+ and D- interface.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_RAIL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The necessary change from GPIO3 to GPIO5 is already represented by the candidate's message-291 MODIFY event.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PCB_ARCHITECTURE_VARIANTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO reassignment does not alter the three-board architecture or the roles of the main and sensor boards.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_STANDALONE_USB_3V3_POWER",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO remapping does not change the standalone USB regulator, its activation condition, powered loads, or source-selection behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_ELECTRICAL_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate explicitly records GPIO3 as the control for the 5V_EN-based LED rail shutdown, so assigning 5V_EN to GPIO5 necessarily updates that control description.",
+      "new_event": {
+        "source_message": {
+          "message_id": 291,
+          "speaker": "client",
+          "text": "Apologies, GPIO3 came from my original ESP32 design, so that was my mistake. You can assign 5V_EN to GPIO5. I also noticed that the WROOM-1 module does not expose GPIO22, 23, 25, or 27, so I need to remap SCL0 (GPIO22→38) and SPI MOSI (GPIO23→26). I will revise the documentation and send you the complete updated GPIO table."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "led_power_control": "GPIO5-controlled shutdown of the complete 5V rail when the LEDs are unnecessary"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The MCU GPIO remapping does not change the sensor board's role as a connector hub.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_SLEEP_WAKE_BEHAVIOR",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "Assigning SPI MOSI to GPIO26 conflicts with the candidate's existing GPIO26 touch-wake assignment, but the source does not decide whether the touch-wake input or SPI MOSI should be remapped.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_ARRAY_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO mapping change does not alter the requirement for an eight-LED array board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_MANAGEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO reassignment does not change the AXP2101 power source, required rails, or battery power path.",
+      "new_event": null
+    }
+  ]
+}

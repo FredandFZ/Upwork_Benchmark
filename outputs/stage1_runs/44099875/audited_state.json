@@ -1,0 +1,1517 @@
+{
+  "input_sha256": "1e0aa7ff9b8250ea3b68c891ca1f156ba2991d0ae369f7e58cb1b1ae35497ca6",
+  "application_version": "ontology_then_events_v1",
+  "inventory": {
+    "run_mode": "REQUIREMENT_DISCOVERY",
+    "sessions": [
+      {
+        "session_id": "S1",
+        "start": "2026-07-15",
+        "end": "2026-07-16",
+        "milestone": null,
+        "phase_label": "Dashboard handoff and Fishwife data-source scoping"
+      },
+      {
+        "session_id": "S2",
+        "start": "2026-07-18",
+        "end": "2026-07-20",
+        "milestone": null,
+        "phase_label": "Fishwife metric-parity validation and PetMeds source setup"
+      },
+      {
+        "session_id": "S3",
+        "start": "2026-07-23",
+        "end": "2026-07-28",
+        "milestone": null,
+        "phase_label": "Metric provisioning and dashboard migration work"
+      },
+      {
+        "session_id": "S4",
+        "start": "2026-07-30",
+        "end": "2026-07-31",
+        "milestone": null,
+        "phase_label": "PetMeds completion and final dashboard verification"
+      }
+    ],
+    "requirement_families": [
+      {
+        "family_id": "BIGQUERY_DASHBOARD_MIGRATIONS",
+        "title": "BigQuery Dashboard Migrations"
+      },
+      {
+        "family_id": "DASHBOARD_METRICS",
+        "title": "Dashboard Metric Availability and Accuracy"
+      }
+    ],
+    "requirements": [
+      {
+        "requirement_id": "REQ_FISHWIFE_BIGQUERY_MIGRATION",
+        "title": "Fishwife BigQuery Dashboard Migration",
+        "family_id": "BIGQUERY_DASHBOARD_MIGRATIONS",
+        "definition": "Configure the Fishwife Looker Studio dashboard to use its BigQuery-backed replacement data source while preserving the other sources that remain applicable.",
+        "anchor_message_ids": [
+          16,
+          22,
+          23,
+          24,
+          86,
+          87
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Covers Fishwife source topology and migration completion; individual metric availability, calculations, and date-range behavior remain separately testable Requirements.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_PETMEDS_BIGQUERY_MIGRATION",
+        "title": "PetMeds BigQuery Dashboard Migration",
+        "family_id": "BIGQUERY_DASHBOARD_MIGRATIONS",
+        "definition": "Configure the PetMeds Looker Studio dashboard to use its BigQuery-backed data source and retire the corresponding old source.",
+        "anchor_message_ids": [
+          39,
+          82,
+          85,
+          86
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "PETMEDS_DASHBOARD"
+          ]
+        },
+        "boundary_note": "PetMeds is a separate migration deliverable with its own source configuration and completion trajectory; metric routing and individual metric behavior are excluded.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_GROSS_SALES_ACCURACY",
+        "title": "Fishwife Gross Sales Accuracy",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Ensure the Fishwife dashboard's gross sales value from BigQuery agrees with the established dashboard result when evaluated over the same date range.",
+        "anchor_message_ids": [
+          30,
+          31,
+          32
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Gross sales has its own observable output and can be validated independently from gross revenue and other dashboard metrics.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_GROSS_REVENUE_ACCURACY",
+        "title": "Fishwife Gross Revenue Accuracy",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Ensure the Fishwife dashboard's gross revenue value from BigQuery agrees with the established dashboard result when evaluated over the same date range.",
+        "anchor_message_ids": [
+          30,
+          31,
+          32
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Gross revenue is independently measurable and is not merged with gross sales merely because both were examined in the same comparison.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_AUTOMATIC_DATE_RANGE",
+        "title": "Fishwife Main Report Automatic Date Range",
+        "family_id": null,
+        "definition": "Keep the main Fishwife report configured to use its automatic date range.",
+        "anchor_message_ids": [
+          30,
+          32,
+          33
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Date-range configuration can change independently and affects how multiple metrics are evaluated, so it is not an attribute of either gross-sales or gross-revenue accuracy alone.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_TOTAL_ORDERS_METRIC",
+        "title": "Fishwife Total Orders Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Provide the total Shopify order-count metric required by the Fishwife dashboard.",
+        "anchor_message_ids": [
+          40,
+          41,
+          45,
+          46,
+          48
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Total orders is distinct from new-customer orders, returning-customer orders, items sold, and customer count.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_PETMEDS_TOTAL_ORDERS_METRIC",
+        "title": "PetMeds Total Orders Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Make the total Shopify order-count metric available for the PetMeds dashboard through the applicable dashboard data source.",
+        "anchor_message_ids": [
+          47,
+          48,
+          74
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "PETMEDS_DASHBOARD"
+          ]
+        },
+        "boundary_note": "PetMeds metric availability is separated from Fishwife because the two dashboards use distinct source configurations and can fail or change independently.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_GOOGLE_ADS_COST",
+        "title": "Fishwife Google Ads Cost Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Provide a usable Google Ads cost metric for the Fishwife dashboard, including a calculated field when the source does not expose it directly.",
+        "anchor_message_ids": [
+          49,
+          51,
+          53,
+          54
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD",
+            "GOOGLE_ADS"
+          ]
+        },
+        "boundary_note": "Google Ads cost is independently calculated and testable from Facebook Ads cost despite the shared formula workaround exchange.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_FACEBOOK_ADS_COST",
+        "title": "Fishwife Facebook Ads Cost Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Provide a usable Facebook Ads cost metric for the Fishwife dashboard, including a calculated field when the source does not expose it directly.",
+        "anchor_message_ids": [
+          50,
+          51,
+          53,
+          54
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD",
+            "FACEBOOK_ADS"
+          ]
+        },
+        "boundary_note": "Facebook Ads cost has a separate platform-specific output and can evolve independently from Google Ads cost.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_RETURNING_CUSTOMER_ORDERS",
+        "title": "Fishwife Returning Customer Orders Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Include the returning-customer order metric needed by the Fishwife dashboard.",
+        "anchor_message_ids": [
+          55,
+          61,
+          64,
+          65
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Returning-customer orders has its own business meaning and availability criterion and is not merged with total orders or customer count.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_ITEMS_SOLD",
+        "title": "Fishwife Items Sold Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Include the sold-item quantity metric needed by the Fishwife dashboard.",
+        "anchor_message_ids": [
+          56,
+          61,
+          64,
+          65
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Items sold measures quantity rather than order count and can be provisioned or removed independently.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_NET_PROFIT_MARGIN",
+        "title": "Fishwife Net Profit Margin Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Represent the historical request for a Fishwife net profit margin metric, which the client later directed to be taken off the dashboard.",
+        "anchor_message_ids": [
+          57,
+          61,
+          62
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Net profit margin remains a separate historical Requirement because it was independently considered and removed rather than merely being an attribute of another metric.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_TOTAL_COGS",
+        "title": "Fishwife Total COGS Metric",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Represent the historical request for a Fishwife total cost-of-goods-sold metric, which the client later directed to be taken off the dashboard.",
+        "anchor_message_ids": [
+          58,
+          61,
+          62
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Total COGS was independently requested and removed alongside, but not as an attribute of, net profit margin.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_SHIPPING_CITY",
+        "title": "Fishwife Shipping City Field",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Make the shipping-city field available to the Fishwife dashboard.",
+        "anchor_message_ids": [
+          59,
+          61,
+          63
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Shipping city is a separate dimension with its own availability criterion rather than an attribute of the order-count metrics.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_FISHWIFE_CUSTOMER_COUNT",
+        "title": "Fishwife Customer Count Support",
+        "family_id": "DASHBOARD_METRICS",
+        "definition": "Expose customer identifiers needed for the Fishwife dashboard to calculate or display customer count.",
+        "anchor_message_ids": [
+          67,
+          69,
+          70
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "boundary_note": "Customer count depends on customer ID and is independently testable from order counts and returning-customer order metrics.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_PETMEDS_ORDER_METRIC_SOURCE_ROUTING",
+        "title": "PetMeds Order-Level Metric Source Routing",
+        "family_id": null,
+        "definition": "Use the separate PetMeds connector that contains order-level metrics rather than assuming all such metrics belong in the primary BigQuery-backed source.",
+        "anchor_message_ids": [
+          71,
+          74,
+          76,
+          78
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "PETMEDS_DASHBOARD",
+            "ORDER_LEVEL_METRICS"
+          ]
+        },
+        "boundary_note": "This Requirement governs source selection for an identifiable class of PetMeds metrics; it is separate from both the overall migration and any individual metric's correctness.",
+        "confidence": "HIGH"
+      },
+      {
+        "requirement_id": "REQ_IMPACT_PAGE_DISABLED",
+        "title": "Hidden Impact Page State",
+        "family_id": null,
+        "definition": "Keep the dashboard's Impact page hidden and turned off rather than migrating or exposing it.",
+        "anchor_message_ids": [
+          90,
+          91
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "IMPACT_PAGE"
+          ]
+        },
+        "boundary_note": "The page's enabled and visibility state can be changed independently from the data-source migration of active dashboard pages.",
+        "confidence": "HIGH"
+      }
+    ],
+    "unresolved_candidates": [
+      {
+        "message_ids": [
+          20,
+          22,
+          23,
+          24,
+          27,
+          28,
+          29
+        ],
+        "description": "The text establishes replacement of Fishwife Funnel Data ALL while retaining other sources, but does not fully resolve whether Fishwife_DataStudio_data should be used exclusively across the dashboard or only where the removed source was used.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "message_ids": [
+          47,
+          48
+        ],
+        "description": "The phrase 'both dashboard data sources' may establish total-orders availability for both Fishwife and PetMeds, but the exact two sources referenced are not named in the acceptance exchange.",
+        "confidence": "LOW"
+      },
+      {
+        "message_ids": [
+          71,
+          72,
+          73,
+          74,
+          75,
+          78
+        ],
+        "description": "PetMeds is reported to lack most of the Fishwife metric list, but the exact missing metrics are never enumerated, so additional PetMeds metric Requirements cannot be safely discovered from this exchange.",
+        "confidence": "LOW"
+      },
+      {
+        "message_ids": [
+          90,
+          91
+        ],
+        "description": "The Impact page's hidden and disabled behavior is clear, but the messages do not explicitly identify whether the page belongs to the Fishwife or PetMeds dashboard.",
+        "confidence": "LOW"
+      }
+    ]
+  },
+  "events": {
+    "REQ_FISHWIFE_BIGQUERY_MIGRATION": [
+      {
+        "source_message": {
+          "message_id": 16,
+          "speaker": "client",
+          "text": "Could you review the Fishwife | Analytics &amp; Marketing Dashboard? I've added a new data source named 'Fishwife\\_DataStudio\\_Data', and it should have everything connected."
+        },
+        "supporting_message_ids": [
+          7
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "dashboard": "Fishwife | Analytics & Marketing Dashboard",
+          "replacement_data_source": "Fishwife_DataStudio_Data",
+          "expected_source_connectivity": "everything connected"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 22,
+          "speaker": "client",
+          "text": "We'll be removing the 'Fishwife Funnel Data ALL'."
+        },
+        "supporting_message_ids": [
+          20
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "data_source_to_retire": "Fishwife Funnel Data ALL"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 23,
+          "speaker": "client",
+          "text": "All the other stay"
+        },
+        "supporting_message_ids": [
+          20,
+          22
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "preserved_data_sources": "all existing dashboard data sources other than Fishwife Funnel Data ALL"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 24,
+          "speaker": "client",
+          "text": "I also replicated 'Fishwife Funnel Data ALL' as 'Fishwife\\_DataStudio\\_data'."
+        },
+        "supporting_message_ids": [
+          22,
+          23
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "replacement_source_role": "Fishwife_DataStudio_data replicates Fishwife Funnel Data ALL"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 68,
+          "speaker": "freelancer",
+          "text": "The Fish wife dashboard is complete and can now be used and shared with your client."
+        },
+        "supporting_message_ids": [],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Freelancer reports that the Fishwife dashboard migration is complete and the dashboard is ready for use and sharing."
+        }
+      },
+      {
+        "source_message": {
+          "message_id": 87,
+          "speaker": "client",
+          "text": "Same for Fishwife"
+        },
+        "supporting_message_ids": [
+          86
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "old_data_source_retired": true
+        },
+        "value_removals": [
+          "data_source_to_retire"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    ],
+    "REQ_PETMEDS_BIGQUERY_MIGRATION": [
+      {
+        "source_message": {
+          "message_id": 39,
+          "speaker": "client",
+          "text": "I've added the data source: PetMeds\\_DataStudio\\_data!"
+        },
+        "supporting_message_ids": [
+          35,
+          36,
+          38
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "bigquery_data_source_name": "PetMeds_DataStudio_data"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "PETMEDS_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 85,
+          "speaker": "client",
+          "text": "A few fields did not update properly; can you check them?"
+        },
+        "supporting_message_ids": [
+          82,
+          84
+        ],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "During review of the PetMeds dashboard, the client observed that several fields had not updated properly."
+        }
+      },
+      {
+        "source_message": {
+          "message_id": 86,
+          "speaker": "client",
+          "text": "The old data source has been removed by me."
+        },
+        "supporting_message_ids": [
+          82,
+          85,
+          87
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "old_data_source_retired": true
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 89,
+          "speaker": "freelancer",
+          "text": "every issue with pet and fishwife has been resolved."
+        },
+        "supporting_message_ids": [
+          85,
+          88
+        ],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Freelancer reports that the identified PetMeds dashboard issues have been resolved."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_GROSS_SALES_ACCURACY": [
+      {
+        "source_message": {
+          "message_id": 30,
+          "speaker": "freelancer",
+          "text": "I tested your bigquery data source, but the numbers for gross sales and gross revenue don't match. Should I continue, or would you prefer to look at it first?"
+        },
+        "supporting_message_ids": [
+          16,
+          31
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "metric": "gross_sales",
+          "accuracy_expectation": "The BigQuery gross sales value matches the established dashboard result."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 30,
+          "speaker": "freelancer",
+          "text": "I tested your bigquery data source, but the numbers for gross sales and gross revenue don't match. Should I continue, or would you prefer to look at it first?"
+        },
+        "supporting_message_ids": [
+          16
+        ],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The freelancer tested the Fishwife BigQuery source and observed that its gross sales number did not match the comparison result."
+        }
+      },
+      {
+        "source_message": {
+          "message_id": 32,
+          "speaker": "client",
+          "text": "Please proceed; they do match, and you didn't have a date range selected."
+        },
+        "supporting_message_ids": [
+          30
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "comparison_condition": "A date range must be selected when comparing the gross sales values."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 32,
+          "speaker": "client",
+          "text": "Please proceed; they do match, and you didn't have a date range selected."
+        },
+        "supporting_message_ids": [
+          30
+        ],
+        "event_type": "RUNTIME_VERIFICATION",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "VERIFIED_WORKING",
+          "observed_behavior": "The client confirms that the gross sales values match when the date-range comparison is configured."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_GROSS_REVENUE_ACCURACY": [
+      {
+        "source_message": {
+          "message_id": 30,
+          "speaker": "freelancer",
+          "text": "I tested your bigquery data source, but the numbers for gross sales and gross revenue don't match. Should I continue, or would you prefer to look at it first?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "metric": "gross revenue",
+          "accuracy_expectation": "The BigQuery gross revenue value should match the established dashboard result."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 30,
+          "speaker": "freelancer",
+          "text": "I tested your bigquery data source, but the numbers for gross sales and gross revenue don't match. Should I continue, or would you prefer to look at it first?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Testing showed that the BigQuery gross revenue number did not match the established dashboard result."
+        }
+      },
+      {
+        "source_message": {
+          "message_id": 32,
+          "speaker": "client",
+          "text": "Please proceed; they do match, and you didn't have a date range selected."
+        },
+        "supporting_message_ids": [
+          30,
+          31
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "comparison_condition": "Evaluate matching values with a date range selected."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 32,
+          "speaker": "client",
+          "text": "Please proceed; they do match, and you didn't have a date range selected."
+        },
+        "supporting_message_ids": [
+          30,
+          31
+        ],
+        "event_type": "RUNTIME_VERIFICATION",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "VERIFIED_WORKING",
+          "observed_behavior": "The client confirmed that the gross revenue values match when the comparison uses a selected date range."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_AUTOMATIC_DATE_RANGE": [
+      {
+        "source_message": {
+          "message_id": 33,
+          "speaker": "client",
+          "text": "The main one uses the auto-date range."
+        },
+        "supporting_message_ids": [
+          30,
+          32
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "date_range_mode": "automatic"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    ],
+    "REQ_FISHWIFE_TOTAL_ORDERS_METRIC": [
+      {
+        "source_message": {
+          "message_id": 41,
+          "speaker": "freelancer",
+          "text": "I'm referring to Fishwife first. I checked every data source, and none of them has a total orders metric. Could you please check?"
+        },
+        "supporting_message_ids": [
+          40
+        ],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The freelancer checked every Fishwife data source and found that none exposed the required total orders metric."
+        }
+      },
+      {
+        "source_message": {
+          "message_id": 45,
+          "speaker": "client",
+          "text": "I'm adding it to the Fishwife data source now."
+        },
+        "supporting_message_ids": [
+          40,
+          41
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "required_metric": "total Shopify order count"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 46,
+          "speaker": "client",
+          "text": "Orders\\_\\_Shopify added"
+        },
+        "supporting_message_ids": [
+          41,
+          45
+        ],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "The client reports that the Orders__Shopify metric was added to the Fishwife data source."
+        }
+      }
+    ],
+    "REQ_PETMEDS_TOTAL_ORDERS_METRIC": [
+      {
+        "source_message": {
+          "message_id": 48,
+          "speaker": "client",
+          "text": "Yes"
+        },
+        "supporting_message_ids": [
+          46,
+          47
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "total_orders_metric_available": true
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "PETMEDS_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    ],
+    "REQ_FISHWIFE_GOOGLE_ADS_COST": [
+      {
+        "source_message": {
+          "message_id": 49,
+          "speaker": "freelancer",
+          "text": "The Fishwife\\_DataStudio\\_data data source doesn't include any cost for google ads."
+        },
+        "supporting_message_ids": [],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "required_metric": "Google Ads cost"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD",
+            "GOOGLE_ADS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 49,
+          "speaker": "freelancer",
+          "text": "The Fishwife\\_DataStudio\\_data data source doesn't include any cost for google ads."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The freelancer reports that Fishwife_DataStudio_data exposes no Google Ads cost."
+        }
+      },
+      {
+        "source_message": {
+          "message_id": 53,
+          "speaker": "freelancer",
+          "text": "No, I created it using formulas, so it's fine now."
+        },
+        "supporting_message_ids": [
+          49,
+          50,
+          51
+        ],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "The freelancer claims the missing advertising cost metric was created using formulas."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_FACEBOOK_ADS_COST": [
+      {
+        "source_message": {
+          "message_id": 50,
+          "speaker": "freelancer",
+          "text": "There also isn't a separate cost metric for facebook ads."
+        },
+        "supporting_message_ids": [
+          49
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "required_metric": "Facebook Ads cost",
+          "required_availability": "separate usable dashboard metric"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD",
+            "FACEBOOK_ADS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 50,
+          "speaker": "freelancer",
+          "text": "There also isn't a separate cost metric for facebook ads."
+        },
+        "supporting_message_ids": [
+          49
+        ],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The Fishwife data source did not expose a separate Facebook Ads cost metric."
+        }
+      },
+      {
+        "source_message": {
+          "message_id": 53,
+          "speaker": "freelancer",
+          "text": "No, I created it using formulas, so it's fine now."
+        },
+        "supporting_message_ids": [
+          50,
+          51,
+          52
+        ],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "The freelancer reports creating the missing Facebook Ads cost metric using formulas."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_RETURNING_CUSTOMER_ORDERS": [
+      {
+        "source_message": {
+          "message_id": 64,
+          "speaker": "client",
+          "text": "The following are being added:\n\\- returning customer orders\n\\- items sold"
+        },
+        "supporting_message_ids": [
+          49,
+          55
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "metric_name": "returning customer orders",
+          "availability_requirement": "available in the Fishwife dashboard data source"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 65,
+          "speaker": "client",
+          "text": "Added!"
+        },
+        "supporting_message_ids": [
+          64
+        ],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Client reports that the previously listed returning customer orders metric was added."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_ITEMS_SOLD": [
+      {
+        "source_message": {
+          "message_id": 64,
+          "speaker": "client",
+          "text": "The following are being added:\n\\- returning customer orders\n\\- items sold"
+        },
+        "supporting_message_ids": [],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "metric_name": "items sold",
+          "included": true
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 65,
+          "speaker": "client",
+          "text": "Added!"
+        },
+        "supporting_message_ids": [
+          64
+        ],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Client reports that the listed items-sold metric was added."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_NET_PROFIT_MARGIN": [
+      {
+        "source_message": {
+          "message_id": 61,
+          "speaker": "client",
+          "text": "Okay, I'll work on this today."
+        },
+        "supporting_message_ids": [
+          57
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "metric_name": "net profit margin",
+          "required_availability": "included in the Fishwife data source"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 62,
+          "speaker": "client",
+          "text": "Net profit margin and COGS can't be added, so we can take them off the dashboard."
+        },
+        "supporting_message_ids": [],
+        "event_type": "REMOVE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    ],
+    "REQ_FISHWIFE_TOTAL_COGS": [
+      {
+        "source_message": {
+          "message_id": 61,
+          "speaker": "client",
+          "text": "Okay, I'll work on this today."
+        },
+        "supporting_message_ids": [
+          58
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "dashboard_inclusion_required": true
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 62,
+          "speaker": "client",
+          "text": "Net profit margin and COGS can't be added, so we can take them off the dashboard."
+        },
+        "supporting_message_ids": [],
+        "event_type": "REMOVE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    ],
+    "REQ_FISHWIFE_SHIPPING_CITY": [
+      {
+        "source_message": {
+          "message_id": 63,
+          "speaker": "client",
+          "text": "Shipping city already in there"
+        },
+        "supporting_message_ids": [
+          59
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "field_name": "shipping_city",
+          "availability": "included"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 63,
+          "speaker": "client",
+          "text": "Shipping city already in there"
+        },
+        "supporting_message_ids": [
+          59
+        ],
+        "event_type": "RUNTIME_VERIFICATION",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "VERIFIED_WORKING",
+          "observed_behavior": "The client reports that the shipping-city field is already present in the Fishwife data source."
+        }
+      }
+    ],
+    "REQ_FISHWIFE_CUSTOMER_COUNT": [
+      {
+        "source_message": {
+          "message_id": 69,
+          "speaker": "client",
+          "text": "Just added, running it now"
+        },
+        "supporting_message_ids": [
+          67
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "required_field": "customer ID",
+          "purpose": "view customer count"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "FISHWIFE_DASHBOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 69,
+          "speaker": "client",
+          "text": "Just added, running it now"
+        },
+        "supporting_message_ids": [
+          67
+        ],
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "CLAIMED_WORKING",
+          "observed_behavior": "Client reports that the requested customer ID field was added and its data process was being run."
+        }
+      }
+    ],
+    "REQ_PETMEDS_ORDER_METRIC_SOURCE_ROUTING": [
+      {
+        "source_message": {
+          "message_id": 74,
+          "speaker": "client",
+          "text": "Also, for PetMeds, remember that the 'order level' metrics are located in the other connector."
+        },
+        "supporting_message_ids": [],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "metric_category": "order-level metrics",
+          "required_source": "other PetMeds connector"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BIGQUERY",
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "PETMEDS_DASHBOARD",
+            "ORDER_LEVEL_METRICS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    ],
+    "REQ_IMPACT_PAGE_DISABLED": [
+      {
+        "source_message": {
+          "message_id": 91,
+          "speaker": "client",
+          "text": "Thank you! It is fine for that page to remain hidden and turned off."
+        },
+        "supporting_message_ids": [
+          90
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "visibility": "hidden",
+          "enabled": false,
+          "bigquery_source_migration_required": false
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "LOOKER_STUDIO"
+          ],
+          "contexts": [
+            "IMPACT_PAGE"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    ]
+  },
+  "human_review": [
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        47,
+        48,
+        74
+      ],
+      "decision_note": "REQ_PETMEDS_TOTAL_ORDERS_METRIC relies on an ambiguous short acceptance; review message 47 to determine whether PetMeds was explicitly included and whether message 48 establishes a requirement rather than actual availability.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "decision_note": "Message 53 uses singular coreference and is propagated to both Google Ads and Facebook Ads cost Requirements; the intervening context must establish independently whether both formula implementations were claimed.",
+      "confidence": "LOW"
+    }
+  ],
+  "audit_patch_count": 6
+}

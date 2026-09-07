@@ -1,0 +1,99 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_AIRBNB_LEAD_SPREADSHEET",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 221,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "lead_tracking_repository": "spreadsheet"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "DATABASE",
+            "STORAGE"
+          ],
+          "contexts": [
+            "AIRBNB_LEAD_TRACKING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        221
+      ],
+      "decision_note": "The message establishes the spreadsheet as the lead-tracking data repository; the downstream HubSpot-entry condition belongs to the separate secured-lead Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 274,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        274
+      ],
+      "decision_note": "The client explicitly changes the spreadsheet data-inclusion rule to include only responding leads.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 293,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        293,
+        294
+      ],
+      "decision_note": "Message 293 narrows the lead-inclusion rule to hosts interested in moving forward with content, and message 294 unambiguously identifies the spreadsheet as the target.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 295,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        295
+      ],
+      "decision_note": "The source changes when a lead is entered into HubSpot, not the Airbnb spreadsheet's storage or inclusion behavior.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "message_ids": [
+        221
+      ],
+      "suggested_requirement_id": "REQ_SECURED_LEAD_HUBSPOT_ENTRY",
+      "suggested_event_type": "INTRODUCE",
+      "description": "The message indicates that spreadsheet information is used for downstream entry when a host is ready to schedule; verify this lifecycle event under the HubSpot-entry Requirement."
+    },
+    {
+      "message_ids": [
+        295
+      ],
+      "suggested_requirement_id": "REQ_SECURED_LEAD_HUBSPOT_ENTRY",
+      "suggested_event_type": "MODIFY",
+      "description": "The client changes the HubSpot-entry condition so a lead is entered only after the arrangement is completely secured."
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_UNIT_1_COMMON_BATHROOM_LAYOUT"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_UNIT_1_COMMON_BATHROOM_LAYOUT",
+            "title": "Unit 1 Common Bathroom Fixture and Plumbing Layout",
+            "family_id": "BATHROOM_DESIGN"
+          },
+          {
+            "requirement_id": "REQ_UNIT_1_COMMON_BATHROOM_DOOR_CONFIGURATION",
+            "title": "Unit 1 Common Bathroom Door Configuration",
+            "family_id": "BATHROOM_DESIGN"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        21,
+        30,
+        41,
+        56,
+        74,
+        77,
+        80,
+        81,
+        95
+      ],
+      "decision_note": "Fixture and plumbing placement evolves separately from the bathroom-door type, swing, collision, and clearance trajectory.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_UNIT_3_BATHROOM_LAYOUT"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_UNIT_3_BATHROOM_LAYOUT",
+            "title": "Unit 3 Bathroom Drainage and Plumbing Layout",
+            "family_id": "BATHROOM_DESIGN"
+          },
+          {
+            "requirement_id": "REQ_UNIT_3_BATHROOM_FIXTURE_FIT",
+            "title": "Unit 3 Bathroom Dimensions and Fixture Fit",
+            "family_id": "BATHROOM_DESIGN"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        41,
+        44,
+        46,
+        48,
+        85,
+        86
+      ],
+      "decision_note": "Drain routing and construction-stage connection scope evolve independently of bathroom width and fixture-fit usability.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_EXISTING_WALL_PRESERVATION",
+        "event_locator": {
+          "message_id": 101,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        101
+      ],
+      "decision_note": "The Unit 1 living-room and corridor partition walls are target-specific corridor-allocation decisions already represented under REQ_COMMON_CORRIDOR_SPACE_ALLOCATION, not a change to the project-wide preservation policy.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_UNIT_1_COMMON_BATHROOM_LAYOUT",
+        "event_locator": {
+          "message_id": 80,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        77,
+        80
+      ],
+      "decision_note": "The same-message MODIFY records the client's selected door swing and bathroom expansion and resolves the addressed VALUE ambiguity during v0.6 replay; a separate RESUME is redundant.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_COMMON_CORRIDOR_SPACE_ALLOCATION",
+        "event_locator": {
+          "message_id": 101,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        51,
+        101
+      ],
+      "decision_note": "The same-message MODIFY records the final wall instructions and resolves any addressed VALUE ambiguity during v0.6 replay; the extra RESUME is redundant and does not independently resolve the remaining door-proximity concern.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        30,
+        32,
+        33
+      ],
+      "decision_note": "Review whether the multiple conditional proposals in message 30 became authoritative changes for the Unit 3 counter, Unit 1 bathroom, balcony, and entrance-area Requirements; the later generic approval may not identify which alternatives were accepted.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        85,
+        86,
+        88
+      ],
+      "decision_note": "The current history contains an ambiguity about Unit 3 bathroom width and fixture placement but omits the underlying client proposal and any possible later resolution; the raw messages are needed to reconstruct this trajectory.",
+      "confidence": "LOW"
+    }
+  ]
+}

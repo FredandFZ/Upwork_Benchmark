@@ -1,0 +1,248 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_ESP32_GPIO_MAPPING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 263,
+        "speaker": "client",
+        "text": "3.3V rail (AXP2101 DCDC1, 2A) — this is the main power source whenever the power board is attached:\n\\- ESP32-S3 module\n\\- INA219\n\\- Every I2C sensor (SCD41, BME280, ENS160) through the sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — ESP32 GPIO3 controls this rail:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (when connected to 5V — version-dependent)\n\n3.3V rail (ME6211A LDO, 1A) — active only if the main board's USB-C is connected WITHOUT the power board:\n\\- It supplies the same 3.3V rail listed above. With Schottky diode OR-ing, whichever source is available takes precedence. This is for standalone programming.\n\nBattery (3.7–4.2V) — supplies the AXP2101, which subsequently powers everything listed above.\n\nThe simple rule is that the AXP2101 supplies everything during normal operation. The LDO activates only for programming when the power board is not connected."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "five_v_enable_gpio": 3
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "MCU",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "GPIO_ASSIGNMENTS",
+          "ESP32_S3"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "freelancer",
+        "text": "Not available on s3"
+      },
+      "supporting_message_ids": [
+        280,
+        286
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The retained GPIO arrangement uses GPIO22 and GPIO23, but the freelancer reports that those pins are unavailable on the ESP32-S3."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 291,
+        "speaker": "client",
+        "text": "Apologies, GPIO3 came from my original ESP32 design, so that was my mistake. You can assign 5V_EN to GPIO5. I also noticed that the WROOM-1 module does not expose GPIO22, 23, 25, or 27, so I need to remap SCL0 (GPIO22→38) and SPI MOSI (GPIO23→26). I will revise the documentation and send you the complete updated GPIO table."
+      },
+      "supporting_message_ids": [
+        288,
+        289,
+        290
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "five_v_enable_gpio": 5,
+        "scl0_gpio": 38,
+        "spi_mosi_gpio": 26
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 291,
+        "speaker": "client",
+        "text": "Apologies, GPIO3 came from my original ESP32 design, so that was my mistake. You can assign 5V_EN to GPIO5. I also noticed that the WROOM-1 module does not expose GPIO22, 23, 25, or 27, so I need to remap SCL0 (GPIO22→38) and SPI MOSI (GPIO23→26). I will revise the documentation and send you the complete updated GPIO table."
+      },
+      "supporting_message_ids": [
+        288,
+        289,
+        290
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 294,
+        "speaker": "client",
+        "text": "Got it, thanks"
+      },
+      "supporting_message_ids": [
+        292
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "restricted_gpio_numbers": [
+          35,
+          36,
+          37
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 295,
+        "speaker": "freelancer",
+        "text": "Gpio26 is unavailable as well, so \"SPI MOSI (GPIO23→26)\" cannot be used."
+      },
+      "supporting_message_ids": [
+        291
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The client assigned SPI MOSI to GPIO26, but the freelancer reports that GPIO26 is unavailable."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 296,
+        "speaker": "client",
+        "text": "You are correct; let’s use 33 instead, and I will revise the docs."
+      },
+      "supporting_message_ids": [
+        295
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "spi_mosi_gpio": 33
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 296,
+        "speaker": "client",
+        "text": "You are correct; let’s use 33 instead, and I will revise the docs."
+      },
+      "supporting_message_ids": [
+        295
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 299,
+        "speaker": "freelancer",
+        "text": "The SPI MOSI pin will need to be changed once again."
+      },
+      "supporting_message_ids": [
+        296
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The freelancer reports that the client-confirmed GPIO33 assignment for SPI MOSI must change again, but no replacement is yet confirmed."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 304,
+        "speaker": "client",
+        "text": "Therefore, on N16R8, the GPIOs that are actually free are GPIO38–GPIO44, GPIO47, and GPIO48, along with GPIO0–GPIO21 subject to the strapping pin caveats. Move SPI MOSI to GPIO47, since nothing else is assigned to it."
+      },
+      "supporting_message_ids": [
+        299
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "spi_mosi_gpio": 47,
+        "candidate_gpio_pool": "GPIO0–GPIO21 subject to strapping-pin caveats; GPIO38–GPIO44; GPIO47; GPIO48"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 304,
+        "speaker": "client",
+        "text": "Therefore, on N16R8, the GPIOs that are actually free are GPIO38–GPIO44, GPIO47, and GPIO48, along with GPIO0–GPIO21 subject to the strapping pin caveats. Move SPI MOSI to GPIO47, since nothing else is assigned to it."
+      },
+      "supporting_message_ids": [
+        299
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 603,
+      "suggested_requirement_id": "REQ_ESP32_FULL_PIN_BREAKOUT",
+      "description": "The claim that every ESP32-S3 module pin is connected to the 40 through-hole pins concerns full pin breakout rather than peripheral GPIO assignment."
+    },
+    {
+      "message_id": 1019,
+      "suggested_requirement_id": "REQ_NATIVE_USB_PROGRAMMING",
+      "description": "The failure to enumerate over native USB belongs to the independently testable native USB programming Requirement."
+    },
+    {
+      "message_id": 1020,
+      "suggested_requirement_id": "REQ_USB_ESD_PROTECTION",
+      "description": "The traced USBLC6 VBUS-to-GND fault concerns USB data-line ESD protection rather than the general peripheral GPIO map."
+    }
+  ],
+  "missing_requirement_candidates": [
+    {
+      "message_ids": [
+        21,
+        23
+      ],
+      "suggested_title": "ESP32 Sleep and Wake Behavior",
+      "description": "The evidence defines deep-sleep conditions and timer/touch wake sources as independently evolving power-management behavior not represented by the frozen inventory."
+    }
+  ]
+}

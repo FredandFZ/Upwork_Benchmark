@@ -1,0 +1,865 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2024-07-31",
+      "end": "2024-08-09",
+      "milestone": null,
+      "phase_label": "CRM data-flow planning and deliverable definition"
+    },
+    {
+      "session_id": "S2",
+      "start": "2024-08-12",
+      "end": "2024-09-12",
+      "milestone": null,
+      "phase_label": "Tool selection and LinkedIn-to-HubSpot integration design"
+    },
+    {
+      "session_id": "S3",
+      "start": "2024-09-13",
+      "end": "2024-10-31",
+      "milestone": null,
+      "phase_label": "Campaign, domain, email, and integration setup"
+    },
+    {
+      "session_id": "S4",
+      "start": "2024-11-04",
+      "end": "2024-11-12",
+      "milestone": null,
+      "phase_label": "Integration verification, lead-sync debugging, and campaign launch"
+    },
+    {
+      "session_id": "S5",
+      "start": "2024-11-12",
+      "end": "2024-12-06",
+      "milestone": null,
+      "phase_label": "HubSpot reporting and outbound-campaign planning"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "title": "Lead Ingestion and Enrichment Pipeline"
+    },
+    {
+      "family_id": "CRM_LEAD_OPERATIONS",
+      "title": "CRM Lead Operations"
+    },
+    {
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "title": "Campaign Automation"
+    },
+    {
+      "family_id": "DOMAIN_EMAIL_INFRASTRUCTURE",
+      "title": "Domain and Email Infrastructure"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_SALES_NAVIGATOR_LEAD_LIST",
+      "title": "Sales Navigator Lead List",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Configure and use a Sales Navigator list as a source of LinkedIn prospects for the lead-ingestion pipeline.",
+      "anchor_message_ids": [
+        22,
+        83,
+        141
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DATABASE",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LINKEDIN_LEAD_SOURCING"
+        ]
+      },
+      "boundary_note": "Covers source-list selection and maintenance only; exporting, enrichment, and downstream CRM synchronization are independently testable Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DIRECT_LINKEDIN_HUBSPOT_INTEGRATION",
+      "title": "Direct LinkedIn-to-HubSpot Integration",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Maintain a direct integration between LinkedIn or Sales Navigator and HubSpot when the selected LinkedIn plan supports CRM synchronization.",
+      "anchor_message_ids": [
+        22,
+        37,
+        56,
+        101,
+        107,
+        117,
+        168,
+        371
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM",
+          "AUTH"
+        ],
+        "contexts": [
+          "LINKEDIN_HUBSPOT_INTEGRATION"
+        ]
+      },
+      "boundary_note": "Remains separate from the Apollo-mediated workflow because the direct integration has its own subscription dependency, failure trajectory, and optionality.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LINKEDIN_APOLLO_LEAD_EXPORT",
+      "title": "LinkedIn-to-Apollo Lead Export",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Allow selected LinkedIn or Sales Navigator prospects to be exported to Apollo through the browser-extension workflow.",
+      "anchor_message_ids": [
+        29,
+        135,
+        138,
+        141,
+        143,
+        198,
+        462
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LINKEDIN_LEAD_EXPORT"
+        ]
+      },
+      "boundary_note": "Covers moving selected prospects into Apollo; duplicate indication, enrichment, and Apollo-to-HubSpot delivery have separate outputs and failure modes.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LINKEDIN_DUPLICATE_VISIBILITY",
+      "title": "LinkedIn Duplicate Visibility",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Show while viewing a LinkedIn prospect whether that person has already been saved in the lead system so duplicate exports can be avoided.",
+      "anchor_message_ids": [
+        26,
+        29
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "UI_UX",
+          "DATABASE"
+        ],
+        "contexts": [
+          "LINKEDIN_PROFILE",
+          "DUPLICATE_PREVENTION"
+        ]
+      },
+      "boundary_note": "This is an independently visible duplicate-prevention behavior rather than an attribute of generic lead transfer.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_LINKEDIN_PROFILE_URL_NORMALIZATION",
+      "title": "LinkedIn Profile URL Normalization",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Store normal LinkedIn profile URLs in HubSpot instead of Sales Navigator-specific links when lead data is enriched.",
+      "anchor_message_ids": [
+        26,
+        29
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CRM",
+          "DATABASE"
+        ],
+        "contexts": [
+          "LEAD_PROFILE_DATA"
+        ]
+      },
+      "boundary_note": "This is a data-accuracy requirement with an independently testable output, separate from whether the contact itself transfers successfully.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_APOLLO_CONTACT_ENRICHMENT",
+      "title": "Apollo Contact Enrichment",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Enrich exported prospect records in Apollo, including discovering available email addresses before or during transfer to HubSpot.",
+      "anchor_message_ids": [
+        22,
+        29,
+        141,
+        405
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "DATABASE"
+        ],
+        "contexts": [
+          "CONTACT_ENRICHMENT"
+        ]
+      },
+      "boundary_note": "Covers enrichment results only; automatic CRM synchronization and fallback handling for contacts that remain without email are separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_APOLLO_HUBSPOT_CONTACT_SYNC",
+      "title": "Apollo-to-HubSpot Contact Synchronization",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Automatically send Apollo contact data and enrichment results into HubSpot with acceptable transfer latency.",
+      "anchor_message_ids": [
+        22,
+        29,
+        141,
+        142,
+        143,
+        405,
+        407,
+        408,
+        410,
+        463
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM",
+          "DATABASE"
+        ],
+        "contexts": [
+          "APOLLO_HUBSPOT_SYNC"
+        ]
+      },
+      "boundary_note": "Owns the Apollo-to-HubSpot delivery path and its latency; LinkedIn export, enrichment quality, and MeetAlfred delivery are independent paths.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CONTACTS_WITHOUT_EMAIL_INGESTION",
+      "title": "Contacts Without Email Ingestion",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Provide a workable process for identifying, exporting, and adding contacts that still lack email addresses to HubSpot.",
+      "anchor_message_ids": [
+        403,
+        404,
+        405,
+        406
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CRM",
+          "DATABASE",
+          "UI_UX"
+        ],
+        "contexts": [
+          "CONTACTS_WITHOUT_EMAIL"
+        ]
+      },
+      "boundary_note": "This fallback can succeed or fail independently of email enrichment and therefore remains separate from the general enrichment Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MINIMAL_TOUCH_LEAD_TRANSFER",
+      "title": "Minimal-Touch Lead Transfer",
+      "family_id": "LEAD_INGESTION_PIPELINE",
+      "definition": "Keep the LinkedIn-to-CRM lead flow low in manual effort and avoid unnecessary integrations or repeated manual import and cleanup steps.",
+      "anchor_message_ids": [
+        123,
+        140,
+        141,
+        143,
+        144,
+        147,
+        406
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LEAD_TRANSFER_USABILITY"
+        ]
+      },
+      "boundary_note": "Represents the independently stated workflow-efficiency constraint; functional transfer and enrichment remain owned by their specific pipeline Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_HUBSPOT_CRM_CONFIGURATION",
+      "title": "HubSpot CRM Configuration",
+      "family_id": "CRM_LEAD_OPERATIONS",
+      "definition": "Configure HubSpot as the project's CRM on a plan that supports the required CRM behavior and integrations.",
+      "anchor_message_ids": [
+        17,
+        18,
+        22,
+        43,
+        44
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CRM"
+        ],
+        "contexts": [
+          "HUBSPOT_PLATFORM"
+        ]
+      },
+      "boundary_note": "Covers the base CRM environment and confirmed plan choice; lead management, reporting, and individual integrations are independently evolving behaviors.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_HUBSPOT_LEAD_MANAGEMENT",
+      "title": "HubSpot Lead Management System",
+      "family_id": "CRM_LEAD_OPERATIONS",
+      "definition": "Provide HubSpot lead-management structures including custom properties, tags, lead stages, categorization, nurturing, lists, notes, and task assignment.",
+      "anchor_message_ids": [
+        24,
+        26,
+        29
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CRM",
+          "DATABASE",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LEAD_MANAGEMENT"
+        ]
+      },
+      "boundary_note": "The listed fields and tools are tightly coupled attributes of one lead-management mechanism; cross-platform status sync and reporting remain separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LEAD_COMMUNICATION_HISTORY_SYNC",
+      "title": "Lead Communication History in HubSpot",
+      "family_id": "CRM_LEAD_OPERATIONS",
+      "definition": "Make lead email and LinkedIn conversation history visible from the corresponding HubSpot record.",
+      "anchor_message_ids": [
+        26,
+        29
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM",
+          "EMAIL"
+        ],
+        "contexts": [
+          "LEAD_COMMUNICATION_HISTORY"
+        ]
+      },
+      "boundary_note": "Conversation-history visibility has a distinct data payload and acceptance criterion from lead-stage or engagement-status updates.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_LEAD_ENGAGEMENT_STATUS_SYNC",
+      "title": "Lead Engagement Status Synchronization",
+      "family_id": "CRM_LEAD_OPERATIONS",
+      "definition": "Update HubSpot Lead Status from MeetAlfred or LinkedIn engagement events, including replies and accepted connection requests.",
+      "anchor_message_ids": [
+        412,
+        413,
+        414,
+        418
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM",
+          "DATABASE"
+        ],
+        "contexts": [
+          "MEETALFRED_STATUS_SYNC"
+        ]
+      },
+      "boundary_note": "Owns engagement-event status updates only; communication content and lead-list transfer have separate state and failure trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ALL_CAMPAIGN_LEADS_TRACKED_IN_CRM",
+      "title": "Complete Campaign Lead Tracking in CRM",
+      "family_id": "CRM_LEAD_OPERATIONS",
+      "definition": "Ensure leads generated through campaign operations are recorded in the CRM, including leads handled through manual campaign workflows.",
+      "anchor_message_ids": [
+        586,
+        587
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CRM",
+          "DATABASE"
+        ],
+        "contexts": [
+          "CAMPAIGN_LEAD_TRACKING"
+        ]
+      },
+      "boundary_note": "This is the cross-path completeness rule for campaign leads; individual automated ingestion mechanisms remain separate Requirements.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_CONTACT_SOURCE_FUNNEL_REPORTING",
+      "title": "Contact-Source Funnel Reporting",
+      "family_id": "CRM_LEAD_OPERATIONS",
+      "definition": "Provide HubSpot reporting for a sales funnel organized by Contact Source, including stage counts and contact-to-lead conversion visibility.",
+      "anchor_message_ids": [
+        24,
+        511,
+        512,
+        538,
+        540,
+        555,
+        566,
+        571
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CRM",
+          "DATABASE",
+          "UI_UX"
+        ],
+        "contexts": [
+          "SALES_FUNNEL_REPORTING"
+        ]
+      },
+      "boundary_note": "Contact Source grouping, stage counts, and conversion are attributes of one funnel-reporting mechanism; reporting remains separate from lead-stage synchronization.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MEETALFRED_INTEGRATION_CONFIGURATION",
+      "title": "MeetAlfred Integration Configuration",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Configure MeetAlfred on a plan that supports the required CRM, email, campaign, and Zapier integrations.",
+      "anchor_message_ids": [
+        24,
+        46,
+        63,
+        65,
+        206,
+        207,
+        214,
+        215,
+        216,
+        217
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM"
+        ],
+        "contexts": [
+          "MEETALFRED_PLATFORM"
+        ]
+      },
+      "boundary_note": "Covers the platform and subscription configuration; campaign behavior and each directional data flow are separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ZAPIER_INTEGRATION_CONFIGURATION",
+      "title": "Zapier Integration Configuration",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Configure the Zapier environment on the required plan, without unnecessary add-ons, to support the project's integration workflows.",
+      "anchor_message_ids": [
+        24,
+        49,
+        271,
+        278,
+        280,
+        290,
+        295,
+        296,
+        370
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API"
+        ],
+        "contexts": [
+          "ZAPIER_PLATFORM"
+        ]
+      },
+      "boundary_note": "Owns the shared Zapier account and plan configuration, not the behavior of individual Zaps such as Apollo-HubSpot or HubSpot-MeetAlfred sync.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AUTOMATED_LINKEDIN_CAMPAIGN",
+      "title": "Automated LinkedIn Campaign",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Configure and retain automated LinkedIn outbound campaign operation through MeetAlfred unless the client accepts a different campaign mode.",
+      "anchor_message_ids": [
+        24,
+        34,
+        101,
+        583,
+        584,
+        585
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "UI_UX"
+        ],
+        "contexts": [
+          "LINKEDIN_CAMPAIGN"
+        ]
+      },
+      "boundary_note": "LinkedIn automation can change independently of email automation, list synchronization, or the number of simultaneously operated accounts.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AUTOMATED_EMAIL_CAMPAIGN",
+      "title": "Automated Email Campaign",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Configure an automated outbound email campaign in MeetAlfred using the campaign mailbox.",
+      "anchor_message_ids": [
+        24,
+        34
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "EMAIL",
+          "API"
+        ],
+        "contexts": [
+          "EMAIL_CAMPAIGN"
+        ]
+      },
+      "boundary_note": "Email campaign execution has independent infrastructure and delivery behavior from LinkedIn campaign automation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_HUBSPOT_TO_MEETALFRED_LEAD_SYNC",
+      "title": "HubSpot-to-MeetAlfred Lead Synchronization",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Push eligible leads from a designated HubSpot list through Zapier into the selected MeetAlfred campaign without manual lead entry.",
+      "anchor_message_ids": [
+        24,
+        359,
+        420,
+        426,
+        431,
+        432,
+        436,
+        443,
+        474,
+        476,
+        500,
+        501,
+        502,
+        506
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM",
+          "DATABASE"
+        ],
+        "contexts": [
+          "HUBSPOT_TO_MEETALFRED"
+        ]
+      },
+      "boundary_note": "Owns lead transfer into an already selected campaign; creating a repeatable campaign-and-Zap pair is a separate operational mechanism.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_REPEATABLE_MEETALFRED_CAMPAIGN_PROVISIONING",
+      "title": "Repeatable MeetAlfred Campaign Provisioning",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Provide a repeatable procedure for creating a new MeetAlfred campaign and its corresponding HubSpot-to-MeetAlfred Zap configuration.",
+      "anchor_message_ids": [
+        420,
+        423,
+        425,
+        468,
+        469,
+        475,
+        502,
+        503
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM",
+          "UI_UX"
+        ],
+        "contexts": [
+          "CAMPAIGN_PROVISIONING"
+        ]
+      },
+      "boundary_note": "Campaign provisioning is independently requested and constrained by platform limitations; it is distinct from whether leads subsequently synchronize.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SILENT_LEAD_FOLLOWUP_AUTOMATION",
+      "title": "Silent-Lead Follow-Up Automation",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Move silent leads into follow-up lists and campaigns without repeatedly cleaning or manually rebuilding earlier MeetAlfred campaigns.",
+      "anchor_message_ids": [
+        26,
+        29
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "API",
+          "CRM",
+          "DATABASE"
+        ],
+        "contexts": [
+          "SILENT_LEAD_FOLLOWUP"
+        ]
+      },
+      "boundary_note": "This segmentation and re-engagement workflow can evolve separately from generic HubSpot-to-MeetAlfred lead transfer.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_PRODUCTION_CAMPAIGN_SAFETY",
+      "title": "Production Campaign and Lead Safety",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Perform integration work without removing existing MeetAlfred campaigns, using genuine leads as test data, or unintentionally sending obsolete campaign messages.",
+      "anchor_message_ids": [
+        101,
+        104,
+        222,
+        223,
+        250,
+        251,
+        260,
+        480,
+        481
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "DATABASE",
+          "API"
+        ],
+        "contexts": [
+          "INTEGRATION_TESTING",
+          "PRODUCTION_CAMPAIGNS"
+        ]
+      },
+      "boundary_note": "This is a concrete operational safety constraint rather than a generic testing Requirement; preservation of campaigns and production leads is the tightly coupled safety mechanism.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MULTI_ACCOUNT_OUTBOUND_OPERATION",
+      "title": "Multi-Account Outbound Operation",
+      "family_id": "CAMPAIGN_AUTOMATION",
+      "definition": "Support outbound campaign operation through at least two accounts simultaneously.",
+      "anchor_message_ids": [
+        588,
+        589,
+        590,
+        591
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "API"
+        ],
+        "contexts": [
+          "MULTI_ACCOUNT_CAMPAIGNS"
+        ]
+      },
+      "boundary_note": "Simultaneous account capacity can be changed independently of campaign automation mode; the specific account identities remain unresolved values.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_CAMPAIGN_DOMAIN_REGISTRATION",
+      "title": "Campaign Domain Registration",
+      "family_id": "DOMAIN_EMAIL_INFRASTRUCTURE",
+      "definition": "Select and establish a dedicated domain for outbound campaign infrastructure using a compatible registrar.",
+      "anchor_message_ids": [
+        19,
+        24,
+        225,
+        227,
+        233,
+        234,
+        237
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DNS"
+        ],
+        "contexts": [
+          "CAMPAIGN_DOMAIN"
+        ]
+      },
+      "boundary_note": "Domain acquisition is distinct from mailbox provisioning, DNS forwarding, and sender-domain warm-up, each of which follows a separate trajectory.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CAMPAIGN_MAILBOX_SETUP",
+      "title": "Campaign Mailbox Setup",
+      "family_id": "DOMAIN_EMAIL_INFRASTRUCTURE",
+      "definition": "Create and configure an email account on the campaign domain using a compatible email provider.",
+      "anchor_message_ids": [
+        235,
+        236,
+        276,
+        277,
+        282,
+        301,
+        302,
+        303,
+        304,
+        311
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "EMAIL",
+          "DNS",
+          "AUTH"
+        ],
+        "contexts": [
+          "CAMPAIGN_MAILBOX"
+        ]
+      },
+      "boundary_note": "Owns mailbox creation and provider compatibility; connecting the mailbox to campaign systems and warming its domain are independent behaviors.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CAMPAIGN_DOMAIN_WARMUP",
+      "title": "Campaign Domain Warm-Up",
+      "family_id": "DOMAIN_EMAIL_INFRASTRUCTURE",
+      "definition": "Warm the campaign domain and mailbox with the selected warm-up tool before regular outbound email use.",
+      "anchor_message_ids": [
+        17,
+        19,
+        24,
+        225,
+        226,
+        286,
+        288,
+        314,
+        316,
+        324,
+        326,
+        328,
+        350,
+        356,
+        357,
+        379
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "EMAIL",
+          "DNS"
+        ],
+        "contexts": [
+          "DOMAIN_WARMUP"
+        ]
+      },
+      "boundary_note": "Warm-up is a bounded executable obligation with its own tooling, duration, and defer/resume trajectory, separate from permanent mailbox configuration.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CAMPAIGN_DOMAIN_WEB_FORWARDING",
+      "title": "Campaign Domain Web Forwarding",
+      "family_id": "DOMAIN_EMAIL_INFRASTRUCTURE",
+      "definition": "Configure the campaign domain to forward web visitors to the client's designated website.",
+      "anchor_message_ids": [
+        242,
+        243
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DNS",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "DOMAIN_WEB_FORWARDING"
+        ]
+      },
+      "boundary_note": "Web forwarding is independently testable and unrelated to mailbox delivery, campaign integration, or sender warm-up.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CAMPAIGN_EMAIL_SYSTEM_INTEGRATION",
+      "title": "Campaign Email System Integration",
+      "family_id": "DOMAIN_EMAIL_INFRASTRUCTURE",
+      "definition": "Connect the campaign email account to MeetAlfred and HubSpot for campaign and CRM use.",
+      "anchor_message_ids": [
+        24,
+        359,
+        360
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "EMAIL",
+          "API",
+          "CRM"
+        ],
+        "contexts": [
+          "CAMPAIGN_EMAIL_INTEGRATION"
+        ]
+      },
+      "boundary_note": "Covers cross-system mailbox connectivity; mailbox creation, warm-up, and automated campaign behavior remain separate Requirements.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        32,
+        34,
+        576,
+        577
+      ],
+      "description": "Timed multichannel outbound scripts are discussed as a possible separately priced continuation, but the visible history does not clearly establish them as an accepted deliverable.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        579,
+        580,
+        581,
+        582
+      ],
+      "description": "Paid LinkedIn advertising is proposed conditionally on audience size, but the client has not accepted paid advertising as a Requirement.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        583,
+        584,
+        585
+      ],
+      "description": "The client prefers MeetAlfred automation while the freelancer advocates manual conversations for appointments; later evidence is needed to determine whether campaign mode changes or remains unresolved.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        588,
+        589,
+        590,
+        591
+      ],
+      "description": "At least two simultaneous campaign accounts are requested, but whether they should be alias accounts, client accounts, or a mixture remains unresolved.",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

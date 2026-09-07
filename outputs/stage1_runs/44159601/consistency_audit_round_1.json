@@ -1,0 +1,109 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_MEMBER_INVITATION_ACCEPTANCE"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_MEMBER_INVITATION_ACCEPTANCE",
+            "title": "Member Invitation Acceptance Submission",
+            "family_id": "TEAM_ACCOUNT_CAPABILITIES"
+          },
+          {
+            "requirement_id": "REQ_MEMBER_INVITATION_LANDING_ROUTE",
+            "title": "Member Invitation Landing Route",
+            "family_id": "TEAM_ACCOUNT_CAPABILITIES"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        21
+      ],
+      "decision_note": "The missing invitation-link route and the missing call to the invitation-acceptance endpoint are independently implementable and testable behaviors.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_INSTANT_CONNECTION_REVOCATION"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_INSTANT_CONNECTION_REVOCATION",
+            "title": "Persisted Connector Access Revocation",
+            "family_id": null
+          },
+          {
+            "requirement_id": "REQ_DISCONNECT_SUCCESS_REPORTING",
+            "title": "Disconnect Success Reporting",
+            "family_id": null
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        21
+      ],
+      "decision_note": "Deleting the persisted connection and reporting a truthful disconnect outcome are independently testable; the source reports incorrect endpoint success while the front end correctly refuses to report success.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MEMBER_INVITATION_ACCEPTANCE",
+        "event_locator": {
+          "message_id": 27,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        21,
+        27
+      ],
+      "decision_note": "The freelancer's retrospective reference to client-confirmed multi-user scope does not provide an authoritative, target-specific resolution of the invitation-flow ambiguity.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ACCOUNT_MEMBER_ACCESS_REVOCATION",
+        "event_locator": {
+          "message_id": 27,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        21,
+        27
+      ],
+      "decision_note": "The broad freelancer reference to multi-user scope does not specifically establish that member-access revocation belongs in Release 1.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ACCOUNT_MEMBER_ACCESS_REVOCATION",
+        "event_locator": {
+          "message_id": 27,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        21,
+        27
+      ],
+      "decision_note": "No supplied authoritative client evidence resolves the member-access-revocation scope ambiguity, so the Requirement cannot be resumed from CLARIFY.",
+      "confidence": "HIGH"
+    }
+  ]
+}

@@ -1,0 +1,490 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-07-15",
+      "end": "2026-07-16",
+      "milestone": null,
+      "phase_label": "Dashboard handoff and Fishwife data-source scoping"
+    },
+    {
+      "session_id": "S2",
+      "start": "2026-07-18",
+      "end": "2026-07-20",
+      "milestone": null,
+      "phase_label": "Fishwife metric-parity validation and PetMeds source setup"
+    },
+    {
+      "session_id": "S3",
+      "start": "2026-07-23",
+      "end": "2026-07-28",
+      "milestone": null,
+      "phase_label": "Metric provisioning and dashboard migration work"
+    },
+    {
+      "session_id": "S4",
+      "start": "2026-07-30",
+      "end": "2026-07-31",
+      "milestone": null,
+      "phase_label": "PetMeds completion and final dashboard verification"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "BIGQUERY_DASHBOARD_MIGRATIONS",
+      "title": "BigQuery Dashboard Migrations"
+    },
+    {
+      "family_id": "DASHBOARD_METRICS",
+      "title": "Dashboard Metric Availability and Accuracy"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_FISHWIFE_BIGQUERY_MIGRATION",
+      "title": "Fishwife BigQuery Dashboard Migration",
+      "family_id": "BIGQUERY_DASHBOARD_MIGRATIONS",
+      "definition": "Configure the Fishwife Looker Studio dashboard to use its BigQuery-backed replacement data source while preserving the other sources that remain applicable.",
+      "anchor_message_ids": [
+        16,
+        22,
+        23,
+        24,
+        86,
+        87
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Covers Fishwife source topology and migration completion; individual metric availability, calculations, and date-range behavior remain separately testable Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PETMEDS_BIGQUERY_MIGRATION",
+      "title": "PetMeds BigQuery Dashboard Migration",
+      "family_id": "BIGQUERY_DASHBOARD_MIGRATIONS",
+      "definition": "Configure the PetMeds Looker Studio dashboard to use its BigQuery-backed data source and retire the corresponding old source.",
+      "anchor_message_ids": [
+        39,
+        82,
+        85,
+        86
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "PETMEDS_DASHBOARD"
+        ]
+      },
+      "boundary_note": "PetMeds is a separate migration deliverable with its own source configuration and completion trajectory; metric routing and individual metric behavior are excluded.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_GROSS_SALES_ACCURACY",
+      "title": "Fishwife Gross Sales Accuracy",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Ensure the Fishwife dashboard's gross sales value from BigQuery agrees with the established dashboard result when evaluated over the same date range.",
+      "anchor_message_ids": [
+        30,
+        31,
+        32
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Gross sales has its own observable output and can be validated independently from gross revenue and other dashboard metrics.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_GROSS_REVENUE_ACCURACY",
+      "title": "Fishwife Gross Revenue Accuracy",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Ensure the Fishwife dashboard's gross revenue value from BigQuery agrees with the established dashboard result when evaluated over the same date range.",
+      "anchor_message_ids": [
+        30,
+        31,
+        32
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Gross revenue is independently measurable and is not merged with gross sales merely because both were examined in the same comparison.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_AUTOMATIC_DATE_RANGE",
+      "title": "Fishwife Main Report Automatic Date Range",
+      "family_id": null,
+      "definition": "Keep the main Fishwife report configured to use its automatic date range.",
+      "anchor_message_ids": [
+        30,
+        32,
+        33
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Date-range configuration can change independently and affects how multiple metrics are evaluated, so it is not an attribute of either gross-sales or gross-revenue accuracy alone.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_TOTAL_ORDERS_METRIC",
+      "title": "Fishwife Total Orders Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide the total Shopify order-count metric required by the Fishwife dashboard.",
+      "anchor_message_ids": [
+        40,
+        41,
+        45,
+        46,
+        48
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Total orders is distinct from new-customer orders, returning-customer orders, items sold, and customer count.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PETMEDS_TOTAL_ORDERS_METRIC",
+      "title": "PetMeds Total Orders Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Make the total Shopify order-count metric available for the PetMeds dashboard through the applicable dashboard data source.",
+      "anchor_message_ids": [
+        47,
+        48,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "PETMEDS_DASHBOARD"
+        ]
+      },
+      "boundary_note": "PetMeds metric availability is separated from Fishwife because the two dashboards use distinct source configurations and can fail or change independently.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_GOOGLE_ADS_COST",
+      "title": "Fishwife Google Ads Cost Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide a usable Google Ads cost metric for the Fishwife dashboard, including a calculated field when the source does not expose it directly.",
+      "anchor_message_ids": [
+        49,
+        51,
+        53,
+        54
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD",
+          "GOOGLE_ADS"
+        ]
+      },
+      "boundary_note": "Google Ads cost is independently calculated and testable from Facebook Ads cost despite the shared formula workaround exchange.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_FACEBOOK_ADS_COST",
+      "title": "Fishwife Facebook Ads Cost Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide a usable Facebook Ads cost metric for the Fishwife dashboard, including a calculated field when the source does not expose it directly.",
+      "anchor_message_ids": [
+        50,
+        51,
+        53,
+        54
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD",
+          "FACEBOOK_ADS"
+        ]
+      },
+      "boundary_note": "Facebook Ads cost has a separate platform-specific output and can evolve independently from Google Ads cost.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_RETURNING_CUSTOMER_ORDERS",
+      "title": "Fishwife Returning Customer Orders Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Include the returning-customer order metric needed by the Fishwife dashboard.",
+      "anchor_message_ids": [
+        55,
+        61,
+        64,
+        65
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Returning-customer orders has its own business meaning and availability criterion and is not merged with total orders or customer count.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_ITEMS_SOLD",
+      "title": "Fishwife Items Sold Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Include the sold-item quantity metric needed by the Fishwife dashboard.",
+      "anchor_message_ids": [
+        56,
+        61,
+        64,
+        65
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Items sold measures quantity rather than order count and can be provisioned or removed independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_NET_PROFIT_MARGIN",
+      "title": "Fishwife Net Profit Margin Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Represent the historical request for a Fishwife net profit margin metric, which the client later directed to be taken off the dashboard.",
+      "anchor_message_ids": [
+        57,
+        61,
+        62
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Net profit margin remains a separate historical Requirement because it was independently considered and removed rather than merely being an attribute of another metric.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_TOTAL_COGS",
+      "title": "Fishwife Total COGS Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Represent the historical request for a Fishwife total cost-of-goods-sold metric, which the client later directed to be taken off the dashboard.",
+      "anchor_message_ids": [
+        58,
+        61,
+        62
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Total COGS was independently requested and removed alongside, but not as an attribute of, net profit margin.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_SHIPPING_CITY",
+      "title": "Fishwife Shipping City Field",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Make the shipping-city field available to the Fishwife dashboard.",
+      "anchor_message_ids": [
+        59,
+        61,
+        63
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Shipping city is a separate dimension with its own availability criterion rather than an attribute of the order-count metrics.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FISHWIFE_CUSTOMER_COUNT",
+      "title": "Fishwife Customer Count Support",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Expose customer identifiers needed for the Fishwife dashboard to calculate or display customer count.",
+      "anchor_message_ids": [
+        67,
+        69,
+        70
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "FISHWIFE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Customer count depends on customer ID and is independently testable from order counts and returning-customer order metrics.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PETMEDS_ORDER_METRIC_SOURCE_ROUTING",
+      "title": "PetMeds Order-Level Metric Source Routing",
+      "family_id": null,
+      "definition": "Use the separate PetMeds connector that contains order-level metrics rather than assuming all such metrics belong in the primary BigQuery-backed source.",
+      "anchor_message_ids": [
+        71,
+        74,
+        76,
+        78
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BIGQUERY",
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "PETMEDS_DASHBOARD",
+          "ORDER_LEVEL_METRICS"
+        ]
+      },
+      "boundary_note": "This Requirement governs source selection for an identifiable class of PetMeds metrics; it is separate from both the overall migration and any individual metric's correctness.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_IMPACT_PAGE_DISABLED",
+      "title": "Hidden Impact Page State",
+      "family_id": null,
+      "definition": "Keep the dashboard's Impact page hidden and turned off rather than migrating or exposing it.",
+      "anchor_message_ids": [
+        90,
+        91
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "LOOKER_STUDIO"
+        ],
+        "contexts": [
+          "IMPACT_PAGE"
+        ]
+      },
+      "boundary_note": "The page's enabled and visibility state can be changed independently from the data-source migration of active dashboard pages.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        20,
+        22,
+        23,
+        24,
+        27,
+        28,
+        29
+      ],
+      "description": "The text establishes replacement of Fishwife Funnel Data ALL while retaining other sources, but does not fully resolve whether Fishwife_DataStudio_data should be used exclusively across the dashboard or only where the removed source was used.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        47,
+        48
+      ],
+      "description": "The phrase 'both dashboard data sources' may establish total-orders availability for both Fishwife and PetMeds, but the exact two sources referenced are not named in the acceptance exchange.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        71,
+        72,
+        73,
+        74,
+        75,
+        78
+      ],
+      "description": "PetMeds is reported to lack most of the Fishwife metric list, but the exact missing metrics are never enumerated, so additional PetMeds metric Requirements cannot be safely discovered from this exchange.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        90,
+        91
+      ],
+      "description": "The Impact page's hidden and disabled behavior is clear, but the messages do not explicitly identify whether the page belongs to the Fishwife or PetMeds dashboard.",
+      "confidence": "LOW"
+    }
+  ]
+}

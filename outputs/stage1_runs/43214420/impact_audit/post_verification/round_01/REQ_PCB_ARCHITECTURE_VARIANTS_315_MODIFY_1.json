@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_PCB_ARCHITECTURE_VARIANTS",
+    "message_id": 315,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_FORM_FACTOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source defines main-board contents and exclusions without changing the power board's dimensions, orientation, mounting, or connector placement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_LAYER_STACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The main-board component allocation does not change the power board's four-layer stack.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_STANDALONE_USB_3V3_POWER",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly places the standalone-operation LDO on the main board, adding a material physical-location constraint absent from the candidate state.",
+      "new_event": {
+        "source_message": {
+          "message_id": 315,
+          "speaker": "client",
+          "text": "Yes, that is right. The main board includes:\n\n- ESP32-S3-WROOM-1-N16R8 module\n- INA219 current monitor on the 3.3V rail\n- USB-C connector for programming, plus an LDO for standalone operation\n- Every JST connector for the power board, sensor board, display, PIR, touch, LEDs, buttons, and reset\n- Supporting passives, including decoupling caps, pull-ups, series resistors, Schottky diodes, and the BOOT button\n\nIt has no sensors or power management, as those are located on the other boards."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "usb_power_regulator_location": "MAIN_BOARD"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_MANAGEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Excluding power management from the main board does not alter the existing AXP2101 behavior, rails, or battery power path, and the source does not identify a more specific new placement for this candidate.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change DCDC1 voltage, current rating, or its normal-operation role.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_RESET_INPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The reset JST interface is already represented by the candidate's same-message INTRODUCE Event, with no omitted change requiring an edit.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already locates the pull-ups and ESP32-side series resistors on the main board; the source adds no new electrical values or placement constraint.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_ELECTRICAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Mentioning main-board JST connectors for LEDs does not change the LED supply voltage, level shifting, GPIO control, or standby-current requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Excluding sensors from the main board is compatible with the sensor board's existing connector-hub role and does not redefine that role.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source confirms that the main board has a power-board JST connection but does not change the established connector type, pin count, or matching-pin-order rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The generic reference to LED JST connectors does not specifically change the charge-status path, J_LED_CHG connector, resistor, or LED population rules.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_GPIO_MAPPING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source confirms the N16R8 module but does not change any current GPIO assignment or the previously established N16R8-compatible GPIO pool.",
+      "new_event": null
+    }
+  ]
+}

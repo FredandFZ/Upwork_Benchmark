@@ -1,0 +1,1393 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-03-18",
+      "end": "2026-03-29",
+      "milestone": null,
+      "phase_label": "Power-board specification, layout, and review"
+    },
+    {
+      "session_id": "S2",
+      "start": "2026-03-29",
+      "end": "2026-04-12",
+      "milestone": null,
+      "phase_label": "Main, sensor, and LED board design"
+    },
+    {
+      "session_id": "S3",
+      "start": "2026-04-12",
+      "end": "2026-04-18",
+      "milestone": null,
+      "phase_label": "Manufacturing preparation and component sourcing"
+    },
+    {
+      "session_id": "S4",
+      "start": "2026-04-19",
+      "end": "2026-05-04",
+      "milestone": null,
+      "phase_label": "Cost-reduced integrated-board redesign and final review"
+    },
+    {
+      "session_id": "S5",
+      "start": "2026-05-30",
+      "end": "2026-06-19",
+      "milestone": null,
+      "phase_label": "Manufactured sample inspection and initial power diagnosis"
+    },
+    {
+      "session_id": "S6",
+      "start": "2026-07-17",
+      "end": "2026-07-30",
+      "milestone": null,
+      "phase_label": "Integrated-board bring-up, USB repair, and power debugging"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "title": "PCB Architecture and Physical Layout"
+    },
+    {
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "title": "Power and Battery System"
+    },
+    {
+      "family_id": "DIGITAL_CONNECTIVITY",
+      "title": "Digital Connectivity and Bus Interfaces"
+    },
+    {
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "title": "Peripheral and Sensor Interfaces"
+    },
+    {
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "title": "Manufacturing and Design Deliverables"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_PCB_ARCHITECTURE_VARIANTS",
+      "title": "PCB Architecture Variants",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Provide the original power/main/sensor board architecture and the later cost-reduced single integrated-board variant while retaining the required device functionality.",
+      "anchor_message_ids": [
+        1,
+        315,
+        371,
+        750
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "SYSTEM_ARCHITECTURE"
+        ],
+        "contexts": [
+          "THREE_BOARD_VARIANT",
+          "INTEGRATED_BOARD_VARIANT"
+        ]
+      },
+      "boundary_note": "Covers only the product-level partitioning of circuitry among PCB variants; electrical behaviors and board-specific layout constraints remain separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_POWER_BOARD_MECHANICAL_FORM_FACTOR",
+      "title": "Power Board Mechanical Form Factor",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Make the power board compact, provide its required mounting holes, and place edge-facing connectors so the board fits and remains accessible in its enclosure.",
+      "anchor_message_ids": [
+        55,
+        57,
+        69,
+        77
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "MECHANICAL"
+        ],
+        "contexts": [
+          "POWER_BOARD",
+          "ENCLOSURE_FIT"
+        ]
+      },
+      "boundary_note": "Board dimensions, aspect ratio, mounting holes, and power-board connector accommodation form one mechanical-fit mechanism; electrical connector pinouts are excluded.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_POWER_BOARD_LAYER_STACK",
+      "title": "Power Board Layer Stack and Grounding",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Use a power-board layer stack and grounding arrangement that supports low-noise switching-power routing, ultimately selecting a four-layer implementation.",
+      "anchor_message_ids": [
+        104,
+        116,
+        117,
+        124
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "POWER"
+        ],
+        "contexts": [
+          "POWER_BOARD",
+          "SWITCHING_POWER"
+        ]
+      },
+      "boundary_note": "Layer count and ground-plane strategy can change independently of board dimensions and connector placement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MAIN_BOARD_ROUTABLE_FORM_FACTOR",
+      "title": "Main Board Routable Form Factor",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Provide a main-board outline large enough to fit and properly route all required components, connectors, and ESP32 breakout access.",
+      "anchor_message_ids": [
+        505,
+        521,
+        536,
+        543,
+        594
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "MECHANICAL"
+        ],
+        "contexts": [
+          "MAIN_BOARD",
+          "ENCLOSURE_FIT"
+        ]
+      },
+      "boundary_note": "Covers the independently tested ability to fit and route the main board; connector orientation and individual electrical interfaces are separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SEPARATE_BOARD_CONNECTOR_LAYOUT",
+      "title": "Separate-Board Connector Placement",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Place and align connectors on the separate main and sensor boards so vertically mounted boards can be connected with short, accessible cables.",
+      "anchor_message_ids": [
+        506,
+        507,
+        510,
+        556,
+        578
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "MAIN_BOARD",
+          "SENSOR_BOARD",
+          "THREE_BOARD_VARIANT"
+        ]
+      },
+      "boundary_note": "Covers physical placement and orientation shared by the separate-board wiring arrangement, not connector types or pin assignments.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_BOARD_PHYSICAL_LAYOUT",
+      "title": "Integrated Board Physical Layout",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Arrange the integrated board for enclosure access, including battery and USB placement, grouped display connections, usable connector directions, and freedom to select the cleanest board orientation.",
+      "anchor_message_ids": [
+        840,
+        842,
+        843,
+        860,
+        863
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "MECHANICAL",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "INTEGRATED_BOARD_VARIANT",
+          "ENCLOSURE_FIT"
+        ]
+      },
+      "boundary_note": "Covers integrated-board mechanical accessibility; ESP32 antenna clearance and connector mounting technology are independently constrained.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ESP32_FULL_PIN_BREAKOUT",
+      "title": "ESP32 Full Pin Breakout",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Expose every usable ESP32-S3 module pin through a compact through-hole breakout so the board can serve as a reusable development platform.",
+      "anchor_message_ids": [
+        546,
+        547,
+        603,
+        611,
+        847
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "MCU"
+        ],
+        "contexts": [
+          "MAIN_BOARD",
+          "INTEGRATED_BOARD_VARIANT",
+          "DEVELOPMENT_ACCESS"
+        ]
+      },
+      "boundary_note": "Pin exposure and breakout pitch are one reusable-access mechanism; assignment of functional signals to GPIOs remains separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ESP32_ANTENNA_CLEARANCE",
+      "title": "ESP32 Antenna Clearance",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Place the ESP32-S3 antenna at a board edge, away from the battery and obstructing copper or components, with the required keepout.",
+      "anchor_message_ids": [
+        540,
+        842,
+        872
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "RF"
+        ],
+        "contexts": [
+          "MAIN_BOARD",
+          "INTEGRATED_BOARD_VARIANT",
+          "WIFI"
+        ]
+      },
+      "boundary_note": "RF keepout can be evaluated and changed independently of general board fit or connector placement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DEVICE_ENCLOSURE",
+      "title": "Device Enclosure",
+      "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+      "definition": "Design a robust, easily assembled enclosure that secures the boards and battery, accommodates the display and LED light path, and provides sensor airflow.",
+      "anchor_message_ids": [
+        740,
+        741
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "MECHANICAL_DESIGN"
+        ],
+        "contexts": [
+          "DEVICE_ENCLOSURE"
+        ]
+      },
+      "boundary_note": "This is an independently requested mechanical artifact discussed as a possible separate project; it is not merged with PCB mounting constraints.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_POWER_INPUT_ESD_PROTECTION",
+      "title": "Power Board ESD Protection",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Include suitable TVS-based ESD protection on the power board.",
+      "anchor_message_ids": [
+        11,
+        13,
+        18
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "PROTECTION"
+        ],
+        "contexts": [
+          "POWER_BOARD"
+        ]
+      },
+      "boundary_note": "Power-input protection is independent from USB data-line ESD protection and battery protection.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_BATTERY_SAFETY_PROTECTION",
+      "title": "Battery Safety Protection",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Provide battery overcharge, overdischarge, short-circuit, and thermal-protection support appropriate to the selected battery and power-management design.",
+      "anchor_message_ids": [
+        12,
+        16,
+        17,
+        150
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "BATTERY",
+          "PROTECTION"
+        ],
+        "contexts": [
+          "POWER_BOARD",
+          "INTEGRATED_BOARD_VARIANT"
+        ]
+      },
+      "boundary_note": "Safety behavior is separate from the physical battery connector and from normal charging and rail regulation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "title": "Battery Connector Interface",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Use a standard battery connector with the required battery-power and NTC contacts, correct pinout, and enclosure-compatible placement.",
+      "anchor_message_ids": [
+        83,
+        84,
+        90,
+        229
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BATTERY",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "POWER_BOARD",
+          "INTEGRATED_BOARD_VARIANT"
+        ]
+      },
+      "boundary_note": "Connector family, pitch, contact count, and pinout are attributes of one battery interface; battery electrical protection is separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AXP2101_POWER_MANAGEMENT",
+      "title": "AXP2101 Power Management",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Use the AXP2101-based power path to charge the battery while operating the device and to supply the required 3.3V and 5V system rails efficiently.",
+      "anchor_message_ids": [
+        263,
+        753,
+        754,
+        758
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "BATTERY",
+          "PMIC"
+        ],
+        "contexts": [
+          "NORMAL_OPERATION",
+          "BATTERY_OPERATION",
+          "USB_POWER"
+        ]
+      },
+      "boundary_note": "Covers the selected PMIC and simultaneous charge-and-run behavior; individual rail switching, voltage regulation, and auxiliary pins have separate trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SWITCHED_5V_RAIL",
+      "title": "Software-Switched 5V Rail",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Provide a normally-off MT3608 5V rail that the ESP32 can enable only when 5V sensors or LEDs are required.",
+      "anchor_message_ids": [
+        19,
+        27,
+        30,
+        31,
+        291,
+        450
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "MCU"
+        ],
+        "contexts": [
+          "FIVE_VOLT_RAIL",
+          "SENSOR_POWER",
+          "LED_POWER"
+        ]
+      },
+      "boundary_note": "The enable GPIO, pull-down, default-off state, and intermittent operation are attributes of one independently controllable rail.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_STANDALONE_USB_3V3_POWER",
+      "title": "Standalone USB 3.3V Power",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Allow USB to power the complete 3.3V rail for programming and sensor debugging when the normal power board or battery source is unavailable.",
+      "anchor_message_ids": [
+        259,
+        263,
+        267,
+        268,
+        977,
+        1046
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "USB"
+        ],
+        "contexts": [
+          "STANDALONE_PROGRAMMING",
+          "USB_POWER",
+          "SENSOR_DEBUGGING"
+        ]
+      },
+      "boundary_note": "Includes the LDO and source-ORing behavior needed for the standalone path; DCDC1 regulation during normal PMIC operation is separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+      "title": "DCDC1 Output Regulation",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Configure and regulate AXP2101 DCDC1 so the downstream rail remains at its intended voltage under idle and transient system loads.",
+      "anchor_message_ids": [
+        434,
+        440,
+        441,
+        989,
+        1046,
+        1066
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "PMIC"
+        ],
+        "contexts": [
+          "THREE_VOLT_THREE_RAIL",
+          "USB_POWER",
+          "BATTERY_OPERATION"
+        ]
+      },
+      "boundary_note": "Voltage target, register setting, transient response, and rail stability form one independently testable regulator behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_DUAL_RAIL_CURRENT_MONITORING",
+      "title": "3.3V and 5V Current Monitoring",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Measure total downstream current on the 3.3V and 5V rails using an appropriate current-monitoring mechanism.",
+      "anchor_message_ids": [
+        336,
+        339,
+        347,
+        354,
+        763
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "SENSING",
+          "I2C"
+        ],
+        "contexts": [
+          "THREE_VOLT_THREE_RAIL",
+          "FIVE_VOLT_RAIL",
+          "INTEGRATED_BOARD_VARIANT"
+        ]
+      },
+      "boundary_note": "The monitored rails, monitor IC, shunts, and spare channel are attributes of one metering mechanism; rail generation is separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PANEL_POWER_BUTTON",
+      "title": "Panel Power Button Interface",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Expose AXP2101 PWRON through a connector for a panel-mounted momentary button that toggles device power.",
+      "anchor_message_ids": [
+        434,
+        439
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "CONNECTORS",
+          "UI_UX"
+        ],
+        "contexts": [
+          "POWER_CONTROL",
+          "ENCLOSURE_PANEL"
+        ]
+      },
+      "boundary_note": "This power-control input is independent from general-purpose panel buttons and switches.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CHARGE_STATUS_OUTPUT",
+      "title": "Battery Charge Status Output",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Provide a usable battery-charge indication path, including the later CHGLED connector and resistor configuration while keeping the on-board LED unpopulated where specified.",
+      "anchor_message_ids": [
+        59,
+        155,
+        249
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "LED",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "CHARGE_STATUS",
+          "POWER_BOARD"
+        ]
+      },
+      "boundary_note": "Charge indication can be changed independently from the addressable status LEDs and their general power/data interface.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_POWER_NET_CURRENT_CAPACITY",
+      "title": "Power Net Current Capacity",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Route VBUS, battery, 5V, and related high-current nets without thin series bottlenecks and with sufficient copper and via stitching for their worst-case current.",
+      "anchor_message_ids": [
+        873,
+        890,
+        892,
+        894
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "PCB_LAYOUT"
+        ],
+        "contexts": [
+          "HIGH_CURRENT_ROUTING",
+          "VBUS",
+          "BATTERY_POWER"
+        ]
+      },
+      "boundary_note": "High-current copper capacity is independently verifiable from voltage regulation, component selection, and general board routing.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AXP_AUXILIARY_PIN_ACCESS",
+      "title": "AXP2101 Auxiliary Pin Access",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Handle VRTC correctly for the current design and expose selected AXP2101 auxiliary signals such as VBACKUP and PWROK for future backup power or debugging.",
+      "anchor_message_ids": [
+        869,
+        874,
+        884,
+        887,
+        889
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "DEBUG"
+        ],
+        "contexts": [
+          "RTC_BACKUP",
+          "PMIC_DEBUG"
+        ]
+      },
+      "boundary_note": "VRTC, VBACKUP, and PWROK are tightly grouped as optional PMIC auxiliary access; they are separate from core DCDC regulation.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_POWER_DECOUPLING_LAYOUT",
+      "title": "Power Converter Decoupling Layout",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Place and connect the AXP2101 and MT3608 input/output decoupling capacitors so the switching regulators remain stable under expected loads.",
+      "anchor_message_ids": [
+        871,
+        1046,
+        1047,
+        1061
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "PCB_LAYOUT"
+        ],
+        "contexts": [
+          "SWITCHING_POWER",
+          "LOAD_TRANSIENTS"
+        ]
+      },
+      "boundary_note": "Converter decoupling has its own layout acceptance criterion and failure investigation, separate from ESP32 module decoupling.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ESP32_DECOUPLING_LAYOUT",
+      "title": "ESP32 Decoupling Layout",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Provide appropriate local and bulk decoupling for the ESP32-S3 supply pins.",
+      "anchor_message_ids": [
+        870,
+        882,
+        883
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "MCU",
+          "PCB_LAYOUT"
+        ],
+        "contexts": [
+          "ESP32_POWER"
+        ]
+      },
+      "boundary_note": "ESP32 local decoupling can be reviewed or changed without altering the PMIC and boost-converter decoupling network.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AXP_THERMAL_ASSEMBLY",
+      "title": "AXP2101 Thermal and Assembly Implementation",
+      "family_id": "POWER_AND_BATTERY_SYSTEM",
+      "definition": "Implement the AXP2101 exposed-pad layout and manufacturing process so heat transfer and reliable reflow attachment are achieved.",
+      "anchor_message_ids": [
+        694,
+        695,
+        994,
+        996,
+        1014
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "PCB_LAYOUT",
+          "MANUFACTURING"
+        ],
+        "contexts": [
+          "PMIC_THERMAL_PAD",
+          "REFLOW_ASSEMBLY"
+        ]
+      },
+      "boundary_note": "Thermal-pad geometry and assembly handling are distinct from the AXP electrical power-path behavior, although the later diagnosis remains partially uncertain.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_NATIVE_USB_PROGRAMMING",
+      "title": "Native USB Programming",
+      "family_id": "DIGITAL_CONNECTIVITY",
+      "definition": "Provide a USB-C data path that allows the ESP32-S3 to enumerate and flash in normal and forced download modes.",
+      "anchor_message_ids": [
+        50,
+        51,
+        1019,
+        1026,
+        1046
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "USB",
+          "MCU"
+        ],
+        "contexts": [
+          "PROGRAMMING",
+          "USB_ENUMERATION"
+        ]
+      },
+      "boundary_note": "USB data functionality is independently testable and can work without ESD protection, as shown by the U3-removal workaround.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_USB_ESD_PROTECTION",
+      "title": "USB Data-Line ESD Protection",
+      "family_id": "DIGITAL_CONNECTIVITY",
+      "definition": "Retain USB ESD protection with the USBLC6 device wired so VBUS, GND, D+, and D- are on the correct separate nets.",
+      "anchor_message_ids": [
+        1020,
+        1022,
+        1030,
+        1031,
+        1045
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "USB",
+          "PROTECTION"
+        ],
+        "contexts": [
+          "USB_DATA",
+          "ESD_PROTECTION"
+        ]
+      },
+      "boundary_note": "Protection is separate from basic USB operation because the board was successfully operated after bypassing the failed protection device.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "title": "I2C Bus Conditioning",
+      "family_id": "DIGITAL_CONNECTIVITY",
+      "definition": "Support the project I2C cable lengths and speed with suitable pull-ups and correctly placed optional series-damping resistors.",
+      "anchor_message_ids": [
+        22,
+        47,
+        309,
+        310,
+        311,
+        494
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "I2C",
+          "MCU"
+        ],
+        "contexts": [
+          "I2C0",
+          "I2C1",
+          "INTERBOARD_CABLING"
+        ]
+      },
+      "boundary_note": "Pull-up values and series-resistor topology are parameters of one bus-signal-integrity mechanism.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ESP32_GPIO_MAPPING",
+      "title": "ESP32-S3 GPIO Mapping",
+      "family_id": "DIGITAL_CONNECTIVITY",
+      "definition": "Assign peripheral signals only to available and suitable ESP32-S3-WROOM-1 GPIOs while respecting strapping and reserved-pin restrictions.",
+      "anchor_message_ids": [
+        288,
+        291,
+        295,
+        304,
+        308,
+        450
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "MCU",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "GPIO_ASSIGNMENTS",
+          "ESP32_S3"
+        ]
+      },
+      "boundary_note": "Individual pin assignments are parameters of one coordinated GPIO map; electrical behaviors driven by those pins remain separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_INTERBOARD_POWER_INTERFACE",
+      "title": "Interboard Power Interface",
+      "family_id": "DIGITAL_CONNECTIVITY",
+      "definition": "Provide matching power connectors and pin ordering between the separate power, main, and sensor boards for 3.3V, 5V, and return paths.",
+      "anchor_message_ids": [
+        101,
+        139,
+        234,
+        343,
+        349,
+        501
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "THREE_BOARD_VARIANT",
+          "INTERBOARD_POWER"
+        ]
+      },
+      "boundary_note": "Power connector pinout and pass-through behavior can change independently from the interboard signal connector.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_INTERBOARD_SIGNAL_INTERFACE",
+      "title": "Interboard Signal Interface",
+      "family_id": "DIGITAL_CONNECTIVITY",
+      "definition": "Provide matching signal connectors between separate boards for I2C, UART, IRQ, PWRON, USB data, and 5V enable signals.",
+      "anchor_message_ids": [
+        96,
+        100,
+        101,
+        496
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CONNECTORS",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "THREE_BOARD_VARIANT",
+          "INTERBOARD_SIGNALS"
+        ]
+      },
+      "boundary_note": "Signal pinout is independent from the interboard power connector and from physical connector alignment.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PANEL_BUTTON_SWITCH_INPUTS",
+      "title": "Panel Button and Switch Inputs",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Connect panel-mounted buttons, reset, and slide-switch inputs through connectors, with the general button and switch GPIOs wired as defined active-low inputs.",
+      "anchor_message_ids": [
+        320,
+        325,
+        326,
+        868,
+        885,
+        887
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DIGITAL_IO",
+          "CONNECTORS",
+          "UI_UX"
+        ],
+        "contexts": [
+          "PANEL_CONTROLS",
+          "ACTIVE_LOW_INPUTS"
+        ]
+      },
+      "boundary_note": "Panel control connectors, pull-ups, and active-low behavior form one input mechanism; the PMIC power button is separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_TOUCH_INPUT_INTERFACES",
+      "title": "Capacitive Touch Input Interfaces",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Provide connector and biasing support for the TTP223 capacitive-touch inputs using active-high output behavior.",
+      "anchor_message_ids": [
+        320,
+        886,
+        887
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DIGITAL_IO",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "CAPACITIVE_TOUCH"
+        ]
+      },
+      "boundary_note": "Touch inputs have their own device behavior and can evolve independently from PIR and button inputs.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PIR_INPUT_INTERFACE",
+      "title": "PIR Sensor Input Interface",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Provide a correctly biased connector input for the AM312 PIR sensor's active-high push-pull output.",
+      "anchor_message_ids": [
+        315,
+        886,
+        887
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DIGITAL_IO",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "PIR_SENSOR"
+        ]
+      },
+      "boundary_note": "The PIR input can fail or be modified independently from touch and panel-control inputs.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ADDRESSABLE_LED_ELECTRICAL_INTERFACE",
+      "title": "Addressable LED Power and Data Interface",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Power and drive the selected addressable LEDs with a compatible supply voltage, data threshold, level-shifting choice, and independently controllable power path.",
+      "anchor_message_ids": [
+        278,
+        281,
+        374,
+        425,
+        432,
+        444
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "LED",
+          "POWER",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "ADDRESSABLE_LEDS",
+          "STATUS_LIGHTING"
+        ]
+      },
+      "boundary_note": "LED model, supply voltage, data compatibility, and level shifting are coupled electrical parameters; physical LED-board layout is separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LED_ARRAY_BOARD",
+      "title": "Addressable LED Array Board",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Provide the independently requested small PCB carrying eight addressable LEDs with the correct part, package, spacing, connector pinout, and production-ready layout.",
+      "anchor_message_ids": [
+        241,
+        385,
+        432,
+        477,
+        486
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "PCB_LAYOUT",
+          "LED"
+        ],
+        "contexts": [
+          "LED_BOARD"
+        ]
+      },
+      "boundary_note": "The LED board is an independent executable artifact; shared LED electrical compatibility is represented separately.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_EPAPER_BACKLIGHT",
+      "title": "E-Paper Backlight Interface",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Provide a PWM-controlled external e-paper backlight output supporting the selected 5V strip and an optional future 3.3V light source.",
+      "anchor_message_ids": [
+        796,
+        798,
+        800,
+        802
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "LED",
+          "POWER",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "EPAPER_BACKLIGHT"
+        ]
+      },
+      "boundary_note": "The backlight switch, PWM control, jumpers, decoupling, and optional resistor are attributes of one independently controlled lighting output.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PASSIVE_BUZZER_INTERFACE",
+      "title": "Passive Buzzer Interface",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Support a suitable passive PCB buzzer with an acceptable voltage, package, and sourceable production part.",
+      "anchor_message_ids": [
+        469,
+        471,
+        473,
+        476
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUDIO",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "BUZZER"
+        ]
+      },
+      "boundary_note": "Buzzer selection and drive compatibility are independent from LED and button interfaces.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+      "title": "Sensor Board Connector Hub",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Provide the sensor board's power and signal inputs plus correctly typed and pinned output connectors for each specified sensor, display, and spare bus port.",
+      "anchor_message_ids": [
+        371,
+        496,
+        498,
+        568
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CONNECTORS",
+          "SENSOR_INTERFACE"
+        ],
+        "contexts": [
+          "SENSOR_BOARD",
+          "SENSOR_MODULES"
+        ]
+      },
+      "boundary_note": "The connector matrix is one distribution mechanism; sensor-specific mode selection and voltage-level compatibility remain separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SENSOR_LOGIC_LEVEL_COMPATIBILITY",
+      "title": "Sensor Logic-Level Compatibility",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Connect the current 3.3V-logic sensors directly and omit unnecessary permanent level-shifter footprints, using an adapter for future 5V-logic sensors.",
+      "anchor_message_ids": [
+        565,
+        567
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SENSOR_INTERFACE",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "SENSOR_BOARD",
+          "I2C",
+          "UART"
+        ]
+      },
+      "boundary_note": "General sensor voltage compatibility can be modified independently from the connector matrix and SPS30 mode selection.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SPS30_I2C_MODE",
+      "title": "SPS30 I2C Mode Selection",
+      "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+      "definition": "Hardwire the SPS30 SEL pin to ground so the sensor remains in I2C mode rather than switching to UART mode.",
+      "anchor_message_ids": [
+        569,
+        572,
+        573
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SENSOR_INTERFACE",
+          "I2C"
+        ],
+        "contexts": [
+          "SPS30"
+        ]
+      },
+      "boundary_note": "This is a sensor-specific mode-selection behavior with its own binary acceptance criterion.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "title": "Production Component Sourceability",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Select standard, replaceable components and connectors that can be sourced reliably for PCB assembly without unnecessary stock or minimum-order risk.",
+      "anchor_message_ids": [
+        51,
+        53,
+        96,
+        401,
+        660,
+        698
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BOM",
+          "MANUFACTURING"
+        ],
+        "contexts": [
+          "COMPONENT_SOURCING",
+          "PCB_ASSEMBLY"
+        ]
+      },
+      "boundary_note": "Sourceability is a cross-cutting design constraint; BOM correctness and order-account setup are separate deliverables.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_CONNECTOR_MOUNTING_TECHNOLOGY",
+      "title": "Integrated Board Connector Mounting Technology",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Use through-hole connectors on the integrated development board where selected for mechanical strength despite the accepted assembly surcharge.",
+      "anchor_message_ids": [
+        804,
+        805,
+        813,
+        814,
+        815
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CONNECTORS",
+          "MANUFACTURING"
+        ],
+        "contexts": [
+          "INTEGRATED_BOARD_VARIANT",
+          "DEVELOPMENT_BOARD"
+        ]
+      },
+      "boundary_note": "TH versus SMD construction is independent from connector placement, pinout, and component sourceability.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BOM_ASSEMBLY_READINESS",
+      "title": "Assembly-Ready BOM",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Provide a complete and accurate BOM for each board with correct values, packages, quantities, and manufacturer or LCSC part numbers.",
+      "anchor_message_ids": [
+        146,
+        599,
+        600,
+        705,
+        706,
+        926,
+        929
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "BOM",
+          "MANUFACTURING"
+        ],
+        "contexts": [
+          "PCB_ASSEMBLY",
+          "ALL_BOARD_VARIANTS"
+        ]
+      },
+      "boundary_note": "BOM completeness is an executable artifact obligation; Gerber, drill, and placement exports are separate production artifacts.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PRODUCTION_EXPORTS",
+      "title": "PCB Production Exports",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Deliver the Gerber, plated and non-plated drill, pick-and-place, and related fabrication files required to manufacture each PCB.",
+      "anchor_message_ids": [
+        600,
+        607,
+        620
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "PCB_FILES",
+          "MANUFACTURING"
+        ],
+        "contexts": [
+          "PCB_FABRICATION",
+          "ALL_BOARD_VARIANTS"
+        ]
+      },
+      "boundary_note": "Production exports are independently deliverable and can be missing even when the schematic, PCB, or BOM is otherwise complete.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_KICAD_PROJECT_PORTABILITY",
+      "title": "Portable KiCad Project Assets",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Package KiCad libraries and 3D models with portable project-relative references so the project opens correctly across machines and KiCad versions.",
+      "anchor_message_ids": [
+        930,
+        934,
+        935,
+        936
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "PCB_FILES",
+          "TOOLING"
+        ],
+        "contexts": [
+          "KICAD_PROJECT",
+          "CROSS_PLATFORM_USE"
+        ]
+      },
+      "boundary_note": "Project portability is an independent design-file quality requirement rather than a PCB electrical behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CONNECTOR_PIN_LABELS",
+      "title": "Connector Pin Labels",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Place clear connector and pin-function markings on accessible PCB surfaces.",
+      "anchor_message_ids": [
+        220,
+        221,
+        222,
+        588
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SILKSCREEN",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "PCB_MARKINGS",
+          "ALL_BOARD_VARIANTS"
+        ]
+      },
+      "boundary_note": "Pin labeling is independently useful for assembly and servicing and is separate from electrical pinout correctness.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_BOARD_QR_IDENTIFICATION",
+      "title": "Board QR Identification",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Add the requested QR code identification to each board before production.",
+      "anchor_message_ids": [
+        730,
+        735
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "SILKSCREEN",
+          "MANUFACTURING"
+        ],
+        "contexts": [
+          "ALL_BOARD_VARIANTS"
+        ]
+      },
+      "boundary_note": "QR identification is an independent board-marking obligation and is not merged with connector labels.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LEAD_FREE_MANUFACTURING",
+      "title": "Lead-Free Manufacturing",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Configure each board for lead-free fabrication and assembly.",
+      "anchor_message_ids": [
+        730,
+        735
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "MANUFACTURING"
+        ],
+        "contexts": [
+          "PCB_ASSEMBLY",
+          "ALL_BOARD_VARIANTS"
+        ]
+      },
+      "boundary_note": "Lead-free process selection affects manufacturing configuration independently from QR markings and electrical design.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_COMPONENT_ORIENTATION_VALIDATION",
+      "title": "Assembly Component Orientation Validation",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Verify component rotations and pin-one orientations in the assembly preview before approving production.",
+      "anchor_message_ids": [
+        406,
+        618,
+        634,
+        638,
+        903,
+        960
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "MANUFACTURING",
+          "PCB_ASSEMBLY"
+        ],
+        "contexts": [
+          "PRODUCTION_REVIEW",
+          "COMPONENT_PLACEMENT"
+        ]
+      },
+      "boundary_note": "This is a concrete production acceptance condition, not generic QA or debugging.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_PCB_ORDER_CONFIGURATION",
+      "title": "PCB Assembly Order Configuration",
+      "family_id": "MANUFACTURING_AND_DELIVERABLES",
+      "definition": "Configure the PCB and assembly orders in the manufacturer's account, including component selection, placement confirmation, and handling unavailable parts.",
+      "anchor_message_ids": [
+        640,
+        673,
+        686,
+        899,
+        902,
+        903
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "MANUFACTURING",
+          "DEPLOYMENT"
+        ],
+        "contexts": [
+          "JLCPCB_ORDER",
+          "PCB_ASSEMBLY"
+        ]
+      },
+      "boundary_note": "This is an independently requested operational deliverable that changes executable manufacturing configuration; payment and milestone administration are excluded.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        385,
+        386
+      ],
+      "description": "The LED-array board clearly requires a physical spacing decision, but no authoritative center-to-center spacing value is visible in the supplied history.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        994,
+        996,
+        1008,
+        1014
+      ],
+      "description": "The AXP2101 thermal-pad stencil change was proposed during diagnosis, but the history later attributes sample damage to component moisture handling; audit should determine whether a windowpane aperture became an actual design requirement.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        740,
+        741,
+        743
+      ],
+      "description": "The enclosure has clear implementation requirements but was discussed as a possible separate project; human review may confirm whether it belongs in this contract's retained inventory.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        889
+      ],
+      "description": "The freelancer reports adding a VRTC output even though the client requested VRTC remain unconnected while exposing VBACKUP and PWROK; event extraction should preserve the authority conflict without treating the freelancer implementation as a client modification.",
+      "confidence": "HIGH"
+    },
+    {
+      "message_ids": [
+        1043,
+        1045
+      ],
+      "description": "The USB protection fix was claimed complete, but the client immediately questioned whether the symbol truly separated VBUS and GND; later evidence does not visibly verify the corrected protected configuration.",
+      "confidence": "HIGH"
+    }
+  ]
+}

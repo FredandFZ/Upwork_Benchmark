@@ -6,8 +6,9 @@
 
 新版 Stage 2.2 先从已标注的 Client task 中选择有 Requirement Memory benchmark
 价值的目标时间 \(t^*\)，再从 Requirement State Graph 确定性生成 Task 前后的 Gold
-State。详细函数、schema、校验、测试和迁移设计见
-[`DESIGN_stage2_target_time_selection.md`](../../Constuction_guideline/DESIGN_stage2_target_time_selection.md)。
+State。目标时间选择与 Gold State 回放的设计逻辑见
+[`DESIGN_stage2_target_time_selection.md`](../../Constuction_guideline/DESIGN_stage2_target_time_selection.md)；
+Python 接口、CLI、配置、恢复、故障处理、校验与测试说明统一维护在本文。
 
 ## 新版数据流
 
@@ -226,6 +227,42 @@ Gold builder 不再自行发现或抽样 Task，只消费最终 selected targets
 Gold 继续通过 State chain、Event grouping、完整 Pre/Post snapshot、affected / preserved、
 INTRODUCE / REMOVE、same-message final State 和 future leakage 校验。
 
+## Python 接口与文件责任
+
+`gold_state.py` 以纯数据变换和校验为主，网络调用通过注入的 client 完成。文件责任如下：
+
+| 文件 | 责任 |
+|---|---|
+| `Code/stage2/gold_state.py` | index、Candidate / Context / Packet 变换、LLM response 校验、coverage / dedup、review finalize、Gold replay 与校验；不读取环境变量或创建 HTTP client |
+| `Code/stage2_generate_gold_state.py` | CLI、默认路径、JSON / JSONL 原子读写、API client 生命周期、resume 编排和阶段状态报告 |
+| `prompt/t_selection_prompt.md` | LLM 角色、评估维度、历史长度禁用规则和唯一允许的 JSON response schema |
+| `Code/config/stage2_gold_state.json` | Candidate、RQ allowlist、LLM runtime 与 selection cap 配置 |
+| `Code/tests/test_stage2_gold_state.py` | 纯函数、fake client、选择与 Gold regression 测试 |
+
+公开的核心 Python 接口为：
+
+```python
+def validate_selection_inputs(annotation, normalized_project, state_graph) -> None: ...
+def generate_candidate_tasks(annotation, normalized_project, state_graph, config) -> dict: ...
+def build_candidate_contexts(candidates, annotation, normalized_project, state_graph) -> dict: ...
+def build_candidate_packets(candidates, contexts) -> list[dict]: ...
+def validate_llm_evaluation(evaluation, packet, config) -> None: ...
+async def evaluate_candidate_packets(packets, *, api, prompt, config) -> list[dict]: ...
+def select_recommended_candidates(...) -> dict: ...
+def calculate_ai_selection_score(...) -> int: ...
+def build_threshold_selection_statistics(...) -> dict: ...
+def render_threshold_selection_markdown(...) -> str: ...
+def select_ai_candidates_by_score(...) -> dict: ...
+def apply_coverage_and_deduplication(...) -> dict: ...
+def finalize_ai_selected_targets(...) -> dict: ...
+def finalize_selected_targets(...) -> dict: ...
+def build_gold_states(selected_targets, normalized_project, state_graph) -> dict: ...
+```
+
+内部的 `_MessageIndex`、`_AnnotationIndex` 和 `_GraphIndex` 分别负责消息、标注及图索引；
+`TargetSelectionConfig` 集中管理选择配置；`LLMClientProtocol` 允许测试注入 fake client，
+避免凭据、网络或真实输出目录成为单元测试依赖。
+
 ## API 与运行参数
 
 当前实现复用现有 `stage1.api_client.Stage1ApiClient` 的认证、并发、重试、JSON 解析、
@@ -243,6 +280,23 @@ $env:UPWORK_BUDGET_ID="..."
 LLM resume、AI 自动接受、human review 和 finalize 编排。`Code/config/stage2_gold_state.json` 已删除
 旧的 `event_priority`、`position_ratio` 和 `random_seed`，改为候选规则、RQ allowlist、
 LLM 参数与 `max_selected_targets`。
+
+当前配置 schema 如下；旧字段会触发迁移错误，不会被静默忽略：
+
+```json
+{
+  "candidate_event_types": ["MODIFY", "REMOVE", "DEFER", "RESUME", "AMBIGUOUS"],
+  "include_introduce_candidates": true,
+  "include_execution_only_tasks": false,
+  "allowed_rq_targets": ["RQ1", "RQ2", "RQ3", "RQ4"],
+  "max_selected_targets": null,
+  "model": "gpt-5.6-sol",
+  "reasoning_effort": "high",
+  "max_concurrent_requests": 4,
+  "retries": 3,
+  "timeout_seconds": 900
+}
+```
 
 ### 完整命令速查
 
@@ -476,12 +530,102 @@ python Code/stage2_generate_gold_state.py `
 该命令只读取 `candidate_llm_evaluations.jsonl` 并执行本地计数，不读取 API 凭据、
 不调用 LLM，也不改写 Gold State。通常在很短时间内完成。
 
+## Resume、fingerprint 与失败处理
+
+每条 LLM evaluation 保存 `candidate_id`、`packet_sha256`、`prompt_sha256`、`model`、
+`reasoning_effort`、`response`、`usage` 和 `request_id`。默认只复用 fingerprint、model
+参数均一致且已经通过 schema 校验的结果；Packet、prompt、model 或 reasoning effort
+任一变化都会触发重新评估。
+
+失败与恢复遵循以下规则：
+
+- 单个请求按 API client 的 retry policy 重试；
+- 中断后保留已验证的 JSONL 行，下一次运行可 resume；
+- 任一 Candidate 最终没有有效 evaluation 时，停止 automatic selection；
+- 人工复核不完整时可以生成 review packet，但不能生成 final targets 或 Gold；
+- 输入 provenance、future leakage 或 Gold validation 失败时，不写成功状态的最终文件；
+- `--force-evaluation` 保留旧 JSONL，成功后压缩为最新结果；`--no-resume` 从头评估。
+
+常见报错应这样处理：
+
+| 报错类型 | 处理方式 |
+|---|---|
+| 缺少 `UPWORK_API_KEY` / `UPWORK_BUDGET_ID` | 只做离线准备时使用 `--prepare-only`；需要评估时设置凭据 |
+| evaluation fingerprint 不匹配 | 重新运行普通评估，或用 `--force-evaluation` 明确全量重评 |
+| human review 不完整/存在未知 Candidate | 补齐模板中的全部决定，并只引用已生成且已评估的 Candidate |
+| provenance、State 或 future leakage 校验失败 | 回到 Stage 1 annotation / State Graph 修复输入；不要绕过校验生成 Gold |
+| TLS 证书问题 | 优先修复证书环境；`--insecure` 仅用于明确受控的临时环境 |
+
+## 校验清单
+
+输入与 Candidate：
+
+- annotation、normalized project、State Graph 的 project ID 一致；
+- message ID 和 `original_index` 唯一，顺序合法；
+- Stage 1 Event 引用真实消息，且与 Graph provenance 一致；
+- Candidate 是 Client message，包含同消息的完整 Event 集合；
+- Event / Requirement ID 不重复；
+- `history_turn_count == conversation_turn_index - 1`。
+
+Context 与 Packet：
+
+- Pre-state supporting Events 和 Requirement history 都严格早于 target；
+- historical evidence 不晚于 target且不重复；
+- 当前 task 只在 `candidate_task` 出现一次；
+- Packet 大小和 reason 长度符合配置限制。
+
+LLM 与选择：
+
+- 每个 Candidate 恰好有一条有效 evaluation；
+- 枚举、布尔、RQ1–RQ4 allowlist 和回显 ID 严格合法；
+- 推荐条件、AI 总分、threshold 集合、coverage、dedup 和 tie-break 均可复算；
+- 排序不读取 `history_turn_count` 或 conversation position；
+- 人工决定完整、唯一且只引用已知 Candidate。
+
+Gold：
+
+- State chain、完整快照、Event 分组、affected / preserved、INTRODUCE / REMOVE、
+  same-message final State 和 future leakage 校验通过；
+- 每个 Task Gold 引用一个最终 selected target；
+- message / Event / Requirement / history metadata 与选择产物一致；
+- 不为被拒绝、未复核且未通过显式 AI 自动接受的 Candidate 生成 Gold。
+
 ## 测试要求
 
-单元和离线集成测试使用 fake LLM client，不调用真实 API。至少覆盖 Candidate 合并、
-非数字 message ID、history metadata、Pre-task boundary、ambiguity resolution、严格模型
-响应校验、resume fingerprint、coverage / dedup、人工决定和现有 Gold replay regression。
+测试不得依赖真实 LLM API，单元和离线集成测试使用 fake client。覆盖范围包括：
+
+1. Candidate generation：单/多 Requirement、同消息多 Event、纯 INTRODUCE、纯 execution、
+   非 Client message、opaque message ID；
+2. History metadata：首条消息、消息空洞、非数字 ID、`original_index` 不连续但顺序合法；
+3. Context boundary：INTRODUCE 无 Pre-state、同消息多 Event、resolution link、未来泄漏；
+4. LLM validator：缺字段、额外字段、错误 enum、ID 不匹配、推荐逻辑矛盾；
+5. Resume：fingerprint 命中，以及 prompt / packet / model 改变后的失效；
+6. Coverage / dedup：相同 fingerprint、ambiguity pattern、上限不足和稳定 tie-break；
+7. Human review 与 AI auto-accept：决定合法性、0–10 分数、阈值边界和跳过 review；
+8. Threshold report：5–10 各行、49/50/99/100 turn 边界、总数和 Markdown 渲染；
+9. Gold regression 与 CLI integration：State replay、provenance、fake API 全流程产物。
 
 测试套件本身不要求凭据或网络。当前 14 个 Stage 2 Gold/selection 测试与全仓库 93 个
 测试均已通过；`42204309 --prepare-only` 生成了 72 个 Candidate Packets。真实 API
 结果不在单元测试中伪造为生产输出。
+
+运行本模块测试：
+
+```powershell
+python -m unittest Code.tests.test_stage2_gold_state -v
+```
+
+## 实施顺序与完成标准
+
+维护或重构本阶段时，按依赖关系依次处理：message / annotation / graph index，Candidate /
+Context / Packet，prompt 与严格 response validator，API client 与 resume，coverage / dedup /
+human review，selected targets，最后是确定性 Gold replay 与 CLI/测试迁移。
+
+完成标准：
+
+- 旧 position / priority / random sampler 不参与选择；
+- 每个最终 target 可追踪到 Candidate packet、合法 evaluation，以及人工复核或显式 AI 自动接受记录；
+- `history_turn_count` 无损保留到 Gold，但不作为 target value 信号；
+- Gold State 仅由已验证 State Graph 确定性回放；
+- 单元测试、离线端到端测试和 artifact validation 全部通过；
+- 真实 LLM selection 仍是需要显式凭据的生产步骤。

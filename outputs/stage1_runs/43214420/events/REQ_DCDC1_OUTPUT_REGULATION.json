@@ -1,0 +1,127 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 263,
+        "speaker": "client",
+        "text": "3.3V rail (AXP2101 DCDC1, 2A) — this is the main power source whenever the power board is attached:\n\\- ESP32-S3 module\n\\- INA219\n\\- Every I2C sensor (SCD41, BME280, ENS160) through the sensor board\n\\- I2C display\n\\- TTP223, AM312 PIR\n\n5V rail (MT3608 boost, 500mA) — ESP32 GPIO3 controls this rail:\n\\- SPS30 particulate sensor\n\\- ZE08-CH2O formaldehyde sensor\n\\- SK6812 LEDs (when connected to 5V — version-dependent)\n\n3.3V rail (ME6211A LDO, 1A) — active only if the main board's USB-C is connected WITHOUT the power board:\n\\- It supplies the same 3.3V rail listed above. With Schottky diode OR-ing, whichever source is available takes precedence. This is for standalone programming.\n\nBattery (3.7–4.2V) — supplies the AXP2101, which subsequently powers everything listed above.\n\nThe simple rule is that the AXP2101 supplies everything during normal operation. The LDO activates only for programming when the power board is not connected."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "dcdc1_nominal_output_voltage": "3.3V",
+        "dcdc1_rated_output_current": "2A",
+        "normal_operation_role": "main 3.3V power source whenever the power board is attached"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "PMIC"
+        ],
+        "contexts": [
+          "THREE_VOLT_THREE_RAIL",
+          "NORMAL_OPERATION",
+          "BATTERY_OPERATION"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 434,
+        "speaker": "client",
+        "text": "I have two items concerning the power board that I believe are final:\n1\\. Physical power button connection — add a 2-pin JST-[FREELANCER_NAME_002] connector (J\\_PWR\\_BTN) for a panel-mounted momentary button connected to the AXP2101 PWRON pin. Press it to switch on and press it to switch off.\n2\\. DCDC1 output voltage — configure AXP2101 DCDC1 through I2C for 3.4V rather than 3.3V. This will offset the Schottky diode drop in the main board power OR-ing circuit and maintain the 3.3V rail at the proper voltage in all conditions."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "dcdc1_nominal_output_voltage": "3.4V",
+        "downstream_rail_target_voltage": "3.3V",
+        "voltage_compensation_purpose": "offset the main-board Schottky OR-ing diode drop"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 989,
+        "speaker": "client",
+        "text": "They sent me the following today:\nAmong the 3 boards, 2 show abnormal L3 voltage measurements that vary between 0.5V and 2V. The remaining board has an L3 voltage of 3.3V, which is in the normal range."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Factory measurements found L3 fluctuating between 0.5V and 2V on two of three boards, while the remaining board held a normal 3.3V."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 1019,
+        "speaker": "client",
+        "text": "I have started bringing up the 3 integrated board samples. Power works correctly on every board: the 3.3V rail rises to ~3.3V, and the ESP32 operates. However, native USB is completely nonfunctional. None of the boards enumerate on the PC in either normal or forced download mode, regardless of [CLIENT_NAME_002]-C orientation. A known-good development board enumerates correctly using the same cable and port, which rules out the cable."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "During initial bring-up of three integrated board samples, each 3.3V rail rose to approximately 3.3V and powered the ESP32."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 1046,
+        "speaker": "client",
+        "text": "Hi [FREELANCER_NAME_001],\n\nFollowing the rework, USB is now completely functional (U3 removed and the data lines bridged); both boards enumerate and flash correctly. I then tested the power behavior and the AXP2101 on both boards, and the results were identical:\n\n1\\. At idle, DCDC1 outputs 3.16V. The register setting is verified as 3.3V (0x82 reads 0x12), meaning the converter is regulating 4 percent below the target.\n2\\. Every load transient causes the rail to collapse. A SPI flash erase (about a 150mA step) or a WiFi TX burst (300-400mA) pulls the 3.3V rail below 2.5V and hard-resets the ESP32. Disabling the brown-out detector changes nothing, confirming that this is an actual rail collapse. An additional 330uF of external capacitance also has no effect. The board therefore cannot operate standalone from USB.\n3\\. Battery-only power works (VSYS around 3.8V), while a 5V USB input does not. In other words, failure occurs precisely when the buck must regulate, whereas operation near dropout succeeds.\n4\\. Programming DCDC1 to 3.4V through I2C improves things significantly: booting, WiFi serving, and a complete 1.9MB OTA write all succeed. However, the WiFi calibration surge during reboot still makes the rail collapse. There is another unusual issue: on several boots, the 0x82 write was disregarded and the readback remained 0x12, but it latched on a later boot. Writes to other registers verify correctly, and the default VBUS input current limit is 1.5A, so input limiting is not responsible.\n5\\. I swapped L3 for a physically larger 2.2uH inductor with a substantially higher saturation-current rating, but this produced no change whatsoever. The inductor is not at fault, and the original DFE252010F specification was adequate in any case.\n6\\. With continued testing, DCDC1 on board 2 deteriorated gradually and eventually failed completely. With everything disconnected, its output now measures about 265 ohm to GND, indicating leakage in the output stage.\n7\\. Supplying an external 3.3V allows the entire board to run flawlessly for hours, including boot, PSRAM, e-paper, WiFi, web UI, and sensors. All downstream circuitry is healthy.\n\nI therefore suspect the AXP2101 chips themselves, potentially because of a bad batch, counterfeit parts, moisture damage during reflow, or non-standard factory programming. I have requested the sourcing information and lot codes from the factory. On your side, one item worth reviewing is the local input decoupling for the DCDC1 VIN pins in the layout: specifically, whether a capacitor is positioned close to the pin or whether there is only the more distant bulk group.\n\nCan you think of another explanation consistent with all these observations? Hi [FREELANCER_NAME_001],\n\nFollowing the rework, USB is now completely functional (U3 removed and the data lines bridged); both boards enumerate and flash correctly. I then tested the power behavior and the AXP2101 on both boards, and the results were identical:\n\n1\\. At idle, DCDC1 outputs 3.16V. The register setting is verified as 3.3V (0x82 reads 0x12), meaning the converter is regulating 4 percent below the target.\n2\\. Every load transient causes the rail to collapse. A SPI flash erase (about a 150mA step) or a WiFi TX burst (300-400mA) pulls the 3.3V rail below 2.5V and hard-resets the ESP32. Disabling the brown-out detector changes nothing, confirming that this is an actual rail collapse. An additional 330uF of external capacitance also has no effect. The board therefore cannot operate standalone from USB.\n3\\. Battery-only power works (VSYS around 3.8V), while a 5V USB input does not. In other words, failure occurs precisely when the buck must regulate, whereas operation near dropout succeeds.\n4\\. Programming DCDC1 to 3.4V through I2C improves things significantly: booting, WiFi serving, and a complete 1.9MB OTA write all succeed. However, the WiFi calibration surge during reboot still makes the rail collapse. There is another unusual issue: on several boots, the 0x82 write was disregarded and the readback remained 0x12, but it latched on a later boot. Writes to other registers verify correctly, and the default VBUS input current limit is 1.5A, so input limiting is not responsible.\n5\\. I swapped L3 for a physically larger 2.2uH inductor with a substantially higher saturation-current rating, but this produced no change whatsoever. The inductor is not at fault, and the original DFE252010F specification was adequate in any case.\n6\\. With continued testing, DCDC1 on board 2 deteriorated gradually and eventually failed completely. With everything disconnected, its output now measures about 265 ohm to GND, indicating leakage in the output stage.\n7\\. Supplying an external 3.3V allows the entire board to run flawlessly for hours, including boot, PSRAM, e-paper, WiFi, web UI, and sensors. All downstream circuitry is healthy.\n\nI therefore suspect the AXP2101 chips themselves, potentially because of a bad batch, counterfeit parts, moisture damage during reflow, or non-standard factory programming. I have requested the sourcing information and lot codes from the factory. On your side, one item worth reviewing is the local input decoupling for the DCDC1 VIN pins in the layout: specifically, whether a capacitor is positioned close to the pin or whether there is only the more distant bulk group.\n\nCan you think of another explanation consistent with all these observations?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Under USB power, DCDC1 regulated at 3.16V instead of its programmed target and collapsed below 2.5V during flash and WiFi load transients, resetting the ESP32. Programming 3.4V improved operation but did not prevent the reboot surge collapse, the setting sometimes failed to latch, and one board's DCDC1 later degraded to complete failure."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 967,
+      "suggested_requirement_id": "REQ_STANDALONE_USB_3V3_POWER",
+      "description": "The report that USB power produced 0V at the sensor pins primarily concerns the USB-powered 3.3V path rather than DCDC1 regulation specifically."
+    },
+    {
+      "message_id": 1019,
+      "suggested_requirement_id": "REQ_NATIVE_USB_PROGRAMMING",
+      "description": "The native USB enumeration failure in this message belongs to the Native USB Programming Requirement; only the explicit 3.3V rail result applies to the target Requirement."
+    },
+    {
+      "message_id": 1046,
+      "suggested_requirement_id": "REQ_NATIVE_USB_PROGRAMMING",
+      "description": "The successful USB enumeration and flashing after removing U3 is execution evidence for Native USB Programming, separate from the DCDC1 observations."
+    },
+    {
+      "message_id": 1046,
+      "suggested_requirement_id": "REQ_POWER_DECOUPLING_LAYOUT",
+      "description": "The request to review local DCDC1 VIN input-capacitor placement may affect the separate Power Converter Decoupling Layout Requirement."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

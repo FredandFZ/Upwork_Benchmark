@@ -1,0 +1,489 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-07-28",
+      "end": "2026-07-28",
+      "milestone": null,
+      "phase_label": "Feature scope and milestone planning"
+    },
+    {
+      "session_id": "S2",
+      "start": "2026-07-29",
+      "end": "2026-07-29",
+      "milestone": null,
+      "phase_label": "Access handoff and technical scope refinement"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "AI_AGENT_CAPABILITIES",
+      "title": "AI Agent Capabilities and Constraints"
+    },
+    {
+      "family_id": "MONETIZATION",
+      "title": "Usage and Monetization"
+    },
+    {
+      "family_id": "PLATFORM_ANALYTICS",
+      "title": "Platform Analytics"
+    },
+    {
+      "family_id": "WEBSITE_EXPERIENCE",
+      "title": "Website Experience"
+    },
+    {
+      "family_id": "REPOSITORY_MAINTENANCE",
+      "title": "Repository Maintenance and Isolation"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_AI_PROVIDER_POLICY",
+      "title": "Avelin AI Provider Policy",
+      "family_id": "AI_AGENT_CAPABILITIES",
+      "definition": "Use the existing Avelin AI integration for platform AI workflows and exclude OpenAI from the production implementation.",
+      "anchor_message_ids": [
+        8,
+        12,
+        15,
+        16,
+        19
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "AI_INTEGRATION"
+        ],
+        "contexts": [
+          "AI_PLATFORM"
+        ]
+      },
+      "boundary_note": "This is a cross-cutting provider constraint that can change independently from the behavior of mood boards, retrieval, or selfie styling.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_STYLING_AGENT_RESPONSE_QUALITY",
+      "title": "Styling Agent Response Enhancement",
+      "family_id": "AI_AGENT_CAPABILITIES",
+      "definition": "Improve the Styling Agent's prompts, response structure, and presented results within the existing agent flow.",
+      "anchor_message_ids": [
+        7,
+        11,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "FRONTEND",
+          "AI_INTEGRATION"
+        ],
+        "contexts": [
+          "STYLING_AGENT"
+        ]
+      },
+      "boundary_note": "Covers general Styling Agent prompt and result quality; mood-board generation and shopping-link retrieval have separate outputs and acceptance criteria.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+      "title": "AI Styling Mood Board Generation",
+      "family_id": "AI_AGENT_CAPABILITIES",
+      "definition": "Allow users to prompt the Styling Agent to generate complete fashion mood boards through Avelin AI and present the generated result in the existing interface.",
+      "anchor_message_ids": [
+        7,
+        8,
+        10,
+        11,
+        43,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "FRONTEND",
+          "AI_INTEGRATION",
+          "UI_UX"
+        ],
+        "contexts": [
+          "STYLING_AGENT",
+          "MOOD_BOARD"
+        ]
+      },
+      "boundary_note": "Backend prompting, response formatting, and UI presentation are coupled implementation dimensions of one generated mood-board behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FASHION_WEB_RETRIEVAL",
+      "title": "Expanded Fashion Web Retrieval",
+      "family_id": "AI_AGENT_CAPABILITIES",
+      "definition": "Improve agent retrieval so results include more relevant fashion sources and shopping links.",
+      "anchor_message_ids": [
+        7,
+        8,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "AI_INTEGRATION"
+        ],
+        "contexts": [
+          "STYLING_AGENT",
+          "WEB_RETRIEVAL",
+          "SHOPPING_LINKS"
+        ]
+      },
+      "boundary_note": "Source expansion and shopping-link return are attributes of one retrieval mechanism, while generated mood boards remain independently testable.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+      "title": "Selfie Styling Capability Evaluation",
+      "family_id": "AI_AGENT_CAPABILITIES",
+      "definition": "Prompt Avelin AI through the backend with selfie-styling inputs, produce image outputs, and submit the results for quality review before deciding whether to build the complete feature.",
+      "anchor_message_ids": [
+        8,
+        16,
+        27,
+        43,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "BACKEND",
+          "AI_INTEGRATION"
+        ],
+        "contexts": [
+          "SELFIE_STYLING"
+        ]
+      },
+      "boundary_note": "The independently requested deliverable is the backend evaluation and review output; a production selfie-styling feature is excluded until the client makes the contingent development decision.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AI_USAGE_LEDGER",
+      "title": "Per-Account AI Usage Ledger",
+      "family_id": "MONETIZATION",
+      "definition": "Record Avelin AI consumption in Supabase by user account, agent, prompt type, token usage, and estimated cost.",
+      "anchor_message_ids": [
+        7,
+        34,
+        36,
+        43,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "AI_INTEGRATION"
+        ],
+        "contexts": [
+          "AI_USAGE"
+        ]
+      },
+      "boundary_note": "The tracked dimensions are attributes of one usage-ledger mechanism; credit balances, subscription entitlements, and payment processing are separate behaviors.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CREDIT_USAGE_SYSTEM",
+      "title": "Credit-Based Usage System",
+      "family_id": "MONETIZATION",
+      "definition": "Represent and enforce AI usage through account-level credits derived from tracked consumption.",
+      "anchor_message_ids": [
+        7,
+        27,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE"
+        ],
+        "contexts": [
+          "CREDIT_SYSTEM",
+          "AI_USAGE"
+        ]
+      },
+      "boundary_note": "Credit accounting is independently enforceable from raw usage measurement, subscription-tier configuration, and Stripe payment processing.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SUBSCRIPTION_TIERS",
+      "title": "Usage-Based Subscription Tiers",
+      "family_id": "MONETIZATION",
+      "definition": "Provide multiple subscription tiers with different prompt or usage limits based on measured Avelin AI consumption.",
+      "anchor_message_ids": [
+        7,
+        27,
+        34,
+        36,
+        41,
+        44
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "SUBSCRIPTIONS",
+          "AI_USAGE"
+        ]
+      },
+      "boundary_note": "Tier limits and usage-derived pricing form one entitlement mechanism; collecting payments and maintaining credit balances can evolve independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_STRIPE_PAYMENT_INTEGRATION",
+      "title": "Stripe Payment Integration",
+      "family_id": "MONETIZATION",
+      "definition": "Integrate Stripe payment APIs to support the platform's paid subscription plans.",
+      "anchor_message_ids": [
+        7,
+        27,
+        34,
+        41,
+        44,
+        70,
+        74,
+        83
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "STRIPE_PAYMENTS",
+          "SUBSCRIPTIONS"
+        ]
+      },
+      "boundary_note": "Covers payment-provider integration only; usage measurement, credit accounting, and subscription limits are independently changing requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_GOOGLE_ANALYTICS_4",
+      "title": "Google Analytics 4 Integration",
+      "family_id": "PLATFORM_ANALYTICS",
+      "definition": "Integrate Google Analytics 4 tracking across the platform.",
+      "anchor_message_ids": [
+        41,
+        43,
+        44,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "PLATFORM_ANALYTICS"
+        ]
+      },
+      "boundary_note": "GA4 has a provider-specific implementation and can be enabled, modified, or verified independently from other analytics tools.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MICROSOFT_CLARITY",
+      "title": "Microsoft Clarity Integration",
+      "family_id": "PLATFORM_ANALYTICS",
+      "definition": "Integrate Microsoft Clarity behavior analytics across the platform.",
+      "anchor_message_ids": [
+        41,
+        43,
+        44,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PLATFORM_ANALYTICS"
+        ]
+      },
+      "boundary_note": "Clarity has an independent provider integration and verification path from GA4 and attribution tooling.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AFFILIATE_ATTRIBUTION_TRACKING",
+      "title": "Affiliate and Campaign Attribution Tracking",
+      "family_id": "PLATFORM_ANALYTICS",
+      "definition": "Integrate two or three additional analytics or attribution tools for affiliate marketing and campaign tracking.",
+      "anchor_message_ids": [
+        41,
+        43,
+        44,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "AFFILIATE_MARKETING",
+          "CAMPAIGN_ATTRIBUTION"
+        ]
+      },
+      "boundary_note": "The exact additional tools are unresolved parameters of one attribution objective; GA4 and Clarity are explicitly named independent integrations.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_SHOWROOM_CONCIERGE_UX",
+      "title": "Showroom and Concierge Journey Clarity",
+      "family_id": "WEBSITE_EXPERIENCE",
+      "definition": "Make the connected showroom and concierge flow easier for users and investors to understand and navigate.",
+      "anchor_message_ids": [
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "SHOWROOM",
+          "CONCIERGE"
+        ]
+      },
+      "boundary_note": "The current evidence frames showroom and concierge as one connected explanatory journey; split them later only if screen-specific requirements or independent trajectories emerge.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_WEBSITE_UI_COPY_UPDATES",
+      "title": "Website UI and Copy Updates",
+      "family_id": "WEBSITE_EXPERIENCE",
+      "definition": "Apply the requested minor user-interface and frontend text changes throughout the platform.",
+      "anchor_message_ids": [
+        41,
+        42,
+        43,
+        44,
+        70,
+        74,
+        116
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "WEBSITE"
+        ]
+      },
+      "boundary_note": "The available history establishes a real UI and copy obligation but does not yet provide enough screen-specific detail for defensible splitting.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_SHOPLINE_WIDGET",
+      "title": "Shopline App Store Widget",
+      "family_id": null,
+      "definition": "Develop a Shopline App Store widget that retrieves its primary content from the existing GIA platform.",
+      "anchor_message_ids": [
+        24,
+        25,
+        27,
+        29,
+        41,
+        43,
+        44,
+        45
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "SHOPLINE_WIDGET"
+        ]
+      },
+      "boundary_note": "OAuth, product/content APIs, publishing, webhooks, and review compliance are currently integration dimensions of one widget rather than separately confirmed product behaviors.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OBSOLETE_BACKEND_REPOSITORY_CLEANUP",
+      "title": "Obsolete Backend Repository Cleanup",
+      "family_id": "REPOSITORY_MAINTENANCE",
+      "definition": "Delete obsolete backend versions from the project's repository set when repository changes are authorized.",
+      "anchor_message_ids": [
+        110,
+        112,
+        113
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "BACKEND",
+          "SOURCE_CONTROL"
+        ],
+        "contexts": [
+          "BACKEND_REPOSITORIES"
+        ]
+      },
+      "boundary_note": "Repository deletion is a concrete cleanup obligation distinct from the rule governing where active development work may occur.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MVP_REPOSITORY_ISOLATION",
+      "title": "MVP Repository Development Isolation",
+      "family_id": "REPOSITORY_MAINTENANCE",
+      "definition": "Confine current development to the designated MVP frontend and backend repositories and perform changes on separate working branches.",
+      "anchor_message_ids": [
+        110,
+        112,
+        113,
+        114,
+        115
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "SOURCE_CONTROL"
+        ],
+        "contexts": [
+          "MVP_DEVELOPMENT"
+        ]
+      },
+      "boundary_note": "This requirement governs active development isolation; deleting obsolete repository versions is a separate action with its own lifecycle.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": []
+}

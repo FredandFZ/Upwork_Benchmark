@@ -1,0 +1,638 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-07-28",
+      "end": "2026-07-28",
+      "milestone": null,
+      "phase_label": "Initial page-speed diagnosis and target clarification"
+    },
+    {
+      "session_id": "S2",
+      "start": "2026-07-28",
+      "end": "2026-07-30",
+      "milestone": null,
+      "phase_label": "South Pointe malware remediation, security hardening, and speed optimization"
+    },
+    {
+      "session_id": "S3",
+      "start": "2026-07-30",
+      "end": "2026-07-31",
+      "milestone": null,
+      "phase_label": "Oakbridge site restoration and malware remediation"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "PAGE_SPEED_OPTIMIZATION",
+      "title": "Page Speed Optimization"
+    },
+    {
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "title": "South Pointe Security Remediation"
+    },
+    {
+      "family_id": "OAKBRIDGE_SECURITY",
+      "title": "Oakbridge Security Remediation"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_ORIGINAL_SITE_PAGE_SPEED",
+      "title": "Original Site Page Speed",
+      "family_id": "PAGE_SPEED_OPTIMIZATION",
+      "definition": "Visitor-facing pages at the original site URL should load quickly after diagnosed image, caching, asset, plugin, or infrastructure issues are corrected.",
+      "anchor_message_ids": [
+        2,
+        18,
+        19,
+        36,
+        99,
+        101,
+        121,
+        122,
+        123
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "ORIGINAL_SITE",
+          "LEGACY_PAGES"
+        ]
+      },
+      "boundary_note": "Covers runtime performance of the original and legacy site experience; RIB is a separately targetable test experience, while image, cache, font, and plugin findings are implementation factors rather than separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_RIB_PAGE_SPEED",
+      "title": "RIB Test Experience Page Speed",
+      "family_id": "PAGE_SPEED_OPTIMIZATION",
+      "definition": "The independently evaluated RIB test experience should have acceptable visitor-facing load performance on mobile and desktop.",
+      "anchor_message_ids": [
+        6,
+        9,
+        10,
+        11,
+        18,
+        19,
+        121,
+        122,
+        123
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "RIB_TEST",
+          "MOBILE",
+          "DESKTOP"
+        ]
+      },
+      "boundary_note": "RIB is kept separate from the original-site performance Requirement because the client explicitly targeted both and RIB had its own cache and design-related performance findings; mobile and desktop remain contexts of one RIB mechanism.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_LAYOUT_INTEGRITY",
+      "title": "South Pointe Layout and Formatting Integrity",
+      "family_id": null,
+      "definition": "South Pointe pages should retain their intended fonts, formatting, and rendered layout when hosting, cache, or optimization changes are applied.",
+      "anchor_message_ids": [
+        28,
+        31,
+        32
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "LEGACY_PAGES"
+        ]
+      },
+      "boundary_note": "This is independent of load speed because formatting can regress even when performance improves; Thrive migration decisions are not included unless they become committed.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_MALWARE_ERADICATION",
+      "title": "South Pointe Malware and Backdoor Eradication",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "Remove malicious code, fake plugins, backdoors, and replicator files from South Pointe and establish a clean site installation.",
+      "anchor_message_ids": [
+        83,
+        87,
+        93,
+        94,
+        99,
+        106,
+        127
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "STORAGE",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "MALWARE_REMEDIATION"
+        ]
+      },
+      "boundary_note": "Covers eradication of malicious executable artifacts; spam data deletion, account cleanup, preventive monitoring, and legitimate-plugin updates have independently testable outcomes and remain separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_ADMIN_ACCOUNT_CONTROL",
+      "title": "South Pointe Authorized Administrator Accounts",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "South Pointe administrator access should be restricted to the client-approved accounts, with unauthorized and hidden accounts removed or stripped of access.",
+      "anchor_message_ids": [
+        47,
+        51,
+        56,
+        59,
+        60,
+        78,
+        83,
+        106
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "DATABASE",
+          "BACKEND"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "ADMIN_ACCESS"
+        ]
+      },
+      "boundary_note": "The approved-account allowlist and unauthorized-account removal form one access-control mechanism; credential rotation is separately actionable and is not merged into this Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_SPAM_CONTENT_CLEANUP",
+      "title": "South Pointe Malicious Content Cleanup",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "Delete malware-generated casino pages, posts, tags, and related unauthorized content while preserving legitimate site content.",
+      "anchor_message_ids": [
+        39,
+        40,
+        41,
+        42,
+        44,
+        59,
+        60,
+        78,
+        106,
+        127
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "DATABASE",
+          "BACKEND",
+          "STORAGE"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "MALICIOUS_CONTENT"
+        ]
+      },
+      "boundary_note": "Database content cleanup is distinct from removing executable malware and from removing already indexed spam URLs from external search results.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_SECURITY_MONITORING",
+      "title": "South Pointe Automated Security Protection",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "Configure ongoing automated malware scanning and attack blocking for South Pointe through Wordfence or an equivalent security control.",
+      "anchor_message_ids": [
+        58,
+        59,
+        60,
+        80,
+        103,
+        106,
+        127,
+        128,
+        144
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "SECURITY_MONITORING"
+        ]
+      },
+      "boundary_note": "Covers ongoing automated detection and blocking, not the one-time eradication of the discovered infection or updates to vulnerable plugins.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_PLUGIN_HARDENING",
+      "title": "South Pointe Vulnerable Plugin Hardening",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "Update, replace, remove, or disable outdated, altered, unlicensed, or high-risk South Pointe plugins that could permit reinfection.",
+      "anchor_message_ids": [
+        83,
+        93,
+        106,
+        109,
+        110,
+        117,
+        127
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "CMS"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "PLUGIN_SECURITY"
+        ]
+      },
+      "boundary_note": "Includes the immediate handling of vulnerable Thrive Apprentice and other risky plugins; a future migration of page-builder content and complete Thrive retirement would be a separate architecture Requirement if firmly accepted.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_SEARCH_SPAM_CLEANUP",
+      "title": "South Pointe Search-Index Spam Cleanup",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "Submit and complete removal of malware-generated South Pointe URLs from search results to prevent continuing search-trust and ranking damage.",
+      "anchor_message_ids": [
+        106,
+        107,
+        108,
+        127
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "SEARCH_CONSOLE"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "SEARCH_INDEX_CLEANUP"
+        ]
+      },
+      "boundary_note": "This external search-index cleanup can succeed or fail independently of deleting spam records from WordPress and therefore remains separate.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_CREDENTIAL_ROTATION",
+      "title": "South Pointe Administrative Credential Rotation",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "Rotate WordPress and WP Engine administrative passwords after the security reset so previously exposed credentials no longer grant access.",
+      "anchor_message_ids": [
+        106,
+        109,
+        111
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "AUTH",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "CREDENTIAL_RESET"
+        ]
+      },
+      "boundary_note": "Credential rotation is a one-time authentication configuration action distinct from deciding which administrator accounts may continue to exist.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_COMMENTS_DISABLED",
+      "title": "South Pointe Commenting Disabled",
+      "family_id": "SOUTH_POINTE_SECURITY",
+      "definition": "Disable public WordPress commenting because commenting is not used by the South Pointe business site.",
+      "anchor_message_ids": [
+        76,
+        77,
+        80
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "CMS"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "PUBLIC_COMMENTS"
+        ]
+      },
+      "boundary_note": "Comment availability can be independently enabled or disabled and is not merely an attribute of malware removal; client acceptance is inferred from the direct response to the unique disablement proposal.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_SOUTH_POINTE_CONTACT_FORM_DELIVERY",
+      "title": "South Pointe Contact Form Delivery",
+      "family_id": null,
+      "definition": "South Pointe contact-form submissions should continue reaching the intended mailbox after security and optimization changes.",
+      "anchor_message_ids": [
+        106,
+        109
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "EMAIL"
+        ],
+        "contexts": [
+          "SOUTH_POINTE_SITE",
+          "CONTACT_FORM"
+        ]
+      },
+      "boundary_note": "The messages request testing, but they also state the independently testable underlying product behavior that lead-delivery must continue; the test activity itself is not a separate Requirement.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_PAGE_AND_LAYOUT_RESTORATION",
+      "title": "Oakbridge Page and Layout Restoration",
+      "family_id": null,
+      "definition": "Restore Oakbridge's legitimate pages, posts, theme rendering, and site layout after malware moved content to Trash and caused blank pages.",
+      "anchor_message_ids": [
+        129,
+        140,
+        158,
+        163,
+        164,
+        166,
+        167,
+        168
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX",
+          "DATABASE",
+          "CMS"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "PAGE_RESTORATION"
+        ]
+      },
+      "boundary_note": "Covers restoration and rendering of legitimate content; deleting injected spam and eradicating malicious code are separate outcomes that can proceed independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_MALWARE_ERADICATION",
+      "title": "Oakbridge Malware and Backdoor Eradication",
+      "family_id": "OAKBRIDGE_SECURITY",
+      "definition": "Remove malicious theme code, backdoors, infected files, and other executable malware from Oakbridge and establish a clean installation.",
+      "anchor_message_ids": [
+        140,
+        148,
+        149,
+        158,
+        162,
+        163,
+        166,
+        167,
+        174
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "STORAGE",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "MALWARE_REMEDIATION"
+        ]
+      },
+      "boundary_note": "Executable malware removal is separated from restoring trashed pages, removing unauthorized accounts, cleaning spam data, and configuring future protection.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_ADMIN_ACCOUNT_CONTROL",
+      "title": "Oakbridge Authorized Administrator Accounts",
+      "family_id": "OAKBRIDGE_SECURITY",
+      "definition": "Retain only the client-authorized Oakbridge administrator account and remove hidden, fake, or otherwise unauthorized users.",
+      "anchor_message_ids": [
+        146,
+        147,
+        154,
+        156,
+        167
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "DATABASE",
+          "BACKEND"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "ADMIN_ACCESS"
+        ]
+      },
+      "boundary_note": "The authorized-account allowlist and hidden-user cleanup form one account-control mechanism; password rotation remains a separate one-time security action.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_SPAM_CONTENT_CLEANUP",
+      "title": "Oakbridge Malicious Content Cleanup",
+      "family_id": "OAKBRIDGE_SECURITY",
+      "definition": "Remove malware-generated posts and other unauthorized spam content from Oakbridge while preserving or restoring legitimate pages.",
+      "anchor_message_ids": [
+        158,
+        162,
+        163,
+        167
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "DATABASE",
+          "BACKEND",
+          "STORAGE"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "MALICIOUS_CONTENT"
+        ]
+      },
+      "boundary_note": "Injected-content deletion is distinct from restoring legitimate pages and from removing externally indexed spam URLs.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_SECURITY_MONITORING",
+      "title": "Oakbridge Automated Security Protection",
+      "family_id": "OAKBRIDGE_SECURITY",
+      "definition": "Configure Wordfence or equivalent automated scanning and attack blocking to protect Oakbridge after cleanup.",
+      "anchor_message_ids": [
+        141,
+        142,
+        144,
+        145,
+        167,
+        174
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "SECURITY_MONITORING"
+        ]
+      },
+      "boundary_note": "Ongoing monitoring and blocking are independently maintained after one-time malware eradication and therefore form a separate Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_PLUGIN_HARDENING",
+      "title": "Oakbridge Vulnerable Plugin Hardening",
+      "family_id": "OAKBRIDGE_SECURITY",
+      "definition": "Clean, update, replace, disable, or remove Oakbridge plugins and theme components whose outdated or altered state presents a security risk.",
+      "anchor_message_ids": [
+        140,
+        143,
+        148,
+        163,
+        167
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "CMS"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "PLUGIN_SECURITY",
+          "THEME_SECURITY"
+        ]
+      },
+      "boundary_note": "Hardening legitimate but vulnerable components is separate from deleting already implanted backdoors and can require future maintenance after the current infection is clean.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_SEARCH_SPAM_CLEANUP",
+      "title": "Oakbridge Search-Index Spam Cleanup",
+      "family_id": "OAKBRIDGE_SECURITY",
+      "definition": "Use the Oakbridge Search Console property to submit malware-generated URLs for removal from search results.",
+      "anchor_message_ids": [
+        167,
+        169,
+        170,
+        171,
+        172,
+        173
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "SEARCH_CONSOLE"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "SEARCH_INDEX_CLEANUP"
+        ]
+      },
+      "boundary_note": "Search Console access is a prerequisite rather than its own Requirement; the independently requested deliverable is removal submission for indexed malicious URLs.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_CREDENTIAL_ROTATION",
+      "title": "Oakbridge Administrative Credential Rotation",
+      "family_id": "OAKBRIDGE_SECURITY",
+      "definition": "Change Oakbridge administrative credentials after malware cleanup so potentially exposed passwords no longer provide access.",
+      "anchor_message_ids": [
+        167
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "AUTH"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "CREDENTIAL_RESET"
+        ]
+      },
+      "boundary_note": "Password rotation is an independently executable authentication change and is separate from removing unauthorized user records.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_OAKBRIDGE_CONTACT_FORM_DELIVERY",
+      "title": "Oakbridge Contact Form Functionality",
+      "family_id": null,
+      "definition": "Oakbridge contact forms should remain operational after backup restoration and malware cleanup.",
+      "anchor_message_ids": [
+        167
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "EMAIL"
+        ],
+        "contexts": [
+          "OAKBRIDGE_SITE",
+          "CONTACT_FORM"
+        ]
+      },
+      "boundary_note": "The instruction to test each form reveals an independently testable underlying product behavior; generic testing activity is not modeled as a Requirement.",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        80,
+        81
+      ],
+      "description": "XML-RPC was reported disabled, but the generic client acknowledgement does not safely establish whether this independently configurable restriction became a client-confirmed persistent Requirement.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        110,
+        114,
+        116,
+        117
+      ],
+      "description": "The history discusses possibly migrating legacy pages to Elementor and later removing Thrive, but it is unclear whether full Thrive retirement was committed or remained a tentative future option; immediate Thrive Apprentice risk mitigation is covered by plugin hardening.",
+      "confidence": "LOW"
+    }
+  ]
+}

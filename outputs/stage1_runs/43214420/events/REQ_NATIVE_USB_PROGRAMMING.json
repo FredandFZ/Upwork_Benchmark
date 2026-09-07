@@ -1,0 +1,157 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NATIVE_USB_PROGRAMMING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 51,
+        "speaker": "client",
+        "text": "Okay, please ensure it is a standard one that can be sourced easily. A simple test is whether it is available on AliExpress; if so, it is acceptable."
+      },
+      "supporting_message_ids": [
+        50
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "usb_data_lines": [
+          "D+",
+          "D-"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "USB"
+        ],
+        "contexts": [
+          "USB_DATA"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 1019,
+        "speaker": "client",
+        "text": "I have started bringing up the 3 integrated board samples. Power works correctly on every board: the 3.3V rail rises to ~3.3V, and the ESP32 operates. However, native USB is completely nonfunctional. None of the boards enumerate on the PC in either normal or forced download mode, regardless of [CLIENT_NAME_002]-C orientation. A known-good development board enumerates correctly using the same cable and port, which rules out the cable."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "required_enumeration_modes": [
+          "normal",
+          "forced_download"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": [
+          "USB",
+          "MCU"
+        ],
+        "contexts": [
+          "USB_DATA",
+          "PROGRAMMING",
+          "USB_ENUMERATION"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 1019,
+        "speaker": "client",
+        "text": "I have started bringing up the 3 integrated board samples. Power works correctly on every board: the 3.3V rail rises to ~3.3V, and the ESP32 operates. However, native USB is completely nonfunctional. None of the boards enumerate on the PC in either normal or forced download mode, regardless of [CLIENT_NAME_002]-C orientation. A known-good development board enumerates correctly using the same cable and port, which rules out the cable."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "None of the three integrated boards enumerated in normal or forced download mode, while a known-good development board worked with the same cable and port."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 1026,
+        "speaker": "client",
+        "text": "Understood. I removed U3 and shorted the D pins, and it is working now."
+      },
+      "supporting_message_ids": [
+        1019,
+        1020,
+        1021,
+        1022,
+        1025
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Native USB worked on the reworked sample after U3 was removed and the USB data lines were bridged."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 1046,
+        "speaker": "client",
+        "text": "Hi [FREELANCER_NAME_001],\n\nFollowing the rework, USB is now completely functional (U3 removed and the data lines bridged); both boards enumerate and flash correctly. I then tested the power behavior and the AXP2101 on both boards, and the results were identical:\n\n1\\. At idle, DCDC1 outputs 3.16V. The register setting is verified as 3.3V (0x82 reads 0x12), meaning the converter is regulating 4 percent below the target.\n2\\. Every load transient causes the rail to collapse. A SPI flash erase (about a 150mA step) or a WiFi TX burst (300-400mA) pulls the 3.3V rail below 2.5V and hard-resets the ESP32. Disabling the brown-out detector changes nothing, confirming that this is an actual rail collapse. An additional 330uF of external capacitance also has no effect. The board therefore cannot operate standalone from USB.\n3\\. Battery-only power works (VSYS around 3.8V), while a 5V USB input does not. In other words, failure occurs precisely when the buck must regulate, whereas operation near dropout succeeds.\n4\\. Programming DCDC1 to 3.4V through I2C improves things significantly: booting, WiFi serving, and a complete 1.9MB OTA write all succeed. However, the WiFi calibration surge during reboot still makes the rail collapse. There is another unusual issue: on several boots, the 0x82 write was disregarded and the readback remained 0x12, but it latched on a later boot. Writes to other registers verify correctly, and the default VBUS input current limit is 1.5A, so input limiting is not responsible.\n5\\. I swapped L3 for a physically larger 2.2uH inductor with a substantially higher saturation-current rating, but this produced no change whatsoever. The inductor is not at fault, and the original DFE252010F specification was adequate in any case.\n6\\. With continued testing, DCDC1 on board 2 deteriorated gradually and eventually failed completely. With everything disconnected, its output now measures about 265 ohm to GND, indicating leakage in the output stage.\n7\\. Supplying an external 3.3V allows the entire board to run flawlessly for hours, including boot, PSRAM, e-paper, WiFi, web UI, and sensors. All downstream circuitry is healthy.\n\nI therefore suspect the AXP2101 chips themselves, potentially because of a bad batch, counterfeit parts, moisture damage during reflow, or non-standard factory programming. I have requested the sourcing information and lot codes from the factory. On your side, one item worth reviewing is the local input decoupling for the DCDC1 VIN pins in the layout: specifically, whether a capacitor is positioned close to the pin or whether there is only the more distant bulk group.\n\nCan you think of another explanation consistent with all these observations? Hi [FREELANCER_NAME_001],\n\nFollowing the rework, USB is now completely functional (U3 removed and the data lines bridged); both boards enumerate and flash correctly. I then tested the power behavior and the AXP2101 on both boards, and the results were identical:\n\n1\\. At idle, DCDC1 outputs 3.16V. The register setting is verified as 3.3V (0x82 reads 0x12), meaning the converter is regulating 4 percent below the target.\n2\\. Every load transient causes the rail to collapse. A SPI flash erase (about a 150mA step) or a WiFi TX burst (300-400mA) pulls the 3.3V rail below 2.5V and hard-resets the ESP32. Disabling the brown-out detector changes nothing, confirming that this is an actual rail collapse. An additional 330uF of external capacitance also has no effect. The board therefore cannot operate standalone from USB.\n3\\. Battery-only power works (VSYS around 3.8V), while a 5V USB input does not. In other words, failure occurs precisely when the buck must regulate, whereas operation near dropout succeeds.\n4\\. Programming DCDC1 to 3.4V through I2C improves things significantly: booting, WiFi serving, and a complete 1.9MB OTA write all succeed. However, the WiFi calibration surge during reboot still makes the rail collapse. There is another unusual issue: on several boots, the 0x82 write was disregarded and the readback remained 0x12, but it latched on a later boot. Writes to other registers verify correctly, and the default VBUS input current limit is 1.5A, so input limiting is not responsible.\n5\\. I swapped L3 for a physically larger 2.2uH inductor with a substantially higher saturation-current rating, but this produced no change whatsoever. The inductor is not at fault, and the original DFE252010F specification was adequate in any case.\n6\\. With continued testing, DCDC1 on board 2 deteriorated gradually and eventually failed completely. With everything disconnected, its output now measures about 265 ohm to GND, indicating leakage in the output stage.\n7\\. Supplying an external 3.3V allows the entire board to run flawlessly for hours, including boot, PSRAM, e-paper, WiFi, web UI, and sensors. All downstream circuitry is healthy.\n\nI therefore suspect the AXP2101 chips themselves, potentially because of a bad batch, counterfeit parts, moisture damage during reflow, or non-standard factory programming. I have requested the sourcing information and lot codes from the factory. On your side, one item worth reviewing is the local input decoupling for the DCDC1 VIN pins in the layout: specifically, whether a capacitor is positioned close to the pin or whether there is only the more distant bulk group.\n\nCan you think of another explanation consistent with all these observations?"
+      },
+      "supporting_message_ids": [
+        1026
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Following U3 removal and data-line bridging, both tested boards enumerated and flashed correctly."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 53,
+      "suggested_requirement_id": "REQ_COMPONENT_SOURCEABILITY",
+      "description": "The accepted connector price and compatible-alternative constraints concern production component sourceability rather than native USB behavior."
+    },
+    {
+      "message_id": 1020,
+      "suggested_requirement_id": "REQ_USB_ESD_PROTECTION",
+      "description": "The incorrect USBLC6 pin-5 connection and its clamping effect concern the ESD protection implementation."
+    },
+    {
+      "message_id": 1022,
+      "suggested_requirement_id": "REQ_USB_ESD_PROTECTION",
+      "description": "The confirmed U3 wiring defect is target-specific evidence for the USB ESD protection Requirement."
+    },
+    {
+      "message_id": 1030,
+      "suggested_requirement_id": "REQ_USB_ESD_PROTECTION",
+      "description": "The permanent correction separating U3 VBUS and GND while retaining protection belongs to the USB ESD protection Requirement."
+    },
+    {
+      "message_id": 1031,
+      "suggested_requirement_id": "REQ_USB_ESD_PROTECTION",
+      "description": "The freelancer's commitment to make the permanent U3 correction is an implementation claim for USB ESD protection."
+    },
+    {
+      "message_id": 1043,
+      "suggested_requirement_id": "REQ_USB_ESD_PROTECTION",
+      "description": "The context-resolved 'Fixed' claim refers to the U3 symbol and net correction, not independently verified native USB operation."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

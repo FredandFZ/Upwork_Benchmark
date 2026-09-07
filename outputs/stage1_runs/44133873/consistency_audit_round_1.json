@@ -1,0 +1,67 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_ADVERTISEMENT_RENDERING_QUALITY"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_ADVERTISEMENT_RENDERING_QUALITY",
+            "title": "Advertisement Rendering Sharpness",
+            "family_id": "ASSET_QUALITY"
+          },
+          {
+            "requirement_id": "REQ_ADVERTISEMENT_PAGE_SAFE_SIZING",
+            "title": "Advertisement Page-Safe Sizing",
+            "family_id": "ASSET_QUALITY"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        81,
+        88,
+        102
+      ],
+      "decision_note": "Advertisement sizing and trim/bleed safety have a separate failure trajectory from advertisement sharpness and resolution repair, so they are independently testable Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MAGAZINE_LAYOUT_STRUCTURE",
+        "event_locator": {
+          "message_id": 72,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        72
+      ],
+      "decision_note": "The placement discretion concerns the dedicated cover-listed article inclusion Requirement and should not be duplicated under the broader layout Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_PRINT_READY_OUTPUT",
+        "event_locator": {
+          "message_id": 81,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        80,
+        81
+      ],
+      "decision_note": "The source reports advertisement-specific sizing and unsafe-zone defects, not a failed print-ready PDF, and belongs to the advertisement page-safe sizing Requirement.",
+      "confidence": "HIGH"
+    }
+  ]
+}

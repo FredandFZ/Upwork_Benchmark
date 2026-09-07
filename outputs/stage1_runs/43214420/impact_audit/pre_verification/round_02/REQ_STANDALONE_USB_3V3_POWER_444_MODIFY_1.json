@@ -1,0 +1,136 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_STANDALONE_USB_3V3_POWER",
+    "message_id": 444,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Moving the LEDs to 3.3V does not change the DCDC1 voltage, current rating, compensation purpose, or downstream rail target.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_MANAGEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The AXP2101 remains the normal-operation source and both the 3.3V and 5V rails remain required for other loads.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DUAL_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Both rails remain monitored, and the existing total-downstream 3.3V measurement description already accommodates loads placed on that rail.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_RAIL",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 444,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY removes the LED load from the 5V rail but leaves the obsolete LED power-control attribute on this sensor-only 5V-rail Requirement.",
+      "new_event": {
+        "source_message": {
+          "message_id": 444,
+          "speaker": "client",
+          "text": "The LEDs now use 3.3V power rather than 5V. With a 3.3V supply, the SK6812 data threshold decreases to 2.31V, and the ESP32 3.3V output meets it directly, eliminating the need for a level shifter. The downside is that 3.3V is somewhat below the SK6812 datasheet minimum of 3.7V, although it operates reliably at indicator brightness levels."
+        },
+        "supporting_message_ids": [
+          425
+        ],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "led_load_power",
+          "led_power_control"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "FIVE_VOLT_RAIL",
+            "SENSOR_POWER"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_BUTTON",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply change does not affect the panel button connector, PWRON signal, mounting, or switching behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change any sensor-board connector, pinout, module connection, or connector count.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_SLEEP_WAKE_BEHAVIOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED electrical supply decision does not modify any ESP32 clock, sleep policy, deep-sleep condition, or wake source.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_ELECTRICAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A same-message MODIFY already fully records the 3.3V supply, direct ESP32 drive, revised threshold, level-shifter removal, and accepted operating condition.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply change does not affect the battery connector family, pin count, pin functions, accessibility, or unresolved pin order.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BATTERY_SAFETY_PROTECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Battery cutoff, thermal sensing, and protection requirements remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Charge status currently uses a separate future external LED through J_LED_CHG, so changing the SK6812 supply does not alter this Requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_INPUT_ESD_PROTECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED rail decision does not change the power-board TVS ESD protection requirement.",
+      "new_event": null
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_INTERBOARD_POWER_INTERFACE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 101,
+        "speaker": "client",
+        "text": "For J\\_PWR\\_POWER, use JST-PH 2.0mm 4-pin:\nPin 1 — 3V3\nPin 2 — GND\nPin 3 — 5V\nPin 4 — GND (5V return)\n\nFor J\\_PWR\\_SIGNAL, use JST-[FREELANCER_NAME_002] 1.25mm 7-pin:\nPin 1 — SDA0\nPin 2 — SCL0\nPin 3 — IRQ\nPin 4 — PWRON\nPin 5 — D+\nPin 6 — D-\nPin 7 — 5V\\_EN"
+      },
+      "supporting_message_ids": [
+        96,
+        100
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "power_interboard_connector_reference": "J_PWR_POWER",
+        "power_interboard_connector_type": "JST-PH 2.0mm",
+        "power_interboard_connector_pin_count": 4,
+        "power_interboard_pinout": {
+          "pin_1": "3V3",
+          "pin_2": "GND",
+          "pin_3": "5V",
+          "pin_4": "GND (5V return)"
+        }
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "CONNECTORS"
+        ],
+        "contexts": [
+          "THREE_BOARD_VARIANT",
+          "INTERBOARD_POWER"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 139,
+        "speaker": "client",
+        "text": "Arrange the pins in whichever order is most convenient for your layout, as long as the connector on the main board matches. Let me know your preferred order, and [CLIENT_NAME_001] revise the docs accordingly."
+      },
+      "supporting_message_ids": [
+        138
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "power_interboard_pin_order_rule": "Pin order may be selected for layout convenience, but the power-board and main-board connectors must match."
+      },
+      "value_removals": [
+        "power_interboard_pinout"
+      ],
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 347,
+        "speaker": "client",
+        "text": "The three boards form a chain: power board → main board → sensor board. Because the main board is in the middle, it receives power from the power board through J\\_PWR\\_PWR, uses that power locally, AND forwards it to the sensor board through J\\_SENSOR\\_PWR. It works like a power strip: power arrives through one cable, and the main board distributes it to both its own components and the sensor board through a second cable.\nThe INA219 is placed in-series on the 3.3V rail immediately after the Schottky diodes. It therefore gives one reading for the total 3.3V current consumed by everything downstream, including the ESP32 itself and anything drawn by the sensor board."
+      },
+      "supporting_message_ids": [
+        343,
+        344,
+        345
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "interboard_power_topology": "Power board to main board to sensor board",
+        "main_board_power_input_connector": "J_PWR_PWR",
+        "main_to_sensor_power_output_connector": "J_SENSOR_PWR",
+        "main_board_power_distribution": "The main board uses incoming power locally and forwards it to the sensor board."
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 371,
+        "speaker": "client",
+        "text": "The sensor board receives two input connections from the main board: one 4-pin JST-PH 2.0mm connector for power (5V, GND, 3V3, GND), plus one 6-pin JST-[FREELANCER_NAME_002] 1.25mm connector carrying the signals (SDA0, SCL0, SDA1, SCL1, UART TX, UART RX).\nIt also provides these output connectors for the individual sensor modules:\n\n- SCD41 — 4-pin JST-[FREELANCER_NAME_002] (3V3/GND/SDA0/SCL0)\n- BME280 — 4-pin JST-[FREELANCER_NAME_002]\n- ENS160 — 4-pin JST-[FREELANCER_NAME_002]\n- SPS30 — 5-pin JST-ZH 1.5mm (5V, SDA0, SCL0, SEL→GND, GND); this uses a different connector type to match the SPS30 cable\n- ZE08-CH2O — 7-pin JST-[FREELANCER_NAME_002], matching the supplied cable\n- I2C display — 4-pin JST-[FREELANCER_NAME_002] (3V3/GND/SDA1/SCL1)\n- One spare I2C0 port — 4-pin JST-[FREELANCER_NAME_002]\n- One spare I2C1 port — 4-pin JST-[FREELANCER_NAME_002]\n\nThat makes 10 connectors in total. The complete pinouts are provided in the sensor board doc."
+      },
+      "supporting_message_ids": [
+        368,
+        369
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "sensor_board_power_input_connector_type": "JST-PH 2.0mm",
+        "sensor_board_power_input_connector_pin_count": 4,
+        "sensor_board_power_input_pinout": [
+          "5V",
+          "GND",
+          "3V3",
+          "GND"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

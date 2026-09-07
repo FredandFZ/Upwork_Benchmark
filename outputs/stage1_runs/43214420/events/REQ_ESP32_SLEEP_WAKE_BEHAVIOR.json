@@ -1,0 +1,62 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_ESP32_SLEEP_WAKE_BEHAVIOR",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 23,
+        "speaker": "client",
+        "text": "The ESP32 operates at up to 160MHz, reduces to 80MHz while idle using automatic light sleep, and only goes into deep sleep (~10µA) when the battery is critical or after a false wake. Its wake sources are a timer (5min) and the touch button (GPIO 26 ext0). However, in the final version I will definitelly keep it in deep sleep most of the time and wake it only for updates.\nDoes that mean we need to relocate some PINs? Maybe AXP IRQ?"
+      },
+      "supporting_message_ids": [
+        21
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "maximum_active_clock_mhz": 160,
+        "idle_clock_mhz": 80,
+        "idle_sleep_mode": "automatic light sleep",
+        "current_deep_sleep_entry_conditions": [
+          "critical battery",
+          "false wake"
+        ],
+        "deep_sleep_current": "~10µA",
+        "timer_wake_interval": "5min",
+        "touch_wake_gpio": 26,
+        "touch_wake_mode": "ext0",
+        "final_deep_sleep_policy": "remain in deep sleep most of the time and wake only for updates"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "MCU",
+          "POWER"
+        ],
+        "contexts": [
+          "ESP32_LOW_POWER"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 23,
+      "suggested_requirement_id": "REQ_ESP32_GPIO_MAPPING",
+      "description": "The question about relocating pins and AXP IRQ concerns GPIO allocation rather than the sleep-policy values established by the same message."
+    },
+    {
+      "message_id": 24,
+      "suggested_requirement_id": "REQ_SWITCHED_5V_RAIL",
+      "description": "The boost EN question concerns control of the switched 5V rail rather than ESP32 sleep and wake behavior."
+    },
+    {
+      "message_id": 25,
+      "suggested_requirement_id": "REQ_SWITCHED_5V_RAIL",
+      "description": "The proposed pull-down on the boost converter EN pin concerns the switched 5V rail's default-off behavior."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

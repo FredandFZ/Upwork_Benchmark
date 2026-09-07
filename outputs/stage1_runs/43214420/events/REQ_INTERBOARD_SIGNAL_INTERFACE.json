@@ -1,0 +1,132 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_INTERBOARD_SIGNAL_INTERFACE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 89,
+        "speaker": "client",
+        "text": "However, on the actual board I want [FREELANCER_NAME_002] for the interboard connections because they are considerably more compact."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "connector_selection": "[FREELANCER_NAME_002] connectors for the actual interboard connections",
+        "selection_reason": "compact form factor"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CONNECTORS",
+          "DIGITAL_IO"
+        ],
+        "contexts": [
+          "THREE_BOARD_VARIANT",
+          "INTERBOARD_SIGNALS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 101,
+        "speaker": "client",
+        "text": "For J\\_PWR\\_POWER, use JST-PH 2.0mm 4-pin:\nPin 1 — 3V3\nPin 2 — GND\nPin 3 — 5V\nPin 4 — GND (5V return)\n\nFor J\\_PWR\\_SIGNAL, use JST-[FREELANCER_NAME_002] 1.25mm 7-pin:\nPin 1 — SDA0\nPin 2 — SCL0\nPin 3 — IRQ\nPin 4 — PWRON\nPin 5 — D+\nPin 6 — D-\nPin 7 — 5V\\_EN"
+      },
+      "supporting_message_ids": [
+        96,
+        100
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "connector_selection": "separate power and signal connectors",
+        "power_to_main_signal_connector": {
+          "reference": "J_PWR_SIGNAL",
+          "type": "JST-[FREELANCER_NAME_002]",
+          "pitch": "1.25mm",
+          "pin_count": 7
+        },
+        "power_to_main_signal_pinout": {
+          "1": "SDA0",
+          "2": "SCL0",
+          "3": "IRQ",
+          "4": "PWRON",
+          "5": "D+",
+          "6": "D-",
+          "7": "5V_EN"
+        }
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 371,
+        "speaker": "client",
+        "text": "The sensor board receives two input connections from the main board: one 4-pin JST-PH 2.0mm connector for power (5V, GND, 3V3, GND), plus one 6-pin JST-[FREELANCER_NAME_002] 1.25mm connector carrying the signals (SDA0, SCL0, SDA1, SCL1, UART TX, UART RX).\nIt also provides these output connectors for the individual sensor modules:\n\n- SCD41 — 4-pin JST-[FREELANCER_NAME_002] (3V3/GND/SDA0/SCL0)\n- BME280 — 4-pin JST-[FREELANCER_NAME_002]\n- ENS160 — 4-pin JST-[FREELANCER_NAME_002]\n- SPS30 — 5-pin JST-ZH 1.5mm (5V, SDA0, SCL0, SEL→GND, GND); this uses a different connector type to match the SPS30 cable\n- ZE08-CH2O — 7-pin JST-[FREELANCER_NAME_002], matching the supplied cable\n- I2C display — 4-pin JST-[FREELANCER_NAME_002] (3V3/GND/SDA1/SCL1)\n- One spare I2C0 port — 4-pin JST-[FREELANCER_NAME_002]\n- One spare I2C1 port — 4-pin JST-[FREELANCER_NAME_002]\n\nThat makes 10 connectors in total. The complete pinouts are provided in the sensor board doc."
+      },
+      "supporting_message_ids": [
+        368,
+        370
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "main_to_sensor_signal_connector_type": "JST-[FREELANCER_NAME_002]",
+        "main_to_sensor_signal_connector_pitch": "1.25mm",
+        "main_to_sensor_signal_connector_pin_count": 6,
+        "main_to_sensor_signal_pinout": [
+          "SDA0",
+          "SCL0",
+          "SDA1",
+          "SCL1",
+          "UART TX",
+          "UART RX"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 496,
+        "speaker": "client",
+        "text": "From the main board, only J\\_SENSOR\\_PWR (4-pin JST-PH 2.0mm) and J\\_SENSOR\\_SIG (6-pin JST-[FREELANCER_NAME_002] 1.25mm) are connected."
+      },
+      "supporting_message_ids": [
+        493
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "main_to_sensor_signal_connector_reference": "J_SENSOR_SIG"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 139,
+      "suggested_requirement_id": "REQ_INTERBOARD_POWER_INTERFACE",
+      "description": "The supplied evidence index identifies this pin-order flexibility as applying to the power connector; the source does not explicitly identify the signal connector."
+    },
+    {
+      "message_id": 439,
+      "suggested_requirement_id": "REQ_PANEL_POWER_BUTTON",
+      "description": "The message uses the existing PWRON signal from J_PWR_SIG to add a separate panel-button connector rather than changing the interboard signal interface."
+    },
+    {
+      "message_id": 506,
+      "suggested_requirement_id": "REQ_SEPARATE_BOARD_CONNECTOR_LAYOUT",
+      "description": "The message changes physical placement and alignment of the interboard connectors, not their signal content or pinout."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

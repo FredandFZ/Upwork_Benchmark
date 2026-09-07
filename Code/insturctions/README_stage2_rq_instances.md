@@ -205,6 +205,18 @@ python -m unittest Code.tests.test_stage2_rq_instances -v
 候选、RQ4 zip 引用、失败 reconstruction report 拒绝、历史计数不一致拒绝，以及 zip
 路径穿越拒绝。
 
+## 常见构建报错与处理
+
+| 报错 | 处理方式 |
+|---|---|
+| `project_id` 或 target message 不一致 | 检查 Gold、State Graph 与 normalized messages 是否来自同一次上游构建 |
+| `turns` / `history_turn_count` 不一致 | 重新生成 Stage 2.2 Gold；不要按 message ID 数值手工修改 turn 数 |
+| code reconstruction report 未通过 | 先修复 `Code Environment/<project_id>/reports/` 中指出的 boundary/build/test 问题 |
+| manifest、target index 或 checksum 不一致 | 重新生成对应 Code Environment，并确认 target 与 `before_message_id` 对齐 |
+| zip CRC、路径穿越、符号链接或 `.git` 校验失败 | 修复压缩包来源；不要关闭安全检查继续构建 |
+| C3 不是 C2 的有序子集 | 回查 relevant Event trajectory 和 message 映射，不要向 C3 填入 target 或未来消息 |
+| 输出目录存在旧实例 | 以新 `index.json` 为准；确认无人工文件依赖后再单独清理未引用文件 |
+
 ## 当前阶段明确未做的事情
 
 - 不运行 Agent；
@@ -215,3 +227,44 @@ python -m unittest Code.tests.test_stage2_rq_instances -v
 - 不生成 RQ4 acceptance criteria、hidden validators 或 reference patch。
 
 这些工作应在实例人工审核完成后进入独立的 evaluation 阶段。
+
+## 后续实现顺序
+
+下列步骤覆盖从当前 construction records 到正式 benchmark 的后续实现；其中 schema、
+join、Pre/Post state expansion 和基础 C1/C2/C3 materialization 已由当前生成器完成：
+
+1. 定义并校验 `rq-core-instance-v1` schema；
+2. 完成 Gold State / State Graph / Code Environment join；
+3. 完成 Pre/Post state expansion 和 field delta；
+4. 物化 C1/C2 history；
+5. 生成 relevant trajectory 和 C3；
+6. 生成人工 review packet，审核 inherited relevance 与 blocking ambiguity；
+7. 派生并冻结 RQ1–RQ3 Gold 和 scorer；
+8. 选择 3–5 个覆盖 MODIFY、REMOVE/DEFER、CLARIFY、RUNTIME_FAILURE 的 pilot targets；
+9. 为 pilot 构造 RQ4 hidden validators，并执行 Agent 端到端试验；
+10. 根据 pilot 修正并冻结 v1 schema，再扩展到全部 targets；
+11. 输出 project / benchmark statistics 和 review agreement。
+
+先用小规模 pilot 验证 response schema、Requirement matching、condition-specific decision
+和 code validator，再批量扩展 hidden tests，避免在协议未稳定时全量返工。
+
+## 正式 Benchmark 验收清单
+
+一个 RQ instance 只有在以下条件全部满足时才可进入正式 benchmark：
+
+- [ ] target、Gold State、State Graph、history 和 pre repo join 成功；
+- [ ] pre/post temporal boundary 通过；
+- [ ] C1/C2/C3 输入按定义生成；
+- [ ] C3 保留 relevant temporal trajectory 且不含 gold labels；
+- [ ] direct relevant 与 inherited constraints 已审核；
+- [ ] RQ1 evidence labels 可追溯到原消息；
+- [ ] RQ2 状态 Gold 完整且 state IDs 可展开；
+- [ ] RQ3 按 condition 保存 ACT/CLARIFY Gold；
+- [ ] blocking ambiguity 与 clarification target 已审核；
+- [ ] RQ4 action taxonomy 与 Pre/Post delta 一致；
+- [ ] executable target 具有 behavior-level hidden validators；
+- [ ] pre-state、reference post-state 和 regression validation 结果符合预期；
+- [ ] public package 不含 future leakage、PII、secret、hidden gold 和 answer-revealing tests；
+- [ ] 自动校验 PASS；
+- [ ] 人工 review / adjudication 完成；
+- [ ] schema version、fingerprint 和 checksums 已冻结。

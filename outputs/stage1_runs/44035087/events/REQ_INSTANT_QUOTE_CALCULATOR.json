@@ -1,0 +1,94 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 10,
+        "speaker": "client",
+        "text": "One idea I had was an instant quote calculator. It would allow clients to complete a form or quiz with questions about the services they want, and then calculate an estimated price in real time. I researched it, and it appears somewhat complicated. Is [PERSON_NAME_004] something you would be able to create?"
+      },
+      "supporting_message_ids": [
+        8
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "interaction_format": "form or quiz about requested services",
+        "quote_result": "estimated price calculated in real time"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "INSTANT_QUOTE"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 16,
+        "speaker": "client",
+        "text": "[PERSON_NAME_003] you very much for the explanation. For the calculator, each of our services is itemized. The more services a customer selects, the more opportunities there are to bundle them. The calculator would therefore need to identify whether the selected services qualify for a bundle; otherwise, it would simply total the individual services. I imagine a survey format, potentially like the following:\n\nWhat is the property's size in sqft? (under 1000 is pricing tier 1, 1001 - 2000 is pricing tier 2, 2001 - 3000 is pricing tier 3, 2001 - 3000 is pricing tier 4, and 3001 + is pricing tier 5; *answers 1253 sqft* is assigned to pricing tier 2)\nPhotos (yes/no): Yes = +200, No = +0 (*answers yes))*\n*Videos? (yes/no):* Yes = +200, No = +0 (*answers yes))*\nWhat is the address? (calculates the distance from the home office) (if it is over 25 miles, apply a $50 dollar surcharge) (*Answers address and is 28 miles away))) +50*\n*(qualifies for basic bundle) -$100*\n*(presses submit)*\n*Displays total : $350*"
+      },
+      "supporting_message_ids": [
+        15,
+        17
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "interaction_format": "survey",
+        "bundle_pricing_rule": "determine whether selected services qualify for a bundle; otherwise total the individual service prices",
+        "property_size_pricing": "assign property square footage to a pricing tier",
+        "service_add_on_logic": "support yes-or-no itemized service selections that add to the quote",
+        "distance_surcharge_rule": "$50 surcharge when the property is more than 25 miles from the home office",
+        "bundle_discount_support": true,
+        "quote_submission_output": "display the calculated total after submission"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "API"
+        ],
+        "contexts": null
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 22,
+        "speaker": "client",
+        "text": "[PERSON_NAME_003] you very much. Also, regarding the instant quote form, I think we should postpone it for the time being. I will make sure to contact you again when we are ready to develop it."
+      },
+      "supporting_message_ids": [],
+      "event_type": "DEFER",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 39,
+      "suggested_requirement_id": "REQ_PACKAGE_TIER_PRICING_DISPLAY",
+      "description": "This message changes the static package display so it shows prices by square-footage range; it does not resume or modify the deferred instant quote calculator."
+    },
+    {
+      "message_id": 46,
+      "suggested_requirement_id": "REQ_PACKAGE_TIER_PRICING_DISPLAY",
+      "description": "The implementation claim concerns revisions to the Pricing page rather than implementation of the instant quote calculator."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

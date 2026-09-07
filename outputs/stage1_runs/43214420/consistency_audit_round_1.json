@@ -1,0 +1,473 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_SENSOR_BOARD_ROUTABLE_FORM_FACTOR",
+        "title": "Sensor Board Routable Form Factor",
+        "family_id": "PCB_ARCHITECTURE_AND_LAYOUT",
+        "definition": "Provide a sensor-board outline large enough to fit and route its required connectors and components.",
+        "anchor_message_ids": [
+          577,
+          586,
+          594
+        ]
+      },
+      "evidence_message_ids": [
+        577,
+        586,
+        594
+      ],
+      "decision_note": "The sensor board has its own component-fit failure and completion trajectory, independent of the main-board form factor.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_ESP32_SLEEP_WAKE_BEHAVIOR",
+        "title": "ESP32 Sleep and Wake Behavior",
+        "family_id": "POWER_AND_BATTERY_SYSTEM",
+        "definition": "Configure the ESP32 low-power behavior, including deep-sleep conditions and the required timer and touch wake sources.",
+        "anchor_message_ids": [
+          21,
+          23
+        ]
+      },
+      "evidence_message_ids": [
+        21,
+        23
+      ],
+      "decision_note": "Deep-sleep and wake-source behavior is an independently executable MCU power requirement absent from the inventory.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_INTEGRATED_SENSOR_CONNECTOR_MATRIX",
+        "title": "Integrated Board Sensor Connector Matrix",
+        "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES",
+        "definition": "Provide the integrated board's required sensor-facing JST and I2C connectors with the specified functions and pin assignments.",
+        "anchor_message_ids": [
+          816,
+          850
+        ]
+      },
+      "evidence_message_ids": [
+        816,
+        850
+      ],
+      "decision_note": "The integrated-board sensor connectors are distinct from the connector hub on the earlier separate sensor board.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_AXP_AUXILIARY_PIN_ACCESS"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_AXP_VRTC_HANDLING",
+            "title": "AXP2101 VRTC Handling",
+            "family_id": "POWER_AND_BATTERY_SYSTEM"
+          },
+          {
+            "requirement_id": "REQ_AXP_VBACKUP_ACCESS",
+            "title": "AXP2101 VBACKUP Access",
+            "family_id": "POWER_AND_BATTERY_SYSTEM"
+          },
+          {
+            "requirement_id": "REQ_AXP_PWROK_ACCESS",
+            "title": "AXP2101 PWROK Access",
+            "family_id": "POWER_AND_BATTERY_SYSTEM"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        874,
+        887,
+        889
+      ],
+      "decision_note": "VRTC is explicitly left unconnected while VBACKUP and PWROK are independently exposed for different purposes, demonstrating separate trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_PANEL_BUTTON_SWITCH_INPUTS"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_PANEL_GPIO_BUTTON_SWITCH_INPUTS",
+            "title": "Panel GPIO Button and Switch Inputs",
+            "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES"
+          },
+          {
+            "requirement_id": "REQ_PANEL_RESET_INPUT",
+            "title": "Panel Reset Input",
+            "family_id": "PERIPHERAL_AND_SENSOR_INTERFACES"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        317,
+        320,
+        326,
+        868,
+        887
+      ],
+      "decision_note": "The GPIO buttons and slide switch share active-low biasing, while the reset connector independently shorts ESP32 EN to ground and is unaffected by that biasing correction.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_AXP_THERMAL_ASSEMBLY"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_AXP_THERMAL_PAD_IMPLEMENTATION",
+            "title": "AXP2101 Thermal Pad and Stencil Implementation",
+            "family_id": "POWER_AND_BATTERY_SYSTEM"
+          },
+          {
+            "requirement_id": "REQ_AXP_PREFLOW_MOISTURE_HANDLING",
+            "title": "AXP2101 Pre-Reflow Moisture Handling",
+            "family_id": "MANUFACTURING_AND_DELIVERABLES"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        694,
+        695,
+        994,
+        996,
+        1014
+      ],
+      "decision_note": "Thermal-pad geometry and stencil design are independently changeable from the later production requirement to bake moisture-sensitive AXP2101 parts before reflow.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "MOVE_EVENT",
+      "targets": {
+        "from_requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+        "to_requirement_id": "REQ_POWER_BOARD_MECHANICAL_FORM_FACTOR",
+        "event_locator": {
+          "message_id": 66,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        66
+      ],
+      "decision_note": "The message constrains physical battery-plug access in the mounted enclosure orientation rather than the connector's electrical interface.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+        "event_locator": {
+          "message_id": 69,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        69
+      ],
+      "decision_note": "Battery-connector placement and orientation are already represented under the power-board mechanical requirement; this copy duplicates the same decision.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+        "event_locator": {
+          "message_id": 77,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        77
+      ],
+      "decision_note": "The back-side placement change is already owned by the power-board mechanical requirement and should not be duplicated under the electrical connector interface.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+        "event_locator": {
+          "message_id": 842,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        842
+      ],
+      "decision_note": "J_BAT edge placement on the integrated board is already represented by the integrated-board physical-layout Event from this source.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+        "event_locator": {
+          "message_id": 860,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        860
+      ],
+      "decision_note": "The enclosure-obstruction observation is a physical-layout failure already represented under the integrated-board layout requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BATTERY_CONNECTOR_INTERFACE",
+        "event_locator": {
+          "message_id": 863,
+          "event_type": "RUNTIME_VERIFICATION",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        863
+      ],
+      "decision_note": "The post-revision layout approval is already represented under the integrated-board layout requirement and is redundant here.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_SEPARATE_BOARD_CONNECTOR_LAYOUT",
+        "event_locator": {
+          "message_id": 599,
+          "event_type": "RUNTIME_VERIFICATION",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        599
+      ],
+      "decision_note": "The broad statement that every connector matches the specification does not concretely verify connector placement, alignment, or cable routing.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+        "event_locator": {
+          "message_id": 599,
+          "event_type": "RUNTIME_VERIFICATION",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        599
+      ],
+      "decision_note": "The broad board-review approval does not specifically verify the sensor-board connector matrix and was propagated across multiple connector Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+        "event_locator": {
+          "message_id": 1019,
+          "event_type": "RUNTIME_VERIFICATION",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        1019,
+        1046
+      ],
+      "decision_note": "A rail rising to approximately 3.3V at initial bring-up does not verify DCDC1 regulation under the required transient loads; later testing shows collapse.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_POWER_DECOUPLING_LAYOUT",
+        "event_locator": {
+          "message_id": 1046,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        1046
+      ],
+      "decision_note": "The client requests diagnostic review of possible local VIN decoupling; the source does not establish a new confirmed layout requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_LED_ARRAY_BOARD",
+        "event_locator": {
+          "message_id": 486,
+          "event_type": "RUNTIME_VERIFICATION",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        477,
+        482,
+        485,
+        486
+      ],
+      "decision_note": "The completion statement resolves the connector-pin concern but does not report concrete verification of the complete LED-board artifact.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_PRODUCTION_EXPORTS",
+        "event_locator": {
+          "message_id": 620,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        600,
+        607,
+        620
+      ],
+      "decision_note": "The client describes the board that previously lacked exports and says the newly supplied files still need review; this is not a concrete post-claim failure.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_COMPONENT_ORIENTATION_VALIDATION",
+        "event_locator": {
+          "message_id": 960,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        957,
+        958,
+        960
+      ],
+      "decision_note": "An insufficient photograph prevents validation but does not show that any component orientation is incorrect.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "MOVE_EVENT",
+      "targets": {
+        "from_requirement_id": "REQ_PCB_ORDER_CONFIGURATION",
+        "to_requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+        "event_locator": {
+          "message_id": 665,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        660,
+        664,
+        665
+      ],
+      "decision_note": "The source states that the sensor board lacks the connectors, which concerns connector implementation rather than account or order configuration.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        11,
+        12,
+        13
+      ],
+      "decision_note": "The same generic client acceptance is used to introduce two Requirements from separate preceding proposals; review must confirm that both proposals were unambiguously accepted.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_DEVICE_ENCLOSURE"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        740,
+        741,
+        743
+      ],
+      "decision_note": "The enclosure has concrete requirements but appears to have been proposed as a separate future project, so its inclusion in this contract requires adjudication.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_LED_ARRAY_BOARD"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        385,
+        386,
+        486
+      ],
+      "decision_note": "No authoritative LED-spacing value is visible; review whether the later broad completion statement validly accepts the existing spacing or leaves that attribute unresolved.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_USB_ESD_PROTECTION"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        1043,
+        1045
+      ],
+      "decision_note": "The terse fix claim is followed by a client challenge to whether VBUS and GND are truly separated; review for a missing target-specific ambiguity Event.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_DCDC1_OUTPUT_REGULATION"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        1066,
+        1075
+      ],
+      "decision_note": "Persistence of the DCDC1 fault after an attempted AXP2101 replacement may be a distinct post-fix failure transition, but the raw source must be reviewed before adding it.",
+      "confidence": "LOW"
+    }
+  ]
+}

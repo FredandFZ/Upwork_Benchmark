@@ -1,0 +1,70 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_POST_ACTIVITY_LOGGING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 252,
+        "speaker": "client",
+        "text": "Hey,\n\n[FREELANCER_NAME_005] clips have been approved and can now go live. Follow these steps exactly when publishing each clip:\n\n**POSTING INSTRUCTIONS**\n\n1\\. On [FREELANCER_NAME_005] assigned Instagram account, upload [FREELANCER_NAME_002] clip as a Reel\n2\\. Include this caption with every clip:\n\n*Follow [HANDLE_003] for more 🔥*\n\n3\\. Include all of these hashtags on every post:\n#teyronalexina #personaldevelopment #entrepreneurship #mindset #motivation #selfimprovement #businessadvice #successmindset #growthmindset #ecommerce\n\n4\\. Make sure [HANDLE_003] is tagged in [FREELANCER_NAME_002] post itself, rather than only in [FREELANCER_NAME_002] caption\n5\\. For [FREELANCER_NAME_002] best reach, publish during peak hours, between 6pm and 9pm\n6\\. After posting, update [FREELANCER_NAME_002] card in Notion with [FREELANCER_NAME_002] Date Posted and [FREELANCER_NAME_002] Instagram link to [FREELANCER_NAME_002] reel\n\nPublish all 3 clips, spacing them out at one per day for maximum reach. Do not publish all three on [FREELANCER_NAME_002] same day.\n\nIf you have any questions, message me immediately.\n\n[CLIENT_NAME_001]"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "logging_trigger": "after each Reel is posted",
+        "record_destination": "corresponding Notion card",
+        "required_fields": [
+          "Date Posted",
+          "Instagram Reel link"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "NOTION",
+          "CONTENT_OPERATIONS",
+          "INSTAGRAM"
+        ],
+        "contexts": [
+          "POST_TRACKING",
+          "REEL_PUBLISHING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 256,
+        "speaker": "freelancer",
+        "text": "Before I begin posting, I just wanted to confirm a couple of details:\n\nCould you tell me which 3 clips received approval? Please send their names if possible.\nAlso, could you share [FREELANCER_NAME_002] Notion link (or [FREELANCER_NAME_002] exact page) where I should enter [FREELANCER_NAME_002] Date Posted and Instagram Reel link after every post?\n\nThanks!"
+      },
+      "supporting_message_ids": [
+        252
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The exact Notion page or card where posting dates and Reel links must be recorded has not been provided."
+      },
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 291,
+      "suggested_requirement_id": "REQ_APPROVED_CLIP_PUBLISHING",
+      "description": "The instruction to publish clips on the assigned page and send the resulting link concerns Reel publication and reporting to the client, not recording the post on the Notion card."
+    },
+    {
+      "message_id": 297,
+      "suggested_requirement_id": "REQ_APPROVED_CLIP_PUBLISHING",
+      "description": "The statement that the clip was uploaded is an implementation claim for publication, but it does not state that the required Notion activity record was created."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ESP32_GPIO_MAPPING",
+    "message_id": 304,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_SIGNAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard signal pinout does not include SPI MOSI, and its existing SCL0 and 5V_EN signals remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the SPI MOSI GPIO does not alter the I2C bus speed, pull-ups, series resistors, or cabling constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard power connector and its pin-order rule are independent of the SPI MOSI GPIO assignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NATIVE_USB_PROGRAMMING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes SPI MOSI and available GPIO information but does not change the native USB D+ and D- requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PCB_ARCHITECTURE_VARIANTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The three-board architecture and board roles remain valid regardless of the SPI MOSI pin reassignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_STANDALONE_USB_3V3_POWER",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The standalone USB power source, activation condition, loads, and source-selection behavior are unaffected.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ADDRESSABLE_LED_ELECTRICAL_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate state contains no SPI MOSI assignment, and its GPIO5-controlled power behavior remains valid because GPIO5 is within the stated usable range.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_RAIL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The switched rail remains assigned to GPIO5, which is included in the stated GPIO0–GPIO21 usable range.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The sensor board's role as a connector hub does not depend on the SPI MOSI GPIO assignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ESP32_SLEEP_WAKE_BEHAVIOR",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The exhaustive N16R8 usable-GPIO statement excludes GPIO26, making the current GPIO26 touch-wake assignment stale; no replacement touch-wake GPIO is established.",
+      "new_event": {
+        "source_message": {
+          "message_id": 304,
+          "speaker": "client",
+          "text": "Therefore, on N16R8, the GPIOs that are actually free are GPIO38–GPIO44, GPIO47, and GPIO48, along with GPIO0–GPIO21 subject to the strapping pin caveats. Move SPI MOSI to GPIO47, since nothing else is assigned to it."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "touch_wake_gpio"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_LED_ARRAY_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED board's required LED count is unaffected by the SPI MOSI reassignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_MANAGEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The PMIC selection, system rails, and battery power path do not depend on the SPI MOSI GPIO assignment.",
+      "new_event": null
+    }
+  ]
+}

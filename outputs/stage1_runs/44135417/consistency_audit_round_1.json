@@ -1,0 +1,226 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MANUFACTURING_DRAWING_SET",
+        "event_locator": {
+          "message_id": 71,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        70,
+        71
+      ],
+      "decision_note": "The source reports color and black-and-white presentation variants but does not claim that the complete manufacturing drawing set was implemented.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_DELIVERABLE_FILE_FORMATS",
+        "event_locator": {
+          "message_id": 35,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "model_exchange_formats": [
+            "STEP"
+          ],
+          "editable_native_formats": [
+            "IPT"
+          ],
+          "format_preference": "IPT preferred; STEP acceptable as a fallback"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "CAD_MODEL"
+          ],
+          "contexts": [
+            "FINAL_DELIVERY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        34,
+        35
+      ],
+      "decision_note": "The source requests only 3D model formats; technical-drawing scope is not introduced until the later format request.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_DELIVERABLE_FILE_FORMATS",
+        "event_locator": {
+          "message_id": 80,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "drawing_viewable_formats": [
+            "PDF"
+          ],
+          "drawing_exchange_formats": [
+            "DWG",
+            "DXF"
+          ],
+          "editable_native_formats": [
+            "IPT",
+            "IDW"
+          ],
+          "format_preference": "Editable native files requested in addition to STEP, if available"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": [
+            "CAD_MODEL",
+            "TECHNICAL_DRAWING"
+          ],
+          "contexts": null
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        80
+      ],
+      "decision_note": "The source extends the format Requirement from 3D models to both CAD models and technical drawings.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_WELDED_ASSEMBLY_FABRICATION",
+        "event_locator": {
+          "message_id": 59,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        55,
+        59
+      ],
+      "decision_note": "The same-source MODIFY supplies the resolving fabrication values; a separate RESUME adds no independent lifecycle operation under v0.6 replay.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MAIN_SHAFT_GEOMETRY",
+        "event_locator": {
+          "message_id": 63,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        62,
+        63
+      ],
+      "decision_note": "The supplied source does not identify which component owns the thread-to-bearing-surface groove, so routing it to the main shaft is unsupported.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BUSHING_GUIDANCE_AND_RETENTION",
+        "event_locator": {
+          "message_id": 45,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        23,
+        45
+      ],
+      "decision_note": "The source establishes bushing location and fit but does not resolve the earlier screw-retention and complete assembly-method uncertainty.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BUSHING_GUIDANCE_AND_RETENTION",
+        "event_locator": {
+          "message_id": 57,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        46,
+        53,
+        57
+      ],
+      "decision_note": "The source resolves the retention arrangement but does not resolve the previously raised uncertainty about the required bushing length.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_SLIDING_MANDREL_FEATURES"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 49,
+          "speaker": "client",
+          "text": "No. As stated in the message (it is shown incorrectly in the drawings), the bushing sits inside the main shaft, and the rod from the control piston is guided through this bushing. Therefore, you need to select a suitable clearance, such as H8/h9, between the bushing and the inner diameter of the shaft. The sliding part contains only the end of the piston."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "piston_end_arrangement": "The sliding part contains only the end of the piston."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        49
+      ],
+      "decision_note": "The client explicitly clarifies the independently modeled piston-end content of the sliding mandrel.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_TECHNICAL_DRAWING_ANNOTATIONS",
+        "event_locator": {
+          "message_id": 83,
+          "event_type": "RESUME",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        82,
+        83
+      ],
+      "decision_note": "The same-source MODIFY supplies the resolving annotation values; a separate RESUME adds no independent lifecycle operation under v0.6 replay.",
+      "confidence": "HIGH"
+    }
+  ]
+}

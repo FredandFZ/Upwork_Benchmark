@@ -1,0 +1,132 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ADDRESSABLE_LED_ELECTRICAL_INTERFACE",
+    "message_id": 444,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_LED_ARRAY_BOARD",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED count and selected LED part remain unchanged; power and data-drive semantics are independently owned by the source Requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SWITCHED_5V_RAIL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-444 MODIFY already removes the obsolete LED load and LED shutdown attributes and removes LED_POWER from this Requirement's scope.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_BOARD_CONNECTOR_HUB",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The sensor-board connector matrix and its 3.3V and 5V input pins remain valid and do not specify the addressable LED supply.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_RESET_INPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel reset connector and EN-to-GND action are unrelated to the LED supply and data interface.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DUAL_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Both rails still require monitoring, and the existing total-downstream 3.3V measurement coverage remains valid without a state change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SPS30_I2C_MODE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SPS30 SEL-to-GND connection and I2C operating mode are unaffected by the LED electrical-interface change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PIR_INPUT_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The PIR connector requirement is independent of the addressable LED power and data interface.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_GPIO_BUTTON_SWITCH_INPUTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel button and switch GPIO assignments and connector mounting remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_STANDALONE_USB_3V3_POWER",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Because standalone USB mode supplies the complete 3.3V rail, moving the SK6812 LEDs onto that rail necessarily adds them to its powered loads.",
+      "new_event": {
+        "source_message": {
+          "message_id": 444,
+          "speaker": "client",
+          "text": "The LEDs now use 3.3V power rather than 5V. With a 3.3V supply, the SK6812 data threshold decreases to 2.31V, and the ESP32 3.3V output meets it directly, eliminating the need for a level shifter. The downside is that 3.3V is somewhat below the SK6812 datasheet minimum of 3.7V, although it operates reliably at indicator brightness levels."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_loads": [
+            "ESP32-S3 module",
+            "INA219",
+            "SCD41",
+            "BME280",
+            "ENS160",
+            "I2C display",
+            "TTP223",
+            "AM312 PIR",
+            "SK6812 LEDs"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_TOUCH_INPUT_INTERFACES",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The capacitive-touch connectors, sensors, and GPIO assignments are unaffected.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_AXP2101_POWER_MANAGEMENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The AXP2101 remains the normal-operation source and both 3.3V and 5V rails remain required because other 5V loads persist.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_DCDC1_OUTPUT_REGULATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 3.4V DCDC1 setting, 3.3V downstream target, and Schottky-drop compensation remain valid unchanged.",
+      "new_event": null
+    }
+  ]
+}
