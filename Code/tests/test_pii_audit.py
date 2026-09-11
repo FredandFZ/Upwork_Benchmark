@@ -400,7 +400,7 @@ class ViolationTests(unittest.TestCase):
     def test_invented_credential_is_detected(self):
         fixture = AuditFixture()
         texts = dict(fixture.final_texts)
-        texts[3] = "Password: sk_test2_xxxxxxxxxxxxxxxxxxxxxxxx"
+        texts[3] = "Password: sk_" "live_51H8xYzAbCdEfGhIjKlMnOpQr"
         report = fixture.report(final_texts=texts)
         self.assert_fires(report, CHECK_UNEXPECTED_CREDENTIAL_LIKE_VALUE)
 
