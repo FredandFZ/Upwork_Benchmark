@@ -382,7 +382,7 @@ class EntityValidationTests(unittest.TestCase):
 
     def test_credential_shaped_replacement_is_rejected(self):
         self.assert_rejected(
-            self.payload(E0001="sk_" "live_51H8xYzAbCdEfGhIjKlMnOpQr"),
+            self.payload(E0001="sk_" "test_xxxxxxxxxxxxxxxxxxxxxxxx"),
             "PLAN_CREDENTIAL_GENERATED",
         )
 
