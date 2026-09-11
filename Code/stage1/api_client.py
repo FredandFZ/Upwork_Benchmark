@@ -18,7 +18,16 @@ RETRYABLE_STATUS_CODES = {408, 409, 429, 500, 502, 503, 504}
 
 
 class ApiError(RuntimeError):
-    pass
+    """A call could not be completed.
+
+    ``cause`` preserves the exception that ended the last attempt so callers can
+    dispatch with ``isinstance`` instead of matching type names inside the
+    message text.  Optional and defaulted, so existing call sites are unchanged.
+    """
+
+    def __init__(self, message: str, *, cause: BaseException | None = None) -> None:
+        super().__init__(message)
+        self.cause = cause
 
 
 class Stage1ApiClient:
@@ -34,6 +43,7 @@ class Stage1ApiClient:
         log_path: Path,
         failed_response_dir: Path,
         reasoning_effort_overrides: dict[str, str] | None = None,
+        retries_overrides: dict[str, int] | None = None,
     ) -> None:
         self.http_client = http_client
         self.api_key = api_key
@@ -41,6 +51,7 @@ class Stage1ApiClient:
         self.model = model
         self.reasoning_effort = reasoning_effort
         self.reasoning_effort_overrides = dict(reasoning_effort_overrides or {})
+        self.retries_overrides = dict(retries_overrides or {})
         self.retries = retries
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
         self.log_path = log_path
@@ -83,9 +94,10 @@ class Stage1ApiClient:
         failed_response_redactor: Callable[[str], str] | None = None,
     ) -> dict[str, Any]:
         effective_reasoning_effort = self.reasoning_effort_for(run_mode)
+        retry_budget = self._retries_for(run_mode)
         last_error: Exception | None = None
         raw_content = ""
-        for attempt in range(self.retries + 1):
+        for attempt in range(retry_budget + 1):
             raw_content = ""
             started = datetime.now(timezone.utc)
             request_id: str | None = None
@@ -108,7 +120,7 @@ class Stage1ApiClient:
                         },
                     )
                 request_id = response.headers.get("x-request-id") or response.headers.get("request-id")
-                if response.status_code == 401 and attempt < self.retries:
+                if response.status_code == 401 and attempt < retry_budget:
                     await self._get_token(force=True)
                     raise _RetryableError(f"LLM authorization failed ({response.status_code})")
                 if response.status_code in RETRYABLE_STATUS_CODES:
@@ -171,19 +183,29 @@ class Stage1ApiClient:
                     effective_reasoning_effort,
                 )
                 retryable = isinstance(exc, (_RetryableError, httpx.HTTPError, json.JSONDecodeError, ValueError))
-                if not retryable or attempt >= self.retries:
+                if not retryable or attempt >= retry_budget:
                     break
                 await asyncio.sleep(min(2**attempt, 8))
         raise ApiError(
             f"{run_mode}{f'/{target_requirement}' if target_requirement else ''} failed after "
-            f"{self.retries + 1} attempt(s): "
+            f"{retry_budget + 1} attempt(s): "
             f"{type(last_error).__name__ if last_error else 'unknown error'}"
-            f"{f': {last_error}' if last_error and str(last_error) else ''}"
+            f"{f': {last_error}' if last_error and str(last_error) else ''}",
+            cause=last_error,
         )
 
     def reasoning_effort_for(self, run_mode: str) -> str:
         """Return the effective reasoning effort for one API run mode."""
         return self.reasoning_effort_overrides.get(run_mode, self.reasoning_effort)
+
+    def _retries_for(self, run_mode: str) -> int:
+        """Retry budget for one run mode.
+
+        Lets a caller cap a phase whose own retry loop already bounds the work:
+        without it, "at most 2 repair attempts" becomes up to 8 API calls,
+        because each attempt internally retries ``retries + 1`` times.
+        """
+        return self.retries_overrides.get(run_mode, self.retries)
 
     async def _log_call(
         self,
