@@ -11,10 +11,12 @@
   "turns": 763,
   "history_turn_count": 763,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
     "source_message_id": 764,
@@ -6156,27 +6158,28 @@
         758
       ],
       "history_message_count": 2,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq1-agent-response-v1",
+    "schema_version": "rq1-agent-response-v2",
     "required_fields": [
-      "selected_history_message_ids",
       "requirements"
     ],
     "requirement_item_fields": [
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids"
-    ]
+    ],
+    "requirement_refs_must_be_unique": true,
+    "evidence_message_ids_must_reference_c2_history": true,
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -6198,10 +6201,38 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "DETERMINISTIC_RQ1_GOLD",
+    "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+    "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
       "REQ_DISCORD_COMMUNITY_SERVER"
     ],
+    "gold_requirement_atoms": {
+      "REQ_DISCORD_COMMUNITY_SERVER": {
+        "canonical_summary": "Discord Community and Support Server",
+        "requirement_title": "Discord Community and Support Server",
+        "family_id": "SUPPORT_CHANNELS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_DISCORD_COMMUNITY_SERVER_EG001",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_DISCORD_COMMUNITY_SERVER_EG002",
+            "acceptable_message_ids": [
+              758
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          143,
+          758
+        ]
+      }
+    },
     "directly_affected_historical_requirement_ids": [
       "REQ_DISCORD_COMMUNITY_SERVER"
     ],
@@ -6222,15 +6253,34 @@
           "REQ_DISCORD_COMMUNITY_SERVER_E002",
           "REQ_DISCORD_COMMUNITY_SERVER_E003"
         ],
+        "trajectory_message_ids": [
+          143,
+          758
+        ],
         "core_message_ids": [
           143,
           758
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_DISCORD_COMMUNITY_SERVER_EG001",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_DISCORD_COMMUNITY_SERVER_EG002",
+            "acceptable_message_ids": [
+              758
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       }
     },
     "derivation_scope": "DIRECT_AFFECTED_ONLY",
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

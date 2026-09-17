@@ -263,7 +263,9 @@ outputs/stage2/<project_id>/gold_states.json
 
 LLM 每次只看到一个 Candidate Packet：当前 Task、triggered Events、受影响 Requirements 的 Pre-task States、此前 Event history 和对应原始 evidence messages。LLM 只判断历史依赖、Requirement 演化、重建风险、歧义决策价值、多 Requirement 价值和 history-sensitive error risk；它不重新标注 Requirement、不修改 State Graph，也不生成 Gold。
 
-Candidate 的 `primary_rq_targets` 严格采用 `Constuction_guideline/ReqMemBench_RP_V2.md` 的四阶段定义：RQ1 Select relevant Requirements、RQ2 Reconstruct current Requirement State、RQ3 Decide whether to act or clarify、RQ4 Execute the reconstructed State in code。
+Candidate evaluation 仍可能保留历史字段 `primary_rq_targets` 供回溯旧选择结果，但该字段不再
+控制 RQ 实例物化。Stage 2.3 会从 Gold State、affected transitions、ACT/CLARIFY candidate
+和 C_env 独立派生 `applicable_rqs`。
 
 `history_turn_count` 定义为 Candidate 前的有效消息数量，从 `normalized_project.messages` 的规范化顺序计算。它会一直保留到最终 target 和 Gold，但不参与 LLM 评分、coverage、去重或排序。
 
@@ -275,10 +277,17 @@ Candidate 的 `primary_rq_targets` 严格采用 `Constuction_guideline/ReqMemBen
 
 ## Stage 2.3：RQ1–RQ4 实例生成
 
-这一阶段把每个最终 target 按 `primary_rq_targets` 物化到项目目录下的 `RQ1/`、
-`RQ2/`、`RQ3/`、`RQ4/`。每个实例保留顶层 `turns`、完整 pre-task history pool、
+这一阶段按确定性规则把每个最终 target 物化到项目目录下的 `RQ1/`、`RQ2/`、`RQ3/`、
+`RQ4/`：RQ1/RQ2 要求 relevant historical Requirement，RQ3 要求 affected target
+transition，RQ4 要求 ACT candidate 和同一 target 的 C_env。每个实例保留顶层 `turns`、
+`applicable_rqs`、完整 pre-task history pool、
 C1/C2/C3 消息选择器、RQ-specific response contract 和 researcher-side
 `construction_gold`。RQ4 只引用并安全校验 `pre_repo.zip`，不会在构造阶段解压。
 
 生成器只负责实例设计，不运行 Agent 或评分。命令、字段说明、目录结构和注意事项见
 [`README_stage2_rq_instances.md`](insturctions/README_stage2_rq_instances.md)。
+
+RQ1 已提供独立的自动评价核心 `evaluation/rq1.py` 和离线入口 `evaluate_rq1.py`：一次 LLM
+调用负责为同一 target 的全部 Prediction–Gold pairs 生成 Atom relation，确定性 scorer 再执行
+一对一匹配并输出 Requirement F1、唯一的端到端 Evidence F1 和 Exact Requirement Set
+Accuracy。RQ1 不进入人工复核；具体命令见同一 README 的“RQ1 自动评价”。

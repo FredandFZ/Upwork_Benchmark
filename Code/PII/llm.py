@@ -1,8 +1,9 @@
 """Shared LLM plumbing: request assembly, redaction, and sharded execution.
 
-:func:`run_sharded_phase` is the single implementation of the batch -> per-message
-fallback that v6 duplicated three times (``Code/PII_Clean.py:1740``, ``:2040``,
-``:2416``).  Centralizing it also centralizes the two properties that matter:
+:func:`run_sharded_phase` is the single implementation of bounded batch
+bisection that v6 duplicated as per-message fallback three times
+(``Code/PII_Clean.py:1740``, ``:2040``, ``:2416``).  Centralizing it also
+centralizes the two properties that matter:
 
 * one failing item never aborts its shard, its phase, or the run -- the phase
   runs to completion so a single run enumerates every problem;
@@ -24,7 +25,12 @@ from typing import Any, Awaitable, Callable, Mapping, Protocol, Sequence, TypeVa
 
 from ._compat import ApiError
 from .config import RUN_MODE
-from .errors import PiiError, PiiValidationError, api_error_is_validation_failure
+from .errors import (
+    VALIDATION_MARKER,
+    PiiError,
+    PiiValidationError,
+    api_error_is_validation_failure,
+)
 from .textutil import message_file_stem
 
 T = TypeVar("T")
@@ -46,10 +52,12 @@ SECTION_ORDER: tuple[str, ...] = (
     "IDENTITY_BUNDLES",
     "SLOT_CLUSTER",
     "RESERVED_VALUES",
+    "PRESERVED_TERMS",
     "CONSTRAINTS",
     "PLAN_SLICE",
     "SAFE_ORIGINAL",
     "SYNTHETIC_REWRITE",
+    "LOCAL_SEMANTIC_ANCHORS",
     "VERDICT",
     "REPAIR_INSTRUCTION",
 )
@@ -59,6 +67,12 @@ _SECTION_NAMES = frozenset(SECTION_ORDER)
 JSON_ONLY_REMINDER = (
     "Return JSON only, with no Markdown fences and no surrounding commentary."
 )
+
+# A large request can repeatedly time out at an upstream gateway even while
+# smaller requests to the same service succeed.  In that case, retrying the
+# byte-identical payload does not help.  Bound the fallback so a genuine
+# service outage cannot fan one shard out into an unbounded number of calls.
+MAX_TRANSPORT_BISECTION_DEPTH = 2
 
 
 class WorkItem(Protocol):
@@ -165,6 +179,37 @@ def run_mode_for(phase: str) -> str:
         raise PiiError(f"phase {phase} has no API run mode") from None
 
 
+def transport_failure_may_benefit_from_split(error: BaseException) -> bool:
+    """Return whether a smaller payload may avoid this transport failure.
+
+    Timeouts and retryable upstream 5xx/408 responses can be payload-duration
+    dependent.  Authentication failures, rate limits and connection failures
+    are not, so splitting those would only multiply unsuccessful API calls.
+    ``_RetryableError`` is private to the shared client; inspect its stable,
+    deliberately short status message instead of importing that private type.
+    """
+
+    cause = getattr(error, "cause", None) or error
+    if isinstance(cause, TimeoutError):
+        return True
+    type_names = {cls.__name__.lower() for cls in type(cause).__mro__}
+    if any("timeout" in name for name in type_names):
+        return True
+    message = str(cause).lower()
+    if "timed out" in message or "timeout" in message:
+        return True
+    return any(
+        marker in message
+        for marker in (
+            "transient llm error 408",
+            "transient llm error 500",
+            "transient llm error 502",
+            "transient llm error 503",
+            "transient llm error 504",
+        )
+    )
+
+
 async def call_phase(
     api: Any,
     *,
@@ -210,7 +255,7 @@ async def run_sharded_phase(
     max_concurrent_shards: int = 1,
     progress: Callable[[str], None] | None = None,
 ) -> None:
-    """Execute every shard, degrading to per-item calls on a content failure.
+    """Execute every shard, bisecting a content failure down to its bad items.
 
     ``parse`` returns a mapping keyed by ``ordinal``.  ``on_failure`` receives
     ``(item, error, is_transport)`` -- the transport flag is what keeps a
@@ -252,6 +297,139 @@ async def run_sharded_phase(
             return
         await commit(results, [item])
 
+    async def fail_items(
+        items: Sequence[Any], error: BaseException, *, transport: bool
+    ) -> None:
+        for item in items:
+            await on_failure(item, error, transport)
+
+    async def isolate_content_failure(
+        items: Sequence[Any],
+        shard: Shard,
+        error: BaseException,
+        *,
+        repair_already_attempted: bool = False,
+    ) -> None:
+        if len(items) == 1:
+            if repair_already_attempted:
+                await on_failure(items[0], error, False)
+            else:
+                await run_single(items[0], shard)
+            return
+        midpoint = len(items) // 2
+        halves = (items[:midpoint], items[midpoint:])
+        if progress is not None:
+            progress(
+                f"{phase} {shard.shard_id} failed validation; "
+                f"bisecting {len(items)} item(s)"
+            )
+        for index, half in enumerate(halves, start=1):
+            await run_validation_subset(
+                Shard(f"{shard.shard_id}_v{index}", tuple(half))
+            )
+
+    async def run_validation_subset(shard: Shard) -> None:
+        """Run one half with repair guidance and retain a passing half whole."""
+
+        try:
+            results = await call_phase(
+                api,
+                phase=phase,
+                project_id=project_id,
+                target=shard.shard_id,
+                prompt=prompt,
+                sections=build_sections(shard.items),
+                task=task,
+                validator=validator_for(shard.items),
+                parse=lambda payload: parse(payload, shard.items),
+                repair_instruction=repair_instruction,
+            )
+        except ApiError as exc:
+            if api_error_is_validation_failure(exc):
+                await isolate_content_failure(
+                    shard.items,
+                    shard,
+                    exc,
+                    repair_already_attempted=True,
+                )
+                return
+            if (
+                len(shard.items) > 1
+                and transport_failure_may_benefit_from_split(exc)
+            ):
+                midpoint = len(shard.items) // 2
+                halves = (shard.items[:midpoint], shard.items[midpoint:])
+                if progress is not None:
+                    progress(
+                        f"{phase} {shard.shard_id} transport exhausted; "
+                        f"bisecting {len(shard.items)} item(s)"
+                    )
+                for index, half in enumerate(halves, start=1):
+                    await run_transport_split(
+                        Shard(f"{shard.shard_id}_t{index}", tuple(half)), 1
+                    )
+                return
+            await fail_items(shard.items, exc, transport=True)
+            return
+        except PiiValidationError as exc:
+            await isolate_content_failure(
+                shard.items,
+                shard,
+                exc,
+                repair_already_attempted=True,
+            )
+            return
+        except Exception as exc:
+            await fail_items(shard.items, exc, transport=False)
+            return
+        await commit(results, shard.items)
+
+    async def run_transport_split(shard: Shard, depth: int) -> None:
+        """Retry a likely payload-sensitive transport failure in smaller halves."""
+
+        try:
+            results = await call_phase(
+                api,
+                phase=phase,
+                project_id=project_id,
+                target=shard.shard_id,
+                prompt=prompt,
+                sections=build_sections(shard.items),
+                task=task,
+                validator=validator_for(shard.items),
+                parse=lambda payload: parse(payload, shard.items),
+            )
+        except ApiError as exc:
+            if api_error_is_validation_failure(exc):
+                await isolate_content_failure(shard.items, shard, exc)
+                return
+            if (
+                depth < MAX_TRANSPORT_BISECTION_DEPTH
+                and len(shard.items) > 1
+                and transport_failure_may_benefit_from_split(exc)
+            ):
+                midpoint = len(shard.items) // 2
+                halves = (shard.items[:midpoint], shard.items[midpoint:])
+                if progress is not None:
+                    progress(
+                        f"{phase} {shard.shard_id} transport exhausted; "
+                        f"bisecting {len(shard.items)} item(s)"
+                    )
+                for index, items in enumerate(halves, start=1):
+                    await run_transport_split(
+                        Shard(f"{shard.shard_id}_t{index}", tuple(items)), depth + 1
+                    )
+                return
+            await fail_items(shard.items, exc, transport=True)
+            return
+        except PiiValidationError as exc:
+            await isolate_content_failure(shard.items, shard, exc)
+            return
+        except Exception as exc:
+            await fail_items(shard.items, exc, transport=False)
+            return
+        await commit(results, shard.items)
+
     async def run_shard(shard: Shard) -> None:
         async with semaphore:
             if progress is not None:
@@ -270,42 +448,34 @@ async def run_sharded_phase(
                 )
             except ApiError as exc:
                 if not api_error_is_validation_failure(exc):
-                    # Transport exhausted: nothing about this shard's content is
-                    # known to be wrong, so do not isolate item by item.
-                    for item in shard.items:
-                        await on_failure(item, exc, True)
+                    if (
+                        len(shard.items) > 1
+                        and transport_failure_may_benefit_from_split(exc)
+                    ):
+                        midpoint = len(shard.items) // 2
+                        halves = (shard.items[:midpoint], shard.items[midpoint:])
+                        if progress is not None:
+                            progress(
+                                f"{phase} {shard.shard_id} transport exhausted; "
+                                f"bisecting {len(shard.items)} item(s)"
+                            )
+                        for index, items in enumerate(halves, start=1):
+                            await run_transport_split(
+                                Shard(f"{shard.shard_id}_t{index}", tuple(items)), 1
+                            )
+                    else:
+                        await fail_items(shard.items, exc, transport=True)
                     return
-                if len(shard.items) == 1:
-                    # Already minimal; a repair-instruction retry is still worth
-                    # one attempt because the instruction itself is new context.
-                    await run_single(shard.items[0], shard)
-                    return
-                if progress is not None:
-                    progress(
-                        f"{phase} {shard.shard_id} failed validation; "
-                        f"isolating {len(shard)} item(s)"
-                    )
-                for item in shard.items:
-                    await run_single(item, shard)
+                await isolate_content_failure(shard.items, shard, exc)
                 return
             except PiiValidationError as exc:
                 # A validation error that reached us unwrapped (no ApiError
                 # envelope) is still a content failure, so it still deserves
-                # per-item isolation rather than failing the whole shard.
-                if len(shard.items) == 1:
-                    await on_failure(shard.items[0], exc, False)
-                    return
-                if progress is not None:
-                    progress(
-                        f"{phase} {shard.shard_id} failed validation; "
-                        f"isolating {len(shard)} item(s)"
-                    )
-                for item in shard.items:
-                    await run_single(item, shard)
+                # bounded isolation rather than failing the whole shard.
+                await isolate_content_failure(shard.items, shard, exc)
                 return
             except Exception as exc:
-                for item in shard.items:
-                    await on_failure(item, exc, False)
+                await fail_items(shard.items, exc, transport=False)
                 return
             await commit(results, shard.items)
 
@@ -333,6 +503,7 @@ async def run_single_call(
     """
 
     last: BaseException | None = None
+    instruction: str | None = None
     for attempt in range(max(1, attempts)):
         try:
             return await call_phase(
@@ -345,11 +516,31 @@ async def run_single_call(
                 task=task,
                 validator=validator,
                 parse=parse,
-                repair_instruction=repair_instruction if attempt else None,
+                repair_instruction=instruction,
             )
         except ApiError as exc:
             last = exc
             if not api_error_is_validation_failure(exc):
                 raise
+            instruction = _informed_instruction(repair_instruction, exc)
     assert last is not None
     raise last
+
+
+def _informed_instruction(base: str, error: ApiError) -> str:
+    """Restate the rule *and* name what actually failed.
+
+    Without this the retry is a blind re-roll: every attempt re-sends a byte
+    identical request, so a chunk of 121 entities kept failing on the same three
+    while the model was never told which three or why.  Validator messages carry
+    only ids, rule codes and synthetic values, so they are safe to return to the
+    model that produced them.
+    """
+
+    detail = str(getattr(error, "cause", None) or "").replace(VALIDATION_MARKER, "").strip()
+    if not detail:
+        return base
+    return (
+        f"{base}\n\nThe previous attempt failed on exactly these points; "
+        f"fix each one and change nothing else:\n{detail}"
+    )

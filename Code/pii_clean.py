@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import dataclasses
 import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import httpx
 
@@ -49,7 +51,30 @@ except ModuleNotFoundError:  # ``python -m Code.pii_clean``
 
 # Phase 5 bounds its own attempts, so it must not multiply them by the global
 # retry budget; see PII/phase5_repair.py.
-RETRIES_OVERRIDES = {"PII7_REPAIR": 1}
+#
+# The project-level phases get a smaller blind budget for the opposite reason:
+# their retry inside the client re-sends a byte-identical request, so a chunk
+# that fails validation fails it identically every time.  One spare attempt
+# still absorbs a transient 5xx; converging on the *content* is the job of
+# ``PLAN_ATTEMPTS``, whose rounds carry the validator's complaints back.
+RETRIES_OVERRIDES = {
+    "PII7_REPAIR": 1,
+    "PII7_PROJECT_CONSOLIDATION": 1,
+    "PII7_TRANSFORMATION_PLAN": 1,
+}
+
+# Tuning defaults come from PiiConfig rather than being restated here.  They were
+# duplicated once and drifted: the dataclass said 2,000,000 while argparse still
+# said 250,000, so the raised limit never took effect on the command line.
+_CONFIG_DEFAULTS = {
+    field.name: field.default
+    for field in dataclasses.fields(PiiConfig)
+    if field.default is not dataclasses.MISSING
+}
+
+
+def _default(name: str) -> Any:
+    return _CONFIG_DEFAULTS[name]
 
 
 def repo_root() -> Path:
@@ -105,17 +130,41 @@ def parse_args() -> argparse.Namespace:
         metavar="PHASE=LEVEL",
         help="Override reasoning effort for one phase, e.g. PHASE_2_TRANSFORMATION_PLAN=max.",
     )
-    parser.add_argument("--preserve-short-max-words", type=int, default=2)
-    parser.add_argument("--short-message-max-words", type=int, default=4)
-    parser.add_argument("--max-batch-messages", type=int, default=40)
-    parser.add_argument("--max-batch-chars", type=int, default=30_000)
-    parser.add_argument("--neighbor-window", type=int, default=2)
-    parser.add_argument("--semantic-fold-chars", type=int, default=60_000)
-    parser.add_argument("--semantic-fold-records", type=int, default=120)
-    parser.add_argument("--max-accumulator-chars", type=int, default=250_000)
-    parser.add_argument("--plan-chunk-bundles", type=int, default=25)
-    parser.add_argument("--plan-chunk-chars", type=int, default=40_000)
-    parser.add_argument("--max-repair-attempts", type=int, default=2)
+    parser.add_argument(
+        "--preserve-short-max-words", type=int,
+        default=_default("preserve_short_max_words"),
+    )
+    parser.add_argument(
+        "--short-message-max-words", type=int,
+        default=_default("short_message_max_words"),
+    )
+    parser.add_argument(
+        "--max-batch-messages", type=int, default=_default("max_batch_messages")
+    )
+    parser.add_argument(
+        "--max-batch-chars", type=int, default=_default("max_batch_chars")
+    )
+    parser.add_argument(
+        "--neighbor-window", type=int, default=_default("neighbor_window")
+    )
+    parser.add_argument(
+        "--semantic-fold-chars", type=int, default=_default("semantic_fold_chars")
+    )
+    parser.add_argument(
+        "--semantic-fold-records", type=int, default=_default("semantic_fold_records")
+    )
+    parser.add_argument(
+        "--max-accumulator-chars", type=int, default=_default("max_accumulator_chars")
+    )
+    parser.add_argument(
+        "--plan-chunk-bundles", type=int, default=_default("plan_chunk_bundles")
+    )
+    parser.add_argument(
+        "--plan-chunk-chars", type=int, default=_default("plan_chunk_chars")
+    )
+    parser.add_argument(
+        "--max-repair-attempts", type=int, default=_default("max_repair_attempts")
+    )
     parser.add_argument("--project-concurrency", type=int, default=2)
     parser.add_argument("--max-concurrent-requests", type=int, default=4)
     parser.add_argument("--retries", type=int, default=3)

@@ -226,8 +226,33 @@ DETECTOR_PEM = "PEM_BLOCK"
 DETECTOR_JWT = "JWT_SHAPE"
 DETECTOR_ENTROPY = "ENTROPY_SHAPE"
 DETECTOR_SEED = "SEED_PHRASE_RUN"
+DETECTOR_CONTEXTUAL_HEX = "CONTEXTUAL_HEX_KEY"
 
 OPAQUE_TOKEN_RE = re.compile(r"(?<![\w./-])[A-Za-z0-9][A-Za-z0-9._~+/=-]{8,511}(?![\w./-])")
+
+
+def _escaped_prefix_pattern(prefix: str) -> str:
+    """Regex for a provider prefix, accepting Markdown-escaped underscores."""
+
+    return re.escape(prefix).replace("_", r"(?:\\)?_")
+
+
+# Chat exports often Markdown-escape underscores (``whsec\_...``).  The generic
+# opaque-token regex starts after that backslash and therefore loses the
+# provider prefix.  Match provider tokens as complete values before applying
+# the generic entropy gate.
+PREFIX_TOKEN_RE = re.compile(
+    r"(?<![\w./-])(?:"
+    + "|".join(_escaped_prefix_pattern(prefix) for prefix, _kind in PREFIX_KINDS)
+    + r")[A-Za-z0-9._~+/=\\-]{7,}(?![\w./-])"
+)
+
+# A 64-hex value is also the shape of a transaction hash, so shape alone is not
+# enough.  It is a credential only when a nearby phrase explicitly calls it a
+# key, secret, credential or value to encrypt.
+CONTEXTUAL_HEX_KEY_RE = re.compile(
+    r"(?<![A-Fa-f0-9])(?P<value>[A-Fa-f0-9]{64})(?![A-Fa-f0-9])"
+)
 
 
 @dataclass(frozen=True)
@@ -249,10 +274,16 @@ def _kind_from_keyword(keyword: str) -> str:
 
 
 def _kind_from_prefix(value: str) -> str | None:
+    value = value.replace(r"\_", "_")
     for prefix, kind in PREFIX_KINDS:
         if value.startswith(prefix) and len(value) > len(prefix) + 6:
             return kind
     return None
+
+
+def _credential_context_near(text: str, start: int, end: int, *, radius: int = 120) -> bool:
+    window = text[max(0, start - radius) : min(len(text), end + radius)]
+    return bool(CREDENTIAL_CONTEXT_RE.search(window))
 
 
 def _is_plausible_secret_value(value: str) -> bool:
@@ -425,7 +456,43 @@ def nominate_secret_spans(text: str) -> list[SecretCandidateSpan]:
             )
         )
 
-    # 5. Structural provider prefixes (always) and the conditional entropy gate.
+    # 5. Provider prefixes, including Markdown-escaped forms.
+    for match in PREFIX_TOKEN_RE.finditer(text):
+        value, removed = _trim_token(match.group(0))
+        if not value:
+            continue
+        proposals.append(
+            SecretCandidateSpan(
+                start=match.start(),
+                end=match.end() - removed,
+                value=value,
+                kind=_kind_from_prefix(value) or KIND_CREDENTIAL,
+                detectors=(DETECTOR_PREFIX,),
+                confidence="HIGH",
+            )
+        )
+
+    # 6. Contextual 64-hex keys.  Exclude explicit 0x values: those are chain
+    # hashes/addresses and belong to phase 0B unless the surrounding assignment
+    # detector already captured them as a credential.
+    for match in CONTEXTUAL_HEX_KEY_RE.finditer(text):
+        start, end = match.span("value")
+        if text[max(0, start - 2) : start].casefold() == "0x":
+            continue
+        if not _credential_context_near(text, start, end):
+            continue
+        proposals.append(
+            SecretCandidateSpan(
+                start=start,
+                end=end,
+                value=match.group("value"),
+                kind=KIND_CREDENTIAL,
+                detectors=(DETECTOR_CONTEXTUAL_HEX,),
+                confidence="HIGH",
+            )
+        )
+
+    # 7. Structural provider prefixes (always) and the conditional entropy gate.
     for match in OPAQUE_TOKEN_RE.finditer(text):
         raw = match.group(0)
         start, end = match.span()
@@ -465,7 +532,7 @@ def nominate_secret_spans(text: str) -> list[SecretCandidateSpan]:
                 )
             )
 
-    # 6. Seed phrases: a long run of lowercase words near a wallet keyword.
+    # 8. Seed phrases: a long run of lowercase words near a wallet keyword.
     lowered = text.casefold()
     if any(word in lowered for word in ("seed phrase", "mnemonic", "recovery phrase")):
         for match in BIP39_RUN_RE.finditer(text):

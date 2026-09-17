@@ -20,7 +20,8 @@ from typing import Any, Mapping, Sequence
 
 from .errors import PiiValidationError, marked
 from .models import MessagePlanSlice, RewriteRecord, SafeMessage, VerdictFinding, VerdictRecord
-from .phase3_rewrite import rewrite_violations
+from .phase3_rewrite import blocking_violations
+from .textutil import semantic_anchor_signature
 
 STATUS_PASS = "PASS"
 STATUS_FAIL = "FAIL"
@@ -62,8 +63,9 @@ SEVERITIES = frozenset({"HIGH", "MEDIUM", "LOW"})
 
 TASK = (
     "Independently verify each synthetic rewrite against its shielded original and the "
-    "supplied transformation plan. Judge project-level semantic equivalence rather than "
-    "word-for-word similarity."
+    "supplied transformation plan. Compare every clause adversarially, treating the plan "
+    "as authorization only for listed entity and value changes. Judge project-level "
+    "semantic equivalence rather than word-for-word similarity."
 )
 
 REPAIR_INSTRUCTION = (
@@ -105,6 +107,14 @@ def build_sections(
             str(item.ordinal): slices[item.ordinal].to_json()
             for item in items
             if item.ordinal in slices
+        },
+        "LOCAL_SEMANTIC_ANCHORS": {
+            str(item.ordinal): {
+                "original": semantic_anchor_signature(item.safe_text),
+                "rewrite": semantic_anchor_signature(rewrites[item.ordinal].text),
+            }
+            for item in items
+            if item.ordinal in rewrites
         },
     }
 
@@ -268,7 +278,10 @@ def cross_check_verdict(
     verification" hole.
     """
 
-    violations = rewrite_violations(safe, rewrite.text, slice_)
+    # Only blocking violations may veto the model's verdict.  The advisory ones
+    # are exactly what this verifier is better placed to judge, so letting them
+    # force a FAIL here would re-impose the string matching that was removed.
+    violations = blocking_violations(safe, rewrite.text, slice_)
     findings = list(verdict.findings)
     checks = dict(verdict.checks)
     status = verdict.status

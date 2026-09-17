@@ -1,6 +1,6 @@
 # Entity taxonomy and policy
 
-**Prompt version:** `pii-v7-entity-policy-1`
+**Prompt version:** `pii-v7-entity-policy-2-private-resource-ids`
 
 This taxonomy is shared by PII discovery, plan generation, rewriting and
 verification. One definition, used identically by all four.
@@ -98,6 +98,14 @@ The distinction is **public versus private**, not "company versus not":
 A public *company* name and a *private* resource hosted with that company are
 different things: `github.com` is public, but `github.com/acme-private/ledger`
 is a `PRIVATE_REPOSITORY`.
+
+This also applies inside URLs. Public providers and technologies such as
+Pinata, IPFS, Chainlink VRF, Lit Protocol, Base Mainnet, Foundry, Anvil,
+ethers.js and public event/standard names are preserved. An app, document,
+subscription, webhook, invitation or meeting-room id in the path/query is a
+private resource identifier and must be synthesized. An actionable meeting URL
+is published under a reserved `.example` host rather than as a plausible room
+on the real public host.
 
 ## Requirement-bearing terms are kept
 

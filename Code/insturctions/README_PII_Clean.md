@@ -95,7 +95,7 @@ python .\Code\pii_clean.py --project-id 42204309 --stop-after-phase PHASE_2_TRAN
 | `--max-batch-chars` | 30000 | 每请求最多字符数（与上者同时生效） |
 | `--neighbor-window` | 2 | Phase 1A 的邻居上下文条数 |
 | `--semantic-fold-chars` | 60000 | Phase 1B 每个 fold 的字符上限 |
-| `--max-accumulator-chars` | 250000 | Phase 1B 累加器硬上限（超限报错，不截断） |
+| `--max-accumulator-chars` | 2000000 | Phase 1B 累加器硬上限（超限报错，不截断） |
 | `--plan-chunk-bundles` | 25 | Phase 2 每块的 identity bundle 数 |
 | `--max-repair-attempts` | 2 | Phase 5 定向修复次数 |
 | `--project-concurrency` | 2 | 并行项目数 |
@@ -129,8 +129,10 @@ python .\Code\pii_clean.py --phase-effort PHASE_3_REWRITE=max --phase-effort PHA
 # 改了 Prompt 后只重算受影响的阶段
 python .\Code\pii_clean.py --project-id 42204309 --force-phase PHASE_0B_PII_DISCOVERY --insecure
 
-# 方案需要重新生成（状态为 REPLAN_REQUIRED 时）
-python .\Code\pii_clean.py --project-id 42204309 --force-phase PHASE_1B_PROJECT_CONSOLIDATION --insecure
+# 方案需要重新生成（状态为 REPLAN_REQUIRED 时）。
+# 具体该强制哪个阶段以 run_metadata.json 的 next_command 为准：
+# Phase 2 的失败只需重算 Phase 2，不要连带作废已经跑完的 1B fold。
+python .\Code\pii_clean.py --project-id 42204309 --force-phase PHASE_2_TRANSFORMATION_PLAN --insecure
 ```
 
 `--force-phase` 会连带重算该阶段在依赖图上的**全部下游**，上游与旁支保留。
@@ -161,7 +163,7 @@ python .\Code\pii_clean.py --project-id 42204309 --status
 | `BLOCKED_RETRYABLE` | 只有网络错误 | **重跑第 2 节的命令即可**，不需要 Agent |
 | `AWAITING_AGENT_REPAIR` | 有内容问题 | 进入步骤 2 |
 | `AGENT_REPAIR_REJECTED` | 上次提交被拒 | 看 `repair_result.json` 后重交 |
-| `REPLAN_REQUIRED` | 方案级问题 | `--force-phase PHASE_1B_PROJECT_CONSOLIDATION`（见第 4 节） |
+| `REPLAN_REQUIRED` | 方案级问题 | 照 `next_command` 给出的 `--force-phase` 重跑（见第 4 节） |
 | `FATAL` | 结构性问题 | 看审计报告，需改代码或源数据 |
 
 命令同时打印每个项目的 `next_command`。

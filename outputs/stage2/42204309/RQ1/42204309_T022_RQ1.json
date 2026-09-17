@@ -11,10 +11,12 @@
   "turns": 741,
   "history_turn_count": 741,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
     "source_message_id": 742,
@@ -5991,27 +5993,28 @@
         738
       ],
       "history_message_count": 13,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq1-agent-response-v1",
+    "schema_version": "rq1-agent-response-v2",
     "required_fields": [
-      "selected_history_message_ids",
       "requirements"
     ],
     "requirement_item_fields": [
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids"
-    ]
+    ],
+    "requirement_refs_must_be_unique": true,
+    "evidence_message_ids_must_reference_c2_history": true,
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -6033,10 +6036,66 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "DETERMINISTIC_RQ1_GOLD",
+    "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+    "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
       "REQ_MINT_SUCCESS_FEEDBACK"
     ],
+    "gold_requirement_atoms": {
+      "REQ_MINT_SUCCESS_FEEDBACK": {
+        "canonical_summary": "Mint Success Feedback",
+        "requirement_title": "Mint Success Feedback",
+        "family_id": "MINT_AND_PAYMENT",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_MINT_SUCCESS_FEEDBACK_EG001",
+            "acceptable_message_ids": [
+              345
+            ]
+          },
+          {
+            "group_id": "REQ_MINT_SUCCESS_FEEDBACK_EG002",
+            "acceptable_message_ids": [
+              598
+            ]
+          },
+          {
+            "group_id": "REQ_MINT_SUCCESS_FEEDBACK_EG003",
+            "acceptable_message_ids": [
+              738
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          357,
+          358,
+          359,
+          360,
+          361,
+          364,
+          377,
+          398,
+          609,
+          610
+        ],
+        "trajectory_message_ids": [
+          345,
+          357,
+          358,
+          359,
+          360,
+          361,
+          364,
+          377,
+          398,
+          598,
+          609,
+          610,
+          738
+        ]
+      }
+    },
     "directly_affected_historical_requirement_ids": [
       "REQ_MINT_SUCCESS_FEEDBACK"
     ],
@@ -6071,7 +6130,7 @@
           "REQ_MINT_SUCCESS_FEEDBACK_E014",
           "REQ_MINT_SUCCESS_FEEDBACK_E015"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           345,
           357,
           358,
@@ -6086,11 +6145,59 @@
           610,
           738
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          345,
+          598,
+          738
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_MINT_SUCCESS_FEEDBACK_EG001",
+            "acceptable_message_ids": [
+              345
+            ]
+          },
+          {
+            "group_id": "REQ_MINT_SUCCESS_FEEDBACK_EG002",
+            "acceptable_message_ids": [
+              598
+            ]
+          },
+          {
+            "group_id": "REQ_MINT_SUCCESS_FEEDBACK_EG003",
+            "acceptable_message_ids": [
+              738
+            ]
+          }
+        ],
+        "context_message_ids": [
+          357,
+          358,
+          359,
+          360,
+          361,
+          364,
+          377,
+          398,
+          609,
+          610
+        ],
+        "neutral_context_message_ids": [
+          357,
+          358,
+          359,
+          360,
+          361,
+          364,
+          377,
+          398,
+          609,
+          610
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       }
     },
     "derivation_scope": "DIRECT_AFFECTED_ONLY",
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

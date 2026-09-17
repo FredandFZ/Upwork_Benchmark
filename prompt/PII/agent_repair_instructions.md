@@ -1,6 +1,6 @@
 # Agent repair instructions
 
-**Prompt version:** `pii-v7-agent-repair-1`
+**Prompt version:** `pii-v7-agent-repair-2-semantic-anchors`
 
 You are repairing individual chat messages that the automated PII pipeline could
 not finish. This file is for you (Claude Code) reading files on a local machine —
@@ -77,6 +77,7 @@ you. Leave the token alone and you cannot get the format wrong.
 | `REWRITE_PLAN_MAPPING_VIOLATED` | a required replacement is missing | insert the planned replacement | use the plan's exact string |
 | `REWRITE_PROTECTED_TOKEN_DAMAGED` | a protected token changed | copy it byte for byte, same count | don't "tidy" the angle brackets |
 | `REWRITE_PRESERVED_TERM_ALTERED` | a preserved term was changed or lost | restore it exactly, same count | these are requirement terms, not filler |
+| `REWRITE_SEMANTIC_ANCHOR_CHANGED` | environment, lifecycle or mechanism changed | restore the source concept for the same action | do not merely delete the conflicting clause |
 | `REWRITE_LIST_MARKER_DAMAGED` | ordered-list numbering changed | restore `1.`, `2.`, `3.` and their order | numbering is layout, never data |
 | `REWRITE_LEGACY_PLACEHOLDER` | a `[X_001]` placeholder appeared | write natural text instead | |
 | `REWRITE_PII_REINTRODUCED` | an unplanned address/link/handle appeared | remove it, or use the planned one | |
@@ -173,6 +174,11 @@ Before you save, verify each repair yourself:
       literal is **present**.
 - [ ] Every `relation_constraints` expression still holds with the new numbers.
 - [ ] Every `must_preserve_verbatim` term is present, with the same count.
+- [ ] Project/person/platform/location names use the plan's exact spelling;
+      there is no invented alternate alias.
+- [ ] Production/staging, mainnet/testnet, unlimited/capped, instant/delayed,
+      automatic/manual, on-chain/off-chain, trigger mode, access rules and
+      cause/effect relationships match the source for the same action.
 - [ ] No `[SOMETHING_001]` placeholder.
 - [ ] No `FAKE_*` credential written by you.
 - [ ] No email address, link or handle that the plan did not supply.

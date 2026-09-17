@@ -15,21 +15,51 @@ The behaviours asserted here are the ones the design exists to guarantee:
 from __future__ import annotations
 
 import asyncio
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
-from Code.PII.agent_handoff import queue_sha256, read_task_package, repairs_dir
-from Code.PII.config import PHASE_0B, PHASE_1A, PiiConfig, ProjectFiles
-from Code.PII.errors import PiiError, PiiValidationError
+from Code.PII.agent_handoff import (
+    clear_task_package,
+    queue_sha256,
+    read_task_package,
+    repairs_dir,
+)
+from Code.PII.config import (
+    HASH_UPSTREAM,
+    PHASE_0B,
+    PHASE_1A,
+    PHASE_1B,
+    PHASE_2,
+    PHASE_3,
+    PHASE_4,
+    PHASE_5,
+    UPSTREAM,
+    PiiConfig,
+    ProjectFiles,
+)
+from Code.PII.errors import VALIDATION_MARKER, PiiError, PiiValidationError, marked
+from Code.PII.llm import _informed_instruction
 from Code.PII.finalize import finalize_project, status_report
 from Code.PII.ledger import (
+    CLASS_PLAN_CONFLICT,
+    CODE_ASSEMBLY_INVALID,
+    NEXT_COMMAND,
+    STATUS_BLOCKED_RETRYABLE,
+    STATUS_RUNNING,
     STATUS_AWAITING_AGENT_REPAIR,
     STATUS_PASSED,
+    STATUS_REPLAN_REQUIRED,
     UnresolvedLedger,
+    next_command,
+    write_run_metadata,
 )
 from Code.PII.phase4_verify import CHECK_DIMENSIONS
+from Code.PII.phase1a_semantics import validate_semantics_response
+from Code.PII.models import SafeMessage
 from Code.PII.pipeline import PiiPipeline
 from Code.PII.prompts import PromptSet
 from Code.stage1.api_client import ApiError
@@ -129,7 +159,7 @@ class FakeApi:
         if mode == "PII7_MESSAGE_SEMANTICS":
             return {"records": [self._semantics(m) for m in body["safe_messages"]]}
         if mode == "PII7_PROJECT_CONSOLIDATION":
-            return {"registry": self._registry(body)}
+            return self._registry(body)
         if mode == "PII7_TRANSFORMATION_PLAN":
             return self._plan(body)
         if mode == "PII7_REWRITE":
@@ -166,11 +196,17 @@ class FakeApi:
     def _semantics(message):
         slots = []
         if "5 winners" in message["text"]:
+            winner_start = message["text"].index("5 winners")
+            prize_start = message["text"].index("$10,000")
             slots = [
                 {"slot_name": "WINNER_COUNT", "value_type": "COUNT",
-                 "source_literal": "5 winners", "meaning": "winners per draw"},
+                 "source_literal": "5 winners", "start": winner_start,
+                 "end": winner_start + len("5 winners"),
+                 "meaning": "winners per draw"},
                 {"slot_name": "PRIZE", "value_type": "AMOUNT",
-                 "source_literal": "$10,000", "meaning": "prize per winner"},
+                 "source_literal": "$10,000", "start": prize_start,
+                 "end": prize_start + len("$10,000"),
+                 "meaning": "prize per winner"},
             ]
         return {"ordinal": message["ordinal"], "speech_act": "STATEMENT",
                 "polarity": "AFFIRMATIVE", "execution_status": "NOT_APPLICABLE",
@@ -178,22 +214,38 @@ class FakeApi:
 
     @staticmethod
     def _registry(body):
-        slots = []
+        """A delta, not the merged registry.
+
+        Phase 1B carries the accumulator forward locally, so a fold reports only
+        what its own chunk adds.
+        """
+
+        existing = {
+            slot["slot_id"]
+            for slot in (body.get("semantic_accumulator") or {}).get("slots", [])
+        }
+        new_slots, updated = [], []
         for record in body["semantic_records"]:
             for slot in record["slots"]:
-                slots.append({
+                entry = {"ordinal": record["ordinal"], "op": "MODIFY",
+                         "new_value": slot["source_literal"]}
+                if slot["slot_name"] in existing:
+                    updated.append({
+                        "slot_id": slot["slot_name"],
+                        "append_history": [entry],
+                        "add_source_literals": [slot["source_literal"]],
+                        "add_message_ordinals": [record["ordinal"]]})
+                    continue
+                existing.add(slot["slot_name"])
+                new_slots.append({
                     "slot_id": slot["slot_name"], "kind": "BUSINESS",
                     "value_type": slot["value_type"], "unit": None,
-                    "current_value": slot["source_literal"], "meaning": slot["meaning"],
-                    "history": [{"ordinal": record["ordinal"], "op": "INTRODUCE",
-                                 "old_value": None, "new_value": slot["source_literal"]}],
+                    "meaning": slot["meaning"],
+                    "history": [{**entry, "op": "INTRODUCE"}],
                     "source_literals": [slot["source_literal"]],
                     "message_ordinals": [record["ordinal"]]})
-        known = {slot["slot_id"] for slot in slots}
-        for slot in (body.get("semantic_accumulator") or {}).get("slots", []):
-            if slot["slot_id"] not in known:
-                slots.append(slot)
-        return {"slots": slots, "relations": [], "decisions": [], "merged_from": {}}
+        return {"new_slots": new_slots, "updated_slots": updated,
+                "merged_from": {}, "new_relations": [], "new_decisions": []}
 
     @staticmethod
     def _plan(body):
@@ -210,8 +262,17 @@ class FakeApi:
              "history": [{"new_value": new_values.get(entry["new_value"],
                                                       entry["new_value"] + "x")}
                          for entry in slot["history"]],
-             "literal_map": {literal: new_values.get(literal, literal + "x")
-                             for literal in slot["source_literals"]}}
+             "literal_replacements": [
+                 {"ordinal": occurrence["ordinal"],
+                  "message_id": occurrence["message_id"],
+                  "start": occurrence["start"],
+                  "end": occurrence["end"],
+                  "original": occurrence["source_literal"],
+                  "replacement": new_values.get(
+                      occurrence["source_literal"],
+                      occurrence["source_literal"] + "x",
+                  )}
+                 for occurrence in slot["literal_occurrences"]]}
             for slot in body["slot_cluster"]]}
 
     def _rewrite(self, message, body):
@@ -225,8 +286,11 @@ class FakeApi:
             if item["policy"] == "SYNTHESIZE":
                 text = text.replace(item["original"], item["replacement"])
         for item in slice_["slot_replacements"]:
-            for original, replacement in item["literal_map"].items():
-                text = text.replace(original, replacement)
+            for occurrence in item["literal_replacements"]:
+                if occurrence["ordinal"] == ordinal:
+                    text = text.replace(
+                        occurrence["original"], occurrence["replacement"]
+                    )
         if body["policy"]["bucket"] == "LONG":
             text = _restructure(text) + self.rewrite_suffix
         else:
@@ -429,8 +493,261 @@ class ResumeTests(unittest.TestCase):
             harness.run(FakeApi(), overwrite=True)
         self.assertIn("changed", str(caught.exception))
 
+    def test_transport_failure_then_success_reaches_done(self):
+        """A run that fails on transport must be able to finish on a retry.
+
+        Regression: the ledger entry from the failed run used to survive
+        ``load_existing`` even after the message succeeded, so the phase-group
+        barrier kept halting and phases 3/4/5 skipped the message as blocked --
+        the project could never reach DONE once it had failed once.
+        """
+
+        harness = PipelineHarness()
+        first = harness.run(FakeApi(transport_fail_modes={"PII7_PII_DISCOVERY"}))
+        self.assertEqual(first["status"], "BLOCKED_RETRYABLE")
+        self.assertFalse(harness.committed.is_file())
+
+        second = harness.run(FakeApi())
+        self.assertEqual(second["status"], "DONE", "a retry must be able to finish")
+        self.assertTrue(harness.committed.is_file())
+
+        ledger = UnresolvedLedger(run_dir=harness.run_dir, project_id="P1")
+        ledger.load_existing()
+        self.assertEqual(ledger.entries(), [], "stale entries must be retired")
+
+    def test_partial_transport_failure_then_success_reaches_done(self):
+        """The real-world shape: some messages fail, the rest are checkpointed."""
+
+        harness = PipelineHarness()
+        harness.run(FakeApi(fail_rewrite_ordinals={1, 3}))
+        ledger = UnresolvedLedger(run_dir=harness.run_dir, project_id="P1")
+        ledger.load_existing()
+        self.assertEqual(len(ledger.entries()), 2)
+
+        # Second run: the same messages now succeed and are no longer blocked.
+        result = harness.run(FakeApi())
+        self.assertEqual(result["status"], "DONE")
+        rows = harness.output_rows()
+        self.assertIn("Marcus Feld", " ".join(row["message"] for row in rows))
+
 
 class FailurePolicyTests(unittest.TestCase):
+    @staticmethod
+    def _safe_message(text: str) -> SafeMessage:
+        return SafeMessage(
+            ordinal=1,
+            message_id=1,
+            speaker="client",
+            safe_text=text,
+            safe_text_sha256="safe",
+            source_text_sha256="source",
+            word_count=len(text.split()),
+            bucket="LONG",
+            secret_tokens=(),
+            sender_id_present=False,
+        )
+
+    @staticmethod
+    def _semantics_payload(slot: dict) -> dict:
+        return {
+            "records": [
+                {
+                    "ordinal": 1,
+                    "speech_act": "REQUEST",
+                    "polarity": "AFFIRMATIVE",
+                    "execution_status": "NOT_STARTED",
+                    "ambiguity_kind": "NONE",
+                    "decisions": [],
+                    "slots": [slot],
+                    "relations": [],
+                }
+            ]
+        }
+
+    def test_phase1a_reanchors_unique_literal_when_model_offsets_drift(self):
+        text = "Use 🔧 before $500 today."
+        literal = "$500"
+        actual_start = text.index(literal)
+        payload = self._semantics_payload(
+            {
+                "slot_name": "PRIZE_AMOUNT",
+                "value_type": "AMOUNT",
+                "source_literal": literal,
+                # A common model error: counting the preceding emoji as two
+                # UTF-16 code units instead of one Python character.
+                "start": actual_start + 1,
+                "end": actual_start + 1 + len(literal),
+                "meaning": "amount of the prize",
+                "unit": "USD",
+                "op": "INTRODUCE",
+            }
+        )
+
+        result = validate_semantics_response(payload, [self._safe_message(text)])
+
+        self.assertEqual(result[1].slots[0].start, actual_start)
+        self.assertEqual(result[1].slots[0].end, actual_start + len(literal))
+
+    def test_phase1a_does_not_reanchor_a_literal_absent_from_source(self):
+        text = "Use the agreed amount today."
+        payload = self._semantics_payload(
+            {
+                "slot_name": "PRIZE_AMOUNT",
+                "value_type": "AMOUNT",
+                "source_literal": "$500",
+                "start": 0,
+                "end": 4,
+                "meaning": "amount of the prize",
+                "unit": "USD",
+                "op": "INTRODUCE",
+            }
+        )
+
+        with self.assertRaises(PiiValidationError):
+            validate_semantics_response(payload, [self._safe_message(text)])
+
+    def test_phase1a_keeps_load_bearing_semantic_facts(self):
+        text = "Deploy Chainlink VRF to production and keep the supply unlimited."
+        payload = {
+            "records": [
+                {
+                    "ordinal": 1,
+                    "speech_act": "REQUEST",
+                    "polarity": "AFFIRMATIVE",
+                    "execution_status": "NOT_STARTED",
+                    "ambiguity_kind": "NONE",
+                    "decisions": [],
+                    "slots": [],
+                    "relations": [],
+                    "semantic_facts": [
+                        {
+                            "kind": "ENVIRONMENT",
+                            "statement": "Deployment targets production.",
+                            "polarity": "AFFIRMATIVE",
+                            "must_preserve_terms": ["Chainlink VRF"],
+                        },
+                        {
+                            "kind": "CONSTRAINT",
+                            "statement": "Supply has no cap.",
+                            "polarity": "AFFIRMATIVE",
+                            "must_preserve_terms": [],
+                        },
+                    ],
+                }
+            ]
+        }
+
+        result = validate_semantics_response(payload, [self._safe_message(text)])
+
+        self.assertEqual(len(result[1].semantic_facts), 2)
+        self.assertEqual(
+            result[1].semantic_facts[0]["must_preserve_terms"],
+            ["Chainlink VRF"],
+        )
+
+    def test_phase1a_fact_preserve_term_must_be_exact_source_text(self):
+        text = "Deploy Chainlink VRF to production."
+        payload = {
+            "records": [
+                {
+                    "ordinal": 1,
+                    "speech_act": "REQUEST",
+                    "polarity": "AFFIRMATIVE",
+                    "execution_status": "NOT_STARTED",
+                    "ambiguity_kind": "NONE",
+                    "decisions": [],
+                    "slots": [],
+                    "relations": [],
+                    "semantic_facts": [
+                        {
+                            "kind": "TECHNOLOGY",
+                            "statement": "Use the specified randomness provider.",
+                            "polarity": "AFFIRMATIVE",
+                            "must_preserve_terms": ["Gelato VRF"],
+                        }
+                    ],
+                }
+            ]
+        }
+
+        with self.assertRaises(PiiValidationError):
+            validate_semantics_response(payload, [self._safe_message(text)])
+
+    def test_validation_failure_bisects_instead_of_retrying_every_item(self):
+        """One bad record in eight should cost seven calls, not nine."""
+
+        class OneBadSemanticsApi(FakeApi):
+            def respond(self, mode, body):
+                payload = super().respond(mode, body)
+                if mode == "PII7_MESSAGE_SEMANTICS":
+                    for record in payload["records"]:
+                        if record["ordinal"] == 5:
+                            record["polarity"] = "INVALID"
+                return payload
+
+        raw = [
+            {
+                "message": (
+                    "Please review the draft carefully, then confirm whether "
+                    "the final structure is acceptable."
+                ),
+                "message_user_type": "client",
+                "sender_id": "aa11bb22cc33",
+                "created_ts": f"t{ordinal}",
+            }
+            for ordinal in range(1, 9)
+        ]
+        harness = PipelineHarness(raw=raw, max_batch_messages=8)
+        api = OneBadSemanticsApi()
+
+        harness.run(api)
+
+        self.assertEqual(api.calls.count("PII7_MESSAGE_SEMANTICS"), 7)
+        checkpoints = harness.run_dir / "phase1a_message_semantics" / "messages"
+        self.assertEqual(len(list(checkpoints.glob("*.json"))), 7)
+        self.assertFalse((checkpoints / "00005.json").exists())
+
+    def test_timeout_on_large_shard_is_bisected_and_completes(self):
+        """A payload-duration timeout should preserve work via bounded bisection."""
+
+        class TimeoutOnLargeDiscoveryApi(FakeApi):
+            async def call(
+                self,
+                *,
+                project_id,
+                run_mode,
+                messages,
+                target_requirement=None,
+                validator=None,
+                failed_response_redactor=None,
+            ):
+                body = json.loads(messages[1]["content"])
+                if (
+                    run_mode == "PII7_PII_DISCOVERY"
+                    and len(body.get("safe_messages", ())) > 1
+                ):
+                    self.calls.append(run_mode)
+                    raise ApiError(
+                        f"{run_mode}/{target_requirement} failed: ReadTimeout",
+                        cause=TimeoutError("read timed out"),
+                    )
+                return await super().call(
+                    project_id=project_id,
+                    run_mode=run_mode,
+                    messages=messages,
+                    target_requirement=target_requirement,
+                    validator=validator,
+                    failed_response_redactor=failed_response_redactor,
+                )
+
+        harness = PipelineHarness()
+        api = TimeoutOnLargeDiscoveryApi()
+        result = harness.run(api)
+
+        self.assertEqual(result["status"], "DONE")
+        self.assertTrue(harness.committed.is_file())
+        self.assertGreater(api.calls.count("PII7_PII_DISCOVERY"), 1)
+
     def test_one_run_enumerates_every_failing_message(self):
         harness = PipelineHarness()
         api = FakeApi(fail_rewrite_ordinals={1, 3})
@@ -487,6 +804,24 @@ class FailurePolicyTests(unittest.TestCase):
         self.assertTrue(task["verifier_failures"], "findings must reach the agent")
         self.assertTrue(task["attempt_history"], "attempt history must reach the agent")
 
+    def test_phase5_logs_queue_progress_and_summary(self):
+        harness = PipelineHarness()
+        api = FakeApi(fail_verify_ordinals={1})
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            harness.run(api)
+
+        log = output.getvalue()
+        self.assertIn("[P1] phase 5: 1 message(s) queued for repair", log)
+        self.assertIn(
+            "[P1] PHASE_5_REPAIR message_00001 attempt_01 (1/1; API)", log
+        )
+        self.assertIn("[P1] PHASE_5_REPAIR message_00001 unresolved (1/1)", log)
+        self.assertIn(
+            "[P1] phase 5: 1/1 processed, 0 repaired, 1 unresolved", log
+        )
+
     def test_ledger_contains_no_raw_values(self):
         harness = PipelineHarness()
         harness.run(FakeApi(fail_rewrite_ordinals={1}))
@@ -495,6 +830,67 @@ class FailurePolicyTests(unittest.TestCase):
         )
         for secret in ("Joseph", "scott@northstar.io", "northstar.io"):
             self.assertNotIn(secret, ledger_text, f"{secret!r} leaked into the ledger")
+
+
+class AccumulatorOverflowTests(unittest.TestCase):
+    """An oversized registry is a local condition, not a model error.
+
+    Regression: it was raised from the response validator, so it looked
+    retryable -- one real run spent eight attempts (~25 minutes) on a condition
+    the model could not affect, because the pipeline itself carries most of the
+    registry forward.
+    """
+
+    def test_overflow_stops_immediately_without_retrying(self):
+        harness = PipelineHarness(max_accumulator_chars=1)
+        api = FakeApi()
+        result = harness.run(api)
+        self.assertEqual(result["status"], "REPLAN_REQUIRED")
+        self.assertEqual(
+            api.calls.count("PII7_PROJECT_CONSOLIDATION"), 1,
+            "an unfixable condition must not be retried",
+        )
+        self.assertFalse(harness.committed.is_file())
+
+    def test_the_message_names_the_flag_to_raise(self):
+        harness = PipelineHarness(max_accumulator_chars=1)
+        harness.run(FakeApi())
+        ledger = UnresolvedLedger(run_dir=harness.run_dir, project_id="P1")
+        ledger.load_existing()
+        error = " ".join(entry.error or "" for entry in ledger.entries())
+        self.assertIn("--max-accumulator-chars", error)
+
+    def test_the_overflowing_fold_is_still_checkpointed(self):
+        """The fold validated; only the aggregate was over budget.
+
+        Discarding it would make the operator pay for it again after simply
+        raising the limit.
+        """
+
+        harness = PipelineHarness(max_accumulator_chars=1)
+        harness.run(FakeApi())
+        folds = list(
+            (harness.run_dir / "phase1b_project_consolidation" / "folds").glob("*.json")
+        )
+        self.assertTrue(folds, "the validated fold must be kept")
+
+        # Raising the limit must reuse it rather than recompute it.
+        second = FakeApi()
+        result = harness.run(second, overwrite=True, max_accumulator_chars=9_000_000)
+        self.assertEqual(result["status"], "DONE")
+        self.assertNotIn("PII7_PROJECT_CONSOLIDATION", set(second.calls))
+
+    def test_raising_the_cap_does_not_invalidate_completed_folds(self):
+        """The cap bounds accumulated state, so it is not in the phase input hash."""
+
+        harness = PipelineHarness()
+        harness.run(FakeApi())
+        second = FakeApi()
+        harness.run(second, overwrite=True, max_accumulator_chars=9_000_000)
+        self.assertNotIn(
+            "PII7_PROJECT_CONSOLIDATION", set(second.calls),
+            "changing the cap must reuse the folds that already validated",
+        )
 
 
 class AgentRepairTests(unittest.TestCase):
@@ -641,3 +1037,225 @@ class AgentRepairTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReplanRoutingTests(unittest.TestCase):
+    """The replan command must name the phase that actually broke.
+
+    Sending the operator to 1B for a phase-2 failure discards every fold of a
+    consolidation that succeeded -- minutes of work and a real spend on a large
+    project -- and does not touch the chunk that failed.
+    """
+
+    def ledger_with(self, phase: str) -> UnresolvedLedger:
+        directory = Path(tempfile.mkdtemp())
+        ledger = UnresolvedLedger(run_dir=directory, project_id="P1")
+        asyncio.run(
+            ledger.record(
+                phase=phase,
+                code="PROJECT_ARTIFACT_INVALID",
+                failure_class=CLASS_PLAN_CONFLICT,
+                message_id=None,
+                ordinal=None,
+                attempts=1,
+                error=PiiError("chunk invalid"),
+            )
+        )
+        return ledger
+
+    def test_phase_2_failure_replans_phase_2(self):
+        ledger = self.ledger_with(PHASE_2)
+        self.assertEqual(ledger.status(), STATUS_REPLAN_REQUIRED)
+        self.assertEqual(ledger.replan_phase(), PHASE_2)
+
+    def test_phase_1b_failure_replans_phase_1b(self):
+        self.assertEqual(self.ledger_with(PHASE_1B).replan_phase(), PHASE_1B)
+
+    def test_next_command_names_the_failing_phase(self):
+        ledger = self.ledger_with(PHASE_2)
+        directory = Path(tempfile.mkdtemp())
+        write_run_metadata(
+            directory,
+            project_id="P1",
+            status=ledger.status(),
+            ledger=ledger,
+        )
+        command = json.loads((directory / "run_metadata.json").read_text("utf-8"))[
+            "next_command"
+        ]
+        self.assertIn(PHASE_2, command)
+        self.assertNotIn(PHASE_1B, command)
+
+
+class InformedRetryTests(unittest.TestCase):
+    """A retry that does not say what failed is a blind re-roll.
+
+    Phase 2 sent eight byte-identical requests for 121 entities, failing on the
+    same three every time, and the model was never told which three or why.
+    """
+
+    def test_the_validator_complaint_reaches_the_next_attempt(self):
+        detail = "PLAN_IDENTITY: E0090 replacement is a lightly masked variant"
+        error = ApiError(
+            "PII7_TRANSFORMATION_PLAN/entities_chunk_0001 failed after 4 attempt(s)",
+            cause=PiiValidationError(marked(detail)),
+        )
+        instruction = _informed_instruction("Base rule.", error)
+        self.assertIn("Base rule.", instruction)
+        self.assertIn("E0090", instruction)
+        self.assertNotIn(VALIDATION_MARKER, instruction)
+
+    def test_a_causeless_error_leaves_the_base_instruction_alone(self):
+        self.assertEqual(
+            _informed_instruction("Base rule.", ApiError("boom")), "Base rule."
+        )
+
+
+class StaleTaskPackageTests(unittest.TestCase):
+    """A run that resolves everything must retire the previous run's package.
+
+    The package is a snapshot of one run's unresolved set.  Left in place, it
+    makes ``--status`` report a phantom open task, and finalize's commit
+    precondition ("no open agent-actionable task") refuses to publish a project
+    that is actually healthy.
+    """
+
+    def test_a_clean_rerun_clears_a_previous_package(self):
+        harness = PipelineHarness()
+        harness.run(FakeApi(fail_verify_ordinals={1}))
+        package = read_task_package(harness.run_dir)
+        self.assertIsNotNone(package, "the failing run must write a package")
+        self.assertGreater(package["counts"]["tasks"], 0)
+
+        # A later run whose only failures are transport writes no tasks.  The
+        # package from the earlier run must not survive it: an agent cannot fix
+        # a ConnectError, and the stale OPEN task would make --status report a
+        # phantom and finalize refuse to publish.
+        result = harness.run(
+            FakeApi(transport_fail_modes={"PII7_VERIFICATION"}),
+            force_phases=(PHASE_4,),
+        )
+        self.assertEqual(result["status"], STATUS_BLOCKED_RETRYABLE)
+        self.assertEqual(result["agent_tasks"], 0)
+        self.assertIsNone(
+            read_task_package(harness.run_dir),
+            "a run with no agent-actionable failure must retire the old package",
+        )
+
+    def test_clear_removes_the_index(self):
+        directory = Path(tempfile.mkdtemp())
+        tasks = directory / "agent_tasks"
+        tasks.mkdir()
+        (tasks / "index.json").write_text('{"tasks": []}', encoding="utf-8")
+        (tasks / "task_00001.md").write_text("stale", encoding="utf-8")
+        clear_task_package(directory)
+        self.assertIsNone(read_task_package(directory))
+        self.assertEqual(list(tasks.glob("*")), [])
+
+    def test_clear_is_safe_when_there_was_never_a_package(self):
+        clear_task_package(Path(tempfile.mkdtemp()))
+
+
+class InterruptedRunStatusTests(unittest.TestCase):
+    """RUNNING persists on disk after Ctrl-C; --status must still advise."""
+
+    def test_running_has_a_resume_command(self):
+        command = NEXT_COMMAND[STATUS_RUNNING].format(
+            project_id="P1", run_dir="r", replan_phase=PHASE_1B
+        )
+        self.assertIn("--project-id P1", command)
+        self.assertNotEqual(command.strip(), "")
+
+
+class AssemblyFailureRoutingTests(unittest.TestCase):
+    """A failure in local assembly must not send the operator to --force-phase.
+
+    Every shard validated; they only failed to compose.  Discarding a whole
+    phase of model output that was never at fault costs the most expensive
+    calls in the run, and does not touch the code that actually broke.
+    """
+
+    def ledger_with(self, code: str) -> UnresolvedLedger:
+        ledger = UnresolvedLedger(run_dir=Path(tempfile.mkdtemp()), project_id="P1")
+        asyncio.run(
+            ledger.record(
+                phase=PHASE_2,
+                code=code,
+                failure_class=CLASS_PLAN_CONFLICT,
+                message_id=None,
+                ordinal=None,
+                attempts=1,
+                error=PiiError("plan invalid"),
+            )
+        )
+        return ledger
+
+    def test_assembly_failure_advises_a_plain_rerun(self):
+        ledger = self.ledger_with(CODE_ASSEMBLY_INVALID)
+        self.assertEqual(ledger.status(), STATUS_REPLAN_REQUIRED)
+        self.assertTrue(ledger.replan_is_local())
+        command = next_command(ledger.status(), "P1", "run", ledger)
+        self.assertNotIn("--force-phase", command)
+        self.assertIn("--project-id P1", command)
+
+    def test_model_output_failure_still_advises_a_replan(self):
+        ledger = self.ledger_with("PROJECT_ARTIFACT_INVALID")
+        self.assertFalse(ledger.replan_is_local())
+        self.assertIn("--force-phase", next_command(ledger.status(), "P1", "run", ledger))
+
+    def test_a_mix_escalates_to_replan(self):
+        """One genuine model failure is enough to need new model output."""
+
+        ledger = self.ledger_with(CODE_ASSEMBLY_INVALID)
+        asyncio.run(
+            ledger.record(
+                phase=PHASE_2,
+                code="PROJECT_ARTIFACT_INVALID",
+                failure_class=CLASS_PLAN_CONFLICT,
+                message_id=None,
+                ordinal=None,
+                attempts=1,
+                error=PiiError("chunk invalid"),
+            )
+        )
+        self.assertFalse(ledger.replan_is_local())
+        self.assertIn("--force-phase", next_command(ledger.status(), "P1", "run", ledger))
+
+
+class PlanChangeCascadeTests(unittest.TestCase):
+    """A plan edit must only invalidate the messages it actually reaches.
+
+    ``UPSTREAM`` is the dependency DAG and ``--force-phase`` needs it, but
+    feeding phase 2's *whole-plan* output hash into every phase-3 message hash
+    made the coarse value win: one byte anywhere in ``plan.json`` invalidated
+    all 824 rewrites.  That is exactly what the plan-slice closure exists to
+    prevent, and what its property test guarantees is unnecessary.
+    """
+
+    def test_per_message_phases_do_not_chain_to_the_whole_plan(self):
+        for phase in (PHASE_3, PHASE_4, PHASE_5):
+            self.assertEqual(
+                HASH_UPSTREAM[phase],
+                (),
+                f"{phase} must depend on its own scope, not the merged plan",
+            )
+
+    def test_the_dependency_dag_is_untouched(self):
+        """--force-phase still has to take the descendant closure."""
+
+        self.assertIn(PHASE_2, UPSTREAM[PHASE_3])
+        self.assertIn(PHASE_3, UPSTREAM[PHASE_4])
+        self.assertIn(PHASE_4, UPSTREAM[PHASE_5])
+
+    def test_aggregate_phases_still_chain(self):
+        self.assertIn(PHASE_1B, UPSTREAM[PHASE_2])
+        self.assertEqual(HASH_UPSTREAM[PHASE_2], UPSTREAM[PHASE_2])
+
+    def test_a_plan_edit_reruns_only_the_messages_it_reaches(self):
+        harness = PipelineHarness()
+        harness.run(FakeApi())
+        first = FakeApi()
+        harness.run(first)
+        self.assertEqual(
+            first.calls.count("PII7_REWRITE"), 0, "an unchanged plan must reuse every rewrite"
+        )

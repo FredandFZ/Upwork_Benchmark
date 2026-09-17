@@ -27,9 +27,12 @@ final project-wide audit, with no trail back to its cause.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, replace
 from decimal import Decimal
+from difflib import SequenceMatcher
 from typing import Any, Mapping, Sequence
+from urllib.parse import urlsplit, urlunsplit
 
 from .config import RESERVED_DOMAIN_SUFFIX
 from .errors import PlanConsistencyError, marked
@@ -45,6 +48,7 @@ from .models import (
     SecretRegistry,
     SemanticRegistry,
     SlotHistoryEntry,
+    SlotLiteralReplacement,
     SlotReplacement,
     TransformationPlan,
 )
@@ -52,6 +56,7 @@ from .phase0b_entities import (
     POLICY_PRESERVE,
     POLICY_PROTECTED,
     POLICY_SYNTHESIZE,
+    PUBLIC_ALLOWLIST,
 )
 from .phase1b_consolidate import evaluate_relation, numeric_value, relation_clusters
 from .secret_shield import nominate_secret_spans
@@ -66,6 +71,9 @@ from .textutil import (
     WORD_RE,
     canonical_json,
     contains_value,
+    find_terms_outside_pii,
+    is_bare_numeric_literal,
+    private_resource_identifiers,
     similarity_ratio,
 )
 
@@ -92,16 +100,38 @@ REPAIR_INSTRUCTION_ENTITIES = (
     "supplied entity_id. A PRESERVE entity must keep its original value unchanged. A "
     "SYNTHESIZE replacement must differ substantially from its original, must not be a "
     "lightly masked variant of it, must not equal any reserved value or any other "
-    f"entity's original, and every synthetic domain must end in '{RESERVED_DOMAIN_SUFFIX}'. "
+    f"entity's original, and every synthetic private domain must end in "
+    f"'{RESERVED_DOMAIN_SUFFIX}'. "
     "Within one bundle, the address local part must derive from the synthetic person name "
-    "and every address, link and repository must use that bundle's synthetic domain. Never "
-    "produce a value that looks like a usable credential."
+    "and every address, private-host link and private-host repository must use that bundle's "
+    "synthetic domain. Public-host links are excluded from that bundle-domain rule. For a "
+    "link on a PRIVATE host, change the host and keep the path; the reserved suffix does not "
+    "excuse keeping the original name in the host. For a link on a PUBLIC host (a block "
+    "explorer, a docs site, a vendor page), keep the host and change the private part of the "
+    "path instead. Either way the replacement must not carry any other entity's real value: "
+    "if the path holds a wallet address, a project name or an invite code that has its own "
+    "replacement, apply that replacement inside the link. For an address, change both the "
+    "local part and the host. For an entity that reads as a description rather than a value, "
+    "restate the whole phrase rather than swapping one word. Never produce a value that "
+    "looks like a usable credential. Never keep an opaque private app, document, webhook, "
+    "subscription or invitation id inside a URL. A meeting URL must use a reserved .example "
+    "host, not a plausible room code on the real service. Every alias must remain a spelling "
+    "of the same planned synthetic identity, never a second identity."
 )
 REPAIR_INSTRUCTION_SLOTS = (
     "The previous response failed local validation. Return one replacement for every "
     "supplied slot_id. Keep the same number of history entries with the same ordinals and "
     "ops, keep the data type and unit, make every new value different from the original, "
-    "and choose values that make every supplied relation hold exactly."
+    "and choose values that make every supplied relation hold exactly. Return one "
+    "literal_replacements record for every supplied literal_occurrence, echoing its "
+    "ordinal, message_id, start, end and source_literal as original. A value written in "
+    "words is still that type and may be rendered as a number ('free' -> '$25', "
+    "'No badges' -> '3 badges'); the reverse is not allowed -- if the original carries a "
+    "number, the replacement must carry one too. Never re-value a name listed in "
+    "PRESERVED_TERMS: a slot whose value is a public name keeps that value exactly, and a "
+    "value that contains one must keep it."
+    " A slot authorizes only a value change: preserve the operator, condition, lifecycle, "
+    "trigger, environment, actor, object and causal rule around it."
 )
 
 
@@ -256,8 +286,181 @@ def build_entity_sections(
     }
 
 
+def preserved_surface_forms(registry: PiiEntityRegistry) -> frozenset[str]:
+    """Every surface form the plan must never alter, casefolded.
+
+    Phase 0B classifies public third parties and public technologies as
+    PRESERVE, and ``TYPE_POLICY`` pins that in code so a prompt regression
+    cannot resurrect v6's brand replacement.  That guard only ever reached the
+    *entity* channel: ``validate_slot_cluster`` is handed the semantic registry
+    and has no idea which literals are public, so the same names came back
+    through the slot channel and a currency ticker, an L2 and a payment
+    provider were all re-valued -- turning requirements into different
+    requirements, and making the value simultaneously PRESERVE (as an entity)
+    and replaced (as a slot literal), which no rewrite can satisfy.
+    """
+
+    forms: set[str] = set()
+    for entity in registry.entities:
+        if entity.policy != POLICY_PRESERVE:
+            continue
+        for form in (entity.canonical_value, *entity.surface_forms()):
+            if not form or not form.strip():
+                continue
+            value = form.strip().casefold()
+            forms.add(value)
+            # A preserved entity is often recorded as a whole link
+            # (``https://<explorer>/?``) while what has to be recognised later is
+            # the bare host inside some *other* link.  Contribute both, plus the
+            # host stripped of its TLD, so a brand recorded as a word still
+            # matches the same brand appearing as a domain.
+            host = _domain_of(value)
+            if host and "." in host:
+                forms.add(host)
+                labels = _identifying_labels(host)
+                if labels:
+                    forms.add(".".join(labels))
+    return frozenset(forms)
+
+
+def _host_is_public(host: str, preserved: frozenset[str]) -> bool:
+    """Whether this host belongs to a preserved public third party."""
+
+    if not host:
+        return False
+    if host in preserved:
+        return True
+    # Walk the labels right to left.  ``docs.google.com`` and ``meet.google.com``
+    # are Google; matching only the full label list recognised a brand solely
+    # when its sub-domain happened to be in the generic list, so one vendor was
+    # caught and an identical one was missed.
+    labels = _identifying_labels(host)
+    for index in range(len(labels)):
+        if ".".join(labels[index:]) in preserved:
+            return True
+    return False
+
+
+def _normalize_public_url_replacement(
+    original: str, replacement: str, preserved: frozenset[str]
+) -> str:
+    """Keep a public service endpoint while accepting the model's new path.
+
+    The model used to receive two contradictory rules: public links had to keep
+    their real public host, while every synthetic link was also required to use
+    a reserved ``.example`` host. Repeated retries therefore could not make the
+    answer reliable. The host choice is deterministic, so do not leave it to
+    the model: copy scheme and authority from the source public URL and retain
+    only the candidate's rewritten path, query and fragment.
+
+    Malformed candidates are left untouched so the normal shape validator can
+    reject them with the useful original diagnostic.
+    """
+
+    if not _host_is_public(_domain_of(original), preserved):
+        return replacement
+    source = urlsplit(original)
+    candidate = urlsplit(replacement)
+    if not source.scheme or not source.netloc or not candidate.scheme or not candidate.netloc:
+        return replacement
+    return urlunsplit(
+        (source.scheme, source.netloc, candidate.path, candidate.query, candidate.fragment)
+    )
+
+
+def _pads_original(original: str, replacement: str) -> bool:
+    """The replacement is the original with words bolted on, not a new value.
+
+    When a slot records a public technology name the model is caught between
+    "keep the public term" and "every value must change", and satisfies both by
+    padding: ``PDF`` -> ``PDF document``, ``Pinata`` -> ``Pinata pinning
+    service``.  That is not a new value, and downstream it is unsatisfiable --
+    the rewrite naturally says ``PDF``, so the gate sees the original surviving
+    while the padded "new value" never appears.
+    """
+
+    left, right = original.strip(), replacement.strip()
+    if not left or not right or left.casefold() == right.casefold():
+        return False
+    return contains_value(right, left) or contains_value(left, right)
+
+
+def _is_only_preserved(value: str, preserved: frozenset[str]) -> bool:
+    """The value is a public term and nothing else."""
+
+    return bool(value.strip()) and value.strip().casefold() in preserved
+
+
+def _preserved_terms_in(value: str, preserved: frozenset[str]) -> set[str]:
+    """Preserved surface forms occurring in ``value`` as whole tokens."""
+
+    if not preserved:
+        return set()
+    tokens = [token.casefold() for token in WORD_RE.findall(value)]
+    token_set = set(tokens)
+    found = {token for token in tokens if token in preserved}
+    # Public acronyms are commonly pluralised in prose (``NFT`` -> ``NFTs``).
+    # Treat only an exact trailing-s plural as the same term; substring matching
+    # would revive the old false positive where ``base`` matched ``database``.
+    found.update(
+        term
+        for term in preserved
+        if " " not in term
+        and re.fullmatch(r"[a-z0-9]+", term)
+        and f"{term}s" in token_set
+    )
+    joined = value.strip().casefold()
+    if joined in preserved:
+        found.add(joined)
+    # Multi-word terms ("Google Meet", "Base Mainnet") are not single tokens.
+    for term in preserved:
+        if " " in term and re.search(
+            r"(?<![A-Za-z0-9])" + re.escape(term) + r"(?![A-Za-z0-9])", value, re.IGNORECASE
+        ):
+            found.add(term)
+    return found
+
+
+def _restore_preserved_unit(
+    source: str,
+    candidate: str,
+    unit: str | None,
+    preserved: frozenset[str],
+) -> str:
+    """Restore a declared public unit when the candidate has an explicit number.
+
+    A model can correctly re-value a count but paraphrase its unit (for example,
+    ``no existing NFT`` -> ``4 digital collectibles``). Retrying a large slot
+    cluster cannot make that deterministic. If every dropped public term comes
+    from the slot's declared unit, the numeric decision is unambiguous: retain
+    it and render it with that unit. Public names outside the unit and values
+    without an explicit number still go through the hard validation failure.
+    """
+
+    required = _preserved_terms_in(source, preserved)
+    if not required or required <= _preserved_terms_in(candidate, preserved):
+        return candidate.strip()
+    if not unit:
+        return candidate.strip()
+    unit_tokens = set(re.findall(r"[a-z0-9]+", unit.casefold()))
+    if not all(
+        term in unit_tokens or (" " not in term and f"{term}s" in unit_tokens)
+        for term in required
+    ):
+        return candidate.strip()
+    number = numeric_value(candidate)
+    if number is None:
+        return candidate.strip()
+    rendered = format(number, "f")
+    if "." in rendered:
+        rendered = rendered.rstrip("0").rstrip(".")
+    return f"{rendered} {unit}".strip()
+
+
 def build_slot_sections(
-    cluster: SlotCluster, registry: SemanticRegistry
+    cluster: SlotCluster,
+    registry: SemanticRegistry,
+    preserved: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     by_id = registry.by_id()
     relations = [
@@ -265,12 +468,23 @@ def build_slot_sections(
         for relation in registry.relations
         if set(relation.slot_ids) & set(cluster.slot_ids)
     ]
+    slots = [by_id[slot_id].to_json() for slot_id in cluster.slot_ids if slot_id in by_id]
+    # Name the public terms these slots actually contain, so the model is told
+    # rather than corrected.  Enforcement still happens locally.
+    present = sorted(
+        {
+            term
+            for slot in slots
+            for value in list(slot.get("source_literals") or [])
+            + [item.get("new_value") or "" for item in slot.get("history") or []]
+            for term in _preserved_terms_in(value, preserved)
+        }
+    )
     return {
         "MODE": MODE_SLOT_CLUSTER,
-        "SLOT_CLUSTER": [
-            by_id[slot_id].to_json() for slot_id in cluster.slot_ids if slot_id in by_id
-        ],
+        "SLOT_CLUSTER": slots,
         "CONSTRAINTS": relations,
+        "PRESERVED_TERMS": present,
     }
 
 
@@ -305,6 +519,127 @@ def _retains_original(original: str, replacement: str) -> bool:
     return contains_value(right, left) or contains_value(left, right)
 
 
+URL_TYPES = frozenset({"PRIVATE_URL", "MEETING_URL", "PRIVATE_REPOSITORY"})
+
+# Sub-domains this generic carry no identity, so a plan is not required to
+# invent new ones; ``api.<private>.xyz`` -> ``api.<synthetic>.example`` is the
+# desired shape, not a leak.
+_GENERIC_LABELS = frozenset(
+    {"www", "api", "app", "dev", "staging", "stage", "test", "mail", "smtp", "cdn"}
+)
+
+
+def _identifying_labels(host: str) -> list[str]:
+    """Host labels that actually identify, TLD and generic prefixes removed."""
+
+    labels = [label for label in host.split(".") if label]
+    if labels and labels[-1] in RESERVED_DOMAIN_SUFFIX.strip(".").split("."):
+        labels = labels[:-1]
+    elif len(labels) > 1:
+        labels = labels[:-1]
+    return [label for label in labels if label not in _GENERIC_LABELS]
+
+
+def _host_masking_failure(original: str, replacement: str) -> str | None:
+    """Compare hosts on their identifying labels, character by character.
+
+    Token similarity is blind here: ``WORD_RE`` treats a whole host as one
+    token, so ``<private>.xyz`` -> ``<private>.example`` scores 0.0 and sails
+    through while the organisation name survives into the published dataset.
+    The reserved-suffix rule does not catch it either -- the suffix is correct.
+    Characters are the right granularity for a host.
+    """
+
+    if not replacement:
+        return "replacement has no host"
+    if original == replacement:
+        return "replacement keeps the original host"
+    left = _identifying_labels(original)
+    right = _identifying_labels(replacement)
+    survivors = sorted(set(left) & set(right))
+    if survivors:
+        return f"replacement host keeps the identifying label(s) {survivors}"
+    joined_left, joined_right = ".".join(left), ".".join(right)
+    if joined_left and joined_right:
+        ratio = SequenceMatcher(None, joined_left, joined_right, autojunk=False).ratio()
+        if ratio > MAX_SIMILARITY:
+            return "replacement host is a lightly masked variant of the original host"
+    if contains_value(replacement, original):
+        return "replacement host still contains the original host"
+    return None
+
+
+def _masking_failure(
+    entity_type: str,
+    original: str,
+    replacement: str,
+    preserved: frozenset[str] = frozenset(),
+) -> str | None:
+    """Whether ``replacement`` only lightly masks ``original``, judged per type.
+
+    Comparing whole strings is wrong for anything with a host.  In
+    ``https://api.<private-host>/api/webhook/contract-events`` the only
+    identifying part is the host; the path states *which endpoint receives
+    contract events*, which is a Requirement the rewrite must carry through.
+    Whole-string similarity scores a correct host swap at 0.80 and rejects it,
+    so the only way past the gate was to destroy the path — the validator was
+    demanding the data be broken.  For hosted types the identity test therefore
+    runs on the host, and on the local part as well for addresses, leaving the
+    path free to survive.
+    """
+
+    if entity_type in URL_TYPES:
+        retained_private_ids = set(private_resource_identifiers(original)) & set(
+            private_resource_identifiers(replacement)
+        )
+        if retained_private_ids:
+            return "replacement keeps a private resource identifier in the URL"
+        if entity_type == "MEETING_URL":
+            if _domain_of(original) == _domain_of(replacement):
+                return "meeting replacement must move to a reserved synthetic host"
+            return _host_masking_failure(_domain_of(original), _domain_of(replacement))
+        if _host_is_public(_domain_of(original), preserved):
+            # A public host is a requirement, not an identity: a block explorer,
+            # a docs site, a vendor page.  Replacing it states that a different
+            # service was used, and when the *path* is what carries the private
+            # part -- an address, an invite code -- replacing the host while
+            # keeping the path is exactly backwards: it disguises the public
+            # half and publishes the private one.
+            if _domain_of(replacement) != _domain_of(original):
+                return "replacement must keep the public host and change the path"
+            source = urlsplit(original)
+            candidate = urlsplit(replacement)
+            if (source.path, source.query, source.fragment) == (
+                candidate.path,
+                candidate.query,
+                candidate.fragment,
+            ):
+                return "replacement must change the private path, query or fragment"
+            return None
+        return _host_masking_failure(_domain_of(original), _domain_of(replacement))
+
+    if entity_type in {"EMAIL", "PRIVATE_DOMAIN"}:
+        host = _host_masking_failure(_domain_of(original), _domain_of(replacement))
+        if host is not None or entity_type == "PRIVATE_DOMAIN":
+            return host
+        # Both halves of an address identify: keeping the local part leaks the
+        # person even under a synthetic domain.
+        left, right = _local_part(original), _local_part(replacement)
+        if not right:
+            return "replacement has no local part"
+        if left == right:
+            return "replacement keeps the original local part"
+        if similarity_ratio(left, right) > MAX_SIMILARITY:
+            return "replacement local part is a lightly masked variant of the original"
+        return None
+
+    if similarity_ratio(original, replacement) > MAX_SIMILARITY:
+        return "replacement is a lightly masked variant of the original"
+    if _retains_original(original, replacement):
+        return "replacement still contains the original value"
+    return None
+
+
 def _looks_like_credential(value: str) -> bool:
     return bool(
         nominate_secret_spans(value)
@@ -333,6 +668,27 @@ def _type_shape_failure(entity_type: str, replacement: str) -> str | None:
     return None
 
 
+def _carried_originals(
+    replacement: str, entity_id: str, by_id: Mapping[str, PiiEntity]
+) -> set[str]:
+    """Other entities whose real value survives inside this replacement.
+
+    Only values long enough to be unambiguous are considered; a short one would
+    match by coincidence and reject correct plans.
+    """
+
+    carried: set[str] = set()
+    for other_id, other in by_id.items():
+        if other_id == entity_id or other.policy != POLICY_SYNTHESIZE:
+            continue
+        value = other.canonical_value.strip()
+        if len(value) < 8:
+            continue
+        if contains_value(replacement, value):
+            carried.add(other_id)
+    return carried
+
+
 def validate_entity_chunk(
     payload: Mapping[str, Any],
     chunk: PlanChunk,
@@ -352,6 +708,7 @@ def validate_entity_chunk(
         )
 
     by_id = registry.by_id()
+    preserved = preserved_surface_forms(registry)
     wanted = [item for item in chunk.entity_ids if item in by_id]
     reserved_flat = {
         value.casefold() for values in reserved.values() for value in values
@@ -380,6 +737,11 @@ def validate_entity_chunk(
             continue
         replacement = replacement.strip()
 
+        if entity.entity_type in URL_TYPES and entity.entity_type != "MEETING_URL":
+            replacement = _normalize_public_url_replacement(
+                entity.canonical_value, replacement, preserved
+            )
+
         if _looks_like_credential(replacement):
             # Checked before everything else: a generated credential is the most
             # severe failure class, and an earlier rejection must not mask it.
@@ -400,16 +762,22 @@ def validate_entity_chunk(
             if replacement.casefold() == entity.canonical_value.casefold():
                 fail("PLAN_IDENTITY", f"{entity_id} replacement equals its original")
                 continue
-            if similarity_ratio(entity.canonical_value, replacement) > MAX_SIMILARITY:
-                fail(
-                    "PLAN_IDENTITY",
-                    f"{entity_id} replacement is a lightly masked variant of the original",
-                )
+            masked = _masking_failure(
+                entity.entity_type, entity.canonical_value, replacement, preserved
+            )
+            if masked is not None:
+                fail("PLAN_IDENTITY", f"{entity_id} {masked}")
                 continue
-            if _retains_original(entity.canonical_value, replacement):
+            carried = _carried_originals(replacement, entity_id, by_id)
+            if carried:
+                # A composite value -- an explorer link built around a wallet
+                # address, an invite URL built around a project name -- must not
+                # publish the part it was assembled from.  Left unchecked, the
+                # same address had two fates depending on whether it stood alone
+                # or sat inside a link, and the real one shipped in the link.
                 fail(
-                    "PLAN_IDENTITY",
-                    f"{entity_id} replacement still contains the original value",
+                    "PLAN_RESIDUAL_PII",
+                    f"{entity_id} replacement still carries {sorted(carried)}'s real value",
                 )
                 continue
             owner = all_originals.get(replacement.casefold())
@@ -434,8 +802,13 @@ def validate_entity_chunk(
                     f"{entity_id} synthetic domain must end in {RESERVED_DOMAIN_SUFFIX}",
                 )
                 continue
-            if entity.entity_type in HOSTED_TYPES and not RESERVED_DOMAIN_RE.search(
-                _domain_of(replacement)
+            public_url = entity.entity_type in URL_TYPES and entity.entity_type != "MEETING_URL" and _host_is_public(
+                _domain_of(entity.canonical_value), preserved
+            )
+            if (
+                entity.entity_type in HOSTED_TYPES
+                and not public_url
+                and not RESERVED_DOMAIN_RE.search(_domain_of(replacement))
             ):
                 fail(
                     "PLAN_REAL_LOOKING_VALUE",
@@ -507,6 +880,7 @@ def _bundle_failures(
 
     failures: list[str] = []
     by_id = registry.by_id()
+    preserved = preserved_surface_forms(registry)
     for bundle_id in chunk.bundle_ids:
         bundle = registry.bundle_by_id().get(bundle_id)
         if bundle is None:
@@ -522,6 +896,12 @@ def _bundle_failures(
             _domain_of(item.replacement)
             for item in members
             if item.entity_type in HOSTED_TYPES or item.entity_type == "PRIVATE_DOMAIN"
+            if not (
+                item.entity_type in URL_TYPES
+                and _host_is_public(
+                    _domain_of(by_id[item.entity_id].canonical_value), preserved
+                )
+            )
         }
         domains.discard("")
         if len(domains) > 1:
@@ -544,17 +924,21 @@ def _bundle_failures(
                         f"PLAN_SCHEMA_INVALID: bundle {bundle_id} address local part "
                         "does not derive from the synthetic person name"
                     )
-        # Every member of a bundle must actually be in this chunk.
-        absent = [
+        # Every member of a bundle must actually be in this chunk.  Members that
+        # *are* in this chunk but were rejected above are not evidence of a split
+        # and must not be reported as one: doing so pointed the diagnosis at the
+        # chunker while the real fault was three rejected replacements.
+        elsewhere = [
             item
             for item in bundle.entity_ids
             if item in by_id
             and by_id[item].policy != POLICY_PROTECTED
             and item not in replacements
+            and item not in chunk.entity_ids
         ]
-        if absent:
+        if elsewhere:
             failures.append(
-                f"PLAN_INCOMPLETE: bundle {bundle_id} was split across chunks ({absent[:5]})"
+                f"PLAN_INCOMPLETE: bundle {bundle_id} was split across chunks ({elsewhere[:5]})"
             )
     return failures
 
@@ -565,7 +949,10 @@ def _bundle_failures(
 
 
 def validate_slot_cluster(
-    payload: Mapping[str, Any], cluster: SlotCluster, registry: SemanticRegistry
+    payload: Mapping[str, Any],
+    cluster: SlotCluster,
+    registry: SemanticRegistry,
+    preserved: frozenset[str] = frozenset(),
 ) -> dict[str, SlotReplacement]:
     failures: list[str] = []
 
@@ -613,19 +1000,68 @@ def validate_slot_cluster(
                 fail("PLAN_SCHEMA_INVALID", f"{slot_id} history[{position}] has no new_value")
                 broken = True
                 break
+            new_value = _restore_preserved_unit(
+                source.new_value, new_value, slot.unit, preserved
+            )
+            kept = _preserved_terms_in(source.new_value, preserved)
+            if kept and not _preserved_terms_in(new_value, preserved) >= kept:
+                fail(
+                    "PLAN_PRESERVED_TERM_DROPPED",
+                    f"{slot_id} history[{position}] drops the public term(s) "
+                    f"{sorted(kept)}; those are requirements, not identities",
+                )
+                broken = True
+                break
+            # Padding is the model saying "this value cannot be re-valued":
+            # it kept a public name and bolted a noun on to look like a change.
+            # Take the keeping and drop the filler.  A numeric value gets no
+            # such licence -- padding a count is dodging the work, not a signal.
+            padded = _pads_original(source.new_value, new_value) and (
+                numeric_value(source.new_value) is None
+            )
+            if padded:
+                new_value = source.new_value
             if new_value.strip() == source.new_value:
+                if padded or _is_only_preserved(source.new_value, preserved):
+                    # A slot whose value *is* a public name has nothing to
+                    # synthesize: the requirement is which public tool was
+                    # chosen, and changing it states a different requirement.
+                    history.append(
+                        SlotHistoryEntry(
+                            ordinal=source.ordinal,
+                            op=source.op,
+                            old_value=history[-1].new_value if history else None,
+                            new_value=new_value.strip(),
+                        )
+                    )
+                    continue
                 fail(
                     "PLAN_IDENTITY",
                     f"{slot_id} history[{position}] keeps the original value",
                 )
                 broken = True
                 break
-            if (numeric_value(source.new_value) is None) != (
+            if numeric_value(source.new_value) is not None and (
                 numeric_value(new_value) is None
             ):
+                # Directional on purpose.  Whether a string parses as a number
+                # is a proxy for its *rendering*, not its type: a COUNT records
+                # "No badges", an AMOUNT records "free", a DURATION records
+                # "a few minutes".  Requiring the replacement to match that
+                # rendering made the natural re-valuation ("free" -> "$25")
+                # look like a type change, and left one slot unsatisfiable --
+                # its history held "0 Badges" and "No badges", so no single
+                # rendering could satisfy both entries.  The declared
+                # ``value_type`` is unchanged either way.
+                #
+                # The other direction stays a hard failure: dropping a number
+                # that was there loses precision the requirement depends on,
+                # and would silently break any arithmetic relation the slot
+                # takes part in.
                 fail(
                     "PLAN_SCHEMA_INVALID",
-                    f"{slot_id} history[{position}] changed the value's data type",
+                    f"{slot_id} history[{position}] replaced a number with a "
+                    "value that has none",
                 )
                 broken = True
                 break
@@ -640,28 +1076,114 @@ def validate_slot_cluster(
         if broken:
             continue
 
-        raw_map = entry.get("literal_map")
-        if not isinstance(raw_map, dict):
-            fail("PLAN_SCHEMA_INVALID", f"{slot_id} has no literal_map")
+        raw_replacements = entry.get("literal_replacements")
+        if not isinstance(raw_replacements, list):
+            fail("PLAN_SCHEMA_INVALID", f"{slot_id} has no literal_replacements list")
             continue
-        literal_map: dict[str, str] = {}
-        for key, value in raw_map.items():
-            if not isinstance(key, str) or not isinstance(value, str) or not value.strip():
-                fail("PLAN_SCHEMA_INVALID", f"{slot_id} literal_map has a malformed entry")
+
+        expected_occurrences = {
+            (item.ordinal, item.start, item.end, item.source_literal): item
+            for item in slot.literal_occurrences
+        }
+        literal_replacements: list[SlotLiteralReplacement] = []
+        seen_occurrences: set[tuple[int, int, int, str]] = set()
+        for position, raw_replacement in enumerate(raw_replacements):
+            if not isinstance(raw_replacement, dict):
+                fail(
+                    "PLAN_SCHEMA_INVALID",
+                    f"{slot_id} literal_replacements[{position}] is malformed",
+                )
                 continue
-            if value.strip() == key:
-                fail("PLAN_IDENTITY", f"{slot_id} literal_map keeps a literal unchanged")
+            ordinal = raw_replacement.get("ordinal")
+            start = raw_replacement.get("start")
+            end = raw_replacement.get("end")
+            key = raw_replacement.get("original")
+            value = raw_replacement.get("replacement")
+            if (
+                isinstance(ordinal, bool)
+                or not isinstance(ordinal, int)
+                or isinstance(start, bool)
+                or not isinstance(start, int)
+                or isinstance(end, bool)
+                or not isinstance(end, int)
+                or not isinstance(key, str)
+                or not isinstance(value, str)
+                or not value.strip()
+            ):
+                fail(
+                    "PLAN_SCHEMA_INVALID",
+                    f"{slot_id} literal_replacements[{position}] is malformed",
+                )
                 continue
-            literal_map[key] = value.strip()
-        expected_literals = set(slot.source_literals)
-        if expected_literals and set(literal_map) != expected_literals:
+            occurrence_key = (ordinal, start, end, key)
+            occurrence = expected_occurrences.get(occurrence_key)
+            if occurrence is None:
+                fail(
+                    "PLAN_SCHEMA_INVALID",
+                    f"{slot_id} literal_replacements[{position}] does not name a "
+                    "recorded occurrence",
+                )
+                continue
+            if raw_replacement.get("message_id") != occurrence.message_id:
+                fail(
+                    "PLAN_SCHEMA_INVALID",
+                    f"{slot_id} literal_replacements[{position}] has the wrong message_id",
+                )
+                continue
+            if occurrence_key in seen_occurrences:
+                fail(
+                    "PLAN_SCHEMA_INVALID",
+                    f"{slot_id} repeats literal occurrence {occurrence_key[:3]}",
+                )
+                continue
+            seen_occurrences.add(occurrence_key)
+            value = _restore_preserved_unit(key, value, slot.unit, preserved)
+            kept = _preserved_terms_in(key, preserved)
+            if _pads_original(key, value) and numeric_value(key) is None:
+                planned_value = key
+            elif _is_only_preserved(key, preserved):
+                # Forced locally rather than rejected: the correct answer is
+                # known without asking, and a rejection would cost a retry.
+                planned_value = key
+            elif kept and not _preserved_terms_in(value, preserved) >= kept:
+                fail(
+                    "PLAN_PRESERVED_TERM_DROPPED",
+                    f"{slot_id} occurrence replacement drops the public term(s) "
+                    f"{sorted(kept)}",
+                )
+                continue
+            elif value.strip() == key:
+                fail(
+                    "PLAN_IDENTITY",
+                    f"{slot_id} occurrence replacement keeps a literal unchanged",
+                )
+                continue
+            else:
+                planned_value = value.strip()
+            literal_replacements.append(
+                SlotLiteralReplacement(
+                    ordinal=occurrence.ordinal,
+                    message_id=occurrence.message_id,
+                    start=occurrence.start,
+                    end=occurrence.end,
+                    original=occurrence.source_literal,
+                    replacement=planned_value,
+                    match_mode=(
+                        "SEMANTIC_ONLY"
+                        if is_bare_numeric_literal(occurrence.source_literal)
+                        else "EXACT"
+                    ),
+                )
+            )
+        if set(expected_occurrences) != seen_occurrences:
             fail(
                 "PLAN_SCHEMA_INVALID",
-                f"{slot_id} literal_map keys must be exactly the recorded source literals",
+                f"{slot_id} literal_replacements must cover every recorded occurrence "
+                "exactly once",
             )
             continue
-        for value in literal_map.values():
-            if _looks_like_credential(value):
+        for item in literal_replacements:
+            if _looks_like_credential(item.replacement):
                 fail("PLAN_CREDENTIAL_GENERATED", f"{slot_id} literal looks like a credential")
                 break
 
@@ -669,7 +1191,7 @@ def validate_slot_cluster(
             slot_id=slot_id,
             value_type=slot.value_type,
             history=tuple(history),
-            literal_map=literal_map,
+            literal_replacements=tuple(literal_replacements),
         )
 
     missing = [item for item in cluster.slot_ids if item in by_id and item not in result]
@@ -761,7 +1283,7 @@ def assemble_plan(
     secret_registry: SecretRegistry,
     semantic_registry: SemanticRegistry,
     *,
-    plan_version: int = 1,
+    plan_version: int = 2,
     amendments: Sequence[Mapping[str, Any]] = (),
 ) -> TransformationPlan:
     """Merge the chunks deterministically.
@@ -853,17 +1375,72 @@ def validate_plan(
             )
 
     # Uniqueness across the whole plan, per type.
+    #
+    # "Shared replacement" is only a fault when the two entities are *different*
+    # real-world things.  Phase 0B routinely splits one referent into several
+    # entities -- a project written with and without a space, an acronym and its
+    # expansion, the same link with and without a scheme -- and phase 2 then
+    # correctly gives them one synthetic identity, cross-registering each other's
+    # surface forms as aliases.  Flagging that as a collision demanded the
+    # opposite: two different synthetic project names for one real project,
+    # which is precisely the cross-message inconsistency phase 6B exists to
+    # catch.
+    #
+    # Two entities that claim the same original surface form denote the same
+    # thing, so sharing a replacement is required of them, not forbidden.  Two
+    # genuinely distinct entities never overlap this way, so the guard against
+    # collapsing distinct identities stays intact.
+    surfaces = {
+        item.entity_id: {original.casefold() for original, _ in item.pairs()}
+        for item in plan.synthesized()
+    }
+    collisions: list[str] = []
     by_type: dict[str, dict[str, str]] = {}
     for item in plan.synthesized():
         owners = by_type.setdefault(item.entity_type, {})
         for value in item.replacements():
             key = value.casefold()
-            if key in owners and owners[key] != item.entity_id:
+            other = owners.setdefault(key, item.entity_id)
+            if other == item.entity_id:
+                continue
+            if surfaces[item.entity_id] & surfaces.get(other, set()):
+                continue
+            # One entry per pair: an alias and its canonical form both collide,
+            # which reported the same fault twice.
+            message = (
+                f"PLAN_COLLISION: {item.entity_type} replacement shared by "
+                f"{other} and {item.entity_id}"
+            )
+            if message not in collisions:
+                collisions.append(message)
+    failures.extend(collisions)
+
+    # A slot's "synthetic" value must not be some entity's real one.  One slot
+    # re-numbered a list of identifiers and picked a number that is itself a
+    # real identifier elsewhere in the project, so the plan would have published
+    # a true value while presenting it as synthetic.  Entity-vs-entity
+    # collisions were already checked; this is the slot side of the same rule.
+    real_values = {
+        entity.canonical_value.strip(): entity.entity_id
+        for entity in entity_registry.entities
+        if entity.policy == POLICY_SYNTHESIZE and len(entity.canonical_value.strip()) >= 5
+    }
+    for slot in plan.slot_replacements:
+        candidates = [
+            item.replacement for item in slot.literal_replacements
+        ] + [
+            item.new_value for item in slot.history
+        ]
+        reported: set[str] = set()
+        for value in candidates:
+            for real, owner in real_values.items():
+                if owner in reported or not contains_value(value or "", real):
+                    continue
+                reported.add(owner)
                 failures.append(
-                    f"PLAN_COLLISION: {item.entity_type} replacement shared by "
-                    f"{owners[key]} and {item.entity_id}"
+                    f"PLAN_RESIDUAL_PII: slot {slot.slot_id} uses {owner}'s real value "
+                    "as a synthetic one"
                 )
-            owners[key] = item.entity_id
 
     originals = {
         entity.canonical_value.casefold(): entity.entity_id
@@ -977,6 +1554,7 @@ def plan_slice(
             "ambiguity_kind": semantics.ambiguity_kind,
             "decisions": [dict(item) for item in semantics.decisions],
             "relations": list(semantics.relations),
+            "semantic_facts": [dict(item) for item in semantics.semantic_facts],
         }
 
     preserved = tuple(
@@ -998,9 +1576,29 @@ def plan_slice(
         entity_replacements=tuple(
             entity_by_id[entity_id] for entity_id in sorted(closure)
         ),
-        slot_replacements=tuple(slot_by_id[slot_id] for slot_id in sorted(slot_closure)),
+        slot_replacements=tuple(
+            replace(
+                slot_by_id[slot_id],
+                literal_replacements=slot_by_id[slot_id].replacements_for(safe.ordinal),
+            )
+            for slot_id in sorted(slot_closure)
+        ),
         secret_tokens=safe.secret_tokens,
-        preserve_literals=tuple(sorted({*preserved, *preserve_terms})),
+        preserve_literals=tuple(
+            sorted(
+                {
+                    *preserved,
+                    *preserve_terms,
+                    *find_terms_outside_pii(safe.safe_text, PUBLIC_ALLOWLIST),
+                    *(
+                        term
+                        for fact in (semantics.semantic_facts if semantics else ())
+                        for term in fact.get("must_preserve_terms", [])
+                        if isinstance(term, str) and term
+                    ),
+                }
+            )
+        ),
         must_replace_terms=(),
         semantic_expectations=expectations,
         relation_constraints=relation_constraints,

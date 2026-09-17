@@ -39,6 +39,7 @@ from .checkpoints import CheckpointStore, check_source_signature, source_signatu
 from .config import (
     BUCKET_LONG,
     ENGINE_VERSION,
+    HASH_UPSTREAM,
     PHASE_0A,
     PHASE_0B,
     PHASE_1A,
@@ -70,15 +71,25 @@ from .errors import (
     ResumeSignatureError,
     api_error_is_validation_failure,
 )
-from .agent_handoff import TaskContext, build_task, write_task_package
+from .agent_handoff import (
+    SUBMISSION_NAME,
+    TaskContext,
+    build_task,
+    clear_task_package,
+    load_submission,
+    repairs_dir,
+    write_task_package,
+)
 from .ledger import (
     CLASS_LOCAL_VALIDATOR,
     CLASS_PLAN_CONFLICT,
     CLASS_REPAIR_EXHAUSTED,
     CLASS_TRANSPORT,
     CLASS_VERIFIER_FAIL,
+    CODE_ASSEMBLY_INVALID,
     STATUS_PASSED,
     STATUS_RUNNING,
+    TASK_KIND_EXTRACTION,
     UnresolvedLedger,
     write_run_metadata,
 )
@@ -108,6 +119,14 @@ from .prompts import PromptSet, rewrite_prompt_key
 from .secret_shield import shield_project
 from .textutil import canonical_sha256, resolve_bucket
 
+# Rounds of *informed* retry for the project-level artifacts (1B folds, phase 2
+# chunks).  Each round restates the specific validator failures, so unlike the
+# blind retries inside the API client these converge.  Kept in step with the
+# lowered ``retries_overrides`` for those run modes so the total call budget is
+# unchanged; what changes is that most of it is now spent on attempts that know
+# what went wrong.
+PLAN_ATTEMPTS = 4
+
 
 @dataclass
 class ProjectRun:
@@ -131,6 +150,8 @@ class ProjectRun:
     states: dict[int, MessageState] = field(default_factory=dict)
     attempts: dict[int, list[dict[str, Any]]] = field(default_factory=dict)
     timings: dict[str, float] = field(default_factory=dict)
+    advisories: dict[str, int] = field(default_factory=dict)
+    extraction_annotations: dict[int, Mapping[str, Any]] | None = None
     source_sha256: str = ""
 
     def safe_by_ordinal(self) -> dict[int, SafeMessage]:
@@ -226,20 +247,22 @@ class PiiPipeline:
         if PHASE_1A in wanted:
             await self._timed(run, PHASE_1A, self._phase_1a)
 
-        # Barrier: the plan cannot be built from a partial inventory.
-        if run.ledger.entries():
+        # Barrier: the plan cannot be built from a partial inventory.  Scoped to
+        # this group's phases -- a leftover phase-3 entry from an earlier run
+        # must not block extraction, which has not reached phase 3 yet.
+        if run.ledger.entries_for_phases((PHASE_0B, PHASE_1A)):
             return self._halt(run, blocked_phase="EXTRACTION")
         self._resolve_buckets(run)
 
         if PHASE_1B in wanted:
             try:
                 await self._timed(run, PHASE_1B, self._phase_1b)
-            except (PiiValidationError, ApiError) as exc:
+            except (PiiValidationError, ApiError, PiiError) as exc:
                 return await self._project_level_failure(run, PHASE_1B, exc)
         if PHASE_2 in wanted:
             try:
                 await self._timed(run, PHASE_2, self._phase_2)
-            except (PiiValidationError, ApiError) as exc:
+            except (PiiValidationError, ApiError, PiiError) as exc:
                 return await self._project_level_failure(run, PHASE_2, exc)
 
         if run.plan is None:
@@ -260,6 +283,14 @@ class PiiPipeline:
         return self._phase_6(run)
 
     async def _timed(self, run: ProjectRun, phase: str, handler: Any) -> None:
+        # A phase about to run re-attempts everything it has no checkpoint for,
+        # so any entry it left on a previous run is obsolete before it starts.
+        # Retiring here rather than on success covers the cache-hit path too: a
+        # message that succeeds by restore never reaches a success callback, and
+        # a surviving entry would both trip the barrier and make `is_blocked`
+        # skip the message in a later phase.  Failures that recur are recorded
+        # again during the phase.
+        run.ledger.clear_for([phase])
         started = time.monotonic()
         await handler(run)
         run.timings[phase] = round(time.monotonic() - started, 3)
@@ -329,6 +360,7 @@ class PiiPipeline:
         params = self.config.params_for(PHASE_0B)
         pending: list[SafeMessage] = []
         results: dict[int, tuple[Any, ...]] = {}
+        agent_annotations = self._agent_extraction_annotations(run)
 
         for safe in run.safe_messages:
             scope = {
@@ -354,6 +386,28 @@ class PiiPipeline:
 
                 results[safe.ordinal] = tuple(
                     PiiOccurrence.from_json(item) for item in cached["body"]["occurrences"]
+                )
+                continue
+            annotation = agent_annotations.get(safe.ordinal)
+            if annotation is not None and isinstance(annotation.get("occurrences"), list):
+                parsed = p0b.validate_discovery_response(
+                    {
+                        "messages": [
+                            {
+                                "ordinal": safe.ordinal,
+                                "occurrences": annotation["occurrences"],
+                            }
+                        ]
+                    },
+                    [safe],
+                )
+                self._commit_0b(
+                    run, safe, parsed[safe.ordinal], upstream, params, results
+                )
+                print(
+                    f"[{run.project.project_id}] phase 0B ordinal {safe.ordinal} "
+                    "restored from agent extraction repair",
+                    flush=True,
                 )
                 continue
             pending.append(safe)
@@ -450,6 +504,7 @@ class PiiPipeline:
             )
 
         pending: list[SafeMessage] = []
+        agent_annotations = self._agent_extraction_annotations(run)
         for safe in run.safe_messages:
             cached = store.load(
                 PHASE_1A,
@@ -459,6 +514,26 @@ class PiiPipeline:
             )
             if cached is not None:
                 run.semantics[safe.ordinal] = MessageSemantics.from_json(cached["body"])
+                continue
+            annotation = agent_annotations.get(safe.ordinal)
+            semantics = annotation.get("semantics") if annotation is not None else None
+            if isinstance(semantics, dict):
+                parsed = p1a.validate_semantics_response(
+                    {"records": [semantics]}, [safe]
+                )[safe.ordinal]
+                run.semantics[safe.ordinal] = parsed
+                store.commit(
+                    PHASE_1A,
+                    f"messages/{safe.ordinal:05d}",
+                    input_sha256=digest_for(safe),
+                    prompt_sha256=self.prompts.sha256(PHASE_1A),
+                    body=parsed.to_json(),
+                )
+                print(
+                    f"[{run.project.project_id}] phase 1A ordinal {safe.ordinal} "
+                    "restored from agent extraction repair",
+                    flush=True,
+                )
                 continue
             pending.append(safe)
 
@@ -505,6 +580,70 @@ class PiiPipeline:
             f"{len(run.semantics)} message(s)",
             flush=True,
         )
+
+    def _agent_extraction_annotations(
+        self, run: ProjectRun
+    ) -> dict[int, Mapping[str, Any]]:
+        """Load stale-safe offline annotations supplied for extraction tasks.
+
+        Extraction repairs are intentionally consumed by ``pii_clean.py`` rather
+        than ``pii_finalize.py`` because they must participate in project-wide
+        entity resolution and planning.  The task id and safe-source hash bind
+        every annotation to this project, phase and exact shielded message.
+        """
+
+        if run.extraction_annotations is not None:
+            return run.extraction_annotations
+
+        path = repairs_dir(run.run_dir) / SUBMISSION_NAME
+        if not path.is_file():
+            run.extraction_annotations = {}
+            return run.extraction_annotations
+
+        submission, repairs, _blocked = load_submission(path)
+        if submission.get("project_id") != run.project.project_id:
+            raise PiiValidationError(
+                marked("agent extraction submission belongs to another project"),
+                failures=("AGENT_REPAIR_REJECTED",),
+            )
+
+        safe_by_ordinal = run.safe_by_ordinal()
+        annotations: dict[int, Mapping[str, Any]] = {}
+        for repair in repairs:
+            if repair.kind != TASK_KIND_EXTRACTION:
+                continue
+            safe = safe_by_ordinal.get(repair.ordinal)
+            allowed_ids = {
+                f"{run.project.project_id}:{PHASE_0B}:{repair.ordinal:05d}",
+                f"{run.project.project_id}:{PHASE_1A}:{repair.ordinal:05d}",
+            }
+            if repair.task_id not in allowed_ids:
+                raise PiiValidationError(
+                    marked(
+                        f"agent extraction task id does not match ordinal {repair.ordinal}"
+                    ),
+                    failures=("AGENT_REPAIR_REJECTED",),
+                )
+            if safe is None or repair.safe_source_sha256 != safe.safe_text_sha256:
+                raise PiiValidationError(
+                    marked(
+                        f"STALE_SUBMISSION: extraction repair for ordinal "
+                        f"{repair.ordinal} does not match the current message"
+                    ),
+                    failures=("AGENT_REPAIR_REJECTED",),
+                )
+            if repair.annotation is None:
+                raise PiiValidationError(
+                    marked(
+                        f"agent extraction repair for ordinal {repair.ordinal} "
+                        "has no annotation"
+                    ),
+                    failures=("AGENT_REPAIR_REJECTED",),
+                )
+            annotations[repair.ordinal] = repair.annotation
+
+        run.extraction_annotations = annotations
+        return annotations
 
     # -- bucket resolution -------------------------------------------------- #
 
@@ -595,18 +734,24 @@ class PiiPipeline:
             if cached is not None:
                 accumulator = SemanticRegistry.from_json(cached["body"])
                 previous_hash = canonical_sha256(accumulator.to_json())
+                print(
+                    f"[{run.project.project_id}] 1B {fold.fold_id}/{len(folds):04d} "
+                    "restored from checkpoint",
+                    flush=True,
+                )
                 continue
 
+            print(
+                f"[{run.project.project_id}] 1B {fold.fold_id}/{len(folds):04d} "
+                f"({len(fold.records)} message(s), "
+                f"{len(accumulator.slots) if accumulator else 0} slot(s) so far)",
+                flush=True,
+            )
             sections = p1b.build_sections(fold, accumulator)
             captured = accumulator
 
             def validator(payload: dict[str, Any], _fold=fold, _acc=captured) -> None:
-                p1b.validate_fold_response(
-                    payload,
-                    _fold,
-                    _acc,
-                    max_accumulator_chars=self.config.max_accumulator_chars,
-                )
+                p1b.validate_fold_response(payload, _fold, _acc)
 
             accumulator = await run_single_call(
                 self.api,
@@ -618,14 +763,16 @@ class PiiPipeline:
                 task=p1b.TASK,
                 validator=validator,
                 parse=lambda payload, _fold=fold, _acc=captured: p1b.validate_fold_response(
-                    payload,
-                    _fold,
-                    _acc,
-                    max_accumulator_chars=self.config.max_accumulator_chars,
+                    payload, _fold, _acc
                 ),
                 repair_instruction=p1b.REPAIR_INSTRUCTION,
+                attempts=PLAN_ATTEMPTS,
             )
             previous_hash = canonical_sha256(accumulator.to_json())
+            # Commit before the size check.  The fold itself validated; it is the
+            # *aggregate* that may exceed a budget, so discarding this result
+            # would force it to be recomputed after the operator simply raises
+            # the limit.
             store.commit(
                 PHASE_1B,
                 f"folds/{fold.fold_id}",
@@ -633,18 +780,44 @@ class PiiPipeline:
                 prompt_sha256=self.prompts.sha256(PHASE_1B),
                 body=accumulator.to_json(),
             )
+            self._assert_accumulator_fits(run, accumulator, fold.fold_id)
 
         registry = accumulator or SemanticRegistry(slots=(), relations=(), decisions=())
+        registry = p1b.attach_literal_occurrences(registry, records)
         p1b.validate_semantic_registry(registry, records)
         run.semantic_registry = registry
         write_json(store.phase_dir(PHASE_1B) / "registry.json", registry.to_json())
         store.commit_output(
-            PHASE_1B, body=registry.to_json(), input_sha256=previous_hash or "seed"
+            PHASE_1B,
+            body=registry.to_json(),
+            input_sha256=canonical_sha256(registry.to_json()),
         )
         print(
             f"[{run.project.project_id}] phase 1B: {len(registry.slots)} slot(s), "
             f"{len(registry.relations)} relation(s) over {len(folds)} fold(s)",
             flush=True,
+        )
+
+    def _assert_accumulator_fits(
+        self, run: ProjectRun, accumulator: SemanticRegistry, fold_id: str
+    ) -> None:
+        """Stop a runaway fold, without retrying something a model cannot fix.
+
+        Checked here rather than in the response validator: by this point most of
+        the registry was carried forward by local code, so the model has no way
+        to make it smaller. Treating the overflow as a validation failure spent
+        eight retries on an unfixable condition.
+        """
+
+        size = p1b.registry_size(accumulator)
+        if size <= self.config.max_accumulator_chars:
+            return
+        raise PiiError(
+            f"{run.project.project_id}: the consolidated registry reached {size:,} "
+            f"characters at {fold_id}, over the {self.config.max_accumulator_chars:,} "
+            "limit. If the growth looks legitimate for a project this size, raise "
+            "--max-accumulator-chars; completed folds are not invalidated by that "
+            "flag. If it does not, a fold is duplicating the registry."
         )
 
     # -- phase 2: plan ------------------------------------------------------ #
@@ -673,11 +846,16 @@ class PiiPipeline:
             }
             digest = store.input_hash(
                 PHASE_2,
-                prompt_sha256=self.prompts.sha256(PHASE_2),
+                prompt_sha256=self.prompts.phase2_sha256(p2.MODE_ENTITY_CHUNK),
                 params=params,
                 upstream=upstream,
                 scope=scope,
                 reasoning_effort=self.config.effort_for(PHASE_2),
+            )
+            print(
+                f"[{run.project.project_id}] 2 entities/{chunk.chunk_id} "
+                f"({len(chunk.entity_ids)} entity/entities)",
+                flush=True,
             )
             cached = store.load(PHASE_2, f"entities/{chunk.chunk_id}", digest)
             if cached is not None:
@@ -705,26 +883,36 @@ class PiiPipeline:
                     payload, _c, entities, _r
                 ),
                 repair_instruction=p2.REPAIR_INSTRUCTION_ENTITIES,
+                attempts=PLAN_ATTEMPTS,
             )
             entity_parts.update(part)
             store.commit(
                 PHASE_2,
                 f"entities/{chunk.chunk_id}",
                 input_sha256=digest,
-                prompt_sha256=self.prompts.sha256(PHASE_2),
+                prompt_sha256=self.prompts.phase2_sha256(p2.MODE_ENTITY_CHUNK),
                 body={key: value.to_json() for key, value in part.items()},
             )
 
         slot_parts: dict[str, Any] = {}
+        # The slot channel has to know which literals are public, or it re-values
+        # currency tickers, networks and SaaS names that the entity channel is
+        # simultaneously preserving -- a contradiction no rewrite can satisfy.
+        preserved = p2.preserved_surface_forms(entities)
         for cluster in p2.slot_clusters(semantics, max_chars=self.config.plan_chunk_chars):
             scope = {"index": cluster.index, "slots": list(cluster.slot_ids)}
             digest = store.input_hash(
                 PHASE_2,
-                prompt_sha256=self.prompts.sha256(PHASE_2),
+                prompt_sha256=self.prompts.phase2_sha256(p2.MODE_SLOT_CLUSTER),
                 params=params,
                 upstream=upstream,
                 scope=scope,
                 reasoning_effort=self.config.effort_for(PHASE_2),
+            )
+            print(
+                f"[{run.project.project_id}] 2 slots/{cluster.cluster_id} "
+                f"({len(cluster.slot_ids)} slot(s))",
+                flush=True,
             )
             cached = store.load(PHASE_2, f"slots/{cluster.cluster_id}", digest)
             if cached is not None:
@@ -743,22 +931,23 @@ class PiiPipeline:
                 project_id=run.project.project_id,
                 target=f"slots_{cluster.cluster_id}",
                 prompt=prompt,
-                sections=p2.build_slot_sections(cluster, semantics),
+                sections=p2.build_slot_sections(cluster, semantics, preserved),
                 task=p2.TASK_SLOTS,
-                validator=lambda payload, _c=cluster: p2.validate_slot_cluster(
-                    payload, _c, semantics
+                validator=lambda payload, _c=cluster, _p=preserved: p2.validate_slot_cluster(
+                    payload, _c, semantics, _p
                 ),
-                parse=lambda payload, _c=cluster: p2.validate_slot_cluster(
-                    payload, _c, semantics
+                parse=lambda payload, _c=cluster, _p=preserved: p2.validate_slot_cluster(
+                    payload, _c, semantics, _p
                 ),
                 repair_instruction=p2.REPAIR_INSTRUCTION_SLOTS,
+                attempts=PLAN_ATTEMPTS,
             )
             slot_parts.update(part)
             store.commit(
                 PHASE_2,
                 f"slots/{cluster.cluster_id}",
                 input_sha256=digest,
-                prompt_sha256=self.prompts.sha256(PHASE_2),
+                prompt_sha256=self.prompts.phase2_sha256(p2.MODE_SLOT_CLUSTER),
                 body={key: value.to_json() for key, value in part.items()},
             )
 
@@ -802,7 +991,7 @@ class PiiPipeline:
 
     async def _phase_3(self, run: ProjectRun) -> None:
         store = run.store
-        upstream = store.upstream_hashes(UPSTREAM[PHASE_3])
+        upstream = store.upstream_hashes(HASH_UPSTREAM[PHASE_3])
         params = self.config.params_for(PHASE_3)
 
         def digest_for(safe: SafeMessage) -> str:
@@ -905,12 +1094,34 @@ class PiiPipeline:
             body=[run.rewrites[key].to_json() for key in sorted(run.rewrites)],
             input_sha256=canonical_sha256(sorted(run.rewrites)),
         )
+        self._count_advisories(run)
+
+    def _count_advisories(self, run: ProjectRun) -> None:
+        """Tally the fidelity findings phase 3 no longer blocks on.
+
+        Phase 4 arbitrates them, but lowering a bar without leaving a trace is
+        how a quality regression goes unnoticed, so the counts land in
+        ``run_metadata.json`` -- fingerprint-level, no text.
+        """
+
+        safe_by_ordinal = run.safe_by_ordinal()
+        for ordinal, record in run.rewrites.items():
+            safe = safe_by_ordinal.get(ordinal)
+            slice_ = run.slices.get(ordinal)
+            if safe is None or slice_ is None:
+                continue
+            _, advisory = p3.split_violations(
+                p3.rewrite_violations(safe, record.text, slice_)
+            )
+            for item in advisory:
+                code = item.split(":", 1)[0]
+                run.advisories[code] = run.advisories.get(code, 0) + 1
 
     # -- phase 4: verification ---------------------------------------------- #
 
     async def _phase_4(self, run: ProjectRun) -> None:
         store = run.store
-        upstream = store.upstream_hashes(UPSTREAM[PHASE_4])
+        upstream = store.upstream_hashes(HASH_UPSTREAM[PHASE_4])
         params = self.config.params_for(PHASE_4)
         prompt = self.prompts.text(PHASE_4)
 
@@ -1011,7 +1222,7 @@ class PiiPipeline:
 
     async def _phase_5(self, run: ProjectRun) -> None:
         store = run.store
-        upstream = store.upstream_hashes(UPSTREAM[PHASE_5])
+        upstream = store.upstream_hashes(HASH_UPSTREAM[PHASE_5])
         params = self.config.params_for(PHASE_5)
         prompt = self.prompts.text(PHASE_5)
         safe_by_ordinal = run.safe_by_ordinal()
@@ -1021,12 +1232,19 @@ class PiiPipeline:
             for ordinal, verdict in sorted(run.verdicts.items())
             if verdict.status == p4.STATUS_FAIL
         ]
-        for ordinal in targets:
+        total_targets = len(targets)
+        accepted_count = 0
+        print(
+            f"[{run.project.project_id}] phase 5: {total_targets} message(s) queued for repair",
+            flush=True,
+        )
+        for target_index, ordinal in enumerate(targets, start=1):
             safe = safe_by_ordinal[ordinal]
             slice_ = run.slices[ordinal]
             verdict = run.verdicts[ordinal]
             rewrite = run.rewrites[ordinal]
             repaired = False
+            accepted_for_target = False
 
             for attempt in range(1, self.config.max_repair_attempts + 1):
                 digest = store.input_hash(
@@ -1037,6 +1255,7 @@ class PiiPipeline:
                     scope={
                         "ordinal": ordinal,
                         "attempt": attempt,
+                        "plan_slice_sha256": canonical_sha256(slice_.to_json()),
                         "verdict": canonical_sha256(verdict.to_json()),
                         "rewrite_text_sha256": rewrite.text_sha256,
                     },
@@ -1044,6 +1263,12 @@ class PiiPipeline:
                 )
                 shard = f"messages/{ordinal:05d}.attempt{attempt:02d}"
                 cached = store.load(PHASE_5, shard, digest)
+                source = "checkpoint" if cached is not None else "API"
+                print(
+                    f"[{run.project.project_id}] PHASE_5_REPAIR message_{ordinal:05d} "
+                    f"attempt_{attempt:02d} ({target_index}/{total_targets}; {source})",
+                    flush=True,
+                )
                 if cached is not None:
                     candidate = RewriteRecord.from_json(cached["body"])
                 else:
@@ -1133,7 +1358,12 @@ class PiiPipeline:
                         text_sha256=candidate.text_sha256,
                         verified=True,
                     )
+                    # A successful repair retires the rewrite failure and the
+                    # verdict failure that caused it, not just its own phase.
+                    await run.ledger.resolve(safe.message_id)
                     repaired = True
+                    accepted_for_target = True
+                    accepted_count += 1
                     break
                 rewrite = candidate
                 verdict = recheck
@@ -1154,6 +1384,12 @@ class PiiPipeline:
                         "plan_slice_sha256": canonical_sha256(slice_.to_json()),
                     },
                 )
+            outcome = "accepted" if accepted_for_target else "unresolved"
+            print(
+                f"[{run.project.project_id}] PHASE_5_REPAIR message_{ordinal:05d} "
+                f"{outcome} ({target_index}/{total_targets})",
+                flush=True,
+            )
 
         # Messages that failed verification but were never repaired (no attempts
         # configured) must still be quarantined rather than shipped.
@@ -1178,6 +1414,11 @@ class PiiPipeline:
             PHASE_5,
             body=[run.rewrites[key].to_json() for key in sorted(run.rewrites)],
             input_sha256=canonical_sha256(sorted(run.rewrites)),
+        )
+        print(
+            f"[{run.project.project_id}] phase 5: {total_targets}/{total_targets} processed, "
+            f"{accepted_count} repaired, {total_targets - accepted_count} unresolved",
+            flush=True,
         )
 
     # -- phase 6: render, audit, commit ------------------------------------- #
@@ -1233,7 +1474,10 @@ class PiiPipeline:
             status=STATUS_PASSED,
             ledger=run.ledger,
             phase_timings=run.timings,
-            extra={"audit": report.counts_by_check()},
+            extra={
+                "audit": report.counts_by_check(),
+                "advisories": dict(sorted(run.advisories.items())),
+            },
         )
         if not self.config.keep_run_artifacts:
             self._prune_run_dir(run)
@@ -1355,7 +1599,12 @@ class PiiPipeline:
             state = run.states.get(item.ordinal)
             if state is not None:
                 state.quarantine()
-            codes = tuple(getattr(error, "failures", ()) or ())
+            # The validator's codes live on the wrapped cause, not on the
+            # ApiError envelope; reading only the envelope reported every content
+            # failure as a bare "REJECTED" and hid why it failed.
+            codes = tuple(getattr(error, "failures", ()) or ()) or tuple(
+                getattr(getattr(error, "cause", None), "failures", ()) or ()
+            )
             await run.ledger.record(
                 phase=phase,
                 code="TRANSPORT_EXHAUSTED" if transport else (codes[0] if codes else "REJECTED"),
@@ -1398,9 +1647,20 @@ class PiiPipeline:
         """1B/2 build one artifact; no hand-written text can fix a bad one."""
 
         transport = isinstance(error, ApiError) and not api_error_is_validation_failure(error)
+        # An error that never went through the API came from local assembly:
+        # every shard validated on its own, they just did not compose.  Telling
+        # the operator to --force-phase then discards a whole phase of model
+        # output that was never at fault; once the assembly code is corrected a
+        # plain rerun re-uses every shard.
+        if transport:
+            code = "TRANSPORT_EXHAUSTED"
+        elif isinstance(error, ApiError):
+            code = "PROJECT_ARTIFACT_INVALID"
+        else:
+            code = CODE_ASSEMBLY_INVALID
         await run.ledger.record(
             phase=phase,
-            code="TRANSPORT_EXHAUSTED" if transport else "PROJECT_ARTIFACT_INVALID",
+            code=code,
             failure_class=CLASS_TRANSPORT if transport else CLASS_PLAN_CONFLICT,
             message_id=None,
             ordinal=None,
@@ -1442,7 +1702,12 @@ class PiiPipeline:
                     preserve_terms=self.config.preserve_terms,
                 )
             )
-        if tasks:
+        if not tasks:
+            # A run that resolved everything must retire the previous run's
+            # package, or finalize refuses to commit a healthy project because
+            # a task from hours ago is still marked OPEN.
+            clear_task_package(run.run_dir)
+        else:
             write_task_package(
                 run.run_dir,
                 project_id=run.project.project_id,
@@ -1467,7 +1732,11 @@ class PiiPipeline:
             status=status,
             ledger=run.ledger,
             phase_timings=run.timings,
-            extra={"blocked_phase": blocked_phase, "agent_tasks": len(tasks)},
+            extra={
+                "blocked_phase": blocked_phase,
+                "agent_tasks": len(tasks),
+                "advisories": dict(sorted(run.advisories.items())),
+            },
         )
         summary = run.ledger.summary()
         print(

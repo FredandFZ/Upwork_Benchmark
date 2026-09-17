@@ -21,6 +21,8 @@ registry hash is stable across runs.
 
 from __future__ import annotations
 
+import re
+
 from typing import Any, Mapping, Sequence
 
 from .errors import PiiValidationError, marked
@@ -34,6 +36,7 @@ from .textutil import (
     URL_RE,
     WALLET_ADDRESS_RE,
     find_terms_outside_pii,
+    literal_term_pattern,
     overlaps_any,
 )
 
@@ -113,6 +116,7 @@ PUBLIC_ALLOWLIST: tuple[str, ...] = (
     "Supabase", "Coinbase Commerce", "Coinbase Pay", "Coinbase", "Stripe",
     "Brevo", "Sendgrid", "Mailgun", "Mailchimp", "Twilio", "MoonPay",
     "Ramp Network", "Wyre", "Transak", "Uniswap", "Alchemy", "Infura",
+    "Pinata", "Filecoin", "IPFS", "Lit Protocol", "Aave", "Basescan",
     "OpenSea", "Visa", "Mastercard", "PayPal", "Shopify", "Slack", "Zoom",
     "Cloudflare", "Vercel", "Netlify", "Heroku", "DigitalOcean", "Atlassian",
     "Jira", "Trello", "Notion", "Figma", "Canva", "Dropbox", "OneDrive",
@@ -121,13 +125,16 @@ PUBLIC_ALLOWLIST: tuple[str, ...] = (
     "gamification mechanics", "gameification mechanics", "Visual Studio Code",
     "React Native", "Ruby on Rails", "JavaScript", "TypeScript", "WordPress",
     "Docker", "Kubernetes", "FastAPI", "GraphQL", "PostgreSQL", "Solidity",
-    "Ethereum", "Chainlink", "OAuth", "USDC", "ETH", "BTC", "KYC", "ERC-721",
-    "ERC-20", "AES-256", "SHA-256",
+    "Ethereum", "Chainlink VRF", "Chainlink", "OAuth", "USDC", "ETH", "BTC",
+    "KYC", "ERC-721C", "ERC-721", "ERC-1155", "ERC-20", "AES-256", "SHA-256",
+    "Base Mainnet", "Base Sepolia", "Sepolia", "Holesky", "Foundry", "Anvil",
+    "Hardhat", "ethers.js", "viem", "Datil", "Serrano", "Mint event",
+    "Transfer event",
 )
 
 TASK = (
-    "Classify every privacy-sensitive occurrence in each supplied message. "
-    "Do not rewrite the messages."
+    "Classify every privacy-sensitive occurrence and every listed public requirement "
+    "term in each supplied message. Do not rewrite the messages."
 )
 
 REPAIR_INSTRUCTION = (
@@ -138,7 +145,10 @@ REPAIR_INSTRUCTION = (
     "Public companies, public services and public technologies are PUBLIC_THIRD_PARTY or "
     "PUBLIC_TECHNOLOGY with policy PRESERVE. Every <SECRET_CANDIDATE:...> token is "
     "SECRET_CANDIDATE with policy PROTECTED. Do not omit any email address, link, social "
-    "handle or phone number that appears in the text."
+    "handle or phone number that appears in the text. An ordinary lowercase word is not "
+    "a PROJECT_NAME alias merely because it is one token inside a multiword project name. "
+    "Every listed public tool or technology present in prose must be returned once with "
+    "PRESERVE, and repeated exact private source text must use one normalized identity."
 )
 
 
@@ -200,11 +210,27 @@ def required_coverage_spans(safe_text: str) -> list[tuple[int, int, str]]:
         (WALLET_ADDRESS_RE, "WALLET_ADDRESS"),
     ):
         for match in pattern.finditer(safe_text):
-            spans.append((*match.span(), label))
+            start, end = match.span()
+            if label == "HANDLE":
+                # ``HANDLE_RE`` allows '.' inside a handle, so it swallows a
+                # sentence-final period.  Trim it, or the demanded value is
+                # ``@Team.`` while the model correctly reports ``@Team``.
+                while end > start and safe_text[end - 1] in ".,;:!?":
+                    end -= 1
+            spans.append((start, end, label))
     for match in PHONE_RE.finditer(safe_text):
         value = match.group(0)
         if _phone_digit_count(value) >= 9 and value.count("-") < 3:
             spans.append((*match.span(), "PHONE"))
+    # Public tools and technical standards are not PII, but they are immutable
+    # requirements.  Requiring one reported occurrence makes their PRESERVE
+    # policy explicit instead of depending on optional model recall.
+    for term in find_terms_outside_pii(safe_text, PUBLIC_ALLOWLIST):
+        for match in re.finditer(literal_term_pattern(term), safe_text, flags=re.IGNORECASE):
+            if overlaps_any(match.span(), [item[:2] for item in spans]):
+                continue
+            spans.append((*match.span(), "PUBLIC_REQUIREMENT"))
+            break
     # Deduplicate nested spans, keeping the widest.
     spans.sort(key=lambda item: (item[0], -(item[1] - item[0])))
     selected: list[tuple[int, int, str]] = []
@@ -305,8 +331,33 @@ def validate_discovery_response(
                     continue
                 start, end = found, found + len(source)
             if overlaps_any((start, end), taken):
-                fail("DISCOVERY_SCHEMA_INVALID", f"{where} overlaps another occurrence")
-                continue
+                # A nested declaration -- the whole address plus its domain, say --
+                # is a known model habit and is harmless: the maximal span already
+                # covers the value, and `merge_entity_registry` groups by value, so
+                # the inner record would only duplicate it.  Dropping the redundant
+                # record is strictly better than rejecting an otherwise correct
+                # response, which on a long message can be unsatisfiable in
+                # practice.  Genuine partial overlaps resolve the same way:
+                # keep-maximal, deterministically.
+                if any(
+                    taken_start <= start and end <= taken_end
+                    for taken_start, taken_end in taken
+                ):
+                    continue
+                replaced = [
+                    index
+                    for index, (taken_start, taken_end) in enumerate(taken)
+                    if start <= taken_start and taken_end <= end
+                ]
+                if not replaced:
+                    fail(
+                        "DISCOVERY_SCHEMA_INVALID",
+                        f"{where} partially overlaps another occurrence",
+                    )
+                    continue
+                for index in reversed(replaced):
+                    del taken[index]
+                    del records[index]
             if INTERNAL_TOKEN_RE.fullmatch(source) and entity_type != "SECRET_CANDIDATE":
                 fail(
                     "DISCOVERY_CATEGORY_UNKNOWN",
@@ -336,18 +387,35 @@ def validate_discovery_response(
             )
 
         # Coverage: regex-certain PII may not be silently dropped.
+        #
+        # Checked per *value*, not per repetition.  What must hold is that the
+        # value is discovered for this message -- that is what puts the entity in
+        # this message's plan slice, and phase 3 then replaces every occurrence of
+        # it in the text by value.  Demanding a separate record for each
+        # repetition rejects a response that found the address once where it
+        # appears twice, which is correct work.
+        taken_spans = [(item.start, item.end) for item in records]
+        covered_values = {item.source.casefold() for item in records}
+        reported: set[str] = set()
         for start, end, label in required_coverage_spans(message.safe_text):
-            if not overlaps_any((start, end), [(item.start, item.end) for item in records]):
-                fail(
-                    "DISCOVERY_COVERAGE_GAP",
-                    f"ordinal {ordinal} omitted a {label} present in the text",
-                )
+            value = message.safe_text[start:end]
+            if value.casefold() in covered_values:
+                continue
+            if overlaps_any((start, end), taken_spans):
+                continue
+            if value.casefold() in reported:
+                continue
+            reported.add(value.casefold())
+            fail(
+                "DISCOVERY_COVERAGE_GAP",
+                f"ordinal {ordinal} omitted a {label} present in the text",
+            )
 
         # Every shielded secret token must be accounted for.
         for match in INTERNAL_TOKEN_RE.finditer(message.safe_text):
-            if not overlaps_any(
-                match.span(), [(item.start, item.end) for item in records]
-            ):
+            if match.group(0).casefold() in covered_values:
+                continue
+            if not overlaps_any(match.span(), taken_spans):
                 fail(
                     "DISCOVERY_COVERAGE_GAP",
                     f"ordinal {ordinal} omitted a shielded secret token",
@@ -437,6 +505,57 @@ def _domain_of(value: str) -> str:
     return host.split(":", 1)[0].strip("<>").casefold()
 
 
+BARE_NUMERAL_RE = re.compile(r"^[#no.\s]*\d{1,4}[.)\s]*$", re.IGNORECASE)
+
+
+def _is_identifying(entity_type: str, value: str) -> bool:
+    """Whether this value can identify anything at all.
+
+    A bare numeral cannot.  ``1`` was extracted as an ACCOUNT_IDENTIFIER from
+    ordinals and list markers ("option 1", "step 1"), and planning a
+    replacement for it asks every later phase to turn every standalone ``1`` in
+    the project into some other number -- corrupting counts and amounts where it
+    lands, and unsatisfiable everywhere else.
+
+    Such a value is *dropped* rather than marked PRESERVE: a PRESERVE entity
+    becomes a must-appear-verbatim literal for the rewrite, which would then
+    forbid the slot plan from re-valuing any amount that happens to contain it.
+    It is neither an identity to disguise nor a term to protect.
+
+    Length alone would be the wrong test -- a two-letter personal name is real
+    PII.  Being *only* digits and list punctuation is the actual signal.
+    """
+
+    if TYPE_POLICY[entity_type] != POLICY_SYNTHESIZE:
+        return True
+    return not BARE_NUMERAL_RE.match(value.strip())
+
+
+def _is_identifying_occurrence(occurrence: PiiOccurrence) -> bool:
+    """Reject weak project-name expansions of ordinary lowercase words.
+
+    A medium/low-confidence ``rebuild`` occurrence normalized to ``Project
+    Rebuild`` does not make the verb an alias of the project.  Proper-cased or
+    high-confidence short forms remain eligible, as do complete multiword
+    names.  This keeps the rule general without maintaining a vocabulary of
+    English verbs.
+    """
+
+    if not _is_identifying(occurrence.entity_type, occurrence.normalized_value):
+        return False
+    source = occurrence.source.strip()
+    normalized_tokens = re.findall(r"[A-Za-z]+", occurrence.normalized_value)
+    is_weak_project_fragment = (
+        occurrence.entity_type == "PROJECT_NAME"
+        and occurrence.confidence != "HIGH"
+        and source.isalpha()
+        and source == source.casefold()
+        and len(normalized_tokens) > 1
+        and source.casefold() in {item.casefold() for item in normalized_tokens}
+    )
+    return not is_weak_project_fragment
+
+
 def merge_entity_registry(
     per_message: Mapping[int, Sequence[PiiOccurrence]]
 ) -> PiiEntityRegistry:
@@ -452,6 +571,8 @@ def merge_entity_registry(
     order: list[tuple[str, str]] = []
     for ordinal in sorted(per_message):
         for occurrence in per_message[ordinal]:
+            if not _is_identifying_occurrence(occurrence):
+                continue
             key = (occurrence.entity_type, occurrence.normalized_value.casefold())
             if key not in grouped:
                 grouped[key] = []

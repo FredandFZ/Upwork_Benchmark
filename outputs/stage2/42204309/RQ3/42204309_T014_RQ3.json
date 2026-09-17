@@ -4,18 +4,19 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
-  "rq_name": "Memory-or-Clarify Decision",
+  "rq_name": "Requirement Update or Clarify",
   "target_id": "42204309_T014",
   "task_gold_id": "42204309_T014_GOLD",
   "target_message_id": 626,
   "turns": 625,
   "history_turn_count": 625,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Given only the evidence available in this condition, decide whether it is safe to act on the current client task or whether a concrete clarification is required.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "question": "Combine the pre-task requirement state with the current client task. If the task determines a unique post-task state, choose ACT and construct that state; otherwise choose CLARIFY and identify the blocking requirement field and the question that must be answered.",
   "target_task": {
     "source_message_id": 626,
     "speaker": "client",
@@ -5057,26 +5058,45 @@
         569
       ],
       "history_message_count": 7,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq3-agent-response-v1",
+    "schema_version": "rq3-agent-response-v2",
     "required_fields": [
       "decision",
-      "clarification"
+      "post_task_states",
+      "clarifications"
     ],
     "decision_values": [
       "ACT",
       "CLARIFY"
-    ]
+    ],
+    "branch_constraints": {
+      "ACT": {
+        "post_task_states": "NON_EMPTY_ARRAY",
+        "clarifications": "EMPTY_ARRAY"
+      },
+      "CLARIFY": {
+        "post_task_states": "NULL",
+        "clarifications": "NON_EMPTY_ARRAY"
+      }
+    },
+    "clarification_item_fields": [
+      "requirement_ref",
+      "requirement_summary",
+      "dimension",
+      "field",
+      "missing_information",
+      "question"
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -5118,19 +5138,305 @@
         "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW"
       }
     },
+    "final_gold_by_condition": {
+      "C1": null,
+      "C2": null,
+      "C3": null
+    },
+    "affected_requirement_ids": [
+      "REQ_NFT_HOLDER_BOOK_ACCESS"
+    ],
+    "affected_requirement_transitions": {
+      "REQ_NFT_HOLDER_BOOK_ACCESS": {
+        "event_ids": [
+          "REQ_NFT_HOLDER_BOOK_ACCESS_E008"
+        ],
+        "event_types": [
+          "AMBIGUOUS"
+        ],
+        "before": {
+          "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+          "requirement_title": "NFT-Holder-Only Book Access",
+          "family_id": "BOOK_DELIVERY_AND_ACCESS",
+          "state_id": "REQ_NFT_HOLDER_BOOK_ACCESS_S007",
+          "attributes": {
+            "access_policy": "only NFT holders may access the ebook",
+            "gating_provider": "Lit Protocol",
+            "metadata_destination": "gated viewer page rather than the PDF directly",
+            "content_protection": "encrypt the PDF and decrypt it only after NFT ownership verification",
+            "ownership_verification": "automatic",
+            "access_experience": "seamless open-link flow with no manual actions required"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "AUTH",
+              "BACKEND",
+              "FRONTEND",
+              "STORAGE"
+            ],
+            "contexts": [
+              "BOOK_READER",
+              "NFT_GATED_ACCESS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "After a successful mint, the NFT holder successfully completed signing and decrypted the book; the subsequent cover-page navigation problem concerns reader UX.",
+            "source_event_id": "REQ_NFT_HOLDER_BOOK_ACCESS_E007"
+          },
+          "supporting_event_ids": [
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E001",
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E002",
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E007"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+          "requirement_title": "NFT-Holder-Only Book Access",
+          "family_id": "BOOK_DELIVERY_AND_ACCESS",
+          "state_id": "REQ_NFT_HOLDER_BOOK_ACCESS_S008",
+          "attributes": {
+            "access_policy": "only NFT holders may access the ebook",
+            "gating_provider": "Lit Protocol",
+            "metadata_destination": "gated viewer page rather than the PDF directly",
+            "content_protection": "encrypt the PDF and decrypt it only after NFT ownership verification",
+            "ownership_verification": "automatic",
+            "access_experience": "seamless open-link flow with no manual actions required"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "AUTH",
+              "BACKEND",
+              "FRONTEND",
+              "STORAGE"
+            ],
+            "contexts": [
+              "BOOK_READER",
+              "NFT_GATED_ACCESS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E008": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "It remains unresolved whether an already signed-in NFT holder must provide a separate ownership signature before viewing the book.",
+              "source_event_id": "REQ_NFT_HOLDER_BOOK_ACCESS_E008"
+            }
+          },
+          "execution": {
+            "status": "VERIFIED_WORKING",
+            "observed_behavior": "After a successful mint, the NFT holder successfully completed signing and decrypted the book; the subsequent cover-page navigation problem concerns reader UX.",
+            "source_event_id": "REQ_NFT_HOLDER_BOOK_ACCESS_E007"
+          },
+          "supporting_event_ids": [
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E001",
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E002",
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E007",
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E008"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "ambiguity"
+          ]
+        }
+      }
+    },
+    "post_task_states": {
+      "REQ_NFT_HOLDER_BOOK_ACCESS": {
+        "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+        "requirement_title": "NFT-Holder-Only Book Access",
+        "family_id": "BOOK_DELIVERY_AND_ACCESS",
+        "state_id": "REQ_NFT_HOLDER_BOOK_ACCESS_S008",
+        "attributes": {
+          "access_policy": "only NFT holders may access the ebook",
+          "gating_provider": "Lit Protocol",
+          "metadata_destination": "gated viewer page rather than the PDF directly",
+          "content_protection": "encrypt the PDF and decrypt it only after NFT ownership verification",
+          "ownership_verification": "automatic",
+          "access_experience": "seamless open-link flow with no manual actions required"
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "AUTH",
+            "BACKEND",
+            "FRONTEND",
+            "STORAGE"
+          ],
+          "contexts": [
+            "BOOK_READER",
+            "NFT_GATED_ACCESS"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": {
+          "REQ_NFT_HOLDER_BOOK_ACCESS_E008": {
+            "status": "OPEN",
+            "dimension": "VALUE",
+            "description": "It remains unresolved whether an already signed-in NFT holder must provide a separate ownership signature before viewing the book.",
+            "source_event_id": "REQ_NFT_HOLDER_BOOK_ACCESS_E008"
+          }
+        },
+        "execution": {
+          "status": "VERIFIED_WORKING",
+          "observed_behavior": "After a successful mint, the NFT holder successfully completed signing and decrypted the book; the subsequent cover-page navigation problem concerns reader UX.",
+          "source_event_id": "REQ_NFT_HOLDER_BOOK_ACCESS_E007"
+        },
+        "supporting_event_ids": [
+          "REQ_NFT_HOLDER_BOOK_ACCESS_E001",
+          "REQ_NFT_HOLDER_BOOK_ACCESS_E002",
+          "REQ_NFT_HOLDER_BOOK_ACCESS_E007",
+          "REQ_NFT_HOLDER_BOOK_ACCESS_E008"
+        ]
+      }
+    },
+    "post_state_scoring_specs": {
+      "REQ_NFT_HOLDER_BOOK_ACCESS": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "access_policy": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "gating_provider": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "metadata_destination": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "content_protection": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "ownership_verification": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "access_experience": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "REQ_NFT_HOLDER_BOOK_ACCESS_E008": {
+              "comparator": "RECURSIVE_FIELDS",
+              "score": true,
+              "fields": {
+                "status": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "dimension": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "description": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "source_event_id": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                }
+              },
+              "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "execution": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "status": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "observed_behavior": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "source_event_id": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        }
+      }
+    },
     "blocking_ambiguity_candidates": [
       {
         "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
         "ambiguity_event_id": "REQ_NFT_HOLDER_BOOK_ACCESS_E008",
         "dimension": "VALUE",
+        "field": null,
         "description": "It remains unresolved whether an already signed-in NFT holder must provide a separate ownership signature before viewing the book.",
+        "missing_information": "It remains unresolved whether an already signed-in NFT holder must provide a separate ownership signature before viewing the book.",
+        "clarification_question": null,
         "source_event_id": "REQ_NFT_HOLDER_BOOK_ACCESS_E008",
         "blocking_status": "PENDING_MATERIALITY_REVIEW"
       }
     ],
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
-    "relevance_review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+    "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
     "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 must be audited independently."
   }
 }

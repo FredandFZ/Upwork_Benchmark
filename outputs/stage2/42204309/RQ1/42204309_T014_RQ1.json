@@ -11,10 +11,11 @@
   "turns": 625,
   "history_turn_count": 625,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
     "source_message_id": 626,
@@ -5057,27 +5058,28 @@
         569
       ],
       "history_message_count": 7,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq1-agent-response-v1",
+    "schema_version": "rq1-agent-response-v2",
     "required_fields": [
-      "selected_history_message_ids",
       "requirements"
     ],
     "requirement_item_fields": [
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids"
-    ]
+    ],
+    "requirement_refs_must_be_unique": true,
+    "evidence_message_ids_must_reference_c2_history": true,
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -5099,10 +5101,54 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "DETERMINISTIC_RQ1_GOLD",
+    "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+    "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
       "REQ_NFT_HOLDER_BOOK_ACCESS"
     ],
+    "gold_requirement_atoms": {
+      "REQ_NFT_HOLDER_BOOK_ACCESS": {
+        "canonical_summary": "NFT-Holder-Only Book Access",
+        "requirement_title": "NFT-Holder-Only Book Access",
+        "family_id": "BOOK_DELIVERY_AND_ACCESS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NFT_HOLDER_BOOK_ACCESS_EG001",
+            "acceptable_message_ids": [
+              217
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_HOLDER_BOOK_ACCESS_EG002",
+            "acceptable_message_ids": [
+              226
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_HOLDER_BOOK_ACCESS_EG003",
+            "acceptable_message_ids": [
+              569
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          461,
+          462,
+          463,
+          560
+        ],
+        "trajectory_message_ids": [
+          217,
+          226,
+          461,
+          462,
+          463,
+          560,
+          569
+        ]
+      }
+    },
     "directly_affected_historical_requirement_ids": [
       "REQ_NFT_HOLDER_BOOK_ACCESS"
     ],
@@ -5129,7 +5175,7 @@
           "REQ_NFT_HOLDER_BOOK_ACCESS_E006",
           "REQ_NFT_HOLDER_BOOK_ACCESS_E007"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           217,
           226,
           461,
@@ -5138,11 +5184,47 @@
           560,
           569
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          217,
+          226,
+          569
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NFT_HOLDER_BOOK_ACCESS_EG001",
+            "acceptable_message_ids": [
+              217
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_HOLDER_BOOK_ACCESS_EG002",
+            "acceptable_message_ids": [
+              226
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_HOLDER_BOOK_ACCESS_EG003",
+            "acceptable_message_ids": [
+              569
+            ]
+          }
+        ],
+        "context_message_ids": [
+          461,
+          462,
+          463,
+          560
+        ],
+        "neutral_context_message_ids": [
+          461,
+          462,
+          463,
+          560
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       }
     },
     "derivation_scope": "DIRECT_AFFECTED_ONLY",
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

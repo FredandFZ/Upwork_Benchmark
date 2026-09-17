@@ -19,7 +19,7 @@ import math
 import re
 from collections import Counter
 from difflib import SequenceMatcher
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from ._compat import id_key, safe_filename, sha256_text
 from .config import (
@@ -41,6 +41,10 @@ EMAIL_RE = re.compile(
 )
 ANGLE_URL_RE = re.compile(r"<\s*(?:https?://|www\.)[^<>\s]+\s*>", re.IGNORECASE)
 URL_RE = re.compile(r"(?:https?://|www\.)[^\s<>]+", re.IGNORECASE)
+ACTIONABLE_MEETING_URL_RE = re.compile(
+    r"https://meet\.google\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}(?=$|[\s<>),.;!?])",
+    re.IGNORECASE,
+)
 HANDLE_RE = re.compile(r"(?<![\w@])@[A-Za-z0-9_][A-Za-z0-9_.-]{1,63}(?![\w@])")
 PHONE_RE = re.compile(
     r"(?<!\d[.,])(?<![\w$€£¥])"
@@ -59,6 +63,142 @@ INLINE_CREDENTIAL_RE = re.compile(
 WALLET_ADDRESS_RE = re.compile(
     r"(?<!\w)(?:0x[a-fA-F0-9]{40}|bc1[a-z0-9]{25,62}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})(?!\w)"
 )
+
+# Opaque identifiers nested in otherwise public URLs can still locate a
+# private app, document, subscription or invitation.  Re-hosting a URL while
+# copying one of these path/query values is therefore not anonymisation.
+PRIVATE_RESOURCE_PATH_ID_RE = re.compile(
+    r"/(?:apps?|projects?|documents?|files?|subscriptions?|webhooks?|invites?|hooks?)/"
+    r"(?P<identifier>[A-Za-z0-9_-]{12,128})(?=$|[/?#|>])",
+    re.IGNORECASE,
+)
+PRIVATE_RESOURCE_QUERY_ID_RE = re.compile(
+    r"(?:[?&](?:app|project|document|file|subscription|webhook|invite)[_-]?id=)"
+    r"(?P<identifier>[A-Za-z0-9_-]{12,128})(?=$|[&#|>])",
+    re.IGNORECASE,
+)
+
+
+def private_resource_identifiers(text: str) -> tuple[str, ...]:
+    """Opaque private-resource ids found inside URLs in ``text``.
+
+    The route marker supplies the meaning; the identifier itself must contain
+    both a letter and a digit so ordinary endpoint names are not treated as
+    private ids.
+    """
+
+    found: list[str] = []
+    for url_match in URL_RE.finditer(text):
+        value = url_match.group(0)
+        for pattern in (PRIVATE_RESOURCE_PATH_ID_RE, PRIVATE_RESOURCE_QUERY_ID_RE):
+            for match in pattern.finditer(value):
+                identifier = match.group("identifier")
+                if not any(char.isalpha() for char in identifier):
+                    continue
+                if not any(char.isdigit() for char in identifier):
+                    continue
+                if identifier not in found:
+                    found.append(identifier)
+    return tuple(found)
+
+
+# High-impact non-numeric concepts whose inversion changes a requirement rather
+# than merely rephrasing it.  Patterns intentionally cover only explicit,
+# low-ambiguity wording; broader semantic equivalence remains phase 4's job.
+SEMANTIC_ANCHOR_PATTERNS: Mapping[str, Mapping[str, tuple[str, ...]]] = {
+    "DEPLOYMENT_ENVIRONMENT": {
+        "PRODUCTION": (
+            r"\bproduction\b",
+            r"\blive testing\b",
+            r"\b(?:push|deploy(?:ed|ment)?)\b.{0,32}\blive\b",
+            r"\basset\b.{0,48}\blive\b",
+        ),
+        "STAGING": (r"\bstaging\b", r"\bsandbox\b"),
+    },
+    "CHAIN_ENVIRONMENT": {
+        "MAINNET": (
+            r"\bmainnet\b",
+            r"\bproduction (?:chain|network)\b",
+            r"\bbase main network\b",
+        ),
+        "TESTNET": (r"\btestnet\b", r"\bSepolia\b", r"\bHolesky\b"),
+    },
+    "EXECUTION_LOCATION": {
+        "ON_CHAIN": (r"\bon[- ]chain\b",),
+        "OFF_CHAIN": (r"\boff[- ]chain\b",),
+    },
+    "SUPPLY_OR_REWARD_LIMIT": {
+        "UNLIMITED": (
+            r"\bunlimited(?:[- ]mint| supply| commissions?| rewards?)?\b",
+            r"\bno (?:limits?|cap)\b",
+            r"\bwithout (?:a )?cap\b",
+        ),
+        "CAPPED": (
+            r"\bcapped\b",
+            r"\blimited (?:NFT|supply|run|edition)\b",
+            r"\bup to \d+[\d,]*(?:\s+rewards?)?\b",
+        ),
+    },
+    "TRIGGER_MODE": {
+        "POOL_BASED": (r"\bpool[- ]based\b",),
+        "SCHEDULE_BASED": (r"\bschedule[- ]based\b",),
+    },
+    "PUBLIC_API_AUTH": {
+        "NO_AUTH": (
+            r"\bno auth(?:entication)?\b.{0,60}\bpublic APIs?\b",
+            r"\bpublic APIs?\b.{0,60}\bno auth(?:entication)?\b",
+        ),
+        "AUTH_REQUIRED": (
+            r"\b(?:require|requiring|required)\b.{0,40}\b(?:signature|auth)\w*\b"
+            r".{0,60}\bpublic APIs?\b",
+            r"\bpublic APIs?\b.{0,60}\b(?:require|requiring|required)\b"
+            r".{0,40}\b(?:signature|auth)\w*\b",
+        ),
+    },
+    "LAUNCH_PAYMENT_MODE": {
+        "CRYPTO_ONLY": (r"\bcrypto[- ]only\b", r"\blaunch (?:with )?crypto only\b"),
+        "FIAT_ONLY": (r"\bfiat[- ]only\b", r"\blaunch (?:with )?fiat only\b"),
+    },
+    "IMPLEMENTATION_COMPONENT": {
+        "BACKEND": (r"\bback[- ]?end\b", r"\bserver[- ]side\b"),
+        "FRONTEND": (r"\bfront[- ]?end\b", r"\bclient[- ]side\b"),
+    },
+}
+
+
+def semantic_anchor_signature(text: str) -> dict[str, tuple[str, ...]]:
+    """Return explicit load-bearing semantic labels present in ``text``."""
+
+    signature: dict[str, tuple[str, ...]] = {}
+    for dimension, labels in SEMANTIC_ANCHOR_PATTERNS.items():
+        present = tuple(
+            label
+            for label, patterns in labels.items()
+            if any(re.search(pattern, text, flags=re.IGNORECASE | re.DOTALL) for pattern in patterns)
+        )
+        if present:
+            signature[dimension] = present
+    return signature
+
+
+def semantic_anchor_differences(
+    source: str, candidate: str
+) -> tuple[tuple[str, tuple[str, ...], tuple[str, ...]], ...]:
+    """Explicit semantic-anchor dimensions changed by ``candidate``."""
+
+    before = semantic_anchor_signature(source)
+    after = semantic_anchor_signature(candidate)
+    differences: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = []
+    # An anchor that was explicit in the source must survive with the same
+    # meaning.  A candidate-only anchor is left to the semantic verifier:
+    # treating every newly explicit synonym as a local hard failure creates
+    # false positives (for example, "UI" rewritten as "frontend").
+    for dimension in sorted(before):
+        if before.get(dimension, ()) != after.get(dimension, ()):
+            differences.append(
+                (dimension, before.get(dimension, ()), after.get(dimension, ()))
+            )
+    return tuple(differences)
 
 # --------------------------------------------------------------------------- #
 # Contextual literals (PII_Clean.py:96-132)
@@ -91,6 +231,19 @@ LIST_MARKER_RE = re.compile(
 # Upper-case technical identifiers such as ERC-721 or AES-256 must survive
 # verbatim: changing the number changes the requirement.
 PROTECTED_LITERAL_RE = re.compile(r"(?<!\w)[A-Z][A-Z0-9_-]{1,}(?!\w)")
+BARE_NUMERIC_LITERAL_RE = re.compile(
+    r"^[+-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?$"
+)
+
+
+def is_bare_numeric_literal(value: str) -> bool:
+    """True when ``value`` has no lexical context beyond a number.
+
+    Currency signs, percentages, units and words deliberately make the value
+    contextual.  Only the context-free case is unsafe for substring auditing.
+    """
+
+    return BARE_NUMERIC_LITERAL_RE.fullmatch(value.strip()) is not None
 
 # --------------------------------------------------------------------------- #
 # Pipeline-internal tokens

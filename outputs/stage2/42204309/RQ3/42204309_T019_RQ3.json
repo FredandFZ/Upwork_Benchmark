@@ -4,18 +4,20 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
-  "rq_name": "Memory-or-Clarify Decision",
+  "rq_name": "Requirement Update or Clarify",
   "target_id": "42204309_T019",
   "task_gold_id": "42204309_T019_GOLD",
   "target_message_id": 684,
   "turns": 683,
   "history_turn_count": 683,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Given only the evidence available in this condition, decide whether it is safe to act on the current client task or whether a concrete clarification is required.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
+  "question": "Combine the pre-task requirement state with the current client task. If the task determines a unique post-task state, choose ACT and construct that state; otherwise choose CLARIFY and identify the blocking requirement field and the question that must be answered.",
   "target_task": {
     "source_message_id": 684,
     "speaker": "client",
@@ -5541,26 +5543,45 @@
         682
       ],
       "history_message_count": 27,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq3-agent-response-v1",
+    "schema_version": "rq3-agent-response-v2",
     "required_fields": [
       "decision",
-      "clarification"
+      "post_task_states",
+      "clarifications"
     ],
     "decision_values": [
       "ACT",
       "CLARIFY"
-    ]
+    ],
+    "branch_constraints": {
+      "ACT": {
+        "post_task_states": "NON_EMPTY_ARRAY",
+        "clarifications": "EMPTY_ARRAY"
+      },
+      "CLARIFY": {
+        "post_task_states": "NULL",
+        "clarifications": "NON_EMPTY_ARRAY"
+      }
+    },
+    "clarification_item_fields": [
+      "requirement_ref",
+      "requirement_summary",
+      "dimension",
+      "field",
+      "missing_information",
+      "question"
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -5602,10 +5623,858 @@
         "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW"
       }
     },
+    "final_gold_by_condition": {
+      "C1": null,
+      "C2": null,
+      "C3": null
+    },
+    "affected_requirement_ids": [
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+      "REQ_TICKET_ACCOUNTING_ACCURACY"
+    ],
+    "affected_requirement_transitions": {
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "event_ids": [
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E009"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+          "requirement_title": "No-Referral Commission Allocation",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_S008",
+          "attributes": {
+            "commission_amount": "$5",
+            "allocation_condition": "A primary mint is completed with no referral code or an invalid referral code.",
+            "recipient_selection": "Random existing NFT holder.",
+            "default_recipient_policy": "Do not route no-referral commissions to the founder by default; distribute them randomly among existing NFT holders.",
+            "commission_issuance_rate": "One $5 commission for every completed no-referral primary mint."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "PAYMENT",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIMARY_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "The no-referral commission recipient for mint #1 is unresolved because no previously minted NFT holder exists; later no-referral mints should allocate the commission to an existing holder.",
+              "source_event_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002"
+            }
+          },
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E001",
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002",
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E003",
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E006",
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E008"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+          "requirement_title": "No-Referral Commission Allocation",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_S009",
+          "attributes": {
+            "commission_amount": "$5",
+            "allocation_condition": "A primary mint after mint #1 is completed with no referral code or an invalid referral code.",
+            "recipient_selection": "Random existing NFT holder.",
+            "default_recipient_policy": "Do not route no-referral commissions to the founder by default; distribute them randomly among existing NFT holders.",
+            "commission_issuance_rate": "One randomly allocated $5 commission per completed no-referral primary mint after mint #1.",
+            "first_mint_random_commission_allocation_required": false
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "PAYMENT",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIMARY_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E001",
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E006",
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E009"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity"
+          ]
+        }
+      },
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "event_ids": [
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E012"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+          "requirement_title": "Commission Accounting Accuracy",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_S011",
+          "attributes": {
+            "commission_view_consistency": "Awarded $5 commissions from both code-used and no-code mints must be represented accurately and consistently in dashboard summaries, leaderboards, and per-NFT attributes.",
+            "commission_count_basis": "One $5 commission must be accounted for per completed primary mint, whether or not a referral code is used; secondary-market sales are excluded.",
+            "random_commission_accounting": "For a no-referral primary mint, the randomly assigned commission must be registered in commission totals after the manual separate random-referral finalization transaction completes.",
+            "no_code_commission_projection": "Randomly assigned $5 commissions from no-referral mints must be reflected on the dashboard, leaderboard, and in NFT attributes.",
+            "historical_commission_backfill_required": false,
+            "ticket_commission_consistency_rule": "Every issued ticket corresponds to one $5 commission, so ticket and commission totals must remain consistent."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "COMMISSION_ACCOUNTING",
+              "DASHBOARD",
+              "LEADERBOARD",
+              "NFT_DETAIL",
+              "NFT_METADATA"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E001",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E008",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E010",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E011"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+          "requirement_title": "Commission Accounting Accuracy",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_S012",
+          "attributes": {
+            "commission_view_consistency": "Awarded $5 commissions from both code-used and no-code mints must be represented accurately and consistently in dashboard summaries, leaderboards, and per-NFT attributes.",
+            "commission_count_basis": "One referral commission must be accounted for per completed primary mint after mint #1; mint #1 has no randomly allocated commission because no earlier NFT holder exists, and secondary-market sales are excluded.",
+            "random_commission_accounting": "For a no-referral primary mint, the randomly assigned commission must be registered in commission totals after the manual separate random-referral finalization transaction completes.",
+            "no_code_commission_projection": "Randomly assigned $5 commissions from no-referral mints must be reflected on the dashboard, leaderboard, and in NFT attributes.",
+            "historical_commission_backfill_required": false,
+            "ticket_commission_consistency_rule": "Every issued ticket corresponds to one $5 commission, so ticket and commission totals must remain consistent."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "COMMISSION_ACCOUNTING",
+              "DASHBOARD",
+              "LEADERBOARD",
+              "NFT_DETAIL",
+              "NFT_METADATA"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E001",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E008",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E010",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E011",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E012"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ]
+        }
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "event_ids": [
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E011"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+          "requirement_title": "No-Referral Ticket Allocation",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_S010",
+          "attributes": {
+            "allocation_trigger": "successful mint with no referral code or an invalid referral code",
+            "recipient_selection": "randomly selected existing NFT holder",
+            "ticket_draws": [
+              "SMALL_BLOCK"
+            ],
+            "standard_no_referral_ticket_count": 1
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIZE_TICKETS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "Ticket issuance and recipient selection for mint #1 are unresolved because no earlier NFT exists for random selection.",
+              "source_event_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003"
+            },
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E010": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "The freelancer proposes that mint #1 receive no ticket because no earlier NFT exists, conflicting with the client's one-ticket-per-mint rule.",
+              "source_event_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_E010"
+            }
+          },
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E001",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E002",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E004",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E009",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E010"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+          "requirement_title": "No-Referral Ticket Allocation",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_S011",
+          "attributes": {
+            "allocation_trigger": "successful mint with no referral code or an invalid referral code",
+            "recipient_selection": "randomly selected existing NFT holder",
+            "ticket_draws": [
+              "SMALL_BLOCK"
+            ],
+            "standard_no_referral_ticket_count": 1,
+            "first_mint_ticket_exception": "No ticket is awarded when no earlier NFT exists for random selection."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIZE_TICKETS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E001",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E002",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E004",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E009",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E011"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity"
+          ]
+        }
+      },
+      "REQ_TICKET_ACCOUNTING_ACCURACY": {
+        "event_ids": [
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E015"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+          "requirement_title": "Prize Ticket Accounting Accuracy",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_TICKET_ACCOUNTING_ACCURACY_S014",
+          "attributes": {
+            "small_block_ticket_counter": "Display a separate current Small Block ticket counter and reset it to 0 after each Small Block draw.",
+            "dashboard_ticket_display": "Display each automatically awarded Small Block prize ticket on the holder's dashboard.",
+            "ticket_association": "Each ticket is associated with the holder's NFT, wallet, and mint number.",
+            "aggregate_ticket_count_rule": "The number of accounted tickets equals the number of mints, excluding secondary-market sales.",
+            "random_ticket_accounting": "Tickets assigned at random for no-referral mints must be registered in ticket totals.",
+            "ticket_surface_consistency_rule": "Tickets awarded through both code-used and no-code mints must be reflected on leaderboards and NFT attributes.",
+            "historical_backfill_required": false
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "NFT_METADATA",
+              "DASHBOARD",
+              "TICKET_ACCOUNTING"
+            ]
+          },
+          "lifecycle_status": null,
+          "ambiguity": {
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E014": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "The freelancer states that 12 mints should produce 11 tickets because the first mint cannot allocate one, conflicting with the client's stated one-ticket-per-mint total.",
+              "source_event_id": "REQ_TICKET_ACCOUNTING_ACCURACY_E014"
+            }
+          },
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E001",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E002",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E003",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E008",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E012",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E013",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E014"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+          "requirement_title": "Prize Ticket Accounting Accuracy",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_TICKET_ACCOUNTING_ACCURACY_S015",
+          "attributes": {
+            "small_block_ticket_counter": "Display a separate current Small Block ticket counter and reset it to 0 after each Small Block draw.",
+            "dashboard_ticket_display": "Display each automatically awarded Small Block prize ticket on the holder's dashboard.",
+            "ticket_association": "Each ticket is associated with the holder's NFT, wallet, and mint number.",
+            "aggregate_ticket_count_rule": "The accounted ticket total equals the number of completed primary mints after mint #1; the first mint contributes no ticket because no earlier NFT holder exists.",
+            "random_ticket_accounting": "Tickets assigned at random for no-referral mints must be registered in ticket totals.",
+            "ticket_surface_consistency_rule": "Tickets awarded through both code-used and no-code mints must be reflected on leaderboards and NFT attributes.",
+            "historical_backfill_required": false
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "NFT_METADATA",
+              "DASHBOARD",
+              "TICKET_ACCOUNTING"
+            ]
+          },
+          "lifecycle_status": null,
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E001",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E002",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E003",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E008",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E012",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E013",
+            "REQ_TICKET_ACCOUNTING_ACCURACY_E015"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity"
+          ]
+        }
+      }
+    },
+    "post_task_states": {
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+        "requirement_title": "No-Referral Commission Allocation",
+        "family_id": "REFERRAL_MECHANICS",
+        "state_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_S009",
+        "attributes": {
+          "commission_amount": "$5",
+          "allocation_condition": "A primary mint after mint #1 is completed with no referral code or an invalid referral code.",
+          "recipient_selection": "Random existing NFT holder.",
+          "default_recipient_policy": "Do not route no-referral commissions to the founder by default; distribute them randomly among existing NFT holders.",
+          "commission_issuance_rate": "One randomly allocated $5 commission per completed no-referral primary mint after mint #1.",
+          "first_mint_random_commission_allocation_required": false
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "PAYMENT",
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "NO_REFERRAL",
+            "PRIMARY_MINT"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E001",
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E006",
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E009"
+        ]
+      },
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+        "requirement_title": "Commission Accounting Accuracy",
+        "family_id": "REFERRAL_MECHANICS",
+        "state_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_S012",
+        "attributes": {
+          "commission_view_consistency": "Awarded $5 commissions from both code-used and no-code mints must be represented accurately and consistently in dashboard summaries, leaderboards, and per-NFT attributes.",
+          "commission_count_basis": "One referral commission must be accounted for per completed primary mint after mint #1; mint #1 has no randomly allocated commission because no earlier NFT holder exists, and secondary-market sales are excluded.",
+          "random_commission_accounting": "For a no-referral primary mint, the randomly assigned commission must be registered in commission totals after the manual separate random-referral finalization transaction completes.",
+          "no_code_commission_projection": "Randomly assigned $5 commissions from no-referral mints must be reflected on the dashboard, leaderboard, and in NFT attributes.",
+          "historical_commission_backfill_required": false,
+          "ticket_commission_consistency_rule": "Every issued ticket corresponds to one $5 commission, so ticket and commission totals must remain consistent."
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "FRONTEND"
+          ],
+          "contexts": [
+            "COMMISSION_ACCOUNTING",
+            "DASHBOARD",
+            "LEADERBOARD",
+            "NFT_DETAIL",
+            "NFT_METADATA"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E001",
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E008",
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E010",
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E011",
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E012"
+        ]
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+        "requirement_title": "No-Referral Ticket Allocation",
+        "family_id": "PRIZE_MECHANICS",
+        "state_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_S011",
+        "attributes": {
+          "allocation_trigger": "successful mint with no referral code or an invalid referral code",
+          "recipient_selection": "randomly selected existing NFT holder",
+          "ticket_draws": [
+            "SMALL_BLOCK"
+          ],
+          "standard_no_referral_ticket_count": 1,
+          "first_mint_ticket_exception": "No ticket is awarded when no earlier NFT exists for random selection."
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "NO_REFERRAL",
+            "PRIZE_TICKETS"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E001",
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E002",
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E004",
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E009",
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E011"
+        ]
+      },
+      "REQ_TICKET_ACCOUNTING_ACCURACY": {
+        "requirement_id": "REQ_TICKET_ACCOUNTING_ACCURACY",
+        "requirement_title": "Prize Ticket Accounting Accuracy",
+        "family_id": "PRIZE_MECHANICS",
+        "state_id": "REQ_TICKET_ACCOUNTING_ACCURACY_S015",
+        "attributes": {
+          "small_block_ticket_counter": "Display a separate current Small Block ticket counter and reset it to 0 after each Small Block draw.",
+          "dashboard_ticket_display": "Display each automatically awarded Small Block prize ticket on the holder's dashboard.",
+          "ticket_association": "Each ticket is associated with the holder's NFT, wallet, and mint number.",
+          "aggregate_ticket_count_rule": "The accounted ticket total equals the number of completed primary mints after mint #1; the first mint contributes no ticket because no earlier NFT holder exists.",
+          "random_ticket_accounting": "Tickets assigned at random for no-referral mints must be registered in ticket totals.",
+          "ticket_surface_consistency_rule": "Tickets awarded through both code-used and no-code mints must be reflected on leaderboards and NFT attributes.",
+          "historical_backfill_required": false
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "SMART_CONTRACT",
+            "FRONTEND"
+          ],
+          "contexts": [
+            "NFT_METADATA",
+            "DASHBOARD",
+            "TICKET_ACCOUNTING"
+          ]
+        },
+        "lifecycle_status": null,
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E001",
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E002",
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E003",
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E008",
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E012",
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E013",
+          "REQ_TICKET_ACCOUNTING_ACCURACY_E015"
+        ]
+      }
+    },
+    "post_state_scoring_specs": {
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "commission_amount": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "allocation_condition": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "recipient_selection": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "default_recipient_policy": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "commission_issuance_rate": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "first_mint_random_commission_allocation_required": {
+              "comparator": "BOOLEAN_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "commission_view_consistency": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "commission_count_basis": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "random_commission_accounting": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "no_code_commission_projection": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "historical_commission_backfill_required": {
+              "comparator": "BOOLEAN_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "ticket_commission_consistency_rule": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "allocation_trigger": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "recipient_selection": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "ticket_draws": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "standard_no_referral_ticket_count": {
+              "comparator": "NUMBER_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "first_mint_ticket_exception": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_TICKET_ACCOUNTING_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "small_block_ticket_counter": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "dashboard_ticket_display": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "ticket_association": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "aggregate_ticket_count_rule": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "random_ticket_accounting": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "ticket_surface_consistency_rule": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "historical_backfill_required": {
+              "comparator": "BOOLEAN_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      }
+    },
     "blocking_ambiguity_candidates": [],
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
-    "relevance_review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+    "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
     "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 must be audited independently."
   }
 }

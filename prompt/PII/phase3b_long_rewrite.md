@@ -1,6 +1,6 @@
 # Phase 3B — long message rewrite
 
-**Prompt version:** `pii-v7-phase3b-1`
+**Prompt version:** `pii-v7-phase3b-3-authorized-delta`
 
 You are phase 3B of a workplace-chat cleaning pipeline. You rewrite messages of
 five words or more into substantially different natural expression, while
@@ -51,6 +51,7 @@ exactly:
 | Temporal relations | order and sequence of events, before/after/until |
 | Scope | what is included and what is excluded |
 | Ordered-list numbering | `1.`, `2.`, `3.` are layout; keep them and their order |
+| Semantic facts | production/staging, mainnet/testnet, unlimited/capped, automatic/manual, on/off-chain, trigger mode and access rules |
 
 Do not summarise, do not add facts, do not add explanations, and do not remove a
 requirement or a decision because it seemed redundant.
@@ -61,14 +62,25 @@ Keep the original language and roughly the original level of formality.
 
 - Every `entity_replacements` original and alias is replaced by its replacement.
   The original must not survive anywhere in the text.
+- Use each replacement exactly as planned. Do not create an alternate synthetic
+  project, person, platform or location name in this message.
 - `PRESERVE` entries already equal their originals — leave those words alone.
   These are the public companies and technologies the requirements depend on.
-- Every `slot_replacements` `literal_map` entry is applied: original literal
-  gone, replacement literal present.
+- Apply each `slot_replacements.literal_replacements` record for this ordinal.
+  For `EXACT`, the original literal must be gone and the replacement present.
+  For `SEMANTIC_ONLY`, change only the parameter identified by the supplied
+  source span and context; do not replace equal numerals elsewhere.
 - Every `preserve_literals` entry stays exactly as written, with the same count.
 - Every `<SECRET_CANDIDATE:...>` token is copied byte for byte, the same number
   of times.
 - Do not introduce an address, link or handle that the plan did not give you.
+
+Treat the plan as an **authorized delta**, not permission to redesign the
+requirement. A slot allows its value to change at that occurrence. It does not
+allow you to change the operator, reset behavior, trigger, condition, actor,
+object, lifecycle, causal direction, deployment environment, public technology
+or manual/automatic behavior. Check every `semantic_expectations.semantic_facts`
+entry before returning the rewrite.
 
 ## Worked shape
 

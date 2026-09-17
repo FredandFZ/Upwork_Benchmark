@@ -11,10 +11,12 @@
   "turns": 683,
   "history_turn_count": 683,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
     "source_message_id": 684,
@@ -5541,27 +5543,28 @@
         682
       ],
       "history_message_count": 27,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq1-agent-response-v1",
+    "schema_version": "rq1-agent-response-v2",
     "required_fields": [
-      "selected_history_message_ids",
       "requirements"
     ],
     "requirement_item_fields": [
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids"
-    ]
+    ],
+    "requirement_refs_must_be_unique": true,
+    "evidence_message_ids_must_reference_c2_history": true,
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -5583,13 +5586,255 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "DETERMINISTIC_RQ1_GOLD",
+    "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+    "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
       "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
       "REQ_COMMISSION_ACCOUNTING_ACCURACY",
       "REQ_NO_REFERRAL_TICKET_ALLOCATION",
       "REQ_TICKET_ACCOUNTING_ACCURACY"
     ],
+    "gold_requirement_atoms": {
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "canonical_summary": "No-Referral Commission Allocation",
+        "requirement_title": "No-Referral Commission Allocation",
+        "family_id": "REFERRAL_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              288
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG003",
+            "acceptable_message_ids": [
+              305
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG004",
+            "acceptable_message_ids": [
+              583
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG005",
+            "acceptable_message_ids": [
+              672
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          308,
+          581,
+          587
+        ],
+        "trajectory_message_ids": [
+          146,
+          288,
+          305,
+          308,
+          581,
+          583,
+          587,
+          672
+        ]
+      },
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "canonical_summary": "Commission Accounting Accuracy",
+        "requirement_title": "Commission Accounting Accuracy",
+        "family_id": "REFERRAL_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              449
+            ]
+          },
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG002",
+            "acceptable_message_ids": [
+              636
+            ]
+          },
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG003",
+            "acceptable_message_ids": [
+              672
+            ]
+          },
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG004",
+            "acceptable_message_ids": [
+              674
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          492,
+          595,
+          599,
+          605,
+          631,
+          662
+        ],
+        "trajectory_message_ids": [
+          449,
+          492,
+          595,
+          599,
+          605,
+          631,
+          636,
+          662,
+          672,
+          674
+        ]
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "canonical_summary": "No-Referral Ticket Allocation",
+        "requirement_title": "No-Referral Ticket Allocation",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG003",
+            "acceptable_message_ids": [
+              288
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG004",
+            "acceptable_message_ids": [
+              305
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG005",
+            "acceptable_message_ids": [
+              672
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG006",
+            "acceptable_message_ids": [
+              682
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          375,
+          579,
+          583,
+          587
+        ],
+        "trajectory_message_ids": [
+          21,
+          195,
+          288,
+          305,
+          375,
+          579,
+          583,
+          587,
+          672,
+          682
+        ]
+      },
+      "REQ_TICKET_ACCOUNTING_ACCURACY": {
+        "canonical_summary": "Prize Ticket Accounting Accuracy",
+        "requirement_title": "Prize Ticket Accounting Accuracy",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG003",
+            "acceptable_message_ids": [
+              210
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG004",
+            "acceptable_message_ids": [
+              595
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG005",
+            "acceptable_message_ids": [
+              672
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG006",
+            "acceptable_message_ids": [
+              674
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG007",
+            "acceptable_message_ids": [
+              682
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          473,
+          492,
+          496,
+          592,
+          605,
+          608,
+          662
+        ],
+        "trajectory_message_ids": [
+          21,
+          195,
+          210,
+          473,
+          492,
+          496,
+          592,
+          595,
+          605,
+          608,
+          662,
+          672,
+          674,
+          682
+        ]
+      }
+    },
     "directly_affected_historical_requirement_ids": [
       "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
       "REQ_COMMISSION_ACCOUNTING_ACCURACY",
@@ -5624,7 +5869,7 @@
           "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E007",
           "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E008"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           146,
           288,
           305,
@@ -5634,8 +5879,56 @@
           587,
           672
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          146,
+          288,
+          305,
+          583,
+          672
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              288
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG003",
+            "acceptable_message_ids": [
+              305
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG004",
+            "acceptable_message_ids": [
+              583
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG005",
+            "acceptable_message_ids": [
+              672
+            ]
+          }
+        ],
+        "context_message_ids": [
+          308,
+          581,
+          587
+        ],
+        "neutral_context_message_ids": [
+          308,
+          581,
+          587
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
         "current_support_event_ids": [
@@ -5663,7 +5956,7 @@
           "REQ_COMMISSION_ACCOUNTING_ACCURACY_E010",
           "REQ_COMMISSION_ACCOUNTING_ACCURACY_E011"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           449,
           492,
           595,
@@ -5675,8 +5968,55 @@
           672,
           674
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          449,
+          636,
+          672,
+          674
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              449
+            ]
+          },
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG002",
+            "acceptable_message_ids": [
+              636
+            ]
+          },
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG003",
+            "acceptable_message_ids": [
+              672
+            ]
+          },
+          {
+            "group_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_EG004",
+            "acceptable_message_ids": [
+              674
+            ]
+          }
+        ],
+        "context_message_ids": [
+          492,
+          595,
+          599,
+          605,
+          631,
+          662
+        ],
+        "neutral_context_message_ids": [
+          492,
+          595,
+          599,
+          605,
+          631,
+          662
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
         "current_support_event_ids": [
@@ -5707,7 +6047,7 @@
           "REQ_NO_REFERRAL_TICKET_ALLOCATION_E009",
           "REQ_NO_REFERRAL_TICKET_ALLOCATION_E010"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           21,
           195,
           288,
@@ -5719,8 +6059,65 @@
           672,
           682
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          21,
+          195,
+          288,
+          305,
+          672,
+          682
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG003",
+            "acceptable_message_ids": [
+              288
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG004",
+            "acceptable_message_ids": [
+              305
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG005",
+            "acceptable_message_ids": [
+              672
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG006",
+            "acceptable_message_ids": [
+              682
+            ]
+          }
+        ],
+        "context_message_ids": [
+          375,
+          579,
+          583,
+          587
+        ],
+        "neutral_context_message_ids": [
+          375,
+          579,
+          583,
+          587
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_TICKET_ACCOUNTING_ACCURACY": {
         "current_support_event_ids": [
@@ -5757,7 +6154,7 @@
           "REQ_TICKET_ACCOUNTING_ACCURACY_E013",
           "REQ_TICKET_ACCOUNTING_ACCURACY_E014"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           21,
           195,
           210,
@@ -5773,11 +6170,81 @@
           674,
           682
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          21,
+          195,
+          210,
+          595,
+          672,
+          674,
+          682
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG003",
+            "acceptable_message_ids": [
+              210
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG004",
+            "acceptable_message_ids": [
+              595
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG005",
+            "acceptable_message_ids": [
+              672
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG006",
+            "acceptable_message_ids": [
+              674
+            ]
+          },
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG007",
+            "acceptable_message_ids": [
+              682
+            ]
+          }
+        ],
+        "context_message_ids": [
+          473,
+          492,
+          496,
+          592,
+          605,
+          608,
+          662
+        ],
+        "neutral_context_message_ids": [
+          473,
+          492,
+          496,
+          592,
+          605,
+          608,
+          662
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       }
     },
     "derivation_scope": "DIRECT_AFFECTED_ONLY",
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

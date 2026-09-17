@@ -48,9 +48,10 @@ outputs/stage2/42204309/
     └── 42204309_Txxx_RQ4.json
 ```
 
-当前项目按照 `gold_states.json` 中的 `primary_rq_targets` 生成 RQ1=21、RQ2=25、
-RQ3=18、RQ4=16，共 80 个 target/RQ 实例。`primary_rq_targets` 只负责本阶段的
-初始收录；每个实例仍将最终 RQ eligibility 标为待审核。
+当前项目按确定性 `applicable_rqs` 规则生成 RQ1=25、RQ2=25、RQ3=25、RQ4=17，
+共 92 个 target/RQ 实例。RQ1/RQ2 要求存在 relevant historical Requirement；RQ3 要求
+存在 affected target transition；RQ4 要求 RQ3 的自动 decision candidate 为 ACT，并且同一
+target 有 C_env。Gold State 中遗留的 `primary_rq_targets` 不再参与收录。
 
 ## 先校验、不写文件
 
@@ -91,6 +92,7 @@ python Code/stage2_generate_rq_instances.py `
   "turns": 157,
   "history_turn_count": 157,
   "difficulty": "LONG",
+  "applicable_rqs": ["RQ1", "RQ2", "RQ3", "RQ4"],
   "question": "...",
   "target_task": {},
   "history_pool": {},
@@ -125,29 +127,33 @@ python Code/stage2_generate_rq_instances.py `
 - `C3`：Oracle Relevant History，当前由直接相关 Requirement 的完整 Event trajectory
   自动生成。
 
-RQ1 只开放 C2；RQ2、RQ3、RQ4 开放 C1/C2/C3。C3 当前尚未加入需人工判断的继承约束
-和指代上下文，因此实例中会显示
-`PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW`，不能直接把它当作最终 Oracle Gold。
+RQ1 只开放 C2；RQ2 只开放 C2/C3；RQ3、RQ4 开放 C1/C2/C3。C3 由 RQ1 Gold 中直接相关
+Requirement 的完整 Event trajectory 确定性生成，状态为
+`DETERMINISTIC_DIRECT_TRAJECTORY_ONLY`。preserved/inherited Requirements 不属于当前 RQ1/RQ2
+Gold 的操作性范围。
 
 ### 四类实例分别保存什么
 
-- RQ1：历史 Requirement 选择、current-support evidence、完整 temporal trajectory、
-  core message IDs，以及新 Requirement 的分离记录。
-- RQ2：直接相关历史 Requirement 在 target 前的完整五维状态：attributes、scope、
-  lifecycle、ambiguity、execution，并保留 provenance。
-- RQ3：`ACT/CLARIFY` 候选、OPEN ambiguity 候选和 condition-specific review 状态。
-  OPEN ambiguity 不会被程序直接宣布为最终 blocking ambiguity。
+- RQ1：Independent Requirement Atoms、current-support required evidence groups、旧 trajectory
+  neutral context、完整 temporal trajectory，以及新 Requirement 的分离记录。RQ1 Gold 使用
+  `DETERMINISTIC_RQ1_GOLD`，不需要 Human Review。
+- RQ2：matched historical Requirement 在 target 前的完整 (G(t^-))：attributes、scope、
+  lifecycle、ambiguity、execution，以及 typed field comparator candidates；不负责 selection，
+  也不把当前 task 写入 Pre-task State。
+- RQ3：affected Requirement transition、完整 Post-task State、`ACT/CLARIFY` 候选、结构化
+  OPEN ambiguity 候选和 condition-specific review 状态。ACT branch 构造 (G(t^+))，
+  CLARIFY branch 要定位 blocking Requirement/dimension/field。
 - RQ4：Pre/Post transition、Requirement action 候选、Code Environment 引用和后续
   execution-readiness blockers；本阶段的 acceptance criteria/validator 列表为空。
 
 ### `construction_gold` 不是 Agent 输入
 
-实例文件包含 `construction_gold`，是为了后续人工审核和 evaluator 构建。未来运行器必须
+实例文件包含 `construction_gold`，是为了 evaluator 构建以及仍为 provisional 的其他 RQ Gold
+处理。未来运行器必须
 根据 `condition_inputs` 物化 Agent 可见输入，并隐藏：
 
 - `construction_gold`；
 - `source_artifacts`；
-- `selection_basis`；
 - Requirement/Event/State 内部 ID 及其他由这些字段派生的答案。
 
 当前代码故意不实现运行器，避免在“实例构造”和“评估”之间形成隐式泄漏。
@@ -191,19 +197,63 @@ python Code/stage2_generate_rq_instances.py `
 `turns`、difficulty 和聚合统计。项目根部的 `rq_instance_manifest.json` 记录四类实例总数、
 输入文件 SHA-256 和本阶段边界。
 
-重复运行会原子覆盖同名实例、索引和 manifest。生成器不会擅自删除文件夹中未被当前
-index 引用的人工文件；如果 target selection 后续发生变化，应以新 `index.json` 为准，
-再人工确认是否清理旧的未引用实例。
+重复运行会原子覆盖同名实例、索引和 manifest，并删除四个 RQ 文件夹中已不再适用的
+`<target_id>_RQ*.json`。其他命名的人工文件不会被删除。
 
 ## 测试
 
 ```powershell
-python -m unittest Code.tests.test_stage2_rq_instances -v
+python -m unittest Code.tests.test_stage2_rq_instances Code.tests.test_rq1_evaluation -v
 ```
 
-测试覆盖四类实例、`turns`/difficulty 边界、RQ tag 收录、Pre-state 重建、ambiguity/action
-候选、RQ4 zip 引用、失败 reconstruction report 拒绝、历史计数不一致拒绝，以及 zip
-路径穿越拒绝。
+测试覆盖四类实例、RQ1 Evidence Gold、SAME/MERGED/UNCERTAIN relations、一对一匹配、遗漏
+Requirement 的 Evidence FN、错误 evidence、neutral context、`turns`/difficulty、RQ4 zip
+引用和安全拒绝。
+
+## RQ1 自动评价
+
+纯评价逻辑位于 `Code/evaluation/rq1.py`。它不直接访问网络，而是把“一次 LLM judge call”和
+确定性评分明确分开。
+
+Agent response 使用 `rq1-agent-response-v2`：
+
+```json
+{
+  "requirements": [
+    {
+      "requirement_ref": "agent-local-1",
+      "requirement_summary": "Periodic small prize reward rule",
+      "evidence_message_ids": [21, 56]
+    }
+  ]
+}
+```
+
+先生成该 target 的 all-pairs judge request：
+
+```powershell
+python Code/evaluate_rq1.py `
+  --instance outputs/stage2/42204309/RQ1/42204309_T001_RQ1.json `
+  --agent-response path/to/agent_response.json `
+  --alignment-request-out path/to/alignment_request.json
+```
+
+把 `alignment_request.json` 整体交给冻结的 Judge model，一次返回
+`rq1-alignment-response-v1`。然后执行确定性评分：
+
+```powershell
+python Code/evaluate_rq1.py `
+  --instance outputs/stage2/42204309/RQ1/42204309_T001_RQ1.json `
+  --agent-response path/to/agent_response.json `
+  --judge-response path/to/judge_response.json `
+  --score-out path/to/rq1_score.json
+```
+
+正式输出只有 Requirement Precision/Recall/F1、一个端到端 Evidence Precision/Recall/F1 和
+Exact Requirement Set Accuracy。`conditional_evidence_recall_not_official` 仅位于 diagnostics。
+Judge 必须覆盖全部 Prediction–Gold pairs；`UNCERTAIN` 和所有非 `SAME_ATOM` relation 自动不匹配，
+不进入人工复核。当前安全上限是每个 target 20 个 Gold Atoms 和 50 个 predicted Requirements；
+超过上限会明确报错，不会静默丢弃 Prediction。
 
 ## 常见构建报错与处理
 
@@ -215,18 +265,18 @@ python -m unittest Code.tests.test_stage2_rq_instances -v
 | manifest、target index 或 checksum 不一致 | 重新生成对应 Code Environment，并确认 target 与 `before_message_id` 对齐 |
 | zip CRC、路径穿越、符号链接或 `.git` 校验失败 | 修复压缩包来源；不要关闭安全检查继续构建 |
 | C3 不是 C2 的有序子集 | 回查 relevant Event trajectory 和 message 映射，不要向 C3 填入 target 或未来消息 |
-| 输出目录存在旧实例 | 以新 `index.json` 为准；确认无人工文件依赖后再单独清理未引用文件 |
+| 输出目录存在旧实例 | 生成器会删除四个 RQ 文件夹内不再适用的 `<target_id>_RQ*.json`，并重写 `index.json`；其他命名的人工文件不会删除 |
 
 ## 当前阶段明确未做的事情
 
 - 不运行 Agent；
 - 不生成 C1/C2/C3 的独立评估 workspace；
-- 不计算 RQ metrics；
+- 除已实现的 RQ1 自动 scorer 外，不计算 RQ2–RQ4 metrics；
 - 不把启发式 ambiguity candidate 当成最终 RQ3 Gold；
 - 不自动判定 preserved Requirement 中哪些是 inherited constraints；
 - 不生成 RQ4 acceptance criteria、hidden validators 或 reference patch。
 
-这些工作应在实例人工审核完成后进入独立的 evaluation 阶段。
+RQ2–RQ4 尚未完成的 Gold/validator 工作进入后续 evaluation 阶段；RQ1 不需要人工审核。
 
 ## 后续实现顺序
 
@@ -238,8 +288,8 @@ join、Pre/Post state expansion 和基础 C1/C2/C3 materialization 已由当前�
 3. 完成 Pre/Post state expansion 和 field delta；
 4. 物化 C1/C2 history；
 5. 生成 relevant trajectory 和 C3；
-6. 生成人工 review packet，审核 inherited relevance 与 blocking ambiguity；
-7. 派生并冻结 RQ1–RQ3 Gold 和 scorer；
+6. 使用确定性 RQ1 Gold 和自动 aligner/scorer；仅为 RQ3 blocking ambiguity 准备后续 review；
+7. 派生并冻结 RQ2–RQ3 其余 Gold 和 scorer；
 8. 选择 3–5 个覆盖 MODIFY、REMOVE/DEFER、CLARIFY、RUNTIME_FAILURE 的 pilot targets；
 9. 为 pilot 构造 RQ4 hidden validators，并执行 Agent 端到端试验；
 10. 根据 pilot 修正并冻结 v1 schema，再扩展到全部 targets；
@@ -256,7 +306,7 @@ join、Pre/Post state expansion 和基础 C1/C2/C3 materialization 已由当前�
 - [ ] pre/post temporal boundary 通过；
 - [ ] C1/C2/C3 输入按定义生成；
 - [ ] C3 保留 relevant temporal trajectory 且不含 gold labels；
-- [ ] direct relevant 与 inherited constraints 已审核；
+- [ ] RQ1 direct relevant set 已按 `DIRECT_AFFECTED_ONLY` 确定性生成；
 - [ ] RQ1 evidence labels 可追溯到原消息；
 - [ ] RQ2 状态 Gold 完整且 state IDs 可展开；
 - [ ] RQ3 按 condition 保存 ACT/CLARIFY Gold；

@@ -4,18 +4,20 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ2",
-  "rq_name": "Current Requirement State Reconstruction",
+  "rq_name": "Pre-task State Reconstruction",
   "target_id": "42204309_T015",
   "task_gold_id": "42204309_T015_GOLD",
   "target_message_id": 631,
   "turns": 630,
   "history_turn_count": 630,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Reconstruct the currently valid state of every historical requirement needed to understand the current client task, resolving superseded values and preserving still-active constraints.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
+  "question": "For the historical requirements relevant to the current client task, reconstruct their last valid state immediately before the current task. Do not apply the current task to that state.",
   "target_task": {
     "source_message_id": 631,
     "speaker": "client",
@@ -4440,7 +4442,7 @@
   },
   "condition_inputs": {
     "C1": {
-      "available": true,
+      "available": false,
       "history_mode": "NO_HISTORY",
       "history_message_ids": [],
       "history_message_count": 0,
@@ -5100,11 +5102,11 @@
         605
       ],
       "history_message_count": 10,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq2-agent-response-v1",
+    "schema_version": "rq2-agent-response-v2",
     "required_fields": [
       "requirements"
     ],
@@ -5112,22 +5114,22 @@
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids",
-      "current_state"
+      "pre_task_state"
     ],
-    "current_state_fields": [
+    "pre_task_state_fields": [
       "attributes",
       "scope",
       "lifecycle_status",
       "ambiguity",
       "execution"
-    ]
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -5149,7 +5151,7 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "PROVISIONAL_REQUIRES_COMPARATOR_REVIEW",
     "gold_requirement_ids": [
       "REQ_COMMISSION_ACCOUNTING_ACCURACY",
       "REQ_NFT_METADATA_ACCURACY"
@@ -5225,13 +5227,176 @@
       }
     },
     "state_dimensions": [
-      "selection",
       "attributes",
-      "lifecycle",
       "scope",
+      "lifecycle_status",
       "ambiguity",
       "execution"
     ],
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "scoring_scope": {
+      "selection_scored_here": false,
+      "matched_requirements_only": true,
+      "report_reconstruction_coverage_separately": true,
+      "no_matched_requirement_result": "N/A"
+    },
+    "field_scoring_specs": {
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "commission_view_consistency": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "commission_count_basis": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "random_commission_accounting": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "status": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "observed_behavior": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "source_event_id": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        }
+      },
+      "REQ_NFT_METADATA_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "small_block_ticket_counter_visible": {
+              "comparator": "BOOLEAN_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "permanent_badges_visible": {
+              "comparator": "BOOLEAN_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "referral_code_attribute_source": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "NULL_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "status": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "observed_behavior": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "source_event_id": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        }
+      }
+    },
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

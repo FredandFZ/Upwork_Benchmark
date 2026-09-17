@@ -4,18 +4,20 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
-  "rq_name": "Memory-or-Clarify Decision",
+  "rq_name": "Requirement Update or Clarify",
   "target_id": "42204309_T021",
   "task_gold_id": "42204309_T021_GOLD",
   "target_message_id": 701,
   "turns": 700,
   "history_turn_count": 700,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Given only the evidence available in this condition, decide whether it is safe to act on the current client task or whether a concrete clarification is required.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
+  "question": "Combine the pre-task requirement state with the current client task. If the task determines a unique post-task state, choose ACT and construct that state; otherwise choose CLARIFY and identify the blocking requirement field and the question that must be answered.",
   "target_task": {
     "source_message_id": 701,
     "speaker": "client",
@@ -5652,26 +5654,45 @@
         555
       ],
       "history_message_count": 2,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq3-agent-response-v1",
+    "schema_version": "rq3-agent-response-v2",
     "required_fields": [
       "decision",
-      "clarification"
+      "post_task_states",
+      "clarifications"
     ],
     "decision_values": [
       "ACT",
       "CLARIFY"
-    ]
+    ],
+    "branch_constraints": {
+      "ACT": {
+        "post_task_states": "NON_EMPTY_ARRAY",
+        "clarifications": "EMPTY_ARRAY"
+      },
+      "CLARIFY": {
+        "post_task_states": "NULL",
+        "clarifications": "NON_EMPTY_ARRAY"
+      }
+    },
+    "clarification_item_fields": [
+      "requirement_ref",
+      "requirement_summary",
+      "dimension",
+      "field",
+      "missing_information",
+      "question"
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -5713,10 +5734,192 @@
         "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW"
       }
     },
+    "final_gold_by_condition": {
+      "C1": null,
+      "C2": null,
+      "C3": null
+    },
+    "affected_requirement_ids": [
+      "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY"
+    ],
+    "affected_requirement_transitions": {
+      "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY": {
+        "event_ids": [
+          "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E003"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY",
+          "requirement_title": "Contract Upgrade Data Continuity",
+          "family_id": null,
+          "state_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_S002",
+          "attributes": {
+            "migration_strategy": "replace the active contract with a fresh contract state",
+            "nft_numbering_policy": "restart NFT numbering at #1",
+            "superseded_contract_policy": "leave the prior NFT contract on-chain but exclude it from project systems",
+            "data_continuity_policy": "do not migrate NFT copies from the superseded contract"
+          },
+          "scope": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "BACKEND",
+              "INFRASTRUCTURE",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "CONTRACT_MIGRATION"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports that the project systems have switched to the new contract.",
+            "source_event_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E002"
+          },
+          "supporting_event_ids": [
+            "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E001",
+            "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E002"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY",
+          "requirement_title": "Contract Upgrade Data Continuity",
+          "family_id": null,
+          "state_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_S003",
+          "attributes": {
+            "migration_strategy": "safely redeploy and merge contract changes while retaining the existing project data",
+            "superseded_contract_policy": "leave the prior NFT contract on-chain but exclude it from project systems",
+            "data_continuity_policy": "retain existing project data during the contract upgrade"
+          },
+          "scope": {
+            "persistence": "TASK_LOCAL",
+            "components": [
+              "BACKEND",
+              "INFRASTRUCTURE",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "CONTRACT_MIGRATION"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E001",
+            "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E003"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ]
+        }
+      }
+    },
+    "post_task_states": {
+      "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY": {
+        "requirement_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY",
+        "requirement_title": "Contract Upgrade Data Continuity",
+        "family_id": null,
+        "state_id": "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_S003",
+        "attributes": {
+          "migration_strategy": "safely redeploy and merge contract changes while retaining the existing project data",
+          "superseded_contract_policy": "leave the prior NFT contract on-chain but exclude it from project systems",
+          "data_continuity_policy": "retain existing project data during the contract upgrade"
+        },
+        "scope": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "BACKEND",
+            "INFRASTRUCTURE",
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "CONTRACT_MIGRATION"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E001",
+          "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY_E003"
+        ]
+      }
+    },
+    "post_state_scoring_specs": {
+      "REQ_CONTRACT_UPGRADE_DATA_CONTINUITY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "migration_strategy": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "superseded_contract_policy": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "data_continuity_policy": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      }
+    },
     "blocking_ambiguity_candidates": [],
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
-    "relevance_review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+    "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
     "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 must be audited independently."
   }
 }

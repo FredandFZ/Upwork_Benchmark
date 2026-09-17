@@ -26,7 +26,7 @@ from ._compat import sha256_text
 from .config import BUCKET_LONG, BUCKET_SHORT, PRESERVED_BUCKETS
 from .errors import PiiValidationError, marked
 from .models import MessagePlanSlice, RewriteRecord, SafeMessage
-from .phase0b_entities import POLICY_SYNTHESIZE
+from .phase0b_entities import POLICY_SYNTHESIZE, PUBLIC_ALLOWLIST
 from .textutil import (
     EMAIL_RE,
     FAKE_CREDENTIAL_RE,
@@ -43,6 +43,7 @@ from .textutil import (
     negation_markers,
     occurrence_count,
     preserved_term_counts,
+    semantic_anchor_differences,
     text_outside_pii,
     word_count,
 )
@@ -57,11 +58,11 @@ SHORT_WORD_CEILING = 8
 
 TASK_SHORT = (
     "Rewrite each short message with clearly different wording while preserving its "
-    "speech act, polarity and immediate intent."
+    "speech act, polarity, immediate intent and every semantic fact."
 )
 TASK_LONG = (
     "Rewrite each message into a substantially different natural expression that "
-    "preserves its project-level meaning and applies every supplied transformation."
+    "preserves every project-level fact and applies only the supplied transformations."
 )
 
 REPAIR_INSTRUCTION_SHORT = (
@@ -70,7 +71,8 @@ REPAIR_INSTRUCTION_SHORT = (
     "eight words, preserves an interrogative form if the original had "
     "one, applies every supplied entity and slot replacement, keeps every "
     "<SECRET_CANDIDATE:...> token byte for byte, and keeps every preserve literal exactly. "
-    "Never emit a bracketed placeholder such as [PERSON_001]."
+    "Use planned entity spellings exactly, preserve every semantic fact, and never emit a "
+    "bracketed placeholder such as [PERSON_001]."
 )
 REPAIR_INSTRUCTION_LONG = (
     "The previous response failed local validation. For each message make an unmistakable "
@@ -79,7 +81,8 @@ REPAIR_INSTRUCTION_LONG = (
     "every supplied entity and slot replacement so no original value survives, keep every "
     "<SECRET_CANDIDATE:...> token byte for byte, keep every preserve literal and every "
     "ordered-list number exactly, and never emit a bracketed placeholder such as "
-    "[PERSON_001]."
+    "[PERSON_001]. A slot changes only its value: preserve its operator, lifecycle, trigger, "
+    "environment, actor, object and causal effect, and use planned entity names exactly."
 )
 
 
@@ -192,14 +195,24 @@ def rewrite_violations(
             f"({len(expected_tokens)} expected, {len(actual_tokens)} present)"
         )
 
-    # -- preserved literals keep their exact count -------------------------- #
+    # -- preserved literals ------------------------------------------------- #
     before = preserved_term_counts(safe.safe_text, slice_.preserve_literals)
     after = preserved_term_counts(candidate, slice_.preserve_literals)
+    public_terms = {term.casefold() for term in PUBLIC_ALLOWLIST}
     for term, count in before.items():
-        if count and after.get(term, 0) != count:
+        after_count = after.get(term, 0)
+        # Named public technologies must not be substituted, but a natural
+        # rewrite may consolidate or repeat a mention.  Other protected
+        # literals (identifiers and fact-specific strings) remain exact-count.
+        changed = (
+            not after_count
+            if term.casefold() in public_terms
+            else after_count != count
+        )
+        if count and changed:
             violations.append(
                 f"REWRITE_PRESERVED_TERM_ALTERED: {fingerprint('PRESERVE', term)} "
-                f"count {count} -> {after.get(term, 0)}"
+                f"count {count} -> {after_count}"
             )
 
     # -- ordered-list numbering is layout, not data ------------------------- #
@@ -231,11 +244,35 @@ def rewrite_violations(
     masked_candidate = text_outside_pii(candidate)
     masked_source = text_outside_pii(safe.safe_text)
     for item in slice_.slot_replacements:
-        for original_literal, new_literal in item.literal_map.items():
+        for occurrence in item.replacements_for(safe.ordinal):
+            if occurrence.match_mode == "SEMANTIC_ONLY":
+                # A bare number is meaningful only at its recorded source span.
+                # After a free-form rewrite its output offset is not stable, so
+                # semantic verification -- not project-wide substring search --
+                # is the correct judge.
+                continue
+            original_literal = occurrence.original
+            new_literal = occurrence.replacement
             if not original_literal:
                 continue
             in_source = occurrence_count(masked_source, original_literal, ignore_case=False)
             if not in_source:
+                continue
+            if new_literal == original_literal:
+                # An identity mapping is the plan saying "keep this".  The slot
+                # records which public tool, network or asset was chosen, and
+                # that is a requirement rather than an identity to disguise, so
+                # phase 2 deliberately maps it to itself.  Without this branch
+                # the correct rewrite -- the one that kept the public name --
+                # is reported as having "kept its original literal", which is
+                # the same blind spot the phase-2 validator had, one phase later.
+                if not occurrence_count(
+                    masked_candidate, original_literal, ignore_case=False
+                ):
+                    violations.append(
+                        f"REWRITE_PRESERVED_TERM_ALTERED: slot {item.slot_id} "
+                        "dropped a value the plan preserves"
+                    )
                 continue
             if occurrence_count(masked_candidate, original_literal, ignore_case=False):
                 violations.append(
@@ -259,15 +296,26 @@ def rewrite_violations(
                     f"REWRITE_PII_REINTRODUCED: unplanned {label} "
                     f"{fingerprint(label, match.group(0))}"
                 )
+    # A URL the *model invented* is the risk here.  One that stands verbatim in
+    # the source and was not classified private by phase 0B is a public link --
+    # a vendor's home page, say -- and keeping it is the stated policy, not a
+    # leak.  Without this the gate quarantined messages for carrying
+    # ``https://stripe.com/``, one of the very names the design names as
+    # preserved.  A private URL that 0B *did* catch is still blocked, by the
+    # residual-entity check above.
+    source_urls = {match.group(0) for match in URL_RE.finditer(safe.safe_text)}
     for match in URL_RE.finditer(candidate):
         value = match.group(0)
-        if value not in planned_values and not any(
+        if value in source_urls or value in planned_values:
+            continue
+        if any(
             value.startswith(planned) or planned.startswith(value)
             for planned in planned_values
         ):
-            violations.append(
-                f"REWRITE_PII_REINTRODUCED: unplanned URL {fingerprint('URL', value)}"
-            )
+            continue
+        violations.append(
+            f"REWRITE_PII_REINTRODUCED: unplanned URL {fingerprint('URL', value)}"
+        )
     source_phones = {
         "".join(character for character in match.group(0) if character.isdigit())
         for match in PHONE_RE.finditer(safe.safe_text)
@@ -278,6 +326,18 @@ def rewrite_violations(
             violations.append(
                 "REWRITE_PII_REINTRODUCED: a source phone number survived"
             )
+
+    # Explicit environment/lifecycle/mechanism anchors are not values phase 2
+    # is allowed to synthesize.  A rewrite that turns production into staging,
+    # on-chain into off-chain, unlimited into capped, or pool-based into
+    # schedule-based has changed the requirement and is rejected locally.
+    for dimension, before_labels, after_labels in semantic_anchor_differences(
+        safe.safe_text, candidate
+    ):
+        violations.append(
+            "REWRITE_SEMANTIC_ANCHOR_CHANGED: "
+            f"{dimension} changed from {list(before_labels)} to {list(after_labels)}"
+        )
 
     # -- bucket policy ------------------------------------------------------ #
     if bucket in PRESERVED_BUCKETS:
@@ -308,8 +368,33 @@ def rewrite_violations(
                 f"REWRITE_WORD_BAND_VIOLATED: short rewrite shrank to {length} words, "
                 f"under the floor of {floor}"
             )
-        if negation_markers(candidate) != negation_markers(safe.safe_text):
-            violations.append("REWRITE_POLARITY_CHANGED: negation markers changed")
+        # Polarity, not negation words.  "Okay, no problem" carries a negation
+        # marker and is AFFIRMATIVE -- phase 1A says so -- so demanding the
+        # marker survive rejected every natural rewrite ("Sure, that works").
+        # Comparing the markers made the local guard contradict the semantic
+        # judgement it exists to protect.  Use 1A's polarity, and keep a surface
+        # guard only in the two directions where it is sound.
+        expected_polarity = (slice_.semantic_expectations or {}).get("polarity")
+        source_negated = bool(negation_markers(safe.safe_text))
+        candidate_negated = bool(negation_markers(candidate))
+        if expected_polarity == "NEGATIVE":
+            # Negation is often lexical -- "mint attempt failed", "access
+            # denied" -- and 1A rightly calls those NEGATIVE, but
+            # ``negation_markers`` only knows function words.  So a marker is
+            # only required to survive if the source actually carried one;
+            # otherwise the rule demanded the rewrite add a marker the original
+            # never had, and in one case fought the plan itself, which maps
+            # "access denied" to "viewer remains locked".  Nothing is said about
+            # the other direction: spelling a lexical negation out explicitly is
+            # a faithful rewrite, not an invented one.
+            if source_negated and not candidate_negated:
+                violations.append(
+                    "REWRITE_POLARITY_CHANGED: the negation was dropped"
+                )
+        elif candidate_negated and not source_negated:
+            violations.append(
+                "REWRITE_POLARITY_CHANGED: a negation was introduced"
+            )
         if is_interrogative(safe.safe_text) != is_interrogative(candidate):
             violations.append("REWRITE_POLARITY_CHANGED: interrogative form changed")
     elif bucket == BUCKET_LONG:
@@ -321,10 +406,62 @@ def rewrite_violations(
     return violations
 
 
+# Violations that describe *fidelity to the plan* or *style*, not safety.
+#
+# Across a full 824-message project the gate raised 218 violations, of which 8
+# were safety-critical (real PII surviving or being reintroduced) and 210 were
+# these.  Every one of them is also judged, semantically and independently, by
+# phase 4 -- which reads the plan and can tell "the number was dropped" from
+# "$20 was written as twenty dollars", a distinction string matching cannot
+# make.  Hard-failing on them locally therefore bought nothing and quarantined
+# messages a better-informed check would have passed.
+#
+# What stays blocking: anything that lets real information survive, any damage
+# to a secret token, pipeline-internal representation leaking into the output,
+# a "rewrite" identical to its source (the one path that would silently ship the
+# original), and polarity -- a flipped negation states a different requirement.
+ADVISORY_CODES: frozenset[str] = frozenset(
+    {
+        "REWRITE_PLAN_MAPPING_VIOLATED",
+        "REWRITE_STRUCTURE_UNCHANGED",
+        "REWRITE_WORD_BAND_VIOLATED",
+    }
+)
+
+
+def _is_advisory(violation: str) -> bool:
+    code = violation.split(":", 1)[0]
+    if code == "REWRITE_PLAN_MAPPING_VIOLATED":
+        # Semantic slot values may be expressed without the plan's exact
+        # surface string and are judged by phase 4.  Entity replacements are
+        # different: allowing another invented name defeats project-wide
+        # identity consistency, so the canonical planned spelling is hard.
+        return violation.split(":", 1)[1].strip().startswith("slot ")
+    if code == "REWRITE_RESIDUAL_ORIGINAL_ENTITY":
+        # A surviving *slot literal* is a stale business value, not a leak; a
+        # surviving entity original is real PII and always blocks.
+        return violation.split(":", 1)[1].strip().startswith("slot ")
+    return code in ADVISORY_CODES
+
+
+def split_violations(violations: Sequence[str]) -> tuple[list[str], list[str]]:
+    """Partition into ``(blocking, advisory)``."""
+
+    blocking = [item for item in violations if not _is_advisory(item)]
+    advisory = [item for item in violations if _is_advisory(item)]
+    return blocking, advisory
+
+
+def blocking_violations(
+    safe: SafeMessage, candidate: str, slice_: MessagePlanSlice
+) -> list[str]:
+    return split_violations(rewrite_violations(safe, candidate, slice_))[0]
+
+
 def assert_rewrite_invariants(
     safe: SafeMessage, candidate: str, slice_: MessagePlanSlice
 ) -> None:
-    violations = rewrite_violations(safe, candidate, slice_)
+    violations = blocking_violations(safe, candidate, slice_)
     if violations:
         raise PiiValidationError(
             marked(
@@ -354,8 +491,8 @@ def make_record(
         item.slot_id
         for item in slice_.slot_replacements
         if any(
-            occurrence_count(candidate, value, ignore_case=False)
-            for value in item.literal_map.values()
+            occurrence_count(candidate, occurrence.replacement, ignore_case=False)
+            for occurrence in item.replacements_for(safe.ordinal)
         )
     )
     return RewriteRecord(
@@ -417,7 +554,7 @@ def validate_rewrite_response(
             failures.append(f"ordinal {ordinal} has no plan slice")
             codes.append("REWRITE_SCHEMA_INVALID")
             continue
-        violations = rewrite_violations(safe, text, slice_)
+        violations = blocking_violations(safe, text, slice_)
         if violations:
             failures.extend(f"ordinal {ordinal}: {item}" for item in violations[:4])
             codes.extend(item.split(":", 1)[0] for item in violations)

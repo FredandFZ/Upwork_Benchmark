@@ -474,6 +474,8 @@ class MessageSlot:
     value_type: str
     source_literal: str
     meaning: str
+    start: int
+    end: int
     unit: str | None = None
     op: str = "INTRODUCE"
 
@@ -485,6 +487,8 @@ class MessageSlot:
             "meaning": self.meaning,
             "unit": self.unit,
             "op": self.op,
+            "start": self.start,
+            "end": self.end,
         }
 
     @classmethod
@@ -497,6 +501,8 @@ class MessageSlot:
             meaning=_text(body.get("meaning"), "slot.meaning"),
             unit=_opt_text(body.get("unit"), "slot.unit"),
             op=_text(body.get("op"), "slot.op"),
+            start=_integer(body.get("start"), "slot.start"),
+            end=_integer(body.get("end"), "slot.end"),
         )
 
 
@@ -511,6 +517,7 @@ class MessageSemantics:
     decisions: tuple[dict[str, Any], ...]
     slots: tuple[MessageSlot, ...]
     relations: tuple[str, ...] = ()
+    semantic_facts: tuple[dict[str, Any], ...] = ()
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -523,6 +530,7 @@ class MessageSemantics:
             "decisions": [dict(item) for item in self.decisions],
             "slots": [item.to_json() for item in self.slots],
             "relations": list(self.relations),
+            "semantic_facts": [dict(item) for item in self.semantic_facts],
         }
 
     @classmethod
@@ -546,6 +554,45 @@ class MessageSemantics:
                 for item in _sequence(body.get("slots"), "semantics.slots")
             ),
             relations=_texts(body.get("relations", []), "semantics.relations"),
+            semantic_facts=tuple(
+                _obj(item, "semantics.semantic_facts[]")
+                for item in _sequence(
+                    body.get("semantic_facts", []), "semantics.semantic_facts"
+                )
+            ),
+        )
+
+
+@dataclass(frozen=True)
+class SlotLiteralOccurrence:
+    """One source rendering of a semantic slot at one exact message span."""
+
+    ordinal: int
+    message_id: Any
+    start: int
+    end: int
+    source_literal: str
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "ordinal": self.ordinal,
+            "message_id": self.message_id,
+            "start": self.start,
+            "end": self.end,
+            "source_literal": self.source_literal,
+        }
+
+    @classmethod
+    def from_json(cls, value: Any) -> "SlotLiteralOccurrence":
+        body = _obj(value, "slot literal occurrence")
+        return cls(
+            ordinal=_integer(body.get("ordinal"), "slot_occurrence.ordinal"),
+            message_id=body.get("message_id"),
+            start=_integer(body.get("start"), "slot_occurrence.start"),
+            end=_integer(body.get("end"), "slot_occurrence.end"),
+            source_literal=_text(
+                body.get("source_literal"), "slot_occurrence.source_literal"
+            ),
         )
 
 
@@ -562,6 +609,7 @@ class SemanticSlot:
     history: tuple[SlotHistoryEntry, ...]
     source_literals: tuple[str, ...]
     message_ordinals: tuple[int, ...]
+    literal_occurrences: tuple["SlotLiteralOccurrence", ...] = ()
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -574,6 +622,7 @@ class SemanticSlot:
             "history": [item.to_json() for item in self.history],
             "source_literals": list(self.source_literals),
             "message_ordinals": list(self.message_ordinals),
+            "literal_occurrences": [item.to_json() for item in self.literal_occurrences],
         }
 
     @classmethod
@@ -594,6 +643,12 @@ class SemanticSlot:
             message_ordinals=tuple(
                 _integer(item, "slot.message_ordinals[]")
                 for item in _sequence(body.get("message_ordinals"), "slot.message_ordinals")
+            ),
+            literal_occurrences=tuple(
+                SlotLiteralOccurrence.from_json(item)
+                for item in _sequence(
+                    body.get("literal_occurrences", []), "slot.literal_occurrences"
+                )
             ),
         )
 
@@ -768,24 +823,79 @@ class EntityReplacement:
 
 
 @dataclass(frozen=True)
+class SlotLiteralReplacement:
+    """The synthetic value for one specific source occurrence.
+
+    ``SEMANTIC_ONLY`` is used for context-free bare numerals.  They still carry
+    a semantic target for the rewriting/verifying models, but a substring gate
+    must not interpret every equal numeral in the message as this occurrence.
+    """
+
+    ordinal: int
+    message_id: Any
+    start: int
+    end: int
+    original: str
+    replacement: str
+    match_mode: str
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "ordinal": self.ordinal,
+            "message_id": self.message_id,
+            "start": self.start,
+            "end": self.end,
+            "original": self.original,
+            "replacement": self.replacement,
+            "match_mode": self.match_mode,
+        }
+
+    @classmethod
+    def from_json(cls, value: Any) -> "SlotLiteralReplacement":
+        body = _obj(value, "slot literal replacement")
+        match_mode = _text(body.get("match_mode"), "literal_replacement.match_mode")
+        if match_mode not in {"EXACT", "SEMANTIC_ONLY"}:
+            raise PiiError(
+                "literal_replacement.match_mode must be EXACT or SEMANTIC_ONLY"
+            )
+        return cls(
+            ordinal=_integer(body.get("ordinal"), "literal_replacement.ordinal"),
+            message_id=body.get("message_id"),
+            start=_integer(body.get("start"), "literal_replacement.start"),
+            end=_integer(body.get("end"), "literal_replacement.end"),
+            original=_text(body.get("original"), "literal_replacement.original"),
+            replacement=_text(
+                body.get("replacement"), "literal_replacement.replacement"
+            ),
+            match_mode=match_mode,
+        )
+
+
+@dataclass(frozen=True)
 class SlotReplacement:
     slot_id: str
     value_type: str
     history: tuple[SlotHistoryEntry, ...]
-    literal_map: Mapping[str, str]
+    literal_replacements: tuple[SlotLiteralReplacement, ...]
+
+    def replacements_for(self, ordinal: int) -> tuple[SlotLiteralReplacement, ...]:
+        return tuple(
+            item for item in self.literal_replacements if item.ordinal == ordinal
+        )
 
     def to_json(self) -> dict[str, Any]:
         return {
             "slot_id": self.slot_id,
             "value_type": self.value_type,
             "history": [item.to_json() for item in self.history],
-            "literal_map": dict(self.literal_map),
+            "literal_replacements": [
+                item.to_json() for item in self.literal_replacements
+            ],
         }
 
     @classmethod
     def from_json(cls, value: Any) -> "SlotReplacement":
         body = _obj(value, "slot replacement")
-        literal_map = _obj(body.get("literal_map"), "slot_replacement.literal_map")
         return cls(
             slot_id=_text(body.get("slot_id"), "slot_replacement.slot_id"),
             value_type=_text(body.get("value_type"), "slot_replacement.value_type"),
@@ -793,10 +903,13 @@ class SlotReplacement:
                 SlotHistoryEntry.from_json(item)
                 for item in _sequence(body.get("history"), "slot_replacement.history")
             ),
-            literal_map={
-                _text(key, "literal_map key"): _text(item, "literal_map value")
-                for key, item in literal_map.items()
-            },
+            literal_replacements=tuple(
+                SlotLiteralReplacement.from_json(item)
+                for item in _sequence(
+                    body.get("literal_replacements"),
+                    "slot_replacement.literal_replacements",
+                )
+            ),
         )
 
 

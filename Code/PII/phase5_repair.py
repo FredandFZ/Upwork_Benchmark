@@ -22,7 +22,7 @@ from .models import MessagePlanSlice, RewriteRecord, SafeMessage, VerdictRecord
 from .phase3_rewrite import (
     make_record,
     repair_instruction_for,
-    rewrite_violations,
+    blocking_violations,
 )
 
 # Findings whose resolution is locally decidable.  The rest are judgement calls
@@ -97,7 +97,7 @@ def unresolved_findings(
     } & MACHINE_CHECKABLE_FINDINGS
     if not targeted:
         return []
-    violations = rewrite_violations(safe, candidate, slice_)
+    violations = blocking_violations(safe, candidate, slice_)
     if violations:
         return sorted(targeted)
     return []
@@ -142,7 +142,7 @@ def validate_repair_response(
             failures=("REPAIR_SCHEMA_INVALID",),
         )
 
-    violations = rewrite_violations(item, text, slice_)
+    violations = blocking_violations(item, text, slice_)
     if violations:
         failures.extend(violations[:6])
         codes.extend(violation.split(":", 1)[0] for violation in violations)

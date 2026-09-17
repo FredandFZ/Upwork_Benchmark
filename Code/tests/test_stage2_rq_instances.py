@@ -160,7 +160,7 @@ def _state_graph() -> dict:
     }
 
 
-def _gold(*, turns: int = 3, rq_targets=None) -> dict:
+def _gold(*, turns: int = 3, legacy_rq_targets=None) -> dict:
     return {
         "schema_version": "task-gold-v2",
         "project_id": "P1",
@@ -172,8 +172,11 @@ def _gold(*, turns: int = 3, rq_targets=None) -> dict:
                 "conversation_turn_index": 4,
                 "history_turn_count": turns,
                 "selection_source": "TEST",
-                "primary_rq_targets": rq_targets
-                or ["RQ1", "RQ2", "RQ3", "RQ4"],
+                **(
+                    {"primary_rq_targets": legacy_rq_targets}
+                    if legacy_rq_targets is not None
+                    else {}
+                ),
                 "target_task": {
                     "source_message_id": 40,
                     "speaker": "client",
@@ -209,7 +212,18 @@ def _gold(*, turns: int = 3, rq_targets=None) -> dict:
     }
 
 
-def _write_code_environment(root: Path, *, unsafe: bool = False) -> Path:
+def _act_state_graph() -> dict:
+    graph = json.loads(json.dumps(_state_graph()))
+    button_graph = graph["requirement_graphs"][0]
+    button_graph["nodes"][1]["attributes"] = {"colour": "green"}
+    button_graph["nodes"][1]["ambiguity"] = None
+    button_graph["edges"][1]["event_type"] = "MODIFY"
+    return graph
+
+
+def _write_code_environment(
+    root: Path, *, unsafe: bool = False, event_types=None
+) -> Path:
     target_dir = root / "targets" / "T001_before_40"
     target_dir.mkdir(parents=True)
     archive_path = target_dir / "pre_repo.zip"
@@ -233,7 +247,7 @@ def _write_code_environment(root: Path, *, unsafe: bool = False) -> Path:
             }
         ],
         "target_event_ids": ["REQ_BUTTON_E002", "REQ_REPORT_E001"],
-        "target_event_types": ["AMBIGUOUS", "INTRODUCE"],
+        "target_event_types": event_types or ["AMBIGUOUS", "INTRODUCE"],
         "target_summary": "Maybe make the button green, and add a report.",
         "pre_state_verified_against_gold": True,
         "post_state_verified_against_gold": True,
@@ -254,7 +268,7 @@ def _write_code_environment(root: Path, *, unsafe: bool = False) -> Path:
 
 
 class RQInstanceTests(unittest.TestCase):
-    def test_builds_all_four_views_and_preserves_turns(self):
+    def test_clarify_target_builds_rq1_to_rq3_and_preserves_turns(self):
         with tempfile.TemporaryDirectory() as directory:
             code_environment = _write_code_environment(Path(directory))
             collections = build_rq_instances(
@@ -268,9 +282,11 @@ class RQInstanceTests(unittest.TestCase):
             "RQ1": 1,
             "RQ2": 1,
             "RQ3": 1,
-            "RQ4": 1,
+            "RQ4": 0,
         })
         for rq_id, rows in collections.items():
+            if not rows:
+                continue
             instance = rows[0]
             self.assertEqual(instance["turns"], 3)
             self.assertEqual(instance["history_turn_count"], 3)
@@ -281,6 +297,7 @@ class RQInstanceTests(unittest.TestCase):
                 [10, 20, 30],
             )
             self.assertNotIn("sender_id", instance["history_pool"]["messages"][0])
+            self.assertEqual(instance["applicable_rqs"], ["RQ1", "RQ2", "RQ3"])
 
         rq1 = collections["RQ1"][0]
         self.assertEqual(
@@ -296,6 +313,19 @@ class RQInstanceTests(unittest.TestCase):
             ["REQ_BUTTON_E001"],
         )
         self.assertEqual(
+            rq1["construction_gold"]["status"], "DETERMINISTIC_RQ1_GOLD"
+        )
+        self.assertEqual(
+            rq1["construction_gold"]["gold_requirement_atoms"]["REQ_BUTTON"][
+                "required_evidence_groups"
+            ][0]["acceptable_message_ids"],
+            [10],
+        )
+        self.assertEqual(
+            rq1["response_contract"]["schema_version"],
+            "rq1-agent-response-v2",
+        )
+        self.assertEqual(
             rq1["condition_inputs"]["C3"]["history_message_ids"], [10]
         )
         self.assertFalse(rq1["condition_inputs"]["C3"]["available"])
@@ -305,6 +335,12 @@ class RQInstanceTests(unittest.TestCase):
             rq2["construction_gold"]["states"]["REQ_BUTTON"]["attributes"],
             {"colour": "blue"},
         )
+        self.assertFalse(rq2["condition_inputs"]["C1"]["available"])
+        self.assertEqual(
+            rq2["response_contract"]["schema_version"],
+            "rq2-agent-response-v2",
+        )
+        self.assertNotIn("selection", rq2["construction_gold"]["state_dimensions"])
         rq3 = collections["RQ3"][0]
         self.assertEqual(
             rq3["construction_gold"]["project_decision_candidate"]["value"],
@@ -316,7 +352,34 @@ class RQInstanceTests(unittest.TestCase):
             ],
             "REQ_BUTTON_E002",
         )
+
+    def test_act_and_matching_code_environment_builds_rq4(self):
+        with tempfile.TemporaryDirectory() as directory:
+            code_environment = _write_code_environment(
+                Path(directory), event_types=["MODIFY", "INTRODUCE"]
+            )
+            collections = build_rq_instances(
+                _gold(),
+                _act_state_graph(),
+                _messages(),
+                code_environment_dir=code_environment,
+            )
+
+        self.assertEqual(
+            {rq: len(rows) for rq, rows in collections.items()},
+            {"RQ1": 1, "RQ2": 1, "RQ3": 1, "RQ4": 1},
+        )
+        rq3 = collections["RQ3"][0]
+        self.assertEqual(
+            rq3["construction_gold"]["project_decision_candidate"]["value"],
+            "ACT",
+        )
+        self.assertIn(
+            "REQ_BUTTON",
+            rq3["construction_gold"]["affected_requirement_transitions"],
+        )
         rq4 = collections["RQ4"][0]
+        self.assertEqual(rq4["applicable_rqs"], ["RQ1", "RQ2", "RQ3", "RQ4"])
         self.assertFalse(
             rq4["code_environment"]["extracted_during_instance_construction"]
         )
@@ -328,26 +391,42 @@ class RQInstanceTests(unittest.TestCase):
         )
         self.assertEqual(len(rq4["code_environment"]["archive_sha256"]), 64)
 
-    def test_primary_rq_targets_control_materialization(self):
+    def test_legacy_primary_rq_targets_do_not_control_materialization(self):
         collections = build_rq_instances(
-            _gold(rq_targets=["RQ2"]), _state_graph(), _messages()
+            _gold(legacy_rq_targets=["RQ4"]), _state_graph(), _messages()
         )
         counts = [len(collections[rq]) for rq in ("RQ1", "RQ2", "RQ3", "RQ4")]
-        self.assertEqual(counts, [0, 1, 0, 0])
+        self.assertEqual(counts, [1, 1, 1, 0])
+
+    def test_target_with_only_a_new_requirement_builds_only_rq3(self):
+        gold = _gold()
+        target = gold["task_gold_states"][0]
+        target["task_event_ids"] = ["REQ_REPORT_E001"]
+        target["affected_requirement_ids"] = ["REQ_REPORT"]
+        collections = build_rq_instances(gold, _state_graph(), _messages())
+        self.assertEqual(
+            [len(collections[rq]) for rq in ("RQ1", "RQ2", "RQ3", "RQ4")],
+            [0, 0, 1, 0],
+        )
+        self.assertEqual(collections["RQ3"][0]["applicable_rqs"], ["RQ3"])
 
     def test_turn_mismatch_is_rejected(self):
         with self.assertRaisesRegex(RQInstanceError, "history_turn_count"):
             build_rq_instances(
-                _gold(turns=2, rq_targets=["RQ2"]), _state_graph(), _messages()
+                _gold(turns=2), _state_graph(), _messages()
             )
 
     def test_unsafe_archive_member_is_rejected_without_extraction(self):
         with tempfile.TemporaryDirectory() as directory:
-            code_environment = _write_code_environment(Path(directory), unsafe=True)
+            code_environment = _write_code_environment(
+                Path(directory),
+                unsafe=True,
+                event_types=["MODIFY", "INTRODUCE"],
+            )
             with self.assertRaisesRegex(RQInstanceError, "unsafe path"):
                 build_rq_instances(
-                    _gold(rq_targets=["RQ4"]),
-                    _state_graph(),
+                    _gold(),
+                    _act_state_graph(),
                     _messages(),
                     code_environment_dir=code_environment,
                 )
@@ -362,7 +441,7 @@ class RQInstanceTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(RQInstanceError, "did not pass"):
                 build_rq_instances(
-                    _gold(rq_targets=["RQ4"]),
+                    _gold(),
                     _state_graph(),
                     _messages(),
                     code_environment_dir=code_environment,
@@ -375,7 +454,7 @@ class RQInstanceTests(unittest.TestCase):
         self.assertEqual(difficulty_from_turns(50), "MEDIUM")
         self.assertEqual(difficulty_from_turns(51), "LONG")
         collections = build_rq_instances(
-            _gold(rq_targets=["RQ2"]), _state_graph(), _messages()
+            _gold(), _state_graph(), _messages()
         )
         indexes = build_rq_indexes(collections)
         manifest = build_project_manifest(
@@ -384,7 +463,11 @@ class RQInstanceTests(unittest.TestCase):
         self.assertEqual(indexes["RQ2"]["instance_count"], 1)
         self.assertEqual(indexes["RQ2"]["instances"][0]["turns"], 3)
         self.assertEqual(manifest["rq_counts"]["RQ2"], 1)
-        self.assertEqual(manifest["total_instance_count"], 1)
+        self.assertEqual(manifest["total_instance_count"], 3)
+        self.assertEqual(
+            manifest["applicability_policy"]["RQ4"],
+            "ACT_AND_MATCHING_CODE_ENVIRONMENT",
+        )
 
 
 if __name__ == "__main__":

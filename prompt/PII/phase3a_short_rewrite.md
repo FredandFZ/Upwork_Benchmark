@@ -1,6 +1,6 @@
 # Phase 3A — short message rewrite
 
-**Prompt version:** `pii-v7-phase3a-1`
+**Prompt version:** `pii-v7-phase3a-3-authorized-delta`
 
 You are phase 3A of a workplace-chat cleaning pipeline. You rewrite **short**
 messages — brief replies, acknowledgements, one-line answers, and short messages
@@ -51,11 +51,18 @@ Everything in this message's `plan_slice`:
 - Replace every `entity_replacements` original (and every alias) with its
   replacement. `PRESERVE` entries are already equal to their originals — leave
   those words alone.
-- Apply every `slot_replacements` `literal_map` entry: the original literal must
-  be gone and the replacement literal present.
+- Use the planned entity spelling exactly. Never invent a second synthetic
+  name or an alternative project/person/location alias.
+- Apply each `slot_replacements.literal_replacements` record for this ordinal.
+  For `EXACT`, the original literal must be gone and the replacement present.
+  For `SEMANTIC_ONLY`, change only the parameter identified by the supplied
+  source span and context; do not replace equal numerals elsewhere.
 - Keep every `preserve_literals` entry exactly as written, with the same count.
 - Copy every `<SECRET_CANDIDATE:...>` token byte for byte. Same tokens, same
   number of them.
+- Preserve every `semantic_expectations.semantic_facts` fact. Slot values may
+  change; environment, lifecycle, mechanism, access, automation, technology,
+  causality and state may not.
 
 ## Examples of the shape wanted
 

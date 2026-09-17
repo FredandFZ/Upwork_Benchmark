@@ -1,6 +1,6 @@
 # Semantic ontology
 
-**Prompt version:** `pii-v7-semantic-ontology-1`
+**Prompt version:** `pii-v7-semantic-ontology-2-facts`
 
 Shared by message semantic extraction, project consolidation and verification.
 
@@ -54,6 +54,31 @@ unambiguous within the project: `BIG_BLOCK_WINNER_COUNT`,
 
 Do **not** name a slot after the value's datatype. `NUMBER_1`, `AMOUNT`,
 `DATE_2` carry no meaning and are rejected.
+
+## Load-bearing semantic facts
+
+Numbers are only part of a requirement. Each message also carries non-numeric
+facts that must not be changed while values are synthesized. Record these under
+`semantic_facts` using one of:
+
+`ENVIRONMENT`, `LIFECYCLE`, `MECHANISM`, `ACCESS`, `AUTOMATION`, `TECHNOLOGY`,
+`CAUSALITY`, `STATE`, `CONSTRAINT`, `OTHER`.
+
+Examples of facts that must be explicit:
+
+- production versus staging; mainnet versus testnet;
+- unlimited versus capped; instant versus delayed;
+- automatic versus manual; on-chain versus off-chain;
+- pool-based versus schedule-based triggers;
+- whether an action creates tickets, only funds a pool, or does neither;
+- whether authentication or a manual connection is required;
+- the chosen public provider, protocol, token standard, event, function or tool;
+- which condition causes which result, and what resets or expires afterward.
+
+A numeric slot permits only the numeric value to change. It never authorizes a
+change to one of these facts. Preserve the fact's polarity, subject, object and
+condition, including cases where one message contains both automatic and manual
+steps for different operations.
 
 ### Value types
 

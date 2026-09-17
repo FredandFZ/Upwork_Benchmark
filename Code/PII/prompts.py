@@ -48,6 +48,14 @@ FRAGMENT_FILES: tuple[str, ...] = (
 PROMPT_KEY_REWRITE_SHORT = "PHASE_3A_SHORT"
 PROMPT_KEY_REWRITE_LONG = "PHASE_3B_LONG"
 
+# Phase 2 keeps both of its modes in one file -- the model is given the whole
+# document either way -- but hashing the whole file for both means a change to
+# the slot rules discards every entity chunk, which on a real project is the
+# most expensive call in the phase.  So each mode gets its own hash, taken over
+# the shared header plus that mode's own section.  Including the header matters:
+# the model does read it, so a change there has to invalidate both.
+MODE_SECTION_PREFIX = "## Mode `"
+
 PROMPT_FILES: Mapping[str, str] = {
     PHASE_0B: "phase0b_pii_discovery.md",
     PHASE_1A: "phase1a_message_semantics.md",
@@ -112,6 +120,16 @@ class PromptSet:
 
         return self.hashes.get(key, "")
 
+    def phase2_sha256(self, mode: str) -> str:
+        """Hash for one phase-2 mode, falling back to the whole document.
+
+        The fallback is what keeps this safe: an unrecognised mode re-uses the
+        coarse hash, which over-invalidates rather than letting an empty string
+        make two different prompts look identical.
+        """
+
+        return self.hashes.get(phase2_prompt_key(mode)) or self.sha256(PHASE_2)
+
     def version(self, key: str) -> str | None:
         return self.versions.get(key)
 
@@ -151,6 +169,35 @@ def _resolve(body: str, fragments: Mapping[str, str], names: tuple[str, ...]) ->
     return "\n\n".join(blocks) + "\n"
 
 
+def phase2_prompt_key(mode: str) -> str:
+    """The hash key for one phase-2 mode."""
+
+    return f"{PHASE_2}:{mode}"
+
+
+def mode_hashes(resolved: str) -> dict[str, str]:
+    """One hash per phase-2 mode: shared header plus that mode's section.
+
+    Falls back to the whole-document hash for every mode if the headings are not
+    found, so a reworded prompt degrades to the old coarse behaviour -- more
+    recomputation than necessary, never a stale checkpoint.
+    """
+
+    lines = resolved.splitlines(keepends=True)
+    starts = [
+        index for index, line in enumerate(lines) if line.startswith(MODE_SECTION_PREFIX)
+    ]
+    if not starts:
+        return {}
+    header = "".join(lines[: starts[0]])
+    hashes: dict[str, str] = {}
+    for position, start in enumerate(starts):
+        end = starts[position + 1] if position + 1 < len(starts) else len(lines)
+        mode = lines[start][len(MODE_SECTION_PREFIX) :].split("`", 1)[0]
+        hashes[phase2_prompt_key(mode)] = sha256_text(header + "".join(lines[start:end]))
+    return hashes
+
+
 def load_prompt_set(prompt_dir: Path) -> PromptSet:
     """Read every v7 prompt, inline shared fragments, and hash the result."""
 
@@ -171,6 +218,8 @@ def load_prompt_set(prompt_dir: Path) -> PromptSet:
         paths[key] = path
         versions[key] = parse_prompt_version(body)
         hashes[key] = sha256_text(resolved)
+        if key == PHASE_2:
+            hashes.update(mode_hashes(resolved))
 
     agent_path = prompt_dir / AGENT_REPAIR_FILE
     agent_text = _read(agent_path)

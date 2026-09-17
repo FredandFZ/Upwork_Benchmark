@@ -449,7 +449,7 @@ def _prune(state: FinalizeState) -> None:
 def status_report(project: ProjectFiles, run_root: Path) -> dict[str, Any]:
     """Read-only: what happened and what to run next.  No network, no writes."""
 
-    from .ledger import NEXT_COMMAND, read_run_metadata
+    from .ledger import next_command, read_run_metadata
 
     run_dir = run_root / project.project_id
     metadata = read_run_metadata(run_dir) or {}
@@ -465,5 +465,8 @@ def status_report(project: ProjectFiles, run_root: Path) -> dict[str, Any]:
         "task_index": str(run_dir / "agent_tasks" / "index.json") if package else None,
         "submission_path": str(repairs_dir(run_dir) / SUBMISSION_NAME) if package else None,
         "next_command": metadata.get("next_command")
-        or NEXT_COMMAND.get(status, "").format(project_id=project.project_id, run_dir=run_dir),
+        # The ledger is not loaded on this read-only path, so a replan command
+        # falls back to the coarse phase; the recorded command already carries
+        # the precise one, and this only runs when there is no metadata at all.
+        or next_command(status, project.project_id, run_dir),
     }

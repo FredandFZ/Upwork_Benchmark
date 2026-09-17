@@ -17,6 +17,7 @@ from Code.PII.config import (
 from Code.PII.discovery import adapt_messages, build_cleaned_chat
 from Code.PII.errors import AuditFailure, PiiError
 from Code.PII.models import (
+    EntityAlias,
     EntityReplacement,
     IdentityBundle,
     MessageState,
@@ -29,21 +30,28 @@ from Code.PII.models import (
     SemanticRegistry,
     SemanticSlot,
     SlotHistoryEntry,
+    SlotLiteralOccurrence,
+    SlotLiteralReplacement,
     SlotReplacement,
     TransformationPlan,
 )
 from Code.PII.phase6_render import (
     AUDIT_CHECKS,
+    CHECK_ACTIONABLE_PUBLIC_MEETING_URL,
     CHECK_COVERAGE_INCOMPLETE,
     CHECK_INCONSISTENT_SLOT_VALUE,
     CHECK_INTERNAL_PLACEHOLDER_PRESENT,
     CHECK_ORIGINAL_EMAIL_PRESENT,
     CHECK_ORIGINAL_PERSON_PRESENT,
+    CHECK_ORIGINAL_PRIVATE_RESOURCE_IDENTIFIER_PRESENT,
+    CHECK_ORIGINAL_PROJECT_IDENTIFIER_PRESENT,
     CHECK_ORIGINAL_SECRET_PRESENT,
     CHECK_ORIGINAL_SENDER_ID_PRESENT,
     CHECK_PLAN_REPLACEMENT_COLLISION,
+    CHECK_PLANNED_ENTITY_REPLACEMENT_MISSING,
     CHECK_PRESERVED_ROW_DRIFTED,
     CHECK_PRESERVED_VALUE_LOST,
+    CHECK_PUBLIC_REQUIREMENT_CHANGED,
     CHECK_PROVENANCE_INVALID,
     CHECK_REQUIRED_CHANGE_NOT_APPLIED,
     CHECK_SECRET_TOKEN_MULTIPLICITY,
@@ -165,6 +173,15 @@ def semantic_registry() -> SemanticRegistry:
                 ),
                 source_literals=("5 winners",),
                 message_ordinals=(4,),
+                literal_occurrences=(
+                    SlotLiteralOccurrence(
+                        ordinal=4,
+                        message_id=4,
+                        start=13,
+                        end=22,
+                        source_literal="5 winners",
+                    ),
+                ),
             ),
         ),
         relations=(),
@@ -201,7 +218,17 @@ def plan() -> TransformationPlan:
                 history=(
                     SlotHistoryEntry(ordinal=4, op="INTRODUCE", old_value=None, new_value="7"),
                 ),
-                literal_map={"5 winners": "7 winners"},
+                literal_replacements=(
+                    SlotLiteralReplacement(
+                        ordinal=4,
+                        message_id=4,
+                        start=13,
+                        end=22,
+                        original="5 winners",
+                        replacement="7 winners",
+                        match_mode="EXACT",
+                    ),
+                ),
             ),
         ),
         secret_replacements=(
@@ -362,6 +389,72 @@ class ViolationTests(unittest.TestCase):
         report = fixture.report(final_texts=texts)
         self.assert_fires(report, CHECK_ORIGINAL_PERSON_PRESENT)
 
+    def test_project_surface_from_another_message_is_not_a_global_alias(self):
+        fixture = AuditFixture()
+        project = PiiEntity(
+            entity_id="E0003",
+            entity_type="PROJECT_NAME",
+            policy="SYNTHESIZE",
+            canonical_value="Project Rebuild",
+            normalized_key="project rebuild",
+            bundle_id=None,
+            confidence="HIGH",
+            occurrences=(
+                PiiOccurrence(
+                    ordinal=1,
+                    message_id=1,
+                    source="Project Rebuild",
+                    start=0,
+                    end=15,
+                    entity_type="PROJECT_NAME",
+                    policy="SYNTHESIZE",
+                    normalized_value="Project Rebuild",
+                    link_hint=None,
+                    confidence="HIGH",
+                ),
+                PiiOccurrence(
+                    ordinal=4,
+                    message_id=4,
+                    source="rebuild",
+                    start=0,
+                    end=7,
+                    entity_type="PROJECT_NAME",
+                    policy="SYNTHESIZE",
+                    normalized_value="Project Rebuild",
+                    link_hint=None,
+                    confidence="MEDIUM",
+                ),
+            ),
+        )
+        registry = entity_registry()
+        registry = PiiEntityRegistry(
+            entities=(*registry.entities, project), bundles=registry.bundles
+        )
+        transformed = TransformationPlan(
+            plan_version=fixture.plan.plan_version,
+            entity_replacements=(
+                *fixture.plan.entity_replacements,
+                EntityReplacement(
+                    entity_id="E0003",
+                    entity_type="PROJECT_NAME",
+                    policy="SYNTHESIZE",
+                    original="Project Rebuild",
+                    replacement="BrightQuill Initiative",
+                ),
+            ),
+            slot_replacements=fixture.plan.slot_replacements,
+            secret_replacements=fixture.plan.secret_replacements,
+        )
+        texts = dict(fixture.final_texts)
+        texts[1] += " It may help me rebuild my life."
+        report = fixture.report(
+            final_texts=texts,
+            entity_registry=registry,
+            plan=transformed,
+        )
+        fired = {violation.check for violation in report.violations}
+        self.assertNotIn(CHECK_ORIGINAL_PROJECT_IDENTIFIER_PRESENT, fired)
+
     def test_non_reserved_email_domain_is_detected(self):
         fixture = AuditFixture()
         texts = dict(fixture.final_texts)
@@ -397,6 +490,22 @@ class ViolationTests(unittest.TestCase):
         report = fixture.report(final_texts=texts)
         self.assert_fires(report, CHECK_ORIGINAL_SECRET_PRESENT)
 
+    def test_current_detector_catches_a_source_secret_missing_from_registry(self):
+        fixture = AuditFixture()
+        value = "whsec" + r"\_" + "Ab9Cd8Ef7Gh6Jk5Lm4Np3Qr2"
+        messages = [dict(item) for item in fixture.messages]
+        messages[3]["text"] = f"The webhook secret is {value}."
+        texts = dict(fixture.final_texts)
+        texts[4] = f"The webhook secret remains {value}."
+        report = fixture.report(final_texts=texts, messages=messages)
+        matches = [
+            item
+            for item in report.violations
+            if item.check == CHECK_ORIGINAL_SECRET_PRESENT
+            and "missed by the shield" in item.detail
+        ]
+        self.assertTrue(matches)
+
     def test_dropped_credential_changes_multiplicity(self):
         fixture = AuditFixture()
         texts = dict(fixture.final_texts)
@@ -424,6 +533,35 @@ class ViolationTests(unittest.TestCase):
         texts[4] = "The sign-in flow is unchanged, and 7 winners is what we settled on."
         report = fixture.report(final_texts=texts)
         self.assert_fires(report, CHECK_PRESERVED_VALUE_LOST)
+        self.assert_fires(report, CHECK_PUBLIC_REQUIREMENT_CHANGED)
+
+    def test_missing_canonical_planned_entity_is_detected(self):
+        fixture = AuditFixture()
+        texts = dict(fixture.final_texts)
+        texts[1] = "The deploy key should go to team@northstar-demo.example."
+        report = fixture.report(final_texts=texts)
+        self.assert_fires(report, CHECK_PLANNED_ENTITY_REPLACEMENT_MISSING)
+
+    def test_private_url_resource_identifier_must_not_survive(self):
+        fixture = AuditFixture()
+        private_id = "k6j6pbuyhm4bgcdd"
+        messages = [dict(item) for item in fixture.messages]
+        messages[3]["text"] = (
+            f"Open https://dashboard.vendor.example/apps/{private_id}/webhooks."
+        )
+        texts = dict(fixture.final_texts)
+        texts[4] = (
+            f"Use https://dashboard-demo.example/apps/{private_id}/webhooks."
+        )
+        report = fixture.report(final_texts=texts, messages=messages)
+        self.assert_fires(report, CHECK_ORIGINAL_PRIVATE_RESOURCE_IDENTIFIER_PRESENT)
+
+    def test_actionable_meeting_room_on_real_host_is_detected(self):
+        fixture = AuditFixture()
+        texts = dict(fixture.final_texts)
+        texts[4] += " Join at https://meet.google.com/abc-defg-hij."
+        report = fixture.report(final_texts=texts)
+        self.assert_fires(report, CHECK_ACTIONABLE_PUBLIC_MEETING_URL)
 
     def test_unapplied_slot_value_is_detected(self):
         fixture = AuditFixture()
@@ -431,6 +569,28 @@ class ViolationTests(unittest.TestCase):
         texts[4] = "The OAuth flow is unchanged, and 5 winners is what we settled on."
         report = fixture.report(final_texts=texts)
         self.assert_fires(report, CHECK_INCONSISTENT_SLOT_VALUE)
+
+    def test_semantic_verifier_is_authoritative_over_slot_wording(self):
+        fixture = AuditFixture()
+        texts = dict(fixture.final_texts)
+        texts[4] = "The OAuth flow stays unchanged; we settled on seven winners."
+        fixture.states[4].mark_done(
+            texts[4],
+            provenance=PROVENANCE_LLM_REWRITE,
+            text_sha256="semantic-sha-4",
+            verified=True,
+        )
+        verified = frozenset(
+            (ordinal, state.text_sha256 or "")
+            for ordinal, state in fixture.states.items()
+            if state.verified
+        )
+        report = fixture.report(
+            final_texts=texts,
+            verified_text_hashes=verified,
+        )
+        fired = {violation.check for violation in report.violations}
+        self.assertNotIn(CHECK_INCONSISTENT_SLOT_VALUE, fired)
 
     def test_missing_final_text_is_detected(self):
         fixture = AuditFixture()
@@ -463,6 +623,34 @@ class ViolationTests(unittest.TestCase):
         )
         report = fixture.report(plan=colliding)
         self.assert_fires(report, CHECK_PLAN_REPLACEMENT_COLLISION)
+
+    def test_alias_forms_of_one_identity_may_share_a_replacement(self):
+        fixture = AuditFixture()
+        aliases = TransformationPlan(
+            plan_version=1,
+            entity_replacements=(
+                EntityReplacement(
+                    entity_id="E0001",
+                    entity_type="PROJECT_NAME",
+                    policy="SYNTHESIZE",
+                    original="Project Rebuild",
+                    replacement="Harbor Quill",
+                    aliases=(EntityAlias("ProjectRebuild", "HarborQuill"),),
+                ),
+                EntityReplacement(
+                    entity_id="E0002",
+                    entity_type="PROJECT_NAME",
+                    policy="SYNTHESIZE",
+                    original="ProjectRebuild",
+                    replacement="HarborQuill",
+                ),
+            ),
+            slot_replacements=fixture.plan.slot_replacements,
+            secret_replacements=fixture.plan.secret_replacements,
+        )
+        report = fixture.report(plan=aliases)
+        fired = {violation.check for violation in report.violations}
+        self.assertNotIn(CHECK_PLAN_REPLACEMENT_COLLISION, fired)
 
     def test_replacement_equal_to_original_is_detected(self):
         fixture = AuditFixture()

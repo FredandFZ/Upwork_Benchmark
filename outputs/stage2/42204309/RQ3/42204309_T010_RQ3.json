@@ -4,18 +4,19 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
-  "rq_name": "Memory-or-Clarify Decision",
+  "rq_name": "Requirement Update or Clarify",
   "target_id": "42204309_T010",
   "task_gold_id": "42204309_T010_GOLD",
   "target_message_id": 288,
   "turns": 287,
   "history_turn_count": 287,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Given only the evidence available in this condition, decide whether it is safe to act on the current client task or whether a concrete clarification is required.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "question": "Combine the pre-task requirement state with the current client task. If the task determines a unique post-task state, choose ACT and construct that state; otherwise choose CLARIFY and identify the blocking requirement field and the question that must be answered.",
   "target_task": {
     "source_message_id": 288,
     "speaker": "client",
@@ -2349,26 +2350,45 @@
         195
       ],
       "history_message_count": 3,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq3-agent-response-v1",
+    "schema_version": "rq3-agent-response-v2",
     "required_fields": [
       "decision",
-      "clarification"
+      "post_task_states",
+      "clarifications"
     ],
     "decision_values": [
       "ACT",
       "CLARIFY"
-    ]
+    ],
+    "branch_constraints": {
+      "ACT": {
+        "post_task_states": "NON_EMPTY_ARRAY",
+        "clarifications": "EMPTY_ARRAY"
+      },
+      "CLARIFY": {
+        "post_task_states": "NULL",
+        "clarifications": "NON_EMPTY_ARRAY"
+      }
+    },
+    "clarification_item_fields": [
+      "requirement_ref",
+      "requirement_summary",
+      "dimension",
+      "field",
+      "missing_information",
+      "question"
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -2410,12 +2430,751 @@
         "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW"
       }
     },
+    "final_gold_by_condition": {
+      "C1": null,
+      "C2": null,
+      "C3": null
+    },
+    "affected_requirement_ids": [
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+      "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY",
+      "REQ_NFT_DETAIL_ASSET_PRESENTATION"
+    ],
+    "affected_requirement_transitions": {
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "event_ids": [
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002"
+        ],
+        "event_types": [
+          "AMBIGUOUS"
+        ],
+        "before": {
+          "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+          "requirement_title": "No-Referral Commission Allocation",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_S001",
+          "attributes": {
+            "commission_amount": "$5",
+            "allocation_condition": "A primary mint is completed without a referral code.",
+            "recipient_selection": "Random existing NFT holder."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "PAYMENT",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIMARY_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E001"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+          "requirement_title": "No-Referral Commission Allocation",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_S002",
+          "attributes": {
+            "commission_amount": "$5",
+            "allocation_condition": "A primary mint is completed without a referral code.",
+            "recipient_selection": "Random existing NFT holder."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "PAYMENT",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIMARY_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "The no-referral commission recipient for mint #1 is unresolved because no previously minted NFT holder exists; later no-referral mints should allocate the commission to an existing holder.",
+              "source_event_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002"
+            }
+          },
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E001",
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "ambiguity"
+          ]
+        }
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "event_ids": [
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003"
+        ],
+        "event_types": [
+          "AMBIGUOUS"
+        ],
+        "before": {
+          "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+          "requirement_title": "No-Referral Ticket Allocation",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_S002",
+          "attributes": {
+            "allocation_trigger": "successful mint without a referral code",
+            "recipient_selection": "randomly selected existing NFT holder",
+            "ticket_draws": [
+              "SMALL_BLOCK"
+            ]
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIZE_TICKETS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E001",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E002"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+          "requirement_title": "No-Referral Ticket Allocation",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_S003",
+          "attributes": {
+            "allocation_trigger": "successful mint without a referral code",
+            "recipient_selection": "randomly selected existing NFT holder",
+            "ticket_draws": [
+              "SMALL_BLOCK"
+            ]
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "NO_REFERRAL",
+              "PRIZE_TICKETS"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "Ticket issuance and recipient selection for mint #1 are unresolved because no earlier NFT exists for random selection.",
+              "source_event_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003"
+            }
+          },
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E001",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E002",
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "ambiguity"
+          ]
+        }
+      },
+      "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY": {
+        "event_ids": [
+          "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E001",
+          "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E002"
+        ],
+        "event_types": [
+          "INTRODUCE",
+          "RUNTIME_FAILURE"
+        ],
+        "before": null,
+        "after": {
+          "requirement_id": "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY",
+          "requirement_title": "Dashboard NFT Ownership Accuracy",
+          "family_id": "NFT_COLLECTION_AND_DATA",
+          "state_id": "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_S002",
+          "attributes": {
+            "dashboard_nft_ownership_rule": "Display and count only successfully minted NFTs actually owned by the connected user."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND"
+            ],
+            "contexts": [
+              "DASHBOARD",
+              "NFT_OWNERSHIP"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "Two failed mint attempts were nevertheless shown as two mints on the client's dashboard.",
+            "source_event_id": "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E002"
+          },
+          "supporting_event_ids": [
+            "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E001",
+            "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E002"
+          ]
+        },
+        "delta": {
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ]
+        }
+      },
+      "REQ_NFT_DETAIL_ASSET_PRESENTATION": {
+        "event_ids": [
+          "REQ_NFT_DETAIL_ASSET_PRESENTATION_E001",
+          "REQ_NFT_DETAIL_ASSET_PRESENTATION_E002"
+        ],
+        "event_types": [
+          "INTRODUCE",
+          "RUNTIME_FAILURE"
+        ],
+        "before": null,
+        "after": {
+          "requirement_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION",
+          "requirement_title": "NFT Detail Cover Presentation",
+          "family_id": "NFT_COLLECTION_AND_DATA",
+          "state_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION_S002",
+          "attributes": {
+            "book_cover_visibility": "fully visible without being cut off",
+            "book_cover_sizing": "appropriately sized on the NFT detail view"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "DASHBOARD",
+              "NFT_DETAIL"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "FAILED",
+            "observed_behavior": "The client reports that the book cover opened from the dashboard is oversized and cut off.",
+            "source_event_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION_E002"
+          },
+          "supporting_event_ids": [
+            "REQ_NFT_DETAIL_ASSET_PRESENTATION_E001",
+            "REQ_NFT_DETAIL_ASSET_PRESENTATION_E002"
+          ]
+        },
+        "delta": {
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ]
+        }
+      }
+    },
+    "post_task_states": {
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
+        "requirement_title": "No-Referral Commission Allocation",
+        "family_id": "REFERRAL_MECHANICS",
+        "state_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_S002",
+        "attributes": {
+          "commission_amount": "$5",
+          "allocation_condition": "A primary mint is completed without a referral code.",
+          "recipient_selection": "Random existing NFT holder."
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "PAYMENT",
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "NO_REFERRAL",
+            "PRIMARY_MINT"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": {
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002": {
+            "status": "OPEN",
+            "dimension": "VALUE",
+            "description": "The no-referral commission recipient for mint #1 is unresolved because no previously minted NFT holder exists; later no-referral mints should allocate the commission to an existing holder.",
+            "source_event_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002"
+          }
+        },
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E001",
+          "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002"
+        ]
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
+        "requirement_title": "No-Referral Ticket Allocation",
+        "family_id": "PRIZE_MECHANICS",
+        "state_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_S003",
+        "attributes": {
+          "allocation_trigger": "successful mint without a referral code",
+          "recipient_selection": "randomly selected existing NFT holder",
+          "ticket_draws": [
+            "SMALL_BLOCK"
+          ]
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "NO_REFERRAL",
+            "PRIZE_TICKETS"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": {
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003": {
+            "status": "OPEN",
+            "dimension": "VALUE",
+            "description": "Ticket issuance and recipient selection for mint #1 are unresolved because no earlier NFT exists for random selection.",
+            "source_event_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003"
+          }
+        },
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E001",
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E002",
+          "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003"
+        ]
+      },
+      "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY": {
+        "requirement_id": "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY",
+        "requirement_title": "Dashboard NFT Ownership Accuracy",
+        "family_id": "NFT_COLLECTION_AND_DATA",
+        "state_id": "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_S002",
+        "attributes": {
+          "dashboard_nft_ownership_rule": "Display and count only successfully minted NFTs actually owned by the connected user."
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND"
+          ],
+          "contexts": [
+            "DASHBOARD",
+            "NFT_OWNERSHIP"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Two failed mint attempts were nevertheless shown as two mints on the client's dashboard.",
+          "source_event_id": "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E002"
+        },
+        "supporting_event_ids": [
+          "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E001",
+          "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY_E002"
+        ]
+      },
+      "REQ_NFT_DETAIL_ASSET_PRESENTATION": {
+        "requirement_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION",
+        "requirement_title": "NFT Detail Cover Presentation",
+        "family_id": "NFT_COLLECTION_AND_DATA",
+        "state_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION_S002",
+        "attributes": {
+          "book_cover_visibility": "fully visible without being cut off",
+          "book_cover_sizing": "appropriately sized on the NFT detail view"
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "contexts": [
+            "DASHBOARD",
+            "NFT_DETAIL"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The client reports that the book cover opened from the dashboard is oversized and cut off.",
+          "source_event_id": "REQ_NFT_DETAIL_ASSET_PRESENTATION_E002"
+        },
+        "supporting_event_ids": [
+          "REQ_NFT_DETAIL_ASSET_PRESENTATION_E001",
+          "REQ_NFT_DETAIL_ASSET_PRESENTATION_E002"
+        ]
+      }
+    },
+    "post_state_scoring_specs": {
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "commission_amount": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "allocation_condition": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "recipient_selection": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002": {
+              "comparator": "RECURSIVE_FIELDS",
+              "score": true,
+              "fields": {
+                "status": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "dimension": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "description": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "source_event_id": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                }
+              },
+              "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "allocation_trigger": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "recipient_selection": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "ticket_draws": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003": {
+              "comparator": "RECURSIVE_FIELDS",
+              "score": true,
+              "fields": {
+                "status": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "dimension": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "description": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "source_event_id": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                }
+              },
+              "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_DASHBOARD_NFT_OWNERSHIP_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "dashboard_nft_ownership_rule": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "status": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "observed_behavior": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "source_event_id": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        }
+      },
+      "REQ_NFT_DETAIL_ASSET_PRESENTATION": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "book_cover_visibility": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "book_cover_sizing": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "status": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "observed_behavior": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "source_event_id": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        }
+      }
+    },
     "blocking_ambiguity_candidates": [
       {
         "requirement_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION",
         "ambiguity_event_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002",
         "dimension": "VALUE",
+        "field": null,
         "description": "The no-referral commission recipient for mint #1 is unresolved because no previously minted NFT holder exists; later no-referral mints should allocate the commission to an existing holder.",
+        "missing_information": "The no-referral commission recipient for mint #1 is unresolved because no previously minted NFT holder exists; later no-referral mints should allocate the commission to an existing holder.",
+        "clarification_question": null,
         "source_event_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002",
         "blocking_status": "PENDING_MATERIALITY_REVIEW"
       },
@@ -2423,14 +3182,17 @@
         "requirement_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION",
         "ambiguity_event_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003",
         "dimension": "VALUE",
+        "field": null,
         "description": "Ticket issuance and recipient selection for mint #1 are unresolved because no earlier NFT exists for random selection.",
+        "missing_information": "Ticket issuance and recipient selection for mint #1 are unresolved because no earlier NFT exists for random selection.",
+        "clarification_question": null,
         "source_event_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003",
         "blocking_status": "PENDING_MATERIALITY_REVIEW"
       }
     ],
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
-    "relevance_review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+    "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
     "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 must be audited independently."
   }
 }

@@ -4,18 +4,19 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
-  "rq_name": "Memory-or-Clarify Decision",
+  "rq_name": "Requirement Update or Clarify",
   "target_id": "42204309_T002",
   "task_gold_id": "42204309_T002_GOLD",
   "target_message_id": 156,
   "turns": 155,
   "history_turn_count": 155,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Given only the evidence available in this condition, decide whether it is safe to act on the current client task or whether a concrete clarification is required.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "question": "Combine the pre-task requirement state with the current client task. If the task determines a unique post-task state, choose ACT and construct that state; otherwise choose CLARIFY and identify the blocking requirement field and the question that must be answered.",
   "target_task": {
     "source_message_id": 156,
     "speaker": "client",
@@ -1292,26 +1293,45 @@
         143
       ],
       "history_message_count": 2,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq3-agent-response-v1",
+    "schema_version": "rq3-agent-response-v2",
     "required_fields": [
       "decision",
-      "clarification"
+      "post_task_states",
+      "clarifications"
     ],
     "decision_values": [
       "ACT",
       "CLARIFY"
-    ]
+    ],
+    "branch_constraints": {
+      "ACT": {
+        "post_task_states": "NON_EMPTY_ARRAY",
+        "clarifications": "EMPTY_ARRAY"
+      },
+      "CLARIFY": {
+        "post_task_states": "NULL",
+        "clarifications": "NON_EMPTY_ARRAY"
+      }
+    },
+    "clarification_item_fields": [
+      "requirement_ref",
+      "requirement_summary",
+      "dimension",
+      "field",
+      "missing_information",
+      "question"
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -1353,19 +1373,902 @@
         "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW"
       }
     },
+    "final_gold_by_condition": {
+      "C1": null,
+      "C2": null,
+      "C3": null
+    },
+    "affected_requirement_ids": [
+      "REQ_ABOUT_PAGE_CONTENT",
+      "REQ_REFERRAL_COMMISSION",
+      "REQ_AAVE_PRIZE_POOL_YIELD",
+      "REQ_PRIZE_CLAIM_FLOW"
+    ],
+    "affected_requirement_transitions": {
+      "REQ_ABOUT_PAGE_CONTENT": {
+        "event_ids": [
+          "REQ_ABOUT_PAGE_CONTENT_E001"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": null,
+        "after": {
+          "requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+          "requirement_title": "About Project Rebuild Page",
+          "family_id": "SITE_CONTENT_AND_PRESENTATION",
+          "state_id": "REQ_ABOUT_PAGE_CONTENT_S001",
+          "attributes": {
+            "page_title": "About Project Rebuild",
+            "subtitle": "The first ebook launch that pays readers to spread it.",
+            "overview_copy": [
+              "Project Rebuild serves as the live proof-of-concept for FAMM (Fully Autonomous Marketing Model) — the first system that allows indie creators to sell NFT ebooks with unlimited minting and reward readers with real commissions + prize tickets for sharing them.",
+              "It is launching on Base with my own raw memoir novella, \"My Underdog Journey: To Own Goal,\".",
+              "It is also my public mission to rebuild my family's life after a seed-phrase wipeout caused us to lose millions.",
+              "If our FAMM proves itself here, Project Rebuild will become BooksOnChain — a community-owned public good platform for every creator."
+            ],
+            "technology_section_title": "Built with Cutting-Edge Technology",
+            "technology_items": [
+              {
+                "label": "Smart Contracts",
+                "copy": "Secure, audited Solidity on Base."
+              },
+              {
+                "label": "Chainlink VRF",
+                "copy": "Random prize-draw selection that is provably fair."
+              },
+              {
+                "label": "Aave Integration",
+                "copy": "Deposits allow the prize pools to generate yield."
+              },
+              {
+                "label": "Base Network",
+                "copy": "Fast transactions and low fees, supported by Ethereum security."
+              },
+              {
+                "label": "Decentralized",
+                "copy": "All logic is fully on-chain from day one, while V1 includes initial safeguards. (battle-testing will guide the evolution to full decentralization)"
+              },
+              {
+                "label": "Secure",
+                "copy": "Uses industry-leading protocols and best practices."
+              }
+            ],
+            "process_items": [
+              {
+                "label": "Mint the ebook NFT",
+                "copy": "Buy your ebook NFT for $15 USD. The mint number you receive becomes your referral code."
+              },
+              {
+                "label": "Earn Through Referrals",
+                "copy": "Share either your mint number or your link. Whenever someone mints with it, you immediately earn $5 USD. There are no limits and no expiration. If no code is provided → the $5 + tickets are awarded to a random existing ticket holder."
+              },
+              {
+                "label": "Build Up Tickets",
+                "copy": "Every referral also awards you Small & Big Block prize tickets for the current blocks. More referrals = more tickets = greater chances."
+              },
+              {
+                "label": "Enter the Prize Draws",
+                "copy": "Small Block: 5 × $500 awarded every 500 sales. Big Block: 5 × $10,000 awarded every 50,000 sales. (Sales = mint + secondary) Chainlink VRF selects the winners randomly and fairly."
+              },
+              {
+                "label": "Receive Your Rewards",
+                "copy": "Commissions are delivered automatically on-chain. Prize wins are posted on the Winners page and can be claimed with one click whenever you're ready."
+              }
+            ],
+            "key_feature_items": [
+              {
+                "label": "Automatic Rewards",
+                "copy": "Smart contracts issue all payments instantly."
+              },
+              {
+                "label": "Fair Prize Selection",
+                "copy": "Chainlink VRF provides genuine randomness."
+              },
+              {
+                "label": "Yield Generation",
+                "copy": "Aave Integration enables the prize pools to accrue yield."
+              },
+              {
+                "label": "Gamification",
+                "copy": "Badges and leaderboards keep the experience fun and competitive."
+              },
+              {
+                "label": "Transparency",
+                "copy": "Every transaction and rule is on-chain and verifiable."
+              },
+              {
+                "label": "Low Fees",
+                "copy": "Base provides speed with minimal transaction costs."
+              }
+            ],
+            "vision_copy": [
+              "Project Rebuild begins with one book, but that is only the start.",
+              "We imagine a world where ebooks succeed solely on merit, free from gatekeepers and Amazon algorithms that drown out indie voices.",
+              "In that world, creators (unknown or established) rise because their work connects with people, not because they game a platform, have the connections, or purchase enough ads.",
+              "Fans are paid for the word-of-mouth marketing they have always provided for free, while any hustler can jump in and earn after spotting a gem worth spreading.",
+              "Our goal is a self-sustaining model that benefits everyone.",
+              "Artists receive their fair share, fans & affiliates develop real income, and communities build direct bonds — turning one underdog's recovery into a decentralized revolution for all creators.",
+              "All without hype, driven only by aligned incentives."
+            ]
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "ABOUT_PAGE"
+            ]
+          },
+          "lifecycle_status": null,
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_ABOUT_PAGE_CONTENT_E001"
+          ]
+        },
+        "delta": {
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ]
+        }
+      },
+      "REQ_REFERRAL_COMMISSION": {
+        "event_ids": [
+          "REQ_REFERRAL_COMMISSION_E003"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_REFERRAL_COMMISSION",
+          "requirement_title": "Code-Used Referral Commission",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_REFERRAL_COMMISSION_S002",
+          "attributes": {
+            "commission_amount": "$5",
+            "payout_mode": "automatic",
+            "commission_trigger": "a successful mint using the NFT holder's referral code",
+            "commission_recipient": "the holder of the referral code used for the mint",
+            "payout_destination": "recipient wallet",
+            "payout_timing": "immediate",
+            "earning_limit": "unlimited"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "PAYMENT",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "REFERRAL_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_REFERRAL_COMMISSION_E001",
+            "REQ_REFERRAL_COMMISSION_E002"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_REFERRAL_COMMISSION",
+          "requirement_title": "Code-Used Referral Commission",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_REFERRAL_COMMISSION_S003",
+          "attributes": {
+            "commission_amount": "$5",
+            "payout_mode": "automatic",
+            "commission_trigger": "a successful mint using the NFT holder's referral code",
+            "commission_recipient": "the holder of the referral code used for the mint",
+            "payout_destination": "recipient wallet",
+            "payout_timing": "immediate",
+            "earning_limit": "unlimited",
+            "earning_expiration": "none"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "PAYMENT",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "REFERRAL_MINT"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_REFERRAL_COMMISSION_E001",
+            "REQ_REFERRAL_COMMISSION_E002",
+            "REQ_REFERRAL_COMMISSION_E003"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ]
+        }
+      },
+      "REQ_AAVE_PRIZE_POOL_YIELD": {
+        "event_ids": [
+          "REQ_AAVE_PRIZE_POOL_YIELD_E001"
+        ],
+        "event_types": [
+          "INTRODUCE"
+        ],
+        "before": null,
+        "after": {
+          "requirement_id": "REQ_AAVE_PRIZE_POOL_YIELD",
+          "requirement_title": "Aave Prize Pool Yield Integration",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_AAVE_PRIZE_POOL_YIELD_S001",
+          "attributes": {
+            "yield_provider": "Aave",
+            "yield_behavior": "Prize-pool deposits accrue yield"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIZE_POOLS",
+              "YIELD_GENERATION"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_AAVE_PRIZE_POOL_YIELD_E001"
+          ]
+        },
+        "delta": {
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ]
+        }
+      },
+      "REQ_PRIZE_CLAIM_FLOW": {
+        "event_ids": [
+          "REQ_PRIZE_CLAIM_FLOW_E003"
+        ],
+        "event_types": [
+          "AMBIGUOUS"
+        ],
+        "before": {
+          "requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+          "requirement_title": "Prize Claim and Delivery Flow",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_PRIZE_CLAIM_FLOW_S002",
+          "attributes": {
+            "prize_collection_mode": "manual_claim",
+            "claim_action": "one_click_claim",
+            "claim_location": "winners_page"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIZE_CLAIM",
+              "WINNERS_PAGE"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PRIZE_CLAIM_FLOW_E001",
+            "REQ_PRIZE_CLAIM_FLOW_E002"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+          "requirement_title": "Prize Claim and Delivery Flow",
+          "family_id": "PRIZE_MECHANICS",
+          "state_id": "REQ_PRIZE_CLAIM_FLOW_S003",
+          "attributes": {
+            "prize_collection_mode": "manual_claim",
+            "claim_action": "one_click_claim",
+            "claim_location": "winners_page"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "SMART_CONTRACT"
+            ],
+            "contexts": [
+              "PRIZE_CLAIM",
+              "WINNERS_PAGE"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": {
+            "REQ_PRIZE_CLAIM_FLOW_E003": {
+              "status": "OPEN",
+              "dimension": "VALUE",
+              "description": "The client leaves unresolved whether prize delivery should be automatic or require a claim button.",
+              "source_event_id": "REQ_PRIZE_CLAIM_FLOW_E003"
+            }
+          },
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_PRIZE_CLAIM_FLOW_E001",
+            "REQ_PRIZE_CLAIM_FLOW_E002",
+            "REQ_PRIZE_CLAIM_FLOW_E003"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "ambiguity"
+          ]
+        }
+      }
+    },
+    "post_task_states": {
+      "REQ_ABOUT_PAGE_CONTENT": {
+        "requirement_id": "REQ_ABOUT_PAGE_CONTENT",
+        "requirement_title": "About Project Rebuild Page",
+        "family_id": "SITE_CONTENT_AND_PRESENTATION",
+        "state_id": "REQ_ABOUT_PAGE_CONTENT_S001",
+        "attributes": {
+          "page_title": "About Project Rebuild",
+          "subtitle": "The first ebook launch that pays readers to spread it.",
+          "overview_copy": [
+            "Project Rebuild serves as the live proof-of-concept for FAMM (Fully Autonomous Marketing Model) — the first system that allows indie creators to sell NFT ebooks with unlimited minting and reward readers with real commissions + prize tickets for sharing them.",
+            "It is launching on Base with my own raw memoir novella, \"My Underdog Journey: To Own Goal,\".",
+            "It is also my public mission to rebuild my family's life after a seed-phrase wipeout caused us to lose millions.",
+            "If our FAMM proves itself here, Project Rebuild will become BooksOnChain — a community-owned public good platform for every creator."
+          ],
+          "technology_section_title": "Built with Cutting-Edge Technology",
+          "technology_items": [
+            {
+              "label": "Smart Contracts",
+              "copy": "Secure, audited Solidity on Base."
+            },
+            {
+              "label": "Chainlink VRF",
+              "copy": "Random prize-draw selection that is provably fair."
+            },
+            {
+              "label": "Aave Integration",
+              "copy": "Deposits allow the prize pools to generate yield."
+            },
+            {
+              "label": "Base Network",
+              "copy": "Fast transactions and low fees, supported by Ethereum security."
+            },
+            {
+              "label": "Decentralized",
+              "copy": "All logic is fully on-chain from day one, while V1 includes initial safeguards. (battle-testing will guide the evolution to full decentralization)"
+            },
+            {
+              "label": "Secure",
+              "copy": "Uses industry-leading protocols and best practices."
+            }
+          ],
+          "process_items": [
+            {
+              "label": "Mint the ebook NFT",
+              "copy": "Buy your ebook NFT for $15 USD. The mint number you receive becomes your referral code."
+            },
+            {
+              "label": "Earn Through Referrals",
+              "copy": "Share either your mint number or your link. Whenever someone mints with it, you immediately earn $5 USD. There are no limits and no expiration. If no code is provided → the $5 + tickets are awarded to a random existing ticket holder."
+            },
+            {
+              "label": "Build Up Tickets",
+              "copy": "Every referral also awards you Small & Big Block prize tickets for the current blocks. More referrals = more tickets = greater chances."
+            },
+            {
+              "label": "Enter the Prize Draws",
+              "copy": "Small Block: 5 × $500 awarded every 500 sales. Big Block: 5 × $10,000 awarded every 50,000 sales. (Sales = mint + secondary) Chainlink VRF selects the winners randomly and fairly."
+            },
+            {
+              "label": "Receive Your Rewards",
+              "copy": "Commissions are delivered automatically on-chain. Prize wins are posted on the Winners page and can be claimed with one click whenever you're ready."
+            }
+          ],
+          "key_feature_items": [
+            {
+              "label": "Automatic Rewards",
+              "copy": "Smart contracts issue all payments instantly."
+            },
+            {
+              "label": "Fair Prize Selection",
+              "copy": "Chainlink VRF provides genuine randomness."
+            },
+            {
+              "label": "Yield Generation",
+              "copy": "Aave Integration enables the prize pools to accrue yield."
+            },
+            {
+              "label": "Gamification",
+              "copy": "Badges and leaderboards keep the experience fun and competitive."
+            },
+            {
+              "label": "Transparency",
+              "copy": "Every transaction and rule is on-chain and verifiable."
+            },
+            {
+              "label": "Low Fees",
+              "copy": "Base provides speed with minimal transaction costs."
+            }
+          ],
+          "vision_copy": [
+            "Project Rebuild begins with one book, but that is only the start.",
+            "We imagine a world where ebooks succeed solely on merit, free from gatekeepers and Amazon algorithms that drown out indie voices.",
+            "In that world, creators (unknown or established) rise because their work connects with people, not because they game a platform, have the connections, or purchase enough ads.",
+            "Fans are paid for the word-of-mouth marketing they have always provided for free, while any hustler can jump in and earn after spotting a gem worth spreading.",
+            "Our goal is a self-sustaining model that benefits everyone.",
+            "Artists receive their fair share, fans & affiliates develop real income, and communities build direct bonds — turning one underdog's recovery into a decentralized revolution for all creators.",
+            "All without hype, driven only by aligned incentives."
+          ]
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "contexts": [
+            "ABOUT_PAGE"
+          ]
+        },
+        "lifecycle_status": null,
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_ABOUT_PAGE_CONTENT_E001"
+        ]
+      },
+      "REQ_REFERRAL_COMMISSION": {
+        "requirement_id": "REQ_REFERRAL_COMMISSION",
+        "requirement_title": "Code-Used Referral Commission",
+        "family_id": "REFERRAL_MECHANICS",
+        "state_id": "REQ_REFERRAL_COMMISSION_S003",
+        "attributes": {
+          "commission_amount": "$5",
+          "payout_mode": "automatic",
+          "commission_trigger": "a successful mint using the NFT holder's referral code",
+          "commission_recipient": "the holder of the referral code used for the mint",
+          "payout_destination": "recipient wallet",
+          "payout_timing": "immediate",
+          "earning_limit": "unlimited",
+          "earning_expiration": "none"
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "PAYMENT",
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "REFERRAL_MINT"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_REFERRAL_COMMISSION_E001",
+          "REQ_REFERRAL_COMMISSION_E002",
+          "REQ_REFERRAL_COMMISSION_E003"
+        ]
+      },
+      "REQ_AAVE_PRIZE_POOL_YIELD": {
+        "requirement_id": "REQ_AAVE_PRIZE_POOL_YIELD",
+        "requirement_title": "Aave Prize Pool Yield Integration",
+        "family_id": "PRIZE_MECHANICS",
+        "state_id": "REQ_AAVE_PRIZE_POOL_YIELD_S001",
+        "attributes": {
+          "yield_provider": "Aave",
+          "yield_behavior": "Prize-pool deposits accrue yield"
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "PRIZE_POOLS",
+            "YIELD_GENERATION"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_AAVE_PRIZE_POOL_YIELD_E001"
+        ]
+      },
+      "REQ_PRIZE_CLAIM_FLOW": {
+        "requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+        "requirement_title": "Prize Claim and Delivery Flow",
+        "family_id": "PRIZE_MECHANICS",
+        "state_id": "REQ_PRIZE_CLAIM_FLOW_S003",
+        "attributes": {
+          "prize_collection_mode": "manual_claim",
+          "claim_action": "one_click_claim",
+          "claim_location": "winners_page"
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "PRIZE_CLAIM",
+            "WINNERS_PAGE"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": {
+          "REQ_PRIZE_CLAIM_FLOW_E003": {
+            "status": "OPEN",
+            "dimension": "VALUE",
+            "description": "The client leaves unresolved whether prize delivery should be automatic or require a claim button.",
+            "source_event_id": "REQ_PRIZE_CLAIM_FLOW_E003"
+          }
+        },
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_PRIZE_CLAIM_FLOW_E001",
+          "REQ_PRIZE_CLAIM_FLOW_E002",
+          "REQ_PRIZE_CLAIM_FLOW_E003"
+        ]
+      }
+    },
+    "post_state_scoring_specs": {
+      "REQ_ABOUT_PAGE_CONTENT": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "page_title": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "subtitle": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "overview_copy": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "technology_section_title": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "technology_items": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "process_items": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "key_feature_items": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "vision_copy": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_REFERRAL_COMMISSION": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "commission_amount": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "payout_mode": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "commission_trigger": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "commission_recipient": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "payout_destination": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "payout_timing": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "earning_limit": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "earning_expiration": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_AAVE_PRIZE_POOL_YIELD": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "yield_provider": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "yield_behavior": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_PRIZE_CLAIM_FLOW": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "prize_collection_mode": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "claim_action": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "claim_location": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "REQ_PRIZE_CLAIM_FLOW_E003": {
+              "comparator": "RECURSIVE_FIELDS",
+              "score": true,
+              "fields": {
+                "status": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "dimension": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "description": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                },
+                "source_event_id": {
+                  "comparator": "ATOMIC_FACT_F1",
+                  "score": true,
+                  "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+                }
+              },
+              "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      }
+    },
     "blocking_ambiguity_candidates": [
       {
         "requirement_id": "REQ_PRIZE_CLAIM_FLOW",
         "ambiguity_event_id": "REQ_PRIZE_CLAIM_FLOW_E003",
         "dimension": "VALUE",
+        "field": null,
         "description": "The client leaves unresolved whether prize delivery should be automatic or require a claim button.",
+        "missing_information": "The client leaves unresolved whether prize delivery should be automatic or require a claim button.",
+        "clarification_question": null,
         "source_event_id": "REQ_PRIZE_CLAIM_FLOW_E003",
         "blocking_status": "PENDING_MATERIALITY_REVIEW"
       }
     ],
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
-    "relevance_review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+    "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
     "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 must be audited independently."
   }
 }

@@ -45,20 +45,21 @@ RQ_DEFINITIONS: dict[str, dict[str, Any]] = {
         "supported_conditions": ["C2"],
     },
     "RQ2": {
-        "name": "Current Requirement State Reconstruction",
+        "name": "Pre-task State Reconstruction",
         "question": (
-            "Reconstruct the currently valid state of every historical "
-            "requirement needed to understand the current client task, resolving "
-            "superseded values and preserving still-active constraints."
+            "For the historical requirements relevant to the current client "
+            "task, reconstruct their last valid state immediately before the "
+            "current task. Do not apply the current task to that state."
         ),
-        "supported_conditions": ["C1", "C2", "C3"],
+        "supported_conditions": ["C2", "C3"],
     },
     "RQ3": {
-        "name": "Memory-or-Clarify Decision",
+        "name": "Requirement Update or Clarify",
         "question": (
-            "Given only the evidence available in this condition, decide whether "
-            "it is safe to act on the current client task or whether a concrete "
-            "clarification is required."
+            "Combine the pre-task requirement state with the current client task. "
+            "If the task determines a unique post-task state, choose ACT and "
+            "construct that state; otherwise choose CLARIFY and identify the "
+            "blocking requirement field and the question that must be answered."
         ),
         "supported_conditions": ["C1", "C2", "C3"],
     },
@@ -416,7 +417,7 @@ def _derive_relevance(
             requirement_id, target_position, messages
         )
         trajectory_event_ids = [edge["event_id"] for edge in trajectory]
-        core_message_ids = _ordered_message_ids(
+        trajectory_message_ids = _ordered_message_ids(
             [edge["source_message_id"] for edge in trajectory],
             messages,
             target_position,
@@ -429,15 +430,37 @@ def _derive_relevance(
             messages,
             target_position,
         )
+        current_support_keys = {
+            _id_key(message_id) for message_id in current_support_message_ids
+        }
+        neutral_context_message_ids = [
+            message_id
+            for message_id in trajectory_message_ids
+            if _id_key(message_id) not in current_support_keys
+        ]
+        required_evidence_groups = [
+            {
+                "group_id": f"{requirement_id}_EG{index:03d}",
+                "acceptable_message_ids": [deepcopy(message_id)],
+            }
+            for index, message_id in enumerate(
+                current_support_message_ids, start=1
+            )
+        ]
         evidence[requirement_id] = {
             "current_support_event_ids": current_support_event_ids,
             "current_support_message_ids": current_support_message_ids,
             "trajectory_event_ids": trajectory_event_ids,
-            "core_message_ids": core_message_ids,
-            "context_message_ids": [],
-            "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW",
+            "trajectory_message_ids": trajectory_message_ids,
+            "core_message_ids": deepcopy(current_support_message_ids),
+            "required_evidence_groups": required_evidence_groups,
+            "context_message_ids": neutral_context_message_ids,
+            "neutral_context_message_ids": deepcopy(
+                neutral_context_message_ids
+            ),
+            "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT",
         }
-        oracle_message_ids.extend(core_message_ids)
+        oracle_message_ids.extend(trajectory_message_ids)
 
     return {
         "relevant_requirement_ids": deepcopy(direct_historical),
@@ -451,11 +474,11 @@ def _derive_relevance(
             oracle_message_ids, messages, target_position
         ),
         "derivation_scope": "DIRECT_AFFECTED_ONLY",
-        "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+        "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
         "review_note": (
-            "Direct historical Requirements and Event trajectories are "
-            "deterministic. Applicable preserved constraints and contextual "
-            "messages require the causal-necessity review defined by the design."
+            "RQ1 relevance is operationally defined as directly affected "
+            "Requirements that already exist in the pre-task snapshot. Preserved "
+            "or inherited Requirements are outside RQ1 Gold."
         ),
     }
 
@@ -479,7 +502,7 @@ def _condition_inputs(
         else:
             mode = "ORACLE_RELEVANT_HISTORY"
             ids = deepcopy(oracle_history_ids)
-            review_status = "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+            review_status = "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
         inputs[condition] = {
             "available": available,
             "history_mode": mode,
@@ -493,40 +516,64 @@ def _condition_inputs(
 def _response_contract(rq_id: str) -> dict[str, Any]:
     if rq_id == "RQ1":
         return {
-            "schema_version": "rq1-agent-response-v1",
-            "required_fields": [
-                "selected_history_message_ids",
-                "requirements",
-            ],
-            "requirement_item_fields": [
-                "requirement_ref",
-                "requirement_summary",
-                "evidence_message_ids",
-            ],
-        }
-    if rq_id == "RQ2":
-        return {
-            "schema_version": "rq2-agent-response-v1",
+            "schema_version": "rq1-agent-response-v2",
             "required_fields": ["requirements"],
             "requirement_item_fields": [
                 "requirement_ref",
                 "requirement_summary",
                 "evidence_message_ids",
-                "current_state",
             ],
-            "current_state_fields": [
+            "requirement_refs_must_be_unique": True,
+            "evidence_message_ids_must_reference_c2_history": True,
+            "internal_ids_forbidden": True,
+        }
+    if rq_id == "RQ2":
+        return {
+            "schema_version": "rq2-agent-response-v2",
+            "required_fields": ["requirements"],
+            "requirement_item_fields": [
+                "requirement_ref",
+                "requirement_summary",
+                "evidence_message_ids",
+                "pre_task_state",
+            ],
+            "pre_task_state_fields": [
                 "attributes",
                 "scope",
                 "lifecycle_status",
                 "ambiguity",
                 "execution",
             ],
+            "internal_ids_forbidden": True,
         }
     if rq_id == "RQ3":
         return {
-            "schema_version": "rq3-agent-response-v1",
-            "required_fields": ["decision", "clarification"],
+            "schema_version": "rq3-agent-response-v2",
+            "required_fields": [
+                "decision",
+                "post_task_states",
+                "clarifications",
+            ],
             "decision_values": ["ACT", "CLARIFY"],
+            "branch_constraints": {
+                "ACT": {
+                    "post_task_states": "NON_EMPTY_ARRAY",
+                    "clarifications": "EMPTY_ARRAY",
+                },
+                "CLARIFY": {
+                    "post_task_states": "NULL",
+                    "clarifications": "NON_EMPTY_ARRAY",
+                },
+            },
+            "clarification_item_fields": [
+                "requirement_ref",
+                "requirement_summary",
+                "dimension",
+                "field",
+                "missing_information",
+                "question",
+            ],
+            "internal_ids_forbidden": True,
         }
     return {
         "schema_version": "rq4-agent-response-v1",
@@ -600,7 +647,15 @@ def _open_ambiguity_candidates(
                     "requirement_id": requirement_id,
                     "ambiguity_event_id": ambiguity_event_id,
                     "dimension": deepcopy(ambiguity.get("dimension")),
+                    "field": deepcopy(ambiguity.get("field")),
                     "description": deepcopy(ambiguity.get("description")),
+                    "missing_information": deepcopy(
+                        ambiguity.get("missing_information")
+                        or ambiguity.get("description")
+                    ),
+                    "clarification_question": deepcopy(
+                        ambiguity.get("clarification_question")
+                    ),
                     "source_event_id": deepcopy(ambiguity.get("source_event_id")),
                     "blocking_status": "PENDING_MATERIALITY_REVIEW",
                 }
@@ -836,6 +891,11 @@ class _CodeEnvironmentIndex:
             "target_index_sha256": _sha256_file(target_index_path),
         }
 
+    def has_target(self, target_id: str) -> bool:
+        """Return whether this project has a reconstructed environment for target."""
+
+        return target_id in self.by_target
+
     def describe(
         self,
         target_id: str,
@@ -939,6 +999,7 @@ def _common_instance(
     history: list[dict[str, Any]],
     messages: _MessageIndex,
     relevance: dict[str, Any],
+    applicable_rqs: list[str],
     sources: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     turns = len(history)
@@ -956,10 +1017,7 @@ def _common_instance(
         "turns": turns,
         "history_turn_count": turns,
         "difficulty": difficulty_from_turns(turns),
-        "selection_basis": {
-            "source": "task_gold.primary_rq_targets",
-            "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW",
-        },
+        "applicable_rqs": deepcopy(applicable_rqs),
         "question": RQ_DEFINITIONS[rq_id]["question"],
         "target_task": deepcopy(gold["target_task"]),
         "history_pool": {
@@ -979,7 +1037,6 @@ def _common_instance(
             "runner_must_hide": [
                 "construction_gold",
                 "source_artifacts",
-                "selection_basis",
             ],
             "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE",
         },
@@ -987,10 +1044,37 @@ def _common_instance(
     }
 
 
-def _build_rq1_gold(relevance: dict[str, Any]) -> dict[str, Any]:
+def _build_rq1_gold(
+    relevance: dict[str, Any], pre_state: Mapping[str, dict[str, Any]]
+) -> dict[str, Any]:
+    atoms: dict[str, dict[str, Any]] = {}
+    for requirement_id in relevance["relevant_requirement_ids"]:
+        state = pre_state[requirement_id]
+        evidence = relevance["evidence"][requirement_id]
+        required_groups = deepcopy(evidence["required_evidence_groups"])
+        if not required_groups:
+            raise RQInstanceError(
+                f"RQ1 Gold Requirement {requirement_id!r} has no current-support "
+                "evidence group"
+            )
+        atoms[requirement_id] = {
+            "canonical_summary": deepcopy(state["requirement_title"]),
+            "requirement_title": deepcopy(state["requirement_title"]),
+            "family_id": deepcopy(state.get("family_id")),
+            "required_evidence_groups": required_groups,
+            "neutral_context_message_ids": deepcopy(
+                evidence["neutral_context_message_ids"]
+            ),
+            "trajectory_message_ids": deepcopy(
+                evidence["trajectory_message_ids"]
+            ),
+        }
     return {
-        "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+        "status": "DETERMINISTIC_RQ1_GOLD",
+        "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+        "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
         "relevant_requirement_ids": deepcopy(relevance["relevant_requirement_ids"]),
+        "gold_requirement_atoms": atoms,
         "directly_affected_historical_requirement_ids": deepcopy(
             relevance["directly_affected_historical_requirement_ids"]
         ),
@@ -1002,34 +1086,148 @@ def _build_rq1_gold(relevance: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _typed_scoring_spec(value: Any) -> dict[str, Any]:
+    """Create a deterministic comparator candidate from a Gold field's type."""
+
+    if value is None:
+        return {
+            "comparator": "NULL_EXACT",
+            "score": True,
+            "review_status": "DETERMINISTIC",
+        }
+    if isinstance(value, bool):
+        return {
+            "comparator": "BOOLEAN_EXACT",
+            "score": True,
+            "review_status": "DETERMINISTIC",
+        }
+    if isinstance(value, (int, float)):
+        return {
+            "comparator": "NUMBER_EXACT",
+            "score": True,
+            "review_status": "DETERMINISTIC",
+        }
+    if isinstance(value, str):
+        return {
+            "comparator": "ATOMIC_FACT_F1",
+            "score": True,
+            "review_status": "PENDING_FACT_NORMALIZATION_REVIEW",
+        }
+    if isinstance(value, list):
+        return {
+            "comparator": "SET_F1",
+            "score": True,
+            "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW",
+        }
+    if isinstance(value, dict):
+        return {
+            "comparator": "RECURSIVE_FIELDS",
+            "score": True,
+            "fields": {
+                str(key): _typed_scoring_spec(child)
+                for key, child in value.items()
+            },
+            "review_status": "PENDING_FIELD_COMPARATOR_REVIEW",
+        }
+    return {
+        "comparator": "NORMALIZED_EXACT",
+        "score": True,
+        "review_status": "PENDING_COMPARATOR_REVIEW",
+    }
+
+
+def _state_scoring_specs(
+    states: Mapping[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    return {
+        requirement_id: {
+            field: _typed_scoring_spec(state.get(field))
+            for field in (
+                "attributes",
+                "scope",
+                "lifecycle_status",
+                "ambiguity",
+                "execution",
+            )
+        }
+        for requirement_id, state in states.items()
+    }
+
+
+def _affected_requirement_transitions(
+    gold: dict[str, Any],
+    event_refs: dict[str, list[dict[str, Any]]],
+    pre_state: dict[str, dict[str, Any]],
+    post_state: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    transitions: dict[str, dict[str, Any]] = {}
+    for requirement_id in [str(value) for value in gold["affected_requirement_ids"]]:
+        events = event_refs.get(requirement_id, [])
+        if not events:
+            raise RQInstanceError(
+                f"affected Requirement {requirement_id!r} has no target Event"
+            )
+        before = pre_state.get(requirement_id)
+        after = post_state.get(requirement_id)
+        transitions[requirement_id] = {
+            "event_ids": [deepcopy(event.get("event_id")) for event in events],
+            "event_types": [deepcopy(event.get("event_type")) for event in events],
+            "before": deepcopy(before),
+            "after": deepcopy(after),
+            "delta": _state_delta(before, after),
+        }
+    return transitions
+
+
 def _build_rq2_gold(
     relevance: dict[str, Any], pre_state: dict[str, dict[str, Any]]
 ) -> dict[str, Any]:
     requirement_ids = relevance["relevant_requirement_ids"]
+    states = {
+        requirement_id: deepcopy(pre_state[requirement_id])
+        for requirement_id in requirement_ids
+    }
     return {
-        "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+        "status": "PROVISIONAL_REQUIRES_COMPARATOR_REVIEW",
         "gold_requirement_ids": deepcopy(requirement_ids),
         "new_requirement_ids": deepcopy(relevance["new_requirement_ids"]),
-        "states": {
-            requirement_id: deepcopy(pre_state[requirement_id])
-            for requirement_id in requirement_ids
-        },
+        "states": states,
         "state_dimensions": [
-            "selection",
             "attributes",
-            "lifecycle",
             "scope",
+            "lifecycle_status",
             "ambiguity",
             "execution",
         ],
+        "scoring_scope": {
+            "selection_scored_here": False,
+            "matched_requirements_only": True,
+            "report_reconstruction_coverage_separately": True,
+            "no_matched_requirement_result": "N/A",
+        },
+        "field_scoring_specs": _state_scoring_specs(states),
         "review_status": relevance["review_status"],
     }
 
 
 def _build_rq3_gold(
-    relevance: dict[str, Any], ambiguity_candidates: list[dict[str, Any]]
+    *,
+    gold: dict[str, Any],
+    event_refs: dict[str, list[dict[str, Any]]],
+    pre_state: dict[str, dict[str, Any]],
+    post_state: dict[str, dict[str, Any]],
+    relevance: dict[str, Any],
+    ambiguity_candidates: list[dict[str, Any]],
 ) -> dict[str, Any]:
     project_candidate = "CLARIFY" if ambiguity_candidates else "ACT"
+    transitions = _affected_requirement_transitions(
+        gold, event_refs, pre_state, post_state
+    )
+    affected_post_states = {
+        requirement_id: deepcopy(transition["after"])
+        for requirement_id, transition in transitions.items()
+        if transition["after"] is not None
+    }
     return {
         "status": "PENDING_HUMAN_DECISION_REVIEW",
         "project_decision_candidate": {
@@ -1055,6 +1253,13 @@ def _build_rq3_gold(
                 "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW",
             },
         },
+        "final_gold_by_condition": {condition: None for condition in CONDITIONS},
+        "affected_requirement_ids": [
+            str(value) for value in gold["affected_requirement_ids"]
+        ],
+        "affected_requirement_transitions": transitions,
+        "post_task_states": affected_post_states,
+        "post_state_scoring_specs": _state_scoring_specs(affected_post_states),
         "blocking_ambiguity_candidates": deepcopy(ambiguity_candidates),
         "safe_subactions": [],
         "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
@@ -1078,23 +1283,16 @@ def _build_rq4_gold(
 ) -> dict[str, Any]:
     affected = [str(value) for value in gold["affected_requirement_ids"]]
     actions: dict[str, dict[str, Any]] = {}
-    transitions: dict[str, dict[str, Any]] = {}
+    transitions = _affected_requirement_transitions(
+        gold, event_refs, pre_state, post_state
+    )
     for requirement_id in affected:
         before = pre_state.get(requirement_id)
         after = post_state.get(requirement_id)
         events = event_refs.get(requirement_id, [])
-        if not events:
-            raise RQInstanceError(
-                f"affected Requirement {requirement_id!r} has no target Event"
-            )
         actions[requirement_id] = _requirement_action_candidate(
             requirement_id, events, before, after
         )
-        transitions[requirement_id] = {
-            "before": deepcopy(before),
-            "after": deepcopy(after),
-            "delta": _state_delta(before, after),
-        }
 
     project_candidate = "CLARIFY" if ambiguity_candidates else "APPLY_CHANGES"
     return {
@@ -1129,6 +1327,25 @@ def _build_rq4_gold(
     }
 
 
+def _derive_applicable_rqs(
+    *,
+    relevance: dict[str, Any],
+    target_event_refs: dict[str, list[dict[str, Any]]],
+    decision_candidate: str,
+    code_environment_available: bool,
+) -> list[str]:
+    """Apply the benchmark's deterministic target/RQ materialization rules."""
+
+    applicable: list[str] = []
+    if relevance["relevant_requirement_ids"]:
+        applicable.extend(["RQ1", "RQ2"])
+    if target_event_refs:
+        applicable.append("RQ3")
+    if decision_candidate == "ACT" and code_environment_available:
+        applicable.append("RQ4")
+    return applicable
+
+
 def build_rq_instances(
     gold_states: dict[str, Any],
     state_graph: dict[str, Any],
@@ -1138,11 +1355,10 @@ def build_rq_instances(
     source_paths: Mapping[str, str | Path] | None = None,
     workspace_root: str | Path | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
-    """Build all provisionally selected RQ instances for one project.
+    """Build RQ instances selected by deterministic RQ-specific rules.
 
-    A target is materialized under an RQ when that RQ occurs in the finalized
-    Task Gold ``primary_rq_targets``.  The tag is treated as a construction
-    inclusion signal, not as final RQ-specific eligibility.
+    Legacy ``primary_rq_targets`` values in Task Gold are intentionally ignored.
+    Each emitted instance records the complete derived ``applicable_rqs`` list.
     """
 
     gold_states = _require_object(gold_states, "gold_states")
@@ -1176,19 +1392,6 @@ def build_rq_instances(
             raise RQInstanceError(f"duplicate target_id {target_id!r}")
         seen_targets.add(target_id)
 
-        rq_targets = _require_array(
-            gold.get("primary_rq_targets"), f"{target_id}.primary_rq_targets"
-        )
-        if not rq_targets:
-            raise RQInstanceError(f"{target_id}.primary_rq_targets cannot be empty")
-        if len({_id_key(value) for value in rq_targets}) != len(rq_targets):
-            raise RQInstanceError(f"{target_id}.primary_rq_targets has duplicates")
-        unknown = [value for value in rq_targets if value not in RQ_IDS]
-        if unknown:
-            raise RQInstanceError(
-                f"{target_id}.primary_rq_targets contains unsupported values: {unknown}"
-            )
-
         pre_state = graph.expand_snapshot(
             gold.get("pre_task_gold_state"), f"{target_id}.pre_task_gold_state"
         )
@@ -1213,9 +1416,16 @@ def build_rq_instances(
         ambiguity_candidates = _open_ambiguity_candidates(
             gold["affected_requirement_ids"], post_state
         )
+        decision_candidate = "CLARIFY" if ambiguity_candidates else "ACT"
+        applicable_rqs = _derive_applicable_rqs(
+            relevance=relevance,
+            target_event_refs=target_event_refs,
+            decision_candidate=decision_candidate,
+            code_environment_available=code_env.has_target(target_id),
+        )
 
         for rq_id in RQ_IDS:
-            if rq_id not in rq_targets:
+            if rq_id not in applicable_rqs:
                 continue
             instance = _common_instance(
                 rq_id=rq_id,
@@ -1227,17 +1437,25 @@ def build_rq_instances(
                 history=history,
                 messages=messages,
                 relevance=relevance,
+                applicable_rqs=applicable_rqs,
                 sources=sources,
             )
             if rq_id == "RQ1":
-                instance["construction_gold"] = _build_rq1_gold(relevance)
+                instance["construction_gold"] = _build_rq1_gold(
+                    relevance, pre_state
+                )
             elif rq_id == "RQ2":
                 instance["construction_gold"] = _build_rq2_gold(
                     relevance, pre_state
                 )
             elif rq_id == "RQ3":
                 instance["construction_gold"] = _build_rq3_gold(
-                    relevance, ambiguity_candidates
+                    gold=gold,
+                    event_refs=target_event_refs,
+                    pre_state=pre_state,
+                    post_state=post_state,
+                    relevance=relevance,
+                    ambiguity_candidates=ambiguity_candidates,
                 )
             else:
                 expected_event_types = [
@@ -1281,6 +1499,16 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
     rq_id = instance.get("rq_id")
     if rq_id not in RQ_IDS:
         errors.append("invalid rq_id")
+    applicable_rqs = instance.get("applicable_rqs")
+    if not isinstance(applicable_rqs, list):
+        errors.append("applicable_rqs must be an array")
+    else:
+        if len(applicable_rqs) != len(set(applicable_rqs)):
+            errors.append("applicable_rqs must not contain duplicates")
+        if any(value not in RQ_IDS for value in applicable_rqs):
+            errors.append("applicable_rqs contains an invalid rq_id")
+        if rq_id in RQ_IDS and rq_id not in applicable_rqs:
+            errors.append("applicable_rqs must contain this instance's rq_id")
     turns = instance.get("turns")
     if isinstance(turns, bool) or not isinstance(turns, int) or turns < 0:
         errors.append("turns must be a non-negative integer")
@@ -1338,7 +1566,13 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
         or condition_inputs["C3"].get("available") is not False
     ):
         errors.append("RQ1 must be available only in C2")
-    if rq_id in ("RQ2", "RQ3", "RQ4") and condition_inputs:
+    if rq_id == "RQ2" and condition_inputs and (
+        condition_inputs["C1"].get("available") is not False
+        or condition_inputs["C2"].get("available") is not True
+        or condition_inputs["C3"].get("available") is not True
+    ):
+        errors.append("RQ2 must be available only in C2 and C3")
+    if rq_id in ("RQ3", "RQ4") and condition_inputs:
         if not all(condition_inputs[c].get("available") is True for c in CONDITIONS):
             errors.append(f"{rq_id} must expose C1, C2, and C3")
     if rq_id == "RQ4":
@@ -1349,6 +1583,81 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
             errors.append("RQ4 archive must not be extracted during construction")
     if "construction_gold" not in instance:
         errors.append("construction_gold is required")
+    elif rq_id == "RQ1":
+        construction_gold = instance["construction_gold"]
+        if not isinstance(construction_gold, dict):
+            errors.append("RQ1 construction_gold must be an object")
+        else:
+            if construction_gold.get("status") != "DETERMINISTIC_RQ1_GOLD":
+                errors.append("RQ1 Gold must have deterministic status")
+            requirement_ids = construction_gold.get("relevant_requirement_ids")
+            atoms = construction_gold.get("gold_requirement_atoms")
+            if not isinstance(requirement_ids, list) or not requirement_ids:
+                errors.append("RQ1 relevant_requirement_ids must be non-empty")
+            elif not isinstance(atoms, dict) or set(atoms) != set(requirement_ids):
+                errors.append(
+                    "RQ1 gold_requirement_atoms must equal relevant_requirement_ids"
+                )
+            else:
+                history_key_set = {_id_key(value) for value in history_ids}
+                for requirement_id in requirement_ids:
+                    atom = atoms[requirement_id]
+                    groups = atom.get("required_evidence_groups") if isinstance(atom, dict) else None
+                    if not isinstance(groups, list) or not groups:
+                        errors.append(
+                            f"RQ1 atom {requirement_id} requires evidence groups"
+                        )
+                        continue
+                    group_ids: set[str] = set()
+                    evidence_keys: set[str] = set()
+                    for group in groups:
+                        if not isinstance(group, dict):
+                            errors.append(
+                                f"RQ1 atom {requirement_id} has invalid evidence group"
+                            )
+                            continue
+                        group_id = group.get("group_id")
+                        acceptable = group.get("acceptable_message_ids")
+                        if not isinstance(group_id, str) or not group_id:
+                            errors.append(
+                                f"RQ1 atom {requirement_id} has invalid group_id"
+                            )
+                        elif group_id in group_ids:
+                            errors.append(
+                                f"RQ1 atom {requirement_id} repeats group_id"
+                            )
+                        else:
+                            group_ids.add(group_id)
+                        if not isinstance(acceptable, list) or not acceptable:
+                            errors.append(
+                                f"RQ1 atom {requirement_id} has empty evidence group"
+                            )
+                            continue
+                        acceptable_keys = {_id_key(value) for value in acceptable}
+                        if not acceptable_keys.issubset(history_key_set):
+                            errors.append(
+                                f"RQ1 atom {requirement_id} evidence leaves history"
+                            )
+                        if evidence_keys.intersection(acceptable_keys):
+                            errors.append(
+                                f"RQ1 atom {requirement_id} evidence groups overlap"
+                            )
+                        evidence_keys.update(acceptable_keys)
+                    neutral = atom.get("neutral_context_message_ids")
+                    if not isinstance(neutral, list):
+                        errors.append(
+                            f"RQ1 atom {requirement_id} neutral context must be an array"
+                        )
+                    else:
+                        neutral_keys = {_id_key(value) for value in neutral}
+                        if not neutral_keys.issubset(history_key_set):
+                            errors.append(
+                                f"RQ1 atom {requirement_id} context leaves history"
+                            )
+                        if neutral_keys.intersection(evidence_keys):
+                            errors.append(
+                                f"RQ1 atom {requirement_id} required/context overlap"
+                            )
     return errors
 
 
@@ -1446,9 +1755,17 @@ def build_project_manifest(
             },
         },
         "inclusion_policy": (
-            "Create a target/RQ pair when the finalized Task Gold lists the RQ "
-            "in primary_rq_targets; final RQ-specific eligibility remains pending."
+            "Derive applicable_rqs deterministically: RQ1 and RQ2 require a "
+            "relevant historical Requirement; RQ3 requires an affected target "
+            "transition; RQ4 requires an ACT construction decision and a matching "
+            "target Code Environment."
         ),
+        "applicability_policy": {
+            "RQ1": "HAS_RELEVANT_HISTORICAL_REQUIREMENT",
+            "RQ2": "HAS_RELEVANT_HISTORICAL_REQUIREMENT",
+            "RQ3": "HAS_AFFECTED_TARGET_TRANSITION",
+            "RQ4": "ACT_AND_MATCHING_CODE_ENVIRONMENT",
+        },
         "rq_counts": {
             rq_id: indexes[rq_id]["instance_count"] for rq_id in RQ_IDS
         },

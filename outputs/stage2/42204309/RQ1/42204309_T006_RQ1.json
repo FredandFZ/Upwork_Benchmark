@@ -11,10 +11,12 @@
   "turns": 194,
   "history_turn_count": 194,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
     "source_message_id": 195,
@@ -1614,27 +1616,28 @@
         191
       ],
       "history_message_count": 12,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq1-agent-response-v1",
+    "schema_version": "rq1-agent-response-v2",
     "required_fields": [
-      "selected_history_message_ids",
       "requirements"
     ],
     "requirement_item_fields": [
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids"
-    ]
+    ],
+    "requirement_refs_must_be_unique": true,
+    "evidence_message_ids_must_reference_c2_history": true,
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -1656,7 +1659,9 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "DETERMINISTIC_RQ1_GOLD",
+    "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+    "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
       "REQ_FAQ_CONTENT",
       "REQ_ABOUT_PAGE_CONTENT",
@@ -1670,6 +1675,331 @@
       "REQ_MINT_PRICE_AND_REVENUE_SPLIT",
       "REQ_NFT_METADATA_ACCURACY"
     ],
+    "gold_requirement_atoms": {
+      "REQ_FAQ_CONTENT": {
+        "canonical_summary": "Product FAQ Content",
+        "requirement_title": "Product FAQ Content",
+        "family_id": "SITE_CONTENT_AND_PRESENTATION",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_FAQ_CONTENT_EG001",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_FAQ_CONTENT_EG002",
+            "acceptable_message_ids": [
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_FAQ_CONTENT_EG003",
+            "acceptable_message_ids": [
+              184
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          158
+        ],
+        "trajectory_message_ids": [
+          143,
+          146,
+          158,
+          184
+        ]
+      },
+      "REQ_ABOUT_PAGE_CONTENT": {
+        "canonical_summary": "About Project Rebuild Page",
+        "requirement_title": "About Project Rebuild Page",
+        "family_id": "SITE_CONTENT_AND_PRESENTATION",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_ABOUT_PAGE_CONTENT_EG001",
+            "acceptable_message_ids": [
+              156
+            ]
+          },
+          {
+            "group_id": "REQ_ABOUT_PAGE_CONTENT_EG002",
+            "acceptable_message_ids": [
+              184
+            ]
+          },
+          {
+            "group_id": "REQ_ABOUT_PAGE_CONTENT_EG003",
+            "acceptable_message_ids": [
+              191
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          158
+        ],
+        "trajectory_message_ids": [
+          156,
+          158,
+          184,
+          191
+        ]
+      },
+      "REQ_MISSION_PAGE_CONTENT": {
+        "canonical_summary": "Our Mission Page",
+        "requirement_title": "Our Mission Page",
+        "family_id": "SITE_CONTENT_AND_PRESENTATION",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_MISSION_PAGE_CONTENT_EG001",
+            "acceptable_message_ids": [
+              157
+            ]
+          },
+          {
+            "group_id": "REQ_MISSION_PAGE_CONTENT_EG002",
+            "acceptable_message_ids": [
+              158
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          157,
+          158
+        ]
+      },
+      "REQ_SMALL_BLOCK_PRIZE": {
+        "canonical_summary": "Small Block Prize Mechanism",
+        "requirement_title": "Small Block Prize Mechanism",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG001",
+            "acceptable_message_ids": [
+              8
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG002",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG003",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG004",
+            "acceptable_message_ids": [
+              158
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG005",
+            "acceptable_message_ids": [
+              184
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          8,
+          21,
+          143,
+          158,
+          184
+        ]
+      },
+      "REQ_BIG_BLOCK_PRIZE": {
+        "canonical_summary": "Big Block Prize Mechanism",
+        "requirement_title": "Big Block Prize Mechanism",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG001",
+            "acceptable_message_ids": [
+              8
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG002",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG003",
+            "acceptable_message_ids": [
+              123
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG004",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG005",
+            "acceptable_message_ids": [
+              158
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          125
+        ],
+        "trajectory_message_ids": [
+          8,
+          21,
+          123,
+          125,
+          143,
+          158
+        ]
+      },
+      "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE": {
+        "canonical_summary": "Code-Used Prize Ticket Issuance",
+        "requirement_title": "Code-Used Prize Ticket Issuance",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          21
+        ]
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "canonical_summary": "No-Referral Ticket Allocation",
+        "requirement_title": "No-Referral Ticket Allocation",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          21
+        ]
+      },
+      "REQ_TICKET_ACCOUNTING_ACCURACY": {
+        "canonical_summary": "Prize Ticket Accounting Accuracy",
+        "requirement_title": "Prize Ticket Accounting Accuracy",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          21
+        ]
+      },
+      "REQ_VRF_WINNER_SELECTION": {
+        "canonical_summary": "Verifiable Random Winner Selection",
+        "requirement_title": "Verifiable Random Winner Selection",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_VRF_WINNER_SELECTION_EG001",
+            "acceptable_message_ids": [
+              8
+            ]
+          },
+          {
+            "group_id": "REQ_VRF_WINNER_SELECTION_EG002",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_VRF_WINNER_SELECTION_EG003",
+            "acceptable_message_ids": [
+              146
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          21,
+          27
+        ],
+        "trajectory_message_ids": [
+          8,
+          21,
+          27,
+          143,
+          146
+        ]
+      },
+      "REQ_MINT_PRICE_AND_REVENUE_SPLIT": {
+        "canonical_summary": "Mint Price and Revenue Allocation",
+        "requirement_title": "Mint Price and Revenue Allocation",
+        "family_id": "MINT_AND_PAYMENT",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT_EG001",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT_EG002",
+            "acceptable_message_ids": [
+              146
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          143,
+          146
+        ]
+      },
+      "REQ_NFT_METADATA_ACCURACY": {
+        "canonical_summary": "NFT Metadata Accuracy",
+        "requirement_title": "NFT Metadata Accuracy",
+        "family_id": "NFT_COLLECTION_AND_DATA",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG002",
+            "acceptable_message_ids": [
+              143
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          27
+        ],
+        "trajectory_message_ids": [
+          21,
+          27,
+          143
+        ]
+      }
+    },
     "directly_affected_historical_requirement_ids": [
       "REQ_FAQ_CONTENT",
       "REQ_ABOUT_PAGE_CONTENT",
@@ -1703,14 +2033,44 @@
           "REQ_FAQ_CONTENT_E003",
           "REQ_FAQ_CONTENT_E004"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           143,
           146,
           158,
           184
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          143,
+          146,
+          184
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_FAQ_CONTENT_EG001",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_FAQ_CONTENT_EG002",
+            "acceptable_message_ids": [
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_FAQ_CONTENT_EG003",
+            "acceptable_message_ids": [
+              184
+            ]
+          }
+        ],
+        "context_message_ids": [
+          158
+        ],
+        "neutral_context_message_ids": [
+          158
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_ABOUT_PAGE_CONTENT": {
         "current_support_event_ids": [
@@ -1729,14 +2089,44 @@
           "REQ_ABOUT_PAGE_CONTENT_E003",
           "REQ_ABOUT_PAGE_CONTENT_E004"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           156,
           158,
           184,
           191
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          156,
+          184,
+          191
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_ABOUT_PAGE_CONTENT_EG001",
+            "acceptable_message_ids": [
+              156
+            ]
+          },
+          {
+            "group_id": "REQ_ABOUT_PAGE_CONTENT_EG002",
+            "acceptable_message_ids": [
+              184
+            ]
+          },
+          {
+            "group_id": "REQ_ABOUT_PAGE_CONTENT_EG003",
+            "acceptable_message_ids": [
+              191
+            ]
+          }
+        ],
+        "context_message_ids": [
+          158
+        ],
+        "neutral_context_message_ids": [
+          158
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_MISSION_PAGE_CONTENT": {
         "current_support_event_ids": [
@@ -1751,12 +2141,31 @@
           "REQ_MISSION_PAGE_CONTENT_E001",
           "REQ_MISSION_PAGE_CONTENT_E002"
         ],
+        "trajectory_message_ids": [
+          157,
+          158
+        ],
         "core_message_ids": [
           157,
           158
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_MISSION_PAGE_CONTENT_EG001",
+            "acceptable_message_ids": [
+              157
+            ]
+          },
+          {
+            "group_id": "REQ_MISSION_PAGE_CONTENT_EG002",
+            "acceptable_message_ids": [
+              158
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_SMALL_BLOCK_PRIZE": {
         "current_support_event_ids": [
@@ -1780,6 +2189,13 @@
           "REQ_SMALL_BLOCK_PRIZE_E004",
           "REQ_SMALL_BLOCK_PRIZE_E005"
         ],
+        "trajectory_message_ids": [
+          8,
+          21,
+          143,
+          158,
+          184
+        ],
         "core_message_ids": [
           8,
           21,
@@ -1787,8 +2203,41 @@
           158,
           184
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG001",
+            "acceptable_message_ids": [
+              8
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG002",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG003",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG004",
+            "acceptable_message_ids": [
+              158
+            ]
+          },
+          {
+            "group_id": "REQ_SMALL_BLOCK_PRIZE_EG005",
+            "acceptable_message_ids": [
+              184
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_BIG_BLOCK_PRIZE": {
         "current_support_event_ids": [
@@ -1813,7 +2262,7 @@
           "REQ_BIG_BLOCK_PRIZE_E005",
           "REQ_BIG_BLOCK_PRIZE_E006"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           8,
           21,
           123,
@@ -1821,8 +2270,52 @@
           143,
           158
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          8,
+          21,
+          123,
+          143,
+          158
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG001",
+            "acceptable_message_ids": [
+              8
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG002",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG003",
+            "acceptable_message_ids": [
+              123
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG004",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_BIG_BLOCK_PRIZE_EG005",
+            "acceptable_message_ids": [
+              158
+            ]
+          }
+        ],
+        "context_message_ids": [
+          125
+        ],
+        "neutral_context_message_ids": [
+          125
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE": {
         "current_support_event_ids": [
@@ -1834,11 +2327,23 @@
         "trajectory_event_ids": [
           "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_E001"
         ],
+        "trajectory_message_ids": [
+          21
+        ],
         "core_message_ids": [
           21
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
         "current_support_event_ids": [
@@ -1850,11 +2355,23 @@
         "trajectory_event_ids": [
           "REQ_NO_REFERRAL_TICKET_ALLOCATION_E001"
         ],
+        "trajectory_message_ids": [
+          21
+        ],
         "core_message_ids": [
           21
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_TICKET_ACCOUNTING_ACCURACY": {
         "current_support_event_ids": [
@@ -1866,11 +2383,23 @@
         "trajectory_event_ids": [
           "REQ_TICKET_ACCOUNTING_ACCURACY_E001"
         ],
+        "trajectory_message_ids": [
+          21
+        ],
         "core_message_ids": [
           21
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_TICKET_ACCOUNTING_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_VRF_WINNER_SELECTION": {
         "current_support_event_ids": [
@@ -1890,15 +2419,47 @@
           "REQ_VRF_WINNER_SELECTION_E004",
           "REQ_VRF_WINNER_SELECTION_E005"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           8,
           21,
           27,
           143,
           146
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          8,
+          143,
+          146
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_VRF_WINNER_SELECTION_EG001",
+            "acceptable_message_ids": [
+              8
+            ]
+          },
+          {
+            "group_id": "REQ_VRF_WINNER_SELECTION_EG002",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_VRF_WINNER_SELECTION_EG003",
+            "acceptable_message_ids": [
+              146
+            ]
+          }
+        ],
+        "context_message_ids": [
+          21,
+          27
+        ],
+        "neutral_context_message_ids": [
+          21,
+          27
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_MINT_PRICE_AND_REVENUE_SPLIT": {
         "current_support_event_ids": [
@@ -1913,12 +2474,31 @@
           "REQ_MINT_PRICE_AND_REVENUE_SPLIT_E001",
           "REQ_MINT_PRICE_AND_REVENUE_SPLIT_E002"
         ],
+        "trajectory_message_ids": [
+          143,
+          146
+        ],
         "core_message_ids": [
           143,
           146
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT_EG001",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_MINT_PRICE_AND_REVENUE_SPLIT_EG002",
+            "acceptable_message_ids": [
+              146
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_NFT_METADATA_ACCURACY": {
         "current_support_event_ids": [
@@ -1934,16 +2514,39 @@
           "REQ_NFT_METADATA_ACCURACY_E002",
           "REQ_NFT_METADATA_ACCURACY_E003"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           21,
           27,
           143
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          21,
+          143
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG002",
+            "acceptable_message_ids": [
+              143
+            ]
+          }
+        ],
+        "context_message_ids": [
+          27
+        ],
+        "neutral_context_message_ids": [
+          27
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       }
     },
     "derivation_scope": "DIRECT_AFFECTED_ONLY",
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

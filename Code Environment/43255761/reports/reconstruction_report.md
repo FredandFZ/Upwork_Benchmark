@@ -22,4 +22,4 @@ The exact appearance requested from a customer-provided bullet reference cannot 
 - Strict before-message future-event exclusion: PASS
 - C_env zero-domain leakage and secret/PII scans: PASS
 - ZIP safe path, CRC, no symlink, no .git: PASS
-- Rendered-page visual QA: recorded in visual_qa_report.json after external review
+- Rendered-page visual QA: not run because the packaged Python/LibreOffice renderer is unavailable; see `visual_qa_report.json`

@@ -153,7 +153,10 @@ def build_task(
         {
             "slot_id": item.slot_id,
             "value_type": item.value_type,
-            "literal_map": dict(item.literal_map),
+            "literal_replacements": [
+                occurrence.to_json()
+                for occurrence in item.replacements_for(safe.ordinal)
+            ],
             "target_values": [entry_.new_value for entry_ in item.history],
         }
         for item in (slice_.slot_replacements if slice_ else ())
@@ -276,6 +279,26 @@ def write_task_package(
             instructions_text, encoding="utf-8"
         )
     return path
+
+
+def clear_task_package(run_dir: Path) -> None:
+    """Retire a package whose tasks are all resolved.
+
+    The package is a snapshot of one run's unresolved set, so leaving the
+    previous one in place after a run that resolved everything is not merely
+    untidy: ``--status`` reports a phantom open task, and finalize's commit
+    precondition ("no open agent-actionable task") refuses to publish a project
+    that is in fact healthy.  Removing it makes "nothing outstanding"
+    indistinguishable from "never had anything outstanding", which is what it
+    means.
+    """
+
+    directory = tasks_dir(run_dir)
+    if not directory.is_dir():
+        return
+    for path in sorted(directory.glob("*")):
+        if path.is_file():
+            path.unlink(missing_ok=True)
 
 
 def read_task_package(run_dir: Path) -> dict[str, Any] | None:
@@ -549,6 +572,10 @@ def review_submission(
 
         text = repair.text or ""
         # The same gate a phase-3 rewrite passes -- not a weaker copy.
+        # The full gate, advisories included -- unlike the online path this one
+        # has no phase 4 behind it to arbitrate fidelity, and it is the last
+        # check before publishing.  Relaxing it here would not hand the question
+        # to a better judge, it would remove the judge.
         problems.extend(rewrite_violations(safe, text, slice_))
 
         stray = sorted(

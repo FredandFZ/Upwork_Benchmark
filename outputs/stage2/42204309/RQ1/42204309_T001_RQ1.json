@@ -11,10 +11,12 @@
   "turns": 113,
   "history_turn_count": 113,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
     "source_message_id": 114,
@@ -956,27 +958,28 @@
         111
       ],
       "history_message_count": 2,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq1-agent-response-v1",
+    "schema_version": "rq1-agent-response-v2",
     "required_fields": [
-      "selected_history_message_ids",
       "requirements"
     ],
     "requirement_item_fields": [
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids"
-    ]
+    ],
+    "requirement_refs_must_be_unique": true,
+    "evidence_message_ids_must_reference_c2_history": true,
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -998,10 +1001,34 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "DETERMINISTIC_RQ1_GOLD",
+    "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+    "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
       "REQ_BADGE_CATALOG_AND_PRESENTATION"
     ],
+    "gold_requirement_atoms": {
+      "REQ_BADGE_CATALOG_AND_PRESENTATION": {
+        "canonical_summary": "Badge Catalog and Presentation",
+        "requirement_title": "Badge Catalog and Presentation",
+        "family_id": "ACHIEVEMENT_SYSTEM",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_EG001",
+            "acceptable_message_ids": [
+              111
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          109
+        ],
+        "trajectory_message_ids": [
+          109,
+          111
+        ]
+      }
+    },
     "directly_affected_historical_requirement_ids": [
       "REQ_BADGE_CATALOG_AND_PRESENTATION"
     ],
@@ -1021,15 +1048,31 @@
           "REQ_BADGE_CATALOG_AND_PRESENTATION_E001",
           "REQ_BADGE_CATALOG_AND_PRESENTATION_E002"
         ],
-        "core_message_ids": [
+        "trajectory_message_ids": [
           109,
           111
         ],
-        "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "core_message_ids": [
+          111
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_EG001",
+            "acceptable_message_ids": [
+              111
+            ]
+          }
+        ],
+        "context_message_ids": [
+          109
+        ],
+        "neutral_context_message_ids": [
+          109
+        ],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       }
     },
     "derivation_scope": "DIRECT_AFFECTED_ONLY",
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

@@ -4,18 +4,20 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
-  "rq_name": "Memory-or-Clarify Decision",
+  "rq_name": "Requirement Update or Clarify",
   "target_id": "42204309_T001",
   "task_gold_id": "42204309_T001_GOLD",
   "target_message_id": 114,
   "turns": 113,
   "history_turn_count": 113,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Given only the evidence available in this condition, decide whether it is safe to act on the current client task or whether a concrete clarification is required.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
+  "question": "Combine the pre-task requirement state with the current client task. If the task determines a unique post-task state, choose ACT and construct that state; otherwise choose CLARIFY and identify the blocking requirement field and the question that must be answered.",
   "target_task": {
     "source_message_id": 114,
     "speaker": "client",
@@ -956,26 +958,45 @@
         111
       ],
       "history_message_count": 2,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq3-agent-response-v1",
+    "schema_version": "rq3-agent-response-v2",
     "required_fields": [
       "decision",
-      "clarification"
+      "post_task_states",
+      "clarifications"
     ],
     "decision_values": [
       "ACT",
       "CLARIFY"
-    ]
+    ],
+    "branch_constraints": {
+      "ACT": {
+        "post_task_states": "NON_EMPTY_ARRAY",
+        "clarifications": "EMPTY_ARRAY"
+      },
+      "CLARIFY": {
+        "post_task_states": "NULL",
+        "clarifications": "NON_EMPTY_ARRAY"
+      }
+    },
+    "clarification_item_fields": [
+      "requirement_ref",
+      "requirement_summary",
+      "dimension",
+      "field",
+      "missing_information",
+      "question"
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -1017,10 +1038,287 @@
         "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW"
       }
     },
+    "final_gold_by_condition": {
+      "C1": null,
+      "C2": null,
+      "C3": null
+    },
+    "affected_requirement_ids": [
+      "REQ_BADGE_CATALOG_AND_PRESENTATION",
+      "REQ_BADGE_AWARD_ACCURACY"
+    ],
+    "affected_requirement_transitions": {
+      "REQ_BADGE_CATALOG_AND_PRESENTATION": {
+        "event_ids": [
+          "REQ_BADGE_CATALOG_AND_PRESENTATION_E003"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_BADGE_CATALOG_AND_PRESENTATION",
+          "requirement_title": "Badge Catalog and Presentation",
+          "family_id": "ACHIEVEMENT_SYSTEM",
+          "state_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_S002",
+          "attributes": {
+            "approved_badge_catalog": "all badges in the freelancer's proposed design"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "BADGES"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_BADGE_CATALOG_AND_PRESENTATION_E002"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_BADGE_CATALOG_AND_PRESENTATION",
+          "requirement_title": "Badge Catalog and Presentation",
+          "family_id": "ACHIEVEMENT_SYSTEM",
+          "state_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_S003",
+          "attributes": {
+            "badge_icon_uniqueness": "avoid using the same icon for multiple badges",
+            "growing_network_badge_icon": "sapling",
+            "first_mint_badge_replacement": "First Referral"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "FRONTEND",
+              "UI_UX"
+            ],
+            "contexts": [
+              "BADGES"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_BADGE_CATALOG_AND_PRESENTATION_E002",
+            "REQ_BADGE_CATALOG_AND_PRESENTATION_E003"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ]
+        }
+      },
+      "REQ_BADGE_AWARD_ACCURACY": {
+        "event_ids": [
+          "REQ_BADGE_AWARD_ACCURACY_E001"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": null,
+        "after": {
+          "requirement_id": "REQ_BADGE_AWARD_ACCURACY",
+          "requirement_title": "Badge Award Accuracy",
+          "family_id": "ACHIEVEMENT_SYSTEM",
+          "state_id": "REQ_BADGE_AWARD_ACCURACY_S001",
+          "attributes": {
+            "first_referral_badge_trigger": "first referral"
+          },
+          "scope": {
+            "persistence": null,
+            "components": null,
+            "contexts": null
+          },
+          "lifecycle_status": null,
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_BADGE_AWARD_ACCURACY_E001"
+          ]
+        },
+        "delta": {
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ]
+        }
+      }
+    },
+    "post_task_states": {
+      "REQ_BADGE_CATALOG_AND_PRESENTATION": {
+        "requirement_id": "REQ_BADGE_CATALOG_AND_PRESENTATION",
+        "requirement_title": "Badge Catalog and Presentation",
+        "family_id": "ACHIEVEMENT_SYSTEM",
+        "state_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_S003",
+        "attributes": {
+          "badge_icon_uniqueness": "avoid using the same icon for multiple badges",
+          "growing_network_badge_icon": "sapling",
+          "first_mint_badge_replacement": "First Referral"
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "contexts": [
+            "BADGES"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_BADGE_CATALOG_AND_PRESENTATION_E002",
+          "REQ_BADGE_CATALOG_AND_PRESENTATION_E003"
+        ]
+      },
+      "REQ_BADGE_AWARD_ACCURACY": {
+        "requirement_id": "REQ_BADGE_AWARD_ACCURACY",
+        "requirement_title": "Badge Award Accuracy",
+        "family_id": "ACHIEVEMENT_SYSTEM",
+        "state_id": "REQ_BADGE_AWARD_ACCURACY_S001",
+        "attributes": {
+          "first_referral_badge_trigger": "first referral"
+        },
+        "scope": {
+          "persistence": null,
+          "components": null,
+          "contexts": null
+        },
+        "lifecycle_status": null,
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_BADGE_AWARD_ACCURACY_E001"
+        ]
+      }
+    },
+    "post_state_scoring_specs": {
+      "REQ_BADGE_CATALOG_AND_PRESENTATION": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "badge_icon_uniqueness": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "growing_network_badge_icon": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "first_mint_badge_replacement": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_BADGE_AWARD_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "first_referral_badge_trigger": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "NULL_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "components": {
+              "comparator": "NULL_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "contexts": {
+              "comparator": "NULL_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      }
+    },
     "blocking_ambiguity_candidates": [],
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
-    "relevance_review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+    "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
     "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 must be audited independently."
   }
 }

@@ -24,6 +24,7 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -48,6 +49,11 @@ SUMMARY_FILE_NAME = "summary.json"
 RUN_METADATA_NAME = "run_metadata.json"
 
 MAX_DIAGNOSTIC_CHARS = 1200
+
+# Windows occasionally refuses an atomic replace while a scanner holds the
+# target handle; a couple of short retries clears it in practice.
+_REPLACE_ATTEMPTS = 4
+_REPLACE_BACKOFF_SECONDS = 0.05
 
 # --- failure classes ------------------------------------------------------- #
 
@@ -94,9 +100,20 @@ STATUS_BLOCKED_RETRYABLE = "BLOCKED_RETRYABLE"
 STATUS_AWAITING_AGENT_REPAIR = "AWAITING_AGENT_REPAIR"
 STATUS_AGENT_REPAIR_REJECTED = "AGENT_REPAIR_REJECTED"
 STATUS_REPLAN_REQUIRED = "REPLAN_REQUIRED"
+
+# A project-level failure raised by local assembly rather than by a model
+# response: every shard validated, they just did not compose.
+CODE_ASSEMBLY_INVALID = "PROJECT_ASSEMBLY_INVALID"
 STATUS_FATAL = "FATAL"
 
 NEXT_COMMAND: Mapping[str, str] = {
+    # ``RUNNING`` persists on disk when a run is interrupted, so this is the
+    # state an operator sees after Ctrl-C.  Leaving it without a command left
+    # ``--status`` printing an empty line at exactly the moment its advice is
+    # most wanted; completed shards are checkpointed, so rerunning is correct.
+    STATUS_RUNNING: (
+        "resume: python .\\Code\\pii_clean.py --project-id {project_id} --insecure"
+    ),
     STATUS_BLOCKED_RETRYABLE: (
         "rerun: python .\\Code\\pii_clean.py --project-id {project_id} --insecure"
     ),
@@ -111,11 +128,20 @@ NEXT_COMMAND: Mapping[str, str] = {
     ),
     STATUS_REPLAN_REQUIRED: (
         "replan: python .\\Code\\pii_clean.py --project-id {project_id} "
-        "--force-phase PHASE_1B_PROJECT_CONSOLIDATION --insecure"
+        "--force-phase {replan_phase} --insecure"
     ),
     STATUS_FATAL: "inspect the audit report; this needs a code or source-data fix",
     STATUS_PASSED: "nothing to do",
 }
+
+# Same status, different remedy.  When only local assembly failed, nothing the
+# model produced was at fault, so a plain rerun re-assembles from the existing
+# shards at no cost; --force-phase would discard a whole phase of model output
+# that was never wrong.  Escalate only if the rerun fails identically.
+REPLAN_LOCAL_COMMAND = (
+    "rerun: python .\\Code\\pii_clean.py --project-id {project_id} --insecure "
+    "(shards are intact; only assembly failed)"
+)
 
 
 def agent_task_kind(phase: str, failure_class: str) -> str:
@@ -375,6 +401,16 @@ class UnresolvedLedger:
     def entries(self) -> list[UnresolvedEntry]:
         return [self._entries[key] for key in sorted(self._entries)]
 
+    def entries_for_phases(self, phases: Sequence[str]) -> list[UnresolvedEntry]:
+        """Entries recorded by the given phases only.
+
+        Phase-group barriers use this: a leftover entry from a *later* phase in a
+        previous run must not block an earlier group that has not reached it yet.
+        """
+
+        targets = set(phases)
+        return [entry for entry in self.entries() if entry.phase in targets]
+
     def entries_for(self, message_id: Any) -> list[UnresolvedEntry]:
         key = id_key(message_id)
         return [entry for (phase, item), entry in sorted(self._entries.items()) if item == key]
@@ -402,6 +438,34 @@ class UnresolvedLedger:
         return any(
             entry.failure_class == CLASS_PLAN_CONFLICT or entry.phase in _REPLAN_PHASES
             for entry in self.entries()
+        )
+
+    def replan_phase(self) -> str:
+        """The earliest phase that actually has to be recomputed.
+
+        A phase-2 failure is a phase-2 failure: pointing the operator at 1B
+        would discard every fold of a consolidation that succeeded, which on a
+        project of this size is several minutes and a real spend, and would not
+        touch the chunk that failed.  Only name 1B when 1B is what broke.
+        """
+
+        phases = {
+            entry.phase
+            for entry in self.entries()
+            if entry.failure_class == CLASS_PLAN_CONFLICT or entry.phase in _REPLAN_PHASES
+        }
+        return PHASE_1B if PHASE_1B in phases else PHASE_2
+
+    def replan_is_local(self) -> bool:
+        """Every replan-triggering failure came from local assembly."""
+
+        entries = [
+            entry
+            for entry in self.entries()
+            if entry.failure_class == CLASS_PLAN_CONFLICT or entry.phase in _REPLAN_PHASES
+        ]
+        return bool(entries) and all(
+            entry.code == CODE_ASSEMBLY_INVALID for entry in entries
         )
 
     def has_fatal(self) -> bool:
@@ -486,22 +550,85 @@ class UnresolvedLedger:
         """Drop entries for phases that are about to be retried, then rewrite."""
 
         targets = set(phases)
-        for key in [key for key in self._entries if key[0] in targets]:
+        stale = [key for key in self._entries if key[0] in targets]
+        if not stale:
+            # Called once per phase, so the overwhelmingly common case is "no
+            # prior failure". Skipping the write keeps a clean run from touching
+            # this file at all.
+            return
+        for key in stale:
             del self._entries[key]
         self._rewrite_ledger()
 
+    def resolve_sync(self, message_id: Any, *, phase: str | None = None) -> bool:
+        """Retire a message's entries once it has produced an accepted result.
+
+        Without this a failure is permanent across runs: ``load_existing``
+        rehydrates the old entry, the phase-group barrier still sees the message
+        as unresolved, and phases 3/4/5 skip it via :meth:`is_blocked` -- so a
+        project that failed once could never reach DONE even after every message
+        succeeded on a later run.
+
+        ``phase=None`` retires every phase's entry for the message, which is what
+        a phase-5 repair needs: it clears the phase-3 rewrite failure and the
+        phase-4 verdict failure that led to the repair in the first place.
+        """
+
+        key = id_key(message_id)
+        targets = [
+            item
+            for item in self._entries
+            if item[1] == key and (phase is None or item[0] == phase)
+        ]
+        if not targets:
+            # The common case: a success with no prior failure. No file write.
+            return False
+        for item in targets:
+            del self._entries[item]
+        self._rewrite_ledger()
+        return True
+
+    async def resolve(self, message_id: Any, *, phase: str | None = None) -> bool:
+        """Async wrapper; serialized against concurrent ``record`` calls."""
+
+        async with self._lock:
+            return self.resolve_sync(message_id, phase=phase)
+
     def _rewrite_ledger(self) -> None:
-        """Compact the append-only log down to the live entries."""
+        """Compact the append-only log down to the live entries.
+
+        Never raises.  On Windows ``Path.replace`` intermittently fails with
+        ``PermissionError`` when a scanner momentarily holds the target handle;
+        the ledger is bookkeeping, so losing one compaction must degrade to a
+        warning rather than abort the phase that triggered it.
+        """
 
         self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
         lines = [
             json.dumps(entry.to_json(), ensure_ascii=False) for entry in self.entries()
         ]
+        payload = "".join(f"{line}\n" for line in lines)
         temporary = self.ledger_path.with_suffix(".jsonl.tmp")
-        temporary.write_text(
-            "".join(f"{line}\n" for line in lines), encoding="utf-8"
-        )
-        temporary.replace(self.ledger_path)
+        try:
+            temporary.write_text(payload, encoding="utf-8")
+            for attempt in range(_REPLACE_ATTEMPTS):
+                try:
+                    temporary.replace(self.ledger_path)
+                    break
+                except PermissionError:
+                    if attempt == _REPLACE_ATTEMPTS - 1:
+                        raise
+                    time.sleep(_REPLACE_BACKOFF_SECONDS * (attempt + 1))
+        except OSError as exc:
+            print(
+                f"[{self.project_id}] could not compact the unresolved ledger "
+                f"({type(exc).__name__}); in-memory state is authoritative",
+                flush=True,
+            )
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError:
+                pass
         self._write_summary()
 
     def reset(self) -> None:
@@ -509,6 +636,27 @@ class UnresolvedLedger:
         if self.ledger_path.is_file():
             self.ledger_path.unlink()
         self._write_summary()
+
+
+def next_command(
+    status: str,
+    project_id: str,
+    run_dir: Any = "",
+    ledger: "UnresolvedLedger | None" = None,
+) -> str:
+    """The command to run next, given what actually failed."""
+
+    if (
+        status == STATUS_REPLAN_REQUIRED
+        and ledger is not None
+        and ledger.replan_is_local()
+    ):
+        return REPLAN_LOCAL_COMMAND.format(project_id=project_id)
+    return NEXT_COMMAND.get(status, "").format(
+        project_id=project_id,
+        run_dir=run_dir,
+        replan_phase=ledger.replan_phase() if ledger is not None else PHASE_1B,
+    )
 
 
 def write_run_metadata(
@@ -531,9 +679,7 @@ def write_run_metadata(
         "status": status,
         "updated_at": _now(),
         "agent_instructions": "prompt/PII/agent_repair_instructions.md",
-        "next_command": NEXT_COMMAND.get(status, "").format(
-            project_id=project_id, run_dir=run_dir
-        ),
+        "next_command": next_command(status, project_id, run_dir, ledger),
         "phase_timings_seconds": dict(sorted((phase_timings or {}).items())),
     }
     if ledger is not None:

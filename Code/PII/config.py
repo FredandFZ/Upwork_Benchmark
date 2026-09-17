@@ -69,6 +69,24 @@ UPSTREAM: Mapping[str, tuple[str, ...]] = {
 # advancing if anything is still unresolved, because phases 1B/2 build one
 # project-wide artifact and global consistency cannot be derived from a partial
 # inventory.
+# What each phase's ``input_hash`` chains to.
+#
+# This is deliberately *not* ``UPSTREAM``.  ``UPSTREAM`` is the dependency DAG,
+# and ``--force-phase`` must keep using it to take the descendant closure.  But
+# a per-message phase already names its exact dependency in its own ``scope``:
+# phase 3 carries ``plan_slice_sha256``, phase 4 adds ``rewrite_text_sha256``,
+# phase 5 adds the verdict.  Feeding the *whole plan's* output hash in as well
+# makes the coarse value win -- one byte anywhere in ``plan.json`` invalidated
+# all 824 rewrites, which is precisely what the plan-slice closure exists to
+# prevent, and what the closure property test guarantees is unnecessary.
+HASH_UPSTREAM: Mapping[str, tuple[str, ...]] = {
+    **UPSTREAM,
+    PHASE_3: (),
+    PHASE_4: (),
+    PHASE_5: (),
+}
+
+
 PHASE_GROUPS: tuple[tuple[str, ...], ...] = (
     (PHASE_0A,),
     (PHASE_0B, PHASE_1A),
@@ -147,7 +165,11 @@ class PiiConfig:
 
     semantic_fold_chars: int = 60_000
     semantic_fold_records: int = 120
-    max_accumulator_chars: int = 250_000
+    # A guard against runaway growth, not a budget for real data: an
+    # 824-message project legitimately reaches ~500 KB of slots and
+    # histories.  Set high enough never to bite honest data, low enough to
+    # catch a fold that starts duplicating the registry.
+    max_accumulator_chars: int = 2_000_000
 
     plan_chunk_bundles: int = 25
     plan_chunk_chars: int = 40_000
@@ -230,10 +252,12 @@ class PiiConfig:
         if phase == PHASE_1A:
             return {**batching, "neighbor_window": self.neighbor_window}
         if phase == PHASE_1B:
+            # ``max_accumulator_chars`` is deliberately absent: it bounds the
+            # *accumulated state*, not what the model is asked for, so changing
+            # it must not invalidate folds that already validated.
             return {
                 "semantic_fold_chars": self.semantic_fold_chars,
                 "semantic_fold_records": self.semantic_fold_records,
-                "max_accumulator_chars": self.max_accumulator_chars,
             }
         if phase == PHASE_2:
             return {

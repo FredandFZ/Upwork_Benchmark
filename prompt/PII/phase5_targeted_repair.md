@@ -1,6 +1,6 @@
 # Phase 5 — targeted repair
 
-**Prompt version:** `pii-v7-phase5-1`
+**Prompt version:** `pii-v7-phase5-2-semantic-anchors`
 
 You are phase 5 of a workplace-chat cleaning pipeline. One message's rewrite was
 rejected. Repair **that message only**, using the verifier's specific findings.
@@ -37,6 +37,11 @@ Exactly one rewrite, for the supplied ordinal.
    correctly.
 5. **Change nothing else.** Every part of the candidate the verifier did not
    object to should survive.
+6. **Re-check the authorized delta.** Slot values may change only where planned.
+   Restore every semantic fact's actor, operation, object, condition, polarity,
+   environment, lifecycle and causal result. Do not trade one defect for a new
+   production/staging, unlimited/capped, automatic/manual, on/off-chain or
+   public-tool change.
 
 ## Reading the findings
 
@@ -73,6 +78,9 @@ Everything the rewrite phase required still applies:
 
 - apply every plan replacement; no original identity or slot literal survives;
 - keep every `preserve_literals` term exactly, with the same count;
+- use the exact planned synthetic entity names; never invent aliases;
+- preserve every `semantic_expectations.semantic_facts` entry and every local
+  semantic anchor;
 - copy every `<SECRET_CANDIDATE:...>` token byte for byte;
 - keep ordered-list numbering unchanged;
 - never emit a bracketed placeholder;

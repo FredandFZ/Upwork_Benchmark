@@ -44,6 +44,18 @@ def write_json(path: Path, value: Any) -> None:
     temporary.replace(path)
 
 
+def prune_stale_instances(
+    rq_dir: Path, rq_id: str, expected_instance_ids: set[str]
+) -> None:
+    """Remove obsolete generated target/RQ files after a successful rebuild."""
+
+    if not rq_dir.is_dir():
+        return
+    for path in rq_dir.glob(f"*_{rq_id}.json"):
+        if path.stem not in expected_instance_ids:
+            path.unlink()
+
+
 def parse_args() -> argparse.Namespace:
     root = repo_root()
     parser = argparse.ArgumentParser(
@@ -197,6 +209,11 @@ def main() -> int:
                 for instance in collections[rq_id]:
                     write_json(rq_dir / f"{instance['instance_id']}.json", instance)
                 write_json(rq_dir / "index.json", indexes[rq_id])
+                prune_stale_instances(
+                    rq_dir,
+                    rq_id,
+                    {instance["instance_id"] for instance in collections[rq_id]},
+                )
             write_json(output_dir / "rq_instance_manifest.json", manifest)
         print(
             _render_summary(

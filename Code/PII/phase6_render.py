@@ -29,8 +29,15 @@ from .models import (
     SemanticRegistry,
     TransformationPlan,
 )
-from .secret_shield import credential_map, render_text, unexpected_credential_spans
+from .phase0b_entities import PUBLIC_ALLOWLIST
+from .secret_shield import (
+    credential_map,
+    nominate_secret_spans,
+    render_text,
+    unexpected_credential_spans,
+)
 from .textutil import (
+    ACTIONABLE_MEETING_URL_RE,
     EMAIL_RE,
     FAKE_CREDENTIAL_RE,
     INTERNAL_TOKEN_RE,
@@ -40,9 +47,12 @@ from .textutil import (
     RESERVED_DOMAIN_RE,
     URL_RE,
     contains_value,
+    find_terms_outside_pii,
     fingerprint,
     occurrence_count,
+    private_resource_identifiers,
     preserved_term_counts,
+    semantic_anchor_differences,
 )
 
 # --------------------------------------------------------------------------- #
@@ -69,11 +79,18 @@ CHECK_INTERNAL_PLACEHOLDER_PRESENT = "INTERNAL_PLACEHOLDER_PRESENT"
 CHECK_SECRET_TOKEN_MULTIPLICITY = "SECRET_TOKEN_MULTIPLICITY"
 CHECK_FAKE_CREDENTIAL_MALFORMED = "FAKE_CREDENTIAL_MALFORMED"
 CHECK_UNEXPECTED_CREDENTIAL_LIKE_VALUE = "UNEXPECTED_CREDENTIAL_LIKE_VALUE"
+CHECK_ORIGINAL_PRIVATE_RESOURCE_IDENTIFIER_PRESENT = (
+    "ORIGINAL_PRIVATE_RESOURCE_IDENTIFIER_PRESENT"
+)
+CHECK_ACTIONABLE_PUBLIC_MEETING_URL = "ACTIONABLE_PUBLIC_MEETING_URL"
 
 CHECK_PLAN_REPLACEMENT_COLLISION = "PLAN_REPLACEMENT_COLLISION"
 CHECK_INCONSISTENT_SYNTHETIC_ENTITY = "INCONSISTENT_SYNTHETIC_ENTITY"
+CHECK_PLANNED_ENTITY_REPLACEMENT_MISSING = "PLANNED_ENTITY_REPLACEMENT_MISSING"
 CHECK_INCONSISTENT_SLOT_VALUE = "INCONSISTENT_SLOT_VALUE"
 CHECK_PRESERVED_VALUE_LOST = "PRESERVED_VALUE_LOST"
+CHECK_PUBLIC_REQUIREMENT_CHANGED = "PUBLIC_REQUIREMENT_CHANGED"
+CHECK_SEMANTIC_ANCHOR_CHANGED = "SEMANTIC_ANCHOR_CHANGED"
 CHECK_LIST_MARKER_DAMAGED = "LIST_MARKER_DAMAGED"
 
 CHECK_UNVERIFIED_TEXT = "UNVERIFIED_TEXT"
@@ -98,10 +115,15 @@ AUDIT_CHECKS: tuple[str, ...] = (
     CHECK_SECRET_TOKEN_MULTIPLICITY,
     CHECK_FAKE_CREDENTIAL_MALFORMED,
     CHECK_UNEXPECTED_CREDENTIAL_LIKE_VALUE,
+    CHECK_ORIGINAL_PRIVATE_RESOURCE_IDENTIFIER_PRESENT,
+    CHECK_ACTIONABLE_PUBLIC_MEETING_URL,
     CHECK_PLAN_REPLACEMENT_COLLISION,
     CHECK_INCONSISTENT_SYNTHETIC_ENTITY,
+    CHECK_PLANNED_ENTITY_REPLACEMENT_MISSING,
     CHECK_INCONSISTENT_SLOT_VALUE,
     CHECK_PRESERVED_VALUE_LOST,
+    CHECK_PUBLIC_REQUIREMENT_CHANGED,
+    CHECK_SEMANTIC_ANCHOR_CHANGED,
     CHECK_LIST_MARKER_DAMAGED,
     CHECK_UNVERIFIED_TEXT,
     CHECK_UNRESOLVED_MESSAGE_PRESENT,
@@ -254,6 +276,9 @@ def _domain_of(value: str) -> str:
     host = value.split("://", 1)[-1]
     host = host.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
     host = host.split("@", 1)[-1]
+    # ``<https://host/path|host>`` is one token to the URL regex, so the label
+    # half has to come off before the host is read.
+    host = host.split("|", 1)[0]
     return host.split(":", 1)[0].strip("<>").casefold()
 
 
@@ -289,7 +314,15 @@ def _host_is_allowed(host: str, allowed: frozenset[str]) -> bool:
         return True
     if host in allowed:
         return True
-    return any(host.endswith(f".{item}") or item.endswith(f".{host}") for item in allowed)
+    if any(host.endswith(f".{item}") or item.endswith(f".{host}") for item in allowed):
+        return True
+    # A public third party is usually recorded as a brand word, not a domain, so
+    # ``stripe.com`` has to be recognised from ``Stripe``.  Without this the
+    # audit rejected the vendor home pages the policy explicitly preserves.
+    labels = [item for item in host.split(".") if item]
+    if len(labels) > 1:
+        labels = labels[:-1]
+    return any(".".join(labels[index:]) in allowed for index in range(len(labels)))
 
 
 # --------------------------------------------------------------------------- #
@@ -351,6 +384,10 @@ def audit_final_texts(
 
     # -- D1: plan-level collisions ------------------------------------------ #
     by_replacement: dict[str, list[str]] = {}
+    original_surfaces = {
+        item.entity_id: {original.casefold() for original, _replacement in item.pairs()}
+        for item in inputs.plan.synthesized()
+    }
     for item in inputs.plan.synthesized():
         for original, replacement in item.pairs():
             if original.casefold() == replacement.casefold():
@@ -364,7 +401,18 @@ def audit_final_texts(
             by_replacement.setdefault(replacement.casefold(), []).append(item.entity_id)
     for replacement, owners in sorted(by_replacement.items()):
         distinct = sorted(set(owners))
-        if len(distinct) > 1:
+        genuinely_distinct = [
+            entity_id
+            for index, entity_id in enumerate(distinct)
+            if any(
+                not (
+                    original_surfaces.get(entity_id, set())
+                    & original_surfaces.get(other_id, set())
+                )
+                for other_id in distinct[index + 1 :]
+            )
+        ]
+        if genuinely_distinct:
             add(
                 Violation(
                     check=CHECK_PLAN_REPLACEMENT_COLLISION,
@@ -489,6 +537,25 @@ def audit_final_texts(
                     )
                 )
 
+        # C4b: independently re-run the current detector over the source.  The
+        # registry is evidence of what phase 0A knew at the time; it must not be
+        # the only authority, or a detector recall bug becomes invisible to the
+        # final audit.
+        registered_secret_values = set(raw_secrets.values())
+        for candidate in nominate_secret_spans(original):
+            if candidate.value in registered_secret_values:
+                continue
+            if candidate.value and candidate.value in final:
+                add(
+                    Violation(
+                        check=CHECK_ORIGINAL_SECRET_PRESENT,
+                        detail="a source credential missed by the shield survived",
+                        ordinal=ordinal,
+                        message_id=message_id,
+                        fingerprints=(fingerprint(candidate.kind, candidate.value),),
+                    )
+                )
+
         # C5: nothing credential-shaped beyond the fake renderings
         unexpected = unexpected_credential_spans(final)
         if unexpected:
@@ -501,6 +568,34 @@ def audit_final_texts(
                     fingerprints=tuple(
                         fingerprint("CANDIDATE", span.value) for span in unexpected[:5]
                     ),
+                )
+            )
+
+        # C6: private app/document/subscription ids inside a URL must change
+        # even when the surrounding host was changed correctly.
+        source_resource_ids = set(private_resource_identifiers(original))
+        for identifier in sorted(source_resource_ids):
+            if identifier and identifier in final:
+                add(
+                    Violation(
+                        check=CHECK_ORIGINAL_PRIVATE_RESOURCE_IDENTIFIER_PRESENT,
+                        detail="a source private-resource identifier survived inside a URL",
+                        ordinal=ordinal,
+                        message_id=message_id,
+                        fingerprints=(fingerprint("PRIVATE_RESOURCE_ID", identifier),),
+                    )
+                )
+
+        # A generated room code on the real Google Meet host could collide with
+        # an actionable room.  Preserve the product name, but publish the link
+        # only under a reserved synthetic domain.
+        if ACTIONABLE_MEETING_URL_RE.search(final):
+            add(
+                Violation(
+                    check=CHECK_ACTIONABLE_PUBLIC_MEETING_URL,
+                    detail="an actionable-looking meeting URL uses a real public host",
+                    ordinal=ordinal,
+                    message_id=message_id,
                 )
             )
 
@@ -521,7 +616,15 @@ def audit_final_texts(
             if entity.policy != "SYNTHESIZE":
                 continue
             replacement = plan_entities.get(entity.entity_id)
-            surfaces = set(entity.surface_forms())
+            # Raw 0B surface forms are occurrence evidence, not project-wide
+            # aliases.  Only forms observed in this message may be searched
+            # here; the canonical value and aliases explicitly approved by the
+            # plan remain global through ``replacement.originals()`` below.
+            surfaces = {
+                occurrence.source
+                for occurrence in entity.occurrences
+                if occurrence.ordinal == ordinal
+            }
             if replacement is not None:
                 surfaces.update(replacement.originals())
             for surface in sorted(surfaces):
@@ -540,6 +643,24 @@ def audit_final_texts(
                         ordinal=ordinal,
                         message_id=message_id,
                         fingerprints=(fingerprint(entity.entity_type, surface),),
+                    )
+                )
+
+            # The original being gone is only half of identity consistency.  A
+            # rewrite must also use the project's canonical planned identity;
+            # otherwise it can invent a fresh project/person name per message
+            # and still pass every residual-original check.
+            if replacement is not None and not any(
+                contains_value(final, value)
+                for value in replacement.replacements()
+                if value
+            ):
+                add(
+                    Violation(
+                        check=CHECK_PLANNED_ENTITY_REPLACEMENT_MISSING,
+                        detail=f"{entity.entity_id} canonical replacement is absent",
+                        ordinal=ordinal,
+                        message_id=message_id,
                     )
                 )
 
@@ -630,6 +751,45 @@ def audit_final_texts(
                         )
                     )
 
+            for dimension, before_labels, after_labels in semantic_anchor_differences(
+                safe.safe_text, final
+            ):
+                add(
+                    Violation(
+                        check=CHECK_SEMANTIC_ANCHOR_CHANGED,
+                        detail=(
+                            f"{dimension} changed from {list(before_labels)} "
+                            f"to {list(after_labels)}"
+                        ),
+                        ordinal=ordinal,
+                        message_id=message_id,
+                    )
+                )
+
+            # Public third parties, protocols, standards and tool names are
+            # immutable requirement content even if phase 0B forgot to emit an
+            # entity record for them.
+            public_terms = find_terms_outside_pii(safe.safe_text, PUBLIC_ALLOWLIST)
+            public_before = preserved_term_counts(safe.safe_text, public_terms)
+            public_after = preserved_term_counts(final, public_terms)
+            for term, count in public_before.items():
+                # Rewrites may consolidate or repeat a mention.  What must
+                # never happen is replacing the public requirement name with
+                # a different tool/standard and losing the original entirely.
+                if count and not public_after.get(term, 0):
+                    add(
+                        Violation(
+                            check=CHECK_PUBLIC_REQUIREMENT_CHANGED,
+                            detail=(
+                                "public requirement term was removed: "
+                                f"{count} -> {public_after.get(term, 0)}"
+                            ),
+                            ordinal=ordinal,
+                            message_id=message_id,
+                            fingerprints=(fingerprint("PUBLIC_TERM", term),),
+                        )
+                    )
+
             # D5: ordered-list numbering is layout, not data
             if list(LIST_MARKER_RE.findall(safe.safe_text)) != list(
                 LIST_MARKER_RE.findall(final)
@@ -644,11 +804,27 @@ def audit_final_texts(
                 )
 
         # D3: planned slot values must be applied, originals gone
+        exact_text_verified = (
+            ordinal,
+            state.text_sha256 if state is not None else "",
+        ) in inputs.verified_text_hashes
         for slot in inputs.semantic_registry.for_ordinal(ordinal):
             replacement = inputs.plan.slot_by_id().get(slot.slot_id)
             if replacement is None:
                 continue
-            for original_literal, new_literal in replacement.literal_map.items():
+            for occurrence in replacement.replacements_for(ordinal):
+                if occurrence.match_mode == "SEMANTIC_ONLY" or exact_text_verified:
+                    # Bare numerals cannot be located after a free-form rewrite,
+                    # and an exact text already accepted by Phase 4's semantic
+                    # verifier must not be overruled by a weaker substring test.
+                    continue
+                original_literal = occurrence.original
+                new_literal = occurrence.replacement
+                if original_literal and new_literal == original_literal:
+                    # The plan maps this literal to itself: it names a public
+                    # tool, network or asset, which is a requirement rather than
+                    # an identity, so its survival is what the plan asks for.
+                    continue
                 if original_literal and contains_value(
                     final, original_literal, ignore_case=False
                 ):

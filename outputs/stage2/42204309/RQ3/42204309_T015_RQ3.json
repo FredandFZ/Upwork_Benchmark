@@ -4,18 +4,20 @@
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
-  "rq_name": "Memory-or-Clarify Decision",
+  "rq_name": "Requirement Update or Clarify",
   "target_id": "42204309_T015",
   "task_gold_id": "42204309_T015_GOLD",
   "target_message_id": 631,
   "turns": 630,
   "history_turn_count": 630,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
-  "question": "Given only the evidence available in this condition, decide whether it is safe to act on the current client task or whether a concrete clarification is required.",
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3",
+    "RQ4"
+  ],
+  "question": "Combine the pre-task requirement state with the current client task. If the task determines a unique post-task state, choose ACT and construct that state; otherwise choose CLARIFY and identify the blocking requirement field and the question that must be answered.",
   "target_task": {
     "source_message_id": 631,
     "speaker": "client",
@@ -5100,26 +5102,45 @@
         605
       ],
       "history_message_count": 10,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq3-agent-response-v1",
+    "schema_version": "rq3-agent-response-v2",
     "required_fields": [
       "decision",
-      "clarification"
+      "post_task_states",
+      "clarifications"
     ],
     "decision_values": [
       "ACT",
       "CLARIFY"
-    ]
+    ],
+    "branch_constraints": {
+      "ACT": {
+        "post_task_states": "NON_EMPTY_ARRAY",
+        "clarifications": "EMPTY_ARRAY"
+      },
+      "CLARIFY": {
+        "post_task_states": "NULL",
+        "clarifications": "NON_EMPTY_ARRAY"
+      }
+    },
+    "clarification_item_fields": [
+      "requirement_ref",
+      "requirement_summary",
+      "dimension",
+      "field",
+      "missing_information",
+      "question"
+    ],
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -5161,10 +5182,376 @@
         "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW"
       }
     },
+    "final_gold_by_condition": {
+      "C1": null,
+      "C2": null,
+      "C3": null
+    },
+    "affected_requirement_ids": [
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+      "REQ_NFT_METADATA_ACCURACY"
+    ],
+    "affected_requirement_transitions": {
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "event_ids": [
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E007"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+          "requirement_title": "Commission Accounting Accuracy",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_S006",
+          "attributes": {
+            "commission_view_consistency": "Awarded referral commission earnings must be represented accurately and consistently in dashboard summaries and per-NFT details.",
+            "commission_count_basis": "One commission must be accounted for per primary mint; secondary-market sales are excluded.",
+            "random_commission_accounting": "Commissions issued at random for primary mints must be registered in commission totals."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "COMMISSION_ACCOUNTING",
+              "DASHBOARD",
+              "LEADERBOARD",
+              "NFT_DETAIL"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports that missing commission records were backfilled for existing NFTs.",
+            "source_event_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_E006"
+          },
+          "supporting_event_ids": [
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E001",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E004",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E006"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+          "requirement_title": "Commission Accounting Accuracy",
+          "family_id": "REFERRAL_MECHANICS",
+          "state_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_S007",
+          "attributes": {
+            "commission_view_consistency": "Awarded referral commission earnings must be represented accurately and consistently in dashboard summaries and per-NFT details.",
+            "commission_count_basis": "One commission must be accounted for per primary mint; secondary-market sales are excluded.",
+            "random_commission_accounting": "Commissions issued at random for primary mints must be registered in commission totals.",
+            "no_code_commission_projection": "Randomly sent commissions from no-code mints must be displayed on the dashboard and in NFT attributes."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": [
+              "BACKEND",
+              "FRONTEND"
+            ],
+            "contexts": [
+              "COMMISSION_ACCOUNTING",
+              "DASHBOARD",
+              "LEADERBOARD",
+              "NFT_DETAIL"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E001",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E004",
+            "REQ_COMMISSION_ACCOUNTING_ACCURACY_E007"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ]
+        }
+      },
+      "REQ_NFT_METADATA_ACCURACY": {
+        "event_ids": [
+          "REQ_NFT_METADATA_ACCURACY_E007"
+        ],
+        "event_types": [
+          "MODIFY"
+        ],
+        "before": {
+          "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+          "requirement_title": "NFT Metadata Accuracy",
+          "family_id": "NFT_COLLECTION_AND_DATA",
+          "state_id": "REQ_NFT_METADATA_ACCURACY_S006",
+          "attributes": {
+            "small_block_ticket_counter_visible": true,
+            "permanent_badges_visible": true,
+            "referral_code_attribute_source": "the NFT's own mint number"
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": null,
+            "contexts": [
+              "NFT_METADATA"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": {
+            "status": "CLAIMED_WORKING",
+            "observed_behavior": "Freelancer reports correcting each NFT's referral, ticket, and earnings details.",
+            "source_event_id": "REQ_NFT_METADATA_ACCURACY_E006"
+          },
+          "supporting_event_ids": [
+            "REQ_NFT_METADATA_ACCURACY_E001",
+            "REQ_NFT_METADATA_ACCURACY_E003",
+            "REQ_NFT_METADATA_ACCURACY_E004",
+            "REQ_NFT_METADATA_ACCURACY_E006"
+          ]
+        },
+        "after": {
+          "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+          "requirement_title": "NFT Metadata Accuracy",
+          "family_id": "NFT_COLLECTION_AND_DATA",
+          "state_id": "REQ_NFT_METADATA_ACCURACY_S007",
+          "attributes": {
+            "small_block_ticket_counter_visible": true,
+            "permanent_badges_visible": true,
+            "referral_code_attribute_source": "the NFT's own mint number",
+            "no_code_random_commission_attribute_visibility": "Commissions randomly assigned from no-code mints must be displayed in NFT attributes."
+          },
+          "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": null,
+            "contexts": [
+              "NFT_METADATA"
+            ]
+          },
+          "lifecycle_status": "ACTIVE",
+          "ambiguity": null,
+          "execution": null,
+          "supporting_event_ids": [
+            "REQ_NFT_METADATA_ACCURACY_E001",
+            "REQ_NFT_METADATA_ACCURACY_E003",
+            "REQ_NFT_METADATA_ACCURACY_E004",
+            "REQ_NFT_METADATA_ACCURACY_E007"
+          ]
+        },
+        "delta": {
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ]
+        }
+      }
+    },
+    "post_task_states": {
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "requirement_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY",
+        "requirement_title": "Commission Accounting Accuracy",
+        "family_id": "REFERRAL_MECHANICS",
+        "state_id": "REQ_COMMISSION_ACCOUNTING_ACCURACY_S007",
+        "attributes": {
+          "commission_view_consistency": "Awarded referral commission earnings must be represented accurately and consistently in dashboard summaries and per-NFT details.",
+          "commission_count_basis": "One commission must be accounted for per primary mint; secondary-market sales are excluded.",
+          "random_commission_accounting": "Commissions issued at random for primary mints must be registered in commission totals.",
+          "no_code_commission_projection": "Randomly sent commissions from no-code mints must be displayed on the dashboard and in NFT attributes."
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "FRONTEND"
+          ],
+          "contexts": [
+            "COMMISSION_ACCOUNTING",
+            "DASHBOARD",
+            "LEADERBOARD",
+            "NFT_DETAIL"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E001",
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E004",
+          "REQ_COMMISSION_ACCOUNTING_ACCURACY_E007"
+        ]
+      },
+      "REQ_NFT_METADATA_ACCURACY": {
+        "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+        "requirement_title": "NFT Metadata Accuracy",
+        "family_id": "NFT_COLLECTION_AND_DATA",
+        "state_id": "REQ_NFT_METADATA_ACCURACY_S007",
+        "attributes": {
+          "small_block_ticket_counter_visible": true,
+          "permanent_badges_visible": true,
+          "referral_code_attribute_source": "the NFT's own mint number",
+          "no_code_random_commission_attribute_visibility": "Commissions randomly assigned from no-code mints must be displayed in NFT attributes."
+        },
+        "scope": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": null,
+          "contexts": [
+            "NFT_METADATA"
+          ]
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null,
+        "supporting_event_ids": [
+          "REQ_NFT_METADATA_ACCURACY_E001",
+          "REQ_NFT_METADATA_ACCURACY_E003",
+          "REQ_NFT_METADATA_ACCURACY_E004",
+          "REQ_NFT_METADATA_ACCURACY_E007"
+        ]
+      }
+    },
+    "post_state_scoring_specs": {
+      "REQ_COMMISSION_ACCOUNTING_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "commission_view_consistency": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "commission_count_basis": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "random_commission_accounting": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "no_code_commission_projection": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      },
+      "REQ_NFT_METADATA_ACCURACY": {
+        "attributes": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "small_block_ticket_counter_visible": {
+              "comparator": "BOOLEAN_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "permanent_badges_visible": {
+              "comparator": "BOOLEAN_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "referral_code_attribute_source": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "no_code_random_commission_attribute_visibility": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "scope": {
+          "comparator": "RECURSIVE_FIELDS",
+          "score": true,
+          "fields": {
+            "persistence": {
+              "comparator": "ATOMIC_FACT_F1",
+              "score": true,
+              "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+            },
+            "components": {
+              "comparator": "NULL_EXACT",
+              "score": true,
+              "review_status": "DETERMINISTIC"
+            },
+            "contexts": {
+              "comparator": "SET_F1",
+              "score": true,
+              "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW"
+            }
+          },
+          "review_status": "PENDING_FIELD_COMPARATOR_REVIEW"
+        },
+        "lifecycle_status": {
+          "comparator": "ATOMIC_FACT_F1",
+          "score": true,
+          "review_status": "PENDING_FACT_NORMALIZATION_REVIEW"
+        },
+        "ambiguity": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        },
+        "execution": {
+          "comparator": "NULL_EXACT",
+          "score": true,
+          "review_status": "DETERMINISTIC"
+        }
+      }
+    },
     "blocking_ambiguity_candidates": [],
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
-    "relevance_review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW",
+    "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
     "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 must be audited independently."
   }
 }

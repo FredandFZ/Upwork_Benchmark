@@ -11,10 +11,11 @@
   "turns": 304,
   "history_turn_count": 304,
   "difficulty": "LONG",
-  "selection_basis": {
-    "source": "task_gold.primary_rq_targets",
-    "final_rq_eligibility": "PENDING_RQ_SPECIFIC_REVIEW"
-  },
+  "applicable_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
     "source_message_id": 305,
@@ -2490,27 +2491,28 @@
         291
       ],
       "history_message_count": 8,
-      "review_status": "PENDING_CONTEXT_AND_INHERITED_CONSTRAINT_REVIEW"
+      "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "response_contract": {
-    "schema_version": "rq1-agent-response-v1",
+    "schema_version": "rq1-agent-response-v2",
     "required_fields": [
-      "selected_history_message_ids",
       "requirements"
     ],
     "requirement_item_fields": [
       "requirement_ref",
       "requirement_summary",
       "evidence_message_ids"
-    ]
+    ],
+    "requirement_refs_must_be_unique": true,
+    "evidence_message_ids_must_reference_c2_history": true,
+    "internal_ids_forbidden": true
   },
   "visibility": {
     "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
     "runner_must_hide": [
       "construction_gold",
-      "source_artifacts",
-      "selection_basis"
+      "source_artifacts"
     ],
     "runner_materialization_status": "NOT_IMPLEMENTED_IN_THIS_STAGE"
   },
@@ -2532,7 +2534,9 @@
     }
   },
   "construction_gold": {
-    "status": "PROVISIONAL_REQUIRES_RELEVANCE_REVIEW",
+    "status": "DETERMINISTIC_RQ1_GOLD",
+    "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
+    "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
       "REQ_REFERRAL_CODE_VALIDATION",
       "REQ_REFERRAL_COMMISSION",
@@ -2540,6 +2544,142 @@
       "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE",
       "REQ_NO_REFERRAL_TICKET_ALLOCATION"
     ],
+    "gold_requirement_atoms": {
+      "REQ_REFERRAL_CODE_VALIDATION": {
+        "canonical_summary": "Referral Code Validation",
+        "requirement_title": "Referral Code Validation",
+        "family_id": "REFERRAL_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_CODE_VALIDATION_EG001",
+            "acceptable_message_ids": [
+              291
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          291
+        ]
+      },
+      "REQ_REFERRAL_COMMISSION": {
+        "canonical_summary": "Code-Used Referral Commission",
+        "requirement_title": "Code-Used Referral Commission",
+        "family_id": "REFERRAL_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_COMMISSION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_COMMISSION_EG002",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_COMMISSION_EG003",
+            "acceptable_message_ids": [
+              156
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          21,
+          143,
+          156
+        ]
+      },
+      "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
+        "canonical_summary": "No-Referral Commission Allocation",
+        "requirement_title": "No-Referral Commission Allocation",
+        "family_id": "REFERRAL_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              288
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          146,
+          288
+        ]
+      },
+      "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE": {
+        "canonical_summary": "Code-Used Prize Ticket Issuance",
+        "requirement_title": "Code-Used Prize Ticket Issuance",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG003",
+            "acceptable_message_ids": [
+              210
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          21,
+          195,
+          210
+        ]
+      },
+      "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
+        "canonical_summary": "No-Referral Ticket Allocation",
+        "requirement_title": "No-Referral Ticket Allocation",
+        "family_id": "PRIZE_MECHANICS",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG003",
+            "acceptable_message_ids": [
+              288
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [],
+        "trajectory_message_ids": [
+          21,
+          195,
+          288
+        ]
+      }
+    },
     "directly_affected_historical_requirement_ids": [
       "REQ_REFERRAL_CODE_VALIDATION",
       "REQ_REFERRAL_COMMISSION",
@@ -2562,11 +2702,23 @@
           "REQ_REFERRAL_CODE_VALIDATION_E001",
           "REQ_REFERRAL_CODE_VALIDATION_E002"
         ],
+        "trajectory_message_ids": [
+          291
+        ],
         "core_message_ids": [
           291
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_CODE_VALIDATION_EG001",
+            "acceptable_message_ids": [
+              291
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_REFERRAL_COMMISSION": {
         "current_support_event_ids": [
@@ -2584,13 +2736,39 @@
           "REQ_REFERRAL_COMMISSION_E002",
           "REQ_REFERRAL_COMMISSION_E003"
         ],
+        "trajectory_message_ids": [
+          21,
+          143,
+          156
+        ],
         "core_message_ids": [
           21,
           143,
           156
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_COMMISSION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_COMMISSION_EG002",
+            "acceptable_message_ids": [
+              143
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_COMMISSION_EG003",
+            "acceptable_message_ids": [
+              156
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_NO_REFERRAL_COMMISSION_ALLOCATION": {
         "current_support_event_ids": [
@@ -2605,12 +2783,31 @@
           "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E001",
           "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_E002"
         ],
+        "trajectory_message_ids": [
+          146,
+          288
+        ],
         "core_message_ids": [
           146,
           288
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_COMMISSION_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              288
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE": {
         "current_support_event_ids": [
@@ -2628,13 +2825,39 @@
           "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_E002",
           "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_E003"
         ],
+        "trajectory_message_ids": [
+          21,
+          195,
+          210
+        ],
         "core_message_ids": [
           21,
           195,
           210
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_REFERRAL_PRIZE_TICKET_ISSUANCE_EG003",
+            "acceptable_message_ids": [
+              210
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       },
       "REQ_NO_REFERRAL_TICKET_ALLOCATION": {
         "current_support_event_ids": [
@@ -2652,16 +2875,42 @@
           "REQ_NO_REFERRAL_TICKET_ALLOCATION_E002",
           "REQ_NO_REFERRAL_TICKET_ALLOCATION_E003"
         ],
+        "trajectory_message_ids": [
+          21,
+          195,
+          288
+        ],
         "core_message_ids": [
           21,
           195,
           288
         ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG002",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKET_ALLOCATION_EG003",
+            "acceptable_message_ids": [
+              288
+            ]
+          }
+        ],
         "context_message_ids": [],
-        "context_review_status": "PENDING_CONTEXT_MESSAGE_REVIEW"
+        "neutral_context_message_ids": [],
+        "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
       }
     },
     "derivation_scope": "DIRECT_AFFECTED_ONLY",
-    "review_status": "PENDING_INHERITED_CONSTRAINT_AND_CONTEXT_REVIEW"
+    "review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY"
   }
 }

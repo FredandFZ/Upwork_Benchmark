@@ -1,6 +1,6 @@
 # Phase 0B — PII discovery
 
-**Prompt version:** `pii-v7-phase0b-1`
+**Prompt version:** `pii-v7-phase0b-3-public-requirements`
 
 You are phase 0B of a workplace-chat de-identification pipeline.
 
@@ -68,6 +68,11 @@ telephone number** in the text must appear as an occurrence. Every
 `<SECRET_CANDIDATE:...>` token must appear as an occurrence typed
 `SECRET_CANDIDATE`.
 
+Every public company, service, protocol, network, standard and development tool
+listed in `policy.preserve_allowlist` and present in the prose must also appear
+once, typed `PUBLIC_THIRD_PARTY` or `PUBLIC_TECHNOLOGY` with `PRESERVE`. These
+terms are collected so later phases cannot silently change the technology stack.
+
 Occurrences must not overlap each other. Prefer the **maximal** span: classify a
 whole address as one `EMAIL`, not a `PERSON` plus a `PRIVATE_DOMAIN`.
 
@@ -76,6 +81,17 @@ whole address as one `EMAIL`, not a `PERSON` plus a `PRIVATE_DOMAIN`.
 Be thorough on the things that identify people and private projects. A private
 project alias, a participant's first name in a greeting, a signature line, a
 dashboard link — all of these identify, and all should be found.
+
+A project alias must identify the project **in that occurrence**. Do not expand
+an ordinary lowercase word into a project name merely because it is one word
+inside that name. For example, in `help me rebuild my life`, `rebuild` is a
+verb, not an alias of `Project Rebuild`; the complete forms `Project Rebuild`
+and `ProjectRebuild` remain identifying project names.
+
+Use one normalized identity project-wide. Repeated exact source text always has
+the same `normalized_value`; short and full forms that clearly name the same
+person or project also share it. Do not create a new normalized entity merely
+because a later message supplies more context.
 
 Be equally firm in the other direction: a public company, service or technology
 is not sensitive because it is named, and a requirement-bearing term is never a

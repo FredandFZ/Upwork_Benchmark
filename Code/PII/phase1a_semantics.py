@@ -87,21 +87,39 @@ VALUE_TYPES: tuple[str, ...] = (
     "OTHER",
 )
 
+SEMANTIC_FACT_KINDS: tuple[str, ...] = (
+    "ENVIRONMENT",
+    "LIFECYCLE",
+    "MECHANISM",
+    "ACCESS",
+    "AUTOMATION",
+    "TECHNOLOGY",
+    "CAUSALITY",
+    "STATE",
+    "CONSTRAINT",
+    "OTHER",
+)
+
 SLOT_NAME_RE = re.compile(r"^[A-Z][A-Z0-9_]{2,63}$")
 
 TASK = (
     "Extract the project semantics of each message and bind every business or "
-    "technical value to a meaning-named slot. Do not rewrite the messages."
+    "technical value to a meaning-named slot. Also enumerate load-bearing environment, "
+    "lifecycle, mechanism, access, automation, technology, causality and state facts. "
+    "Do not rewrite the messages."
 )
 
 REPAIR_INSTRUCTION = (
     "The previous response failed local validation. Return exactly one record for every "
     "supplied message. Use only the allowed enum values. Every slot must carry an "
     "UPPER_SNAKE_CASE slot_name, a value_type from the allowed list, a non-empty meaning, "
-    "and a source_literal that is an exact substring of that message's text. Give the same "
+    "and a source_literal with exact start/end character offsets into that message's text. "
+    "Return one slot record per occurrence; repeated slot_names are allowed when their "
+    "spans differ. Give the same "
     "literal two different slot_names when it plays two different roles. Never emit an "
     "email address, link, social handle or any other personally identifying value in any "
-    "field."
+    "field. Also return the load-bearing non-numeric semantic facts: environment, "
+    "lifecycle, mechanism, access, automation, public technology, causality and state."
 )
 
 
@@ -116,6 +134,7 @@ def build_sections(
             "ambiguity_kinds": list(AMBIGUITY_KINDS),
             "decision_kinds": list(DECISION_KINDS),
             "value_types": list(VALUE_TYPES),
+            "semantic_fact_kinds": list(SEMANTIC_FACT_KINDS),
             "slot_name_pattern": SLOT_NAME_RE.pattern,
         },
         "SAFE_MESSAGES": [
@@ -180,6 +199,73 @@ def _pii_egress(value: str) -> str | None:
         if pattern.search(value):
             return label
     return None
+
+
+def _literal_spans(text: str, literal: str) -> list[tuple[int, int]]:
+    """Return every exact, including overlapping, occurrence of ``literal``.
+
+    Models are useful for deciding what a value means but are unreliable
+    character counters, especially after non-ASCII text.  The literal itself
+    is still model-selected; this helper only lets the local process derive
+    the exact coordinates that it can compute deterministically.
+    """
+
+    spans: list[tuple[int, int]] = []
+    cursor = 0
+    while True:
+        start = text.find(literal, cursor)
+        if start < 0:
+            return spans
+        spans.append((start, start + len(literal)))
+        cursor = start + 1
+
+
+def _resolve_literal_span(
+    *,
+    text: str,
+    literal: str,
+    proposed_start: Any,
+    proposed_end: Any,
+    slot_name: str,
+    claimed: set[tuple[str, int, int]],
+) -> tuple[int, int] | None:
+    """Validate an exact span or deterministically re-anchor its literal.
+
+    A unique occurrence is always safe to re-anchor.  When a literal repeats,
+    the proposed start is used only if it identifies one uniquely nearest
+    unclaimed occurrence.  Otherwise the ambiguity remains a hard failure.
+    """
+
+    offsets_are_ints = (
+        isinstance(proposed_start, int)
+        and not isinstance(proposed_start, bool)
+        and isinstance(proposed_end, int)
+        and not isinstance(proposed_end, bool)
+    )
+    if (
+        offsets_are_ints
+        and 0 <= proposed_start < proposed_end <= len(text)
+        and text[proposed_start:proposed_end] == literal
+    ):
+        return proposed_start, proposed_end
+
+    candidates = [
+        span
+        for span in _literal_spans(text, literal)
+        if (slot_name, span[0], span[1]) not in claimed
+    ]
+    if len(candidates) == 1:
+        return candidates[0]
+    if not candidates or not isinstance(proposed_start, int) or isinstance(
+        proposed_start, bool
+    ):
+        return None
+
+    nearest_distance = min(abs(start - proposed_start) for start, _ in candidates)
+    nearest = [
+        span for span in candidates if abs(span[0] - proposed_start) == nearest_distance
+    ]
+    return nearest[0] if len(nearest) == 1 else None
 
 
 def validate_semantics_response(
@@ -281,7 +367,7 @@ def validate_semantics_response(
         if not isinstance(raw_slots, list):
             fail("EXTRACTION_SCHEMA_INVALID", f"ordinal {ordinal} slots must be a list")
         else:
-            names: set[str] = set()
+            occurrences: set[tuple[str, int, int]] = set()
             for position, slot in enumerate(raw_slots):
                 where = f"ordinal {ordinal} slot {position}"
                 if not isinstance(slot, dict):
@@ -290,12 +376,11 @@ def validate_semantics_response(
                 name = slot.get("slot_name")
                 value_type = slot.get("value_type")
                 literal = slot.get("source_literal")
+                start = slot.get("start")
+                end = slot.get("end")
                 meaning = slot.get("meaning")
                 if not isinstance(name, str) or not SLOT_NAME_RE.fullmatch(name):
                     fail("EXTRACTION_SLOT_INVALID", f"{where} slot_name {name!r} is invalid")
-                    continue
-                if name in names:
-                    fail("EXTRACTION_SLOT_INVALID", f"{where} repeats slot_name {name}")
                     continue
                 if value_type not in VALUE_TYPES:
                     fail("EXTRACTION_SLOT_INVALID", f"{where} value_type {value_type!r}")
@@ -303,11 +388,41 @@ def validate_semantics_response(
                 if not isinstance(literal, str) or not literal.strip():
                     fail("EXTRACTION_SLOT_INVALID", f"{where} has no source_literal")
                     continue
-                if literal not in message.safe_text:
-                    fail(
-                        "EXTRACTION_SPAN_NOT_FOUND",
-                        f"{where} source_literal is not a substring of the message",
+                offsets_valid = not (
+                    isinstance(start, bool)
+                    or not isinstance(start, int)
+                    or isinstance(end, bool)
+                    or not isinstance(end, int)
+                    or start < 0
+                    or end <= start
+                    or end > len(message.safe_text)
+                )
+                resolved_span = _resolve_literal_span(
+                    text=message.safe_text,
+                    literal=literal,
+                    proposed_start=start,
+                    proposed_end=end,
+                    slot_name=name,
+                    claimed=occurrences,
+                )
+                if resolved_span is None:
+                    code = (
+                        "EXTRACTION_SPAN_NOT_FOUND"
+                        if offsets_valid
+                        else "EXTRACTION_SPAN_INVALID"
                     )
+                    fail(
+                        code,
+                        (
+                            f"{where} source_literal cannot be anchored to one exact "
+                            "text occurrence"
+                        ),
+                    )
+                    continue
+                start, end = resolved_span
+                occurrence_key = (name, start, end)
+                if occurrence_key in occurrences:
+                    fail("EXTRACTION_SLOT_INVALID", f"{where} repeats the same occurrence")
                     continue
                 if INTERNAL_TOKEN_RE.search(literal):
                     fail(
@@ -322,7 +437,7 @@ def validate_semantics_response(
                 if leaked is not None:
                     fail("EXTRACTION_PII_EGRESS", f"{where} meaning contains a {leaked}")
                     continue
-                names.add(name)
+                occurrences.add(occurrence_key)
                 slots.append(
                     MessageSlot(
                         slot_name=name,
@@ -339,6 +454,8 @@ def validate_semantics_response(
                             if slot.get("op") in ("INTRODUCE", "MODIFY", "CONFIRM", "REMOVE")
                             else "INTRODUCE"
                         ),
+                        start=start,
+                        end=end,
                     )
                 )
 
@@ -347,6 +464,80 @@ def validate_semantics_response(
             for item in (entry.get("relations") or [])
             if isinstance(item, str) and item.strip()
         ]
+
+        raw_facts = entry.get("semantic_facts") or []
+        semantic_facts: list[dict[str, Any]] = []
+        if not isinstance(raw_facts, list):
+            fail(
+                "EXTRACTION_SCHEMA_INVALID",
+                f"ordinal {ordinal} semantic_facts must be a list",
+            )
+        else:
+            for position, fact in enumerate(raw_facts):
+                where = f"ordinal {ordinal} semantic fact {position}"
+                if not isinstance(fact, dict):
+                    fail("EXTRACTION_SCHEMA_INVALID", f"{where} must be an object")
+                    continue
+                kind = fact.get("kind")
+                statement = fact.get("statement")
+                fact_polarity = fact.get("polarity", "AFFIRMATIVE")
+                if kind not in SEMANTIC_FACT_KINDS:
+                    fail("EXTRACTION_SCHEMA_INVALID", f"{where} kind {kind!r} is invalid")
+                    continue
+                if fact_polarity not in POLARITIES:
+                    fail(
+                        "EXTRACTION_SCHEMA_INVALID",
+                        f"{where} polarity {fact_polarity!r} is invalid",
+                    )
+                    continue
+                if not isinstance(statement, str) or not statement.strip():
+                    fail("EXTRACTION_SCHEMA_INVALID", f"{where} has no statement")
+                    continue
+                leaked = _pii_egress(statement)
+                if leaked is not None:
+                    fail(
+                        "EXTRACTION_PII_EGRESS",
+                        f"{where} statement contains a {leaked}",
+                    )
+                    continue
+                raw_terms = fact.get("must_preserve_terms") or []
+                if not isinstance(raw_terms, list) or not all(
+                    isinstance(term, str) and term.strip() for term in raw_terms
+                ):
+                    fail(
+                        "EXTRACTION_SCHEMA_INVALID",
+                        f"{where} must_preserve_terms must be a string list",
+                    )
+                    continue
+                terms: list[str] = []
+                invalid_term = False
+                for term in raw_terms:
+                    if term not in message.safe_text:
+                        fail(
+                            "EXTRACTION_SCHEMA_INVALID",
+                            f"{where} preserve term is not an exact source substring",
+                        )
+                        invalid_term = True
+                        break
+                    if _pii_egress(term) is not None:
+                        fail(
+                            "EXTRACTION_PII_EGRESS",
+                            f"{where} preserve term contains PII-shaped data",
+                        )
+                        invalid_term = True
+                        break
+                    if term not in terms:
+                        terms.append(term)
+                if invalid_term:
+                    continue
+                semantic_facts.append(
+                    {
+                        "kind": kind,
+                        "statement": statement.strip(),
+                        "polarity": fact_polarity,
+                        "must_preserve_terms": terms,
+                    }
+                )
 
         result[ordinal] = MessageSemantics(
             ordinal=ordinal,
@@ -360,6 +551,7 @@ def validate_semantics_response(
             decisions=tuple(decisions),
             slots=tuple(slots),
             relations=tuple(relations),
+            semantic_facts=tuple(semantic_facts),
         )
 
     missing = sorted(set(expected).difference(seen))
@@ -390,4 +582,8 @@ def validate_cached_semantics(body: Any) -> None:
         if slot.value_type not in VALUE_TYPES:
             raise PiiValidationError(
                 marked(f"cached value_type {slot.value_type} is unknown")
+            )
+        if slot.start is None or slot.end is None or slot.end <= slot.start:
+            raise PiiValidationError(
+                marked("cached slot occurrence has no valid start/end offsets")
             )
