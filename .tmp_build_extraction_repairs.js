@@ -242,7 +242,34 @@ for (const [project, repairs] of byProject) {
   };
   const directory = path.join(runDir, "agent_repairs");
   fs.mkdirSync(directory, { recursive: true });
-  fs.writeFileSync(path.join(directory, "repairs.json"), `${JSON.stringify(output, null, 2)}\n`, "utf8");
+  const outputPath = path.join(directory, "repairs.json");
+  fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`, "utf8");
+  const roundTrip = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  if (roundTrip.queue_sha256 !== queueHash(index)) {
+    throw new Error(`${project}: queue hash did not round-trip`);
+  }
+  for (const repair of roundTrip.repairs) {
+    const taskFile = path.join(
+      runDir,
+      "agent_tasks",
+      `task_${String(repair.ordinal).padStart(5, "0")}.json`,
+    );
+    const task = readJson(taskFile);
+    if (task.safe_source_sha256 !== repair.safe_source_sha256) {
+      throw new Error(`${repair.task_id}: source hash mismatch`);
+    }
+    for (const item of repair.annotation.occurrences) {
+      if (task.safe_original_text.slice(item.start, item.end) !== item.source) {
+        throw new Error(`${repair.task_id}: bad occurrence span`);
+      }
+    }
+    for (const slot of repair.annotation.semantics.slots || []) {
+      if (task.safe_original_text.slice(slot.start, slot.end) !== slot.source_literal) {
+        throw new Error(`${repair.task_id}: bad semantic slot span`);
+      }
+    }
+  }
+  console.log(`${project}: ${roundTrip.repairs.length} repair(s) validated`);
 }
 
 console.log(`wrote ${specs.length} extraction repairs across ${byProject.size} projects`);
