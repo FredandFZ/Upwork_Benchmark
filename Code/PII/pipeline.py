@@ -70,6 +70,7 @@ from .errors import (
     PiiValidationError,
     ResumeSignatureError,
     api_error_is_validation_failure,
+    marked,
 )
 from .agent_handoff import (
     SUBMISSION_NAME,
