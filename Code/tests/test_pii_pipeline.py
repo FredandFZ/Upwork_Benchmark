@@ -1035,6 +1035,61 @@ class AgentRepairTests(unittest.TestCase):
         )
 
 
+class ExtractionAgentRepairTests(unittest.TestCase):
+    def test_clean_consumes_offline_extraction_repair_without_recalling_phase0b(self):
+        class MissingOrdinalApi(FakeApi):
+            def respond(self, mode, body):
+                payload = super().respond(mode, body)
+                if mode == "PII7_PII_DISCOVERY":
+                    payload["messages"] = [
+                        item for item in payload["messages"] if item["ordinal"] != 3
+                    ]
+                return payload
+
+        harness = PipelineHarness()
+        first = harness.run(MissingOrdinalApi())
+        self.assertEqual(first["status"], STATUS_AWAITING_AGENT_REPAIR)
+        package = read_task_package(harness.run_dir)
+        task = next(item for item in package["tasks"] if item["ordinal"] == 3)
+        text = task["safe_original_text"]
+        submission = {
+            "schema_version": "pii-agent-repairs-v1",
+            "project_id": "P1",
+            "queue_sha256": queue_sha256(package),
+            "repairs": [
+                {
+                    "task_id": task["task_id"],
+                    "kind": "EXTRACTION",
+                    "ordinal": 3,
+                    "message_id": 3,
+                    "safe_source_sha256": task["safe_source_sha256"],
+                    "plan_slice_sha256": None,
+                    "author": "test-agent",
+                    "reason": "Supplied the missing offline extraction annotation.",
+                    "annotation": {
+                        "occurrences": FakeApi._occurrences({"text": text}),
+                        "semantics": FakeApi._semantics(
+                            {"ordinal": 3, "text": text}
+                        ),
+                    },
+                }
+            ],
+            "blocked": [],
+        }
+        path = repairs_dir(harness.run_dir) / "repairs.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(submission), encoding="utf-8")
+
+        second_api = FakeApi(
+            transport_fail_modes={"PII7_PII_DISCOVERY", "PII7_MESSAGE_SEMANTICS"}
+        )
+        result = harness.run(second_api)
+
+        self.assertEqual(result["status"], "DONE")
+        self.assertNotIn("PII7_PII_DISCOVERY", second_api.calls)
+        self.assertNotIn("PII7_MESSAGE_SEMANTICS", second_api.calls)
+
+
 if __name__ == "__main__":
     unittest.main()
 
