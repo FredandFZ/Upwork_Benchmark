@@ -220,9 +220,11 @@ Agent：
 3. 找出相关 historical Requirements，并引用可见 message IDs；
 4. 恢复 target 前的 current Requirement State，正确处理 update、override、remove 和 scope；
 5. 判断证据是否足以 `ACT`，否则输出具体 `CLARIFY` 问题；
-6. 如果决定 `ACT`，在 `repository/` 中完成当前 client task；
-7. 最终回答必须符合 `response.schema.json`；
-8. 不输出 private chain-of-thought，只输出结构化结论。
+6. 如果决定 `ACT`，输出完整 closed-world Post-state：保留仍适用字段，省略已删除/被替换的旧
+   属性，并把删除项列入 `removed_attribute_keys`；
+7. 如果决定 `ACT`，在 `repository/` 中完成当前 client task；
+8. 最终回答必须符合 `response.schema.json`；
+9. 不输出 private chain-of-thought，只输出结构化结论。
 
 Prompt 中不能包含 target-specific Gold、正确 Requirement 名称、预期文件路径或 hidden test
 提示。
@@ -233,13 +235,12 @@ Prompt 中不能包含 target-specific Gold、正确 Requirement 名称、预期
 
 ```json
 {
-  "selected_history_message_ids": [21, 146, 195],
   "requirements": [
     {
       "requirement_ref": "agent-local-1",
       "requirement_summary": "...",
       "evidence_message_ids": [21, 146, 195],
-      "current_state": {
+      "pre_task_state": {
         "attributes": {},
         "scope": {},
         "lifecycle_status": "ACTIVE",
@@ -249,17 +250,42 @@ Prompt 中不能包含 target-specific Gold、正确 Requirement 名称、预期
     }
   ],
   "decision": "ACT",
-  "clarification": null
+  "post_task_states": [
+    {
+      "requirement_ref": "agent-local-1",
+      "requirement_summary": "...",
+      "change_type": "MODIFIED",
+      "removed_attribute_keys": [],
+      "state": {
+        "attributes": {},
+        "scope": {},
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ],
+  "clarifications": []
 }
 ```
 
 约束：
 
-- `selected_history_message_ids` 和 `evidence_message_ids` 只能引用当前 `history.jsonl` 中的 ID；
+- `evidence_message_ids` 只能引用当前 `history.jsonl` 中的 ID；不再输出与其重复的顶层
+  `selected_history_message_ids`；
 - Agent 使用自己的 `requirement_ref`，不要求猜 `REQ_*`；
+- `pre_task_state` 与 Post-state 都恰好包含五个语义 dimensions；内部 Requirement/Event/State
+  ID 禁止输出；`ambiguity` 只能为 `null` 或 record array；
+- State 采用 closed-world 语义，多余的 stale/未知字段会作为 false positive；
 - `decision` 只能是 `ACT` 或 `CLARIFY`；
-- `ACT` 时 `clarification=null`；
-- `CLARIFY` 时 clarification 必须包含具体问题、Requirement ref 和 dimension；
+- `ACT` 时 `post_task_states` 为数组且 `clarifications=[]`；
+- `CLARIFY` 时仍必须输出 `requirements` 及其 `pre_task_state`，`post_task_states=null`，并在
+  `clarifications` 中输出具体问题、Requirement ref、dimension、field 与缺失信息；
+- RQ1 scorer 按 `rq1-agent-response-v3` 直接接收此统一 response：验证声明字段白名单后，仅投影
+  `requirement_ref`、`requirement_summary`、`evidence_message_ids` 参与 RQ1 评分；Runner 不需要
+  预先删除 `pre_task_state` 或顶层 RQ2/RQ3 字段；
+- RQ2 与 RQ3 分别按 `rq2-agent-response-v3`、`rq3-agent-response-v3` 验证；自然语言语义叶的
+  API 判断与最终确定性计分分离；
 - RQ4 新评估方式不要求使用 planned action 判断最终代码是否通过；代码结果由 workspace 和
   hidden validator 决定。
 

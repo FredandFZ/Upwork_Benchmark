@@ -42,6 +42,7 @@ from Code.PII.phase6_render import (
     CHECK_INCONSISTENT_SLOT_VALUE,
     CHECK_INTERNAL_PLACEHOLDER_PRESENT,
     CHECK_ORIGINAL_EMAIL_PRESENT,
+    CHECK_ORIGINAL_ENTITY_PRESENT,
     CHECK_ORIGINAL_PERSON_PRESENT,
     CHECK_ORIGINAL_PRIVATE_RESOURCE_IDENTIFIER_PRESENT,
     CHECK_ORIGINAL_PROJECT_IDENTIFIER_PRESENT,
@@ -388,6 +389,60 @@ class ViolationTests(unittest.TestCase):
         texts[1] = "Joseph should receive the deploy key at marcus.f@northstar-demo.example."
         report = fixture.report(final_texts=texts)
         self.assert_fires(report, CHECK_ORIGINAL_PERSON_PRESENT)
+
+    def test_original_url_prefix_inside_its_replacement_is_not_residual(self):
+        fixture = AuditFixture()
+        original = "https://public.example/"
+        replacement = "https://public.example/sample-project"
+        url_entity = PiiEntity(
+            entity_id="E0003",
+            entity_type="PRIVATE_URL",
+            policy="SYNTHESIZE",
+            canonical_value=original,
+            normalized_key=original,
+            bundle_id=None,
+            confidence="HIGH",
+            occurrences=(
+                PiiOccurrence(
+                    ordinal=1,
+                    message_id=1,
+                    source=original,
+                    start=0,
+                    end=len(original),
+                    entity_type="PRIVATE_URL",
+                    policy="SYNTHESIZE",
+                    normalized_value=original,
+                    link_hint=None,
+                    confidence="HIGH",
+                ),
+            ),
+        )
+        registry = entity_registry()
+        registry = PiiEntityRegistry(
+            entities=(*registry.entities, url_entity), bundles=registry.bundles
+        )
+        transformed = TransformationPlan(
+            plan_version=fixture.plan.plan_version,
+            entity_replacements=(
+                *fixture.plan.entity_replacements,
+                EntityReplacement(
+                    entity_id="E0003",
+                    entity_type="PRIVATE_URL",
+                    policy="SYNTHESIZE",
+                    original=original,
+                    replacement=replacement,
+                ),
+            ),
+            slot_replacements=fixture.plan.slot_replacements,
+            secret_replacements=fixture.plan.secret_replacements,
+        )
+        texts = dict(fixture.final_texts)
+        texts[1] += f" Portfolio: {replacement}."
+        report = fixture.report(
+            final_texts=texts, entity_registry=registry, plan=transformed
+        )
+        fired = {violation.check for violation in report.violations}
+        self.assertNotIn(CHECK_ORIGINAL_ENTITY_PRESENT, fired)
 
     def test_project_surface_from_another_message_is_not_a_global_alias(self):
         fixture = AuditFixture()

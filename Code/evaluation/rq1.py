@@ -17,8 +17,9 @@ import re
 
 ALIGNMENT_REQUEST_SCHEMA_VERSION = "rq1-alignment-request-v1"
 ALIGNMENT_RESPONSE_SCHEMA_VERSION = "rq1-alignment-response-v1"
-EVALUATION_RESULT_SCHEMA_VERSION = "rq1-evaluation-result-v1"
-AGGREGATE_RESULT_SCHEMA_VERSION = "rq1-aggregate-result-v1"
+EVALUATION_RESULT_SCHEMA_VERSION = "rq1-evaluation-result-v2"
+AGGREGATE_RESULT_SCHEMA_VERSION = "rq1-aggregate-result-v2"
+AGENT_RESPONSE_SCHEMA_VERSION = "rq1-agent-response-v3"
 
 RELATIONS = (
     "SAME_ATOM",
@@ -31,6 +32,22 @@ RELATIONS = (
 
 MAX_PREDICTED_REQUIREMENTS = 50
 MAX_GOLD_REQUIREMENTS = 20
+
+RQ1_REQUIRED_TOP_LEVEL_FIELDS = {"requirements"}
+RQ1_ALLOWED_TOP_LEVEL_FIELDS = {
+    "requirements",
+    "decision",
+    "post_task_states",
+    "clarifications",
+}
+RQ1_REQUIRED_REQUIREMENT_FIELDS = {
+    "requirement_ref",
+    "requirement_summary",
+    "evidence_message_ids",
+}
+RQ1_ALLOWED_REQUIREMENT_FIELDS = RQ1_REQUIRED_REQUIREMENT_FIELDS | {
+    "pre_task_state"
+}
 
 
 class RQ1EvaluationError(ValueError):
@@ -182,10 +199,47 @@ def validate_agent_response(
     """Validate and normalize the public RQ1 Agent response."""
 
     _gold_atoms(instance)
-    response = _object(response, "agent response")
-    if set(response) != {"requirements"}:
+    contract = _object(instance.get("response_contract"), "response_contract")
+    if contract.get("schema_version") != AGENT_RESPONSE_SCHEMA_VERSION:
         raise RQ1EvaluationError(
-            "agent response must contain exactly the 'requirements' field"
+            "RQ1 response_contract must use "
+            f"{AGENT_RESPONSE_SCHEMA_VERSION!r}"
+        )
+    allowed_top_level_fields = {
+        _text(value, "response_contract.allowed_top_level_fields[]")
+        for value in _array(
+            contract.get("allowed_top_level_fields"),
+            "response_contract.allowed_top_level_fields",
+        )
+    }
+    allowed_requirement_fields = {
+        _text(value, "response_contract.allowed_requirement_item_fields[]")
+        for value in _array(
+            contract.get("allowed_requirement_item_fields"),
+            "response_contract.allowed_requirement_item_fields",
+        )
+    }
+    if not RQ1_ALLOWED_TOP_LEVEL_FIELDS.issubset(allowed_top_level_fields):
+        raise RQ1EvaluationError(
+            "RQ1 response_contract omits a declared unified top-level field"
+        )
+    if not RQ1_ALLOWED_REQUIREMENT_FIELDS.issubset(allowed_requirement_fields):
+        raise RQ1EvaluationError(
+            "RQ1 response_contract omits a declared Requirement item field"
+        )
+    response = _object(response, "agent response")
+    response_fields = set(response)
+    missing_response_fields = RQ1_REQUIRED_TOP_LEVEL_FIELDS.difference(response_fields)
+    unsupported_response_fields = response_fields.difference(allowed_top_level_fields)
+    if missing_response_fields:
+        raise RQ1EvaluationError(
+            "agent response is missing required RQ1 field(s): "
+            f"{sorted(missing_response_fields)}"
+        )
+    if unsupported_response_fields:
+        raise RQ1EvaluationError(
+            "agent response contains unsupported field(s): "
+            f"{sorted(unsupported_response_fields)}"
         )
     rows = _array(response.get("requirements"), "agent response.requirements")
     if len(rows) > MAX_PREDICTED_REQUIREMENTS:
@@ -197,10 +251,18 @@ def validate_agent_response(
     output: list[dict[str, Any]] = []
     for position, raw in enumerate(rows):
         item = _object(raw, f"requirements[{position}]")
-        expected = {"requirement_ref", "requirement_summary", "evidence_message_ids"}
-        if set(item) != expected:
+        item_fields = set(item)
+        missing_item_fields = RQ1_REQUIRED_REQUIREMENT_FIELDS.difference(item_fields)
+        unsupported_item_fields = item_fields.difference(allowed_requirement_fields)
+        if missing_item_fields:
             raise RQ1EvaluationError(
-                f"requirements[{position}] must contain exactly {sorted(expected)}"
+                f"requirements[{position}] is missing required field(s): "
+                f"{sorted(missing_item_fields)}"
+            )
+        if unsupported_item_fields:
+            raise RQ1EvaluationError(
+                f"requirements[{position}] contains unsupported field(s): "
+                f"{sorted(unsupported_item_fields)}"
             )
         ref = _text(item.get("requirement_ref"), f"requirements[{position}].requirement_ref")
         if ref.casefold().startswith("req_"):
@@ -549,6 +611,147 @@ def _prf(tp: int, fp: int, fn: int) -> dict[str, Any]:
     }
 
 
+def _match_evidence_claims(
+    predictions: list[dict[str, Any]],
+    requirement_ids: list[str],
+    atoms: Mapping[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Match target-level evidence claims to Gold groups one-to-one.
+
+    Requirement granularity is scored separately.  An evidence claim is one
+    ``(prediction_ref, message_id)`` pair, while a Gold unit is one
+    ``(requirement_id, evidence_group)`` pair.  A claim can cover a group when
+    its message ID is acceptable for that group, regardless of whether the
+    enclosing predicted Requirement was atomized correctly.  This prevents a
+    merge/split error from being repeated in the Evidence metric.
+    """
+
+    claims: list[dict[str, Any]] = []
+    for prediction_index, prediction in enumerate(predictions):
+        for evidence_position, message_id in enumerate(
+            prediction["evidence_message_ids"]
+        ):
+            claims.append(
+                {
+                    "prediction_index": prediction_index,
+                    "prediction_ref": prediction["requirement_ref"],
+                    "evidence_position": evidence_position,
+                    "message_id": deepcopy(message_id),
+                    "message_key": _id_key(message_id),
+                }
+            )
+
+    groups: list[dict[str, Any]] = []
+    acceptable_union: set[str] = set()
+    neutral_union: set[str] = set()
+    for gold_index, requirement_id in enumerate(requirement_ids):
+        atom = atoms[requirement_id]
+        for group_position, group in enumerate(atom["required_evidence_groups"]):
+            acceptable = {
+                _id_key(value) for value in group["acceptable_message_ids"]
+            }
+            acceptable_union.update(acceptable)
+            groups.append(
+                {
+                    "gold_index": gold_index,
+                    "gold_requirement_id": requirement_id,
+                    "group_position": group_position,
+                    "group_id": group["group_id"],
+                    "acceptable": acceptable,
+                }
+            )
+        neutral_union.update(
+            _id_key(value)
+            for value in atom.get("neutral_context_message_ids", [])
+        )
+
+    candidate_groups = [
+        [
+            group_index
+            for group_index, group in enumerate(groups)
+            if claim["message_key"] in group["acceptable"]
+        ]
+        for claim in claims
+    ]
+    group_to_claim: dict[int, int] = {}
+
+    def augment(claim_index: int, seen_groups: set[int]) -> bool:
+        for group_index in candidate_groups[claim_index]:
+            if group_index in seen_groups:
+                continue
+            seen_groups.add(group_index)
+            previous_claim = group_to_claim.get(group_index)
+            if previous_claim is None or augment(previous_claim, seen_groups):
+                group_to_claim[group_index] = claim_index
+                return True
+        return False
+
+    for claim_index in range(len(claims)):
+        augment(claim_index, set())
+
+    matched_pairs = sorted(
+        (
+            (claim_index, group_index)
+            for group_index, claim_index in group_to_claim.items()
+        ),
+        key=lambda pair: (pair[0], pair[1]),
+    )
+    matched_claim_indexes = {claim_index for claim_index, _ in matched_pairs}
+    matched_group_indexes = {group_index for _, group_index in matched_pairs}
+    false_positive_claims = [
+        claim
+        for index, claim in enumerate(claims)
+        if index not in matched_claim_indexes
+        and claim["message_key"] not in acceptable_union
+        and claim["message_key"] not in neutral_union
+    ]
+    ignored_claims = [
+        claim
+        for index, claim in enumerate(claims)
+        if index not in matched_claim_indexes and claim not in false_positive_claims
+    ]
+    missing_groups = [
+        group
+        for index, group in enumerate(groups)
+        if index not in matched_group_indexes
+    ]
+
+    def public_claim(claim: Mapping[str, Any]) -> dict[str, Any]:
+        return {
+            "prediction_ref": claim["prediction_ref"],
+            "message_id": deepcopy(claim["message_id"]),
+        }
+
+    return {
+        "tp": len(matched_pairs),
+        "fp": len(false_positive_claims),
+        "fn": len(missing_groups),
+        "matched_claims": [
+            {
+                **public_claim(claims[claim_index]),
+                "gold_requirement_id": groups[group_index][
+                    "gold_requirement_id"
+                ],
+                "evidence_group_id": groups[group_index]["group_id"],
+            }
+            for claim_index, group_index in matched_pairs
+        ],
+        "false_positive_claims": [
+            public_claim(claim) for claim in false_positive_claims
+        ],
+        "ignored_gold_or_neutral_claims": [
+            public_claim(claim) for claim in ignored_claims
+        ],
+        "missing_evidence_groups": [
+            {
+                "gold_requirement_id": group["gold_requirement_id"],
+                "evidence_group_id": group["group_id"],
+            }
+            for group in missing_groups
+        ],
+    }
+
+
 def score_rq1(
     instance: Mapping[str, Any],
     agent_response: Mapping[str, Any],
@@ -570,9 +773,6 @@ def score_rq1(
         len(requirement_ids) - len(pairs),
     )
 
-    evidence_tp = 0
-    evidence_fp = 0
-    evidence_fn = 0
     conditional_tp = 0
     conditional_fn = 0
     matched_rows: list[dict[str, Any]] = []
@@ -583,14 +783,6 @@ def score_rq1(
         selected = {
             _id_key(value) for value in prediction["evidence_message_ids"]
         }
-        acceptable = {
-            _id_key(value)
-            for group in atom["required_evidence_groups"]
-            for value in group["acceptable_message_ids"]
-        }
-        neutral = {
-            _id_key(value) for value in atom.get("neutral_context_message_ids", [])
-        }
         covered_group_ids: list[str] = []
         missing_group_ids: list[str] = []
         for group in atom["required_evidence_groups"]:
@@ -598,14 +790,11 @@ def score_rq1(
                 _id_key(value) for value in group["acceptable_message_ids"]
             }
             if selected.intersection(group_ids):
-                evidence_tp += 1
                 conditional_tp += 1
                 covered_group_ids.append(group["group_id"])
             else:
-                evidence_fn += 1
                 conditional_fn += 1
                 missing_group_ids.append(group["group_id"])
-        evidence_fp += len(selected.difference(acceptable).difference(neutral))
         matched_rows.append(
             {
                 "prediction_ref": prediction["requirement_ref"],
@@ -615,12 +804,9 @@ def score_rq1(
             }
         )
 
-    for gold_index, requirement_id in enumerate(requirement_ids):
-        if gold_index not in matched_gold_indexes:
-            evidence_fn += len(atoms[requirement_id]["required_evidence_groups"])
-    for prediction_index, prediction in enumerate(predictions):
-        if prediction_index not in matched_prediction_indexes:
-            evidence_fp += len(prediction["evidence_message_ids"])
+    evidence_alignment = _match_evidence_claims(
+        predictions, requirement_ids, atoms
+    )
 
     relation_counts = Counter(relations.values())
     conditional_recall = (
@@ -636,7 +822,11 @@ def score_rq1(
         "status": "SCORED",
         "official_metrics": {
             "requirement": requirement_score,
-            "evidence": _prf(evidence_tp, evidence_fp, evidence_fn),
+            "evidence": _prf(
+                evidence_alignment["tp"],
+                evidence_alignment["fp"],
+                evidence_alignment["fn"],
+            ),
             "exact_requirement_set_accuracy": int(
                 requirement_score["fp"] == 0 and requirement_score["fn"] == 0
             ),
@@ -653,6 +843,19 @@ def score_rq1(
                 requirement_id
                 for index, requirement_id in enumerate(requirement_ids)
                 if index not in matched_gold_indexes
+            ],
+        },
+        "evidence_alignment": {
+            "policy": "TARGET_LEVEL_MAX_CARDINALITY_CLAIM_TO_GROUP",
+            "matched_claims": evidence_alignment["matched_claims"],
+            "false_positive_claims": evidence_alignment[
+                "false_positive_claims"
+            ],
+            "ignored_gold_or_neutral_claims": evidence_alignment[
+                "ignored_gold_or_neutral_claims"
+            ],
+            "missing_evidence_groups": evidence_alignment[
+                "missing_evidence_groups"
             ],
         },
         "diagnostics": {
@@ -727,6 +930,7 @@ def aggregate_rq1_results(results: Iterable[Mapping[str, Any]]) -> dict[str, Any
 
 
 __all__ = [
+    "AGENT_RESPONSE_SCHEMA_VERSION",
     "AGGREGATE_RESULT_SCHEMA_VERSION",
     "ALIGNMENT_REQUEST_SCHEMA_VERSION",
     "ALIGNMENT_RESPONSE_SCHEMA_VERSION",

@@ -16,6 +16,9 @@ def _canonical_event(event: dict[str, Any], event_id: str) -> dict[str, Any]:
             "speaker": source.get("speaker"),
             "text": source.get("text"),
         },
+        "supporting_message_ids": deepcopy(
+            event.get("supporting_message_ids") or []
+        ),
         "event_type": event.get("event_type"),
         "value_updates": deepcopy(event.get("value_updates")),
         "value_removals": deepcopy(event.get("value_removals")),

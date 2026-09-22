@@ -19,8 +19,8 @@ eligibility 的 RQ。
 | RQ | 评价问题 | 主要结果 |
 |---|---|---|
 | RQ1 | Agent 能否找出真正相关的历史 Requirement 和证据？ | Requirement F1、Evidence F1 |
-| RQ2 | 对已经对齐的 relevant historical Requirements，Agent 能否恢复 target 前的真实有效状态？ | Matched State Score、Matched Full-State Exact |
-| RQ3 | Agent 能否根据 Pre-task State 和当前 task 构造确定的 Post-task State；若不能，能否指出具体阻塞点并提出有效澄清？ | Decision Accuracy、Post-State Score、Clarification Score |
+| RQ2 | 对已经对齐的 relevant historical Requirements，Agent 能否恢复 target 前的真实有效状态？ | Attribute Reconstruction、分维度分数、Matched Full-State Exact、Coverage |
+| RQ3 | Agent 能否根据 Pre-task State 和当前 task 构造确定的 Post-task State；若不能，能否指出具体阻塞点并提出有效澄清？ | Decision / Balanced Accuracy、Post-State、Clarification |
 | RQ4 | Agent 修改后的代码能否通过最终自动验证？ | Delivery Pass |
 
 四个 RQ 组成一条有明确职责边界的能力链：
@@ -162,6 +162,20 @@ Agent 返回结构化 JSON；代码修改直接保存在 workspace：
 
 ```json
 {
+  "requirements": [
+    {
+      "requirement_ref": "agent-local-1",
+      "requirement_summary": "Small Block prize rule",
+      "evidence_message_ids": [8, 21, 156],
+      "pre_task_state": {
+        "attributes": {},
+        "scope": {},
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ],
   "decision": "CLARIFY",
   "post_task_states": null,
   "clarifications": [
@@ -255,17 +269,28 @@ Agent 为每个预测 Requirement 输出本地引用、语义摘要和其选择�
 来自该 instance 的 C2 history。无需额外输出与 per-Requirement evidence 重复的
 `selected_history_message_ids`。
 
+RQ1 scorer 直接接受上述统一 response，而不是要求 Runner 先另存一个只含 RQ1 字段的 JSON。
+验证采用“必需字段 + 声明字段白名单”：顶层必须有 `requirements`，并允许统一协议声明的
+`decision`、`post_task_states`、`clarifications`；每个 Requirement 必须有
+`requirement_ref`、`requirement_summary`、`evidence_message_ids`，并允许 RQ2 声明的
+`pre_task_state`。未声明字段仍会被拒绝。验证通过后，scorer 内部只投影三个 RQ1 必需字段，
+因此 RQ2/RQ3 字段不会参与 RQ1 计分。对应 contract 为 `rq1-agent-response-v3`。
+
 ### 3.3 确定性 Evidence Gold
 
 每个 Gold Atom 保存：
 
 - `required_evidence_groups`：由 Pre-task State 的 current-support messages 确定性生成；
-- `neutral_context_message_ids`：完整 trajectory 中不再承担 current support 的旧消息；
+- `neutral_context_message_ids`：同 `family_id` 的全部 target 前 trajectory 中，不属于当前 Atom
+  current support 的消息；没有 family 时退化为该 Atom 自身 trajectory；
 - `trajectory_message_ids`：保留该 Atom 在 target 前的完整演化轨迹。
+- `family_trajectory_message_ids`：保留上述 family-wide neutral 边界，供审计使用。
 
-第一版中每个不同的 current-support message 形成一个 singleton evidence group。后续如果存在
-多个完全等价的消息来源，可以在同一 group 的 `acceptable_message_ids` 中列出多个 ID，但选择
-其中任意一个只形成一个 Evidence TP。
+每个 current-support Event 形成一个 evidence group。该 Event 的主 `source_message_id` 与其
+`supporting_message_ids` 中所有严格早于 target 的消息共同进入该组的
+`acceptable_message_ids`；若两个 Event group 因共享消息而重叠，则确定性合并，保证 groups
+两两不相交。选择同一 group 中任意一个 ID 只形成一个 Evidence TP。target 当下或之后的
+supporting message 永不进入 Gold，也不进入 C3 history。
 
 ### 3.4 一次 LLM Atom Relation Classification
 
@@ -335,17 +360,22 @@ subparts 时产生三个 FP 和一个 FN。
 RQ1 正式结果只保留一个完整 Evidence Precision/Recall/F1，不同时发布 Conditional 与
 End-to-End 两套主指标。
 
-对成功匹配的 Prediction–Gold pair：
+Evidence 与 Requirement 粒度评分解耦。对同一 target 构造：
 
-- 选择某 required group 中至少一个 acceptable message：Evidence TP +1；
-- 未覆盖 required group：Evidence FN +1；
-- 同组选择多个 acceptable messages：仍只计一个 TP，多出的 acceptable messages 不计 FP；
-- 选择 neutral context：既不增加 TP，也不增加 FP；
-- 选择该 Atom 的其他历史消息：Evidence FP +1。
+- Prediction claim：每个 `(prediction_ref, message_id)`；
+- Gold unit：每个 `(gold_requirement_id, evidence_group_id)`；
+- 合法 edge：claim 的 `message_id` 出现在该 group 的 `acceptable_message_ids` 中。
 
-对未匹配 Gold Atom，其全部 required evidence groups 自然成为 FN。对未匹配 Prediction，其提交的
-每个不同 evidence message ID 都成为 FP。Evidence 的归属单位是
-`(Requirement, EvidenceGroup)`；同一消息确实支持不同 Requirements 时，可以分别合法计入。
+在该二分图上执行确定性的 maximum-cardinality 一对一匹配：每个 matched claim/group 计一个
+Evidence TP；未匹配 Gold group 计一个 Evidence FN；未匹配 claim 只有在其 message ID 既不属于
+本 target 任一 Gold group 的 acceptable 集合、也不属于任一 Gold Atom 的 neutral 集合时，才计
+一个 Evidence FP。重复选择同组替代消息、把正确 Gold 证据放在错误粒度的预测 Requirement 下，
+或选择 family-neutral context，均保留在 diagnostics 中但不计 FP。
+
+因此一个 `MERGED_ATOMS` 或 `SUBPART_OF_ATOM` 错误仍只由 Requirement Score 惩罚，不会通过
+Requirement FP/FN 再把同一粒度错误复制到 Evidence Score。Evidence Score 衡量的是 target-level
+证据选择能力；Requirement 的原子划分和归属能力由 Requirement Score 衡量。若同一 message
+确实支持多个 Gold groups，则必须存在足够多的独立 claims，才能一对一覆盖这些 groups。
 
 `Conditional Evidence Recall` 只允许作为 `diagnostics` 中的错误分析值，不能进入正式 RQ1 指标、
 论文主表或综合分数。
@@ -414,8 +444,10 @@ C3 是最纯粹的 RQ2 setting；C2−C3 的差异反映 full history 中的噪�
 
 ### 4.3 Requirement 对齐与评分集合
 
-Evaluator 先使用 RQ1 的对齐结果，把 Agent 的 `requirement_ref` 映射到 Gold
-`requirement_id`。设成功对齐的集合为：
+Evaluator 使用与 RQ1 相同的通用 Requirement alignment 协议，把 Agent 的
+`requirement_ref + requirement_summary + evidence_message_ids` 映射到 Gold Requirement。
+Judge 只返回离散 Atom relation，确定性代码再做稳定的一对一 `SAME_ATOM` 匹配，不允许
+Judge 直接产生分数。设成功对齐的集合为：
 
 \[
 M_t = \{(r_{agent}, r_{gold}) \mid alignment\ accepted\}.
@@ -479,9 +511,9 @@ Gold 包括：
 - `ambiguity`；
 - `execution`。
 
-`requirement_title`、`family_id`、`state_id` 和 `supporting_event_ids` 用于 provenance、对齐和
-审计，不作为 Agent 必须复现的状态字段。`new_requirement_ids` 在 \(t^-\) 没有 State，因此
-不进入 RQ2 分母。
+`requirement_title`、`family_id`、`state_id` 和 `supporting_event_ids` 只存在于独立的
+provenance/alignment metadata，不得混入可评分 State，也不得要求 Agent 生成内部 ID。
+`new_requirement_ids` 在 \(t^-\) 没有 State，因此不进入 RQ2 分母。
 
 同一 target 的 C2/C3 使用同一份真实 \(G(t^-)\) Gold。condition 改变的是可见历史，不是
 项目事实。
@@ -498,12 +530,13 @@ Gold 包括：
 | unordered set | element Precision、Recall、F1 |
 | ordered list / workflow | 顺序敏感比较；必要时使用 normalized edit score |
 | object / record | 递归到叶子字段后 macro average |
-| free-text requirement fact | 拆成审核后的 atomic facts，再计算 fact-level F1 |
-| null / unknown / absent | 三者分开；不得把“未提及”自动解释为 `null` 或 `false` |
+| free-text requirement fact | 由冻结的 API Judge 返回 `EQUIVALENT/NOT_EQUIVALENT/UNCERTAIN`，确定性映射为 1/0/0 |
+| null / unknown / absent | 三者分开；未知且未标注的 Gold leaf 使用 `SKIP`，明确为空才用 `NULL_EXACT` |
 
-自然语言仅允许做格式归一化和语义等价匹配，不能因为措辞不同直接判错。例如“每完成 100
-次销售触发”与“100 sales per draw”可以等价；但 `$300` 与 `$500`、`DEFERRED` 与
-`REMOVED` 不得视为近似正确。无法由确定性规则判断的语义等价项进入盲化人工复核。
+自然语言仅允许通过冻结的 API Judge 做语义等价判断。例如“每完成 100 次销售触发”与
+“100 sales per draw”可以等价；但 `$300` 与 `$500`、`DEFERRED` 与 `REMOVED` 必须由
+确定性 comparator 判错。Judge 不处理 enum、boolean、number、set 或 null，也不覆盖 exact
+结果。Judge 返回 `UNCERTAIN` 时保守计 0；基础设施失败则整条 run 标记 `JUDGE_ERROR` 后重跑。
 
 五个 State dimensions 的比较为：
 
@@ -512,15 +545,18 @@ Gold 包括：
 | `attributes` | 按 field-specific typed comparator 计算，再对适用字段平均 |
 | `scope` | `persistence` exact；`components`、`contexts` 默认 set F1 |
 | `lifecycle_status` | `ACTIVE/DEFERRED/REMOVED/...` exact match |
-| `ambiguity` | null/open 状态、dimension、涉及字段和候选值分别比较 |
+| `ambiguity` | `null` 或 record array；按 `(dimension, description)` 等语义字段做最大权一对一集合匹配 |
 | `execution` | status exact；observed behavior 使用审核后的 atomic facts |
 
-Gold 中无法可靠标注或对该 Requirement 不适用的字段不进入分母。禁止为了提高一致性而把
-整个复杂 attribute 压成一个字符串。
+所有闭合枚举（包括 lifecycle、persistence、execution status、ambiguity status/dimension）
+统一使用 normalized exact，不调用 LLM。Gold 中无法可靠标注或对该 Requirement 不适用的
+字段不进入分母。完整 State 使用 closed-world 语义：Agent 多输出的 stale/未知字段计 FP；
+空 object dimension 记 `N/A`，不能凭空贡献满分。禁止为了提高一致性而把整个复杂 attribute
+压成一个字符串。
 
 ### 4.7 RQ2 指标
 
-对每个 matched Requirement，先计算适用 dimensions 的平均：
+对每个 matched Requirement，仍计算适用 dimensions 的平均，作为诊断性辅助指标：
 
 \[
 StateScore(r)=\operatorname{mean}_{d\in D_r} Score(r,d).
@@ -532,15 +568,20 @@ StateScore(r)=\operatorname{mean}_{d\in D_r} Score(r,d).
 MatchedStateScore_t = \operatorname{mean}_{r\in M_t} StateScore(r).
 \]
 
-正式报告：
+正式主结果按能力分列，不再把五维等权平均当作头号指标：
 
-- `Matched State Score`：允许 State field 部分正确；
+- `Attribute Reconstruction Score`：真正承载属性恢复能力的主指标；
+- `Per-Dimension Scores`：`attributes/scope/lifecycle_status/ambiguity/execution` 分列报告；
 - `Matched Full-State Exact`：所有 matched Requirements 的全部适用字段都正确时为 1；
 - `Reconstruction Coverage`：matched Gold Requirements 的比例，单独报告；
 - C2、C3 分条件结果；
 - `C3 − C2`：移除无关历史与 stale information 后的增益。
 
-RQ2 主分数中不再报告 `C2 − C1`，因为 C1 不构成正式 reconstruction condition。
+`Matched State Score` 只保留为 auxiliary，不能单独承担主要结论。每次正式实验还必须报告
+oracle-aligned 常量 baseline：`attributes={}`、`persistence=PROJECT_PERSISTENT`、
+`lifecycle_status=ACTIVE`、`ambiguity=null`、`execution=null`。该 baseline 与各维分布共同揭示
+类别不平衡，不能代替 Coverage 或 RQ1 selection 指标。RQ2 主结果中不报告 `C2 − C1`，因为
+C1 不构成正式 reconstruction condition。
 
 ---
 
@@ -599,7 +640,9 @@ Agent 必须：
 2. 对每个 affected Requirement 输出完整 `post_task_state`；
 3. 对 target 新引入的 Requirement 输出其第一个 State；
 4. 保留未被当前 task 改变、但仍适用于该 Requirement 的字段；
-5. 不把历史中的 superseded value 重新带入 \(G(t^+)\)。
+5. 被当前 task 明确删除或替换的属性必须从完整 `state.attributes` 中省略，并列入
+   `removed_attribute_keys`；
+6. 不把历史中的 superseded value 重新带入 \(G(t^+)\)。
 
 示例：
 
@@ -619,6 +662,7 @@ Agent 输出结构：
       "requirement_ref": "agent-local-1",
       "requirement_summary": "Small Block prize rule",
       "change_type": "MODIFIED",
+      "removed_attribute_keys": [],
       "state": {
         "attributes": {"prize_amount_usd": 500},
         "scope": {},
@@ -635,10 +679,10 @@ Agent 输出结构：
 Post-task State 使用与 RQ2 相同的 typed field comparators，但评分范围是 target 的
 `affected Requirements`，并与 Gold \(G(t^+)\) 比较。
 
-已有 historical Requirements 继续使用前序 `requirement_ref` 对齐；target 首次引入的新
-Requirement 不属于 RQ1/RQ2 的历史集合，Evaluator 应使用 `requirement_summary`、target
-evidence 和 Post-state fields 将其直接对齐到 affected Gold Requirement，不能因它没有
-RQ1 match 而排除。
+Evaluator 对所有 affected Requirements 使用同一个通用 alignment API。已有 historical
+Requirements 可利用前序 summary/evidence；target 首次引入的 Requirement 使用
+`requirement_summary`、target task 和 `introduced_by_target` metadata 对齐。两类 Requirement
+均进入同一次一对一匹配，不能因新 Requirement 没有 RQ1 match 而排除。
 
 ### 5.4 Gold = CLARIFY
 
@@ -684,13 +728,18 @@ Agent 不得自行选择一个候选值并伪造完整 \(G(t^+)\)。它应输出
 
 ### 5.5 RQ3 Gold 的人工冻结
 
-自动构造器只能生成 decision 和 ambiguity candidates。正式 Gold 必须由人工审核并冻结：
+自动构造器只能生成 decision 和 ambiguity candidates。正式 Gold 必须由至少两名不同审核者
+独立检查并完成 adjudication 后冻结：
 
 - 每个 condition 的最终 `ACT/CLARIFY`；
 - ACT branch 的 affected Requirement Post-task States；
 - CLARIFY branch 的 blocking Requirement、dimension、field 和缺失信息；
 - 可接受 clarification questions 的语义范围；
 - 当前 ambiguity 是否 material、是否能被已有 evidence 消解。
+
+冻结工具必须拒绝缺少 C1/C2/C3 任一 branch、缺少 reviewer 身份、未 adjudicate、ACT 缺少完整
+Post-state，或 CLARIFY 缺少 `acceptable_question_facts` 的 review。C1 必须优先独立审核；不能
+从项目级 ambiguity 或 C2/C3 candidate 自动复制，因为它是最可能产生 condition 差异的分支。
 
 如果 State Graph 在 CLARIFY 情况下保存了带 `OPEN ambiguity` 的 Post snapshot，该 snapshot
 只表示“截至当前消息仍不确定”，不能被当作唯一可执行的 \(G(t^+)\)。
@@ -702,13 +751,16 @@ Agent 不得自行选择一个候选值并伪造完整 \(G(t^+)\)。它应输出
 - `Decision Correct`：Agent 是否选择 ACT；
 - `Post-State Score`：复用 RQ2 typed State Scoring，对 affected Requirements 的
   \(\widehat{G}(t^+)\) 与 Gold \(G(t^+)\) 比较；
-- `Post-State Exact`：全部 affected Requirements 的完整适用字段是否正确；
+- `Post-State Exact`：全部 affected Requirements 的完整适用字段、删除声明和 Requirement 集合
+  是否正确；
 - `ACT End-to-End Success`：decision 正确且 `Post-State Exact = 1`。
 
 如果 Gold 为 ACT 而 Agent 选择 CLARIFY，Decision 记错，`ACT End-to-End Success = 0`；由于
 Agent 没有输出 Post-state，不能把缺失输出排除后只报告一个看似较高的 State Score。
-Agent 遗漏任一 affected Requirement 时，该 Requirement 的 Post-state 得 0；这里不能沿用
-RQ2 的 matched-only 规则，因为“正确更新哪些 Requirements”本身就是 RQ3 的能力范围。
+Agent 遗漏任一 affected Requirement 时，该 Requirement 的 Post-state 得 0；额外 Requirement
+同样按 closed-world false positive 惩罚。这里不能沿用 RQ2 的 matched-only 规则，因为“正确
+更新哪些 Requirements”本身就是 RQ3 的能力范围。Gold 的 `changed_paths/removed_paths` 用于
+审计 field-level delta；最终得分仍比较完整 Post-state，防止旧属性被错误保留。
 
 ### 5.7 CLARIFY branch 评分
 
@@ -718,11 +770,11 @@ RQ2 的 matched-only 规则，因为“正确更新哪些 Requirements”本身�
 (Requirement, Dimension, Field, Missing Information)
 ```
 
-Evaluator 先对齐 Requirement，再评价：
+Evaluator 先用通用 alignment API 对齐 Requirement，再评价：
 
 - `Requirement Correct`：是否指向真正阻塞的 Requirement；
 - `Dimension Correct`：是否识别正确的 uncertainty dimension；
-- `Field Correct`：是否进一步定位到具体 field；
+- `Field Correct`：仅在 Gold field 非空时 exact；Gold field 为 `null` 时为 N/A；
 - `Blocking Issue F1`：对完整 blocking tuples 计算 Precision、Recall、F1；
 - `Question Validity`：问题是否真正询问缺失信息，且答案能够消除对应阻塞；
 - `Clarification Success`：decision 正确、所有 material blocking issues 被覆盖、且没有无关
@@ -730,7 +782,8 @@ Evaluator 先对齐 Requirement，再评价：
 
 一个有效问题必须满足：不预设未经证实的答案；不重复询问历史中已经明确的信息；具体到
 client 能直接回答；其答案确实能够在候选 States 之间作出选择。自然语言措辞不同但询问同一
-blocking fact 时视为等价；无法确定时进入盲化人工复核。
+blocking fact 时，由冻结的 clarification API Judge 返回离散的 issue equivalence 与 question
+validity；Judge 不直接给最终分数，`UNCERTAIN` 保守计错。
 
 Gold ambiguity 影响整个 dimension、确实无法定位单一 field 时，`field` 可以为 `null`，此时
 `Field Correct` 记为不适用；只要可以定位具体字段，就必须填写，不能用宽泛 dimension 代替。
@@ -739,12 +792,19 @@ Gold ambiguity 影响整个 dimension、确实无法定位单一 field 时，`fi
 
 正式报告：
 
-- `Decision Accuracy`；
+- `Decision Accuracy`、`Balanced Accuracy`；
 - `ACT Recall`、`CLARIFY Recall`；
 - ACT targets 的 `Post-State Score`、`Post-State Exact`、`ACT End-to-End Success`；
 - CLARIFY targets 的 `Requirement/Dimension/Field Correct`、`Blocking Issue F1`、
   `Question Validity`、`Clarification Success`；
 - C1/C2/C3 分条件结果。
+
+每个 condition 同时报告 all-ACT 与 all-CLARIFY 常量 decision baselines，以及 Gold class
+counts。对 `CLARIFY Recall`、`Unsupported Autonomy Rate` 等小样本比例，报告分子/分母与
+two-sided exact binomial 95% CI；当 CLARIFY 样本只来自单一项目时，不作跨项目泛化主张。
+`dimension` 分布高度集中时只作诊断，不把 Dimension Accuracy 单独作为能力主张。
+`Unsupported Autonomy Rate` 的分母是 Gold CLARIFY targets，`Unnecessary Clarification Rate`
+的分母是 Gold ACT targets；不得用全部 targets 稀释这两类风险。
 
 同时区分：
 
@@ -910,17 +970,21 @@ delivery 成功。
 
 1. `public_materializer`：按各 RQ 的 availability 生成安全输入；RQ2 不生成正式 C1 run；
 2. `agent_runner`：在独立 workspace 中调用 Agent，并保存 JSON、patch 和日志；
-3. `requirement_aligner`：当前已由 `Code/evaluation/rq1.py` 实现 all-pairs relation contract、
-   无人工复核的一对一对齐、RQ1 正式指标及 target-level macro 聚合，结果也供 RQ2 使用；
-4. `rq2_typed_state_scorer`：读取 field comparator specs，只在 matched Requirements 上评价
-   \(G(t^-)\)，并另报 coverage；
-5. `rq3_branch_scorer`：先评价 ACT/CLARIFY，再分别评价 Post-state 或 blocking
-   clarification；
-6. `rq4_validator_runner`：只对最终 RQ3 Gold 为 ACT 的 condition 执行 target-specific
+3. `requirement_aligner`：`Code/evaluation/alignment.py` 为 RQ2/RQ3 提供通用 all-pairs relation
+   contract 与确定性一对一匹配；RQ1 保持自己的 v3 对齐契约与证据评分；
+4. `typed_state_scorer`：`Code/evaluation/state.py` 负责 exact/set/recursive/closed-world 评分，
+   只把自由文本语义叶交给 API Judge；
+5. `rq2_typed_state_scorer`：`Code/evaluation/rq2.py` 与 `Code/evaluate_rq2.py` 已实现两阶段离线
+   request/response、主/辅助指标、coverage 与 oracle-aligned 常量 baseline；
+6. `rq3_branch_scorer`：`Code/evaluation/rq3.py` 与 `Code/evaluate_rq3.py` 已实现 decision、ACT
+   Post-state、CLARIFY blocker/question 评分及 all-ACT/all-CLARIFY baseline；
+7. `rq3_gold_review`：`Code/stage2/rq3_review.py` 与 `Code/finalize_rq3_gold.py` 生成 review template，
+   并仅在双人审核和 adjudication 完成后冻结 condition-specific Gold；
+8. `rq4_validator_runner`：只对最终 RQ3 Gold 为 ACT 的 condition 执行 target-specific
    hidden validator，根据 exit code 生成 `rq4_pass`。
 
-当前 RQ1 instances 已包含确定性 Atom/Evidence Gold；RQ2/RQ3 仍包含 provisional Gold，且 RQ4 的 `acceptance_criteria`、
-`validator_ids` 为空、`execution_ready=false`。因此现阶段可以测试 materialization 和 Agent
-运行流程，但在 RQ2 field comparator review、RQ3 branch Gold review 和 RQ4 hidden
-validators 完成前不能发布对应正式分数。当前生成器已经输出 RQ1/RQ2/RQ3 v2 response
-contracts；任何遗留 v1 instance 必须先重新生成 public inputs。
+当前 RQ1 instances 已包含确定性 Atom/Evidence Gold；RQ2 使用 v3 contract，但仍保持
+`PROVISIONAL_REQUIRES_FIELD_REVIEW`，因此只能生成诊断分数；RQ3 使用 v3 contract，但 25 个
+targets 的 condition-specific Gold 仍须人工冻结；RQ4 的 `acceptance_criteria`、`validator_ids`
+仍为空且 `execution_ready=false`。对应 review/validator 完成前不能发布正式分数。任何遗留
+RQ2/RQ3 v1/v2 instance 必须先重新生成 public inputs。

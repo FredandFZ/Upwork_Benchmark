@@ -206,13 +206,16 @@ RQ1 将“一张 Requirement Graph 等于一个 Independent Gold Atom”和 `DIR
 对每个直接相关的历史 Requirement，构造器生成：
 
 - `current_support_event_ids`：支持 Pre-task 当前状态的 Events；
-- `current_support_message_ids`：上述 Events 对应的消息；
+- `current_support_message_ids`：上述 Events 的 source 与 target 前 supporting messages 的有序并集；
 - `trajectory_event_ids`：target 前该 Requirement 的完整 Event trajectory；
-- `trajectory_message_ids`：完整 trajectory 对应的有序消息；
+- `trajectory_message_ids`：完整 trajectory 的 source 与 target 前 supporting messages 的有序并集；
+- `family_trajectory_message_ids`：同 `family_id` 的全部 Pre-task Requirement trajectories；无
+  family 时等于本 Requirement trajectory；
 - `core_message_ids`：与 current-support messages 相同，作为兼容字段；
-- `required_evidence_groups`：每个 current-support message 对应一个确定性 group；
-- `neutral_context_message_ids`：trajectory 中已不再提供 current support 的旧消息；
-- `context_review_status=DETERMINISTIC_TRAJECTORY_CONTEXT`。
+- `required_evidence_groups`：每个 current-support Event 对应一个确定性 group，组内包含该
+  Event 在 target 前可见的 source/supporting message alternatives；重叠 groups 会合并；
+- `neutral_context_message_ids`：family trajectory 中不属于本 Atom current support 的消息；
+- `context_review_status=DETERMINISTIC_FAMILY_TRAJECTORY_CONTEXT`。
 
 ### 3.4 历史池与条件引用
 
@@ -375,10 +378,11 @@ outputs/stage2/<project_id>/RQ1/<target_id>_RQ1.json
 1. 从 `affected_requirement_ids` 中找出 Pre-task snapshot 已存在的 Requirements；
 2. 将 target 首次引入、Pre-task 不存在的 Requirements 单独放入 `new_requirement_ids`；
 3. 对每个历史 Requirement 从 State Graph 提取当前支持 Events；
-4. 提取该 Requirement 在 target 前的完整 Event trajectory；
-5. 将 Event IDs 映射为有序 message IDs；
-6. 将 current-support messages 构造成 `required_evidence_groups`；
-7. 将 trajectory 中不属于 current support 的消息构造成 `neutral_context_message_ids`；
+4. 提取该 Requirement 以及同 family Requirements 在 target 前的完整 Event trajectories；
+5. 将每个 Event 的 source 与 target 前可见的 `supporting_message_ids` 映射为有序 message IDs；
+6. 每个 current-support Event 形成一个 `required_evidence_group`，共享 message 的 groups 合并；
+7. 将 family trajectory 中不属于本 Atom current support 的消息构造成
+   `neutral_context_message_ids`；
 8. 按“一张 Requirement Graph 等于一个 Independent Gold Atom”构造
    `gold_requirement_atoms`；
 9. 使用 `DIRECT_AFFECTED_ONLY` 冻结 Gold，不追加 inherited/preserved Requirements，也不进入
@@ -405,11 +409,12 @@ RQ1 文件的核心不是重复保存完整 State，而是保存“哪些历史 
       "required_evidence_groups": [
         {
           "group_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_EG001",
-          "acceptable_message_ids": [101]
+          "acceptable_message_ids": [99, 101]
         }
       ],
       "neutral_context_message_ids": [85],
-      "trajectory_message_ids": [85, 101]
+      "trajectory_message_ids": [85, 99, 101],
+      "family_trajectory_message_ids": [72, 85, 99, 101]
     }
   },
   "directly_affected_historical_requirement_ids": [
@@ -424,22 +429,23 @@ RQ1 文件的核心不是重复保存完整 State，而是保存“哪些历史 
       "current_support_event_ids": [
         "REQ_BADGE_CATALOG_AND_PRESENTATION_E002"
       ],
-      "current_support_message_ids": [101],
+      "current_support_message_ids": [99, 101],
       "trajectory_event_ids": [
         "REQ_BADGE_CATALOG_AND_PRESENTATION_E001",
         "REQ_BADGE_CATALOG_AND_PRESENTATION_E002"
       ],
-      "trajectory_message_ids": [85, 101],
-      "core_message_ids": [101],
+      "trajectory_message_ids": [85, 99, 101],
+      "family_trajectory_message_ids": [72, 85, 99, 101],
+      "core_message_ids": [99, 101],
       "required_evidence_groups": [
         {
           "group_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_EG001",
-          "acceptable_message_ids": [101]
+          "acceptable_message_ids": [99, 101]
         }
       ],
-      "context_message_ids": [85],
-      "neutral_context_message_ids": [85],
-      "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT"
+      "context_message_ids": [72, 85],
+      "neutral_context_message_ids": [72, 85],
+      "context_review_status": "DETERMINISTIC_FAMILY_TRAJECTORY_CONTEXT"
     }
   },
   "derivation_scope": "DIRECT_AFFECTED_ONLY",
@@ -447,12 +453,12 @@ RQ1 文件的核心不是重复保存完整 State，而是保存“哪些历史 
 }
 ```
 
-`required_evidence_groups` 是正式 Evidence Recall 的 Gold 单位。当前自动构造中每个 group
-包含一个 current-support message；未来即使允许同一 group 保存多个等价 message IDs，覆盖该
-group 仍只计一个 TP。`neutral_context_message_ids` 既不计 TP 也不计 FP。完整 trajectory 继续
-用于 C3 和审计，但不会全部强制成为 RQ1 Evidence FN。
+`required_evidence_groups` 是正式 Evidence Recall 的 Gold 单位。当前自动构造把同一 Event 的
+source/supporting messages 作为同组 alternatives；覆盖其中任一 ID 仍只计一个 TP。
+`neutral_context_message_ids` 既不计 TP 也不计 FP。完整本 Requirement trajectory 继续用于 C3，
+family trajectory 用于扩大确定性的 neutral 边界与审计，但二者都不会全部强制成为 Evidence FN。
 
-RQ1 response contract 为 `rq1-agent-response-v2`，只要求：
+RQ1 response contract 为 `rq1-agent-response-v3`。RQ1 的最小 projection 只要求：
 
 ```json
 {
@@ -466,8 +472,11 @@ RQ1 response contract 为 `rq1-agent-response-v2`，只要求：
 }
 ```
 
-不再要求冗余的 `selected_history_message_ids`。`requirement_ref` 必须唯一且不能使用内部
-`REQ_*` ID，evidence IDs 必须来自 C2 history。
+统一 Agent response 可以在顶层同时包含 `decision`、`post_task_states`、`clarifications`，并在
+每个 Requirement 中包含 `pre_task_state`；这些是声明白名单中的字段，不会被 RQ1 scorer 拒绝。
+scorer 验证后投影出上面的三个 RQ1 字段。未声明字段仍严格拒绝。不再要求冗余的
+`selected_history_message_ids`。`requirement_ref` 必须唯一且不能使用内部 `REQ_*` ID，evidence
+IDs 必须来自 C2 history。
 
 ---
 
@@ -524,8 +533,10 @@ RQ1，不通过构造伪造第二次惩罚。
 
 1. 在 Task Gold 的 Pre-task snapshot 中读取 `state_id`；
 2. 从 Requirement State Graph 定位该 State；
-3. 展开 `attributes`、`scope`、`lifecycle_status`、`ambiguity` 和 `execution`；
-4. 保存 title/family/state/event provenance，供 evaluator 对齐和审计；
+3. 展开 `attributes`、`scope`、`lifecycle_status`、`ambiguity` 和 `execution`；其中
+   `ambiguity` 规范化为 `null` 或 record array，不再以 Event ID 作动态 key；
+4. 把 title/family/state/event provenance 单独保存，供 evaluator 对齐和审计，不混入可评分
+   State；
 5. 校验所有 `supporting_event_ids` 的 source message 均严格早于 target；
 6. 禁止读取 Post-task State 的新值回填 Pre-task State。
 
@@ -540,21 +551,27 @@ field 保存 comparator metadata。默认规则如下：
 
 | 数据角色 | comparator |
 |---|---|
-| boolean / enum / identifier | `EXACT` |
-| integer / amount / threshold | `NUMERIC_EXACT` |
+| boolean | `BOOLEAN_EXACT` |
+| 闭合 enum（lifecycle、persistence、status、dimension） | `NORMALIZED_EXACT` |
+| integer / amount / threshold | `NUMBER_EXACT` |
 | unordered collection | `SET_F1` |
-| ordered workflow / priority list | `ORDERED_SEQUENCE` |
-| nested object | `RECURSIVE_FIELDS` |
-| natural-language Requirement fact | `ATOMIC_FACT_F1` |
+| nested object | `RECURSIVE_FIELDS`，默认 closed-world |
+| unordered record array | `UNORDERED_RECORD_F1`，最大权一对一匹配 |
+| natural-language Requirement fact | `SEMANTIC_FACT`，API Judge 只返回离散等价关系 |
 | Gold 明确允许误差的数值 | `NUMERIC_TOLERANCE`，必须保存 tolerance |
+| 未标注/不可靠的 unknown null | `SKIP`，`score=false` |
 
 构造器可以根据 JSON 类型生成初始 comparator candidate，但以下内容必须人工审核：
 
 - array 是 set 还是 ordered sequence；
 - free text 应拆成哪些 atomic facts；
 - 数值是否允许 tolerance；
-- `null` 表示不适用、未知还是明确为空；
+- `null` 表示不适用、未知还是明确为空；未知不得用 `NULL_EXACT` 给常量预测器送分；
 - 哪些 field 因 Gold 不可靠而排除评分。
+
+构造器必须通过 enum path 白名单分配 comparator，不能使用“凡 string 均走语义 Judge”的
+类型启发式。任何 `source_event_id`、Event ID、State ID 或 Requirement ID 路径都必须
+`score=false`，并在 schema validation 中禁止进入可评分 State。
 
 未完成 comparator review 的 instance 可以生成，但必须保持 provisional，不能用于正式 RQ2
 分数。
@@ -571,9 +588,9 @@ valid immediately before the current client task. Do not apply the current task.
 
 ```json
 {
-  "schema_version": "rq2-agent-response-v2",
+  "schema_version": "rq2-agent-response-v3",
   "required_fields": ["requirements"],
-  "requirement_item_fields": [
+  "required_requirement_item_fields": [
     "requirement_ref",
     "requirement_summary",
     "evidence_message_ids",
@@ -586,18 +603,20 @@ valid immediately before the current client task. Do not apply the current task.
     "ambiguity",
     "execution"
   ],
+  "ambiguity_representation": "NULL_OR_ARRAY_OF_RECORDS",
+  "complete_state_closed_world": true,
+  "unexpected_state_fields_are_false_positives": true,
   "internal_ids_forbidden": true
 }
 ```
 
-现有 `rq2-agent-response-v1` 中的 `current_state` 与这里的语义相同，但实现同步时必须迁移为
-`pre_task_state` 并提升 contract version，避免新旧输出混用。
+遗留 v1/v2 输出必须迁移并重新生成，不能与 v3 混用。
 
 ### 6.7 RQ2 `construction_gold` schema
 
 ```json
 {
-  "status": "PROVISIONAL_REQUIRES_COMPARATOR_REVIEW",
+  "status": "PROVISIONAL_REQUIRES_FIELD_REVIEW",
   "gold_requirement_ids": [
     "REQ_BADGE_CATALOG_AND_PRESENTATION"
   ],
@@ -606,10 +625,6 @@ valid immediately before the current client task. Do not apply the current task.
   ],
   "states": {
     "REQ_BADGE_CATALOG_AND_PRESENTATION": {
-      "requirement_id": "REQ_BADGE_CATALOG_AND_PRESENTATION",
-      "requirement_title": "Badge Catalog and Presentation",
-      "family_id": "ACHIEVEMENT_SYSTEM",
-      "state_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_S002",
       "attributes": {},
       "scope": {
         "persistence": "PROJECT_PERSISTENT",
@@ -618,10 +633,13 @@ valid immediately before the current client task. Do not apply the current task.
       },
       "lifecycle_status": "ACTIVE",
       "ambiguity": null,
-      "execution": null,
-      "supporting_event_ids": [
-        "REQ_BADGE_CATALOG_AND_PRESENTATION_E002"
-      ]
+      "execution": null
+    }
+  },
+  "state_provenance": {
+    "REQ_BADGE_CATALOG_AND_PRESENTATION": {
+      "state_id": "REQ_BADGE_CATALOG_AND_PRESENTATION_S002",
+      "supporting_event_ids": ["REQ_BADGE_CATALOG_AND_PRESENTATION_E002"]
     }
   },
   "state_dimensions": [
@@ -660,9 +678,9 @@ valid immediately before the current client task. Do not apply the current task.
 }
 ```
 
-`states` 同样以 `requirement_id` 为动态 key。每个 State 对象固定包含
-`requirement_id`、`requirement_title`、`family_id`、`state_id`、`attributes`、`scope`、
-`lifecycle_status`、`ambiguity`、`execution` 和 `supporting_event_ids`。
+`states` 仍以 researcher-side `requirement_id` 为动态 key，但其 value 只包含五个语义
+dimensions。内部 ID 与 supporting Events 进入独立 provenance；Agent 不会看到动态 key 或
+provenance。`ambiguity` 只能为 `null` 或 array，数组元素中不得出现 Event ID。
 
 `state_dimensions` 不再包含 `selection`。`field_scoring_specs` 同样以 Requirement 和 field
 为动态 key；它决定 evaluator 如何比较状态，但不提供给 Agent。
@@ -725,11 +743,16 @@ RQ3 复用 RQ4 的 transition helper，但不关联代码：
 3. 对已有 Requirement 展开 Pre-task 和 Post-task State；
 4. 对新 Requirement 使用 `before = null`，并展开其第一个 Post-task State；
 5. 比较 `attributes`、`scope`、`lifecycle_status`、`ambiguity`、`execution`；
-6. 生成 `delta.change_type` 与 `delta.changed_fields`；
-7. 保存 target Events，说明 transition 是由哪个当前 task 事实触发的。
+6. 生成 `delta.change_type`、dimension-level `changed_fields`、field-level `changed_paths` 与
+   `removed_paths`；例如删除 `big_block_ticket_cycle` 记录为
+   `attributes.big_block_ticket_cycle`；
+7. 把 State/Event ID 保存到独立 `state_provenance`，不混入 before/after 可评分 State；
+8. 保存 target Events，说明 transition 是由哪个当前 task 事实触发的。
 
 RQ3 必须保存完整 Post-task State，而不是只保存 changed fields。这样 evaluator 才能检查 Agent
-是否既应用了新要求，又保留了未被 target 覆盖的有效字段。
+是否既应用了新要求，又保留了未被 target 覆盖的有效字段。Agent 输出中，被删除属性必须从
+完整 State 省略，并显式列入 `removed_attribute_keys`；完整 State 的额外旧字段按 closed-world
+规则计 false positive。
 
 ### 7.4 Blocking ambiguity candidates
 
@@ -785,7 +808,8 @@ CLARIFY。C2/C3 拥有相同有效 evidence 时应得到相同 Gold；如不一�
 
 ### 7.6 人工审核与 branch 冻结
 
-人工审核后，每个 condition 必须冻结为以下两个互斥 branch 之一。
+至少两名不同审核者完成 adjudication 后，每个 condition 必须冻结为以下两个互斥 branch
+之一。C1 必须独立判定，不能从 C2/C3 candidate 自动复制；C2/C3 若不同必须写明证据差异理由。
 
 ACT branch：
 
@@ -843,7 +867,7 @@ the concrete clarification needed to make that state unique.
 
 ```json
 {
-  "schema_version": "rq3-agent-response-v2",
+  "schema_version": "rq3-agent-response-v3",
   "required_fields": [
     "decision",
     "post_task_states",
@@ -868,17 +892,33 @@ the concrete clarification needed to make that state unique.
     "missing_information",
     "question"
   ],
+  "post_task_state_item_fields": [
+    "requirement_ref",
+    "requirement_summary",
+    "change_type",
+    "removed_attribute_keys",
+    "state"
+  ],
+  "state_fields": [
+    "attributes",
+    "scope",
+    "lifecycle_status",
+    "ambiguity",
+    "execution"
+  ],
+  "ambiguity_representation": "NULL_OR_ARRAY_OF_RECORDS",
+  "complete_state_closed_world": true,
+  "unexpected_state_fields_are_false_positives": true,
   "internal_ids_forbidden": true
 }
 ```
 
 ACT branch 的每个 `post_task_states` item 还必须包含 `requirement_ref`、
-`requirement_summary`、`change_type` 和完整 `state`。对 target 首次引入的 Requirement，
+`requirement_summary`、`change_type`、`removed_attribute_keys` 和完整 `state`。对 target 首次引入的 Requirement，
 `requirement_summary` 是 evaluator 建立对齐的必要字段。clarification 中的 `field` 必须存在，
 但 Gold 确实无法定位单一字段时允许为 `null`。
 
-现有只要求 `decision`、`clarification` 的 `rq3-agent-response-v1` 无法评价
-\(G(t^+)\)，实现时必须升级并重新生成 instance。
+遗留 rq3 response v1/v2 无法表达完整的 closed-world State 与删除声明，必须重新生成。
 
 ### 7.8 RQ3 provisional `construction_gold`
 

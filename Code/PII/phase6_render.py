@@ -13,6 +13,7 @@ fingerprints -- never a sensitive value.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
@@ -47,12 +48,16 @@ from .textutil import (
     RESERVED_DOMAIN_RE,
     URL_RE,
     contains_value,
+    contained_in_any,
     find_terms_outside_pii,
     fingerprint,
     occurrence_count,
     private_resource_identifiers,
+    normalized_surface,
+    literal_term_pattern,
     preserved_term_counts,
     semantic_anchor_differences,
+    value_spans,
 )
 
 # --------------------------------------------------------------------------- #
@@ -385,7 +390,9 @@ def audit_final_texts(
     # -- D1: plan-level collisions ------------------------------------------ #
     by_replacement: dict[str, list[str]] = {}
     original_surfaces = {
-        item.entity_id: {original.casefold() for original, _replacement in item.pairs()}
+        item.entity_id: {
+            normalized_surface(original) for original, _replacement in item.pairs()
+        }
         for item in inputs.plan.synthesized()
     }
     for item in inputs.plan.synthesized():
@@ -627,8 +634,19 @@ def audit_final_texts(
             }
             if replacement is not None:
                 surfaces.update(replacement.originals())
+            replacement_spans = value_spans(
+                final, replacement.replacements() if replacement is not None else ()
+            )
             for surface in sorted(surfaces):
-                if not surface or not contains_value(final, surface):
+                if not surface:
+                    continue
+                matches = re.finditer(
+                    literal_term_pattern(surface), final, flags=re.IGNORECASE
+                )
+                if not any(
+                    not contained_in_any(match.span(), replacement_spans)
+                    for match in matches
+                ):
                     continue
                 if entity.entity_type in PERSON_TYPES:
                     check = CHECK_ORIGINAL_PERSON_PRESENT

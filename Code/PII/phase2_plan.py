@@ -31,7 +31,7 @@ import re
 from dataclasses import dataclass, replace
 from decimal import Decimal
 from difflib import SequenceMatcher
-from typing import Any, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 from urllib.parse import urlsplit, urlunsplit
 
 from .config import RESERVED_DOMAIN_SUFFIX
@@ -67,12 +67,14 @@ from .textutil import (
     LEGACY_PLACEHOLDER_RE,
     PHONE_RE,
     RESERVED_DOMAIN_RE,
+    STRUCTURAL_STOP_WORDS,
     URL_RE,
     WORD_RE,
     canonical_json,
     contains_value,
     find_terms_outside_pii,
     is_bare_numeric_literal,
+    normalized_surface,
     private_resource_identifiers,
     similarity_ratio,
 )
@@ -320,13 +322,74 @@ def preserved_surface_forms(registry: PiiEntityRegistry) -> frozenset[str]:
                 labels = _identifying_labels(host)
                 if labels:
                     forms.add(".".join(labels))
-    return frozenset(forms)
+
+    # Phase 0B can file one value under both policies -- a client's brand read
+    # once as a public third party and once as the project's own name.  Keeping
+    # such a form here would demand that the plan preserve a literal it is
+    # simultaneously required to remove, which no plan and no rewrite can
+    # satisfy.  Identity removal is the higher invariant, so the SYNTHESIZE
+    # decision wins and the form drops out of the preserved set.
+    synthesized = {
+        value.strip().casefold()
+        for entity in registry.entities
+        if entity.policy == POLICY_SYNTHESIZE
+        for value in (entity.canonical_value, *entity.surface_forms())
+        if value and value.strip()
+    }
+    return frozenset(forms.difference(synthesized))
+
+
+def semantic_preserve_terms(
+    records: Iterable[MessageSemantics],
+    registry: PiiEntityRegistry,
+) -> frozenset[str]:
+    """Phase 1A's ``must_preserve_terms``, minus anything that is an identity.
+
+    Phase 1A is the only stage that reads a message closely enough to know that
+    a literal *is* the requirement -- a file format, a compliance standard, a
+    part number, a tool version.  ``plan_slice`` already folds those terms into
+    ``preserve_literals``, so the rewrite gate enforces them; until they also
+    reached this channel, the slot validator could not see them and re-valued
+    exactly those literals.  The result was a slice demanding both "keep this
+    verbatim" and "replace this", which no rewrite can satisfy and which
+    surfaced only as an unfixable agent task.
+
+    Terms a SYNTHESIZE entity owns are excluded: phase 1A is contracted not to
+    put a private name here, and when it does, identity removal wins.
+    """
+
+    owned = {
+        form.strip().casefold()
+        for entity in registry.entities
+        if entity.policy == POLICY_SYNTHESIZE
+        for form in (entity.canonical_value, *entity.surface_forms())
+        if form and form.strip()
+    }
+    terms: set[str] = set()
+    for record in records:
+        for fact in record.semantic_facts:
+            for term in fact.get("must_preserve_terms") or []:
+                if not isinstance(term, str):
+                    continue
+                value = term.strip().casefold()
+                if value and value not in owned:
+                    terms.add(value)
+    return frozenset(terms)
 
 
 def _host_is_public(host: str, preserved: frozenset[str]) -> bool:
     """Whether this host belongs to a preserved public third party."""
 
     if not host:
+        return False
+    # On hosted-site platforms the registrable service suffix is public but
+    # the leading label is the customer's private site identity.  Treating the
+    # entire host as public forced plans to retain names such as
+    # ``client-name.webflow.io`` and made anonymisation impossible.  Service
+    # hosts such as ``docs.google.com`` remain public; this exception is only
+    # for platforms whose subdomain is user-controlled identity.
+    tenant_suffixes = ("webflow.io", "netlify.app", "lovable.app")
+    if any(host.endswith(f".{suffix}") for suffix in tenant_suffixes):
         return False
     if host in preserved:
         return True
@@ -386,9 +449,36 @@ def _pads_original(original: str, replacement: str) -> bool:
 
 
 def _is_only_preserved(value: str, preserved: frozenset[str]) -> bool:
-    """The value is a public term and nothing else."""
+    """The value is preserved terms and nothing else.
 
-    return bool(value.strip()) and value.strip().casefold() in preserved
+    "Nothing else" is about *words*, not characters.  A slot records the value
+    as it was written, so the same requirement arrives as ``PDF``, ``.pdf``,
+    ``PDFs`` or ``PDF+DWG``, and a list of formats arrives with the connectives
+    that joined them (``SAT, IGES or IFC``).  Exact-string matching recognised
+    only the first of those, so the remainder fell through to
+    ``PLAN_PRESERVED_TERM_DROPPED`` -- a hard failure for a value whose only
+    correct answer is itself, since re-valuing it necessarily drops the term.
+
+    A value carrying anything else still re-values normally: ``PDF document``
+    adds a noun (and is caught as padding), ``3 PDFs`` adds a count, and a
+    number is exactly what a slot exists to change.
+    """
+
+    text = value.strip()
+    if not text:
+        return False
+    if text.casefold() in preserved:
+        return True
+    found = _preserved_terms_in(text, preserved)
+    if not found:
+        return False
+    tokens = [token.casefold() for token in WORD_RE.findall(text)]
+    return bool(tokens) and all(
+        token in preserved
+        or token in STRUCTURAL_STOP_WORDS
+        or any(token == f"{term}s" for term in found)
+        for token in tokens
+    )
 
 
 def _preserved_terms_in(value: str, preserved: frozenset[str]) -> set[str]:
@@ -1041,8 +1131,10 @@ def validate_slot_cluster(
                 )
                 broken = True
                 break
-            if numeric_value(source.new_value) is not None and (
-                numeric_value(new_value) is None
+            if (
+                numeric_value(source.new_value) is not None
+                and numeric_value(new_value) is None
+                and slot.value_type != "IDENTIFIER"
             ):
                 # Directional on purpose.  Whether a string parses as a number
                 # is a proxy for its *rendering*, not its type: a COUNT records
@@ -1057,7 +1149,9 @@ def validate_slot_cluster(
                 # The other direction stays a hard failure: dropping a number
                 # that was there loses precision the requirement depends on,
                 # and would silently break any arithmetic relation the slot
-                # takes part in.
+                # takes part in.  IDENTIFIER is the exception: a numeric code
+                # may legitimately become an alphanumeric synthetic code, and
+                # carries identity rather than measurable precision.
                 fail(
                     "PLAN_SCHEMA_INVALID",
                     f"{slot_id} history[{position}] replaced a number with a "
@@ -1391,7 +1485,7 @@ def validate_plan(
     # genuinely distinct entities never overlap this way, so the guard against
     # collapsing distinct identities stays intact.
     surfaces = {
-        item.entity_id: {original.casefold() for original, _ in item.pairs()}
+        item.entity_id: {normalized_surface(original) for original, _ in item.pairs()}
         for item in plan.synthesized()
     }
     collisions: list[str] = []
@@ -1568,6 +1662,45 @@ def plan_slice(
         )
     )
 
+    # Phase 1A's ``must_preserve_terms`` is contracted to hold *non-private*
+    # substrings only ("Do not place a private name, address, link, handle or
+    # credential there").  When it breaks that contract -- a location, a client
+    # organisation, a project name -- honouring it would pin a real identity
+    # into the output and make the slice unsatisfiable, because the same slice
+    # also carries that identity's SYNTHESIZE mapping.  Identity removal is the
+    # higher invariant, so the entity decision wins and the mis-filed term is
+    # dropped here rather than rejected upstream.
+    synthesized = {
+        original.casefold()
+        for entity_id in closure
+        for item in (entity_by_id[entity_id],)
+        if item.policy == POLICY_SYNTHESIZE
+        for original, _replacement in item.pairs()
+        if original
+    }
+    synthesized_values = tuple(sorted(synthesized, key=len, reverse=True))
+    # A fact-level preserve phrase can legitimately contain the value of an
+    # EXACT slot (for example, ``Sales Navigator Advance`` while the plan
+    # changes the tier ``Advance`` to ``Advanced``).  Keeping the whole phrase
+    # and applying the slot edit are mutually exclusive.  The position-bound
+    # slot decision is more specific, so it takes precedence over the broader
+    # preservation phrase.  SEMANTIC_ONLY bare numerals are deliberately not
+    # used here: they do not identify a stable substring after rewriting.
+    changed_slot_literals = tuple(
+        occurrence.original
+        for slot_id in sorted(slot_closure)
+        for occurrence in slot_by_id[slot_id].replacements_for(safe.ordinal)
+        if occurrence.match_mode == "EXACT"
+        and occurrence.original
+        and occurrence.replacement != occurrence.original
+    )
+    fact_terms = tuple(
+        term
+        for fact in (semantics.semantic_facts if semantics else ())
+        for term in fact.get("must_preserve_terms", [])
+        if isinstance(term, str) and term and term.casefold() not in synthesized
+    )
+
     return MessagePlanSlice(
         ordinal=safe.ordinal,
         message_id=safe.message_id,
@@ -1586,17 +1719,26 @@ def plan_slice(
         secret_tokens=safe.secret_tokens,
         preserve_literals=tuple(
             sorted(
-                {
+                term
+                for term in {
                     *preserved,
                     *preserve_terms,
                     *find_terms_outside_pii(safe.safe_text, PUBLIC_ALLOWLIST),
-                    *(
-                        term
-                        for fact in (semantics.semantic_facts if semantics else ())
-                        for term in fact.get("must_preserve_terms", [])
-                        if isinstance(term, str) and term
-                    ),
+                    *fact_terms,
                 }
+                # Apply the identity-removal precedence to every preservation
+                # source, not only Phase 1A facts.  A global configured term or
+                # public allowlist hit can still collide with a real entity in
+                # this particular project/message.
+                if term.casefold() not in synthesized
+                and not any(
+                    len(original) >= 5 and contains_value(term, original)
+                    for original in synthesized_values
+                )
+                and not any(
+                    contains_value(term, original)
+                    for original in changed_slot_literals
+                )
             )
         ),
         must_replace_terms=(),

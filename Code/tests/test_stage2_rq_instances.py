@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 import tempfile
 import unittest
@@ -323,7 +324,7 @@ class RQInstanceTests(unittest.TestCase):
         )
         self.assertEqual(
             rq1["response_contract"]["schema_version"],
-            "rq1-agent-response-v2",
+            "rq1-agent-response-v3",
         )
         self.assertEqual(
             rq1["condition_inputs"]["C3"]["history_message_ids"], [10]
@@ -338,10 +339,25 @@ class RQInstanceTests(unittest.TestCase):
         self.assertFalse(rq2["condition_inputs"]["C1"]["available"])
         self.assertEqual(
             rq2["response_contract"]["schema_version"],
-            "rq2-agent-response-v2",
+            "rq2-agent-response-v3",
         )
         self.assertNotIn("selection", rq2["construction_gold"]["state_dimensions"])
+        rq2_state = rq2["construction_gold"]["states"]["REQ_BUTTON"]
+        self.assertEqual(
+            set(rq2_state),
+            {"attributes", "scope", "lifecycle_status", "ambiguity", "execution"},
+        )
+        self.assertNotIn("state_id", rq2_state)
+        self.assertEqual(
+            rq2["construction_gold"]["field_scoring_specs"]["REQ_BUTTON"]
+            ["lifecycle_status"]["comparator"],
+            "NORMALIZED_EXACT",
+        )
         rq3 = collections["RQ3"][0]
+        self.assertEqual(
+            rq3["response_contract"]["schema_version"],
+            "rq3-agent-response-v3",
+        )
         self.assertEqual(
             rq3["construction_gold"]["project_decision_candidate"]["value"],
             "CLARIFY",
@@ -352,6 +368,91 @@ class RQInstanceTests(unittest.TestCase):
             ],
             "REQ_BUTTON_E002",
         )
+        post_ambiguity = rq3["construction_gold"]["post_task_states"][
+            "REQ_BUTTON"
+        ]["ambiguity"]
+        self.assertIsInstance(post_ambiguity, list)
+        self.assertNotIn("source_event_id", post_ambiguity[0])
+
+    def test_rq1_groups_same_event_messages_and_neutralizes_family_trajectory(self):
+        state_graph = deepcopy(_state_graph())
+        state_graph["requirement_graphs"][0]["edges"][0][
+            "supporting_message_ids"
+        ] = [20]
+        state_graph["requirement_graphs"].append(
+            {
+                "graph_id": "REQ_LABEL_GRAPH",
+                "requirement_id": "REQ_LABEL",
+                "title": "Button label",
+                "family_id": "UI",
+                "nodes": [
+                    {
+                        "state_id": "REQ_LABEL_S001",
+                        "attributes": {"label": "Save"},
+                        "scope": {
+                            "persistence": "PROJECT_PERSISTENT",
+                            "components": ["FRONTEND"],
+                            "contexts": ["BUTTON"],
+                        },
+                        "lifecycle_status": "ACTIVE",
+                        "ambiguity": None,
+                        "execution": None,
+                        "supporting_event_ids": ["REQ_LABEL_E001"],
+                    }
+                ],
+                "edges": [
+                    {
+                        "from_state_id": None,
+                        "to_state_id": "REQ_LABEL_S001",
+                        "event_id": "REQ_LABEL_E001",
+                        "event_type": "INTRODUCE",
+                        "source_message_id": 30,
+                        "supporting_message_ids": [],
+                        "value_removals": None,
+                    }
+                ],
+            }
+        )
+        gold = deepcopy(_gold())
+        gold["task_gold_states"][0]["pre_task_gold_state"][
+            "requirement_states"
+        ].append(
+            {"requirement_id": "REQ_LABEL", "state_id": "REQ_LABEL_S001"}
+        )
+        gold["task_gold_states"][0]["post_task_gold_state"][
+            "requirement_states"
+        ].append(
+            {"requirement_id": "REQ_LABEL", "state_id": "REQ_LABEL_S001"}
+        )
+
+        rq1 = build_rq_instances(gold, state_graph, _messages())["RQ1"][0]
+        atom = rq1["construction_gold"]["gold_requirement_atoms"]["REQ_BUTTON"]
+
+        self.assertEqual(
+            atom["required_evidence_groups"][0]["acceptable_message_ids"],
+            [10, 20],
+        )
+        self.assertEqual(atom["trajectory_message_ids"], [10, 20])
+        self.assertEqual(atom["family_trajectory_message_ids"], [10, 20, 30])
+        self.assertEqual(atom["neutral_context_message_ids"], [30])
+
+    def test_rq1_does_not_expose_same_event_support_at_or_after_target(self):
+        state_graph = deepcopy(_state_graph())
+        state_graph["requirement_graphs"][0]["edges"][0][
+            "supporting_message_ids"
+        ] = [40]
+
+        rq1 = build_rq_instances(
+            _gold(), state_graph, _messages()
+        )["RQ1"][0]
+        atom = rq1["construction_gold"]["gold_requirement_atoms"]["REQ_BUTTON"]
+
+        self.assertEqual(
+            atom["required_evidence_groups"][0]["acceptable_message_ids"],
+            [10],
+        )
+        self.assertNotIn(40, atom["trajectory_message_ids"])
+        self.assertNotIn(40, rq1["condition_inputs"]["C3"]["history_message_ids"])
 
     def test_act_and_matching_code_environment_builds_rq4(self):
         with tempfile.TemporaryDirectory() as directory:

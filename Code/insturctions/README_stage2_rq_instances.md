@@ -134,15 +134,17 @@ Gold 的操作性范围。
 
 ### 四类实例分别保存什么
 
-- RQ1：Independent Requirement Atoms、current-support required evidence groups、旧 trajectory
-  neutral context、完整 temporal trajectory，以及新 Requirement 的分离记录。RQ1 Gold 使用
-  `DETERMINISTIC_RQ1_GOLD`，不需要 Human Review。
+- RQ1：Independent Requirement Atoms、按 Event 聚合的 current-support evidence groups、
+  same-family trajectory neutral context、完整 temporal trajectory，以及新 Requirement 的分离
+  记录。同一 Event 的 source/supporting messages 是同组 alternatives；target 当下或之后的
+  supporting message 会被过滤。RQ1 Gold 使用 `DETERMINISTIC_RQ1_GOLD`，不需要 Human Review。
 - RQ2：matched historical Requirement 在 target 前的完整 (G(t^-))：attributes、scope、
-  lifecycle、ambiguity、execution，以及 typed field comparator candidates；不负责 selection，
-  也不把当前 task 写入 Pre-task State。
+  lifecycle、ambiguity、execution，以及 typed field comparator specs；可评分 State 不含内部 ID，
+  ambiguity 使用 record array；不负责 selection，也不把当前 task 写入 Pre-task State。
 - RQ3：affected Requirement transition、完整 Post-task State、`ACT/CLARIFY` 候选、结构化
-  OPEN ambiguity 候选和 condition-specific review 状态。ACT branch 构造 (G(t^+))，
-  CLARIFY branch 要定位 blocking Requirement/dimension/field。
+  OPEN ambiguity 候选、field-level `changed_paths/removed_paths` 和 condition-specific review 状态。
+  ACT branch 构造 closed-world (G(t^+))，CLARIFY branch 要定位 blocking
+  Requirement/dimension/field。
 - RQ4：Pre/Post transition、Requirement action 候选、Code Environment 引用和后续
   execution-readiness blockers；本阶段的 acceptance criteria/validator 列表为空。
 
@@ -203,19 +205,23 @@ python Code/stage2_generate_rq_instances.py `
 ## 测试
 
 ```powershell
-python -m unittest Code.tests.test_stage2_rq_instances Code.tests.test_rq1_evaluation -v
+python -m unittest `
+  Code.tests.test_stage2_rq_instances `
+  Code.tests.test_rq1_evaluation `
+  Code.tests.test_rq2_evaluation `
+  Code.tests.test_rq3_evaluation -v
 ```
 
-测试覆盖四类实例、RQ1 Evidence Gold、SAME/MERGED/UNCERTAIN relations、一对一匹配、遗漏
-Requirement 的 Evidence FN、错误 evidence、neutral context、`turns`/difficulty、RQ4 zip
-引用和安全拒绝。
+测试覆盖四类实例、RQ1 Evidence Gold、same-Event alternatives、same-family neutral context、
+target boundary、统一 response projection、SAME/MERGED/UNCERTAIN relations、一对一匹配、
+Requirement 粒度与 Evidence 评分解耦、错误 evidence、`turns`/difficulty、RQ4 zip 引用和安全拒绝。
 
 ## RQ1 自动评价
 
 纯评价逻辑位于 `Code/evaluation/rq1.py`。它不直接访问网络，而是把“一次 LLM judge call”和
 确定性评分明确分开。
 
-Agent response 使用 `rq1-agent-response-v2`：
+Agent response 使用 `rq1-agent-response-v3`。下面的 RQ1-only projection 合法：
 
 ```json
 {
@@ -228,6 +234,11 @@ Agent response 使用 `rq1-agent-response-v2`：
   ]
 }
 ```
+
+同一 run 的统一 response 也可直接输入：顶层允许 `decision`、`post_task_states`、
+`clarifications`，每个 Requirement 允许 `pre_task_state`。scorer 先按声明白名单验证，再只投影
+`requirement_ref`、`requirement_summary`、`evidence_message_ids`；未知字段仍会被拒绝，Runner
+无需预先 strip RQ2/RQ3 字段。
 
 先生成该 target 的 all-pairs judge request：
 
@@ -255,6 +266,115 @@ Judge 必须覆盖全部 Prediction–Gold pairs；`UNCERTAIN` 和所有非 `SAM
 不进入人工复核。当前安全上限是每个 target 20 个 Gold Atoms 和 50 个 predicted Requirements；
 超过上限会明确报错，不会静默丢弃 Prediction。
 
+Evidence 以 target-level claim↔Gold-group 二分匹配独立计分：正确 Gold evidence 即使位于一个
+`MERGED_ATOMS`/`SUBPART_OF_ATOM` prediction 中，也不会因粒度错误再次计 FP；只有既不属于任何
+Gold acceptable set、也不属于任何 neutral set 的未匹配 claim 才计 FP。Requirement 粒度错误仍
+完整保留在 Requirement TP/FP/FN 中。
+
+## RQ2 自动评价
+
+RQ2 使用 `rq2-agent-response-v3`。评分分为两个 Judge request 和最终确定性聚合：
+
+1. 通用 Requirement alignment API 只返回每个 Prediction–Gold pair 的离散 relation；
+2. State semantic API 只判断 `SEMANTIC_FACT` 自由文本叶的等价性；
+3. enum、number、boolean、set、null、closed-world extra fields 和最终指标全部由本地代码计算。
+
+先生成 alignment request：
+
+```powershell
+python Code/evaluate_rq2.py `
+  --instance outputs/stage2/42204309/RQ2/42204309_T001_RQ2.json `
+  --agent-response path/to/agent_response.json `
+  --condition C2 `
+  --request-out path/to/rq2_alignment_request.json
+```
+
+取得冻结 Judge 的 alignment response 后，生成 State semantic request：
+
+```powershell
+python Code/evaluate_rq2.py `
+  --instance outputs/stage2/42204309/RQ2/42204309_T001_RQ2.json `
+  --agent-response path/to/agent_response.json `
+  --condition C2 `
+  --alignment-response path/to/alignment_response.json `
+  --request-out path/to/rq2_state_request.json
+```
+
+最后传入两个 Judge responses 评分：
+
+```powershell
+python Code/evaluate_rq2.py `
+  --instance outputs/stage2/42204309/RQ2/42204309_T001_RQ2.json `
+  --agent-response path/to/agent_response.json `
+  --condition C2 `
+  --alignment-response path/to/alignment_response.json `
+  --semantic-response path/to/state_response.json `
+  --score-out path/to/rq2_score.json
+```
+
+主指标为 `attribute_reconstruction_score`、五个分维度分数、
+`matched_full_state_exact` 和 `reconstruction_coverage`；`matched_state_score` 仅为 auxiliary。
+`score_rq2_constant_state_baseline()` 提供 oracle-aligned majority/null 强制 baseline。当前实例状态为
+`PROVISIONAL_REQUIRES_FIELD_REVIEW`，scorer 会明确输出 `reporting_eligible=false`，只能用于诊断，
+不能发布为正式结果。
+
+## RQ3 Gold 冻结与自动评价
+
+当前自动候选不能直接计分。先为每个 RQ3 target 生成 review template：
+
+```powershell
+python Code/finalize_rq3_gold.py `
+  --instance outputs/stage2/42204309/RQ3/42204309_T001_RQ3.json `
+  --template-out path/to/reviews/42204309_T001.json
+```
+
+review 必须覆盖 C1/C2/C3，由至少两名不同审核者完成 adjudication。ACT branch 使用审核后的
+完整 construction after-states；CLARIFY branch 必须补齐 blocking Requirement、dimension、可空
+field、missing information 和非空 `acceptable_question_facts`。完成后写入新的 frozen instance：
+
+```powershell
+python Code/finalize_rq3_gold.py `
+  --instance outputs/stage2/42204309/RQ3/42204309_T001_RQ3.json `
+  --review path/to/reviews/42204309_T001.json `
+  --output-instance path/to/frozen/RQ3/42204309_T001_RQ3.json
+```
+
+工具不会原地伪造或自动接受 Gold。未冻结实例交给 `evaluate_rq3.py` 会明确失败。
+
+RQ3 使用 `rq3-agent-response-v3`。ACT item 必须包含完整 closed-world `state` 与
+`removed_attribute_keys`；CLARIFY item 必须包含实际 question。若 Agent 选择错误 branch，
+scorer 直接产生 decision/error score，不调用 API；branch 正确时依次生成 Requirement alignment
+request 和 branch semantic request：
+
+```powershell
+python Code/evaluate_rq3.py `
+  --instance path/to/frozen/RQ3/42204309_T001_RQ3.json `
+  --agent-response path/to/agent_response.json `
+  --condition C1 `
+  --request-out path/to/rq3_alignment_request.json
+
+python Code/evaluate_rq3.py `
+  --instance path/to/frozen/RQ3/42204309_T001_RQ3.json `
+  --agent-response path/to/agent_response.json `
+  --condition C1 `
+  --alignment-response path/to/alignment_response.json `
+  --request-out path/to/rq3_branch_semantic_request.json
+
+python Code/evaluate_rq3.py `
+  --instance path/to/frozen/RQ3/42204309_T001_RQ3.json `
+  --agent-response path/to/agent_response.json `
+  --condition C1 `
+  --alignment-response path/to/alignment_response.json `
+  --semantic-response path/to/branch_semantic_response.json `
+  --score-out path/to/rq3_score.json
+```
+
+ACT scoring 覆盖所有 affected Requirements，包括 target 新引入项，并惩罚遗漏和额外项。
+CLARIFY scoring 用 exact dimension/field gate、语义 blocker equivalence、question validity 和一对一
+matching 计算。聚合时报告 Decision/ Balanced Accuracy、class recalls、Unsupported Autonomy、
+Unnecessary Clarification 和 branch-specific metrics；`score_rq3_constant_decision_baseline()` 提供
+all-ACT/all-CLARIFY baselines。
+
 ## 常见构建报错与处理
 
 | 报错 | 处理方式 |
@@ -271,12 +391,13 @@ Judge 必须覆盖全部 Prediction–Gold pairs；`UNCERTAIN` 和所有非 `SAM
 
 - 不运行 Agent；
 - 不生成 C1/C2/C3 的独立评估 workspace；
-- 除已实现的 RQ1 自动 scorer 外，不计算 RQ2–RQ4 metrics；
-- 不把启发式 ambiguity candidate 当成最终 RQ3 Gold；
+- 不在 evaluator 内直接调用外部 API；CLI 只生成冻结、可审计的 Judge request 并消费 response；
+- 不把启发式 ambiguity candidate 当成最终 RQ3 Gold，也不自动填写双人 review；
 - 不自动判定 preserved Requirement 中哪些是 inherited constraints；
 - 不生成 RQ4 acceptance criteria、hidden validators 或 reference patch。
 
-RQ2–RQ4 尚未完成的 Gold/validator 工作进入后续 evaluation 阶段；RQ1 不需要人工审核。
+RQ1 scorer 已可用；RQ2 scorer 已可生成 provisional diagnostics，但 field review 完成前不具备
+报告资格；RQ3 scorer 已可用，但必须先冻结全部 condition-specific Gold；RQ4 仍等待 validators。
 
 ## 后续实现顺序
 
@@ -288,12 +409,13 @@ join、Pre/Post state expansion 和基础 C1/C2/C3 materialization 已由当前�
 3. 完成 Pre/Post state expansion 和 field delta；
 4. 物化 C1/C2 history；
 5. 生成 relevant trajectory 和 C3；
-6. 使用确定性 RQ1 Gold 和自动 aligner/scorer；仅为 RQ3 blocking ambiguity 准备后续 review；
-7. 派生并冻结 RQ2–RQ3 其余 Gold 和 scorer；
-8. 选择 3–5 个覆盖 MODIFY、REMOVE/DEFER、CLARIFY、RUNTIME_FAILURE 的 pilot targets；
-9. 为 pilot 构造 RQ4 hidden validators，并执行 Agent 端到端试验；
-10. 根据 pilot 修正并冻结 v1 schema，再扩展到全部 targets；
-11. 输出 project / benchmark statistics 和 review agreement。
+6. 使用确定性 RQ1 Gold 和自动 aligner/scorer；
+7. 完成 RQ2 field review，冻结可评分/跳过字段并重跑常量 baseline；
+8. 优先冻结全部 C1 Gold，再完成 C2/C3 双人 review 与 adjudication；
+9. 选择 3–5 个覆盖 MODIFY、REMOVE/DEFER、CLARIFY、RUNTIME_FAILURE 的 pilot targets；
+10. 为 pilot 构造 RQ4 hidden validators，并执行 Agent 端到端试验；
+11. 根据 pilot 冻结 schema/Judge 配置，再扩展到全部 targets；
+12. 输出 project / benchmark statistics、exact binomial CI 和 review agreement。
 
 先用小规模 pilot 验证 response schema、Requirement matching、condition-specific decision
 和 code validator，再批量扩展 hidden tests，避免在协议未稳定时全量返工。

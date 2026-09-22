@@ -15,6 +15,7 @@ def event(
     ambiguity=None,
     execution=None,
     resolves_ambiguity_event_ids=None,
+    supporting_message_ids=None,
 ):
     return {
         "event_id": f"REQ_X_E{number:03d}",
@@ -23,6 +24,7 @@ def event(
             "speaker": "client",
             "text": f"message {number}",
         },
+        "supporting_message_ids": supporting_message_ids or [],
         "event_type": event_type,
         "value_updates": value_updates,
         "value_removals": value_removals,
@@ -108,6 +110,37 @@ class RequirementStateGraphTests(unittest.TestCase):
             removed["supporting_event_ids"],
             ["REQ_X_E001", "REQ_X_E005", "REQ_X_E008"],
         )
+
+    def test_edges_preserve_same_event_supporting_messages(self) -> None:
+        graph = build_requirement_state_graph(
+            annotation(
+                [
+                    event(
+                        1,
+                        "INTRODUCE",
+                        value_updates={"a": 1},
+                        supporting_message_ids=[10, 11],
+                    )
+                ]
+            )
+        )["requirement_graphs"][0]
+
+        self.assertEqual(graph["edges"][0]["supporting_message_ids"], [10, 11])
+
+    def test_supporting_messages_cannot_repeat_primary_source(self) -> None:
+        with self.assertRaisesRegex(Stage2ReplayError, "repeats its source"):
+            build_requirement_state_graph(
+                annotation(
+                    [
+                        event(
+                            1,
+                            "INTRODUCE",
+                            value_updates={"a": 1},
+                            supporting_message_ids=[1],
+                        )
+                    ]
+                )
+            )
 
     def test_null_scope_fields_preserve_previous_dimensions(self) -> None:
         events = [

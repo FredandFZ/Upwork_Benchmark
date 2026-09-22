@@ -563,8 +563,11 @@ def merge_entity_registry(
 
     Grouping key is ``(entity_type, casefolded normalized value)``; ids follow
     first-occurrence order.  Bundles come from the transitive closure of the
-    model's ``link_hint`` plus a local rule that ties an address or link to the
-    private domain it sits under.
+    model's message-local ``link_hint`` plus a local rule that ties an address
+    or link to the private domain it sits under.  ``link_hint`` labels are not
+    globally unique: every API response may start again at ``L1``.  Scoping the
+    label by ordinal prevents unrelated identities from different messages (or
+    shards) being joined merely because the model reused the same short label.
     """
 
     grouped: dict[tuple[str, str], list[PiiOccurrence]] = {}
@@ -610,12 +613,13 @@ def merge_entity_registry(
     for entity in entities:
         union.add(entity.entity_id)
 
-    by_hint: dict[str, list[str]] = {}
+    by_hint: dict[tuple[int, str], list[str]] = {}
     for key, occurrences in grouped.items():
         entity_id = entity_ids[key]
         for occurrence in occurrences:
             if occurrence.link_hint:
-                by_hint.setdefault(occurrence.link_hint, []).append(entity_id)
+                hint_key = (occurrence.ordinal, occurrence.link_hint)
+                by_hint.setdefault(hint_key, []).append(entity_id)
     for members in by_hint.values():
         for other in members[1:]:
             union.union(members[0], other)

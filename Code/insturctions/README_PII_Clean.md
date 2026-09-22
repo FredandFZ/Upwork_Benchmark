@@ -234,6 +234,59 @@ python .\Code\pii_finalize.py --status
 python .\Code\pii_clean.py --project-id 42204309 --insecure
 ```
 
+### 当 Agent 报告 `blocked`（方案自相矛盾）
+
+Agent 把任务放进 `blocked` 时，问题不在文本，而在 Phase 2 的方案。最常见的一种是：
+Phase 1A 在 `must_preserve_terms` 里声明了某个**需求值**（文件格式、合规标准、料号、
+工具版本），而 Phase 2 把同一个 literal 重新赋了值。这种 slice 同时要求"原样保留"和
+"必须替换"，任何改写都满足不了。
+
+先把这些 slot 迁移到修正后的 preserve 集合上，再重跑：
+
+```powershell
+# 先看会改什么，不写任何文件
+python .\Code\pii_apply_preserved_slot_repair.py --project-id 42204309 --dry-run
+
+# 实际迁移，然后照常续跑
+python .\Code\pii_apply_preserved_slot_repair.py --project-id 42204309
+python .\Code\pii_clean.py --project-id 42204309 --insecure
+```
+
+迁移只改写 Phase 2 的 slot checkpoint：值**是**保留词的，按 Phase 2 自己的规则强制回到
+identity（这一步是确定性的，不调模型，因此不会连带改动无关的值，也就不会让已通过的改写
+失效）。值里既含保留词又含可改写内容的（例如 `3D model`），需要的是判断而非 identity，
+工具会原样留下，由下一次 `pii_clean.py` 交给模型重新规划。
+
+输出里的 `needs_replan=N` 就是这类 cluster 的数量。
+
+### 核查已发布结果有没有丢掉需求词
+
+同一个缺陷也可能**不触发 blocked** 就发布出去：一条消息只要 Phase 2 重估了某个需求值、
+而 Phase 1A 恰好没在这条消息里声明它，就会顺利通过全部阶段。成功项目的过程文件已被清除，
+但对比源项目与已发布结果就能查出来：
+
+```powershell
+# 全部已发布项目
+python .\Code\pii_scan_requirement_drift.py
+
+# 对已 prune 的项目再加上全大写词（会同时报出合法的身份替换，需人工判读）
+python .\Code\pii_scan_requirement_drift.py --include-source-acronyms
+
+# 单个项目 / 机器可读
+python .\Code\pii_scan_requirement_drift.py --project-id 43214420 --json
+```
+
+依据是 Phase 2 的 slot 决定在全项目内一致：被改坏的格式不是从某条消息里消失，而是从所有
+消息里消失、同时在相同位置出现替代词。逐条 diff 会被改写噪声淹没，项目级词频对比不会。
+
+输出里的 `[own terms]` 表示用的是该项目自己的 Phase 1A 声明（精度最高）；
+`[corpus terms, advisory]` 表示运行目录已被清除、只能借用语料级词表，需人工判读。
+`X: 12 -> 0 -> .tiff (in 3 message(s))` 读作：源文件用了 12 次，发布结果 0 次，
+其中 3 条消息里出现了 `.tiff` 顶替它。
+
+**命中不等于违规。**身份替换与需求替换在词频上是同一种形状，工具区分不了意图，它只负责把
+需要人看的地方缩短到几行。
+
 ---
 
 ## 6. 输出与过程目录
