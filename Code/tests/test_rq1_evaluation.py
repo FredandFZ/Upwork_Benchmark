@@ -9,6 +9,7 @@ from Code.evaluation.rq1 import (
     aggregate_rq1_results,
     build_alignment_request,
     score_rq1,
+    validate_agent_response,
 )
 from Code.stage2.rq_instances import build_rq_instances
 from Code.tests.test_stage2_rq_instances import _gold, _messages, _state_graph
@@ -46,6 +47,78 @@ def _relations(request: dict, values: dict[tuple[str, str], str]) -> dict:
 
 
 class RQ1EvaluationTests(unittest.TestCase):
+    def test_unified_response_is_projected_to_rq1_fields(self):
+        instance = _instance()
+        response = {
+            "requirements": [
+                {
+                    **_prediction("agent-local-1", "Button colour", [10]),
+                    "pre_task_state": {
+                        "attributes": {"colour": "blue"},
+                        "scope": {},
+                        "lifecycle_status": "ACTIVE",
+                        "ambiguity": None,
+                        "execution": None,
+                    },
+                }
+            ],
+            "decision": "CLARIFY",
+            "post_task_states": None,
+            "clarifications": [
+                {
+                    "requirement_ref": "agent-local-1",
+                    "question": "Which colour?",
+                }
+            ],
+        }
+
+        projected = validate_agent_response(instance, response)
+
+        self.assertEqual(projected, [_prediction("agent-local-1", "Button colour", [10])])
+
+    def test_unified_response_still_rejects_unknown_fields(self):
+        instance = _instance()
+        with self.assertRaisesRegex(RQ1EvaluationError, "unsupported field"):
+            validate_agent_response(
+                instance,
+                {"requirements": [], "undeclared_rq_field": True},
+            )
+        with self.assertRaisesRegex(RQ1EvaluationError, "unsupported field"):
+            validate_agent_response(
+                instance,
+                {
+                    "requirements": [
+                        {
+                            **_prediction("p1", "Button colour", [10]),
+                            "undeclared_item_field": True,
+                        }
+                    ]
+                },
+            )
+
+    def test_declared_future_rq_fields_do_not_break_rq1_projection(self):
+        instance = _instance()
+        instance["response_contract"]["allowed_top_level_fields"].append(
+            "future_rq_output"
+        )
+        instance["response_contract"][
+            "allowed_requirement_item_fields"
+        ].append("future_item_output")
+        response = {
+            "requirements": [
+                {
+                    **_prediction("p1", "Button colour", [10]),
+                    "future_item_output": {"value": True},
+                }
+            ],
+            "future_rq_output": {"value": True},
+        }
+
+        self.assertEqual(
+            validate_agent_response(instance, response),
+            [_prediction("p1", "Button colour", [10])],
+        )
+
     def test_same_atom_scores_requirement_and_required_evidence(self):
         instance = _instance()
         response = _agent(
@@ -109,7 +182,7 @@ class RQ1EvaluationTests(unittest.TestCase):
         self.assertEqual(result["official_metrics"]["evidence"]["tp"], 1)
         self.assertEqual(result["official_metrics"]["evidence"]["fp"], 0)
 
-    def test_merged_atom_is_not_matched_and_its_evidence_is_false_positive(self):
+    def test_merged_atom_is_not_matched_but_correct_evidence_is_credited(self):
         instance = _instance()
         response = _agent(
             _prediction("agent-local-1", "All interface rules", [10])
@@ -123,8 +196,50 @@ class RQ1EvaluationTests(unittest.TestCase):
 
         self.assertEqual(result["official_metrics"]["requirement"]["fp"], 1)
         self.assertEqual(result["official_metrics"]["requirement"]["fn"], 1)
-        self.assertEqual(result["official_metrics"]["evidence"]["fp"], 1)
-        self.assertEqual(result["official_metrics"]["evidence"]["fn"], 1)
+        self.assertEqual(result["official_metrics"]["evidence"]["tp"], 1)
+        self.assertEqual(result["official_metrics"]["evidence"]["fp"], 0)
+        self.assertEqual(result["official_metrics"]["evidence"]["fn"], 0)
+        self.assertEqual(result["official_metrics"]["evidence"]["f1"], 1.0)
+
+    def test_one_merged_prediction_can_cover_evidence_for_two_gold_atoms(self):
+        instance = _instance()
+        instance["construction_gold"]["relevant_requirement_ids"].append(
+            "REQ_SECOND"
+        )
+        instance["construction_gold"]["gold_requirement_atoms"]["REQ_SECOND"] = {
+            "canonical_summary": "Button label",
+            "requirement_title": "Button label",
+            "family_id": "UI",
+            "required_evidence_groups": [
+                {
+                    "group_id": "REQ_SECOND_EG001",
+                    "acceptable_message_ids": [20],
+                }
+            ],
+            "neutral_context_message_ids": [],
+            "trajectory_message_ids": [20],
+        }
+        response = _agent(
+            _prediction("agent-local-1", "All button rules", [10, 20])
+        )
+        request = build_alignment_request(instance, response)
+        relations = _relations(
+            request,
+            {
+                ("agent-local-1", "gold-local-001"): "MERGED_ATOMS",
+                ("agent-local-1", "gold-local-002"): "MERGED_ATOMS",
+            },
+        )
+
+        result = score_rq1(instance, response, relations)
+
+        self.assertEqual(result["official_metrics"]["requirement"]["tp"], 0)
+        self.assertEqual(result["official_metrics"]["requirement"]["fp"], 1)
+        self.assertEqual(result["official_metrics"]["requirement"]["fn"], 2)
+        self.assertEqual(result["official_metrics"]["evidence"]["tp"], 2)
+        self.assertEqual(result["official_metrics"]["evidence"]["fp"], 0)
+        self.assertEqual(result["official_metrics"]["evidence"]["fn"], 0)
+        self.assertEqual(result["official_metrics"]["evidence"]["f1"], 1.0)
 
     def test_over_split_subparts_are_all_false_positives(self):
         instance = _instance()
@@ -146,6 +261,17 @@ class RQ1EvaluationTests(unittest.TestCase):
         self.assertEqual(result["official_metrics"]["requirement"]["tp"], 0)
         self.assertEqual(result["official_metrics"]["requirement"]["fp"], 3)
         self.assertEqual(result["official_metrics"]["requirement"]["fn"], 1)
+        self.assertEqual(result["official_metrics"]["evidence"]["tp"], 1)
+        self.assertEqual(result["official_metrics"]["evidence"]["fp"], 0)
+        self.assertEqual(result["official_metrics"]["evidence"]["fn"], 0)
+        self.assertEqual(
+            len(
+                result["evidence_alignment"][
+                    "ignored_gold_or_neutral_claims"
+                ]
+            ),
+            2,
+        )
 
     def test_matching_maximizes_cardinality_before_weight(self):
         instance = _instance()

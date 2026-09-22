@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, field
+import json
 from typing import Any
 
 
@@ -113,6 +114,31 @@ def _validate_event(event: Any, requirement_id: str, number: int) -> dict[str, A
     source = _require_object(event.get("source_message"), f"{event_id}.source_message")
     if "message_id" not in source:
         raise Stage2ReplayError(f"{event_id}.source_message.message_id is required")
+    supporting_message_ids = event.get("supporting_message_ids") or []
+    if not isinstance(supporting_message_ids, list):
+        raise Stage2ReplayError(
+            f"{event_id}.supporting_message_ids must be an array or null"
+        )
+    source_key = json.dumps(
+        source.get("message_id"), ensure_ascii=False, sort_keys=True
+    )
+    supporting_keys: list[str] = []
+    for position, value in enumerate(supporting_message_ids):
+        if value is None or isinstance(value, (dict, list, bool)):
+            raise Stage2ReplayError(
+                f"{event_id}.supporting_message_ids[{position}] is invalid"
+            )
+        supporting_key = json.dumps(value, ensure_ascii=False, sort_keys=True)
+        if supporting_key == source_key:
+            raise Stage2ReplayError(
+                f"{event_id}.supporting_message_ids repeats its source message"
+            )
+        supporting_keys.append(supporting_key)
+    if len(set(supporting_keys)) != len(supporting_keys):
+        raise Stage2ReplayError(
+            f"{event_id}.supporting_message_ids must not contain duplicates"
+        )
+    event["supporting_message_ids"] = deepcopy(supporting_message_ids)
 
     value_updates = event.get("value_updates")
     value_removals = event.get("value_removals")
@@ -396,6 +422,7 @@ def _build_requirement_graph(
                 "event_id": event["event_id"],
                 "event_type": event["event_type"],
                 "source_message_id": event["source_message"]["message_id"],
+                "supporting_message_ids": deepcopy(event["supporting_message_ids"]),
                 "value_removals": deepcopy(event.get("value_removals")),
             }
         )

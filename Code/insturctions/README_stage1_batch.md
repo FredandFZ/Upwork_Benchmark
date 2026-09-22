@@ -12,7 +12,14 @@ Every Event contains `value_removals`; a MODIFY may delete obsolete top-level at
 
 ## Explicit ambiguity linking
 
-The final Event schema also contains:
+The final Event schema preserves the extraction-time evidence alternatives and
+the explicit ambiguity links:
+
+```json
+"supporting_message_ids": []
+```
+
+and:
 
 ```json
 "resolves_ambiguity_event_ids": null
@@ -66,8 +73,9 @@ stage1_runs/<project_id>/
 - `ambiguity_linking.json` is the project-level human-readable aggregation of
   every per-Requirement decision, including `affected_state_paths`, resolver,
   non-resolving intermediate Events, decision note, and confidence.
-- The final annotation keeps only `resolves_ambiguity_event_ids`; the diagnostic
-  fields remain in `ambiguity_linking.json`.
+- The final annotation keeps `supporting_message_ids` and
+  `resolves_ambiguity_event_ids`; the other diagnostic fields remain in
+  `ambiguity_linking.json`.
 
 Automatic application requires every condition below:
 
@@ -554,7 +562,7 @@ Verifier 还可以输出 `missing_event_candidates`，但 Pipeline 不会自动 
 ...
 ```
 
-4. 删除 intermediate-only 的 `supporting_message_ids`；
+4. 保留并复制 `supporting_message_ids`，使同一 Event 的多条证据消息可追溯到 Stage 2；
 5. 只保留 canonical Stage 1 Event 字段；
 6. 组装 Sessions、Families、Requirements 和 Events；
 7. 执行最终验证。
@@ -567,6 +575,7 @@ Verifier 还可以输出 `missing_event_candidates`，但 Pipeline 不会自动 
 - Event ID 连续且全局唯一；
 - Event chronological order；
 - source message ID 存在；
+- supporting message IDs 为已知、无重复的消息，且不重复主 source；
 - speaker 和原始 text 精确一致；
 - canonical Event fields 和 payload 结构合法。
 
@@ -1045,7 +1054,7 @@ outputs/
 | `requirement_id` | verifier 认为该候选应属于哪个 Requirement。 |
 | `missing_event_candidate` | 一个完整但尚未应用的候选 Event。它只是建议，pipeline 不会直接把它加入 `verified_events.json`。 |
 | `source_message` | 建议作为 Event 主证据的原始消息。仍需人工检查其文本是否真正蕴含目标 Requirement 和 event type。 |
-| `supporting_message_ids` | 仅用于解析指代/接受关系的局部上下文，不能替代主 `source_message` 承担全部语义。 |
+| `supporting_message_ids` | 用于解析指代/接受关系并保留映射到同一 Event 的辅助消息；它不能替代主 `source_message` 来证明 Event 本身有效，但 Event 通过验证后，Stage 2 可将这些消息与主 source 组成同一个 RQ1 acceptable evidence group。 |
 
 missing candidate 可能是真漏标，也可能是重复或错路由。例如同一 message 已经在目标 Requirement 中以另一个正确 event type 存在，或已经由更合适的 Requirement 拥有，此时不应再次添加。
 

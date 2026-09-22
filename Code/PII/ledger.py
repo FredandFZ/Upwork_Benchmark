@@ -415,9 +415,23 @@ class UnresolvedLedger:
         key = id_key(message_id)
         return [entry for (phase, item), entry in sorted(self._entries.items()) if item == key]
 
-    def is_blocked(self, message_id: Any) -> bool:
+    def is_blocked(self, message_id: Any, *, phases: Sequence[str] | None = None) -> bool:
+        """Whether this message is unresolved, optionally only in ``phases``.
+
+        The scope matters.  A phase clears its own entries before it runs, so a
+        *later* phase's entries from the previous run are still present when an
+        earlier one starts.  Asked without a scope, a message that merely failed
+        verification last time looks blocked to the rewrite that is supposed to
+        replace it -- so it keeps its stale text, the verifier then skips it for
+        the same reason, and it finishes the run "resolved" with text written
+        against a plan that no longer exists.
+        """
+
         key = id_key(message_id)
-        return any(item == key for _phase, item in self._entries)
+        return any(
+            item == key and (phases is None or phase in phases)
+            for phase, item in self._entries
+        )
 
     def blocked_message_ids(self) -> list[Any]:
         seen: dict[str, Any] = {}

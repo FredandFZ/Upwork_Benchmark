@@ -156,6 +156,65 @@ class AssemblyAndValidationTests(unittest.TestCase):
             )
         )
 
+    def test_supporting_message_ids_survive_final_assembly(self) -> None:
+        normalized = normalized_fixture()
+        normalized["messages"].append(
+            {
+                "message_id": 2,
+                "created_ts": "2026-01-01 10:01:00",
+                "speaker": "client",
+                "text": "Use the blue version we just discussed.",
+                "milestone": None,
+                "original_index": 1,
+                "sender_id": "c1",
+            }
+        )
+        inventory = {
+            "sessions": [],
+            "requirement_families": [],
+            "requirements": [
+                {"requirement_id": "REQ_X", "title": "X", "family_id": None}
+            ],
+        }
+        event = {
+            "source_message": {
+                "message_id": 2,
+                "speaker": "client",
+                "text": "Use the blue version we just discussed.",
+            },
+            "supporting_message_ids": [1],
+            "event_type": "INTRODUCE",
+            "value_updates": {"color": "blue"},
+            "scope_updates": None,
+            "ambiguity": None,
+            "execution": None,
+        }
+
+        annotation = assemble_stage1_annotation(
+            normalized, inventory, {"REQ_X": [event]}
+        )
+
+        assembled_event = annotation["requirements"][0]["events"][0]
+        self.assertEqual(assembled_event["supporting_message_ids"], [1])
+        validate_stage1_annotation(annotation, normalized)
+
+    def test_supporting_message_may_follow_its_primary_event_source(self) -> None:
+        annotation = valid_annotation()
+        annotation["requirements"][0]["events"][0]["supporting_message_ids"] = [2]
+        normalized = normalized_fixture()
+        normalized["messages"].append(
+            {
+                "message_id": 2,
+                "created_ts": "2026-01-01 10:01:00",
+                "speaker": "client",
+                "text": "Later evidence.",
+                "milestone": None,
+                "original_index": 1,
+                "sender_id": "c1",
+            }
+        )
+        validate_stage1_annotation(annotation, normalized)
+
     def test_paraphrased_source_text_fails(self) -> None:
         annotation = valid_annotation()
         annotation["requirements"][0]["events"][0]["source_message"]["text"] = "Make it blue."

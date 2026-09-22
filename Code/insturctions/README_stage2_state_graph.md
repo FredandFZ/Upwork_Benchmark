@@ -32,6 +32,11 @@ Replay behavior:
 - Stage 1 Event array order is preserved. The Stage 1 assembler has already
   sorted Events by original project-history position, including ordered Events
   from the same source message.
+- Every edge preserves the Stage 1 Event's `supporting_message_ids`. These IDs
+  are alternative messages mapped to the same Event and are not replayed as
+  separate state transitions. A supporting message may follow the Event's
+  primary source; downstream instance construction applies the target boundary
+  and never exposes a target/future supporting message.
 - `MODIFY` performs top-level attribute patching and per-dimension scope
   patching. A null scope dimension means “not updated”. Because a modification
   creates a new Requirement version, it also resets execution to null.

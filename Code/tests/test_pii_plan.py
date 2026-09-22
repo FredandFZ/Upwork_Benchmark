@@ -13,6 +13,16 @@ from __future__ import annotations
 import unittest
 
 from Code.PII.phase0b_entities import _is_identifying, _is_identifying_occurrence
+from Code.PII.textutil import EMAIL_RE, normalized_surface
+from Code.pii_prepare_offline_text_repairs import _apply_slots, _entity_slot_conflicts
+from Code.pii_apply_preserved_slot_repair import (
+    _entity_authoritative_value,
+    _restore_missing_preserved_terms,
+    _synthetic_slot_value,
+    _without_real_values,
+    entity_occurrence_substitutions,
+    entity_substitutions,
+)
 from Code.PII.phase3_rewrite import rewrite_violations, split_violations
 from Code.PII.prompts import mode_hashes, phase2_prompt_key
 from dataclasses import replace
@@ -24,6 +34,7 @@ from Code.PII.models import (
     MessagePlanSlice,
     EntityReplacement,
     IdentityBundle,
+    MessageSemantics,
     PiiEntity,
     PiiEntityRegistry,
     PiiOccurrence,
@@ -41,8 +52,11 @@ from Code.PII.models import (
 from Code.PII.phase2_plan import (
     PlanChunk,
     SlotCluster,
+    _is_only_preserved,
     assemble_plan,
+    preserved_surface_forms,
     bundle_chunks,
+    semantic_preserve_terms,
     plan_slice,
     reserved_values,
     slot_clusters,
@@ -1183,6 +1197,15 @@ class PreservedTermsInSlotsTests(unittest.TestCase):
             self.validate(registry, "4800 users", "4800 users")
         self.assertIn("PLAN_IDENTITY", caught.exception.failures)
 
+    def test_numeric_identifier_may_become_an_alphanumeric_code(self):
+        registry = self.registry_for("1")
+        registry = replace(
+            registry,
+            slots=(replace(registry.slots[0], value_type="IDENTIFIER"),),
+        )
+        result = self.validate(registry, "NX-A", "NX-A")
+        self.assertEqual(result["PAYMENT_ASSET"].history[0].new_value, "NX-A")
+
     def test_multi_word_terms_are_matched(self):
         self.assertEqual(
             _preserved_terms_in("we used Google Meet again", self.PRESERVED),
@@ -1348,6 +1371,143 @@ def _safe(text: str, bucket: str) -> SafeMessage:
         secret_tokens=(),
         sender_id_present=True,
     )
+
+
+class NestedEntityAndSlotRewriteTests(unittest.TestCase):
+    def slice_with(
+        self,
+        *,
+        entities: tuple[EntityReplacement, ...] = (),
+        slots: tuple[SlotReplacement, ...] = (),
+    ) -> MessagePlanSlice:
+        return MessagePlanSlice(
+            ordinal=1,
+            message_id=1,
+            bucket="LONG",
+            safe_text_sha256="x" * 64,
+            entity_replacements=entities,
+            slot_replacements=slots,
+            secret_tokens=(),
+            preserve_literals=(),
+            must_replace_terms=(),
+            semantic_expectations={},
+            relation_constraints=(),
+            plan_version=1,
+        )
+
+    def test_name_nested_only_in_url_does_not_require_duplicate_replacement(self):
+        source = "Use https://alpha.example/contact for support."
+        entities = (
+            EntityReplacement(
+                "E0001", "PROJECT_NAME", "SYNTHESIZE", "alpha", "Blue Harbor"
+            ),
+            EntityReplacement(
+                "E0002",
+                "PRIVATE_URL",
+                "SYNTHESIZE",
+                "https://alpha.example/contact",
+                "https://blue-harbor.example/contact",
+            ),
+        )
+        violations = rewrite_violations(
+            _safe(source, "LONG"),
+            "For support, use https://blue-harbor.example/contact.",
+            self.slice_with(entities=entities),
+        )
+        self.assertFalse(
+            any("E0001 replacement was not applied" in item for item in violations),
+            violations,
+        )
+
+    def test_name_inside_unplanned_address_shape_still_requires_replacement(self):
+        source = "Contact alpha@example.com for support."
+        decision = EntityReplacement(
+            "E0001", "PROJECT_NAME", "SYNTHESIZE", "alpha", "Blue Harbor"
+        )
+        violations = rewrite_violations(
+            _safe(source, "LONG"),
+            "For support, contact the account.",
+            self.slice_with(entities=(decision,)),
+        )
+        self.assertTrue(
+            any("E0001 replacement was not applied" in item for item in violations),
+            violations,
+        )
+
+    def test_original_prefix_inside_its_planned_replacement_is_not_residual(self):
+        original = "https://public.example/"
+        replacement = "https://public.example/sample-project"
+        decision = EntityReplacement(
+            "E0001", "PRIVATE_URL", "SYNTHESIZE", original, replacement
+        )
+        violations = rewrite_violations(
+            _safe(f"Portfolio: {original}", "LONG"),
+            f"The portfolio is available at {replacement}.",
+            self.slice_with(entities=(decision,)),
+        )
+        self.assertFalse(
+            any("RESIDUAL_ORIGINAL_ENTITY" in item for item in violations),
+            violations,
+        )
+
+    def test_slot_inside_synthesized_entity_is_owned_by_entity_mapping(self):
+        original = "https://old.example/backend"
+        replacement = "https://new.example/backend"
+        source = f"Use {original} now."
+        start = source.index(original)
+        entity_decision = EntityReplacement(
+            "E0001", "PRIVATE_REPOSITORY", "SYNTHESIZE", original, replacement
+        )
+        slot_decision = SlotReplacement(
+            slot_id="BACKEND_REPOSITORY",
+            value_type="IDENTIFIER",
+            history=(),
+            literal_replacements=(
+                SlotLiteralReplacement(
+                    1,
+                    1,
+                    start,
+                    start + len(original),
+                    original,
+                    replacement,
+                    "EXACT",
+                ),
+            ),
+        )
+        violations = rewrite_violations(
+            _safe(source, "LONG"),
+            f"The repository to use now is {replacement}.",
+            self.slice_with(entities=(entity_decision,), slots=(slot_decision,)),
+        )
+        self.assertFalse(any("BACKEND_REPOSITORY" in item for item in violations))
+
+    def test_complete_pii_slot_replacement_is_checked_on_raw_candidate(self):
+        original = "old-repo"
+        replacement = "https://new.example/backend"
+        source = f"Use repository {original} now."
+        start = source.index(original)
+        slot_decision = SlotReplacement(
+            slot_id="BACKEND_REPOSITORY",
+            value_type="IDENTIFIER",
+            history=(),
+            literal_replacements=(
+                SlotLiteralReplacement(
+                    1,
+                    1,
+                    start,
+                    start + len(original),
+                    original,
+                    replacement,
+                    "EXACT",
+                ),
+            ),
+        )
+        violations = rewrite_violations(
+            _safe(source, "LONG"),
+            f"The repository to use now is {replacement}.",
+            self.slice_with(slots=(slot_decision,)),
+        )
+        self.assertFalse(any("BACKEND_REPOSITORY" in item for item in violations))
 
 
 class SlotIdentityMappingTests(unittest.TestCase):
@@ -1847,6 +2007,25 @@ class CompositeUrlTests(unittest.TestCase):
             )
         )
 
+    def test_public_hosted_site_brand_does_not_preserve_private_subdomain(self):
+        preserved = frozenset({"webflow", "webflow.io"})
+        self.assertIsNotNone(
+            _masking_failure(
+                "PRIVATE_URL",
+                "https://private-client.webflow.io/contact",
+                "https://private-client.webflow.io/revised-contact",
+                preserved,
+            )
+        )
+        self.assertIsNone(
+            _masking_failure(
+                "PRIVATE_URL",
+                "https://private-client.webflow.io/contact",
+                "https://cobalt-harbor.example/contact",
+                preserved,
+            )
+        )
+
     def test_public_host_swap_cannot_hide_a_retained_private_app_id(self):
         private_id = "k6j6pbuyhm4bgcdd"
         original = f"https://dashboard.vendor.example/apps/{private_id}/webhooks"
@@ -1885,4 +2064,664 @@ class SemanticAnchorRegressionTests(unittest.TestCase):
         self.assertEqual(
             semantic_anchor_differences("Fix the UI.", "Fix the frontend UI."),
             (),
+        )
+
+
+class PreservedRequirementTermTests(unittest.TestCase):
+    """Phase 1A's ``must_preserve_terms`` has to reach the phase-2 slot channel.
+
+    ``plan_slice`` folds those terms into a slice's ``preserve_literals``, so the
+    rewrite gate enforces them.  The slot validator never received them, so it
+    re-valued exactly those literals -- planning ``.pdf`` -> ``.tiff`` and
+    ``STEP`` -> ``IGES``.  The resulting slice demanded both "keep this
+    verbatim" and "replace this", which no rewrite can satisfy: the messages
+    surfaced as agent tasks no text could close, and the requirement they
+    carried had quietly become a different requirement.
+    """
+
+    def semantics_with(self, *terms: str, ordinal: int = 1) -> MessageSemantics:
+        return MessageSemantics(
+            ordinal=ordinal,
+            message_id=ordinal,
+            speech_act="REQUEST",
+            polarity="AFFIRMATIVE",
+            execution_status="PENDING",
+            ambiguity_kind="NONE",
+            decisions=(),
+            slots=(),
+            semantic_facts=(
+                {
+                    "kind": "TECHNOLOGY",
+                    "statement": "a delivery format is specified",
+                    "polarity": "AFFIRMATIVE",
+                    "must_preserve_terms": list(terms),
+                },
+            ),
+        )
+
+    def test_a_requirement_term_reaches_the_slot_channel(self):
+        registry = build_entity_registry()
+        terms = semantic_preserve_terms([self.semantics_with("PDF", "STEP")], registry)
+        self.assertEqual(terms, frozenset({"pdf", "step"}))
+
+    def test_a_term_a_synthesize_entity_owns_is_not_preserved(self):
+        """Phase 1A is contracted not to file a private name here.
+
+        When it does anyway -- a location, a client organisation, a project name
+        -- honouring it would pin a real identity into the output, because the
+        same slice also carries that identity's SYNTHESIZE mapping.  Identity
+        removal is the higher invariant, so the entity decision wins.
+        """
+
+        registry = build_entity_registry()
+        terms = semantic_preserve_terms(
+            [self.semantics_with("PDF", "Joseph", "northstar.io")], registry
+        )
+        self.assertEqual(terms, frozenset({"pdf"}))
+
+    def test_a_slice_drops_a_preserve_term_its_own_plan_replaces(self):
+        slice_ = plan_slice(
+            build_plan(),
+            safe_message(1),
+            entity_registry=build_entity_registry(),
+            semantic_registry=build_semantic_registry(),
+            semantics=self.semantics_with("PDF", "Joseph"),
+        )
+        self.assertIn("PDF", slice_.preserve_literals)
+        self.assertNotIn("Joseph", slice_.preserve_literals)
+
+    def test_global_preserve_term_cannot_override_identity_removal(self):
+        slice_ = plan_slice(
+            build_plan(),
+            safe_message(1),
+            entity_registry=build_entity_registry(),
+            semantic_registry=build_semantic_registry(),
+            semantics=self.semantics_with("PDF"),
+            preserve_terms=("Joseph",),
+        )
+        self.assertNotIn("Joseph", slice_.preserve_literals)
+
+    def test_preserved_phrase_cannot_embed_a_synthesized_identity(self):
+        slice_ = plan_slice(
+            build_plan(),
+            safe_message(1),
+            entity_registry=build_entity_registry(),
+            semantic_registry=build_semantic_registry(),
+            semantics=self.semantics_with("PDF"),
+            preserve_terms=("Joseph framework",),
+        )
+        self.assertNotIn("Joseph framework", slice_.preserve_literals)
+
+    def test_exact_slot_edit_overrides_a_broader_preserve_phrase(self):
+        text = "Use Sales Navigator Advance for prospecting."
+        start = text.index("Advance")
+        semantic_slot = SemanticSlot(
+            slot_id="SALES_NAVIGATOR_TIER",
+            kind="BUSINESS",
+            value_type="OTHER",
+            unit=None,
+            current_value="Advance",
+            meaning="selected Sales Navigator tier",
+            history=(SlotHistoryEntry(1, "INTRODUCE", None, "Advance"),),
+            source_literals=("Advance",),
+            message_ordinals=(1,),
+            literal_occurrences=(
+                SlotLiteralOccurrence(
+                    1, 1, start, start + len("Advance"), "Advance"
+                ),
+            ),
+        )
+        slot_decision = SlotReplacement(
+            slot_id="SALES_NAVIGATOR_TIER",
+            value_type="OTHER",
+            history=(SlotHistoryEntry(1, "INTRODUCE", None, "Advanced"),),
+            literal_replacements=(
+                SlotLiteralReplacement(
+                    1,
+                    1,
+                    start,
+                    start + len("Advance"),
+                    "Advance",
+                    "Advanced",
+                    "EXACT",
+                ),
+            ),
+        )
+        plan = TransformationPlan(
+            plan_version=1,
+            entity_replacements=(),
+            slot_replacements=(slot_decision,),
+            secret_replacements=(),
+        )
+        safe = replace(
+            safe_message(1),
+            safe_text=text,
+            safe_text_sha256=canonical_sha256(text),
+            source_text_sha256=canonical_sha256(text),
+            word_count=len(text.split()),
+        )
+        slice_ = plan_slice(
+            plan,
+            safe,
+            entity_registry=PiiEntityRegistry(entities=(), bundles=()),
+            semantic_registry=SemanticRegistry(
+                slots=(semantic_slot,), relations=(), decisions=()
+            ),
+            semantics=self.semantics_with("Sales Navigator Advance"),
+        )
+        self.assertNotIn("Sales Navigator Advance", slice_.preserve_literals)
+
+
+class OnlyPreservedValueTests(unittest.TestCase):
+    """A slot value that *is* a requirement term has only one correct answer.
+
+    A slot records the value as written, so one requirement arrives as ``PDF``,
+    ``.pdf``, ``PDFs`` or ``PDF+DWG``, and a list of them arrives with the
+    connectives that joined it.  Exact-string matching recognised only the bare
+    form, so every other spelling fell through to a hard
+    ``PLAN_PRESERVED_TERM_DROPPED`` -- for a value whose only correct answer is
+    itself, since re-valuing it necessarily drops the term.
+    """
+
+    preserved = frozenset({"pdf", "dwg", "iges", "sat", "ifc"})
+
+    def test_decorated_and_pluralised_spellings_are_the_same_requirement(self):
+        for value in (".pdf", "PDF", "PDFs", "PDF+DWG", "SAT, IGES or IFC"):
+            with self.subTest(value=value):
+                self.assertTrue(_is_only_preserved(value, self.preserved))
+
+    def test_a_value_carrying_anything_else_still_gets_re_valued(self):
+        for value in ("PDF document", "3 PDFs", "the client PDF template", "300 pages"):
+            with self.subTest(value=value):
+                self.assertFalse(_is_only_preserved(value, self.preserved))
+
+    def test_nothing_is_preserved_without_a_preserved_set(self):
+        self.assertFalse(_is_only_preserved(".pdf", frozenset()))
+
+
+class PlannedShapeContainmentTests(unittest.TestCase):
+    """A PII shape inside a planned value is that value, not a second one.
+
+    Phase 2 routinely plans a *decorated* value: a Slack mention
+    ``<@id:id|Name>``, an angle-bracketed link, an autolink's ``url|label``.
+    Comparing a regex match for equality against the planned set cannot see
+    that the bare handle or link inside one of those already *is* planned, so
+    the gate rejected correctly-planned text as having reintroduced PII -- a
+    verdict no rewrite could clear, because removing the shape would drop the
+    mapping the same gate demands.
+    """
+
+    def slice_with(self, *replacements: str) -> MessagePlanSlice:
+        return MessagePlanSlice(
+            ordinal=1,
+            message_id=1,
+            bucket="LONG",
+            safe_text_sha256="x" * 64,
+            entity_replacements=tuple(
+                EntityReplacement(
+                    entity_id=f"E{index:04d}",
+                    entity_type="SOCIAL_ACCOUNT",
+                    policy="SYNTHESIZE",
+                    original=f"original-{index}",
+                    replacement=value,
+                    bundle_id=None,
+                )
+                for index, value in enumerate(replacements, start=1)
+            ),
+            slot_replacements=(),
+            secret_tokens=(),
+            preserve_literals=(),
+            must_replace_terms=(),
+            semantic_expectations={},
+            relation_constraints=(),
+            plan_version=1,
+        )
+
+    def reintroduced(self, source: str, candidate: str, *replacements: str):
+        return [
+            item
+            for item in rewrite_violations(
+                _safe(source, "LONG"), candidate, self.slice_with(*replacements)
+            )
+            if "REWRITE_PII_REINTRODUCED" in item
+        ]
+
+    def test_a_handle_inside_a_planned_mention_is_planned(self):
+        mention = "<@1704826159032741888:1704826159032741889|Darius Mercer>"
+        self.assertEqual(
+            self.reintroduced(
+                "Please loop in <@1691932955036610560:1691932955036610561|Cleavon Lasten>.",
+                f"Could you bring {mention} into the thread?",
+                mention,
+            ),
+            [],
+        )
+
+    def test_a_link_inside_a_planned_angle_bracket_is_planned(self):
+        wrapped = "<https://www.youtube.com/@ardenvalevideo>"
+        self.assertEqual(
+            self.reintroduced(
+                "Channel is <https://www.youtube.com/@tonalexina>",
+                f"The channel lives at {wrapped}",
+                wrapped,
+            ),
+            [],
+        )
+
+    def test_a_shape_outside_every_planned_value_is_still_reported(self):
+        mention = "<@1704826159032741888:1704826159032741889|Darius Mercer>"
+        violations = self.reintroduced(
+            "Please loop in <@1691932955036610560:1691932955036610561|Cleavon Lasten>.",
+            f"Bring {mention} in, and copy @someone_else too.",
+            mention,
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("HANDLE", violations[0])
+
+    def test_an_autolink_label_is_not_an_unplanned_address(self):
+        """``|`` is Slack's label delimiter, never an address character here.
+
+        Admitting it into the local part made the match start one character
+        early, so it matched neither the planned value nor anything inside one.
+        """
+
+        planned_url = "http://elias.ward@emberfield-studio.example?"
+        planned_mail = "elias.ward@emberfield-studio.example"
+        self.assertEqual(
+            self.reintroduced(
+                "Share it with <http://joshua@fireandspark.com?|joshua@fireandspark.com?>",
+                f"Please share it with <{planned_url}|{planned_mail}?>",
+                planned_url,
+                planned_mail,
+            ),
+            [],
+        )
+
+    def test_link_syntax_does_not_become_part_of_an_address(self):
+        """``|`` and ``/`` are delimiters here, not local-part characters.
+
+        Admitting them made the match start early.  The pipe form matched
+        neither the planned value nor anything inside one; the slash form was
+        worse, because the audit's host parser truncates at the first ``/`` and
+        so read the host as empty -- reporting a reserved ``.example`` address
+        as an original one.
+        """
+
+        text = (
+            "<http://elias.ward@emberfield-studio.example?"
+            "|elias.ward@emberfield-studio.example?>"
+        )
+        self.assertEqual(
+            [match.group(0) for match in EMAIL_RE.finditer(text)],
+            [
+                "elias.ward@emberfield-studio.example",
+                "elias.ward@emberfield-studio.example",
+            ],
+        )
+
+
+class PlannedNegationTests(unittest.TestCase):
+    """A negation word the plan supplied is not a negation the rewrite added.
+
+    The guard's own subject is polarity, not function words.  One slot maps
+    ``immediately`` to ``without delay`` -- the same polarity, but ``without``
+    is a negation marker, so applying the plan and keeping the polarity became
+    mutually exclusive and the message had no satisfiable rewrite at all.
+    """
+
+    def slice_with(self, original: str, replacement: str) -> MessagePlanSlice:
+        return MessagePlanSlice(
+            ordinal=1,
+            message_id=1,
+            bucket="SHORT",
+            safe_text_sha256="x" * 64,
+            entity_replacements=(),
+            slot_replacements=(
+                SlotReplacement(
+                    slot_id="DELIVERY_TIMING",
+                    value_type="OTHER",
+                    history=(),
+                    literal_replacements=(
+                        SlotLiteralReplacement(
+                            ordinal=1,
+                            message_id=1,
+                            start=0,
+                            end=len(original),
+                            original=original,
+                            replacement=replacement,
+                            match_mode="EXACT",
+                        ),
+                    ),
+                ),
+            ),
+            secret_tokens=(),
+            preserve_literals=(),
+            must_replace_terms=(),
+            semantic_expectations={"polarity": "AFFIRMATIVE"},
+            relation_constraints=(),
+            plan_version=1,
+        )
+
+    def polarity_violations(self, source: str, candidate: str, original, replacement):
+        return [
+            item
+            for item in rewrite_violations(
+                _safe(source, "SHORT"), candidate, self.slice_with(original, replacement)
+            )
+            if "POLARITY" in item
+        ]
+
+    def test_a_marker_carried_in_by_the_plan_is_not_a_new_negation(self):
+        self.assertEqual(
+            self.polarity_violations(
+                "i will send immediately", "I will send without delay",
+                "immediately", "without delay",
+            ),
+            [],
+        )
+
+    def test_a_negation_the_rewrite_invented_is_still_reported(self):
+        violations = self.polarity_violations(
+            "i will send immediately", "I will not send without delay",
+            "immediately", "without delay",
+        )
+        self.assertEqual(len(violations), 1)
+        self.assertIn("a negation was introduced", violations[0])
+
+
+class EntitySlotDoubleClaimTests(unittest.TestCase):
+    """The two phase-2 channels must not price the same literal differently.
+
+    Identities and requirement values are decided in separate calls, and
+    nothing stops both from claiming one literal.  A message asking that a
+    document's footer code match its report version had the codes mapped once
+    as identities and again as footer values, to different strings.  Applying
+    both satisfies each rule in isolation and destroys the relation the message
+    states, so it is a re-plan, not a rewrite.
+    """
+
+    def task(self, entity_replacement: str, slot_replacement: str) -> dict:
+        return {
+            "must_apply_entities": [
+                {
+                    "entity_id": "E0011",
+                    "entity_type": "ACCOUNT_IDENTIFIER",
+                    "policy": "SYNTHESIZE",
+                    "original_surface_forms": ["RR-01"],
+                    "replacement": entity_replacement,
+                    "alias_replacements": [],
+                }
+            ],
+            "must_apply_slots": [
+                {
+                    "slot_id": "FOOTER_REPORT_CODE",
+                    "literal_replacements": [
+                        {
+                            "ordinal": 1,
+                            "message_id": 1,
+                            "start": 0,
+                            "end": 5,
+                            "original": "RR-01",
+                            "replacement": slot_replacement,
+                            "match_mode": "EXACT",
+                        }
+                    ],
+                }
+            ],
+        }
+
+    def test_divergent_replacements_for_one_literal_are_a_conflict(self):
+        self.assertEqual(
+            _entity_slot_conflicts(self.task("LV21", "AX-17")),
+            ["FOOTER_REPORT_CODE"],
+        )
+
+    def test_the_two_channels_agreeing_is_not_a_conflict(self):
+        self.assertEqual(_entity_slot_conflicts(self.task("LV21", "LV21")), [])
+
+
+class OneReferentTwoSpellingsTests(unittest.TestCase):
+    """Phase 0B records one thing twice when the source spells it two ways.
+
+    An address written ``Washington DC`` in one message and ``Washington, DC``
+    in the next becomes two entities, and phase 2 correctly gives both the same
+    synthetic value.  The collision guards exempt entities that share an
+    original surface form, but compared those forms exactly -- so a single comma
+    made the exemption miss and reported the correct plan as a collision, in
+    both phase 2 and the phase-6B audit.
+    """
+
+    def plan_for(self, first: str, second: str) -> TransformationPlan:
+        return TransformationPlan(
+            plan_version=1,
+            entity_replacements=(
+                EntityReplacement(
+                    entity_id="E0011", entity_type="ADDRESS", policy="SYNTHESIZE",
+                    original=first, replacement="2846 Alder Lane, Philadelphia PA",
+                    bundle_id=None,
+                ),
+                EntityReplacement(
+                    entity_id="E0022", entity_type="ADDRESS", policy="SYNTHESIZE",
+                    original=second, replacement="2846 Alder Lane, Philadelphia PA",
+                    bundle_id=None,
+                ),
+            ),
+            slot_replacements=(),
+            secret_replacements=(),
+        )
+
+    def collisions(self, plan: TransformationPlan) -> list[str]:
+        surfaces = {
+            item.entity_id: {normalized_surface(o) for o, _ in item.pairs()}
+            for item in plan.synthesized()
+        }
+        found = []
+        for left in plan.synthesized():
+            for right in plan.synthesized():
+                if left.entity_id >= right.entity_id:
+                    continue
+                shares = surfaces[left.entity_id] & surfaces[right.entity_id]
+                same = set(left.replacements()) & set(right.replacements())
+                if same and not shares:
+                    found.append(f"{left.entity_id}/{right.entity_id}")
+        return found
+
+    def test_spellings_differing_only_in_punctuation_are_one_referent(self):
+        plan = self.plan_for(
+            "1717 K Street NW, Washington DC 20006",
+            "1717 K Street NW, Washington, DC 20006",
+        )
+        self.assertEqual(self.collisions(plan), [])
+
+    def test_two_different_addresses_sharing_a_replacement_still_collide(self):
+        plan = self.plan_for(
+            "1717 K Street NW, Washington DC 20006",
+            "40 Harbour Road, Bristol BS1 4RN",
+        )
+        self.assertEqual(self.collisions(plan), ["E0011/E0022"])
+
+
+class ContradictoryPolicyTests(unittest.TestCase):
+    """One value filed under both policies must not be preserved.
+
+    Phase 0B can read a client's brand once as a public third party and once as
+    the project's own name, giving the same literal a PRESERVE entity and a
+    SYNTHESIZE one.  Keeping it in the preserved set asks the plan to preserve a
+    literal it is simultaneously required to remove -- unsatisfiable, and on the
+    wrong side of the invariant that outranks it.
+    """
+
+    def registry(self, *entries) -> PiiEntityRegistry:
+        return PiiEntityRegistry(
+            entities=tuple(
+                replace(
+                    entity(entity_id, entity_type, value, None, (1,)), policy=policy
+                )
+                for entity_id, entity_type, value, policy in entries
+            ),
+            bundles=(),
+        )
+
+    def test_a_value_some_entity_must_remove_is_not_preserved(self):
+        forms = preserved_surface_forms(
+            self.registry(
+                ("E0011", "PUBLIC_THIRD_PARTY", "Fishwife", "PRESERVE"),
+                ("E0018", "PROJECT_NAME", "Fishwife", "SYNTHESIZE"),
+            )
+        )
+        self.assertNotIn("fishwife", forms)
+
+    def test_an_uncontested_public_name_is_still_preserved(self):
+        forms = preserved_surface_forms(
+            self.registry(
+                ("E0011", "PUBLIC_THIRD_PARTY", "Stripe", "PRESERVE"),
+                ("E0018", "PROJECT_NAME", "Fishwife", "SYNTHESIZE"),
+            )
+        )
+        self.assertIn("stripe", forms)
+
+
+class SlotCarryingRealValueTests(unittest.TestCase):
+    """A slot's synthetic value must not be built around a real name.
+
+    Slots and identities are decided in separate calls, so the slot channel can
+    return a filename or a deadline still containing a real project name or
+    place -- publishing a true value while presenting it as synthetic.  The
+    correction is forced: the entity channel has already decided what that name
+    becomes.
+    """
+
+    def test_a_real_name_inside_a_slot_value_takes_the_planned_replacement(self):
+        registry = PiiEntityRegistry(
+            entities=(entity("E0025", "PROJECT_NAME", "Bestyrelsesseminar", None, (1,)),),
+            bundles=(),
+        )
+        decisions = {
+            "E0025": EntityReplacement(
+                entity_id="E0025", entity_type="PROJECT_NAME", policy="SYNTHESIZE",
+                original="Bestyrelsesseminar", replacement="Strategiforum",
+                bundle_id=None,
+            )
+        }
+        pairs = entity_substitutions(registry, decisions)
+        self.assertEqual(
+            _without_real_values("Bestyrelsesseminar v38.docx", pairs),
+            "Strategiforum v38.docx",
+        )
+
+    def test_an_unrelated_value_is_left_alone(self):
+        self.assertEqual(_without_real_values("report v38.docx", []), "report v38.docx")
+
+    def test_entity_aliases_are_substituted_with_their_own_planned_forms(self):
+        registry = PiiEntityRegistry(
+            entities=(entity("E0025", "PROJECT_NAME", "Project Lighthouse", None, (1,)),),
+            bundles=(),
+        )
+        decisions = {
+            "E0025": EntityReplacement(
+                entity_id="E0025",
+                entity_type="PROJECT_NAME",
+                policy="SYNTHESIZE",
+                original="Project Lighthouse",
+                replacement="Project Northstar",
+                aliases=(EntityAlias(original="Lighthouse", replacement="Northstar"),),
+                bundle_id=None,
+            )
+        }
+        pairs = entity_substitutions(registry, decisions)
+        self.assertEqual(_without_real_values("Lighthouse brief.pdf", pairs), "Northstar brief.pdf")
+
+    def test_entity_decision_overrides_an_unrelated_slot_invention(self):
+        pairs = [("Report-Code-17", "Report-Code-82")]
+        self.assertEqual(
+            _entity_authoritative_value("Report-Code-17", "Report-Code-41", pairs),
+            "Report-Code-82",
+        )
+
+    def test_short_entity_surface_is_only_used_for_an_exact_slot_source(self):
+        pairs = [("R2", "N7")]
+        self.assertEqual(_entity_authoritative_value("R2", "Q4", pairs), "N7")
+        self.assertEqual(_without_real_values("section R2", pairs), "section R2")
+
+    def test_equal_aliases_are_disambiguated_by_message_ordinal(self):
+        registry = PiiEntityRegistry(
+            entities=(
+                entity("E0001", "IDENTIFIER", "R2", None, (10,)),
+                entity("E0002", "IDENTIFIER", "R2", None, (20,)),
+            ),
+            bundles=(),
+        )
+        decisions = {
+            "E0001": EntityReplacement(
+                "E0001", "IDENTIFIER", "SYNTHESIZE", "R2", "N7"
+            ),
+            "E0002": EntityReplacement(
+                "E0002", "IDENTIFIER", "SYNTHESIZE", "R2", "K4"
+            ),
+        }
+        contextual = entity_occurrence_substitutions(registry, decisions)
+        self.assertEqual(contextual[(10, "r2")], "N7")
+        self.assertEqual(contextual[(20, "r2")], "K4")
+
+    def test_duplicate_slot_occurrence_is_applied_once(self):
+        occurrence = {
+            "ordinal": 1,
+            "start": 5,
+            "end": 8,
+            "original": "ABC",
+            "replacement": "XYZ",
+            "match_mode": "EXACT",
+        }
+        task = {
+            "must_apply_slots": [
+                {"literal_replacements": [occurrence]},
+                {"literal_replacements": [dict(occurrence)]},
+            ]
+        }
+        self.assertEqual(_apply_slots("Code ABC", task), "Code XYZ")
+
+    def test_nested_slot_occurrence_uses_the_outer_position_safe_edit(self):
+        task = {
+            "must_apply_slots": [
+                {
+                    "literal_replacements": [
+                        {
+                            "ordinal": 1,
+                            "start": 5,
+                            "end": 14,
+                            "original": "ABC - DEF",
+                            "replacement": "North Star",
+                            "match_mode": "EXACT",
+                        }
+                    ]
+                },
+                {
+                    "literal_replacements": [
+                        {
+                            "ordinal": 1,
+                            "start": 9,
+                            "end": 10,
+                            "original": "-",
+                            "replacement": "/",
+                            "match_mode": "EXACT",
+                        }
+                    ]
+                },
+            ]
+        }
+        self.assertEqual(_apply_slots("Book ABC - DEF", task), "Book North Star")
+
+    def test_offline_numeric_generation_keeps_units_but_changes_value(self):
+        value = _synthetic_slot_value(
+            "MAX_DISTANCE", "5 mm", "DIMENSION", frozenset({"mm"})
+        )
+        self.assertEqual(value, "10 mm")
+
+    def test_preserved_filename_term_is_a_separate_token(self):
+        value = _restore_missing_preserved_terms(
+            "current BOM file", "northstar-asset.jpg", frozenset({"bom"})
+        )
+        self.assertIn("bom", value.casefold())
+        self.assertEqual(
+            _preserved_terms_in(value, frozenset({"bom"})), {"bom"}
         )

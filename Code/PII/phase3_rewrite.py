@@ -20,6 +20,7 @@ must pass :func:`textutil.has_structural_change`.
 
 from __future__ import annotations
 
+import re
 from typing import Any, Mapping, Sequence
 
 from ._compat import sha256_text
@@ -36,15 +37,20 @@ from .textutil import (
     LIST_MARKER_RE,
     PHONE_RE,
     URL_RE,
+    contained_in_any,
     contains_value,
     fingerprint,
     has_structural_change,
     is_interrogative,
+    literal_term_pattern,
+    mask_spans,
     negation_markers,
     occurrence_count,
     preserved_term_counts,
+    pii_shaped_spans,
     semantic_anchor_differences,
     text_outside_pii,
+    value_spans,
     word_count,
 )
 
@@ -223,18 +229,64 @@ def rewrite_violations(
 
     # -- entity originals gone, planned replacements present ---------------- #
     planned_values: set[str] = set()
+    source_entity_spans = value_spans(
+        safe.safe_text,
+        {
+            original
+            for entity in slice_.entity_replacements
+            if entity.policy == POLICY_SYNTHESIZE
+            for original, _replacement in entity.pairs()
+            if original
+        },
+    )
     for item in slice_.entity_replacements:
         planned_values.update(item.replacements())
         if item.policy != POLICY_SYNTHESIZE:
             continue
         for original, replacement in item.pairs():
-            present_in_source = contains_value(safe.safe_text, original)
-            if contains_value(candidate, original):
+            source_matches = tuple(
+                match.span()
+                for match in re.finditer(
+                    literal_term_pattern(original), safe.safe_text, flags=re.IGNORECASE
+                )
+            )
+            present_in_source = bool(source_matches)
+            # A non-PII entity name can occur only as an inner component of a
+            # URL/address that has its own entity mapping.  Replacing that
+            # complete outer value already removes the inner occurrence; a
+            # second standalone spelling would duplicate content and can make
+            # a SHORT rewrite impossible.  Equal spans are not "nested": a
+            # complete URL/email entity still has to apply its own mapping.
+            needs_own_replacement = any(
+                not any(
+                    outer_start <= start
+                    and end <= outer_end
+                    and (outer_start, outer_end) != (start, end)
+                    for outer_start, outer_end in source_entity_spans
+                )
+                for start, end in source_matches
+            )
+            candidate_matches = tuple(
+                match.span()
+                for match in re.finditer(
+                    literal_term_pattern(original), candidate, flags=re.IGNORECASE
+                )
+            )
+            replacement_spans = value_spans(candidate, (replacement,))
+            original_survived = any(
+                not contained_in_any(span, replacement_spans)
+                for span in candidate_matches
+            )
+            if original_survived:
                 violations.append(
                     "REWRITE_RESIDUAL_ORIGINAL_ENTITY: "
                     f"{item.entity_id} ({fingerprint(item.entity_type, original)}) survived"
                 )
-            elif present_in_source and not contains_value(candidate, replacement):
+            elif (
+                present_in_source
+                and needs_own_replacement
+                and not contains_value(candidate, replacement)
+            ):
                 violations.append(
                     "REWRITE_PLAN_MAPPING_VIOLATED: "
                     f"{item.entity_id} replacement was not applied"
@@ -243,6 +295,15 @@ def rewrite_violations(
     # -- slot literals, compared outside complete PII values ---------------- #
     masked_candidate = text_outside_pii(candidate)
     masked_source = text_outside_pii(safe.safe_text)
+    synthesized_entity_spans = value_spans(
+        safe.safe_text,
+        {
+            original
+            for entity in slice_.entity_replacements
+            if entity.policy == POLICY_SYNTHESIZE
+            for original, _replacement in entity.pairs()
+        },
+    )
     for item in slice_.slot_replacements:
         for occurrence in item.replacements_for(safe.ordinal):
             if occurrence.match_mode == "SEMANTIC_ONLY":
@@ -254,6 +315,14 @@ def rewrite_violations(
             original_literal = occurrence.original
             new_literal = occurrence.replacement
             if not original_literal:
+                continue
+            # If the slot is the whole entity value or an inner piece of it,
+            # the entity mapping owns the source span.  Enforcing the slot too
+            # would demand duplicate output (and, for URL internals, inspect a
+            # value that is intentionally replaced atomically).
+            if contained_in_any(
+                (occurrence.start, occurrence.end), synthesized_entity_spans
+            ):
                 continue
             in_source = occurrence_count(masked_source, original_literal, ignore_case=False)
             if not in_source:
@@ -279,23 +348,44 @@ def rewrite_violations(
                     f"REWRITE_RESIDUAL_ORIGINAL_ENTITY: slot {item.slot_id} kept its "
                     "original literal"
                 )
-            elif not occurrence_count(masked_candidate, new_literal, ignore_case=False):
-                violations.append(
-                    f"REWRITE_PLAN_MAPPING_VIOLATED: slot {item.slot_id} new value "
-                    "was not applied"
+            else:
+                new_literal_is_complete_pii = any(
+                    span == (0, len(new_literal))
+                    for span in pii_shaped_spans(new_literal)
                 )
+                candidate_for_new_literal = (
+                    candidate if new_literal_is_complete_pii else masked_candidate
+                )
+                if not occurrence_count(
+                    candidate_for_new_literal, new_literal, ignore_case=False
+                ):
+                    violations.append(
+                        f"REWRITE_PLAN_MAPPING_VIOLATED: slot {item.slot_id} new value "
+                        "was not applied"
+                    )
 
     # -- no unplanned PII shape --------------------------------------------- #
+    # Phase 2 routinely plans a *decorated* value: a Slack mention
+    # ``<@id:id|Name>``, an angle-bracketed link, an autolink's ``url|label``.
+    # The bare address, handle or link inside one of those is not a second,
+    # unplanned value -- it is the planned value, and equality against
+    # ``planned_values`` alone cannot see that.  Containment in a planned span
+    # can, and it stays closed: a shape that merely abuts a planned value, or
+    # sits outside every one of them, is still reported.
+    planned_spans = value_spans(candidate, planned_values)
     for pattern, label in (
         (EMAIL_RE, "EMAIL"),
         (HANDLE_RE, "HANDLE"),
     ):
         for match in pattern.finditer(candidate):
-            if match.group(0) not in planned_values:
-                violations.append(
-                    f"REWRITE_PII_REINTRODUCED: unplanned {label} "
-                    f"{fingerprint(label, match.group(0))}"
-                )
+            if match.group(0) in planned_values:
+                continue
+            if contained_in_any(match.span(), planned_spans):
+                continue
+            violations.append(
+                f"REWRITE_PII_REINTRODUCED: unplanned {label} "
+                f"{fingerprint(label, match.group(0))}"
+            )
     # A URL the *model invented* is the risk here.  One that stands verbatim in
     # the source and was not classified private by phase 0B is a public link --
     # a vendor's home page, say -- and keeping it is the stated policy, not a
@@ -312,6 +402,8 @@ def rewrite_violations(
             value.startswith(planned) or planned.startswith(value)
             for planned in planned_values
         ):
+            continue
+        if contained_in_any(match.span(), planned_spans):
             continue
         violations.append(
             f"REWRITE_PII_REINTRODUCED: unplanned URL {fingerprint('URL', value)}"
@@ -376,7 +468,21 @@ def rewrite_violations(
         # guard only in the two directions where it is sound.
         expected_polarity = (slice_.semantic_expectations or {}).get("polarity")
         source_negated = bool(negation_markers(safe.safe_text))
-        candidate_negated = bool(negation_markers(candidate))
+        # A marker the *plan* put there is not one the rewrite introduced.  One
+        # slot maps "immediately" to "without delay": same polarity, but
+        # ``without`` is a marker, so applying the plan and keeping the polarity
+        # became mutually exclusive and no text could satisfy both.  Reading the
+        # markers outside the planned values keeps this guard on what it is for
+        # -- polarity the rewrite changed -- rather than on the plan's wording.
+        planned_surfaces = set(planned_values)
+        planned_surfaces.update(
+            occurrence.replacement
+            for item in slice_.slot_replacements
+            for occurrence in item.replacements_for(safe.ordinal)
+            if occurrence.replacement
+        )
+        outside_plan = mask_spans(candidate, value_spans(candidate, planned_surfaces))
+        candidate_negated = bool(negation_markers(outside_plan))
         if expected_polarity == "NEGATIVE":
             # Negation is often lexical -- "mint attempt failed", "access
             # denied" -- and 1A rightly calls those NEGATIVE, but

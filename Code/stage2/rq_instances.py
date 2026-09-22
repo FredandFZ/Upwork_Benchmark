@@ -251,6 +251,22 @@ class _GraphIndex:
                 if event_id in self.event_by_id:
                     raise RQInstanceError(f"duplicate event_id {event_id!r}")
                 message_position = messages.position(edge.get("source_message_id"))
+                supporting_message_ids = edge.get("supporting_message_ids", [])
+                _require_array(
+                    supporting_message_ids,
+                    f"{requirement_id}.edges[{edge_position}].supporting_message_ids",
+                )
+                supporting_keys: set[str] = set()
+                source_key = _id_key(edge.get("source_message_id"))
+                for message_id in supporting_message_ids:
+                    support_key = _id_key(message_id)
+                    messages.position(message_id)
+                    if support_key == source_key or support_key in supporting_keys:
+                        raise RQInstanceError(
+                            f"{event_id}.supporting_message_ids repeats a message"
+                        )
+                    supporting_keys.add(support_key)
+                edge.setdefault("supporting_message_ids", [])
                 if message_position < previous_position:
                     raise RQInstanceError(
                         f"{requirement_id}.edges are not in conversation order"
@@ -410,42 +426,99 @@ def _derive_relevance(
     evidence: dict[str, dict[str, Any]] = {}
     oracle_message_ids: list[Any] = []
 
-    for requirement_id in direct_historical:
-        state = pre_state[requirement_id]
-        current_support_event_ids = deepcopy(state["supporting_event_ids"])
+    def visible_edge_message_ids(edge: dict[str, Any]) -> list[Any]:
+        return [
+            message_id
+            for message_id in [
+                edge["source_message_id"],
+                *edge.get("supporting_message_ids", []),
+            ]
+            if messages.position(message_id) < target_position
+        ]
+
+    trajectory_cache: dict[str, dict[str, Any]] = {}
+    for requirement_id in pre_state:
         trajectory = graph.trajectory_before(
             requirement_id, target_position, messages
         )
-        trajectory_event_ids = [edge["event_id"] for edge in trajectory]
-        trajectory_message_ids = _ordered_message_ids(
-            [edge["source_message_id"] for edge in trajectory],
-            messages,
-            target_position,
-        )
+        trajectory_cache[requirement_id] = {
+            "event_ids": [edge["event_id"] for edge in trajectory],
+            "message_ids": _ordered_message_ids(
+                [
+                    message_id
+                    for edge in trajectory
+                    for message_id in visible_edge_message_ids(edge)
+                ],
+                messages,
+                target_position,
+            ),
+        }
+
+    for requirement_id in direct_historical:
+        state = pre_state[requirement_id]
+        current_support_event_ids = deepcopy(state["supporting_event_ids"])
+        trajectory_event_ids = trajectory_cache[requirement_id]["event_ids"]
+        trajectory_message_ids = trajectory_cache[requirement_id]["message_ids"]
+
+        candidate_groups: list[list[Any]] = []
+        for event_id in current_support_event_ids:
+            edge = graph.event_by_id[_id_key(event_id)][1]
+            candidate_ids = _ordered_message_ids(
+                visible_edge_message_ids(edge),
+                messages,
+                target_position,
+            )
+            overlapping = [
+                index
+                for index, group_ids in enumerate(candidate_groups)
+                if {_id_key(value) for value in group_ids}.intersection(
+                    {_id_key(value) for value in candidate_ids}
+                )
+            ]
+            if not overlapping:
+                candidate_groups.append(candidate_ids)
+                continue
+            keep = overlapping[0]
+            merged_ids = list(candidate_groups[keep]) + candidate_ids
+            for index in reversed(overlapping[1:]):
+                merged_ids.extend(candidate_groups.pop(index))
+            candidate_groups[keep] = _ordered_message_ids(
+                merged_ids, messages, target_position
+            )
+
         current_support_message_ids = _ordered_message_ids(
-            [
-                graph.event_by_id[_id_key(event_id)][1]["source_message_id"]
-                for event_id in current_support_event_ids
-            ],
+            [message_id for group_ids in candidate_groups for message_id in group_ids],
             messages,
             target_position,
         )
         current_support_keys = {
             _id_key(message_id) for message_id in current_support_message_ids
         }
+
+        family_id = state.get("family_id")
+        family_trajectory_message_ids = list(trajectory_message_ids)
+        if family_id is not None:
+            family_trajectory_message_ids = _ordered_message_ids(
+                [
+                    message_id
+                    for sibling_id, sibling_state in pre_state.items()
+                    if sibling_state.get("family_id") == family_id
+                    for message_id in trajectory_cache[sibling_id]["message_ids"]
+                ],
+                messages,
+                target_position,
+            )
         neutral_context_message_ids = [
             message_id
-            for message_id in trajectory_message_ids
+            for message_id in family_trajectory_message_ids
             if _id_key(message_id) not in current_support_keys
         ]
         required_evidence_groups = [
             {
                 "group_id": f"{requirement_id}_EG{index:03d}",
-                "acceptable_message_ids": [deepcopy(message_id)],
+                "acceptable_message_ids": deepcopy(group_ids),
             }
-            for index, message_id in enumerate(
-                current_support_message_ids, start=1
-            )
+            for index, group_ids in enumerate(candidate_groups, start=1)
         ]
         evidence[requirement_id] = {
             "current_support_event_ids": current_support_event_ids,
@@ -458,7 +531,10 @@ def _derive_relevance(
             "neutral_context_message_ids": deepcopy(
                 neutral_context_message_ids
             ),
-            "context_review_status": "DETERMINISTIC_TRAJECTORY_CONTEXT",
+            "family_trajectory_message_ids": deepcopy(
+                family_trajectory_message_ids
+            ),
+            "context_review_status": "DETERMINISTIC_FAMILY_TRAJECTORY_CONTEXT",
         }
         oracle_message_ids.extend(trajectory_message_ids)
 
@@ -516,22 +592,54 @@ def _condition_inputs(
 def _response_contract(rq_id: str) -> dict[str, Any]:
     if rq_id == "RQ1":
         return {
-            "schema_version": "rq1-agent-response-v2",
+            "schema_version": "rq1-agent-response-v3",
             "required_fields": ["requirements"],
-            "requirement_item_fields": [
+            "allowed_top_level_fields": [
+                "requirements",
+                "decision",
+                "post_task_states",
+                "clarifications",
+            ],
+            "required_requirement_item_fields": [
                 "requirement_ref",
                 "requirement_summary",
                 "evidence_message_ids",
             ],
+            "allowed_requirement_item_fields": [
+                "requirement_ref",
+                "requirement_summary",
+                "evidence_message_ids",
+                "pre_task_state",
+            ],
+            "rq1_projection": {
+                "top_level_fields": ["requirements"],
+                "requirement_item_fields": [
+                    "requirement_ref",
+                    "requirement_summary",
+                    "evidence_message_ids",
+                ],
+            },
             "requirement_refs_must_be_unique": True,
             "evidence_message_ids_must_reference_c2_history": True,
             "internal_ids_forbidden": True,
         }
     if rq_id == "RQ2":
         return {
-            "schema_version": "rq2-agent-response-v2",
+            "schema_version": "rq2-agent-response-v3",
             "required_fields": ["requirements"],
-            "requirement_item_fields": [
+            "allowed_top_level_fields": [
+                "requirements",
+                "decision",
+                "post_task_states",
+                "clarifications",
+            ],
+            "required_requirement_item_fields": [
+                "requirement_ref",
+                "requirement_summary",
+                "evidence_message_ids",
+                "pre_task_state",
+            ],
+            "allowed_requirement_item_fields": [
                 "requirement_ref",
                 "requirement_summary",
                 "evidence_message_ids",
@@ -544,12 +652,21 @@ def _response_contract(rq_id: str) -> dict[str, Any]:
                 "ambiguity",
                 "execution",
             ],
+            "ambiguity_representation": "NULL_OR_ARRAY_OF_RECORDS",
+            "complete_state_closed_world": True,
+            "unexpected_state_fields_are_false_positives": True,
             "internal_ids_forbidden": True,
         }
     if rq_id == "RQ3":
         return {
-            "schema_version": "rq3-agent-response-v2",
+            "schema_version": "rq3-agent-response-v3",
             "required_fields": [
+                "decision",
+                "post_task_states",
+                "clarifications",
+            ],
+            "allowed_top_level_fields": [
+                "requirements",
                 "decision",
                 "post_task_states",
                 "clarifications",
@@ -573,6 +690,23 @@ def _response_contract(rq_id: str) -> dict[str, Any]:
                 "missing_information",
                 "question",
             ],
+            "post_task_state_item_fields": [
+                "requirement_ref",
+                "requirement_summary",
+                "change_type",
+                "removed_attribute_keys",
+                "state",
+            ],
+            "state_fields": [
+                "attributes",
+                "scope",
+                "lifecycle_status",
+                "ambiguity",
+                "execution",
+            ],
+            "ambiguity_representation": "NULL_OR_ARRAY_OF_RECORDS",
+            "complete_state_closed_world": True,
+            "unexpected_state_fields_are_false_positives": True,
             "internal_ids_forbidden": True,
         }
     return {
@@ -590,15 +724,30 @@ def _response_contract(rq_id: str) -> dict[str, Any]:
 def _semantic_state(state: dict[str, Any] | None) -> dict[str, Any] | None:
     if state is None:
         return None
+    ambiguity = state.get("ambiguity")
+    if isinstance(ambiguity, dict):
+        ambiguity = [
+            {
+                str(key): deepcopy(value)
+                for key, value in raw.items()
+                if key not in {"source_event_id", "ambiguity_event_id"}
+            }
+            for _, raw in sorted(ambiguity.items(), key=lambda item: str(item[0]))
+            if isinstance(raw, dict)
+        ]
+    execution = state.get("execution")
+    if isinstance(execution, dict):
+        execution = {
+            str(key): deepcopy(value)
+            for key, value in execution.items()
+            if key != "source_event_id"
+        }
     return {
-        key: deepcopy(state.get(key))
-        for key in (
-            "attributes",
-            "scope",
-            "lifecycle_status",
-            "ambiguity",
-            "execution",
-        )
+        "attributes": deepcopy(state.get("attributes")),
+        "scope": deepcopy(state.get("scope")),
+        "lifecycle_status": deepcopy(state.get("lifecycle_status")),
+        "ambiguity": deepcopy(ambiguity),
+        "execution": deepcopy(execution),
     }
 
 
@@ -606,9 +755,21 @@ def _state_delta(
     before: dict[str, Any] | None, after: dict[str, Any] | None
 ) -> dict[str, Any]:
     if before is None:
-        return {"change_type": "INTRODUCED", "changed_fields": ["existence"]}
+        return {
+            "change_type": "INTRODUCED",
+            "changed_fields": ["existence"],
+            "changed_paths": ["existence"],
+            "removed_paths": [],
+        }
     if after is None:
-        return {"change_type": "REMOVED_FROM_SNAPSHOT", "changed_fields": ["existence"]}
+        return {
+            "change_type": "REMOVED_FROM_SNAPSHOT",
+            "changed_fields": ["existence"],
+            "changed_paths": ["existence"],
+            "removed_paths": ["existence"],
+        }
+    before_semantic = _semantic_state(before) or {}
+    after_semantic = _semantic_state(after) or {}
     fields = [
         key
         for key in (
@@ -618,11 +779,35 @@ def _state_delta(
             "ambiguity",
             "execution",
         )
-        if before.get(key) != after.get(key)
+        if before_semantic.get(key) != after_semantic.get(key)
     ]
+
+    changed_paths: list[str] = []
+    removed_paths: list[str] = []
+
+    def visit(path: str, old: Any, new: Any) -> None:
+        if old == new:
+            return
+        if isinstance(old, dict) and isinstance(new, dict):
+            for key in sorted(set(old) | set(new)):
+                child_path = f"{path}.{key}" if path else str(key)
+                if key not in new:
+                    changed_paths.append(child_path)
+                    removed_paths.append(child_path)
+                elif key not in old:
+                    changed_paths.append(child_path)
+                else:
+                    visit(child_path, old[key], new[key])
+            return
+        changed_paths.append(path)
+
+    for field in fields:
+        visit(field, before_semantic.get(field), after_semantic.get(field))
     return {
         "change_type": "MODIFIED" if fields else "UNCHANGED",
         "changed_fields": fields,
+        "changed_paths": changed_paths,
+        "removed_paths": removed_paths,
     }
 
 
@@ -1065,6 +1250,9 @@ def _build_rq1_gold(
             "neutral_context_message_ids": deepcopy(
                 evidence["neutral_context_message_ids"]
             ),
+            "family_trajectory_message_ids": deepcopy(
+                evidence["family_trajectory_message_ids"]
+            ),
             "trajectory_message_ids": deepcopy(
                 evidence["trajectory_message_ids"]
             ),
@@ -1086,14 +1274,41 @@ def _build_rq1_gold(
     }
 
 
-def _typed_scoring_spec(value: Any) -> dict[str, Any]:
-    """Create a deterministic comparator candidate from a Gold field's type."""
+_NORMALIZED_EXACT_PATHS = {
+    ("scope", "persistence"),
+    ("lifecycle_status",),
+    ("ambiguity", "[]", "status"),
+    ("ambiguity", "[]", "dimension"),
+    ("ambiguity", "[]", "field"),
+    ("execution", "status"),
+}
+
+_UNKNOWN_NULL_PATHS = {
+    ("lifecycle_status",),
+    ("scope", "persistence"),
+    ("scope", "components"),
+    ("scope", "contexts"),
+}
+
+
+def _typed_scoring_spec(
+    value: Any, path: tuple[str, ...] = ()
+) -> dict[str, Any]:
+    """Create a path-aware comparator for an agent-expressible Gold field."""
 
     if value is None:
+        if path in _UNKNOWN_NULL_PATHS:
+            return {
+                "comparator": "SKIP",
+                "score": False,
+                "null_semantics": "UNKNOWN_UNANNOTATED",
+                "review_status": "REQUIRES_FIELD_REVIEW",
+            }
         return {
             "comparator": "NULL_EXACT",
             "score": True,
-            "review_status": "DETERMINISTIC",
+            "null_semantics": "EXPLICIT_ABSENT",
+            "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE",
         }
     if isinstance(value, bool):
         return {
@@ -1108,26 +1323,65 @@ def _typed_scoring_spec(value: Any) -> dict[str, Any]:
             "review_status": "DETERMINISTIC",
         }
     if isinstance(value, str):
+        if path in _NORMALIZED_EXACT_PATHS:
+            return {
+                "comparator": "NORMALIZED_EXACT",
+                "score": True,
+                "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER",
+            }
         return {
-            "comparator": "ATOMIC_FACT_F1",
+            "comparator": "SEMANTIC_FACT",
             "score": True,
-            "review_status": "PENDING_FACT_NORMALIZATION_REVIEW",
+            "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE",
         }
     if isinstance(value, list):
+        if any(isinstance(child, dict) for child in value):
+            item_fields = sorted(
+                {
+                    str(key)
+                    for child in value
+                    if isinstance(child, dict)
+                    for key in child
+                }
+            )
+            result = {
+                "comparator": "UNORDERED_RECORD_F1",
+                "score": True,
+                "item_fields": {
+                    field: _typed_scoring_spec(
+                        next(
+                            (
+                                child.get(field)
+                                for child in value
+                                if isinstance(child, dict) and field in child
+                            ),
+                            None,
+                        ),
+                        path + ("[]", field),
+                    )
+                    for field in item_fields
+                },
+                "matching_policy": "MAX_WEIGHT_ONE_TO_ONE",
+                "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES",
+            }
+            if path == ("ambiguity",):
+                result["matching_key_fields"] = ["dimension", "description"]
+            return result
         return {
             "comparator": "SET_F1",
             "score": True,
-            "review_status": "PENDING_COLLECTION_SEMANTICS_REVIEW",
+            "review_status": "DETERMINISTIC_UNORDERED_SET",
         }
     if isinstance(value, dict):
         return {
             "comparator": "RECURSIVE_FIELDS",
             "score": True,
+            "closed_world": True,
             "fields": {
-                str(key): _typed_scoring_spec(child)
+                str(key): _typed_scoring_spec(child, path + (str(key),))
                 for key, child in value.items()
             },
-            "review_status": "PENDING_FIELD_COMPARATOR_REVIEW",
+            "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES",
         }
     return {
         "comparator": "NORMALIZED_EXACT",
@@ -1141,7 +1395,7 @@ def _state_scoring_specs(
 ) -> dict[str, dict[str, Any]]:
     return {
         requirement_id: {
-            field: _typed_scoring_spec(state.get(field))
+            field: _typed_scoring_spec(state.get(field), (field,))
             for field in (
                 "attributes",
                 "scope",
@@ -1167,14 +1421,30 @@ def _affected_requirement_transitions(
             raise RQInstanceError(
                 f"affected Requirement {requirement_id!r} has no target Event"
             )
-        before = pre_state.get(requirement_id)
-        after = post_state.get(requirement_id)
+        raw_before = pre_state.get(requirement_id)
+        raw_after = post_state.get(requirement_id)
+        before = _semantic_state(raw_before)
+        after = _semantic_state(raw_after)
         transitions[requirement_id] = {
             "event_ids": [deepcopy(event.get("event_id")) for event in events],
             "event_types": [deepcopy(event.get("event_type")) for event in events],
-            "before": deepcopy(before),
-            "after": deepcopy(after),
-            "delta": _state_delta(before, after),
+            "before": before,
+            "after": after,
+            "state_provenance": {
+                "before_state_id": deepcopy(
+                    raw_before.get("state_id") if raw_before else None
+                ),
+                "after_state_id": deepcopy(
+                    raw_after.get("state_id") if raw_after else None
+                ),
+                "before_supporting_event_ids": deepcopy(
+                    raw_before.get("supporting_event_ids", []) if raw_before else []
+                ),
+                "after_supporting_event_ids": deepcopy(
+                    raw_after.get("supporting_event_ids", []) if raw_after else []
+                ),
+            },
+            "delta": _state_delta(raw_before, raw_after),
         }
     return transitions
 
@@ -1184,12 +1454,34 @@ def _build_rq2_gold(
 ) -> dict[str, Any]:
     requirement_ids = relevance["relevant_requirement_ids"]
     states = {
-        requirement_id: deepcopy(pre_state[requirement_id])
+        requirement_id: _semantic_state(pre_state[requirement_id])
+        for requirement_id in requirement_ids
+    }
+    requirement_summaries = {
+        requirement_id: deepcopy(pre_state[requirement_id].get("requirement_title"))
+        for requirement_id in requirement_ids
+    }
+    alignment_evidence_message_ids = {
+        requirement_id: deepcopy(
+            relevance["evidence"][requirement_id]["trajectory_message_ids"]
+        )
+        for requirement_id in requirement_ids
+    }
+    state_provenance = {
+        requirement_id: {
+            "state_id": deepcopy(pre_state[requirement_id].get("state_id")),
+            "supporting_event_ids": deepcopy(
+                pre_state[requirement_id].get("supporting_event_ids", [])
+            ),
+        }
         for requirement_id in requirement_ids
     }
     return {
-        "status": "PROVISIONAL_REQUIRES_COMPARATOR_REVIEW",
+        "status": "PROVISIONAL_REQUIRES_FIELD_REVIEW",
         "gold_requirement_ids": deepcopy(requirement_ids),
+        "requirement_summaries": requirement_summaries,
+        "alignment_evidence_message_ids": alignment_evidence_message_ids,
+        "state_provenance": state_provenance,
         "new_requirement_ids": deepcopy(relevance["new_requirement_ids"]),
         "states": states,
         "state_dimensions": [
@@ -1206,6 +1498,18 @@ def _build_rq2_gold(
             "no_matched_requirement_result": "N/A",
         },
         "field_scoring_specs": _state_scoring_specs(states),
+        "scoring_policy": {
+            "closed_world_objects": True,
+            "unexpected_fields": "FALSE_POSITIVE_AND_EXACT_FAILURE",
+            "semantic_judge_outputs_final_scores": False,
+            "primary_metrics": [
+                "ATTRIBUTE_RECONSTRUCTION_SCORE",
+                "MATCHED_FULL_STATE_EXACT",
+                "RECONSTRUCTION_COVERAGE",
+                "PER_DIMENSION_SCORES",
+            ],
+            "auxiliary_metrics": ["MATCHED_STATE_SCORE"],
+        },
         "review_status": relevance["review_status"],
     }
 
@@ -1227,6 +1531,19 @@ def _build_rq3_gold(
         requirement_id: deepcopy(transition["after"])
         for requirement_id, transition in transitions.items()
         if transition["after"] is not None
+    }
+    alignment_gold = {
+        requirement_id: {
+            "canonical_summary": deepcopy(
+                (
+                    post_state.get(requirement_id)
+                    or pre_state.get(requirement_id)
+                    or {}
+                ).get("requirement_title")
+            ),
+            "introduced": requirement_id not in pre_state,
+        }
+        for requirement_id in transitions
     }
     return {
         "status": "PENDING_HUMAN_DECISION_REVIEW",
@@ -1257,6 +1574,7 @@ def _build_rq3_gold(
         "affected_requirement_ids": [
             str(value) for value in gold["affected_requirement_ids"]
         ],
+        "affected_requirement_alignment_gold": alignment_gold,
         "affected_requirement_transitions": transitions,
         "post_task_states": affected_post_states,
         "post_state_scoring_specs": _state_scoring_specs(affected_post_states),
@@ -1488,6 +1806,54 @@ def build_rq_instances(
     return collections
 
 
+def _scoring_spec_issues(specs: Any, path: tuple[str, ...] = ()) -> list[str]:
+    issues: list[str] = []
+    if not isinstance(specs, dict):
+        return [f"{'.'.join(path) or 'spec'} must be an object"]
+    comparator = specs.get("comparator")
+    if path and path[-1] in {
+        "source_event_id",
+        "ambiguity_event_id",
+        "state_id",
+        "requirement_id",
+        "supporting_event_ids",
+    } and specs.get("score") is not False:
+        issues.append(f"internal provenance field {'.'.join(path)} is scoreable")
+    if path in {
+        ("scope", "persistence"),
+        ("lifecycle_status",),
+        ("execution", "status"),
+    } and comparator not in {"NORMALIZED_EXACT", "SKIP"}:
+        issues.append(f"enum field {'.'.join(path)} must use NORMALIZED_EXACT")
+    for key, child in specs.get("fields", {}).items():
+        issues.extend(_scoring_spec_issues(child, path + (str(key),)))
+    for key, child in specs.get("item_fields", {}).items():
+        issues.extend(_scoring_spec_issues(child, path + ("[]", str(key))))
+    return issues
+
+
+def _state_shape_issues(state: Any, label: str) -> list[str]:
+    if not isinstance(state, dict):
+        return [f"{label} must be an object"]
+    issues: list[str] = []
+    expected = {"attributes", "scope", "lifecycle_status", "ambiguity", "execution"}
+    if set(state) != expected:
+        issues.append(f"{label} must contain exactly the five semantic dimensions")
+    ambiguity = state.get("ambiguity")
+    if ambiguity is not None and not isinstance(ambiguity, list):
+        issues.append(f"{label}.ambiguity must be null or an array")
+    serialized = json.dumps(state, ensure_ascii=False)
+    for forbidden in (
+        "source_event_id",
+        "ambiguity_event_id",
+        "state_id",
+        "supporting_event_ids",
+    ):
+        if f'"{forbidden}"' in serialized:
+            issues.append(f"{label} contains internal provenance field {forbidden}")
+    return issues
+
+
 def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
     """Return structural errors for one constructed instance."""
 
@@ -1658,6 +2024,55 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
                             errors.append(
                                 f"RQ1 atom {requirement_id} required/context overlap"
                             )
+    elif rq_id == "RQ2":
+        construction_gold = instance["construction_gold"]
+        contract = instance.get("response_contract", {})
+        if contract.get("schema_version") != "rq2-agent-response-v3":
+            errors.append("RQ2 response contract must use v3")
+        states = construction_gold.get("states")
+        specs = construction_gold.get("field_scoring_specs")
+        requirement_ids = construction_gold.get("gold_requirement_ids")
+        if not isinstance(requirement_ids, list) or not requirement_ids:
+            errors.append("RQ2 gold_requirement_ids must be non-empty")
+        elif not isinstance(states, dict) or set(states) != set(requirement_ids):
+            errors.append("RQ2 states must equal gold_requirement_ids")
+        elif not isinstance(specs, dict) or set(specs) != set(requirement_ids):
+            errors.append("RQ2 scoring specs must equal gold_requirement_ids")
+        else:
+            for requirement_id in requirement_ids:
+                errors.extend(
+                    _state_shape_issues(
+                        states[requirement_id], f"RQ2 states.{requirement_id}"
+                    )
+                )
+                for dimension, spec in specs[requirement_id].items():
+                    errors.extend(_scoring_spec_issues(spec, (dimension,)))
+    elif rq_id == "RQ3":
+        construction_gold = instance["construction_gold"]
+        contract = instance.get("response_contract", {})
+        if contract.get("schema_version") != "rq3-agent-response-v3":
+            errors.append("RQ3 response contract must use v3")
+        post_states = construction_gold.get("post_task_states")
+        specs = construction_gold.get("post_state_scoring_specs")
+        if not isinstance(post_states, dict) or not isinstance(specs, dict):
+            errors.append("RQ3 post states and scoring specs must be objects")
+        elif set(post_states) != set(specs):
+            errors.append("RQ3 post states and scoring specs must have identical keys")
+        else:
+            for requirement_id, state in post_states.items():
+                errors.extend(
+                    _state_shape_issues(
+                        state, f"RQ3 post_task_states.{requirement_id}"
+                    )
+                )
+                for dimension, spec in specs[requirement_id].items():
+                    errors.extend(_scoring_spec_issues(spec, (dimension,)))
+        final = construction_gold.get("final_gold_by_condition")
+        if construction_gold.get("status") == "FINAL_UPDATE_OR_CLARIFY_GOLD":
+            if not isinstance(final, dict) or set(final) != set(CONDITIONS):
+                errors.append("final RQ3 Gold must contain C1, C2, and C3")
+            elif any(not isinstance(final[condition], dict) for condition in CONDITIONS):
+                errors.append("final RQ3 Gold cannot contain null branches")
     return errors
 
 
@@ -1774,7 +2189,14 @@ def build_project_manifest(
         ),
         "source_artifacts": source_records,
         "construction_boundaries": {
-            "evaluation_implemented": False,
+            "evaluation_implemented": {
+                "RQ1": True,
+                "RQ2": True,
+                "RQ3": True,
+                "RQ4": False,
+            },
+            "rq2_formal_scores_require_final_field_review": True,
+            "rq3_formal_scores_require_frozen_condition_gold": True,
             "rq4_archives_extracted": False,
             "human_review_required": True,
         },

@@ -78,6 +78,7 @@ from .models import (
     SemanticRegistry,
     TransformationPlan,
 )
+from .phase3_rewrite import blocking_violations
 from .phase6_render import AuditInputs, audit_final_texts, render_final_texts
 from .textutil import canonical_sha256
 
@@ -177,9 +178,25 @@ class FinalizeState:
     def _load_rewrites(self) -> dict[int, tuple[RewriteRecord, str]]:
         """Accepted texts from phases 3 and 5, with their provenance.
 
-        A phase-5 record supersedes the phase-3 record for the same message.
+        A phase-5 record supersedes the phase-3 record for the same message --
+        but only while it still holds against the current plan.
+
+        Phase 5 writes one file per attempt and never revisits a message it was
+        not asked to repair, so a repair written against an *earlier* plan stays
+        on disk after phase 3 has re-written that message under a new one.
+        Preferring it unconditionally let a superseded replacement name override
+        the fresh, correct rewrite that had just replaced it; the contradiction
+        then surfaced only in the phase-6B audit, reported against a message
+        that had no agent task and so no route to a fix.
+
+        Every other phase guards reuse with an input hash.  A rewrite record
+        carries no slice hash, so the equivalent check here is the text itself:
+        blocking violations only, because the advisory half is what phase 4
+        arbitrated when this text was accepted and re-litigating it offline
+        would reject work that is still perfectly good.
         """
 
+        by_ordinal = {item.ordinal: item for item in self.safe_messages}
         records: dict[int, tuple[RewriteRecord, str]] = {}
         for phase, provenance in (
             (PHASE_3, PROVENANCE_LLM_REWRITE),
@@ -192,6 +209,18 @@ class FinalizeState:
                 envelope = read_json(path)
                 body = envelope.get("body", envelope)
                 record = RewriteRecord.from_json(body)
+                safe = by_ordinal.get(record.ordinal)
+                slice_ = self.slices.get(record.ordinal)
+                if safe is not None and slice_ is not None:
+                    stale = blocking_violations(safe, record.text, slice_)
+                    if stale:
+                        print(
+                            f"[{self.project.project_id}] discarding stale "
+                            f"{phase} text for ordinal {record.ordinal}: "
+                            f"{stale[0]}",
+                            flush=True,
+                        )
+                        continue
                 records[record.ordinal] = (record, provenance)
         return records
 

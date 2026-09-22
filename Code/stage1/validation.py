@@ -19,6 +19,7 @@ AMBIGUITY_RESOLVER_EVENT_TYPES = {"INTRODUCE", "MODIFY", "DEFER", "RESUME", "REM
 CANONICAL_EVENT_FIELDS = {
     "event_id",
     "source_message",
+    "supporting_message_ids",
     "event_type",
     "value_updates",
     "value_removals",
@@ -161,6 +162,8 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
                 # Backward-compatible load normalization. Absence never implies
                 # a heuristic resolution; it means the ambiguity remains OPEN.
                 event["resolves_ambiguity_event_ids"] = None
+            if isinstance(event, dict) and "supporting_message_ids" not in event:
+                event["supporting_message_ids"] = []
             if not isinstance(event, dict) or set(event) != CANONICAL_EVENT_FIELDS:
                 _error(f"{requirement_id} event {number} has non-canonical fields")
             expected_id = f"{requirement_id}_E{number:03d}"
@@ -187,6 +190,21 @@ def validate_stage1_annotation(annotation: dict[str, Any], normalized: dict[str,
             if position < previous_position:
                 _error(f"{requirement_id} Events are not chronological")
             previous_position = position
+            supporting_message_ids = event.get("supporting_message_ids")
+            if not isinstance(supporting_message_ids, list):
+                _error(f"{expected_id}.supporting_message_ids must be an array")
+            supporting_keys = [id_key(value) for value in supporting_message_ids]
+            if len(set(supporting_keys)) != len(supporting_keys):
+                _error(f"{expected_id}.supporting_message_ids contains duplicates")
+            for supporting_key in supporting_keys:
+                if supporting_key == key:
+                    _error(
+                        f"{expected_id}.supporting_message_ids repeats its source message"
+                    )
+                if supporting_key not in message_by_id:
+                    _error(
+                        f"{expected_id}.supporting_message_ids references an unknown message"
+                    )
             _validate_event_payload(event, expected_id)
             removals = event.get("value_removals") or []
             missing = [attribute for attribute in removals if attribute not in current_attributes]

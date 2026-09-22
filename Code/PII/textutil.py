@@ -19,7 +19,7 @@ import math
 import re
 from collections import Counter
 from difflib import SequenceMatcher
-from typing import Any, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 from ._compat import id_key, safe_filename, sha256_text
 from .config import (
@@ -34,8 +34,16 @@ from .config import (
 # PII-shaped values (PII_Clean.py:79-101)
 # --------------------------------------------------------------------------- #
 
+# ``|`` and ``/`` are excluded from the local part on purpose.  Both are legal
+# there only inside a quoted string, and every real occurrence in this corpus is
+# link syntax: Slack's ``<link|label>`` delimiter and a URL's path separator.
+# Admitting them made the match start early and swallow the delimiter, so a
+# correctly planned address inside an autolink read as a second, *unplanned*
+# address that no rewrite could remove -- and one whose host parsed as empty,
+# because ``_domain_of`` truncates at the first ``/``.  Narrowing the class
+# shortens the match without losing it: the address itself still matches.
 EMAIL_RE = re.compile(
-    r"(?<![\w.+-])[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@"
+    r"(?<![\w.+-])[A-Z0-9.!#$%&'*+=?^_`{}~-]+@"
     r"(?:[A-Z0-9-]+\.)+[A-Z]{2,63}(?![\w.-])",
     re.IGNORECASE,
 )
@@ -320,6 +328,49 @@ def overlaps_any(span: tuple[int, int], excluded: Sequence[tuple[int, int]]) -> 
     )
 
 
+def normalized_surface(value: str) -> str:
+    """A surface form reduced to what decides whether two refer to one thing.
+
+    Phase 0B routinely records one referent twice when the source spells it two
+    ways -- an address written ``Washington DC`` in one message and
+    ``Washington, DC`` in the next.  Phase 2 then correctly gives both the same
+    synthetic value, and the collision guards, which exempt entities that share
+    an original surface form, missed the exemption over a single comma and
+    reported the correct plan as a collision.
+
+    Punctuation and spacing are exactly what varies between such spellings and
+    never what distinguishes two different identities, so both are dropped.
+    """
+
+    return re.sub(r"[^\w]+", " ", value.casefold()).strip()
+
+
+def value_spans(text: str, values: Iterable[str]) -> list[tuple[int, int]]:
+    """Every span at which one of ``values`` occurs verbatim in ``text``."""
+
+    spans: list[tuple[int, int]] = []
+    for value in values:
+        if not value:
+            continue
+        start = text.find(value)
+        while start >= 0:
+            spans.append((start, start + len(value)))
+            start = text.find(value, start + 1)
+    return spans
+
+
+def contained_in_any(span: tuple[int, int], spans: Sequence[tuple[int, int]]) -> bool:
+    """Whether ``span`` lies wholly inside one of ``spans``.
+
+    Containment, not overlap: a PII shape that sits *inside* a value the plan
+    chose is part of that value, while one that merely touches its edge is a
+    different value and still has to be accounted for.
+    """
+
+    start, end = span
+    return any(outer_start <= start and end <= outer_end for outer_start, outer_end in spans)
+
+
 def mask_spans(text: str, spans: Sequence[tuple[int, int]]) -> str:
     """Hide complete spans while retaining offsets and token boundaries."""
 
@@ -402,6 +453,12 @@ def find_terms_outside_pii(text: str, terms: Sequence[str]) -> tuple[str, ...]:
     A provider name inside a URL is part of that URL: the ``Google`` in
     ``docs.google.com`` must not make the whole message look like it mentions a
     public service in prose.
+
+    A single-word term that is not an acronym (``Zoom``, ``Notion``, ``Visa``,
+    ``Apple``, ``Meta``) is also an ordinary English word or common noun, so it
+    is matched case-sensitively: "if you zoom in" is not a mention of the
+    video-conferencing product.  Multi-word phrases and all-caps acronyms keep
+    case-insensitive matching, where a coincidental collision is negligible.
     """
 
     excluded = pii_shaped_spans(text)
@@ -411,7 +468,8 @@ def find_terms_outside_pii(text: str, terms: Sequence[str]) -> tuple[str, ...]:
         term = configured.strip()
         if not term or term.casefold() in seen:
             continue
-        for match in re.finditer(literal_term_pattern(term), text, flags=re.IGNORECASE):
+        flags = 0 if (" " not in term and not term.isupper()) else re.IGNORECASE
+        for match in re.finditer(literal_term_pattern(term), text, flags=flags):
             if overlaps_any(match.span(), excluded):
                 continue
             exact = match.group(0)

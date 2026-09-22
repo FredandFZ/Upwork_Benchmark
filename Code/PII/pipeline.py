@@ -128,6 +128,12 @@ from .textutil import canonical_sha256, resolve_bucket
 # what went wrong.
 PLAN_ATTEMPTS = 4
 
+# The phases whose failure genuinely stops a message from being rewritten: no
+# annotation, or no plan, means there is nothing to rewrite against.  A failure
+# *after* the rewrite says the opposite -- that this message most needs a fresh
+# one -- so it must not be read as a reason to skip.
+REWRITE_UPSTREAM: tuple[str, ...] = (PHASE_0B, PHASE_1A, PHASE_1B, PHASE_2)
+
 
 @dataclass
 class ProjectRun:
@@ -899,9 +905,25 @@ class PiiPipeline:
         # The slot channel has to know which literals are public, or it re-values
         # currency tickers, networks and SaaS names that the entity channel is
         # simultaneously preserving -- a contradiction no rewrite can satisfy.
-        preserved = p2.preserved_surface_forms(entities)
+        # ...and which literals phase 1A declared to *be* the requirement (a file
+        # format, a standard, a tool version).  ``plan_slice`` folds those into
+        # the slice's preserve literals either way, so a slot channel that does
+        # not see them produces a plan the rewrite gate can never satisfy.
+        preserved = p2.preserved_surface_forms(entities) | p2.semantic_preserve_terms(
+            run.semantics.values(), entities
+        )
         for cluster in p2.slot_clusters(semantics, max_chars=self.config.plan_chunk_chars):
-            scope = {"index": cluster.index, "slots": list(cluster.slot_ids)}
+            sections = p2.build_slot_sections(cluster, semantics, preserved)
+            scope = {
+                "index": cluster.index,
+                "slots": list(cluster.slot_ids),
+                # The preserved terms reach this call's prompt and constrain its
+                # validation, so they are an input to it.  Recording them here is
+                # what makes a corrected preserve set invalidate exactly the
+                # clusters it changes, instead of silently reusing a plan built
+                # under the old rule.
+                "preserved_terms": list(sections.get("PRESERVED_TERMS") or ()),
+            }
             digest = store.input_hash(
                 PHASE_2,
                 prompt_sha256=self.prompts.phase2_sha256(p2.MODE_SLOT_CLUSTER),
@@ -932,7 +954,7 @@ class PiiPipeline:
                 project_id=run.project.project_id,
                 target=f"slots_{cluster.cluster_id}",
                 prompt=prompt,
-                sections=p2.build_slot_sections(cluster, semantics, preserved),
+                sections=sections,
                 task=p2.TASK_SLOTS,
                 validator=lambda payload, _c=cluster, _p=preserved: p2.validate_slot_cluster(
                     payload, _c, semantics, _p
@@ -1027,7 +1049,11 @@ class PiiPipeline:
 
             pending: list[SafeMessage] = []
             for safe in items:
-                if run.ledger.is_blocked(safe.message_id):
+                # Scoped to the phases that actually gate a rewrite.  Left
+                # unscoped, a message that failed *verification* on a previous
+                # run was skipped here, kept its stale text through a plan
+                # change, and then passed the rest of the run unexamined.
+                if run.ledger.is_blocked(safe.message_id, phases=REWRITE_UPSTREAM):
                     continue
                 cached = store.load(
                     PHASE_3,
@@ -1147,7 +1173,9 @@ class PiiPipeline:
             for safe in run.safe_messages
             if safe.bucket not in PRESERVED_BUCKETS
             and safe.ordinal in run.rewrites
-            and not run.ledger.is_blocked(safe.message_id)
+            and not run.ledger.is_blocked(
+                safe.message_id, phases=(*REWRITE_UPSTREAM, PHASE_3)
+            )
         ]
         pending: list[SafeMessage] = []
         for safe in candidates:

@@ -291,3 +291,14 @@ RQ1 已提供独立的自动评价核心 `evaluation/rq1.py` 和离线入口 `ev
 调用负责为同一 target 的全部 Prediction–Gold pairs 生成 Atom relation，确定性 scorer 再执行
 一对一匹配并输出 Requirement F1、唯一的端到端 Evidence F1 和 Exact Requirement Set
 Accuracy。RQ1 不进入人工复核；具体命令见同一 README 的“RQ1 自动评价”。
+
+RQ2/RQ3 评价也已实现：`evaluation/alignment.py` 提供通用 Requirement 对齐，
+`evaluation/state.py` 提供 closed-world typed State scoring，`evaluation/rq2.py` 与
+`evaluation/rq3.py` 负责各自指标；离线入口为 `evaluate_rq2.py`、`evaluate_rq3.py`。API Judge
+只返回离散的 Requirement/自由文本语义关系，enum、数值、集合、缺失/额外字段和最终聚合均由
+确定性代码完成。
+
+RQ2 当前仍是 `PROVISIONAL_REQUIRES_FIELD_REVIEW`，只能输出不可发布的诊断分数。RQ3 必须先用
+`finalize_rq3_gold.py` 完成 C1/C2/C3 双人审核与 adjudication，未冻结 Gold 会被 scorer 拒绝。
+完整命令、常量 baselines 和发布门禁见同一 README 的“RQ2 自动评价”与“RQ3 Gold 冻结与自动
+评价”。

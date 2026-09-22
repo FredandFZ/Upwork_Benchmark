@@ -426,7 +426,7 @@ supporting_event_ids
         ↓
 Requirement Events
         ↓
-source_message
+source_message + supporting_message_ids
         ↓
 Original Project History
 ```
@@ -454,6 +454,7 @@ Stage 1 中不同 Event Type 对 State 的影响如下。
 - Requirement IDs 和全项目 Event IDs 唯一；
 - Event type、payload 和 execution status 符合 canonical schema；
 - `value_updates`、`value_removals`、`scope_updates` 的类型与组合合法；
+- `supporting_message_ids` 是已知、无重复且不重复主 source 的消息数组；
 - `resolves_ambiguity_event_ids` 为 `null` 或非空、无重复的字符串数组；
 - resolution target 存在于同一 Requirement，位于 resolver 之前且类型为 `AMBIGUOUS`；
 - 同一个 ambiguity 没有被重复解决；
@@ -1203,9 +1204,11 @@ REQ_ETH_MINT_S002
 REQ_ETH_MINT_S003
 ```
 
-Edge 不需要重新复制完整的 Event Annotation。
+Edge 不需要重新复制完整的 Event Annotation，但会保留证据构造必需的
+`source_message_id` 与 `supporting_message_ids`。
 
-完整 Event 信息仍然保存在 Stage 1 Project Annotation 中，State Graph 只通过 `event_id` 建立关联。
+完整 Event payload 仍然保存在 Stage 1 Project Annotation 中；State Graph 通过 `event_id` 建立
+关联，并冗余保留 evidence/deletion 构造所需的少量字段。
 
 例如：
 
@@ -1216,11 +1219,16 @@ Edge 不需要重新复制完整的 Event Annotation。
   "event_id": "REQ_SMALL_PRIZE_E002",
   "event_type": "MODIFY",
   "source_message_id": 158,
+  "supporting_message_ids": [156, 157],
   "value_removals": null
 }
 ```
 
-Edge 固定保留 `value_removals`，便于后续 Gold 构建和审计直接识别 attribute deletion；其余完整 Event payload 仍通过 `event_id` 回到 Stage 1 Annotation 查询。
+Edge 固定保留 `supporting_message_ids` 和 `value_removals`：前者让 RQ1 将同一 Event 的多条
+消息构造成一个 acceptable evidence group，后者便于 Gold 构建和审计直接识别 attribute
+deletion；其余完整 Event payload 仍通过 `event_id` 回到 Stage 1 Annotation 查询。若某条
+supporting message 晚于该 Event 的主 source，下游仍必须按 target 边界过滤，不能把 target
+当下或未来消息暴露给 Agent。
 
 因此：
 
@@ -1228,7 +1236,7 @@ Edge 固定保留 `value_removals`，便于后续 Gold 构建和审计直接识�
 State Graph Edge
         ↓ event_id
 Stage 1 Requirement Event
-        ↓ source_message
+        ↓ source_message + supporting_message_ids
 Original Project History
 ```
 

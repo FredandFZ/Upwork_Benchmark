@@ -22,6 +22,8 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
+from Code.PII.textutil import canonical_sha256
+from Code.PII.pipeline import REWRITE_UPSTREAM
 from Code.PII.agent_handoff import (
     clear_task_package,
     queue_sha256,
@@ -1314,3 +1316,81 @@ class PlanChangeCascadeTests(unittest.TestCase):
         self.assertEqual(
             first.calls.count("PII7_REWRITE"), 0, "an unchanged plan must reuse every rewrite"
         )
+
+
+class StaleRewriteRecordTests(AgentRepairTests):
+    """A cached repair must not outlive the plan it was written against.
+
+    Phase 5 writes one file per attempt and never revisits a message it was not
+    asked to repair.  When phase 3 later re-writes that message under a changed
+    plan, the old repair is still on disk, and finalize preferred it purely for
+    being a phase-5 record.  A superseded replacement name then overrode the
+    fresh, correct rewrite, and the contradiction surfaced only in the phase-6B
+    audit -- against a message with no agent task, so no route to a fix.
+    """
+
+    def stale_record(self, ordinal: int, text: str) -> None:
+        directory = self.harness.run_dir / "phase5_repair" / "messages"
+        directory.mkdir(parents=True, exist_ok=True)
+        body = {
+            "ordinal": ordinal,
+            "message_id": ordinal,
+            "bucket": "LONG",
+            "text": text,
+            "text_sha256": canonical_sha256(text),
+            "applied_entity_ids": [],
+            "applied_slot_ids": [],
+            "retained_secret_tokens": [],
+            "structural_change": True,
+            "source": "LLM_REPAIR",
+            "attempt": 1,
+        }
+        (directory / f"{ordinal:05d}.attempt01.json").write_text(
+            json.dumps({"body": body}), encoding="utf-8"
+        )
+
+    def test_a_stale_repair_loses_to_the_valid_phase_three_text(self):
+        fresh = self.harness.output_rows if self.harness.committed.is_file() else None
+        self.assertIsNone(fresh)
+        # A repair that drops the planned replacement: exactly what a plan
+        # change leaves behind.
+        self.stale_record(1, "We should get moving on this soon, thanks.")
+        self.write(self.submission())
+        manifest = self.finalize()
+        self.assertEqual(manifest["status"], "DONE")
+        committed = self.harness.output_rows()[0]["message"]
+        self.assertNotEqual(committed, "We should get moving on this soon, thanks.")
+        self.assertNotIn("Joseph", committed)
+
+
+class BlockedScopeTests(unittest.TestCase):
+    """A downstream failure must not stop the rewrite that would fix it.
+
+    Each phase clears only its own ledger entries before running, so when
+    phase 3 starts, the *previous* run's phase-4 and phase-5 entries are still
+    there.  Read without a scope they made phase 3 skip exactly the messages it
+    most needed to redo: the message kept text written against a plan that had
+    since changed, phase 4 then skipped it for the same reason, and it finished
+    the run counted as resolved -- with no agent task, and so no route to a fix.
+    """
+
+    def ledger(self, phase: str) -> UnresolvedLedger:
+        led = UnresolvedLedger(run_dir=Path(tempfile.mkdtemp()), project_id="P1")
+        led.record_sync(
+            phase=phase,
+            code="SOME_CODE",
+            failure_class="CONTENT",
+            message_id=7,
+            ordinal=7,
+            attempts=1,
+        )
+        return led
+
+    def test_a_verification_failure_does_not_block_the_rewrite(self):
+        led = self.ledger(PHASE_4)
+        self.assertTrue(led.is_blocked(7))
+        self.assertFalse(led.is_blocked(7, phases=REWRITE_UPSTREAM))
+
+    def test_a_missing_annotation_still_blocks_the_rewrite(self):
+        led = self.ledger(PHASE_1A)
+        self.assertTrue(led.is_blocked(7, phases=REWRITE_UPSTREAM))

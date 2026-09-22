@@ -19,6 +19,7 @@ from Code.PII.phase0b_entities import (
     required_coverage_spans,
     validate_discovery_response,
 )
+from Code.PII.models import PiiOccurrence
 from Code.PII.secret_shield import nominate_secret_spans, shield_project
 from Code.PII.textutil import private_resource_identifiers
 
@@ -180,6 +181,27 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("DISCOVERY_COVERAGE_GAP", caught.exception.failures)
 
 
+class AmbiguousCommonWordTests(unittest.TestCase):
+    def test_common_verb_colliding_with_a_brand_name_is_not_required(self):
+        """'zoom in' is not a mention of the Zoom product.
+
+        Case-insensitive matching against PUBLIC_ALLOWLIST previously forced a
+        DISCOVERY_COVERAGE_GAP for any lowercase use of an ordinary word that
+        happens to share a single-word public brand's spelling.
+        """
+
+        safe = safe_message(
+            "If you zoom in, you'll be able to see the text and logo clearly."
+        )
+        labels = [label for _, _, label in required_coverage_spans(safe.safe_text)]
+        self.assertNotIn("PUBLIC_REQUIREMENT", labels)
+
+    def test_properly_capitalized_brand_mention_is_still_required(self):
+        safe = safe_message("Let's hop on a Zoom call at noon.")
+        labels = [label for _, _, label in required_coverage_spans(safe.safe_text)]
+        self.assertIn("PUBLIC_REQUIREMENT", labels)
+
+
 class SecretAndPrivateIdentifierRegressionTests(unittest.TestCase):
     def test_markdown_escaped_webhook_secret_is_detected(self):
         value = "whsec" + r"\_" + "Ab9Cd8Ef7Gh6Jk5Lm4Np3Qr2"
@@ -221,6 +243,69 @@ class MergeTests(unittest.TestCase):
         self.assertIn("EMAIL", types)
         self.assertIn("SOCIAL_ACCOUNT", types)
         self.assertIn("PRIVATE_URL", types)
+
+    def test_link_hints_are_scoped_to_one_message(self):
+        """Two API responses may both start their arbitrary labels at ``L1``."""
+
+        first = PiiOccurrence(
+            ordinal=1,
+            message_id="m1",
+            source="Alice Example",
+            start=0,
+            end=13,
+            entity_type="PERSON",
+            policy="SYNTHESIZE",
+            normalized_value="Alice Example",
+            link_hint="L1",
+            confidence="HIGH",
+        )
+        second = PiiOccurrence(
+            ordinal=2,
+            message_id="m2",
+            source="Bob Example",
+            start=0,
+            end=11,
+            entity_type="PERSON",
+            policy="SYNTHESIZE",
+            normalized_value="Bob Example",
+            link_hint="L1",
+            confidence="HIGH",
+        )
+
+        registry = merge_entity_registry({1: (first,), 2: (second,)})
+
+        self.assertEqual(registry.bundles, ())
+
+    def test_link_hint_still_bundles_entities_within_one_message(self):
+        person = PiiOccurrence(
+            ordinal=1,
+            message_id="m1",
+            source="Alice Example",
+            start=0,
+            end=13,
+            entity_type="PERSON",
+            policy="SYNTHESIZE",
+            normalized_value="Alice Example",
+            link_hint="L1",
+            confidence="HIGH",
+        )
+        email = PiiOccurrence(
+            ordinal=1,
+            message_id="m1",
+            source="alice@private.invalid",
+            start=17,
+            end=38,
+            entity_type="EMAIL",
+            policy="SYNTHESIZE",
+            normalized_value="alice@private.invalid",
+            link_hint="L1",
+            confidence="HIGH",
+        )
+
+        registry = merge_entity_registry({1: (person, email)})
+
+        self.assertEqual(len(registry.bundles), 1)
+        self.assertEqual(set(registry.bundles[0].entity_ids), {"E0001", "E0002"})
 
 
 if __name__ == "__main__":
