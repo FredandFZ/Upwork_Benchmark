@@ -64,6 +64,14 @@ The main paper uses seven top-level sections and no `subsubsection` headings. Bo
 
 **Nine-page planning budget:** Abstract 0.2 page; Introduction 1.0; Related Work 0.6; Sections 3–4 together 3.0–3.3; Experiments 2.4–2.7; Analysis and Limitations 0.8–1.0; Conclusion 0.2–0.3. Figures and tables must fit inside these allocations.
 
+Introduction：约 1 页
+Related Work：0.5–0.7 页
+Method：1.1–1.3 页
+Benchmark/Data：1.8–2.1 页
+Experiments and Results：2.3–2.6 页
+Analysis and Limitations：0.8–1.0 页
+Conclusion：0.2–0.3 页
+
 ### Figure plan
 
 | ID | Placement | Purpose | Required content | Status |
@@ -78,7 +86,6 @@ The main paper uses seven top-level sections and no `subsubsection` headings. Bo
 
 | ID | Placement | Purpose | Status |
 | --- | --- | --- | --- |
-| Table 1 (optional) | Related Work or Appendix | Position ReqMemBench against the closest coding, memory, and long-horizon coding benchmarks | Use in the main text only if it is compact and fully verified |
 | Table 2 | Section 4 | Report project-, requirement-, event-, task-, provenance-, and eligibility-level benchmark statistics | Structure exists; values incomplete |
 | Table 3 | Section 3 or 5 | Summarize the four evaluation stages, applicable conditions, repository visibility, outputs, primary metrics, and scoring units | Replaces repeated per-RQ definitions across sections |
 | Table 4 | Section 5.2 | Main results for requirement selection and pre-task state reconstruction | Two compact panels for RQ1 and RQ2; full breakdowns move to the appendix |
@@ -312,20 +319,6 @@ The following rows are working comparison notes, not an additional main-text sub
 | RECODE-H | Multi-turn simulated human feedback for research-code revision | Feedback-driven improvement rather than arbitrary-time state reconstruction |
 | LoCoEval | Repository-oriented long-horizon conversation, iterative requirements, noise, and retrospective questions | Closest comparison; verify whether it explicitly evaluates lifecycle/scope/ambiguity/execution state and state-to-action chain |
 | ReqMemBench | Arbitrary-time takeover with history-only requirement reasoning followed by gated pre-task-repository execution | Explicit task-relevant pre/post requirement states and validated delivery under a leakage-controlled phase boundary |
-
-**Planned comparison dimensions.**
-
-| Dimension | Coding benchmarks | Memory benchmarks | Conversational coding | ReqMemBench |
-| --- | --- | --- | --- | --- |
-| Real repository | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Longitudinal project | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Historical conversation | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Requirement evolution | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Explicit lifecycle | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Scope and ambiguity | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Temporal gold state $G(t)$ | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Intermediate takeover | TODO verify | TODO verify | TODO verify | Intended: yes |
-| Downstream action | TODO verify | TODO verify | TODO verify | Intended: yes |
 
 ## 3. Temporal Requirement-State Reconstruction
 
@@ -855,3 +848,4 @@ The appendix should contain:
 ## Reference backlog
 
 The current bibliography is a template placeholder and contains unrelated references. The paper currently names or plans to discuss HumanEval, MBPP, CrossCodeEval, RepoBench, SWE-bench, BigCodeBench, SWE-Lancer, LongMemEval, ConvCodeWorld, SWE-Bench-CL, SWE-ContextBench, SR-Eval, RECODE-H, LoCoEval, and RigorBench. Every title, version, venue/year, task description, and comparison-table cell must be verified against the primary paper or official benchmark documentation before citation.
+

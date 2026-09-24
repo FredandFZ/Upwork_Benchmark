@@ -1,0 +1,187 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_HUBSPOT_TO_MEETALFRED_LEAD_SYNC",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 63,
+        "speaker": "client",
+        "text": "Caleb Hart, hello!\n\nBecause an urgent MeetAlfred campaign is currently running through my LinkedIn, could we begin with only Apollo and HubSpot for now?"
+      },
+      "supporting_message_ids": [
+        24
+      ],
+      "event_type": "DEFER",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 359,
+        "speaker": "client",
+        "text": "Before the deferred domain warm-up, please integrate the email with MeetAlfred and Hubspot. Also ensure that lists can be pushed from Hubspot to MeetAlfred."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "sync_direction": "HubSpot to MeetAlfred",
+        "sync_object": "HubSpot lists"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "CRM",
+          "AUTOMATION"
+        ],
+        "contexts": [
+          "HUBSPOT_TO_MEETALFRED"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 359,
+        "speaker": "client",
+        "text": "Before the deferred domain warm-up, please integrate the email with MeetAlfred and Hubspot. Also ensure that lists can be pushed from Hubspot to MeetAlfred."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 426,
+        "speaker": "client",
+        "text": "Meet Alfred still shows 68 leads, even though I added many more to that test campaign in Hubspot."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "MeetAlfred remained at 68 leads despite the client adding many more leads to the HubSpot test campaign."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 436,
+        "speaker": "client",
+        "text": "No contacts were added manually by me to MeetAlfred; instead, it should import the lists from Hubspot."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "contact_addition_mode": "automatically import HubSpot lists into MeetAlfred rather than manually adding contacts"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 458,
+        "speaker": "client",
+        "text": "Neither activating the campaign nor the working-hours change affects the contact-upload problem."
+      },
+      "supporting_message_ids": [
+        454,
+        456,
+        457
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The contact-upload failure persisted after the campaign was activated and its working hours were changed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 476,
+        "speaker": "client",
+        "text": "It currently shows 0 leads."
+      },
+      "supporting_message_ids": [
+        475
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A newly configured Zap and MeetAlfred campaign showed zero synchronized leads."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 500,
+        "speaker": "freelancer",
+        "text": "Leads already in the Hubspot list before Zapp was created are not being pushed; a new lead added afterward, however, is pushed to Alfred."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Leads that were already present in the HubSpot list when the Zap was created were not pushed to MeetAlfred."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 501,
+        "speaker": "freelancer",
+        "text": "Because you created this list before Zapp, its existing leads are not being pushed. As a test, I added my name to the list, and it was pushed at once."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A newly added test lead was immediately pushed from the HubSpot list to MeetAlfred."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 405,
+      "suggested_requirement_id": "REQ_APOLLO_CONTACT_ENRICHMENT",
+      "description": "This message reports Apollo email enrichment and HubSpot import outcomes rather than HubSpot-to-MeetAlfred synchronization."
+    },
+    {
+      "message_id": 414,
+      "suggested_requirement_id": "REQ_MEETALFRED_ACTIVITY_STATUS_IN_HUBSPOT",
+      "description": "This message defines how MeetAlfred reply activity appears in HubSpot Lead Status."
+    },
+    {
+      "message_id": 425,
+      "suggested_requirement_id": "REQ_MEETALFRED_NEW_CAMPAIGN_WORKFLOW",
+      "description": "This message concerns the inability to create a new MeetAlfred campaign, not synchronization into an existing selected campaign."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

@@ -1,0 +1,209 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_HUBSPOT_TO_MEETALFRED_LEAD_SYNC",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 24,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "connected_platforms": [
+            "HubSpot",
+            "MeetAlfred"
+          ],
+          "integration_method": "Zapier"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "CRM",
+            "AUTOMATION"
+          ],
+          "contexts": [
+            "HUBSPOT_TO_MEETALFRED"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        20,
+        23,
+        24
+      ],
+      "decision_note": "The proposed deliverable establishes a persistent Zapier connection between HubSpot and MeetAlfred, but it does not yet establish a synchronization direction or an explicit API component.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "event_locator": {
+        "message_id": 63,
+        "event_type": "DEFER",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        63,
+        65
+      ],
+      "decision_note": "The client limits the current phase to Apollo and HubSpot, deferring the MeetAlfred synchronization work.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 359,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "sync_direction": "HubSpot to MeetAlfred",
+          "sync_object": "HubSpot lists"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        359
+      ],
+      "decision_note": "The client specifies the software behavior of pushing HubSpot lists into MeetAlfred; the message does not independently change persistence or component scope.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 359,
+        "event_type": "RESUME",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        63,
+        359
+      ],
+      "decision_note": "The client requests that the previously deferred MeetAlfred integration proceed before domain warm-up.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 426,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        426
+      ],
+      "decision_note": "This is the first concrete report that added HubSpot leads were not reflected in the selected MeetAlfred campaign.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 436,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        434,
+        436
+      ],
+      "decision_note": "The client establishes automatic import from HubSpot lists, rather than manual MeetAlfred contact entry, as the required synchronization behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 458,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        454,
+        456,
+        457,
+        458
+      ],
+      "decision_note": "This repeats the existing contact-upload failure after debugging configuration changes without an intervening fix claim or a distinct synchronization path.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 476,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        475,
+        476
+      ],
+      "decision_note": "This establishes failure on a distinct path using a newly configured Zap and MeetAlfred campaign, which showed zero synchronized leads.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 500,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        498,
+        499,
+        500
+      ],
+      "decision_note": "This identifies a distinct failure mode: leads already present before Zap creation are not synchronized.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 501,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        501
+      ],
+      "decision_note": "This is the first concrete end-to-end verification that a newly added HubSpot lead is immediately pushed to MeetAlfred.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 453,
+        "speaker": "client",
+        "text": "No—contact uploads happen regardless of the configured working hours."
+      },
+      "supporting_message_ids": [
+        452
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "contact_upload_working_hours_dependency": "none; contact uploads occur regardless of configured working hours"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ]
+}
