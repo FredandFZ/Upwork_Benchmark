@@ -46,36 +46,38 @@ History
 
 ## 2. 如何利用 Agent 进行测试
 
-### 2.1 C1/C2/C3
+### 2.1 C1/C2
 
-同一个 target 使用三种历史条件：
+同一个 target 使用两种历史条件，两者都提供 target 前的项目历史：
 
 | Condition | Agent 可见历史 |
 |---|---|
-| C1 — No History | 不提供 target 前的对话历史 |
-| C2 — Full History | 提供 target 前的完整脱敏历史 |
-| C3 — Oracle Relevant History | 只提供审核后的相关原始历史消息 |
+| C1 — Full History | 提供 target 前的完整脱敏历史 |
+| C2 — Oracle Relevant History | 只提供审核后的相关原始历史消息 |
 
-RQ1 只在 C2 下评价，因为 C1 没有历史可供选择，C3 已经提前筛选了相关历史。
+No-History 不再属于正式条件。ReqMemBench 的研究对象是 Agent 接手进行中的项目；移除全部历史会
+把任务改成孤立指令理解，无法评价项目记忆、状态恢复或基于历史继续交付的能力。若未来需要观察
+无历史行为，只能作为单独命名的探索性消融，不能进入 RQ1–RQ4 主结果。
 
-RQ2 的正式评价只使用 C2 和 C3。C1 没有历史，无法构成有意义的历史状态恢复任务，因此不进入
-RQ2 主结果；如果为调试保留 C1 输出，也必须标记为 `NOT_SCORED_DIAGNOSTIC`。
+RQ1 只在 C1 下评价，因为 C2 已经提前筛选了相关历史。RQ2、RQ3 在 C1/C2 下评价，分别观察
+完整项目历史与 oracle relevant history 下的 State Reconstruction 和 Update-or-Clarify。
+RQ4 只在对应 condition 的最终 RQ3 Gold decision 为 `ACT` 时评价代码交付。
 
-RQ3 在 C1/C2/C3 下评价。C1 用于观察缺少历史时 Agent 是否会在无法确定更新时主动澄清；
-C2/C3 用于评价 Agent 在不同历史噪声条件下是否能形成正确的 Post-task State 或
-clarification。RQ4 只在对应 condition 的最终 RQ3 Gold decision 为 `ACT` 时评价代码交付。
-
-同一个 target 的三个 conditions 之间只能改变历史内容。以下内容必须一致：
+同一个 target 的两个 conditions 之间，RQ1–RQ3 reasoning phase 只能改变历史内容。以下内容
+必须一致：
 
 - target task；
-- pre-task code repository；
-- Agent prompt 和输出格式；
-- 模型、工具权限和运行预算；
-- build/test 命令。
+- RQ1–RQ3 Agent prompt 和输出格式；
+- RQ1–RQ3 模型、非仓库工具权限和运行预算。
+
+正式 RQ1–RQ3 一律不得向 Agent 暴露 pre-task repository、repository 文件树、archive path、
+代码搜索工具或 build/test 输出。pre-task repository 只在 RQ1–RQ3 response 已冻结后进入独立的
+RQ4 execution phase。两个 conditions 的 RQ4 phase 使用同一份 pre-task repository、相同执行
+prompt、工具权限、预算和 build/test 命令。
 
 ### 2.2 Agent 可见输入
 
-Runner 为每个 `target × condition` 创建一个全新的隔离目录：
+Runner 为每个 `target × condition` 先创建一个不含仓库的 RQ1–RQ3 reasoning workspace：
 
 从 researcher-side RQ instance 到该目录的完整转换规则见
 `Constuction_guideline/DESIGN_RQ_agent_input_materialization.md`。
@@ -85,16 +87,16 @@ run_workspace/
 ├── instructions.md
 ├── task.json
 ├── history.jsonl
-└── repository/
+└── response.schema.json
 ```
 
 其中：
 
 - `task.json` 只保存当前 client task；
-- `history.jsonl` 根据 C1/C2/C3 写入允许 Agent 看到的消息；
-- `repository/` 从对应 `pre_repo.zip` 全新解压；
-- Agent 可以读取和修改 `repository/`；
-- 每个 condition 和 replicate 都必须使用新的 workspace。
+- `history.jsonl` 根据 C1/C2 写入允许 Agent 看到的消息；
+- reasoning workspace 不存在 `repository/`，也不提供任何能读取 Code Environment 的工具；
+- 每个 condition 和 replicate 都必须使用新的 workspace；
+- RQ1–RQ3 结构化 response 写出后立即复制到 evaluator-side immutable storage，并记录 hash。
 
 不得提供给 Agent：
 
@@ -105,12 +107,17 @@ run_workspace/
 - target 之后的消息、代码或测试；
 - 其他 Agent 的运行结果。
 
-### 2.3 一次 Agent run
+当前 `pre_repo.zip` 可能由 State Graph 重建，并直接编码 RQ2 Pre-state 或帮助推导 RQ3
+Post-state，因此不能作为正式 RQ1–RQ3 输入。对 RQ1–RQ3，Gold leakage 的控制方式是硬隔离，
+不是依赖文本清洗。若研究代码可见条件，可另设明确标记的 `+Repo` 消融；该结果不得与正式
+history-only 主结果混报。
 
-推荐一次 Agent run 完成同一条能力链：
+### 2.3 两阶段 Agent run
+
+一个逻辑 run 分成两个有不可逆边界的阶段：
 
 ```text
-读取 task、history 和 pre-task repository
+Phase A：只读取 task 和 history；repository 不存在
              ↓
 选择相关历史 Requirement 和 evidence       RQ1
              ↓
@@ -118,10 +125,18 @@ run_workspace/
              ↓
 决定 ACT 或 CLARIFY                         RQ3
              ↓
-如果 ACT，修改 repository                    RQ4
+写出并冻结 RQ1–RQ3 response（hash + timestamp）
+             ↓
+若 Agent decision=ACT 且该 condition 的 RQ4 eligible
+             ↓
+Phase B：开放全新 pre-task repository，只允许修改代码  RQ4
 ```
 
-Agent 返回结构化 JSON；代码修改直接保存在 workspace：
+Phase B 可以延续同一 Agent session，也可以启动固定配置的新 execution session；无论采用哪种
+方式，都不得覆盖、补写或重新解释已经冻结的 RQ1–RQ3 response。RQ4 scorer 只读取 Phase B 的
+最终 repository，不读取 Agent 在开放仓库后产生的任何修订版 State/decision。
+
+Agent 在 Phase A 为 RQ1–RQ3 返回结构化 JSON：
 
 ```json
 {
@@ -199,26 +214,30 @@ Agent 不需要猜内部 `REQ_*` ID。RQ1 Evaluator 对同一 target 的全部 P
 
 每个 run 至少保存：
 
-- Agent 原始输出和结构化 JSON；
+- Phase A Agent 原始输出、冻结的结构化 JSON、freeze timestamp 和 SHA-256；
 - condition、model 和运行状态；
-- token、耗时和工具调用；
-- changed files 和 patch；
-- Agent 修改后的 repository；
-- RQ1–RQ4 score；
+- Phase A 与 Phase B 分开的 token、耗时、工具调用和权限日志；
+- Phase A workspace 不存在 repository 的证明；
+- 如进入 Phase B，保存 changed files、patch 和 Agent 修改后的 repository；
+- applicable RQ1–RQ3 scores，以及 eligible RQ4 的 `PASS`/`FAIL`；
 - RQ4 自动验证脚本的 stdout、stderr 和 exit code。
 
 ### 2.5 推荐测试顺序
 
 第一轮只运行一个 replicate：
 
-1. 先选择一个同时覆盖 RQ1–RQ4 的 target；
-2. 分别运行 C1、C2、C3，共 3 次 Agent run；
-3. 确认 public input 没有 Gold 泄漏；
-4. 确认 JSON response、patch 和验证日志可以保存；
-5. 再扩展到全部 targets。
+1. 先选择一个 RQ1–RQ3 ready 且 RQ4 eligible 的 target；
+2. 分别运行 C1、C2 的 Phase A，并确认 Agent 无法读取 repository；
+3. 冻结两份 RQ1–RQ3 response，确认 hash 在 Phase B 后保持不变；
+4. 只对满足执行条件的 run 开放 Phase B repository；
+5. 确认 JSON response、patch、权限日志和验证日志可以保存；
+6. 再扩展到全部 targets。
 
-对项目 `42204309`，可以先使用 `42204309_T001` 做同时覆盖 RQ1–RQ4 的 smoke test。全部 25 个 targets
-按统一协议运行一次需要最多 `25 × 3 = 75` 个 Agent runs。
+对项目 `42204309`，完成 RQ3 Gold 和 RQ4 validator 校准后，才能选取一个 eligible target 做
+两阶段端到端 smoke test。当前 `pre_repo.zip` 只能在 Phase B 用于 RQ4，不能用于 Phase A。
+全部 25 个 targets 按统一协议运行一个 replicate 需要 `25 × 2 = 50` 个 Phase A reasoning
+runs，另加通过 Agent=`ACT` 与 RQ4 eligibility 双重门控的 Phase B execution runs。只有通过各
+RQ eligibility 的 target-condition 进入相应分母。
 
 ---
 
@@ -226,7 +245,7 @@ Agent 不需要猜内部 `REQ_*` ID。RQ1 Evaluator 对同一 target 的全部 P
 
 ### 3.1 评价目标与 Gold 单位
 
-RQ1 只使用 C2 Full History，评价：
+RQ1 只使用 C1 Full History，评价：
 
 \[
 Requirement\ Selection + Evidence\ Selection.
@@ -266,7 +285,7 @@ Agent 为每个预测 Requirement 输出本地引用、语义摘要和其选择�
 ```
 
 `requirement_ref` 在一次 response 内唯一，不允许使用内部 `REQ_*` ID；所有 evidence IDs 必须
-来自该 instance 的 C2 history。无需额外输出与 per-Requirement evidence 重复的
+来自该 instance 的 C1 history。无需额外输出与 per-Requirement evidence 重复的
 `selected_history_message_ids`。
 
 RQ1 scorer 直接接受上述统一 response，而不是要求 Runner 先另存一个只含 RQ1 字段的 JSON。
@@ -290,7 +309,7 @@ RQ1 scorer 直接接受上述统一 response，而不是要求 Runner 先另存�
 `supporting_message_ids` 中所有严格早于 target 的消息共同进入该组的
 `acceptable_message_ids`；若两个 Event group 因共享消息而重叠，则确定性合并，保证 groups
 两两不相交。选择同一 group 中任意一个 ID 只形成一个 Evidence TP。target 当下或之后的
-supporting message 永不进入 Gold，也不进入 C3 history。
+supporting message 永不进入 Gold，也不进入 C2 history。
 
 ### 3.4 一次 LLM Atom Relation Classification
 
@@ -435,12 +454,11 @@ RQ2 的正式 conditions 为：
 
 | Condition | 作用 | 是否进入 RQ2 正式结果 |
 |---|---|---|
-| C1 — No History | 没有历史，不能进行真实的 historical state reconstruction | 否 |
-| C2 — Full History | 测试 Agent 能否从噪声、过期值和干扰信息中恢复当前有效状态 | 是 |
-| C3 — Oracle Relevant History | 测试已经移除 selection/noise 难度后的纯 reconstruction 能力 | 是 |
+| C1 — Full History | 测试 Agent 能否从噪声、过期值和干扰信息中恢复当前有效状态 | 是 |
+| C2 — Oracle Relevant History | 测试已经移除 selection/noise 难度后的纯 reconstruction 能力 | 是 |
 
-C3 是最纯粹的 RQ2 setting；C2−C3 的差异反映 full history 中的噪声与 stale information
-对恢复能力的影响。C1 如被 runner 保留，只能用于调试，不得混入论文中的 RQ2 平均分。
+C2 是最纯粹的 RQ2 setting；`C2 − C1` 的差异反映移除 full history 中的无关消息和 stale
+information 后的增益。
 
 ### 4.3 Requirement 对齐与评分集合
 
@@ -515,7 +533,7 @@ Gold 包括：
 provenance/alignment metadata，不得混入可评分 State，也不得要求 Agent 生成内部 ID。
 `new_requirement_ids` 在 \(t^-\) 没有 State，因此不进入 RQ2 分母。
 
-同一 target 的 C2/C3 使用同一份真实 \(G(t^-)\) Gold。condition 改变的是可见历史，不是
+同一 target 的 C1/C2 使用同一份真实 \(G(t^-)\) Gold。condition 改变的是可见历史，不是
 项目事实。
 
 ### 4.6 Typed State Scoring
@@ -574,14 +592,13 @@ MatchedStateScore_t = \operatorname{mean}_{r\in M_t} StateScore(r).
 - `Per-Dimension Scores`：`attributes/scope/lifecycle_status/ambiguity/execution` 分列报告；
 - `Matched Full-State Exact`：所有 matched Requirements 的全部适用字段都正确时为 1；
 - `Reconstruction Coverage`：matched Gold Requirements 的比例，单独报告；
-- C2、C3 分条件结果；
-- `C3 − C2`：移除无关历史与 stale information 后的增益。
+- C1、C2 分条件结果；
+- `C2 − C1`：移除无关历史与 stale information 后的增益。
 
 `Matched State Score` 只保留为 auxiliary，不能单独承担主要结论。每次正式实验还必须报告
 oracle-aligned 常量 baseline：`attributes={}`、`persistence=PROJECT_PERSISTENT`、
 `lifecycle_status=ACTIVE`、`ambiguity=null`、`execution=null`。该 baseline 与各维分布共同揭示
-类别不平衡，不能代替 Coverage 或 RQ1 selection 指标。RQ2 主结果中不报告 `C2 − C1`，因为
-C1 不构成正式 reconstruction condition。
+类别不平衡，不能代替 Coverage 或 RQ1 selection 指标。
 
 ---
 
@@ -614,20 +631,19 @@ RQ3 与相邻 RQ 的边界是：
 
 ### 5.2 Conditions 与 condition-specific Gold
 
-RQ3 在 C1/C2/C3 下运行，因为“是否能够安全更新”取决于该 condition 中实际可见的证据。
-例如同一 target 可能是：
+RQ3 在 C1/C2 下运行。两种 condition 都包含完成当前任务所需的相关历史，因此同一 target 的
+最终 decision 和 Post-task State 应一致：
 
 ```json
 {
-  "C1": "CLARIFY",
-  "C2": "ACT",
-  "C3": "ACT"
+  "C1": "ACT",
+  "C2": "ACT"
 }
 ```
 
-C1 缺少历史时，如果当前 task 依赖旧值、代词或既有范围，Gold 可以是 `CLARIFY`。C2/C3
-包含相同有效 evidence 时，其最终 decision 和 Post-task State 应一致；如果两者不同，必须
-先检查 C3 是否漏掉了必要 contextual evidence，而不能直接接受差异。
+C1/C2 Gold 不一致时，必须先检查 C2 是否漏掉必要 contextual evidence，或 C1 中是否存在改变
+语义解释的相关证据。不能把 history noise 本身标成不同 Gold；condition 差异来自 Agent 表现，
+而不是评价目标改变。
 
 ### 5.3 Gold = ACT
 
@@ -737,9 +753,9 @@ Agent 不得自行选择一个候选值并伪造完整 \(G(t^+)\)。它应输出
 - 可接受 clarification questions 的语义范围；
 - 当前 ambiguity 是否 material、是否能被已有 evidence 消解。
 
-冻结工具必须拒绝缺少 C1/C2/C3 任一 branch、缺少 reviewer 身份、未 adjudicate、ACT 缺少完整
-Post-state，或 CLARIFY 缺少 `acceptable_question_facts` 的 review。C1 必须优先独立审核；不能
-从项目级 ambiguity 或 C2/C3 candidate 自动复制，因为它是最可能产生 condition 差异的分支。
+冻结工具必须拒绝缺少 C1/C2 任一 branch、缺少 reviewer 身份、未 adjudicate、ACT 缺少完整
+Post-state，或 CLARIFY 缺少 `acceptable_question_facts` 的 review。C1/C2 的 final decision、
+Post-state 或 blocking issues 必须一致；若不一致，先修复 Oracle history 或 Gold review。
 
 如果 State Graph 在 CLARIFY 情况下保存了带 `OPEN ambiguity` 的 Post snapshot，该 snapshot
 只表示“截至当前消息仍不确定”，不能被当作唯一可执行的 \(G(t^+)\)。
@@ -797,7 +813,7 @@ Gold ambiguity 影响整个 dimension、确实无法定位单一 field 时，`fi
 - ACT targets 的 `Post-State Score`、`Post-State Exact`、`ACT End-to-End Success`；
 - CLARIFY targets 的 `Requirement/Dimension/Field Correct`、`Blocking Issue F1`、
   `Question Validity`、`Clarification Success`；
-- C1/C2/C3 分条件结果。
+- C1/C2 分条件结果。
 
 每个 condition 同时报告 all-ACT 与 all-CLARIFY 常量 decision baselines，以及 Gold class
 counts。对 `CLARIFY Recall`、`Unsupported Autonomy Rate` 等小样本比例，报告分子/分母与
@@ -835,27 +851,69 @@ clarification。
 
 ### 6.1 核心定义
 
-RQ4 不再使用复杂的 action/gate 综合评分。第一版只回答：
+RQ4 只回答：
 
-> Agent 修改后的代码能否通过我们为当前 target 编写的自动交付验证？
+> Agent 先仅依据当前 task 与 condition 对应历史冻结 RQ1–RQ3 判断；在其选择 `ACT` 后再开放
+> 同一份 pre-task repository，其最终 repository 能否通过为当前 target 预先设计的自动交付验证？
 
-RQ4 只评价对应 condition 的最终 RQ3 Gold decision 为 `ACT`、代码环境可运行、能够编写
-确定性测试的实例。RQ3 Gold 为 `CLARIFY` 的 condition 只在 RQ3 中评价，不进入 RQ4
-分母。
+RQ4 评价最终 repository，不评价 Agent 对行动的文字说明、`planned_actions`、结构化 action
+label 或 patch 与 reference patch 的相似度。ACT/CLARIFY decision 由 RQ3 评价；RQ4 只运行
+对应 condition 的最终 RQ3 Gold decision 为 `ACT` 的实例。
 
-### 6.2 我们编写 hidden validator
+Gold decision 决定 RQ4 分母，Agent decision 决定是否实际开放 Phase B repository。若 Gold 为
+`ACT` 但 Agent 的冻结 decision 不是 `ACT` 或 response 无法解析，Runner 不开放 repository，并将
+该 RQ4-eligible 实例记录为 `NO_CODE_SUBMISSION` / `FAIL`；不能通过事后查看代码来修订 RQ3。
 
-Benchmark 作者根据当前 target 和 Gold Requirement，为每个 RQ4 target 编写一个专属的
-hidden validator。例如：
+RQ4 的正式结果只有 `PASS` 和 `FAIL`。实例是否可以进入评分由独立的 eligibility gate 决定，
+不把不可执行、环境故障或 validator 故障扩展为第三类 RQ4 分数。
 
-Validator 的行为 oracle 来自 RQ3 已冻结的 \(G(t^+)\)，而不是重新解释聊天或只根据
-`planned_actions` 猜测预期实现。
+### 6.2 评分资格
+
+一个 `target × condition` 当且仅当同时满足以下条件时进入 RQ4：
+
+1. 该 condition 的最终 RQ3 Gold decision 为 `ACT`；
+2. RQ4-only `pre_repo.zip` 可以在固定环境中完成 build 和已有 regression tests；
+3. 当前 Requirement 至少对应一个确定、可自动观察的行为或工件结果；
+4. target-specific hidden tests 已由人工提前设计并通过双人独立复核；
+5. validator 已完成 §6.6 的校准并冻结；
+6. Agent-visible repository 不含 future state、validator、reference delivery 或 evaluator-only
+   Requirement/State/Event metadata。
+
+未通过 eligibility gate 的实例不启动正式 RQ4 run，也不产生 `PASS` 或 `FAIL`。它仍可用于
+RQ1–RQ3，并在私有资格记录中保存 `rq4_eligible=false` 和一个排除原因。排除原因只用于统计
+Executable Coverage，不属于 RQ4 评分状态。
+
+建议使用以下有限枚举：
 
 ```text
-validators/
+RQ3_NOT_ACT
+NO_RUNNABLE_ENVIRONMENT
+NO_DETERMINISTIC_OBSERVABLE
+CONFIG_ONLY_NO_INDEPENDENT_BEHAVIOR
+SUBJECTIVE_VISUAL_OR_SEMANTIC
+VALIDATOR_NOT_READY
+REPOSITORY_GOLD_LEAKAGE
+```
+
+### 6.3 人工预先设计 hidden validator
+
+Benchmark 作者根据当前 target 和 Gold Requirement，为每个 RQ4 target 编写一个专属的
+hidden validator。Validator author 先把所有必要交付结果写成 acceptance criteria，再为每项
+criterion 指定至少一个可执行断言。测试必须在任何正式 Agent run 之前完成、复核和冻结；不得
+查看某个 Agent 的提交后再增删断言。
+
+Validator 的行为 oracle 来自 RQ3 已冻结的 \(G(t^+)\)，而不是重新解释聊天或只根据
+Agent 输出猜测预期实现。Target Test 必须验证外部行为或生成工件，不能把 Gold attributes
+原样序列化后再做配置相等比较。同一 target 的所有模型和 C1/C2 conditions 使用同一
+validator；condition 只改变 Agent 可见历史。
+
+```text
+validators/rq4/
 └── <project_id>/
     └── <target_id>/
-        ├── validate.py
+        ├── validate.mjs
+        ├── target-tests/
+        ├── fixtures/
         └── validator.json
 ```
 
@@ -863,16 +921,17 @@ validators/
 
 ```json
 {
-  "validator_id": "42204309_T003_v1",
-  "target_id": "42204309_T003",
-  "command": ["python", "validate.py", "--repo", "<agent_repo>"],
-  "execution_ready": true
+  "validator_id": "43214420_T016_v1",
+  "target_id": "43214420_T016",
+  "command": ["node", "validate.mjs", "--repo", "<agent_repo>"],
+  "acceptance_criteria_ids": ["AC001", "AC002"],
+  "calibration_complete": true
 }
 ```
 
 Validator 不放入 Agent workspace，Agent 在提交代码前不能读取它。
 
-### 6.3 Validator 检查三件事
+### 6.4 Validator 检查三件事
 
 每个 validator 只需要完成三类检查：
 
@@ -880,23 +939,28 @@ Validator 不放入 Agent workspace，Agent 在提交代码前不能读取它。
 2. **Target Test**：当前 Requirement 对应的功能是否正确；
 3. **Regression**：项目已有的基础测试是否仍然通过。
 
-Target Test 根据任务类型编写：
+Target Test 只检查当前 target 的必要交付结果。通常一个 target 使用一个 hidden test suite，
+内部包含少量关键断言；测试数量由必要行为决定，不设固定下限或上限。适用的观察方式包括：
 
-| Requirement 类型 | Validator 示例 |
+| 可观察结果 | Validator 示例 |
 |---|---|
 | 函数行为 | 调用函数并断言返回值 |
-| API | 启动服务、发送请求并断言 response |
-| 配置 | 读取配置并断言 key/value |
-| 数据库 | 执行 migration/query 并检查 schema 或结果 |
+| 本地 API | 启动服务、发送请求并断言 response |
 | CLI | 执行命令并检查 exit code 和输出 |
-| 前端 | 使用 Playwright/Selenium 操作并断言页面行为 |
-| REMOVE | 确认旧接口、按钮或行为已经不存在 |
-| Bug fix | 复现旧 bug，确认 Agent 修改后不再出现 |
+| 生成工件 | 解析 KiCad、DOCX 或 PDF，检查结构、内容、拓扑或确定性几何约束 |
+| REMOVE | 确认旧接口、元素、章节或行为已经不存在 |
+| Bug fix | 复现旧 bug，并确认修改后不再出现 |
 
 一个 target 涉及多个必要 Requirement 时，Target Test 必须覆盖所有必要行为；任意必要行为
 失败，整个 Target Test 失败。
 
-### 6.4 RQ4 Pass
+纯配置相等不构成主 RQ4 的独立行为证据。例如，读取 feature module 后断言
+`configuration == Gold attributes` 的 target 应以
+`CONFIG_ONLY_NO_INDEPENDENT_BEHAVIOR` 排除。配置只有在被真实函数、API、CLI 或工件生成流程
+消费时，才通过最终行为进入 Target Test。自由文本只在客户明确要求逐字文案时使用 exact
+match；主观视觉或语义相似度不调用 LLM/API Judge，而是排除出 RQ4。
+
+### 6.5 PASS 与 FAIL
 
 RQ4 使用简单的二元评分：
 
@@ -911,8 +975,8 @@ BuildPass
 也可以直接使用总验证脚本的退出码：
 
 ```text
-exit code = 0      → RQ4 PASS
-exit code != 0     → RQ4 FAIL
+exit code = 0      -> PASS
+exit code != 0     -> FAIL
 ```
 
 保存的结果示例：
@@ -920,47 +984,71 @@ exit code != 0     → RQ4 FAIL
 ```json
 {
   "target_id": "42204309_T003",
-  "condition": "C2",
+  "condition": "C1",
   "build_pass": true,
   "target_test_pass": true,
   "regression_pass": true,
   "exit_code": 0,
-  "rq4_pass": true
+  "result": "PASS"
 }
 ```
 
-不根据 Agent patch 与 reference patch 的文本相似度评分。只要自动行为测试全部通过，就认为
-delivery 成功。
+Build、Target Test 或 Regression 任一失败均为 `FAIL`。Gold 为 `ACT` 但 Agent 未选择 `ACT`、
+Phase A response 无法解析、Agent timeout，或 Agent 没有留下可测试的 repository，也记为
+`FAIL`。Phase B final message 无法解析但 repository 可测试时，忽略文字输出并
+继续验证。Agent 不修改代码但最终测试全部通过仍为 `PASS`；§6.6 的 pre-repo 校准应保证这种
+情况只在当前 task 原本已经满足或 validator 无效时出现。
 
-### 6.5 Validator 校准
+### 6.6 Validator 校准
 
-每个 validator 在正式使用前必须完成两次校准：
+每个 validator 在正式使用前必须完成以下校准：
 
-1. 在 target 的 `pre_repo.zip` 上运行：Target Test 应失败；
-2. 在确认正确的 delivery 上运行：Build、Target Test 和 Regression 应全部通过。
+1. **Pre-repo**：Build 和 Regression 必须通过，Target Test 必须失败；
+2. **Reference delivery**：Build、Target Test 和 Regression 必须全部通过；
+3. **Partial delivery**：当 target 包含多个必要行为时，至少构造一个只实现部分 acceptance
+   criteria 的 delivery，并确认 Target Test 失败。单一原子行为不要求额外 partial delivery。
 
 如果 pre-task code 已经通过 Target Test，说明测试没有检查到当前新增或修改的要求；如果
-正确 delivery 仍失败，说明 validator 本身需要修正。
+reference delivery 仍失败，或 partial delivery 意外通过，validator 不得进入正式实验。
 
-### 6.6 不能自动验证的任务
+校准通过后冻结 validator ID、validator 内容版本、acceptance criteria、reference delivery
+版本和校准记录。正式实验开始后若修改 validator，必须提升版本，并重跑该 validator 产生的
+全部结果。
 
-以下 target 不进入自动 RQ4：
+### 6.7 运行与环境边界
 
-- Requirement 无法转换成确定性断言；
-- 缺少必要外部服务且无法模拟；
-- Code Environment 无法安装或运行；
-- Requirement 仍存在阻塞实现的歧义；
-- 只能进行主观视觉或风格判断。
+只有 Phase A 的 RQ1–RQ3 response 已经冻结且 Agent decision 为 `ACT` 时，Runner 才从同一
+RQ4-only `pre_repo.zip` 全新解压，在独立 execution workspace 中开放 repository。Agent 停止后
+先冻结 repository，再由 workspace 外的 evaluator 顺序执行 Build、Target Test 和 Regression。
+Agent 不能访问 validator、acceptance criteria、reference delivery 或验证失败细节，也不能改写
+Phase A 的冻结 response。
 
-这些 target 可以继续用于 RQ1–RQ3，但标记为 `RQ4_NOT_EXECUTABLE`。
+环境有效性在 Agent 运行前检查：pre-repo Build、Regression 和 validator startup 必须成功。
+若环境、validator 或 harness 自身失败，当前 attempt 作废，修复后从干净 pre-repo 重跑；该
+attempt 不写入正式 RQ4 结果。最终评分数据中的 `result` 因而始终只有 `PASS` 或 `FAIL`。
 
-### 6.7 失败与环境错误
+### 6.8 指标与聚合
 
-- Agent timeout、修改后 build 失败或 Target Test 失败：RQ4 FAIL；
-- Agent 运行前 `pre_repo` 无法安装或 validator 自身崩溃：环境错误，修复后重跑，不给
-  Agent 记 0；
-- Agent 不修改代码但最终测试全部通过：仍然 PASS，因为 RQ4 评价行为结果，不要求必须产生
-  patch。
+正式主指标为：
+
+\[
+RQ4SuccessRate = \frac{\#PASS}{\#PASS + \#FAIL}.
+\]
+
+同时报告：
+
+\[
+ExecutableCoverage =
+\frac{\#\text{进入 PASS/FAIL 评分的 target-condition}}
+{\#\text{RQ3 Gold 为 ACT 的 target-condition}}.
+\]
+
+结果先在 target 内聚合，再在 project 内聚合，正式总分使用 project macro-average。Build、
+Target Test 和 Regression 的通过率可以作为失败分析，但不形成新的 RQ4 分数等级。
+
+C1/C2 的主要比较使用共同支持集合：同一 target 在两个 conditions 中均为 RQ3 Gold
+`ACT`、均通过 eligibility gate，并使用同一 validator。各 condition 的全量 eligible 结果和
+coverage 另行报告，不能把不同分母的差异直接解释为历史条件效果。
 
 ---
 
@@ -968,8 +1056,9 @@ delivery 成功。
 
 要真正使用 Claude Code、Codex 或其他 Coding Agent 跑测试，至少需要实现：
 
-1. `public_materializer`：按各 RQ 的 availability 生成安全输入；RQ2 不生成正式 C1 run；
-2. `agent_runner`：在独立 workspace 中调用 Agent，并保存 JSON、patch 和日志；
+1. `public_materializer`：按各 RQ 的 availability 生成 C1 Full History 与 C2 Oracle Relevant
+   History 输入；RQ1 只启用 C1；
+2. `agent_runner`：在独立 workspace 中调用 Agent，并保存最终 repository、patch 和日志；
 3. `requirement_aligner`：`Code/evaluation/alignment.py` 为 RQ2/RQ3 提供通用 all-pairs relation
    contract 与确定性一对一匹配；RQ1 保持自己的 v3 对齐契约与证据评分；
 4. `typed_state_scorer`：`Code/evaluation/state.py` 负责 exact/set/recursive/closed-world 评分，
@@ -980,11 +1069,23 @@ delivery 成功。
    Post-state、CLARIFY blocker/question 评分及 all-ACT/all-CLARIFY baseline；
 7. `rq3_gold_review`：`Code/stage2/rq3_review.py` 与 `Code/finalize_rq3_gold.py` 生成 review template，
    并仅在双人审核和 adjudication 完成后冻结 condition-specific Gold；
-8. `rq4_validator_runner`：只对最终 RQ3 Gold 为 ACT 的 condition 执行 target-specific
-   hidden validator，根据 exit code 生成 `rq4_pass`。
+8. `rq4_eligibility_builder`：在 RQ3 Gold 冻结后，按 condition 判定 RQ4 eligibility，并记录
+   唯一的排除原因；
+9. `rq4_validator_registry`：保存人工设计的 acceptance criteria、hidden validator、版本、哈希、
+   适用 target 和 conditions；
+10. `rq4_calibration_runner`：验证 pre-repo、reference delivery，以及适用时的 partial delivery，
+    产出可审计的校准记录；
+11. `rq4_validator_runner`：对 eligible run 的最终 repository 依次运行 Build、Target Test 和
+    Regression，并只写出 `PASS` 或 `FAIL`；
+12. `rq4_aggregator`：计算 Success Rate、Executable Coverage、project macro-average 和
+    condition common-support 对比。
 
 当前 RQ1 instances 已包含确定性 Atom/Evidence Gold；RQ2 使用 v3 contract，但仍保持
 `PROVISIONAL_REQUIRES_FIELD_REVIEW`，因此只能生成诊断分数；RQ3 使用 v3 contract，但 25 个
 targets 的 condition-specific Gold 仍须人工冻结；RQ4 的 `acceptance_criteria`、`validator_ids`
 仍为空且 `execution_ready=false`。对应 review/validator 完成前不能发布正式分数。任何遗留
 RQ2/RQ3 v1/v2 instance 必须先重新生成 public inputs。
+
+现有 RQ4 records 仅是候选实例：其 acceptance criteria、validator、校准记录和 repository
+leakage 检查尚未完成，因此均不具备正式 eligibility，也不能生成 `PASS`/`FAIL`。只有完成
+§6.2 和 §6.6 的全部 gate 后，才可以将对应 target-condition 纳入 RQ4 分母。

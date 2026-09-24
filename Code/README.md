@@ -281,8 +281,18 @@ Candidate evaluation 仍可能保留历史字段 `primary_rq_targets` 供回溯�
 `RQ4/`：RQ1/RQ2 要求 relevant historical Requirement，RQ3 要求 affected target
 transition，RQ4 要求 ACT candidate 和同一 target 的 C_env。每个实例保留顶层 `turns`、
 `applicable_rqs`、完整 pre-task history pool、
-C1/C2/C3 消息选择器、RQ-specific response contract 和 researcher-side
+C1/C2 消息选择器、RQ-specific response contract 和 researcher-side
 `construction_gold`。RQ4 只引用并安全校验 `pre_repo.zip`，不会在构造阶段解压。
+
+这里描述的是已冻结的新两条件协议。当前 Python 生成器、scorer 参数和既有 Stage 2 JSON 仍需
+从旧三条件 schema 迁移后重生成；迁移完成前不得把旧输出用于正式实验。
+
+正式 Agent 评估采用两阶段权限边界：Phase A 的 RQ1–RQ3 只接收 task、condition-specific
+history、instructions 和 response schema，禁止访问 `pre_repo.zip`、repository、代码文件树及
+build/test 输出；其结构化 response 先以 hash 和时间戳冻结。只有冻结 decision 为 `ACT` 且
+RQ4 eligible 时，Runner 才在独立 Phase B workspace 中全新解压同一份 RQ4-only
+`pre_repo.zip`。Phase B 不得修改或重新解释已冻结的 RQ1–RQ3 response。当前压缩包因此不能
+直接用于正式 RQ2/RQ3；repository-visible reasoning 只能作为单独的 `+Repo` ablation。
 
 生成器只负责实例设计，不运行 Agent 或评分。命令、字段说明、目录结构和注意事项见
 [`README_stage2_rq_instances.md`](insturctions/README_stage2_rq_instances.md)。
@@ -299,6 +309,6 @@ RQ2/RQ3 评价也已实现：`evaluation/alignment.py` 提供通用 Requirement 
 确定性代码完成。
 
 RQ2 当前仍是 `PROVISIONAL_REQUIRES_FIELD_REVIEW`，只能输出不可发布的诊断分数。RQ3 必须先用
-`finalize_rq3_gold.py` 完成 C1/C2/C3 双人审核与 adjudication，未冻结 Gold 会被 scorer 拒绝。
+`finalize_rq3_gold.py` 完成 C1/C2 双人审核与 adjudication，未冻结 Gold 会被 scorer 拒绝。
 完整命令、常量 baselines 和发布门禁见同一 README 的“RQ2 自动评价”与“RQ3 Gold 冻结与自动
 评价”。

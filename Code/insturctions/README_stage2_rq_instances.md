@@ -10,6 +10,10 @@ RQ4 的 Code Environment，为每个选中 target 构造 RQ 问题实例。它�
 - 命令行：`Code/stage2_generate_rq_instances.py`
 - 测试：`Code/tests/test_stage2_rq_instances.py`
 
+> **迁移状态：** 本文以下条件定义已经切换为新协议：C1=Full History、C2=Oracle Relevant
+> History。当前生成器、评价入口、测试和既有 `outputs/stage2` JSON 仍需同步迁移并重生成；在
+> 该工作完成前，下面的生成命令只能代表目标接口，不能产生可用于正式实验的新协议实例。
+
 ## 一条命令生成
 
 在仓库根目录运行：
@@ -68,7 +72,7 @@ python Code/stage2_generate_rq_instances.py `
 - Gold、State Graph、消息目录的 `project_id` 是否一致；
 - target 消息、顺序、`turns`、Pre/Post boundary 是否一致；
 - State ID、Event ID、Requirement ID 是否能严格关联；
-- C1 为空、C2 为完整历史、C3 是 C2 的有序子集；
+- C1 为完整历史、C2 是 C1 的有序子集；
 - RQ4 manifest 是否和 target message/Event 一致；
 - `reports/target_index.json` 是否与全部 target manifest 一致，项目级
   `validation_report.json.overall` 是否为 `pass`；
@@ -122,12 +126,11 @@ python Code/stage2_generate_rq_instances.py `
 `message_id`、`created_ts`、`speaker`、`text` 和 `milestone`。具体条件通过
 `condition_inputs.<condition>.history_message_ids` 引用该池：
 
-- `C1`：No History，消息列表为空；
-- `C2`：Full History，包含完整 pre-task 历史；
-- `C3`：Oracle Relevant History，当前由直接相关 Requirement 的完整 Event trajectory
+- `C1`：Full History，包含完整 pre-task 历史；
+- `C2`：Oracle Relevant History，当前由直接相关 Requirement 的完整 Event trajectory
   自动生成。
 
-RQ1 只开放 C2；RQ2 只开放 C2/C3；RQ3、RQ4 开放 C1/C2/C3。C3 由 RQ1 Gold 中直接相关
+RQ1 只开放 C1；RQ2、RQ3、RQ4 开放 C1/C2。C2 由 RQ1 Gold 中直接相关
 Requirement 的完整 Event trajectory 确定性生成，状态为
 `DETERMINISTIC_DIRECT_TRAJECTORY_ONLY`。preserved/inherited Requirements 不属于当前 RQ1/RQ2
 Gold 的操作性范围。
@@ -160,6 +163,23 @@ Gold 的操作性范围。
 
 当前代码故意不实现运行器，避免在“实例构造”和“评估”之间形成隐式泄漏。
 
+### 正式评估的两阶段暴露边界
+
+正式 `target × condition` 运行必须拆成两个权限阶段：
+
+1. **Phase A — RQ1–RQ3 reasoning**：只物化 `task.json`、condition-specific
+   `history.jsonl`、统一 instructions 和 response schema。workspace 不得出现 repository、
+   `pre_repo.zip`、archive path、代码文件树、代码搜索入口或 build/test 输出。
+2. **Freeze**：Agent 提交 RQ1–RQ3 response 后，Evaluator 将其写入不可变存储，记录 SHA-256
+   和时间戳。
+3. **Phase B — RQ4 execution**：仅当冻结 response 中的 Agent decision 为 `ACT` 且该 condition
+   已通过 RQ4 eligibility gate，才在新的 workspace 中解压 RQ4-only `pre_repo.zip`。Phase B
+   不能覆盖、补写或重新评分 Phase A response。
+
+因此，当前 `pre_repo.zip` 不能复制到正式 RQ1/RQ2/RQ3 workspace，也不能作为这些 RQ 的可见
+上下文。若需要研究 repository-visible reasoning，只能另行命名为 `+Repo` ablation，不能混入
+主结果。
+
 ## RQ4 的压缩包处理
 
 实例生成时不需要也不会解压 `pre_repo.zip`。构造器只做流式哈希和 zip 安全检查，并在
@@ -173,8 +193,10 @@ Gold 的操作性范围。
 - `workspace_policy = EXTRACT_TO_FRESH_ISOLATED_WORKSPACE_PER_RUN`；
 - `extracted_during_instance_construction = false`。
 
-后续真正评估 RQ4 时，运行器应为每次 target-condition run 创建全新的隔离目录，再把
-压缩包解压进去；不得在实例目录中原地解压，也不得跨 run 复用被 Agent 修改过的目录。
+后续真正评估 RQ4 时，运行器应先验证 Phase A response 已冻结，再为通过执行门控的
+target-condition run 创建全新的隔离目录并解压压缩包；不得在实例目录中原地解压，也不得跨
+run 复用被 Agent 修改过的目录。解压前还必须通过 RQ4-specific leakage audit，确认归档不含
+future/post-task state、hidden validator、reference delivery 或 evaluator-only metadata。
 
 ## 自定义路径
 
@@ -285,7 +307,7 @@ RQ2 使用 `rq2-agent-response-v3`。评分分为两个 Judge request 和最终�
 python Code/evaluate_rq2.py `
   --instance outputs/stage2/42204309/RQ2/42204309_T001_RQ2.json `
   --agent-response path/to/agent_response.json `
-  --condition C2 `
+  --condition C1 `
   --request-out path/to/rq2_alignment_request.json
 ```
 
@@ -295,7 +317,7 @@ python Code/evaluate_rq2.py `
 python Code/evaluate_rq2.py `
   --instance outputs/stage2/42204309/RQ2/42204309_T001_RQ2.json `
   --agent-response path/to/agent_response.json `
-  --condition C2 `
+  --condition C1 `
   --alignment-response path/to/alignment_response.json `
   --request-out path/to/rq2_state_request.json
 ```
@@ -306,7 +328,7 @@ python Code/evaluate_rq2.py `
 python Code/evaluate_rq2.py `
   --instance outputs/stage2/42204309/RQ2/42204309_T001_RQ2.json `
   --agent-response path/to/agent_response.json `
-  --condition C2 `
+  --condition C1 `
   --alignment-response path/to/alignment_response.json `
   --semantic-response path/to/state_response.json `
   --score-out path/to/rq2_score.json
@@ -328,7 +350,8 @@ python Code/finalize_rq3_gold.py `
   --template-out path/to/reviews/42204309_T001.json
 ```
 
-review 必须覆盖 C1/C2/C3，由至少两名不同审核者完成 adjudication。ACT branch 使用审核后的
+review 必须覆盖 C1/C2，由至少两名不同审核者完成 adjudication，且两个 condition 使用相同
+Gold branch。ACT branch 使用审核后的
 完整 construction after-states；CLARIFY branch 必须补齐 blocking Requirement、dimension、可空
 field、missing information 和非空 `acceptable_question_facts`。完成后写入新的 frozen instance：
 
@@ -384,13 +407,14 @@ all-ACT/all-CLARIFY baselines。
 | code reconstruction report 未通过 | 先修复 `Code Environment/<project_id>/reports/` 中指出的 boundary/build/test 问题 |
 | manifest、target index 或 checksum 不一致 | 重新生成对应 Code Environment，并确认 target 与 `before_message_id` 对齐 |
 | zip CRC、路径穿越、符号链接或 `.git` 校验失败 | 修复压缩包来源；不要关闭安全检查继续构建 |
-| C3 不是 C2 的有序子集 | 回查 relevant Event trajectory 和 message 映射，不要向 C3 填入 target 或未来消息 |
+| C2 不是 C1 的有序子集 | 回查 relevant Event trajectory 和 message 映射，不要向 C2 填入 target 或未来消息 |
 | 输出目录存在旧实例 | 生成器会删除四个 RQ 文件夹内不再适用的 `<target_id>_RQ*.json`，并重写 `index.json`；其他命名的人工文件不会删除 |
 
 ## 当前阶段明确未做的事情
 
 - 不运行 Agent；
-- 不生成 C1/C2/C3 的独立评估 workspace；
+- 不生成 C1/C2 的独立评估 workspace；
+- 不把 `pre_repo.zip` 或 Code Environment 暴露给 RQ1–RQ3；
 - 不在 evaluator 内直接调用外部 API；CLI 只生成冻结、可审计的 Judge request 并消费 response；
 - 不把启发式 ambiguity candidate 当成最终 RQ3 Gold，也不自动填写双人 review；
 - 不自动判定 preserved Requirement 中哪些是 inherited constraints；
@@ -401,21 +425,22 @@ RQ1 scorer 已可用；RQ2 scorer 已可生成 provisional diagnostics，但 fie
 
 ## 后续实现顺序
 
-下列步骤覆盖从当前 construction records 到正式 benchmark 的后续实现；其中 schema、
-join、Pre/Post state expansion 和基础 C1/C2/C3 materialization 已由当前生成器完成：
+下列步骤覆盖从当前 construction records 到正式 benchmark 的后续实现；其中 schema、join 和
+Pre/Post state expansion 已由当前生成器完成，两条件 materialization 尚需迁移：
 
 1. 定义并校验 `rq-core-instance-v1` schema；
 2. 完成 Gold State / State Graph / Code Environment join；
 3. 完成 Pre/Post state expansion 和 field delta；
-4. 物化 C1/C2 history；
-5. 生成 relevant trajectory 和 C3；
+4. 物化 C1 Full History；
+5. 生成 relevant trajectory 和 C2 Oracle Relevant History；
 6. 使用确定性 RQ1 Gold 和自动 aligner/scorer；
 7. 完成 RQ2 field review，冻结可评分/跳过字段并重跑常量 baseline；
-8. 优先冻结全部 C1 Gold，再完成 C2/C3 双人 review 与 adjudication；
+8. 完成 C1/C2 的双人 review 与 adjudication，并验证两者使用相同 RQ3 Gold；
 9. 选择 3–5 个覆盖 MODIFY、REMOVE/DEFER、CLARIFY、RUNTIME_FAILURE 的 pilot targets；
-10. 为 pilot 构造 RQ4 hidden validators，并执行 Agent 端到端试验；
-11. 根据 pilot 冻结 schema/Judge 配置，再扩展到全部 targets；
-12. 输出 project / benchmark statistics、exact binomial CI 和 review agreement。
+10. 实现无仓库的 Phase A、response hash 冻结和 RQ4-only Phase B 门控；
+11. 为 pilot 构造 RQ4 hidden validators，并执行 Agent 端到端试验；
+12. 根据 pilot 冻结 schema/Judge 配置，再扩展到全部 targets；
+13. 输出 project / benchmark statistics、exact binomial CI 和 review agreement。
 
 先用小规模 pilot 验证 response schema、Requirement matching、condition-specific decision
 和 code validator，再批量扩展 hidden tests，避免在协议未稳定时全量返工。
@@ -424,16 +449,20 @@ join、Pre/Post state expansion 和基础 C1/C2/C3 materialization 已由当前�
 
 一个 RQ instance 只有在以下条件全部满足时才可进入正式 benchmark：
 
-- [ ] target、Gold State、State Graph、history 和 pre repo join 成功；
+- [ ] target、Gold State、State Graph 与 history join 成功；RQ4 candidate 另行完成 pre repo join；
 - [ ] pre/post temporal boundary 通过；
-- [ ] C1/C2/C3 输入按定义生成；
-- [ ] C3 保留 relevant temporal trajectory 且不含 gold labels；
+- [ ] C1/C2 输入按定义生成；
+- [ ] RQ1–RQ3 Phase A 输入不含 repository、archive path、代码入口或 build/test 输出；
+- [ ] RQ1–RQ3 response 在任何 repository 开放前完成 hash 与不可变冻结；
+- [ ] C2 保留 relevant temporal trajectory 且不含 gold labels；
 - [ ] RQ1 direct relevant set 已按 `DIRECT_AFFECTED_ONLY` 确定性生成；
 - [ ] RQ1 evidence labels 可追溯到原消息；
 - [ ] RQ2 状态 Gold 完整且 state IDs 可展开；
 - [ ] RQ3 按 condition 保存 ACT/CLARIFY Gold；
 - [ ] blocking ambiguity 与 clarification target 已审核；
 - [ ] RQ4 action taxonomy 与 Pre/Post delta 一致；
+- [ ] 仅对 Agent=`ACT` 且 RQ4 eligible 的 run 开放全新的 Phase B repository；
+- [ ] Phase B 结束后冻结的 Phase A response hash 保持不变；
 - [ ] executable target 具有 behavior-level hidden validators；
 - [ ] pre-state、reference post-state 和 regression validation 结果符合预期；
 - [ ] public package 不含 future leakage、PII、secret、hidden gold 和 answer-revealing tests；

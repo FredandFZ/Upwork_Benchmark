@@ -480,17 +480,19 @@ $$
 - $C_{t^{*-}}$：执行当前任务之前的代码；
 - $C_{t^{*+}}$：Agent 完成任务之后的代码。
 
-RQ4 关注的不只是当前 task 是否完成，还包括所有当前有效并与该 task 相关的历史 requirement 是否被真正落实。
+RQ4 只在 RQ3 的 condition-specific Gold decision 为 `ACT` 且存在可确定性验证的代码行为时
+进入评分。Benchmark 作者在正式实验前人工设计并冻结 target-specific hidden tests，验证：
 
-评价可以通过：
+1. repository 可以 Build；
+2. 当前 task 的必要行为全部通过 Target Tests；
+3. 既有行为通过 Regression Tests。
 
-- functional tests；
-- requirement-specific tests；
-- static checks；
-- code inspection；
-- execution behavior；
+三项全部通过记为 `PASS`，任一失败记为 `FAIL`。RQ4 不评分 action 文本，不比较 patch 与
+reference patch 的相似度，也不调用外部 LLM/API judge。只有配置镜像、自由文本文案或主观
+视觉语义、无法形成确定性行为测试的 target 不进入主 RQ4，并单独计入 executable coverage。
 
-判断 implementation 是否与 Gold Requirement State 一致。
+因此，RQ4 评价的是当前 Code Environment 实际支持的、可执行验证的 Requirement-to-Code
+delivery，而不是把任意 requirement 都声称为通用代码能力测试。
 
 ### Example
 
@@ -515,6 +517,10 @@ logger.info(user.email)
 RQ4 因此回答的是：
 
 > **Did the agent actually act on the correct requirement state?**
+
+这里的“正确”由预先校准的 hidden tests 判定。每个 validator 必须满足：pre-repo 上 Target
+Tests 失败，reference delivery 上 Build/Target/Regression 全部通过；包含多个必要行为时，
+只完成部分行为的 delivery 也必须失败。
 
 ---
 

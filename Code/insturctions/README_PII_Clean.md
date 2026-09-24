@@ -2,6 +2,8 @@
 
 本文只讲**怎么跑**。流程设计见
 [`Constuction_guideline/PII 流程详解.md`](../../Constuction_guideline/PII%20流程详解.md)。
+已发布项目的逐条 Agent 复核标准见
+[`PII_agent_audit_requirements.md`](PII_agent_audit_requirements.md)。
 
 实现入口：
 

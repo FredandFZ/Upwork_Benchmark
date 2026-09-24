@@ -301,7 +301,7 @@ open_ambiguities: dict[event_id, ambiguity_state]
 
 Node 中的 `ambiguity` 为 `null` 或按 `AMBIGUOUS` Event ID keyed 的对象。只有后续 Event 的 `resolves_ambiguity_event_ids` 显式引用某个 key 时，才删除这一条；其他 OPEN ambiguities 保持不变。
 
-这一设计对于后续 RQ4 的 **Memory-or-Clarify Decision** 非常重要。
+这一设计对于后续 RQ3 的 **Memory-or-Clarify Decision** 非常重要。
 
 ---
 
@@ -779,7 +779,7 @@ open_ambiguities is not empty
 > Requirement 最后一次确认的状态仍然有效，但当前存在新的 unresolved uncertainty，使 Agent 不能在受影响的任务中安全地自行推断下一步。
 > 
 
-当该 unresolved ambiguity 与当前 evaluation task 相关时，后续 RQ4 可以进一步派生：
+当该 unresolved ambiguity 与当前 evaluation task 相关时，后续 RQ3 可以进一步派生：
 
 ```
 Agent Action = CLARIFY

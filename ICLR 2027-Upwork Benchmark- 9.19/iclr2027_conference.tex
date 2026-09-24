@@ -11,7 +11,7 @@
 \usepackage{graphicx}
 
 
-\title{ReqMemBench: Benchmarking Temporal Requirement-State Reconstruction for Coding Agents}
+\title{ReqMemBench: Benchmarking Coding Agents on Temporal Requirement-State Reconstruction }
 
 % Authors must not appear in the submitted version. They should be hidden
 % as long as the \iclrfinalcopy macro remains commented out below.
@@ -33,135 +33,98 @@
 \maketitle
 
 \begin{abstract}
-Coding agents are moving from solving isolated tasks to participating in long-running software projects, where they may join at an arbitrary intermediate time. In such settings, requirements are repeatedly revised, deferred, resumed, removed, clarified, and tested against implementation feedback, so correct continuation depends on determining which requirements remain valid now. Existing coding benchmarks primarily evaluate whether an agent resolves a given task in a repository and do not explicitly measure reconstruction of this temporally evolving requirement state. We introduce temporal requirement-state reconstruction as an evaluation problem and present ReqMemBench, a benchmark for state-aware project takeover. ReqMemBench derives requirement events from authentic client--developer histories, replays them into temporal state graphs, and associates each takeover point with the preceding history, pre-task code snapshot, current task, and an explicit gold state covering requirement values, lifecycle, scope, ambiguity, and execution status. The current benchmark snapshot contains 51 projects, 859 requirement atoms, 2,793 requirement events, and 210 takeover tasks from 39 projects, with histories ranging from 1 to 898 turns. Controlled No-History, Full-History, and Oracle-Relevant-History conditions separate the effects of evidence availability, context selection, temporal reconciliation, clarification, and downstream execution. \placeholder{Insert the main quantitative findings for RQ1--RQ4 and the supported conclusion about the dominant bottlenecks.}
+Coding agents increasingly operate as persistent participants in software projects, inheriting evolving codebases midway through long-running client collaborations. Successful continuation requires recovering the specification governing the current task: requirements may have been revised, narrowed in scope, deferred, resumed, or withdrawn across earlier interactions. Existing coding and memory benchmarks offer limited visibility into whether agents correctly reconstruct the requirement state that should guide implementation. We introduce ReqMemBench, a benchmark for temporal requirement-state reconstruction built from real freelance project histories that have been rewritten for privacy and include a subset of role-played messages. At intermediate takeover points, ReqMemBench provides evidence-linked gold requirement states and evaluates four capabilities: selecting relevant historical requirements and evidence, reconstructing their pre-task states, updating requirements or identifying material clarification needs, and delivering the requested code changes. A two-phase protocol freezes history-based responses before agents choosing to act on eligible tasks receive repository access. Full History and Oracle Relevant History conditions assess the effect of history filtering and agents’ reconstruction accuracy when relevant evidence is explicitly supplied. [TO COMPLETE: report the principal quantitative findings, including performance under oracle history and the relationship between requirement-state accuracy and code delivery.]
 \end{abstract}
 
 \section{Introduction}
 \label{sec:introduction}
 
-This section should establish that correctly continuing a real software project requires more than understanding the current task and code. An agent must also determine which historically expressed requirements remain valid at the present time. The argument should proceed from the temporal nature of real projects, through the need to reconstruct current requirements, to the absence of an explicit temporal requirement-state target in existing coding evaluations. The introduction should comprise five or six natural paragraphs rather than formal subsections.
+Code-generation evaluation has progressively expanded from self-contained function synthesis to repository-scale software engineering. HumanEval and MBPP measure whether models can produce short programs from natural-language specifications \citep{chen2021codex,austin2021mbpp}. CrossCodeEval and RepoBench add cross-file retrieval and repository context \citep{ding2023crosscodeeval,liu2024repobench}, while SWE-bench evaluates patches for real GitHub issues and SWE-Lancer evaluates freelance engineering tasks with executable or expert-derived criteria \citep{jimenez2024swebench,miserendino2025swelancer}. These benchmarks broaden the scope and realism of coding evaluation, but do not explicitly measure whether agents can reconstruct requirement states from histories of revisions, deferrals, and withdrawals. A coding agent joining an ongoing project faces a prior question: before deciding how to modify the code, it must determine which requirements currently govern the task.
 
-\begin{enumerate}
-    \item \textbf{From isolated coding tasks to stateful software projects.}
-    Explain that coding agents are evolving from one-shot code generators into persistent participants in software projects, and that an agent may enter a project at any intermediate time. A requirement may evolve as
-    \[
-    \mathrm{INTRODUCE}\rightarrow\mathrm{MODIFY}\rightarrow\mathrm{DEFER}
-    \rightarrow\mathrm{RESUME}\rightarrow\mathrm{REMOVE},
-    \]
-    or as
-    \[
-    \mathrm{AMBIGUOUS}\rightarrow\mathrm{CLARIFY}\rightarrow\mathrm{RESOLVE}.
-    \]
-    Consequently, different time points correspond to different valid specifications, and the desired action is generally not a function of the current task alone:
-    \[
-    \mathrm{DesiredAction}_{t^*}\neq f(q_{t^*}),
-    \qquad
-    \mathrm{DesiredAction}_{t^*}
-    =f(H_{<t^*},C_{t^{*-}},q_{t^*}).
-    \]
+The information needed to reconstruct these requirements is distributed across the project's interaction history. Requirements engineering has long emphasized tracing requirements from their origins through refinement and implementation \citep{nuseibeh2000requirements,gotel1994analysis}. In a long-running project, a requirement may be introduced, modified, deferred, resumed, or removed. Some aspects may remain ambiguous while others are settled, and execution feedback may update the known implementation status without changing the requirement itself. A previously authoritative statement may therefore be superseded in whole or in part at takeover, yet remain useful evidence for reconstructing how a requirement evolved. The central challenge is to reconstruct the current state of task-relevant requirements from these updates, preserving both settled constraints and unresolved ambiguities.
 
-    \item \textbf{The missing state between history and coding.}
-    Distinguish between what happened and what remains valid now. If a requirement was introduced, modified, deferred, and then removed, the correct interpretation is not merely to retain four messages, but to infer
-    \[
-    \mathrm{State}_{X}(t_4)=\mathrm{REMOVED}.
-    \]
-    The central conceptual statement is: the challenge is not to remember everything that happened, but to determine what still matters now.
+Several related lines of evaluation test important parts of this challenge. Conversational coding benchmarks measure how models revise programs in response to iterative compilation, execution, or verbal feedback \citep{han2025convcodeworld}. Long-term memory benchmarks test capabilities including information extraction, temporal reasoning, knowledge updates, long-range understanding, selective forgetting, and abstention over extended interactions \citep{wu2025longmemeval,maharana2024locomo,hu2025memoryagentbench}. These benchmarks assess the use of historical information, and some also evaluate retrieval quality. However, they do not directly score the task-relevant project requirement state that should guide code implementation, including requirement values, lifecycle status, scope, unresolved ambiguities, and implementation evidence. Explicit evaluation of this state would support separate assessment of history selection, requirement reconstruction, and code delivery.
 
-    \item \textbf{The gap in existing coding evaluation.}
-    Summarize conventional repository-level evaluation as
-    \[
-    (C,q)\rightarrow\mathrm{Patch},
-    \]
-    where correctness is primarily defined by whether a model resolves a given issue in a given repository. In contrast, ReqMemBench studies
-    \[
-    (H,C,q)\rightarrow\mathrm{CurrentRequirementState}\rightarrow\mathrm{Action}.
-    \]
-    The claim should not be that existing benchmarks contain no history. The more precise claim is that they generally define correctness around the current task outcome rather than an explicit, temporally evolving requirement state. The problem is also distinct from simple long-context retrieval: even when all relevant messages are accessible, an agent must reconcile revisions, invalidations, deferrals, resumptions, clarifications, and execution feedback.
+We formulate this setting as \emph{temporal requirement-state reconstruction}. An agent enters a project at a target time $t^*$ and first reasons from the condition-specific pre-target history $H^{(c)}_{<t^*}$ and current task $q_{t^*}$. During this history-only phase, it selects the directly affected historical requirements and their supporting evidence, reconstructs their pre-task states, and either predicts complete post-task states for all affected requirements (\texttt{ACT}) or identifies material ambiguities requiring clarification (\texttt{CLARIFY}). The response is frozen before repository access is granted. For an execution-eligible target, a run proceeds to an execution phase with the pre-task repository $C_{t^{*-}}$ only when the agent's frozen decision is \texttt{ACT}. This separation protects the history-only evaluation from repository-derived information and allows the frozen requirement interpretation to be compared with final code correctness.
 
-    \item \textbf{The evaluation target.}
-    Introduce the core formulation:
-    \[
-    \boxed{
-    H_{<t^*}+C_{t^{*-}}+q_{t^*}
-    \rightarrow G_P(t^{*-})\rightarrow\mathrm{Action}
-    }.
-    \]
-    ReqMemBench does not assume that the same agent has participated since the first day of a project. It evaluates a more focused takeover setting: when a coding agent enters a real project at an arbitrary intermediate time, can it reconstruct what the project currently requires and continue development correctly?
+ReqMemBench operationalizes this formulation by annotating longitudinal project histories as evidence-linked Requirement Events and replaying validated events into temporal Requirement State Graphs. Each takeover instance includes task-local gold pre-task states and either complete post-task states or clarification targets, execution-eligible instances additionally have a fixed hidden validator. The benchmark evaluates four capabilities along the path from history to delivery: selecting directly affected historical requirements and supporting evidence, reconstructing their pre-task states, producing complete post-task states or identifying material clarification needs, and delivering the requested code changes. Full History provides the complete transformed pre-target conversation, whereas Oracle Relevant History provides an audited, order-preserving subsequence retaining the relevant requirement trajectories and context, including superseded statements where needed. Requirement and evidence selection are scored only under Full History because oracle construction uses gold relevance annotations. The oracle condition evaluates reconstruction and update-or-clarify reasoning with relevant evidence explicitly supplied.
 
-    \item \textbf{The ReqMemBench approach.}
-    Present the construction pipeline at a high level without introducing serialization details:
-    \[
-    \mathrm{RealProjectHistory}\rightarrow\mathrm{RequirementEvents}
-    \rightarrow\mathrm{RequirementStateGraph}\rightarrow\mathrm{GoldState}(t^*)
-    \rightarrow\mathrm{EvaluationInstance}.
-    \]
-    State that the data come from real software projects, requirement evolution is grounded in source messages, event replay constructs temporal state, a single project can yield instances at multiple takeover points, each takeover point has an explicit pre-task gold state, and the target task determines the correct subsequent action.
+Our contributions are:
+\begin{itemize}
+    \item We formulate temporal requirement-state reconstruction as an evaluation problem for coding-agent takeover, with explicit task-local targets for reconstructing pre-task requirement states and determining their updates or material clarification needs under the current request.
+    \item We construct ReqMemBench from transformed longitudinal freelance project histories, providing evidence-linked Requirement Events, temporal Requirement State Graphs, and annotated takeover instances at intermediate project stages.
+    \item We design a two-phase protocol that freezes history-based responses before repository access and compares requirement reconstruction, update-or-clarify reasoning, and eligible code delivery under Full History and Oracle Relevant History. %\placeholder{TODO: replace this sentence with the principal quantitative findings after the formal experiments are complete.}
+\end{itemize}
 
-    \item \textbf{Contributions.}
-    Fix the final contribution list to four items:
-    \begin{itemize}
-        \item \textbf{A new evaluation problem.} Formalize temporal requirement-state reconstruction for coding agents: recovering the currently valid project requirements at an arbitrary intermediate time.
-        \item \textbf{A real-world benchmark.} Construct ReqMemBench from longitudinal software projects, authentic client--developer histories, evolving requirements, intermediate code states, and real target tasks.
-        \item \textbf{Temporal gold-state construction.} Introduce
-        \[
-        \mathrm{Messages}\rightarrow\mathrm{Events}\rightarrow\mathrm{StateGraph}
-        \rightarrow G_P(t),
-        \]
-        thereby providing explicit temporal requirement ground truth rather than only a collection of historical messages.
-        \item \textbf{Empirical findings.} Use controlled No-History, Full-History, and Oracle-History evaluations to identify bottlenecks in evidence access, context management, temporal state reasoning, and downstream execution. \placeholder{Replace this description with concrete findings after completing the experiments.}
-    \end{itemize}
-\end{enumerate}
-
-\begin{figure}[t]
+\begin{figure}[b]
 \begin{center}
 \fbox{\begin{minipage}{0.90\linewidth}
 \centering
 \textbf{Figure 1 placeholder: Motivation and task definition}\\[0.5em]
-Introduce A $\rightarrow$ Modify A $\rightarrow$ Introduce B
-$\rightarrow$ Remove B $\rightarrow$ Clarify A\\
+Introduce A $\rightarrow$ Modify A $\rightarrow$ Defer A
+$\rightarrow$ Resume A $\rightarrow$ Ambiguous A\\
 $\downarrow\ t^*\ \downarrow$\\
-Current code $+$ current task $\rightarrow$ agent
-$\rightarrow$ current valid requirement state $\rightarrow$ correct action
+Phase A: history $+$ current task $\rightarrow$ select $\rightarrow$ reconstruct
+$\rightarrow$ act or clarify $\rightarrow$ freeze\\
+Phase B: eligible act $+$ pre-task repository $\rightarrow$ execute
+$\rightarrow$ hidden validator
 \end{minipage}}
 \end{center}
-\caption{The ReqMemBench takeover setting. An agent enters a project at an intermediate time and reconstructs the currently valid requirement state from the preceding history, pre-task code state, and current task.}
+\caption{The ReqMemBench takeover setting. An agent first reasons from the preceding history and current task without repository access. After its response is frozen, eligible \texttt{ACT} runs receive the pre-task repository for delivery evaluation.}
 \label{fig:motivation}
 \end{figure}
 
+% \placeholder{TODO before final submission: report the verified benchmark size and artifact-level provenance; replace the final contribution with measured RQ1--RQ4 findings; and replace the boxed Figure~\ref{fig:motivation} placeholder with the final motivation figure.}
+
 \section{Related Work}
 \label{sec:related-work}
+\subsection{Coding and Software Engineering Benchmarks}
+Coding benchmarks span function-level synthesis in HumanEval and MBPP \citep{chen2021codex,austin2021mbpp} and library-intensive programming in BigCodeBench \citep{zhuo2025bigcodebench}. CrossCodeEval and RepoBench evaluate code completion with cross-file context \citep{ding2023crosscodeeval,liu2024repobench}, while SWE-bench and SWE-Lancer cover issue resolution and freelance engineering tasks \citep{jimenez2024swebench,miserendino2025swelancer}. SWE-EVO evaluates release-level software evolution \citep{le2026sweevo}, and ProjDevBench evaluates project creation and completion \citep{lu2026projdevbench}. Beyond implementation outcomes, RigorBench evaluates engineering process discipline, including abstention and clarification on infeasible or ambiguous tasks \citep{madiraju2026rigorbench}.
 
-This section should establish that coding benchmarks, long-term memory benchmarks, and long-horizon conversational coding benchmarks each cover part of the problem, but none uses the temporal requirement state defined by ReqMemBench as its explicit evaluation object. The comparison should focus on differences in inputs, gold targets, and outputs rather than understating the contributions of prior work. \placeholder{Add and verify all citations before submission.}
-
-\subsection{Coding Benchmarks}
-
-Organize this subsection around the progression
-\[
-\mathrm{FunctionGeneration}\rightarrow\mathrm{RepositoryIssueResolution}
-\rightarrow\mathrm{AgenticSoftwareEngineering}.
-\]
-Begin with function-generation benchmarks such as HumanEval and MBPP. Then discuss SWE-bench and related work that extends evaluation to issue resolution in real repositories. Continue with project-level and agentic software-engineering benchmarks, including process-oriented evaluations such as RigorBench. Conclude that these benchmarks have progressively expanded how an agent completes a task, while correctness is still generally centered on the outcome of a given task rather than an explicit project requirement state at an arbitrary time.
 
 \subsection{Long-Term Memory and Long-Context Evaluation}
-
-Review benchmarks such as LongMemEval, which evaluate information extraction, multi-session reasoning, temporal reasoning, knowledge updates, and abstention. Explain how these abilities relate to ReqMemBench while emphasizing the difference in evaluation object. A typical memory benchmark takes the form
-\[
-\mathrm{History}+\mathrm{Query}\rightarrow\mathrm{Answer},
-\]
-whereas ReqMemBench evaluates
-\[
-\mathrm{ProjectHistory}+\mathrm{Code}+\mathrm{Task}
-\rightarrow\mathrm{ProjectState}\rightarrow\mathrm{DevelopmentAction}.
-\]
-Here, history is not merely a knowledge base to be queried; it is temporal evidence from which the current project specification must be constructed.
+An emerging line of research evaluates agents in more realistic and complex settings involving sequences of tasks, where prior work can serve as a resource. SWE-Bench-CL \citep{joshi2025swebenchcl}, SWE Context Bench \citep{zhu2026swecontextbench}, and SlopCodeBench \citep{orlanski2026slopcode} evaluate knowledge transfer, trajectory reuse, and quality degradation, respectively. In these settings, history is treated as potentially useful experience. The other group of long-term memory benchmarks treat history as a store of facts that an assistant
+must retain, update, and retrieve on demand. LongMemEval \citep{wu2025longmemeval}, MemoryAgentBench
+\citep{hu2025memoryagentbench}, and LoCoMo \citep{maharana2024locomo} test
+retention over long multi-session dialogue, including knowledge updates,
+selective forgetting, and abstention-analogues of requirement override and
+clarification. These benchmarks evaluate whether an agent can use the history and the current query to recover an answer already contained in that history. However they fail to question whether an agent can integrate project history, existing code, and the current task to reconstruct the project state and determine the appropriate action. This state is rarely stated explicitly: it must be inferred from requirements with different scopes and validity, and must then guide the implementation.
 
 \subsection{Long-Horizon Conversational Coding}
+Multi-turn coding benchmarks allow the target to be clarified or modified throughout an interaction, making them the closest to real-world development settings. ConvCodeWorld \citep{han2025convcodeworld} and RECODE-H \citep{miao2026recodeh} evaluate code revision under feedback toward a fixed target. SR-Eval \citep{zhan2025sreval} simulates the stepwise refinement of a final requirement, while LoCoEval \citep{liu2026locoeval} examines context management in LLM-generated repository conversations involving iterative requirements.
 
-Use LoCoEval as the main comparison in this subsection. Describe its focus on repository-oriented long-horizon conversational context management, iterative requirements, and information retention. The intended distinction is not that one problem subsumes the other: LoCoEval asks how long conversational context should be managed in repository-oriented interaction, whereas ReqMemBench asks which requirements remain valid in an evolving real project and what the agent should do next. Verify the data-generation setting, task types, annotation targets, and whether requirement lifecycle, scope, ambiguity, execution state, and arbitrary takeover points are explicitly represented.
+Taken together, the benchmarks discussed above and long-horizon conversational coding benchmarks capture complementary aspects of the broader problem. However, none explicitly treats the evolving validity and scope of requirements over time-the temporal requirement state defined in ReqMemBench-as the object of evaluation. Our comparison therefore focuses on differences in the inputs provided to agents, the gold targets used for evaluation, and the outputs agents are expected to produce, while fully acknowledging the distinct contributions of prior work.
 
-\subsection{Positioning ReqMemBench}
 
-Table~\ref{tab:related-comparison} should summarize the complementary scope of the four research directions. Its purpose is not to mark every competing category as lacking every feature, but to make the distinct evaluation object of ReqMemBench immediately visible.
+% \subsection{Coding Benchmarks}
+
+% Organize this subsection around the progression
+% \[
+% \mathrm{FunctionGeneration}\rightarrow\mathrm{RepositoryIssueResolution}
+% \rightarrow\mathrm{AgenticSoftwareEngineering}.
+% \]
+% Begin with function-generation benchmarks such as HumanEval and MBPP. Then discuss SWE-bench and related work that extends evaluation to issue resolution in real repositories. Continue with project-level and agentic software-engineering benchmarks, including process-oriented evaluations such as RigorBench. Conclude that these benchmarks have progressively expanded how an agent completes a task, while correctness is still generally centered on the outcome of a given task rather than an explicit project requirement state at an arbitrary time.
+
+
+
+% Review benchmarks such as LongMemEval, which evaluate information extraction, multi-session reasoning, temporal reasoning, knowledge updates, and abstention. Explain how these abilities relate to ReqMemBench while emphasizing the difference in evaluation object. A typical memory benchmark takes the form
+% \[
+% \mathrm{History}+\mathrm{Query}\rightarrow\mathrm{Answer},
+% \]
+% whereas ReqMemBench evaluates
+% \[
+% \mathrm{ProjectHistory}+\mathrm{Code}+\mathrm{Task}
+% \rightarrow\mathrm{ProjectState}\rightarrow\mathrm{DevelopmentAction}.
+% \]
+% Here, history is not merely a knowledge base to be queried; it is temporal evidence from which the current project specification must be constructed.
+
+% \subsection{Long-Horizon Conversational Coding}
+
+% Use LoCoEval as the main comparison in this subsection. Describe its focus on repository-oriented long-horizon conversational context management, iterative requirements, and information retention. The intended distinction is not that one problem subsumes the other: LoCoEval asks how long conversational context should be managed in repository-oriented interaction, whereas ReqMemBench asks which requirements remain valid in an evolving real project and what the agent should do next. Verify the data-generation setting, task types, annotation targets, and whether requirement lifecycle, scope, ambiguity, execution state, and arbitrary takeover points are explicitly represented.
+
+% \subsection{Positioning ReqMemBench}
+
+% Table~\ref{tab:related-comparison} should summarize the complementary scope of the four research directions. Its purpose is not to mark every competing category as lacking every feature, but to make the distinct evaluation object of ReqMemBench immediately visible.
 
 \begin{table}[t]
 \caption{Positioning ReqMemBench relative to related evaluation directions. All entries must be verified against the cited work.}
@@ -185,506 +148,469 @@ Downstream action & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & 
 \end{center}
 \end{table}
 
-\section{Task Formulation: Requirement-State-Aware Project Continuation}
+\section{Temporal Requirement-State Reconstruction}
 \label{sec:formulation}
 
-This section should establish that the currently valid requirement state is a well-defined and measurable evaluation object with a meaningful relationship to downstream development actions. It defines the temporal project boundary, requirement atoms and their state, the project-level gold state, state recovery through event replay, and the two evaluation levels of state reconstruction and state-conditioned action.
+Requirements engineering has long treated requirements as artifacts whose origins, refinements, and realization must remain traceable across a system's lifecycle \citep{nuseibeh2000requirements,gotel1994analysis}. ReqMemBench uses evidence-linked requirement states as explicit evaluation targets at intermediate project takeover points. Given the preceding interaction history and current request, the agent reconstructs task-relevant pre-task states and either predicts complete post-task states for all affected requirements or identifies material ambiguities requiring clarification.
 
-\subsection{Temporal Project Setting}
+\subsection{Problem Formulation}
 
-Define a project as
-\[
-P=(H,C),
-\]
-where $H$ is the timestamped project history and $C$ is the code state as it evolves over time. For a target task $q_{t^*}$ arriving at time $t^*$, the agent may use only the preceding history
-\[
-H_{<t^*}
-\]
-and the code snapshot immediately before the task arrives,
-\[
-C_{t^{*-}}.
-\]
-Specify which client messages, developer messages, and execution feedback belong to $H$; how code snapshots are aligned with time; how $t^*$ is determined; and why all evidence after $t^*$ is excluded to prevent future-information leakage.
+We represent a project as $P=(H,C)$, where $H=\langle h_1,\ldots,h_n\rangle$ is the temporally ordered interaction history and $C(t)$ is the corresponding code state. The history contains client and developer messages together with recorded execution feedback. A target task $q_{t^*}$ arrives at takeover time $t^*$, inducing a strict temporal boundary: $H_{<t^*}$ contains only interactions before the target, and $C_{t^{*-}}$ denotes the code snapshot immediately before it. No evidence produced after the target may enter the pre-task state, the target itself is used only to identify which historical requirements are relevant.
 
-\subsection{Requirement and Requirement State}
+The atomic unit of state is a \emph{Requirement Atom}. Atoms that concern the same feature may be grouped into a Requirement Family, but each atom has an independent lifecycle. For an atom $r$, we define its state at time $t$ as
+\begin{equation}
+G_r(t)=\bigl(A_r(t),L_r(t),S_r(t),U_r(t),X_r(t)\bigr),
+\label{eq:requirement-state}
+\end{equation}
+where $A_r$ is the map of currently valid attributes. $L_r$ is the lifecycle state, such as \texttt{ACTIVE}, \texttt{DEFERRED}, or \texttt{REMOVED}. $S_r$ records persistence, component, and contextual scope. $U_r$ is the set of unresolved ambiguities and their affected dimensions. And $X_r$ records the latest implementation evidence, such as \texttt{CLAIMED\_WORKING}, \texttt{FAILED}, or \texttt{VERIFIED\_WORKING}. Unknown fields remain unknown rather than being completed by inference.
 
-Use a requirement atom as the independent lifecycle unit. A requirement family is only a semantic grouping and does not have an independent lifecycle. For a requirement atom $r$, define
-\[
-G_r(t)=
-\bigl(\mathrm{Attributes},\mathrm{Lifecycle},\mathrm{Scope},
-\mathrm{Ambiguity},\mathrm{Execution}\bigr).
-\]
-The five dimensions represent the current requirement value; a lifecycle such as $\mathrm{ACTIVE}$, $\mathrm{DEFERRED}$, $\mathrm{REMOVED}$, or $\mathrm{CLARIFY}$; persistence, component, and contextual scope; open or closed ambiguity and the affected dimensions; and execution states such as $\mathrm{FAILED}$, $\mathrm{CLAIMED\_WORKING}$, and $\mathrm{VERIFIED\_WORKING}$. \placeholder{Provide complete state vocabularies and the requirement-atom segmentation rules.}
+The five dimensions are deliberately separate. An active requirement may contain an unresolved ambiguity, and a valid requirement may currently have a failed implementation. Conversely, removing a requirement changes its lifecycle but does not erase its historical attributes or execution evidence. \texttt{CLARIFY} is therefore an agent decision introduced below, not a lifecycle value or a requirement event.
 
-\subsection{Project-Level Gold State}
+ReqMemBench derives states by replaying temporally ordered Requirement Events. Let
+\begin{equation}
+E_r=\langle e_r^{(1)},\ldots,e_r^{(n_r)}\rangle
+\end{equation}
+be the validated event sequence for atom $r$. Each event deterministically transforms the preceding state,
+\begin{equation}
+S_r^{(k)}=T\!\left(S_r^{(k-1)},e_r^{(k)}\right),
+\qquad
+G_r(t)=\operatorname{Replay}\!\left(E_r^{\leq t}\right),
+\label{eq:event-replay}
+\end{equation}
+where $T$ implements the transition rules described in Section~\ref{sec:construction}. The event vocabulary separates semantic changes (\texttt{INTRODUCE}, \texttt{MODIFY}, \texttt{DEFER}, \texttt{RESUME}, and \texttt{REMOVE}), uncertainty (\texttt{AMBIGUOUS}), and implementation evidence (\texttt{IMPLEMENTATION\_CLAIM}, \texttt{RUNTIME\_FAILURE}, and \texttt{RUNTIME\_VERIFICATION}). Every state retains the events and source messages that currently support its fields, so replay produces both a snapshot and its temporal provenance.
 
-Define the project-level requirement state at time $t$ as
-\[
-G_P(t)=\{G_r(t)\mid r\text{ appeared before }t\}.
-\]
-A removed requirement does not disappear from the gold state. It remains represented with lifecycle $\mathrm{REMOVED}$ because recognizing that a requirement is invalid, and avoiding its continued implementation or accidental resurrection, is itself part of the evaluated capability.
+The project state is the collection of all requirement states observable by time $t$,
+\begin{equation}
+G_P(t)=\{G_r(t)\mid r\in R_P(t)\}.
+\end{equation}
+Removed requirements remain in $G_P(t)$ with lifecycle \texttt{REMOVED}, otherwise an evaluator could not distinguish correct invalidation from accidental resurrection. ReqMemBench does not ask an agent to reproduce this entire project graph for every target. Let $A_{t^*}$ be the atoms directly affected by the target, including atoms first introduced by it, and let $R_P(t^{*-})$ be the atoms that existed before takeover. The task-relevant historical set and its pre-task state are
+\begin{equation}
+R^{\mathrm{hist}}_{t^*}=A_{t^*}\cap R_P(t^{*-}),
+\qquad
+G^-_{t^*}=\{G_r(t^{*-})\mid r\in R^{\mathrm{hist}}_{t^*}\}.
+\label{eq:pre-task-gold}
+\end{equation}
+Atoms introduced by $q_{t^*}$ are absent from $G^-_{t^*}$. They enter the complete post-task target together with affected historical atoms:
+\begin{equation}
+G^+_{t^*}=\{G_r(t^{*+})\mid r\in A_{t^*}\}.
+\label{eq:post-task-gold}
+\end{equation}
+This projection makes selection, reconstruction, and updating measurable without requiring recovery of unrelated parts of the project.
 
-\subsection{Requirement State as Event Replay}
+\subsection{Takeover Task and Evaluation Stages}
 
-Convert the history relevant to requirement $r$ into an ordered event sequence
-\[
-E_r=(e_1,e_2,\ldots,e_n),
-\]
-and recover the complete state at any time through
-\[
-G_r(t)=\mathrm{Replay}(E_r^{\leq t}).
-\]
-Events record what changed and why, while state nodes represent the complete requirement state after each change. This design reflects four properties: requirements are evolving objects; messages are evidence rather than states; events retain temporal provenance; and the same project graph can be replayed at multiple takeover points.
+Evaluation uses two history conditions. C1 exposes the full pre-target history, $H^{(\mathrm{C1})}_{<t^*}=H_{<t^*}$. C2 exposes an audited, order-preserving subsequence $H^{(\mathrm{C2})}_{<t^*}\subseteq H_{<t^*}$ that retains the trajectories and contextual messages needed to determine the same gold state. Both conditions represent takeover of an ongoing project, neither removes history altogether.
 
-\subsection{Evaluation Task}
+Each logical run has two phases. In Phase A, the repository is absent and the agent receives only condition-specific history and the current task:
+\begin{equation}
+H^{(c)}_{<t^*}+q_{t^*}
+\longrightarrow
+\left(
+\widehat{R}^{\mathrm{hist}}_{t^*},
+\widehat{G}^{-}_{t^*},
+\widehat{d}_{t^*},
+\widehat{Z}_{t^*}
+\right),
+\label{eq:phase-a}
+\end{equation}
+where $c\in\{\mathrm{C1},\mathrm{C2}\}$, $\widehat{d}_{t^*}\in\{\mathrm{ACT},\mathrm{CLARIFY}\}$, and $\widehat{Z}_{t^*}$ is either a complete predicted post-task state $\widehat{G}^{+}_{t^*}$ or a structured set of blocking issues and clarification questions $\widehat{Q}_{t^*}$. An open ambiguity warrants \texttt{CLARIFY} only when it is material to the target, unresolved by the visible evidence, and prevents a unique safe update.
 
-The complete ReqMemBench task is
-\[
-H_{<t^*}+C_{t^{*-}}+q_{t^*}
-\rightarrow\widehat{G}_P(t^{*-})\rightarrow\widehat{A}_{t^*}.
-\]
-Evaluation has two levels. Level I evaluates state reconstruction:
-\[
-\widehat{G}_P(t^{*-})\overset{?}{=}G_P(t^{*-}).
-\]
-Level II evaluates the state-conditioned action:
-\[
-\widehat{A}_{t^*}\overset{?}{=}A^*_{t^*}.
-\]
-This separation distinguishes an agent that does not know what the project currently requires from an agent that understands the requirements but fails to execute them correctly.
+The Phase-A response is frozen before code becomes visible. For an RQ4-eligible target whose gold decision is \texttt{ACT}, the agent enters Phase B only if its frozen decision is also \texttt{ACT}:
+\begin{equation}
+H^{(c)}_{<t^*}+q_{t^*}+C_{t^{*-}}+\mathrm{FrozenResponse}_{t^*}^{(c)}
+\longrightarrow \widehat{C}_{t^{*+}}.
+\label{eq:phase-b}
+\end{equation}
+This boundary prevents the repository, build output, or hidden tests from revealing the answers to the history-only tasks. It also separates an incorrect interpretation from an implementation failure under a correct interpretation.
+
+\begin{table}[b]
+\caption{The four evaluation stages. C1 is Full History and C2 is Oracle Relevant History.}
+\label{tab:evaluation-stages}
+\centering
+\small
+\begin{tabular}{@{}lp{0.23\linewidth}p{0.29\linewidth}cc@{}}
+\toprule
+Stage & Evaluated capability & Gold target & History & Repository \\
+\midrule
+RQ1 & Select directly affected historical atoms and their current-state evidence & $R^{\mathrm{hist}}_{t^*}$ and supporting evidence groups & C1 & No \\
+RQ2 & Reconstruct the pre-task state of aligned historical atoms & $G^-_{t^*}$ over matched atoms & C1/C2 & No \\
+RQ3 & Construct the complete post-task state or identify material blockers & $G^+_{t^*}$ for \texttt{ACT}, or clarification gold & C1/C2 & No \\
+RQ4 & Deliver the frozen update in code & Final repository passing the frozen validator & Eligible C1/C2 & Yes, after freeze \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+RQ1 is evaluated only under C1 because C2 is constructed from the relevant gold trajectory and would expose the selection answer. RQ2 scores state correctness only over successfully aligned historical atoms and reports reconstruction coverage separately, preventing selection errors from being counted twice. RQ3 evaluates all affected atoms, including those introduced by the target, and requires either a complete update or complete coverage of the material blockers. RQ4 evaluates only the final repository: a delivery passes when build, target-specific tests, and regression tests all pass. Together, the stages localize failure along the chain
+\begin{equation}
+\mathrm{Select}\rightarrow\mathrm{Reconstruct}\rightarrow\mathrm{Decide}\rightarrow\mathrm{Execute}.
+\end{equation}
 
 \section{ReqMemBench Construction}
 \label{sec:construction}
 
-This section should establish that the ReqMemBench gold annotations are systematically recovered from naturally occurring project histories rather than created as artificial tasks for evaluation. It should be one of the most detailed sections of the paper, covering data sources, event annotation, state-graph construction, target-time selection, instance generation, quality control, and benchmark statistics.
+ReqMemBench construction separates the provenance of project histories, requirement annotations, and executable code environments. It transforms the source material into temporal requirement graphs, selects intermediate takeover points, and materializes condition-controlled evaluation instances while keeping researcher-side Gold and execution artifacts hidden from the agent.
 
 \begin{figure}[t]
 \begin{center}
 \fbox{\begin{minipage}{0.90\linewidth}
 \centering
 \textbf{Figure 2 placeholder: ReqMemBench construction pipeline}\\[0.5em]
-Raw project $\rightarrow$ event annotation $\rightarrow$ state graph
-$\rightarrow$ target selection\\
-$\rightarrow$ temporal gold state $\rightarrow$ evaluation instance
+Upwork projects $\rightarrow$ privacy-preserving conversation rewrite
+$\rightarrow$ event annotation\\
+$\rightarrow$ state graph $\rightarrow$ target selection
+$\rightarrow$ temporal Gold $\rightarrow$ evaluation instance\\[0.5em]
+Project artifacts $+$ requirement state $\rightarrow$ optional pre-task code-environment reconstruction\\[0.5em]
+\emph{Responsibility lanes: model-assisted candidate extraction; deterministic validation, replay, and materialization; human review and adjudication.}\\[0.5em]
+\emph{The final figure will mark $t^*$ and separate public agent input from hidden evaluation gold.}
 \end{minipage}}
 \end{center}
-\caption{The ReqMemBench construction pipeline from real project histories to temporal requirement-state evaluation instances.}
+\caption{The ReqMemBench construction pipeline from project source material to temporal requirement-state evaluation instances.}
 \label{fig:pipeline}
 \end{figure}
 
-\subsection{Data Source and Project Selection}
+\subsection{Data and Temporal Requirement Graph Construction}
 
-Explain why real freelance software projects are suitable for studying naturally occurring requirement evolution. List the available artifacts, such as client--developer messages, code snapshots, commits or deliveries, execution feedback, and timestamps. Define inclusion and exclusion criteria based on historical completeness, code recoverability, meaningful interaction length, identifiable requirement evolution, and privacy or authorization constraints. Emphasize that the introduction, modification, deferral, removal, and clarification of requirements occurred during real development rather than being inserted by benchmark authors. \placeholder{Insert the data source, authorization procedure, filtering pipeline, and final project count.}
+\paragraph{Project provenance and privacy transformation.}
+ReqMemBench is derived from software projects conducted through Upwork, including project descriptions, deliverables and other available artifacts, and conversations between clients and freelancers. The source projects and their interactions are real, but the conversations released to the construction pipeline are not verbatim platform transcripts. We rewrite every conversation to protect the participants' privacy. The transformation replaces or removes direct identifiers, private links, account information, credentials, and project-specific entities while preserving the requirements, decisions, negations, temporal order, cross-message revisions, and reported execution outcomes needed for temporal reasoning. Replacements are planned consistently at the project level, checked against the source meaning, and subjected to a final safety audit. A conversation is withheld if any message remains unresolved. A small subset of messages is role-played. ReqMemBench should therefore be understood as a privacy-preserving transformation of real project histories that contains a limited role-played component, rather than as a release of raw conversations.
 
-\subsection{Stage 1: Requirement Event Annotation}
+Code provenance is tracked separately from conversation provenance. Available project artifacts provide evidence about the implemented system and its toolchain. When an exact executable snapshot immediately before a target is unavailable, we reconstruct a pre-task code environment from the available artifacts and the annotated requirement state. Each reconstructed environment is aligned to a specific target boundary, built deterministically, and validated for reproducibility and consistency with the corresponding pre-task state. Recovered artifacts and reconstructed executable environments are distinguished in researcher-side metadata. A reconstructed environment is not treated as an observed historical repository snapshot.
+\placeholder{TODO: report the frozen counts of projects and messages, the rewritten-versus-role-played provenance breakdown, and the recovered-versus-reconstructed code-environment breakdown after the release snapshot is fixed.}
 
-The first construction stage is
+\paragraph{Requirement-event annotation.}
+The transformed history is converted into a temporal representation in two stages. Stage 1 first groups semantically related requirements into optional Requirement Families and then segments them into Requirement Atoms, each of which has an independent lifecycle. It next associates state-changing evidence with exactly nine first-class Requirement Events:
 \[
-\mathrm{RawMessages}\rightarrow\mathrm{RequirementFamilies}
-\rightarrow\mathrm{RequirementAtoms}\rightarrow\mathrm{RequirementEvents}.
+\begin{split}
+\mathcal{E}=\{&
+\texttt{INTRODUCE},\texttt{MODIFY},\texttt{DEFER},\texttt{RESUME},
+\texttt{REMOVE},\texttt{AMBIGUOUS},\\
+&\texttt{IMPLEMENTATION\_CLAIM},\texttt{RUNTIME\_FAILURE},
+\texttt{RUNTIME\_VERIFICATION}\}.
+\end{split}
 \]
-The event taxonomy should include $\mathrm{INTRODUCE}$, $\mathrm{MODIFY}$, $\mathrm{REMOVE}$, $\mathrm{DEFER}$, $\mathrm{RESUME}$, $\mathrm{AMBIGUOUS}$, $\mathrm{CLARIFY}$, $\mathrm{RESOLVE}$, $\mathrm{IMPLEMENTATION\_CLAIM}$, $\mathrm{RUNTIME\_FAILURE}$, and $\mathrm{RUNTIME\_VERIFICATION}$. Explain why these events capture changes in value, lifecycle, scope, ambiguity, and execution status, and require every event to retain source-message evidence. Detailed serialization fields can be placed in the appendix.
+Each event is anchored to a source message and the normalized conversation order, identifies its owning atom, and records the payload needed to update attributes, scope, lifecycle, ambiguity, or execution state. \texttt{CLARIFY} is an agent decision in RQ3 rather than a Requirement Event. Likewise, ambiguity resolution is represented by an eligible later state-changing event that references the ambiguity it resolves, rather than by a separate \texttt{RESOLVE} event. Model-assisted extraction proposes families, atoms, events, and evidence links; schema checks, cross-reference validation, and review determine which candidates enter the canonical annotation.
 
-\subsection{Stage 2: Requirement State Graph}
+\paragraph{Deterministic replay and state graphs.}
+Stage 2 treats the validated event sequence as canonical input and does not reinterpret the conversation. For each atom, it orders events by their normalized message position and deterministically applies the transition function in Equation~\ref{eq:event-replay}. Every resulting node contains the complete five-dimensional state from Equation~\ref{eq:requirement-state}, while the incoming edge records the event responsible for the transition. Supporting-event references are updated with the state, preserving a trace from each current field to its historical evidence. Schema violations, invalid transitions, and unresolved cross-references cause validation failure rather than model-based repair. The atom-level trajectories are then combined into one project graph that can be replayed at multiple takeover times, removed requirements remain represented with lifecycle \texttt{REMOVED}.
 
-The second stage converts events into state nodes and a state graph:
+\subsection{Takeover Instance Construction and History Conditions}
+
+\paragraph{Selecting takeover points.}
+A target candidate is a client message, not an individual event. All events triggered by the same message are grouped into one candidate so that a multi-requirement request remains one takeover task. The candidate pool prioritizes state-changing messages involving modification, removal, deferral, resumption, ambiguity, or ambiguity resolution. An \texttt{INTRODUCE} event may also qualify when it occurs after an existing project state and therefore depends on prior context, whereas the first context-free introduction and messages containing only execution evidence are excluded by default. Candidate packets contain the current message, its triggered events, the affected atoms' pre-task states and earlier trajectories, and their historical evidence. They exclude future messages and future-supported states.
+
+A structured model assessment rates each candidate's historical dependency, requirement evolution, reconstruction risk, ambiguity-decision value, and multi-requirement value. These categorical ratings are converted deterministically into a selection score. Retained candidates must be valid development tasks, depend on history, and be recommended under the frozen selection rule. Stable IDs, message order, event grouping, score calculation, and all Gold states are produced by code rather than by the selector. Each selected target records whether it entered through threshold-based selection or human review so that the final benchmark can report the provenance of target selection.
+\placeholder{TODO: report the frozen selection threshold and review route, together with candidate, accepted, rejected, and add-back counts.}
+
+\paragraph{Gold boundaries and task-local projections.}
+For a selected target $q_{t^*}$, the pre-task Gold state is obtained by replaying only events whose source messages occur strictly before the target. The post-task Gold state additionally applies every event triggered by the target message, in their validated order. Thus the two boundaries are exclusive and inclusive with respect to the same message:
 \[
-\mathrm{Events}\rightarrow\mathrm{StateNodes}\rightarrow\mathrm{StateGraph}.
+G_P(t^{*-})=\operatorname{Replay}(E^{<t^*}),
+\qquad
+G_P(t^{*+})=\operatorname{Replay}(E^{\leq t^*}).
 \]
-Each node stores a complete requirement state, and each edge corresponds to the event responsible for the transition. For example,
-\[
-S_1\xrightarrow{\mathrm{MODIFY}}S_2
-\xrightarrow{\mathrm{DEFER}}S_3.
-\]
-Explain why an explicit graph is preferable to an event list alone, how replay deterministically reconstructs state, and how ambiguity and execution state are updated alongside lifecycle. \placeholder{Add the complete state-transition rules or transition table.}
+An atom first introduced by the target has no pre-task state, an atom removed by the target remains in the post-task graph with lifecycle \texttt{REMOVED}. Construction stores complete project snapshots at both boundaries and then derives the target-local sets in Equations~\ref{eq:pre-task-gold} and~\ref{eq:post-task-gold}. This order avoids constructing Gold from the agent-facing history condition.
 
-\subsection{Target Time and Task Selection}
+\paragraph{RQ-specific construction.}
+The instance constructor joins four researcher-side sources: the target and its pre/post state references, the project state graph, the transformed pre-target conversation, and, for RQ4 candidates only, a target-aligned code environment. Applicability is derived deterministically rather than inherited from model-generated RQ tags. A target enters RQ1 and RQ2 when it directly affects at least one atom that existed before takeover. It enters RQ3 when the target induces at least one verifiable requirement transition, and it becomes an RQ4 candidate only when such a transition has a matching pre-task code environment.
 
-Define the target time as
-\[
-t^*=\text{arrival time of the target client task}.
-\]
-Each target task establishes two boundaries: the pre-task state $G_P(t^{*-})$ and the state after the task has been correctly interpreted and handled, $G_P(t^{*+})$. The current task triggers the transition
-\[
-G_P(t^{*-})\xrightarrow{q_{t^*}}G_P(t^{*+}).
-\]
-The pre-task state is what the agent should recover upon takeover. The post-task state, affected requirements, and task events jointly help define the correct action. \placeholder{Specify target-task eligibility and temporal-alignment rules.}
+RQ1 Gold contains the directly affected historical atoms and deterministic evidence groups supporting their current pre-task fields. RQ2 expands the pre-task states only for those historical atoms, requirements first introduced by the target are recorded separately and never receive a fabricated pre-state. RQ3 represents either the complete post-task states of all affected atoms or the material blocking ambiguities and corresponding clarification questions. C1 and C2 share the same frozen RQ3 branch and semantic Gold. An RQ4 candidate becomes formally eligible only when its RQ3 Gold decision is \texttt{ACT}, its pre-task environment is reproducibly executable, the target has locally observable acceptance criteria, the hidden validator has been reviewed and calibrated, and repository-leakage checks pass.
 
-\subsection{Instance Construction}
+\paragraph{History conditions and leakage control.}
+Every instance contains a common pool of transformed messages strictly before the target. C1 selects the entire pool as Full History. C2 selects an order-preserving Oracle Relevant History consisting of the affected atoms' trajectories and the contextual messages needed to interpret them. RQ1 is scored only under C1 because constructing C2 uses the RQ1 Gold trajectory, exposing C2 to RQ1 would reveal the selection answer. RQ2 and RQ3 use both conditions, and eligible RQ4 runs inherit the same condition-specific history. No-History is not part of the benchmark.
 
-The basic unit of the benchmark is a target task at a target time, not an individual requirement, because one client message may affect multiple requirements. Each instance contains the historical record $H_{<t^*}$, pre-task code state $C_{t^{*-}}$, and current task $q_{t^*}$ as inputs. Hidden gold annotations contain the relevant historical evidence, $G_P(t^{*-})$, affected requirements, task events, $G_P(t^{*+})$, and expected action. \placeholder{Include one complete serialized instance in the appendix.}
+The materializer merges the RQ-specific researcher views into one logical run for each target--condition pair. Phase A exposes only the target task, selected history, common instructions, and a response schema through an opaque workspace. It withholds condition names, RQ eligibility, internal Requirement/Event/State identifiers, construction Gold, code paths, repositories, validators, and future information. After the structured RQ1--RQ3 response is frozen and hashed, an eligible run whose agent decision is \texttt{ACT} enters Phase B. The runner then extracts a fresh copy of the target-aligned pre-task repository, including reconstructed environments where applicable, and supplies a read-only copy of the frozen response. C1 and C2 use the same repository hash, modified repositories are never reused across runs, and the hidden validator executes outside the agent workspace. These controls prevent code or test feedback from changing the history-only answers.
+\placeholder{TODO: insert the frozen RQ1--RQ4 instance counts by condition and the final numbers of RQ4 candidates, executable environments, eligible runs, and exclusions.}
 
-\subsection{Annotation and Quality Control}
+\subsection{Annotation Quality and Benchmark Statistics}
 
-Clearly separate the responsibilities of language models, deterministic code, and human reviewers:
+\paragraph{Annotation and quality control.}
+The final description will separate the following responsibilities:
 \begin{itemize}
-    \item \textbf{Language-model assistance:} propose requirement families, requirement atoms, event types, and source evidence; treat all generated outputs as candidates for review.
-    \item \textbf{Deterministic processing:} sort events by time, replay events, generate states, validate cross-instance consistency, detect future leakage, and reject impossible transitions.
-    \item \textbf{Human review:} verify requirement boundaries, event semantics, scope, ambiguity, execution status, and expected actions; adjudicate disagreements.
-    \item \textbf{Evidence retention:} trace every event and state transition to a source message and timestamp.
-    \item \textbf{Quality reporting:} report the manual-review sample, double-annotation or adjudication protocol, agreement by field, and appropriate agreement statistics.
+    \item \textbf{Language-model assistance:} propose requirement families, atoms, events, source evidence, or candidate target times, with all outputs treated as candidates subject to validation and review.
+    \item \textbf{Deterministic processing:} sort events, validate schemas, replay events, generate states, join histories, code, and targets, test consistency, detect future leakage, and reject impossible transitions.
+    \item \textbf{Human review:} apply stage-specific review. RQ1 uses deterministic gold and calibrated semantic alignment. RQ2 requires typed-field and comparator review. RQ3 requires two independent reviewers plus adjudication. RQ4 requires acceptance-criterion and hidden-validator review and calibration.
+    \item \textbf{Evidence retention:} trace each event and transition to source evidence and a temporal-order anchor.
+    \item \textbf{Quality reporting:} report the review sample, annotator count, training and frozen guidelines, adjudication, field-level agreement, and suitable agreement statistics.
 \end{itemize}
-\placeholder{Insert the actual annotation workflow, review scale, agreement results, and error-correction procedure.}
+A generic agreement sample will not be presented as validation for all four RQs. Any retained audit of 200 state-change steps will be reported only for the construction fields it examines, separately from RQ1 judge calibration, RQ3 gold adjudication, and RQ4 validator calibration.
+\placeholder{TODO: insert the actual annotation workflow, review scale, agreement results, error-correction procedure, and scorer/judge calibration.}
 
-\subsection{Benchmark Statistics}
+\paragraph{Curation-validity checks.}
+Requirement determinacy will be reported separately for each construction layer. Stage-1 and state-graph audits test event and transition consistency, RQ2 review freezes typed fields and comparators, RQ3 uses independent review and adjudication, and RQ4 validates acceptance criteria and hidden tests against the pre-task repository, reference solution, and applicable partial deliveries. Oracle-history sufficiency will verify that C2 is an ordered subsequence of C1 and preserves every message needed to determine the same RQ2 pre-task state and RQ3 gold branch. A C1/C2 gold disagreement indicates missing oracle evidence or a gold-review error, not a condition effect.
 
-Use Table~\ref{tab:statistics} and at least one distribution figure to describe the benchmark at project, requirement, event, and target-task levels. Report totals together with means, medians, ranges, or quantiles so that scale is not represented by a single aggregate count.
-
+\paragraph{Benchmark statistics.}
+Table~\ref{tab:statistics} will report totals with appropriate means, medians, ranges, or quantiles.
 \begin{table}[t]
-\caption{Planned ReqMemBench statistics.}
+\caption{Planned ReqMemBench statistics. Reported construction counts remain provisional until regenerated from a frozen dataset snapshot.}
 \label{tab:statistics}
-\begin{center}
-\begin{tabular}{p{0.55in}p{3.85in}p{0.55in}}
-\hline
-Level & Statistics & Value \\
-\hline
-Project & Count, duration, messages, history length, repository size & \placeholder{TBD} \\
-Requirement & Families, atoms, and requirements per project & \placeholder{TBD} \\
-Event & Count, type distribution, events per requirement, transitions & \placeholder{TBD} \\
-Task & Count, affected requirements, position, preceding history length & \placeholder{TBD} \\
-\hline
+\centering
+\small
+\begin{tabular}{@{}p{0.65in}p{3.15in}p{1.05in}@{}}
+\toprule
+Level & Required statistics & Current snapshot \\
+\midrule
+Project & Count, provenance, duration, messages, history length, and repository recoverability & 51 projects \\
+Requirement & Families, atoms, requirements per project, and populated dimensions & 859 atoms \\
+Event & Count, type distribution, events per requirement, and transitions & 2,793 events \\
+Task & Count, source projects, affected requirements, target position, and history length & 210 tasks; 39 projects \\
+RQ/\allowbreak condition & Constructed, reviewed, eligible, and evaluated instances for RQ1--RQ4 under C1/C2 & \placeholder{TBD} \\
+Difficulty & Short, medium, and long counts by project and RQ & \placeholder{TBD} \\
+\bottomrule
 \end{tabular}
-\end{center}
 \end{table}
 
-\section{Experimental Design and Evaluation Protocol}
+\begin{figure}[t]
+\begin{center}
+\fbox{\begin{minipage}{0.90\linewidth}
+\centering
+\textbf{Figure 3 placeholder: benchmark distributions}\\[0.5em]
+Project duration and history length; requirements per project; events per requirement; target positions; affected requirements; and RQ/condition/difficulty coverage.
+\end{minipage}}
+\end{center}
+\caption{Planned ReqMemBench scale and distribution summary. The final figure will expose empty or heavily imbalanced strata.}
+\label{fig:benchmark-statistics}
+\end{figure}
+
+\section{Experiments}
 \label{sec:experiments}
 
-This section should establish that the experimental design separates general coding ability, access to historical evidence, requirement-state reasoning, and downstream action. All controlled conditions should use the same agent scaffold, tool permissions, and resource budgets, varying only the explicitly defined independent variable---most importantly, access to project history.
+We evaluate whether a coding agent can carry an evolving specification from historical evidence to a validated repository. The evaluation unit is a model--harness pair, and the logical run unit is a target--condition pair. One frozen Phase-A response supplies all applicable RQ1--RQ3 outputs. Phase B begins only when the RQ3 decision is \texttt{ACT} and the target passes the RQ4 eligibility gate. This design preserves the dependency between the four capabilities without rerunning the same agent separately for each research question.
 
-\iffalse
-\begin{table}[t]
-\caption{ReqMemBench experimental matrix across agent frameworks, backbone models, history-length strata, research questions, and input conditions. C1: No History; C2: Full History; C3: Oracle Relevant History. RQ1 is evaluated only under C2.}
-\label{tab:main_experiment_matrix}
-\begin{center}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}ll*{18}{c}@{}}
-\toprule
-\multirow{3}{*}{Difficulty} & \multirow{3}{*}{Research question}
-& \multicolumn{9}{c}{Codex}
-& \multicolumn{9}{c}{Claude Code} \\
-\cmidrule(lr){3-11}\cmidrule(lr){12-20}
-&
-& \multicolumn{3}{c}{GPT-5.6-SOL}
-& \multicolumn{3}{c}{GPT-5.6-Terra}
-& \multicolumn{3}{c}{GPT-5.5}
-& \multicolumn{3}{c}{Claude Opus 5}
-& \multicolumn{3}{c}{Claude Sonnet 5}
-& \multicolumn{3}{c}{Claude Haiku 4.5} \\
-\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
-\cmidrule(lr){12-14}\cmidrule(lr){15-17}\cmidrule(lr){18-20}
-&
-& C1 & C2 & C3
-& C1 & C2 & C3
-& C1 & C2 & C3
-& C1 & C2 & C3
-& C1 & C2 & C3
-& C1 & C2 & C3 \\
-\midrule
-\multirow{4}{*}{Short (0--25)}
-& RQ1 Selection
-& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & --
-& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- \\
-& RQ2 Reconstruction
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-& RQ3 Clarify
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-& RQ4 Execution
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-\addlinespace
-\multirow{4}{*}{Medium (26--50)}
-& RQ1 Selection
-& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & --
-& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- \\
-& RQ2 Reconstruction
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-& RQ3 Clarify
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-& RQ4 Execution
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-\addlinespace
-\multirow{4}{*}{Long ($>50$)}
-& RQ1 Selection
-& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & --
-& -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- & -- & \phantom{0.00} & -- \\
-& RQ2 Reconstruction
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-& RQ3 Clarify
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-& RQ4 Execution
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00}
-& \phantom{0.00} & \phantom{0.00} & \phantom{0.00} \\
-\bottomrule
-\end{tabular}%
-}
-\end{center}
-\end{table}
-\fi
+\subsection{Experimental Setup}
+
+\paragraph{Conditions and protocol.}
+C1 provides the complete transformed pre-target conversation, whereas C2 provides an order-preserving oracle subset containing the affected requirements' trajectories and the context needed to interpret them. RQ1 is evaluated only under C1 because C2 is constructed from the gold-relevant trajectory and would reveal the selection answer. RQ2 and RQ3 use both conditions. RQ4 inherits the corresponding condition-specific history but exposes the same pre-task repository only after Phase A has been frozen. No-History is not a formal condition.
+
+For a given target, C1 and C2 use the same current task, response schema, model, prompt, non-repository tools, and resource budget. Each condition and replicate runs in a fresh workspace without cross-run session memory. Condition labels, research-question labels, gold states, internal requirement identifiers, and evaluator artifacts are hidden from the agent. In Phase B, both conditions additionally share the same repository snapshot, execution tools, budget, and target-specific validator. History length is analyzed, rather than sampled, using Short (0--25 prior turns), Medium (26--50), and Long ($>50$) strata.
+
+\paragraph{Agents and run controls.}
+We treat the model and its coding-agent harness as a single deployed system because scaffolding, tool use, and stopping behavior can affect the result. The experiment manifest will record the provider model identifier and revision, harness version, evaluation date, context window, temperature and sampling settings, prompt and output-schema hashes, permitted tools and network access, token and wall-clock budgets, retry and stopping policies, and the number of independent runs. The runner will retain the frozen Phase-A response, tool and token logs, final Phase-B repository, and evaluator outputs.
+\placeholder{TODO: freeze the evaluated Codex and Claude Code configurations, exact model versions, prompts, budgets, evaluation dates, and replicate policy before formal runs.}
+
+\paragraph{Scoring.}
+RQ1 aligns predicted and gold requirement atoms through a frozen semantic-relation classifier followed by deterministic one-to-one matching. It reports Requirement Precision, Recall, and F1; Evidence Precision, Recall, and F1; and Exact Requirement Set Accuracy. Requirement and evidence scores remain separate, and RQ1 receives no C2 result.
+
+RQ2 evaluates the pre-task state only for one-to-one matched historical requirements. Typed comparators score attributes, scope, lifecycle, ambiguity, and execution. \emph{Matched Full-State Exact} requires every applicable field of every matched requirement to be correct. Because unmatched gold requirements are not scored a second time, Reconstruction Coverage, $|M_t|/|R_t^{\mathrm{gold}}|$, is reported separately. Targets with no matched requirement are \texttt{N/A}, not perfect reconstructions. An oracle-aligned constant-state baseline exposes class imbalance, and the paired C2--C1 contrast estimates the effect of removing irrelevant and stale history.
+
+RQ3 first scores the \texttt{ACT}/\texttt{CLARIFY} decision using Decision Accuracy, Balanced Accuracy, and class recall. Gold-ACT targets additionally report typed Post-State Score, Post-State Exact, and end-to-end success. A missing affected requirement scores zero, and an extra requirement is a closed-world false positive. Gold-CLARIFY targets report blocking-issue Precision/Recall/F1, question validity, and clarification success, with requirement-, dimension-, and field-level diagnostics. Unsupported Autonomy uses Gold-CLARIFY targets as its denominator, whereas Unnecessary Clarification uses Gold-ACT targets. All-ACT and all-CLARIFY decision baselines are reported for both conditions.
+
+RQ4 scores only the final repository. A target--condition pair is eligible only if its frozen RQ3 gold decision is \texttt{ACT}, the pre-task environment is reproducibly runnable, the requested behavior is deterministically observable, the hidden target tests have passed two independent reviews, the validator has passed calibration, and the agent-visible repository passes the leakage audit. For an eligible target,
+\[
+\mathrm{RQ4Pass}
+=
+\mathrm{BuildPass}\land
+\mathrm{TargetTestPass}\land
+\mathrm{RegressionPass}.
+\]
+A frozen non-\texttt{ACT} or unparsable Phase-A response on an eligible target yields \texttt{NO\_CODE\_SUBMISSION}/\texttt{FAIL}; evaluator, environment, or harness failures instead invalidate the attempt and trigger a clean rerun. RQ4 reports Success Rate and Executable Coverage. The primary C1/C2 comparison uses only targets eligible under both conditions with the same validator, while all-eligible results and coverage are shown separately.
 
 \begin{table}[t]
-\caption{ReqMemBench experimental matrix across agent frameworks, backbone models, history-length strata, research questions, and input conditions. C1: No History; C2: Full History; C3: Oracle Relevant History. RQ1 is evaluated only under C2. The two panels preserve the full experimental matrix while retaining readable body text.}
-\label{tab:main_experiment_matrix}
+\caption{Primary metrics and comparison sets for the four evaluation stages.}
+\label{tab:primary-metrics}
 \centering
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.32}
-\begin{tabular}{@{}ll*{9}{c}@{}}
+\small
+\begin{tabular}{@{}lp{1.95in}p{2.20in}@{}}
 \toprule
-\multirow{3}{*}{Difficulty} & \multirow{3}{*}{Research question}
-& \multicolumn{9}{c}{Codex} \\
-\cmidrule(lr){3-11}
-&
-& \multicolumn{3}{c}{\shortstack{GPT-5.6\\SOL}}
-& \multicolumn{3}{c}{\shortstack{GPT-5.6\\Terra}}
-& \multicolumn{3}{c}{GPT-5.5} \\
-\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
-& & C1 & C2 & C3 & C1 & C2 & C3 & C1 & C2 & C3 \\
+Stage & Main-text metrics & Scoring set or comparison \\
 \midrule
-\multirow{4}{*}{\shortstack{Short\\(0--25)}} & RQ1 Select. & \matrixselectioncells \\
-& RQ2 Recon. & \matrixresultcells \\
-& RQ3 Clarify & \matrixresultcells \\
-& RQ4 Execute & \matrixresultcells \\
-\addlinespace[3pt]
-\multirow{4}{*}{\shortstack{Medium\\(26--50)}} & RQ1 Select. & \matrixselectioncells \\
-& RQ2 Recon. & \matrixresultcells \\
-& RQ3 Clarify & \matrixresultcells \\
-& RQ4 Execute & \matrixresultcells \\
-\addlinespace[3pt]
-\multirow{4}{*}{\shortstack{Long\\($>50$)}} & RQ1 Select. & \matrixselectioncells \\
-& RQ2 Recon. & \matrixresultcells \\
-& RQ3 Clarify & \matrixresultcells \\
-& RQ4 Execute & \matrixresultcells \\
-\bottomrule
-\end{tabular}
-
-\vspace{0.8em}
-
-\begin{tabular}{@{}ll*{9}{c}@{}}
-\toprule
-\multirow{3}{*}{Difficulty} & \multirow{3}{*}{Research question}
-& \multicolumn{9}{c}{Claude Code} \\
-\cmidrule(lr){3-11}
-&
-& \multicolumn{3}{c}{\shortstack{Claude\\Opus 5}}
-& \multicolumn{3}{c}{\shortstack{Claude\\Sonnet 5}}
-& \multicolumn{3}{c}{\shortstack{Claude\\Haiku 4.5}} \\
-\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
-& & C1 & C2 & C3 & C1 & C2 & C3 & C1 & C2 & C3 \\
-\midrule
-\multirow{4}{*}{\shortstack{Short\\(0--25)}} & RQ1 Select. & \matrixselectioncells \\
-& RQ2 Recon. & \matrixresultcells \\
-& RQ3 Clarify & \matrixresultcells \\
-& RQ4 Execute & \matrixresultcells \\
-\addlinespace[3pt]
-\multirow{4}{*}{\shortstack{Medium\\(26--50)}} & RQ1 Select. & \matrixselectioncells \\
-& RQ2 Recon. & \matrixresultcells \\
-& RQ3 Clarify & \matrixresultcells \\
-& RQ4 Execute & \matrixresultcells \\
-\addlinespace[3pt]
-\multirow{4}{*}{\shortstack{Long\\($>50$)}} & RQ1 Select. & \matrixselectioncells \\
-& RQ2 Recon. & \matrixresultcells \\
-& RQ3 Clarify & \matrixresultcells \\
-& RQ4 Execute & \matrixresultcells \\
+RQ1 & Requirement/Evidence F1; Exact Set & C1 targets; target-level macro \\
+RQ2 & Attribute Reconstruction; Matched Full-State Exact; Coverage & Matched historical requirements; paired C2--C1 \\
+RQ3 & Decision/Balanced Accuracy; ACT and CLARIFY success & Separate Gold-ACT and Gold-CLARIFY denominators \\
+RQ4 & Repository Success Rate; Executable Coverage & Eligible targets; C1/C2 common support \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:main_experiment_matrix} crosses five experimental dimensions: history difficulty, research question, coding-agent framework, backbone model, and controlled input condition. The two stacked panels group results first by agent framework, then by backbone model, and finally by input condition. Rows stratify instances by the number of conversation turns before the target task and by the requirement-management capability being evaluated. Empty cells reserve locations for future measurements. Dashes mark combinations that are not applicable: RQ1 requires access to the full project history and is therefore evaluated only under C2.
+\paragraph{Aggregation and uncertainty.}
+Metrics are first computed at their stated unit and then macro-averaged over targets; benchmark-level cross-project claims use project macro-averages so that projects with many targets do not dominate. Every table reports the number of targets for each condition and RQ3 branch. C2--C1 effects use paired targets with identical gold, and RQ4 uses the common-support set described above. Class-conditional recall and risk rates with small denominators will include their numerator, denominator, and two-sided exact-binomial 95\% confidence interval. Semantic-judge or schema failures are recorded as \texttt{JUDGE\_ERROR} and rerun rather than converted into agent errors. Detailed field scores, judge calibration, validator calibration, and per-project results will be reported in the appendix.
+\placeholder{TODO: freeze the replicate aggregation rule, confidence-interval and paired-comparison procedures, multiple-comparison policy, and final handling of agent timeouts and other missing outputs.}
 
-\subsection{Research Questions}
+\subsection{Main Results: Requirement Identification and Reconstruction}
 
-Organize the experiments around four top-level research questions that follow the requirement-management pipeline from evidence selection to code execution:
-\begin{itemize}
-    \item \textbf{RQ1: Selection.} Can an agent identify the historical requirements and evidence relevant to the target task from the full project history?
-    \item \textbf{RQ2: State Reconstruction.} Can an agent reconcile requirement evolution and recover the currently valid requirement state at the takeover point?
-    \item \textbf{RQ3: Memory-or-Clarify.} Can an agent determine whether the available project memory resolves the task or whether unresolved ambiguity requires clarification?
-    \item \textbf{RQ4: Requirement-to-Code.} Can an agent translate the correct requirement state into an appropriate development action and, where execution is supported, a correct code change?
-\end{itemize}
+\paragraph{RQ1: Can agents select the relevant historical requirements?}
+\placeholder{Writing template: Begin with one sentence that answers RQ1 using Requirement F1 and its uncertainty under C1. Identify the strongest model--harness pair and quantify the gap between Requirement F1, Evidence F1, and Exact Requirement Set Accuracy. Then explain the dominant precision or recall failure with one representative case. Report all target counts and avoid generalizing from a single project or history-length stratum.}
 
-\subsection{History Conditions}
+\paragraph{RQ2: Can agents reconstruct the current requirement state?}
+\placeholder{Writing template: Begin with one sentence that answers RQ2 using Attribute Reconstruction and Matched Full-State Exact. Report the paired C2--C1 difference with uncertainty, followed by Reconstruction Coverage so that matched-only state quality is not mistaken for end-to-end selection performance. Compare against the oracle-aligned constant-state baseline, identify the weakest state dimension, and discuss a counterexample. Do not apply current-task updates to the pre-task state.}
 
-Use three controlled input conditions:
-\begin{itemize}
-    \item \textbf{C1---No History:}
-    \[
-    I_{\mathrm{C1}}(t^*)=C_{t^{*-}}+q_{t^*}.
-    \]
-    This condition measures how much performance is supported by the current code and task alone.
-    \item \textbf{C2---Full History:}
-    \[
-    I_{\mathrm{C2}}(t^*)=H_{<t^*}+C_{t^{*-}}+q_{t^*}.
-    \]
-    This condition represents the realistic takeover setting and includes relevant, stale, and irrelevant information.
-    \item \textbf{C3---Oracle Relevant History:}
-    \[
-    I_{\mathrm{C3}}(t^*)=H^{\mathrm{rel}}_{<t^*}+C_{t^{*-}}+q_{t^*}.
-    \]
-    This condition supplies only human-verified relevant history, largely removing selection and retrieval burden while retaining temporal reconciliation and state reasoning.
-\end{itemize}
-RQ1 is defined only for C2: C1 contains no historical context to select, while C3 has already resolved selection by providing oracle-relevant history. For RQ2--RQ4, the C2--C1 difference estimates the benefit of project history, while the C3--C2 difference diagnoses losses associated with full-history selection, retrieval, and context management. Errors that remain under C3 indicate difficulties with state reconciliation, clarification decisions, or execution. The agent scaffold must remain fixed across conditions.
-\subsection{Benchmark Curation Validity}
-\subsubsection{Requirement determinacy}
-$\geq$ 200 steps of state changes and evaluate by human and other two LLMs at the same time. Calculate Cohen's/ Feiss's k)
-\subsubsection{}section{History Necessity Rate}
-Whether the change is really necessary for coding agents. (complete chat history + change) vs. (abstract of final requirement only) comparing the different pass rate.
-\subsection{Models and Coding Agents}
+\begin{table*}[t]
+\caption{Main-result template for RQ1 selection and RQ2 pre-task reconstruction. All entries remain TBD until the formal evaluation is frozen and executed.}
+\label{tab:rq12}
+\centering
+\scriptsize
+\textbf{Panel A: RQ1 selection under C1}\\[0.3em]
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+Model/agent & Targets & Req. P & Req. R & Req. F1 & Exact Set & Evidence P & Evidence R & Evidence F1 \\
+\midrule
+\placeholder{Model/agent} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\bottomrule
+\end{tabular}\\[0.8em]
+\textbf{Panel B: RQ2 reconstruction under C1/C2}\\[0.3em]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrrrrrr@{}}
+\toprule
+Model/agent & Cond./contrast & $N$ & Attributes & Scope & Lifecycle & Ambiguity & Execution & Matched Exact & Recon. Coverage \\
+\midrule
+\placeholder{Model/agent} & C1 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\placeholder{Model/agent} & C2 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\placeholder{Model/agent} & C2--C1 & \placeholder{paired TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+Oracle-aligned constant & Baseline & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\bottomrule
+\end{tabular}}
+\end{table*}
 
-Report every evaluated model and version, the agent harness, context window, available tools, execution budget, temperature, retry policy, stopping criteria, and evaluation date. Treat the model--harness combination as the deployed evaluation unit while using a common scaffold to isolate the effect of history condition. \placeholder{Insert final models, versions, prompts, tools, budgets, and number of repeated runs.}
+\subsection{Main Results: Update Decisions and Code Delivery}
 
-\subsection{Metrics}
+\paragraph{RQ3: Can agents produce the correct requirement update or clarification?}
+\placeholder{Writing template: Answer RQ3 first with Decision Accuracy and Balanced Accuracy under C1/C2, together with Gold ACT/CLARIFY counts and the all-ACT/all-CLARIFY baselines. Report paired C2--C1 effects before separating the branches. For Gold-ACT targets, report Post-State Exact and end-to-end success; for Gold-CLARIFY targets, report Blocking-Issue F1, Question Validity, and Clarification Success. State the numerator, denominator, and exact 95\% interval for Unsupported Autonomy and Unnecessary Clarification, and do not combine their denominators.}
 
-For RQ1, report relevant-requirement and evidence-selection precision, recall, and F1 under C2. Define the RQ2 state reconstruction score over six dimensions:
-\[
-S_{\mathrm{state}}=
-f(S_{\mathrm{selection}},S_{\mathrm{value}},S_{\mathrm{lifecycle}},
-S_{\mathrm{scope}},S_{\mathrm{ambiguity}},S_{\mathrm{execution}}).
-\]
-Compute state-dimension scores at the requirement level, aggregate them at the task level, and use project-level macro averaging so that projects with more requirements or more annotated fields do not receive disproportionate weight. For RQ3, report the accuracy and class-conditional performance of the memory-versus-clarify decision, including unsupported autonomous decisions and unnecessary clarification requests. For RQ4, evaluate action correctness across implement, modify, remove, preserve, and clarify; for executable repositories, additionally report test success, regressions, and task-specific correctness. Report all metrics by history-length stratum and input condition where applicable. \placeholder{Specify matching rules, partial credit, macro-averaging equations, confidence intervals, and significance tests.}
+\paragraph{RQ4: Can agents translate requirements into correct code?}
+\placeholder{Writing template: Answer RQ4 with repository Success Rate on the C1/C2 common-support set, including paired uncertainty. Then report each condition's all-eligible Success Rate and Executable Coverage with Gold-ACT, eligible, and common-support counts. Attribute a history-condition effect only on common support. Reserve Build, Target Test, and Regression pass rates for failure analysis, and do not report formal PASS/FAIL values until the RQ3 gold, eligibility gates, validators, calibration, and leakage audits are frozen.}
 
-\section{Results}
-\label{sec:results}
+\begin{table*}[t]
+\caption{Main-result template for RQ3 update-or-clarify reasoning and RQ4 repository delivery. All entries remain TBD until the formal evaluation is frozen and executed.}
+\label{tab:rq34}
+\centering
+\scriptsize
+\textbf{Panel A: RQ3 decision quality}\\[0.3em]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrrrrr@{}}
+\toprule
+Model/agent & Cond. & Gold A/C & Dec. Acc. & Bal. Acc. & ACT Rec. & CLARIFY Rec. & Unsup. Autonomy & Unnec. Clarify \\
+\midrule
+\placeholder{Model/agent} & C1 & \placeholder{TBD/TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\placeholder{Model/agent} & C2 & \placeholder{TBD/TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+All-ACT & C1/C2 & \placeholder{TBD/TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+All-CLARIFY & C1/C2 & \placeholder{TBD/TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\bottomrule
+\end{tabular}}\\[0.7em]
+\textbf{Panel B: RQ3 Gold-ACT branch}\\[0.3em]
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Model/agent & Cond. & Gold-ACT $N$ & Post-State Score & Post-State Exact & End-to-End Success \\
+\midrule
+\placeholder{Model/agent} & C1 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\placeholder{Model/agent} & C2 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\bottomrule
+\end{tabular}\\[0.7em]
+\textbf{Panel C: RQ3 Gold-CLARIFY branch}\\[0.3em]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrrrrrrr@{}}
+\toprule
+Model/agent & Cond. & Gold-CLARIFY $N$ & Req. Correct & Dim. Correct & Field Correct & Blocker P & Blocker R & Blocker F1 & Question Validity & Clarification Success \\
+\midrule
+\placeholder{Model/agent} & C1 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\placeholder{Model/agent} & C2 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\bottomrule
+\end{tabular}}\\[0.7em]
+\textbf{Panel D: RQ4 repository delivery}\\[0.3em]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+Model/agent & Cond. & Gold-ACT $N$ & Eligible $N$ & Common $N$ & PASS (common) & PASS (eligible) & Exec. Coverage \\
+\midrule
+\placeholder{Model/agent} & C1 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\placeholder{Model/agent} & C2 & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} & \placeholder{TBD} \\
+\bottomrule
+\end{tabular}}
+\end{table*}
 
-Organize this section directly around the four research questions rather than using generic ``main results'' and ``additional results'' headings. Each subsection should begin with a one-sentence answer to its RQ, present the primary table or figure, and then explain the most important differences, failure dimensions, and statistical uncertainty. The current outline reserves result locations without presupposing the findings.
-
-\subsection{RQ1: Can Agents Select the Relevant Historical Requirements?}
-
-Evaluate requirement and evidence selection under C2 Full History for each agent--model configuration and history-length stratum. Report selection precision, recall, and the task- or project-level aggregate defined in Section~\ref{sec:experiments}. Analyze whether selection quality degrades from short to medium and long project histories. \placeholder{Insert the RQ1 selection results and the first concrete finding.}
-
-\subsection{RQ2: Can Agents Reconstruct the Current Requirement State?}
-
-Report overall state-reconstruction performance and performance on all six state dimensions under C1, C2, and C3. Answer how well current agents perform, which state dimension is most difficult, where the largest differences between models or agents arise, and how history difficulty changes these conclusions. Table~\ref{tab:rq2} is the primary state-reconstruction result table. \placeholder{Insert the main RQ2 finding at the start of this subsection.}
-
-\begin{table}[t]
-\caption{RQ2 requirement-state reconstruction results. Report project-level macro averages with uncertainty estimates.}
-\label{tab:rq2}
-\begin{center}
-\begin{tabular}{lrrrrrrr}
-\hline
-Model & Overall & Select. & Value & Life. & Scope & Ambig. & Exec. \\
-\hline
-\placeholder{Model} & -- & -- & -- & -- & -- & -- & -- \\
-\placeholder{Model} & -- & -- & -- & -- & -- & -- & -- \\
-\hline
-\end{tabular}
-\end{center}
-\end{table}
-
-Compare C1 No History, C2 Full History, and C3 Oracle Relevant History within the RQ2 analysis. $\mathrm{C3}>\mathrm{C2}>\mathrm{C1}$ indicates that history is useful but selection or retrieval remains a bottleneck. $\mathrm{C3}>\mathrm{C1}>\mathrm{C2}$ indicates that unfiltered history may harm the agent. $\mathrm{C3}\approx\mathrm{C2}\ll100\%$ indicates that temporal state reasoning, rather than retrieval, is the dominant limitation. \placeholder{Insert the central C1--C2--C3 comparison and select the interpretation supported by the data.}
-
-\subsection{RQ3: Can Agents Decide When to Use Memory or Clarify?}
-
-Evaluate whether the agent correctly proceeds from available project memory or requests clarification when ambiguity remains open. Break down accuracy by ambiguity type, history-length stratum, and input condition. Distinguish unsupported autonomous decisions from unnecessary clarification requests, and test whether C3 reduces selection errors without eliminating genuine ambiguity. \placeholder{Insert the RQ3 decision results and representative cases.}
-
-\subsection{RQ4: Can Agents Translate Requirements into Correct Code?}
-
-Analyze the relationship between state accuracy and downstream action or code accuracy, with particular attention to
-\[
-P(\mathrm{ActionCorrect}\mid\mathrm{StateCorrect})
-\quad\text{versus}\quad
-P(\mathrm{ActionCorrect}\mid\mathrm{StateWrong}).
-\]
-Identify which state errors most often propagate into action or coding errors, and analyze both ``incorrect state but accidentally correct action'' and ``correct state but incorrect execution'' cases. This analysis tests whether $G_P(t)$ is a meaningful bridge between project memory and coding outcomes rather than an artificial intermediate variable. \placeholder{Insert the RQ4 state-accuracy versus action-success figure.}
-
-\section{Analysis and Discussion}
+\section{Analysis and Limitations}
 \label{sec:analysis}
 
-This section should establish that ReqMemBench reveals concrete failure mechanisms of persistent coding agents, not merely a model ranking. The analysis should explain phenomena observed in the main experiments and should avoid presenting unsupported conclusions as established findings.
+This section will analyze concrete failure mechanisms rather than only model rankings. Each implication will be tied to an observed result or case.
 
-\subsection{Requirement-Evolution Failure Modes}
+\subsection{Failure Modes and Error Propagation}
 
-Break down errors by transitions involving $\mathrm{INTRODUCE}$, $\mathrm{MODIFY}$, $\mathrm{REMOVE}$, $\mathrm{DEFER}$, $\mathrm{RESUME}$, $\mathrm{AMBIGUOUS}$, $\mathrm{CLARIFY}$, and $\mathrm{RESOLVE}$. Initial error categories include stale-state errors that retain superseded values, resurrection errors that reuse removed requirements, missing-scope errors that apply a valid requirement to the wrong component or context, ambiguity hallucinations that resolve underspecified choices without evidence, and execution-state confusion that treats an implementation claim as verified success. \placeholder{Revise the taxonomy using observed errors and add anonymized examples.}
+\paragraph{Requirement-evolution failure modes.}
+The analysis will cover \texttt{INTRODUCE}, \texttt{MODIFY}, \texttt{DEFER}, \texttt{RESUME}, \texttt{REMOVE}, \texttt{AMBIGUOUS}, \texttt{IMPLEMENTATION\_CLAIM}, \texttt{RUNTIME\_FAILURE}, and \texttt{RUNTIME\_VERIFICATION}. \texttt{CLARIFY} will be analyzed as an RQ3 decision rather than a Requirement Event. Initial categories include stale-state errors that retain superseded values, resurrection errors that reuse removed requirements, missing-scope errors, ambiguity hallucinations, and execution-state confusion.
+\placeholder{TODO: revise this taxonomy using observed errors and add anonymized, provenance-safe examples.}
 
-\subsection{Effects of History Characteristics}
+\paragraph{Effects of history characteristics.}
+Analyze history length, evidence distance, relevant-evidence density, number of updates, parallel requirements, target position, and number of affected requirements. The final analysis will specify bins, controls, model, and multiple-comparison treatment before interpreting correlations.
 
-Analyze history length, evidence distance, relevant-evidence density, number of requirement updates, number of parallel requirements, target position within the project, and number of affected requirements per task. The goal is to determine which properties make long-running projects difficult to take over. \placeholder{Specify bins, controls, and the statistical analysis.}
+\paragraph{Does unfiltered history hurt?}
+Compare C1 Full History with C2 Oracle Relevant History on paired targets with the same gold. A C2--C1 difference will be attributed to removal of irrelevant and stale context only after confirming identical prompts, models, budgets, non-repository tools, and sufficient oracle evidence. Candidate mechanisms include noise, stale-state interference, truncation, context competition, and dimension-specific state errors. No-History remains outside the formal comparison.
 
-\subsection{Is More Context Better?}
+\paragraph{Coding ability versus requirement-state ability.}
+Compare model rankings on a standard coding benchmark, ReqMemBench pre/post-state reasoning, and ReqMemBench RQ4 delivery. Any ranking inversion will be interpreted only after aligning model versions, evaluation dates, harnesses, and uncertainty. If no inversion occurs, the final text will report the observed relationship directly.
 
-Compare Full History directly with No History. If Full History is not consistently superior, examine noise, stale state, conflicting evidence, and context competition as potential mechanisms, and emphasize that context availability and state understanding are different capabilities. If Full History consistently helps, report which state dimensions and task types account for the improvement.
+\paragraph{Error propagation across the four stages.}
+\begin{table}[t]
+\caption{Planned cross-stage failure analysis.}
+\label{tab:error-propagation}
+\centering
+\small
+\begin{tabular}{@{}lp{2.05in}p{2.30in}@{}}
+\toprule
+Stage & Diagnostic question & Typical failure \\
+\midrule
+RQ1 & Were the affected historical requirements and evidence selected? & Missed gold atom/evidence group or imported unrelated requirement \\
+RQ2 & Were the matched pre-task states reconstructed? & Stale attributes, widened scope, ignored lifecycle, or confused execution evidence \\
+RQ3 & Was the complete update or every material blocker identified? & Incorrect update, unsupported action, or unnecessary/mislocalized question \\
+RQ4 & Did the eligible ACT run pass the frozen validator? & Correct reasoning followed by Build, Target Test, or Regression failure \\
+\bottomrule
+\end{tabular}
+\end{table}
+The analysis distinguishes
+\[
+\mathrm{MemoryFailure}
+\neq\mathrm{StateReasoningFailure}
+\neq\mathrm{DecisionFailure}
+\neq\mathrm{ImplementationFailure}.
+\]
 
-\subsection{Coding Ability versus Requirement-State Ability}
+\begin{figure}[t]
+\begin{center}
+\fbox{\begin{minipage}{0.90\linewidth}
+\centering
+\textbf{Figure 4 placeholder: cross-stage error propagation}\\[0.5em]
+Conditional RQ4 PASS rates given correct versus incorrect RQ2/RQ3 outputs, optionally paired with the strongest verified history-characteristic effect.
+\end{minipage}}
+\end{center}
+\caption{Planned diagnostic of how requirement-state and decision errors propagate to repository delivery.}
+\label{fig:error-propagation}
+\end{figure}
 
-Compare model rankings on a standard coding benchmark, ReqMemBench State, and ReqMemBench Action. If a model that performs better on standard coding performs worse on ReqMemBench, use the ranking inversion to motivate the claim that isolated-task coding performance may not reliably predict effectiveness in persistent project settings. If no inversion occurs, report the observed relationship without overstating the distinction. \placeholder{Specify the source of external coding scores, version alignment, and correlation analysis.}
+\subsection{Implications and Limitations}
 
-\subsection{Implications for Coding-Agent Design}
+\paragraph{Implications for coding-agent design.}
+The final discussion will retain only implications supported by measured evidence. Candidate implications are that memory should represent current state rather than only retrieve messages; invalidation can matter as much as remembering; requirement memory should preserve temporal provenance; material unresolved ambiguity should trigger clarification; and requirement reasoning should be frozen before repository execution so code cannot reveal the state-reconstruction answer.
 
-Connect the results to five system-design implications: memory should represent current state rather than only retrieve messages; forgetting and invalidation are as important as remembering; requirement memory should preserve temporal provenance; open ambiguity should trigger clarification; and repository state and conversational memory should be interpreted jointly. Each implication should be tied to a reported result or failure case.
-
-\section{Limitations}
-\label{sec:limitations}
-
-This section should explicitly delimit the conclusions supported by ReqMemBench. It should cover at least the following six limitations:
-\begin{itemize}
-    \item \textbf{Data domain.} Freelance projects do not represent every enterprise development process, organizational structure, or quality requirement.
-    \item \textbf{Historical takeover setting.} The benchmark provides an already observed history and evaluates project-state reconstruction from available evidence. It does not have the same agent experience every interaction online from $t_0$, and therefore does not directly evaluate an online memory-writing policy.
-    \item \textbf{Requirement-annotation subjectivity.} Requirement atomicity, scope, and ambiguity permit reasonable interpretation differences that must be controlled through human validation and agreement reporting.
-    \item \textbf{Code availability and executability.} Dependencies, environments, or external services may not be fully recoverable for every real project, so not every instance can support end-to-end execution tests.
-    \item \textbf{Requirement gold versus implementation gold.} A requirement state may permit multiple valid implementations; therefore,
+\paragraph{Limitations.}
+The final paper will cover:
+\begin{enumerate}
+    \item \textbf{Data domain.} Freelance projects do not represent every enterprise process, organization, safety requirement, or codebase.
+    \item \textbf{Data-generation provenance.} If histories or code states are rewritten, reconstructed, simulated, or mixed, conclusions apply to that construction rather than to unqualified naturally occurring development.
+    \item \textbf{Historical takeover setting.} ReqMemBench supplies an observed history and does not directly evaluate an online memory-writing policy from $t_0$.
+    \item \textbf{Annotation subjectivity.} Requirement atomicity, typed state fields, material ambiguity, post-task branches, and clarification targets permit interpretation differences and require stage-specific reliability evidence.
+    \item \textbf{Code availability and executability.} Dependencies, environments, external services, or original snapshots may not be recoverable for every project.
+    \item \textbf{Requirement gold versus implementation gold.} Multiple implementations may satisfy one requirement:
     \[
     \mathrm{RequirementGold}\neq\mathrm{UniqueCodePatch}.
     \]
-    \item \textbf{Coverage.} The current data may not cover enterprise multi-team development, multi-source histories spanning issue trackers, chat, and code review, multi-year project memory, or autonomous agents operating continually online.
-\end{itemize}
+    \item \textbf{Evaluation-judge dependence.} Semantic scorers, target selectors, and validators may introduce model or schema bias; calibration and deterministic checks bound but do not eliminate this risk.
+    \item \textbf{Sampling and dependence.} Multiple targets from one project are correlated, and empty or imbalanced history strata limit generalization.
+    \item \textbf{Coverage.} The benchmark may not cover multi-team enterprise development, combined issue-tracker/chat/code-review histories, multi-year memory, or continuously operating autonomous agents.
+\end{enumerate}
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-The conclusion should be brief and answer three questions. First, what was missing: existing coding evaluation provides an incomplete picture of agents that must operate inside long-running software projects. Second, what was introduced: ReqMemBench evaluates whether an agent can reconstruct the currently valid requirement state at arbitrary project times and continue development accordingly. Third, what was learned: summarize the one or two most important empirical findings. \placeholder{Insert the final findings.} End with the central message: for persistent coding agents, knowing how to code is not sufficient; they must also know what the project requires now.
+The conclusion will briefly state what existing evaluation misses, what ReqMemBench introduces, and the one or two most important measured findings. ReqMemBench evaluates whether an agent can identify directly affected historical requirements, reconstruct their pre-task states, update or clarify affected post-task states, and complete eligible repository deliveries at intermediate takeover points.
+\placeholder{TODO: insert the final findings and end with the supported form of the central message: persistent coding agents must know both how to code and what the project requires now.}
 
 \subsection*{AI Use Statement}
 
-\placeholder{Complete this required statement according to the ICLR 2027 AI Policy for Authors. Disclose the use of generative AI in research ideation, data processing, code, experiments, writing, or editing; explain how the authors reviewed AI-assisted work; and state that the authors take responsibility for the final paper.}
+\placeholder{TODO: complete this statement according to the current ICLR 2027 author policy; disclose generative-AI use in research ideation, data processing, annotation, code, experiments, writing, or editing; and explain human verification and responsibility.}
 
 \subsection*{Ethics Statement}
 
-\placeholder{Describe data authorization, privacy protection, de-identification, sensitive-information handling, release scope, potential harms, and legal or ethical safeguards for the real freelance project data.}
+\placeholder{TODO: describe data authorization, Terms-of-Service or contractual constraints, privacy and de-identification, credentials and sensitive content, reconstructed or simulated artifacts, release scope, re-identification risk, potential harms, and safeguards. Distinguish source-data access from the public release.}
 
 \subsection*{Reproducibility Statement}
 
-\placeholder{Point to the sections, appendices, and supplementary artifacts that document data construction, annotation, event replay, evaluation protocols, model configurations, and statistical analysis.}
+\placeholder{TODO: point to the sections, appendices, code, configurations, prompts, schemas, dataset cards, and supplementary artifacts covering selection, provenance, PII processing, annotation, replay, target construction, instance materialization, models, metrics, judge calibration, validator calibration, and statistics.}
 
 \bibliography{iclr2027_conference}
 \bibliographystyle{iclr2027_conference}
@@ -693,6 +619,22 @@ The conclusion should be brief and answer three questions. First, what was missi
 
 \section{Appendix Structure}
 
-The appendix should contain the complete requirement-state schema and field definitions; event types and state-transition rules; project-selection and privacy procedures; annotation guidelines and review interfaces; complete evaluation prompts and output formats; model and agent configurations; metric equations and statistical tests; additional benchmark distributions; full results by project, event, and history characteristic; failure cases; and one end-to-end example from source messages to the state graph and target action.
+The appendix will contain:
+\begin{enumerate}
+    \item the complete requirement-state schema and field definitions;
+    \item the event taxonomy and state-transition rules;
+    \item project selection, provenance categories, authorization, privacy, and de-identification procedures;
+    \item annotation guidelines, review interfaces, and agreement analysis;
+    \item target-time selection and leakage controls;
+    \item expanded RQ1--RQ4 definitions and examples, complete prompts, public response schemas, and hidden scoring contracts;
+    \item model, agent, tool, budget, and retry configurations;
+    \item full metric equations, field-level comparators, branch-specific denominators, aggregation, uncertainty, and statistical tests;
+    \item judge and validator calibration, baselines, and human-ceiling estimates;
+    \item full benchmark distributions and eligibility counts;
+    \item full per-RQ result tables and breakdowns by project, event, condition, model, and history characteristic;
+    \item failure cases and qualitative examples;
+    \item one end-to-end example from source evidence through events, the state graph, target-local pre/post states, the frozen Phase-A output and score, and validated repository delivery; and
+    \item a data card and release statement explaining which artifacts can and cannot be shared.
+\end{enumerate}
 
 \end{document}

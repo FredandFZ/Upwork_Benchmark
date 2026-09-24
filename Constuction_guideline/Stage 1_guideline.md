@@ -1457,7 +1457,7 @@ open_ambiguities = {
 }
 ```
 
-当该 `OPEN` ambiguity 与当前 evaluation task 相关，并阻止 Agent 安全决定下一步时，后续 RQ4 自动派生：
+当该 `OPEN` ambiguity 与当前 evaluation task 相关，并阻止 Agent 安全决定下一步时，后续 RQ3 Gold 派生：
 
 ```
 Agent Action = CLARIFY
@@ -1474,7 +1474,7 @@ Requirement Gold State
         ↓
 Current task is affected
         ↓
-RQ4 Gold Action = CLARIFY
+RQ3 Gold Decision = CLARIFY
 ```
 
 而不是：
@@ -1676,7 +1676,7 @@ open_ambiguities[REQ_PAYMENT_PROVIDER_E002] = OPEN
 > Coinbase Commerce 仍然是最后一次由 Client 明确确认的 Requirement Value，但新的冲突证据使 Agent 当前不能安全地直接继续执行。
 > 
 
-在相关任务中，RQ4 应派生：
+在相关任务中，RQ3 应派生：
 
 ```
 Agent Action = CLARIFY
@@ -1780,7 +1780,7 @@ Does it also apply to PAYMENT_PROVIDER_ELIGIBILITY?
 对于涉及 `PAYMENT_PROVIDER_ELIGIBILITY` 的后续任务：
 
 ```
-RQ4 Gold Action = CLARIFY
+RQ3 Gold Decision = CLARIFY
 ```
 
 ---
@@ -1847,7 +1847,7 @@ last_confirmed_lifecycle = ACTIVE
 因此：
 
 ```
-RQ4 Gold Action = CLARIFY
+RQ3 Gold Decision = CLARIFY
 ```
 
 直到后续 Client 明确：
@@ -2378,4 +2378,3 @@ Final validator 必须检查：
 - Event 删除或重编号后不存在悬空引用；
 - 没有 resolver 的 ambiguity 可以一直保持 OPEN；
 - 不使用 dimension-based fallback 自动关闭 ambiguity。
-
