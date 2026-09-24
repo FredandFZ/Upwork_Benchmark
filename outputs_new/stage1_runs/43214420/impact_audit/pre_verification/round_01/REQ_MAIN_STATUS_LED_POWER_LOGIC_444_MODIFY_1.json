@@ -1,0 +1,155 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+    "message_id": 444,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Moving the SK6812 LEDs onto the monitored 3.3V rail necessarily adds their load to the total downstream 3.3V current measurement.",
+      "new_event": {
+        "source_message": {
+          "message_id": 444,
+          "speaker": "client",
+          "text": "The supply for the LEDs has changed from 5V to 3.3V. With a 3.3V supply, the SK6812 data threshold falls to 2.31V, which the 3.3V output from ESP32 satisfies directly, so a level shifter is unnecessary. Although 3.3V is slightly below the SK6812 datasheet minimum of 3.7V, they operate reliably at indicator brightness levels."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "three_v_three_current_coverage": "total downstream current for the ESP32, sensor board, and SK6812 LEDs in one reading"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The standalone LDO powers the complete 3.3V rail, so changing the SK6812 supply to 3.3V necessarily adds the LEDs to its powered scope.",
+      "new_event": {
+        "source_message": {
+          "message_id": 444,
+          "speaker": "client",
+          "text": "The supply for the LEDs has changed from 5V to 3.3V. With a 3.3V supply, the SK6812 data threshold falls to 2.31V, which the 3.3V output from ESP32 satisfies directly, so a level shifter is unnecessary. Although 3.3V is slightly below the SK6812 datasheet minimum of 3.7V, they operate reliably at indicator brightness levels."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_scope": "The complete 3.3V rail, including the ESP32-S3, INA219, I2C sensors, I2C display, TTP223, AM312 PIR, and SK6812 LEDs."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED load moves onto the existing 3.3V rail, but the OR-ing sources, method, and source-selection behavior remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_DCDC1_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the DCDC1 setpoint, I2C configuration, diode-drop compensation, or 3.3V downstream target.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SK6812 chain remains the charge-status indicator; its supply and data-level change does not alter this requirement's indicator, GPIO, connector, or resistor state.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply and level-shifting decision does not affect panel controls, input connectors, GPIO mappings, reset wiring, or button placement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BOOST_ENABLE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the LEDs from 5V to 3.3V necessarily removes the LEDs and their logic from the boost converter's enumerated 5V loads.",
+      "new_event": {
+        "source_message": {
+          "message_id": 444,
+          "speaker": "client",
+          "text": "The supply for the LEDs has changed from 5V to 3.3V. With a 3.3V supply, the SK6812 data threshold falls to 2.31V, which the 3.3V output from ESP32 satisfies directly, so a level shifter is unnecessary. Although 3.3V is slightly below the SK6812 datasheet minimum of 3.7V, they operate reliably at indicator brightness levels."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_5v_loads": [
+            "SPS30 particulate sensor",
+            "ZE08-CH2O formaldehyde sensor"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes LED power and data-level handling but does not add, remove, or alter any connector in the main-board inventory.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_DECOUPLING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the requirement for local decoupling capacitors or specify new LED decoupling behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard 3.3V and 5V rails remain present for other loads, and the source does not change connector types, signals, pin-order policy, or matching-numbering requirements.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SK6812 supply and data path are independent of the SDA/SCL series-resistor policy and topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns main-board SK6812 power and logic and does not change any sensor-board input or output connector.",
+      "new_event": null
+    }
+  ]
+}

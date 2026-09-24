@@ -1,0 +1,350 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+    "message_id": 843,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_LED_BOARD_POWER_PINOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board architecture eliminates the separate LED-board-to-main-board pin-order relationship.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "separate_led_board_status": "not present in the single-board design"
+        },
+        "value_removals": [
+          "power_and_data_pin_order"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ADDRESSABLE_LEDS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already moves monitoring to the integrated-board context and replaces sensor-board coverage with direct sensor coverage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing event correctly removes obsolete interboard counts and connections but should preserve the still-required external connector destinations in updated form.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "jst_connector_destinations": [
+            "sensors",
+            "display",
+            "PIR",
+            "touch inputs",
+            "LEDs",
+            "buttons",
+            "reset",
+            "panel power button"
+          ]
+        },
+        "value_removals": [
+          "jst_connector_count",
+          "low_pin_count_scope",
+          "sensor_board_connection_count",
+          "sensor_board_connections"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "CONNECTOR_SET"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already relocates the panel power-button connection and the panel-control scope to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already relocates charge indication to the integrated-board LED chain and removes the obsolete interboard charge-status connector.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing event removes the obsolete power-board-absence condition but omits the necessary scope migration from the main board to the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "standalone_activation_condition"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "STANDALONE_PROGRAMMING",
+            "SENSOR_DEBUGGING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The OR-ing behavior remains applicable, but its two sources are now circuits on the integrated board rather than sources located on separate power and main boards.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_sources": [
+            "integrated-board AXP2101 DCDC1 3.3V rail",
+            "integrated-board USB-C ME6211A LDO 3.3V rail"
+          ],
+          "normal_operation_source": "integrated-board AXP2101 DCDC1",
+          "standalone_programming_source": "integrated-board USB-C ME6211A LDO"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "POWER_ORING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_BOARD_LAYOUT",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing event over-removes unaffected layout choices and omits the integrated-board scope and accepted flexible connector-placement policy.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          841,
+          842
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "separate_main_board_status": "not present in the single-board design",
+          "connector_placement_policy": "Connectors may be placed along three sides subject to the battery, USB-C, display-flex, and ESP32 antenna constraints."
+        },
+        "value_removals": [
+          "high_pin_count_connector_placement",
+          "sensor_connector_alignment",
+          "interboard_cable_path",
+          "enclosure_board_order",
+          "cable_access"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ENCLOSURE_FIT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_SWITCHED_3V3_LOAD",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The switched 3.3V circuit remains applicable but is now located on the integrated board rather than a separate main board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "SWITCHED_3V3_RAIL"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "Only the two interboard input connectors become obsolete; the eight sensor-facing connector definitions remain required on the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "separate_sensor_board_status": "not present in the single-board design",
+          "total_connector_count": 8
+        },
+        "value_removals": [
+          "main_board_input_connectors"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "SENSOR_CONNECTIONS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_ESP32_BREAKOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The ESP32 breakout remains required, but its physical scope moves from the separate main board to the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ESP32_BREAKOUT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_DECOUPLING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Local decoupling remains required, but its scope moves from the separate main board to the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "DECOUPLING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

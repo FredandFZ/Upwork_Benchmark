@@ -1,0 +1,284 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+    "message_id": 843,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing Event removes the obsolete power-board-absence condition but fails to move the retained standalone-power requirement to the integrated-board context.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "standalone_activation_condition"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "STANDALONE_PROGRAMMING",
+            "SENSOR_DEBUGGING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a same-message MODIFY moving the retained LED behavior to the integrated-board context.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already relocates the panel power-button connector and panel-control scope to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already removes obsolete separate-board connector details and changes the connector-set context to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_ESP32_BREAKOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The active ESP32 breakout remains scoped to the former main board even though the source decision establishes a single integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ESP32_BREAKOUT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already removes the obsolete separate sensor-board topology and records the integrated sensor-connection context.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_BOARD_LAYOUT",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing Event removes obsolete three-board layout constraints but omits the integrated-board scope and the accepted connector-placement constraints from the immediately adjacent exchange.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          841,
+          842
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "separate_main_board_status": "not present in the single-board design",
+          "connector_placement_flexibility": "Connectors may be placed along three sides wherever practical, subject to the identified battery, USB-C, display-route, and antenna constraints.",
+          "battery_connector_placement": "J_BAT must be on a short edge",
+          "user_facing_usb_c_placement": "The user-facing USB-C connector must be on a short edge",
+          "display_connector_grouping": "J_DISP_SPI, J_DISP_I2C, and J_DISP_LED must be grouped on the edge nearest the display-flex route",
+          "esp32_antenna_orientation": "The ESP32-S3 antenna end must face away from the battery",
+          "esp32_antenna_keepout": "At least 8mm"
+        },
+        "value_removals": [
+          "high_pin_count_connector_placement",
+          "sensor_connector_alignment",
+          "interboard_cable_path",
+          "enclosure_board_order",
+          "cable_access",
+          "small_connector_placement",
+          "mounting_orientation",
+          "board_dimensions_mm",
+          "esp32_placement"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ENCLOSURE_FIT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The electrical OR-ing requirement remains active, but its source labels and scope still refer to separate power and main boards that the source decision consolidates.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_sources": [
+            "integrated-board AXP2101 DCDC1 3.3V rail",
+            "integrated-board USB-C ME6211A LDO 3.3V rail"
+          ],
+          "normal_operation_source": "integrated-board AXP2101 DCDC1",
+          "standalone_programming_source": "integrated-board USB-C ME6211A LDO for standalone programming"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "POWER_ORING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision makes the INA3221 rail-monitoring requirement part of the integrated board, resolving the candidate's prior conditional separate-INA state and defining the required coverage.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "current_measurement_capability": "Use INA3221 to monitor the 3.3V and 5V rails, with the 3.3V channel measuring total downstream current for the ESP32, sensors, and SK6812 LEDs in one reading.",
+          "separate_ina_device": "Retain INA3221 on the integrated board for rail current monitoring."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_DECOUPLING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The retained local-decoupling requirement remains valid but must move from the former main-board context to the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "DECOUPLING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_LIGHT_SENSOR_PORT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "This connector requirement is already defined for the integrated board and is unchanged by the source decision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_DCDC1_OUTPUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The DCDC1 setpoint remains tied to Schottky-drop compensation, but its wording and scope still refer to the obsolete separate power-board and main-board topology.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "voltage_compensation": "Compensate for the Schottky diode drop in the integrated-board power OR-ing circuit"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "DCDC1"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

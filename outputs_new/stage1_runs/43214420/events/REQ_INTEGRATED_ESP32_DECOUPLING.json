@@ -1,0 +1,114 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_INTEGRATED_ESP32_DECOUPLING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 870,
+        "speaker": "client",
+        "text": "The ESP32 module’s C18 (0.2 µF) and C19 (47 µF) decoupling capacitors sit 12–15 mm from its 3V3 pin (pin 2), while the specification calls for no more than 4 mm. Could we place a small 0.2 µF capacitor closer to that pin? The bulk C19 can remain where it is."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "esp32_decoupling_configuration": "add a small 0.2 µF capacitor close to the ESP32 3V3 pin while retaining the 47 µF bulk capacitor at its existing location",
+        "maximum_distance_from_3v3_pin": "4 mm"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "HARDWARE",
+          "PCB_LAYOUT",
+          "POWER"
+        ],
+        "contexts": [
+          "INTEGRATED_BOARD",
+          "ESP32_DECOUPLING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 882,
+        "speaker": "freelancer",
+        "text": "No problems are expected from the ESP32 decoupling capacitors, so they can remain unchanged. The module also has decoupling capacitors internally."
+      },
+      "supporting_message_ids": [
+        870
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "It is unresolved whether an additional capacitor must be placed near the ESP32 3V3 pin or whether the existing and module-internal decoupling is sufficient."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 883,
+        "speaker": "client",
+        "text": "I’ll check the documentation now; in the meantime, leave the capacitors unchanged."
+      },
+      "supporting_message_ids": [
+        870,
+        882
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "esp32_decoupling_configuration": "leave the existing ESP32 decoupling capacitors unchanged"
+      },
+      "value_removals": [
+        "maximum_distance_from_3v3_pin"
+      ],
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 883,
+        "speaker": "client",
+        "text": "I’ll check the documentation now; in the meantime, leave the capacitors unchanged."
+      },
+      "supporting_message_ids": [
+        870,
+        882
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 871,
+      "suggested_requirement_id": "REQ_INTEGRATED_POWER_CONVERTER_DECOUPLING",
+      "description": "This message concerns AXP2101 and MT3608 local decoupling rather than ESP32-module decoupling."
+    },
+    {
+      "message_id": 1046,
+      "suggested_requirement_id": "REQ_INTEGRATED_POWER_CONVERTER_DECOUPLING",
+      "description": "The local-input-decoupling question concerns the AXP2101 DCDC1 VIN pins, not the ESP32 decoupling network."
+    },
+    {
+      "message_id": 1047,
+      "suggested_requirement_id": "REQ_INTEGRATED_POWER_CONVERTER_DECOUPLING",
+      "description": "In context, the freelancer's capacitor check addresses the AXP2101 DCDC1 input decoupling."
+    },
+    {
+      "message_id": 1061,
+      "suggested_requirement_id": "REQ_INTEGRATED_POWER_CONVERTER_DECOUPLING",
+      "description": "The capacitors beside the USB connector are converter-input decoupling and do not describe ESP32 local decoupling."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

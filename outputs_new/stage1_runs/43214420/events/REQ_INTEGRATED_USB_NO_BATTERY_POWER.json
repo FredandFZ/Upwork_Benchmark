@@ -1,0 +1,72 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_INTEGRATED_USB_NO_BATTERY_POWER",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 977,
+        "speaker": "client",
+        "text": "My understanding is that it should also operate without a battery."
+      },
+      "supporting_message_ids": [
+        965,
+        967,
+        978
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "usb_operation_without_battery": true
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "HARDWARE",
+          "USB"
+        ],
+        "contexts": [
+          "INTEGRATED_BOARD",
+          "USB_NO_BATTERY_OPERATION"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 1046,
+        "speaker": "client",
+        "text": "Hi Luka,\n\nAfter the rework—removing U3 and bridging the data lines—USB is now fully operational; the boards enumerate correctly and can be flashed. Testing the power system and AXP2101 on both boards produced identical results:\n\n1\\. DCDC1 idles at 3.16V. The register is confirmed at 3.3V (0x82 reads 0x12), so the converter regulates 4 percent low.\n2\\. Every load transient collapses the rail. A SPI flash erase with an approximately 150mA step or a WiFi TX burst of 300-400mA pulls the 3.3V rail below 2.5V and hard-resets the ESP32. Disabling the brown-out detector changes nothing because the rail itself is genuinely collapsing, and adding 330uF of external capacitance does not help. The board therefore cannot operate standalone from USB.\n3\\. Battery-only operation succeeds with VSYS around 3.8V, whereas a 5V USB input causes failure. In other words, the problem appears exactly when the buck must regulate, while operation near dropout survives.\n4\\. Programming DCDC1 to 3.4V through I2C improves matters substantially: booting, WiFi service, and a complete 1.9MB OTA write all succeed. The calibration surge from WiFi during reboot still collapses the rail, however. Another oddity is that the 0x82 write was ignored on several boots, with readback remaining 0x12, before it latched during a later boot. Other register writes verify correctly. Because the default VBUS input-current limit is 1.5A, input limiting is not the cause.\n5\\. I substituted L3 with a physically larger 2.2uH inductor rated for much higher saturation current, but the behavior did not change at all. The inductor is not responsible, and the original DFE252010F specification was adequate.\n6\\. Further testing caused DCDC1 on board 2 to deteriorate progressively before failing completely. With everything else disconnected, its output now measures about 265 ohm to GND, indicating leakage in the output stage.\n7\\. Supplying the board externally at 3.3V keeps the entire system working perfectly for hours. Boot, PSRAM, e-paper, WiFi, the web UI, and the sensors all operate correctly, so the downstream circuitry is healthy.\n\nMy current conclusion is that the AXP2101 devices themselves may be suspect because of a bad batch, counterfeit components, moisture damage during reflow, or non-standard factory programming. I have asked the factory for sourcing details and lot codes. On your side, one useful check would be the local input decoupling at the DCDC1 VIN pins: is a capacitor placed close to those pins, or is there only the more distant bulk group?\n\nCan you think of another explanation consistent with all these findings?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "With 5V USB input, load transients collapse the 3.3V rail below 2.5V and reset the ESP32, preventing standalone USB operation without a battery; battery-only operation succeeds."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 1019,
+      "suggested_requirement_id": "REQ_INTEGRATED_NATIVE_USB",
+      "description": "The concrete failure in this message is native USB enumeration across the integrated-board samples; the power observation does not establish full no-battery operation."
+    },
+    {
+      "message_id": 1026,
+      "suggested_requirement_id": "REQ_INTEGRATED_NATIVE_USB",
+      "description": "Removing U3 and joining the USB data lines verifies native USB operation rather than no-battery power behavior."
+    },
+    {
+      "message_id": 1046,
+      "suggested_requirement_id": "REQ_INTEGRATED_DCDC1_REGULATION",
+      "description": "The same source also contains a distinct DCDC1 setpoint and load-stability failure that should be represented under the DCDC1 regulation Requirement."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

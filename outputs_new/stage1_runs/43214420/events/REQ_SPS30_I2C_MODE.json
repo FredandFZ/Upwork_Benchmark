@@ -1,0 +1,72 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_SPS30_I2C_MODE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 371,
+        "speaker": "client",
+        "text": "The complete pinouts are in the sensor board doc. From the main board, the sensor board receives power and signals over two input connectors: a 4-pin JST-PH 2.0mm power connector (5V, GND, 3V3, GND) and a 6-pin JST-GH 1.25mm signal connector (SDA0, SCL0, SDA1, SCL1, UART TX, UART RX).\n\nEach sensor module then receives an output connection:\n- SCD41 — 4-pin JST-GH (3V3/GND/SDA0/SCL0)\n- BME280 — 4-pin JST-GH\n- ENS160 — 4-pin JST-GH\n- SPS30 — 5-pin JST-ZH 1.5mm (5V, SDA0, SCL0, SEL→GND, GND); this different connector type matches the SPS30 cable\n- ZE08-CH2O — 7-pin JST-GH, matching the supplied cable\n- I2C display — 4-pin JST-GH (3V3/GND/SDA1/SCL1)\n- One spare I2C0 port — 4-pin JST-GH\n- One spare I2C1 port — 4-pin JST-GH\n\nThe complete count is 10 connectors."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "sel_pin_connection": "GND"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "HARDWARE"
+        ],
+        "contexts": [
+          "SENSOR_BOARD",
+          "SPS30"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "Is pin 4 (SEL) of the SPS30 hardwired to GND on the PCB? This is critical: if SEL floats or goes HIGH, the SPS30 enters UART mode and stops responding over I2C."
+      },
+      "supporting_message_ids": [
+        371
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "sel_pin_connection": "hardwired_to_GND",
+        "required_operating_mode": "I2C"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 573,
+        "speaker": "freelancer",
+        "text": "The PDF I sent shows SEL connected to ground."
+      },
+      "supporting_message_ids": [
+        569,
+        572
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the supplied design PDF shows the SPS30 SEL pin connected to ground."
+      }
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

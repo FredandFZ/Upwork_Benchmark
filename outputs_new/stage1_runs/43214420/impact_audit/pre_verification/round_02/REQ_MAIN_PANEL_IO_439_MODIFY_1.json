@@ -1,0 +1,145 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_PANEL_IO",
+    "message_id": 439,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 439,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing Event adds the connector and increments the count, but the aggregate JST destination list must also include the new panel power button.",
+      "new_event": {
+        "source_message": {
+          "message_id": 439,
+          "speaker": "client",
+          "text": "The power board is no problem, so could you instead add a 2-pin JST-GH connector to the main board for a panel-mounted power button? PWRON already arrives through J\\_PWR\\_SIG pin 4; the new connector only needs to tap that line so a button can be wired from the enclosure panel."
+        },
+        "supporting_message_ids": [
+          334
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "jst_connector_destinations": [
+            "power board",
+            "sensor board",
+            "display",
+            "PIR",
+            "touch inputs",
+            "LEDs",
+            "buttons",
+            "reset",
+            "panel power button"
+          ],
+          "jst_connector_count": 15,
+          "panel_power_button_connector": {
+            "connector_type": "JST-GH",
+            "pin_count": 2,
+            "signal": "PWRON",
+            "signal_source": "J_PWR_SIG pin 4"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_GPIO_ASSIGNMENTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The new connector taps the existing PWRON interboard signal and does not assign or change an ESP32 GPIO.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Adding a panel-button connector on the PWRON line does not change current-monitor IC, rail coverage, placement, or channel usage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-439 MODIFY already records relocation to the main board, the J_PWR_SIG pin 4 source, and the corresponding scope change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_DECOUPLING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision does not alter the main board's local decoupling requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel power-button connector does not change addressable-LED supply, switching, model, or data-level handling.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Tapping the PWRON control line does not change the power-source OR-ing topology or source-selection behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The new panel connector does not change standalone USB activation, LDO capacity, or powered scope.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The decision adds a main-board panel connector and does not alter any sensor-board input or output connector.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The PWRON panel-button connection is independent of the CHGLED connector and charge-status indication.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision concerns the PWRON line and has no effect on I2C series resistors or their topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_DCDC1_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Message 439 relocates the power-button connector but does not change the DCDC1 output setpoint; the voltage question remains separate.",
+      "new_event": null
+    }
+  ]
+}

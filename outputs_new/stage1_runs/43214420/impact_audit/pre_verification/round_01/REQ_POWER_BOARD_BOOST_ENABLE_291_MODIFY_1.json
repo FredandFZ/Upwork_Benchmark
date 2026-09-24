@@ -1,0 +1,125 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_POWER_BOARD_BOOST_ENABLE",
+    "message_id": 291,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO5 change applies to 5V_EN, not the separate GPIO13 charge-status LED signal or its connector circuit.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The addressable LEDs use the switched 5V rail, whose enable control necessarily changes from GPIO3 to GPIO5.",
+      "new_event": {
+        "source_message": {
+          "message_id": 291,
+          "speaker": "client",
+          "text": "That was my mistake: GPIO3 came from my original ESP32 design. Use GPIO5 for 5V_EN instead. I also realized that GPIO22, GPIO23, GPIO25, and GPIO27 are not exposed on the WROOM-1 module, so SCL0 must move from GPIO22 to GPIO38 and SPI MOSI from GPIO23 to GPIO26. I'll update the documentation and send you the complete revised GPIO table."
+        },
+        "supporting_message_ids": [
+          289,
+          290
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_switching": "The LED-supplying 5V rail is controlled by ESP32 GPIO5"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_AXP2101_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the switched-boost enable GPIO does not alter the AXP2101 VMID/VSYS topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The battery connector, pinout, placement, and NTC interface are unaffected by the 5V_EN GPIO reassignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The battery-protection mechanisms and thresholds do not depend on the switched-boost enable GPIO assignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_TEMPERATURE_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Battery temperature monitoring through the J_BAT NTC is independent of 5V_EN.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_LAYER_STACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The GPIO reassignment does not change the power board's eight-layer stack.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The 5V_EN signal reassignment does not change board dimensions, mounting, orientation, or connector placement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_TVS_ESD_PROTECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "TVS-based ESD protection remains unchanged by the boost-enable GPIO reassignment.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_USB_CONNECTOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The USB-C connector's data-line and sourceability requirements are independent of 5V_EN.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_GPIO_ASSIGNMENTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "This Requirement already has a same-message MODIFY that records 5V_EN on GPIO5, SCL0 on GPIO38, and SPI MOSI on GPIO26.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes control of the separate switched 5V boost rail, not the main board's 3.3V source OR-ing topology or source-selection behavior.",
+      "new_event": null
+    }
+  ]
+}

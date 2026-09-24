@@ -62,12 +62,12 @@ The main paper uses seven top-level sections and no `subsubsection` headings. Bo
 - Reproducibility Statement
 - Appendix
 
-**Nine-page planning budget:** Abstract 0.2 page; Introduction 1.0; Related Work 0.6; Sections 3–4 together 3.0–3.3; Experiments 2.4–2.7; Analysis and Limitations 0.8–1.0; Conclusion 0.2–0.3. Figures and tables must fit inside these allocations.
+**Nine-page planning budget:** Abstract 0.2 page; Introduction 1.0; Related Work 0.6; Sections 3–4 together 2.6–2.8; Experiments 2.4–2.7; Analysis and Limitations 0.8–1.0; Conclusion 0.2–0.3. Figures and tables must fit inside these allocations.
 
 Introduction：约 1 页
 Related Work：0.5–0.7 页
 Method：1.1–1.3 页
-Benchmark/Data：1.8–2.1 页
+Benchmark/Data：约 1.5 页
 Experiments and Results：2.3–2.6 页
 Analysis and Limitations：0.8–1.0 页
 Conclusion：0.2–0.3 页
@@ -77,17 +77,17 @@ Conclusion：0.2–0.3 页
 | ID | Placement | Purpose | Required content | Status |
 | --- | --- | --- | --- | --- |
 | Figure 1 | Introduction / Section 3 | Motivate the takeover task and make the repository-isolation boundary explicit | Requirement-event timeline and takeover time $t^*$; Phase A uses history and task to produce frozen RQ1–RQ3 outputs without a repository; eligible ACT runs enter Phase B with the pre-task repository for RQ4 | Placeholder specified |
-| Figure 2 | Section 4 | Explain benchmark construction | Raw project/history → event annotation → state graph → target selection → temporal gold state → evaluation instance; distinguish model assistance, deterministic processing, and human review | Placeholder specified |
-| Figure 3 | Section 4 | Summarize benchmark scale and distribution | Project duration/history length, requirements per project, events per requirement, target positions, affected requirements, and RQ/difficulty coverage | Required but not yet designed |
-| Figure 4 | Section 6 | Diagnose cross-stage error propagation | $P(\mathrm{RQ4Pass}\mid\mathrm{RQ2/RQ3\ correct})$ versus $P(\mathrm{RQ4Pass}\mid\mathrm{RQ2/RQ3\ incorrect})$ on eligible runs; optionally include the strongest history-characteristic effect | Required but not yet designed |
-| Appendix figures | Appendix | Preserve complete distribution and failure analyses | Remaining history-characteristic plots and detailed failure taxonomy | Candidate; depends on data |
+| Figure 2 | Section 4 | Explain benchmark construction | Project records → reviewed events → deterministic state graph → target selection → task-local Gold and C1/C2 instances; distinguish model assistance, deterministic processing, and human review | Compact main-text figure |
+| Figure 3 | Section 6 | Diagnose cross-stage error propagation | $P(\mathrm{RQ4Pass}\mid\mathrm{RQ2/RQ3\ correct})$ versus $P(\mathrm{RQ4Pass}\mid\mathrm{RQ2/RQ3\ incorrect})$ on eligible runs; optionally include the strongest history-characteristic effect | Required but not yet designed |
+| Appendix figures | Appendix | Preserve benchmark distributions and detailed failure analyses | Project/history distributions, requirement/event distributions, target coverage, remaining history-characteristic plots, and detailed failure taxonomy | Candidate; depends on data |
 
 ### Table plan
 
 | ID | Placement | Purpose | Status |
 | --- | --- | --- | --- |
-| Table 2 | Section 4 | Report project-, requirement-, event-, task-, provenance-, and eligibility-level benchmark statistics | Structure exists; values incomplete |
-| Table 3 | Section 3 or 5 | Summarize the four evaluation stages, applicable conditions, repository visibility, outputs, primary metrics, and scoring units | Replaces repeated per-RQ definitions across sections |
+| Table 1 | Section 3 | Summarize the four evaluation stages, applicable conditions, repository visibility, outputs, and scoring units | Replaces repeated per-RQ definitions across sections |
+| Table 2 | Section 4 | Report compact project-, requirement-, event-, task-, and eligibility-level benchmark statistics | Structure exists; values incomplete |
+| Table 3 | Section 5.1 | Summarize primary metrics, denominators, and comparisons | Structure exists |
 | Table 4 | Section 5.2 | Main results for requirement selection and pre-task state reconstruction | Two compact panels for RQ1 and RQ2; full breakdowns move to the appendix |
 | Table 5 | Section 5.3 | Main results for update/clarification decisions and repository delivery | Compact RQ3 and RQ4 panels; branch-specific and validator diagnostics move to the appendix |
 
@@ -414,7 +414,7 @@ Events record what changed and why, while state nodes represent the complete req
 
 ### 3.2 Takeover Task and Evaluation Stages
 
-Table 3 should define the complete evaluation chain once. Later sections refer back to these stages rather than redefining the RQs.
+Table 1 should define the complete evaluation chain once. Later sections refer back to these stages rather than redefining the RQs.
 
 | Stage | Question | Phase-A input | Output / Gold target | Conditions | Repository |
 | --- | --- | --- | --- | --- | --- |
@@ -449,158 +449,51 @@ This separation distinguishes selection, pre-task reconstruction, update-or-clar
 
 ## 4. ReqMemBench Construction
 
-**Drafting goal.**
-
-Explain how ReqMemBench gold annotations are recovered or constructed from project source material. This should be one of the most detailed sections, covering provenance, data source, privacy transformation, event annotation, state-graph construction, target-time selection, instance generation, quality control, and statistics.
+ReqMemBench converts longitudinal project records into temporal Requirement State Graphs and derives evaluation instances at intermediate takeover points. Figure 2 summarizes the pipeline and separates model-assisted extraction, deterministic processing, and human review. Section 3 defines the state representation and evaluation stages; this section describes how their Gold targets and agent-visible inputs are constructed.
 
 **Figure 2 — Construction pipeline.**
 
-**Visual specification:**
+Project records → reviewed Requirement Events → deterministic replay → temporal State Graph → target selection → task-local Gold → C1/C2 instances.
 
-```text
-Raw project/history → event annotation → state graph → target selection
-                    → temporal gold state → evaluation instance
-```
+The figure should mark the cutoff at \(t^*\) and distinguish agent-visible inputs from hidden Gold.
 
-The final figure should also show three responsibility lanes:
+**Caption:** ReqMemBench converts longitudinal project records into evidence-linked Requirement States and leakage-controlled takeover instances.
 
-- model-assisted candidate extraction;
-- deterministic validation/replay/materialization;
-- human review/adjudication.
+### 4.1 Temporal Requirement Graph Construction
 
-It should mark the temporal boundary at $t^*$ and separate public agent input from hidden evaluation gold.
+ReqMemBench is derived from longitudinal records of real freelance software projects. All agent-visible histories are privacy-preserving transformations of project records, and some messages or code environments are reconstructed when exact historical artifacts are unavailable. These distinctions are recorded at the instance level; detailed access, authorization, transformation, and release procedures belong in the Ethics Statement and Data Card.
 
-**Caption:** The ReqMemBench construction pipeline from project source material to temporal requirement-state evaluation instances.
+Using the vocabulary defined in Section 3, model-assisted extraction proposes Requirement Atoms, state-changing Events, and links to supporting messages. Schema checks, cross-reference validation, and human review determine which candidates enter the canonical annotation. Deterministic replay then applies the accepted Events in project order to produce temporally indexed Requirement States. Invalid transitions fail validation rather than receiving model-based repair, and every state retains its supporting evidence. Complete schemas, transition rules, and provenance categories move to the appendix.
 
-### 4.1 Data and Temporal Requirement Graph Construction
+> **TODO:** Report frozen project and message counts and the proportions of transformed histories, reconstructed messages, recovered code environments, and reconstructed code environments. Document authorization and public-release scope separately in the Ethics Statement and Data Card.
 
-**Data source and project selection.**
+### 4.2 Takeover Instance Construction
 
-Explain why project-level freelance software tasks are useful for studying requirement evolution. List available artifacts such as client–developer messages, job/task descriptions, deliverables, code snapshots or reconstructed repositories, execution feedback, and timestamps. Define inclusion and exclusion criteria based on historical completeness, code recoverability, interaction length, identifiable requirement evolution, domain/task suitability, privacy, and authorization.
+Each target is a client task whose interpretation depends on earlier project context and induces a verifiable Requirement transition. A multi-requirement message remains one takeover task; context-free introductions and messages containing only implementation evidence are excluded. Candidates are admitted through a frozen historical-dependence and requirement-evolution rule, with the full rubric, threshold, review policy, and candidate-flow counts reported in the appendix.
 
-The latest research plan describes the histories and requirement changes as real project records, while Code Environment metadata shows that at least some executable pre-states are reconstructed or simulated. The final subsection must report the provenance of histories and repositories separately, explain how each pre-task repository is aligned to the target state, and provide instance-level labels when construction modes differ.
+Deterministic replay produces the pre-task and post-task boundaries defined in Section 3. The benchmark stores the complete project states but evaluates their affected task-local projection. Requirements introduced by the target have no pre-task state, while removed Requirements remain represented as **REMOVED**. This construction supplies the Gold for selection, reconstruction, and update-or-clarify evaluation without redefining the four RQs.
 
-> **TODO:** Insert the data source, authorization procedure, privacy/de-identification pipeline, filtering pipeline, provenance categories, and final project count.
+Each target is materialized under Full History and Oracle Relevant History. The latter is an audited, order-preserving subsequence that retains the affected Requirement trajectories and the context needed to determine the same Gold. Gold annotations, internal identifiers, future messages, repositories, and validators are excluded from Phase A; repository access begins only after the Phase-A response is frozen. Full serialization, RQ applicability, RQ4 eligibility, and runner-isolation details move to the appendix or Section 5.
 
-**Stage 1: requirement-event annotation.**
+> **TODO:** Report accepted and rejected targets, C1/C2 instance counts, and RQ4 candidate, environment, eligibility, and exclusion counts.
 
-The first construction stage is
+### 4.3 Curation Validity and Benchmark Statistics
 
-$$
-\mathrm{RawMessages}\rightarrow\mathrm{RequirementFamilies}
-\rightarrow\mathrm{RequirementAtoms}\rightarrow\mathrm{RequirementEvents}.
-$$
+Quality control is matched to each construction layer: language models propose candidates, deterministic code validates and replays Events, and human review freezes semantic annotations and ambiguity-sensitive Gold. At least 200 stratified state transitions will be reassessed through human review and two independent LLM assessments. The final report will define the unit, label space, reviewer independence, prevalence, and adjudication, then report raw agreement and coefficients appropriate to the final rater design. This audit remains separate from RQ1 judge calibration, RQ3 adjudication, and RQ4 validator calibration.
 
-The event taxonomy contains exactly nine first-class event types: `INTRODUCE`, `MODIFY`, `DEFER`, `RESUME`, `REMOVE`, `AMBIGUOUS`, `IMPLEMENTATION_CLAIM`, `RUNTIME_FAILURE`, and `RUNTIME_VERIFICATION`. Explain how events update attributes, lifecycle, scope, ambiguity, and execution status. `CLARIFY` is an RQ3 Agent decision rather than an event type, and ambiguity resolution is recorded by `resolves_ambiguity_event_ids` on an eligible later state-changing event rather than by a `RESOLVE` event. Every event must retain source-message evidence and a time/order anchor. Put detailed serialization fields in the appendix.
+Oracle-history sufficiency is audited independently. C2 must be an ordered subsequence of C1 and retain the evidence needed to determine the same pre-task state and frozen RQ3 branch. Any disagreement triggers correction or exclusion rather than being counted as a condition effect.
 
-**Stage 2: temporal requirement-state graph.**
-
-The second stage converts events into state nodes and a state graph:
-
-$$
-\mathrm{Events}\rightarrow\mathrm{StateNodes}\rightarrow\mathrm{StateGraph}.
-$$
-
-Each node stores a complete requirement state, and each edge corresponds to the event responsible for the transition. For example,
-
-$$
-S_1\xrightarrow{\mathrm{MODIFY}}S_2
-\xrightarrow{\mathrm{DEFER}}S_3.
-$$
-
-Explain why an explicit graph is preferable to an event list alone, how deterministic replay reconstructs state, how contradictions and invalid transitions are handled, and how ambiguity and execution state are updated alongside lifecycle.
-
-> **TODO:** Add the complete state-transition rules or a transition table, including which state-changing events may carry `resolves_ambiguity_event_ids` and how multiple open ambiguities are tracked.
-
-### 4.2 Takeover Instance Construction and History Conditions
-
-**Target time and task selection.**
-
-Define the target time as
-
-$$
-t^*=\text{arrival time of the target client task}.
-$$
-
-Each target task establishes two project-graph boundaries: the pre-task state $G_P(t^{*-})$ and the state after the task has been correctly interpreted, $G_P(t^{*+})$. The current task triggers
-
-$$
-G_P(t^{*-})\xrightarrow{q_{t^*}}G_P(t^{*+}).
-$$
-
-Construction retains both full graph snapshots, but evaluation projects them onto target-local subsets. RQ1/RQ2 use the directly affected historical set $R^{\mathrm{hist}}_{t^*}$ and its pre-task states $G^-_{t^*}$; RQ3 uses the post-task states $G^+_{t^*}$ of all affected requirements, including newly introduced requirements.
-
-The construction design says that target candidates are scored by a model, selected above a threshold, optionally or historically human-reviewed, and then converted to gold through deterministic state replay. The paper must report the final protocol actually used, not every historical implementation path.
-
-> **TODO:** Specify target-task eligibility, threshold selection, dev/test separation, temporal alignment, review/adjudication, and how target sampling avoids project and history-length imbalance.
-
-**Instance materialization.**
-
-The benchmark unit is a target task at a target time, not an individual requirement, because one client message may affect multiple requirements. Researcher-side construction records join the preceding history, target task, pre/post state references, affected events, and, for RQ4 candidates only, a matching Code Environment. These records are never given directly to the Agent.
-
-The implementation first creates RQ-specific researcher views and then materializes one logical run per `target × condition`. Phase A contains only the current task, condition-specific history, a fixed prompt, and the response schema. Its unified RQ1–RQ3 response is frozen in evaluator-side immutable storage. Phase B is created only when the frozen Agent decision is `ACT` and the condition is RQ4-eligible; it receives a fresh copy of the same pre-task repository and a read-only copy of the frozen response. Modified repositories are never reused across conditions or replicates.
-
-> **TODO:** Include one complete serialized instance in the appendix and describe the mapping from one target to RQ1–RQ4 and C1/C2 without exposing Gold, internal IDs, Code Environment paths, validators, or future state to the Agent.
-
-**Controlled history conditions.** Use two controlled history conditions, both of which represent takeover of an ongoing project:
-
-- **C1 — Full History**
-  $$
-  I_{\mathrm{C1}}^{A}(t^*)=H_{<t^*}+q_{t^*}.
-  $$
-  This condition includes relevant evidence, stale values, and unrelated project messages.
-
-- **C2 — Oracle Relevant History**
-  $$
-  I_{\mathrm{C2}}^{A}(t^*)=H^{\mathrm{rel}}_{<t^*}+q_{t^*}.
-  $$
-  This condition is an audited ordered subsequence of C1 that retains the relevant trajectories and necessary contextual messages.
-
-Neither Phase A input contains the repository. RQ1 is evaluated only under C1 because C2 is constructed from the RQ1 Gold trajectory and would expose the selection answer. RQ2 and RQ3 are evaluated under C1/C2. For RQ4-eligible runs, both conditions receive the same pre-task repository only after the Phase A response is frozen.
-
-For RQ2–RQ4, `C2 − C1` measures the effect of removing irrelevant and stale history while holding the target, prompt, model, tools, budget, and Gold fixed. Remaining errors under C2 indicate reconstruction, update-or-clarify, or delivery difficulty rather than full-history selection noise. No-History is not a formal condition; any future no-history study must be labeled as an exploratory ablation and excluded from RQ1–RQ4 main results.
-
-### 4.3 Annotation Quality and Benchmark Statistics
-
-**Annotation and quality control.**
-
-Separate responsibilities clearly:
-
-- **Language-model assistance:** propose requirement families, atoms, events, source evidence, or candidate target times. Treat outputs as candidates governed by validation/review rules.
-- **Deterministic processing:** sort events, validate schemas, replay events, generate states, join histories/code/targets, validate consistency, detect future leakage, and reject impossible transitions.
-- **Human review:** use stage-specific review rather than a blanket per-instance process. RQ1 uses deterministic Gold and calibrated semantic alignment without per-response adjudication; RQ2 requires typed-field/comparator review; RQ3 requires two independent reviewers plus adjudication; RQ4 requires acceptance-criterion and hidden-validator review and calibration.
-- **Evidence retention:** trace each event and state transition to source evidence and a timestamp/order anchor.
-- **Quality reporting:** report review sample, annotator count, training/frozen guidelines, adjudication, field-level agreement, and suitable agreement statistics.
-
-Do not present one generic agreement sample as validation of all four RQs. If the earlier proposal to review 200 state-change steps is retained, use it only for the construction fields it actually audits and report its sampling unit, annotator independence, prevalence, adjudication, and results separately from RQ1 judge calibration, RQ3 Gold adjudication, and RQ4 validator calibration.
-
-> **TODO:** Insert the actual annotation workflow, review scale, agreement results, error-correction procedure, and scorer/judge calibration. Distinguish annotation reliability from automated evaluation reliability.
-
-**Curation-validity checks.**
-
-**Requirement determinacy.**
-
-Report determinacy evidence separately for each construction layer. Stage 1/State Graph audits test event and state-transition consistency; RQ2 review freezes typed fields and comparators; RQ3 uses two independent reviewers and adjudication; RQ4 validates acceptance criteria and hidden tests against pre-repo, reference, and applicable partial deliveries. Any sampled agreement study must define its unit, labels, annotator independence, prevalence, and adjudication, and cannot substitute for the RQ-specific gates.
-
-**Oracle-history sufficiency.**
-
-Audit that C2 is an ordered subsequence of C1 and retains every message needed to determine the same RQ2 pre-task state and RQ3 Gold branch. C1/C2 must use identical RQ3 Gold; any disagreement indicates missing contextual evidence or a Gold-review error rather than a valid condition effect. Report the audit procedure and rejection/correction counts as benchmark-curation evidence, not as an Agent result.
-
-**Benchmark statistics.**
-
-Report totals with means, medians, ranges, and/or quantiles.
-
-| Level | Required statistics | Current value |
+| Level | Main-text statistic | Current snapshot |
 | --- | --- | --- |
-| Project | Count, provenance type, duration, messages, history length, repository size/recoverability | 51 projects reported; remaining fields TODO |
-| Requirement | Families, atoms, requirements per project, dimensions populated | 859 atoms reported; remaining fields TODO |
-| Event | Count, type distribution, events per requirement, transitions | 2,793 events reported; remaining fields TODO |
-| Task | Count, source projects, affected requirements, target position, preceding history length | 210 tasks from 39 projects reported; remaining fields TODO |
-| RQ/condition | Constructed, reviewed, eligible, and evaluated instances for RQ1–RQ4 under C1/C2 | TODO |
-| Difficulty | Short/medium/long counts by project and RQ | TODO |
+| Project | Projects | 51 |
+| Requirement | Requirement Atoms | 859 |
+| Event | Requirement Events | 2,793 |
+| Task | Takeover tasks and source projects | 210 tasks from 39 projects |
+| Evaluation | Reviewed/eligible instances by RQ and condition | TBD |
 
-Figure 3 should show the corresponding distributions and reveal empty or heavily imbalanced strata.
+Detailed distributions, provenance categories, repository recoverability, and exclusion reasons move to the appendix.
 
+> **TODO:** Insert the frozen review workflow, agreement and oracle-history audit results, correction counts, and regenerated benchmark statistics.
 ## 5. Experiments
 
 **Drafting goal.**
@@ -609,7 +502,7 @@ Separate history selection, requirement-state reasoning, clarification behavior,
 
 ### 5.1 Experimental Setup
 
-Section 3 and Table 3 define the four evaluation stages. This subsection reports only the evaluated model–harness units, condition applicability, run budgets, prompts/tools, primary metrics, aggregation, and uncertainty. Full response schemas, comparator rules, metric equations, judge calibration, and validator calibration belong in the appendix.
+Section 3 and Table 1 define the four evaluation stages. This subsection reports only the evaluated model–harness units, condition applicability, run budgets, prompts/tools, primary metrics, aggregation, and uncertainty. Full response schemas, comparator rules, metric equations, judge calibration, and validator calibration belong in the appendix.
 
 **Evaluation matrix.**
 
@@ -623,7 +516,7 @@ The current plan crosses five dimensions:
 | Backbone model | Codex: GPT-5.6 SOL, GPT-5.6 Terra, GPT-5.5; Claude Code: Claude Opus 5, Claude Sonnet 5, Claude Haiku 4.5 |
 | Input condition | C1 Full History, C2 Oracle Relevant History; RQ1 uses C1 only |
 
-Table 3 records protocol applicability rather than reserving a rectangular result cell for every combination:
+The protocol matrix below records applicability rather than reserving a rectangular result cell for every combination:
 
 | RQ | Phase | C1 | C2 | Repository visible | Primary scoring unit |
 | --- | --- | ---: | ---: | --- | --- |
@@ -722,7 +615,7 @@ The RQ4 portion of Table 5 reports both the fair C1/C2 comparison on common supp
 
 Do not report formal PASS/FAIL results until RQ3 Gold, acceptance criteria, hidden validators, calibration, and repository-leakage audits are frozen. Build, Target Test, and Regression rates appear in failure analysis rather than as additional score levels.
 
-Figure 4 may analyze
+Figure 3 may analyze
 
 $$
 P(\mathrm{RQ4Pass}\mid\mathrm{RQ2/RQ3\ correct})
@@ -848,4 +741,3 @@ The appendix should contain:
 ## Reference backlog
 
 The current bibliography is a template placeholder and contains unrelated references. The paper currently names or plans to discuss HumanEval, MBPP, CrossCodeEval, RepoBench, SWE-bench, BigCodeBench, SWE-Lancer, LongMemEval, ConvCodeWorld, SWE-Bench-CL, SWE-ContextBench, SR-Eval, RECODE-H, LoCoEval, and RigorBench. Every title, version, venue/year, task description, and comparison-table cell must be verified against the primary paper or official benchmark documentation before citation.
-

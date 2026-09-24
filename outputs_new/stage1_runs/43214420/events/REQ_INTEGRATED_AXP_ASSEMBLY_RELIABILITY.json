@@ -1,0 +1,87 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_INTEGRATED_AXP_ASSEMBLY_RELIABILITY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 994,
+        "speaker": "client",
+        "text": "Factory testing covered all 3 boards: 1 works with L3 steady at 3.3V, while 2 fluctuate across 0.5–2V. Because one unit works, the design appears sound; the suspected cause on the other 2 is an AXP2101 thermal-pad soldering problem.\n\nThe factory uses a fully automated process with a stencil and reflow oven, but without hand soldering. I reviewed the gerbers: the 13 GND vias under the pad are tented and look fine, but the AXP2101 thermal-pad paste aperture is one full opening rather than a segmented pattern. Could excess paste make the chip float in the reflow oven and ground inconsistently? Would changing that aperture to a segmented \"windowpane\" pattern improve yield? What do you think?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Factory testing found only one of three boards with stable L3 output; two fluctuated between 0.5V and 2V, with an AXP2101 thermal-pad assembly problem suspected as the yield issue."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 996,
+        "speaker": "client",
+        "text": "The factory’s latest detail may support the theory: VBUS and VSYS are normal on all 3 boards, and both sets of pins lie along the top edge of the AXP2101. On the right edge are the DCDC1 pins—FB1, LX1, and VIN1—and that is precisely the side failing on the 2 bad boards.\n\nThis pattern suggests that, during reflow, the chip may tilt: its top edge remains connected while its right edge lifts. The single full paste opening beneath the center pad may be depositing too much solder and floating the chip. Does that fit what you would expect, and can you apply the windowpane stencil change on your side?"
+      },
+      "supporting_message_ids": [
+        994,
+        995
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "thermal_pad_paste_aperture": "segmented windowpane pattern"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "MANUFACTURING",
+          "POWER"
+        ],
+        "contexts": [
+          "INTEGRATED_BOARD",
+          "AXP2101_ASSEMBLY"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 1008,
+        "speaker": "client",
+        "text": "Hi Luka,\n\nAfter inspecting the AP2101 with x ray, they found it properly welded and saw no evidence of poor welding. They reported that powering up these two boards caused the positive terminal of the L3 capacitor to become short-circuited to GND."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "X-ray inspection found the AXP2101 properly welded with no evidence of poor welding, but powering the two affected boards caused the positive terminal of the L3 capacitor to short to ground."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 1014,
+        "speaker": "client",
+        "text": "Hi Luka. The cause was that they skipped baking the AXP before reflow, allowing steam bubbles to destroy 2 AXPs. They have replaced 2 AXPs in the samples and will bake the components before reflow in full production. The repaired samples are scheduled to ship soon, so we'll see how they perform after they arrive. Thanks for the support."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "pre_reflow_moisture_control": "Bake AXP2101 components before reflow to prevent moisture-induced steam damage."
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

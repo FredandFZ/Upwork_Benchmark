@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+    "message_id": 444,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-444 MODIFY already adds the SK6812 LEDs to the monitored 3.3V downstream-current coverage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Standalone USB mode powers the complete 3.3V rail, so moving the SK6812 LEDs onto that rail necessarily adds them to its powered scope.",
+      "new_event": {
+        "source_message": {
+          "message_id": 444,
+          "speaker": "client",
+          "text": "The supply for the LEDs has changed from 5V to 3.3V. With a 3.3V supply, the SK6812 data threshold falls to 2.31V, which the 3.3V output from ESP32 satisfies directly, so a level shifter is unnecessary. Although 3.3V is slightly below the SK6812 datasheet minimum of 3.7V, they operate reliably at indicator brightness levels."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "powered_scope": "The complete 3.3V rail, including the ESP32-S3, INA219, I2C sensors, I2C display, TTP223, AM312 PIR, and SK6812 LEDs."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BOOST_ENABLE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-444 MODIFY already removes the SK6812 LEDs from the switched 5V boost load list while preserving the two 5V sensors.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Moving the LEDs onto the existing 3.3V rail does not change the OR-ing sources, method, or source-selection behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_DCDC1_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The DCDC1 setpoint and its compensated downstream 3.3V target remain unchanged by the LED load migration.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED supply and data-level change does not alter any panel control, input, GPIO mapping, or power-button connection.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SK6812 chain remains the charge-status indicator on GPIO13; its indicator function and charge-status interface are unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes LED electrical power and logic handling but does not add, remove, or redefine a connector.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_DECOUPLING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the requirement for local decoupling capacitors or specify any new decoupling values or topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The interboard connectors still carry both 3.3V and 5V, and the source does not change their pinout, connector types, or numbering policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The SK6812 power and data-level decision does not affect I2C series resistors, topology, or signal conditioning.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED rail migration does not change the battery connector, battery voltage range, placement, pin functions, or AXP2101 connection.",
+      "new_event": null
+    }
+  ]
+}

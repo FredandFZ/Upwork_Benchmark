@@ -1,0 +1,281 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_BOARD_CHAIN_POWER_DISTRIBUTION",
+    "message_id": 843,
+    "event_type": "REMOVE",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "Collapsing the three-board system into one board eliminates the power-board and sensor-board interboard connectors, making their inventory entries, count, and interboard pin-count exception obsolete.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "jst_connector_destinations": [
+            "sensors",
+            "display",
+            "PIR",
+            "touch inputs",
+            "LEDs",
+            "buttons",
+            "reset",
+            "panel power button"
+          ]
+        },
+        "value_removals": [
+          "jst_connector_count",
+          "low_pin_count_scope",
+          "sensor_board_connection_count",
+          "sensor_board_connections"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel control remains required, but its connection can no longer originate from the removed J_PWR_SIG interboard link.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "connection_source"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "PANEL_CONTROLS",
+            "MAIN_BOARD"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A separate sensor board no longer exists, so its two interboard input connectors are obsolete while the eight direct sensor connections remain.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "total_connector_count": 8
+        },
+        "value_removals": [
+          "main_board_input_connectors"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "SENSOR_CONNECTIONS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already removes the obsolete interboard connector attributes and retains the operational fact that interboard links are absent.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICAL",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The old interboard cable-length constraint and multi-board scope are obsolete after consolidation, while the electrical I2C settings remain otherwise unchanged.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "interboard_cable_length"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "I2C_BUS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The monitoring requirement remains, but its coverage can no longer refer to current drawn by a separate sensor board and must instead refer directly to the sensors.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "three_v_three_current_coverage": "total downstream current for the ESP32, sensors, and SK6812 LEDs in one reading"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The condition that standalone USB power activates while the power board is absent is obsolete, but the source does not determine the replacement activation and source-selection behavior for the unified board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The panel power-button connector remains valid, but its nested reference to the removed J_PWR_SIG interboard line must be deleted.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_button_connector": {
+            "connector_type": "JST-GH",
+            "pin_count": 2,
+            "board_location": "MAIN_BOARD",
+            "button_location": "ENCLOSURE_PANEL",
+            "signal": "PWRON",
+            "connection_method": "TAP_EXISTING_LINE"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BOOST_ENABLE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The switched 5V supply remains required for the 5V sensors, but it is no longer scoped to a separate power board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "SWITCHED_5V_RAIL"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_BOARD_LAYOUT",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing event correctly removes three-board alignment, cable-path, board-order, and top-access constraints, but it over-removes the still-compatible vertical orientation and permission for side placement.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "high_pin_count_connector_placement",
+          "sensor_connector_alignment",
+          "interboard_cable_path",
+          "enclosure_board_order",
+          "cable_access"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The separate-board source labels and power-board-absence condition are obsolete, but the source does not establish whether the same OR-ing architecture remains or how source selection should operate on the unified board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The power-board/main-board scope is obsolete, but it is unclear whether J_LED_CHG remains necessary for external LEDs or should be removed after board consolidation.",
+      "new_event": null
+    }
+  ]
+}

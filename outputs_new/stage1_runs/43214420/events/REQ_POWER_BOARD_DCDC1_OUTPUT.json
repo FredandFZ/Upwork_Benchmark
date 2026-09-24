@@ -1,0 +1,63 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_POWER_BOARD_DCDC1_OUTPUT",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 434,
+        "speaker": "client",
+        "text": "Two points that I think should finalize the power board:\n1\\. Add a 2-pin JST-GH connector (J\\_PWR\\_BTN) for a panel-mounted momentary button connected to the AXP2101 PWRON pin. Pressing it while the system is off turns it on, and pressing it while on turns it off.\n2\\. For the DCDC1 output, configure AXP2101 DCDC1 to 3.4V rather than 3.3V through I2C. This compensates for the Schottky diode drop in the main-board power OR-ing circuit and keeps the 3.3V rail at the correct voltage under all conditions."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "configured_output_voltage": "3.4V",
+        "configuration_interface": "I2C",
+        "downstream_rail_target": "3.3V",
+        "voltage_compensation": "Compensate for the Schottky diode drop in the main-board power OR-ing circuit"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "FIRMWARE"
+        ],
+        "contexts": [
+          "POWER_BOARD",
+          "DCDC1"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 267,
+      "suggested_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "description": "This message defines when the main board uses its standalone LDO versus power-board DCDC1; it does not change the power-board DCDC1 output setpoint."
+    },
+    {
+      "message_id": 989,
+      "suggested_requirement_id": "REQ_INTEGRATED_DCDC1_REGULATION",
+      "description": "The L3 voltage observations concern manufactured integrated-board DCDC1 regulation rather than the earlier power-board setpoint requirement."
+    },
+    {
+      "message_id": 990,
+      "suggested_requirement_id": "REQ_INTEGRATED_DCDC1_REGULATION",
+      "description": "This duplicates the integrated-board L3 regulation outcome and does not test the separate power-board setpoint requirement."
+    },
+    {
+      "message_id": 1046,
+      "suggested_requirement_id": "REQ_INTEGRATED_DCDC1_REGULATION",
+      "description": "The detailed DCDC1 undervoltage, transient-collapse, and 3.4V programming results concern the later single integrated board."
+    },
+    {
+      "message_id": 1075,
+      "suggested_requirement_id": "REQ_INTEGRATED_AXP_ASSEMBLY_RELIABILITY",
+      "description": "The unsuccessful AXP2101 replacement concerns the integrated board's suspected device or assembly reliability, not the power-board setpoint."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

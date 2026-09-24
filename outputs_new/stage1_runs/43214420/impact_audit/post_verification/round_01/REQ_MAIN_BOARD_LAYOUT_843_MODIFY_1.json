@@ -1,0 +1,255 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_BOARD_LAYOUT",
+    "message_id": 843,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_SENSOR_BOARD_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A same-message MODIFY already records that the separate sensor board is absent and removes the obsolete multi-board mechanical constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board decision eliminates the prior main-to-power and main-to-sensor interboard connector inventory, making its counts, destinations, and interboard pin-count exception stale.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "jst_connector_destinations",
+          "jst_connector_count",
+          "low_pin_count_scope",
+          "sensor_board_connection_count",
+          "sensor_board_connections"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "CONNECTOR_SET"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A same-message MODIFY already records that the separate power board is absent and removes its obsolete mechanical-layout attributes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The connector topology describes a separate sensor board and its two interboard inputs, all of which become obsolete under the single-board design.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "separate_sensor_board_status": "not present in the single-board design"
+        },
+        "value_removals": [
+          "main_board_input_connectors",
+          "sensor_output_connectors",
+          "total_connector_count"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing same-message MODIFY already captures acceptance of flexible connector placement while preserving the explicit edge and antenna constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The battery interface survives on the integrated board, but its former separate-power-board placement, orientation, and mounting-hole constraints are superseded; the adjacent client constraint places J_BAT on a short edge.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          842
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "battery_connector_placement": "J_BAT on a short edge"
+        },
+        "value_removals": [
+          "battery_connector_orientation",
+          "mounting_hole_clearance"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "BATTERY_CONNECTOR"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The all-rail monitoring requirement remains applicable, but its coverage description must no longer treat the sensors as a separate downstream sensor board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "three_v_three_current_coverage": "total current for the ESP32, sensors, and SK6812 LEDs in one reading on the single-board design"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "CURRENT_MONITORING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The panel power button remains required, but its connector can no longer source PWRON through the former interboard J_PWR_SIG connection and must instead use the integrated board's PWRON net.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_button_connector": {
+            "connector_type": "JST-GH",
+            "pin_count": 2,
+            "board_location": "INTEGRATED_BOARD",
+            "button_location": "ENCLOSURE_PANEL",
+            "signal": "PWRON",
+            "signal_source": "PWRON net on the integrated board",
+            "connection_method": "TAP_EXISTING_LINE"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "PANEL_CONTROLS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board mechanical decision does not change the LED supply voltage, direct ESP32 data drive, power-control separation, or selected LED model.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "With charge-status circuitry and the addressable LED chain on one board, the former J_LED_CHG interboard connector is obsolete while the charge-status indication itself remains.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "charge_status_indicator": "SK6812 addressable LED chain on the integrated board"
+        },
+        "value_removals": [
+          "charge_status_connector"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "CHARGE_STATUS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_ESP32_BREAKOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Consolidating the boards does not alter the independently required full through-hole ESP32 pin breakout or its assembly policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The condition that USB standalone mode applies while the separate power board is absent becomes obsolete, but the source does not establish whether the dedicated LDO mode remains, changes activation behavior, or is removed in the integrated design.",
+      "new_event": null
+    }
+  ]
+}

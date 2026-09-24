@@ -1,0 +1,392 @@
+{
+  "run_mode": "AMBIGUITY_LINKING",
+  "project_id": "43214420",
+  "requirements": [
+    {
+      "requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS_E003",
+          "affected_state_paths": [
+            "attributes.power_connector_pinout.pin_1"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "No later Event in CURRENT_EVENTS settles whether physical pin 1 is 5V or GND.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_POWER_BOARD_BATTERY_INTERFACE_E007",
+          "affected_state_paths": [
+            "attributes.pin_functions",
+            "attributes.connector_labels"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [
+            "REQ_POWER_BOARD_BATTERY_INTERFACE_E008"
+          ],
+          "decision_note": "E008 specifies the supported battery voltage range and that the battery feeds the AXP2101, but it does not settle the physical battery-connector pinout or correct its labels.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_POWER_BOARD_AXP2101_TOPOLOGY",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_POWER_BOARD_AXP2101_TOPOLOGY_E002",
+          "affected_state_paths": [
+            "attributes.vmid_vsys_connection"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_POWER_BOARD_AXP2101_TOPOLOGY_E003",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E003 directly settles whether VMID and VSYS may share a connection by accepting the connection depicted in the supplied AXP2101 reference PDF.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_MAIN_USB_STANDALONE_POWER_E003",
+          "affected_state_paths": [
+            "attributes.standalone_power_source",
+            "attributes.ldo_current_rating",
+            "attributes.ldo_capacity_requirement"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [
+            "REQ_MAIN_USB_STANDALONE_POWER_E004"
+          ],
+          "decision_note": "E004 adds the SK6812 LEDs to the powered 3.3V scope but does not determine whether the selected 1.6A LD1117S33CTR is adequate for the stated 2A standalone USB requirement or select a suitable replacement.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_MAIN_GPIO_ASSIGNMENTS",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_MAIN_GPIO_ASSIGNMENTS_E003",
+          "affected_state_paths": [
+            "attributes.spi_mosi_gpio"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [
+            "REQ_MAIN_GPIO_ASSIGNMENTS_E004"
+          ],
+          "decision_note": "E004 assigns GPIOs for panel buttons, a switch, and touch connectors but does not replace the unavailable GPIO26 assignment for SPI MOSI. No later eligible Event settles the SPI MOSI GPIO value.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_MAIN_PANEL_IO",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_MAIN_PANEL_IO_E004",
+          "affected_state_paths": [
+            "attributes.panel_button_connection_mode",
+            "attributes.directly_board_mounted_button"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_MAIN_PANEL_IO_E005",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E005 explicitly resolves the mounting uncertainty by requiring panel-button connections through connectors and identifying BOOT as the only directly board-mounted button.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING_E001",
+          "affected_state_paths": [
+            "attributes.series_resistor_population_policy",
+            "attributes.series_resistor_topology"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING_E003",
+          "non_resolving_intermediate_event_ids": [
+            "REQ_MAIN_I2C_SIGNAL_CONDITIONING_E002"
+          ],
+          "decision_note": "E002 settles whether the 44Ω resistors may be retained or removed but does not settle their placement. E003 then explicitly sets their topology directly beside the ESP32-S3 I2C pins, with pull-ups and devices on the far side, completing resolution of both parts of the ambiguity.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_MAIN_ESP32_BREAKOUT",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_MAIN_ESP32_BREAKOUT_E003",
+          "affected_state_paths": [
+            "attributes.pin_access_coverage",
+            "attributes.module_pin_count"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_MAIN_ESP32_BREAKOUT_E005",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E005 establishes that the actual ESP32-S3 module has 40 pins and that the apparent 44-pin count came from duplicated pins on a development board, resolving whether the 40-pin breakout omitted module pins.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC_E005",
+          "affected_state_paths": [
+            "attributes.supply_voltage",
+            "attributes.level_shifter_required",
+            "attributes.data_level_handling"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC_E006",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E006 explicitly selects a 5V LED supply and requires the 74AHCT1G125 level shifter, directly settling the voltage and data-level-handling uncertainty.",
+          "confidence": "HIGH"
+        },
+        {
+          "ambiguity_event_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC_E009",
+          "affected_state_paths": [
+            "attributes.level_shifter_required",
+            "attributes.data_level_handling"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC_E010",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E010 explicitly states that the 3.3V LED supply permits direct ESP32 data drive and that a level shifter is unnecessary.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_LED_BOARD_ARRAY",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_LED_BOARD_ARRAY_E002",
+          "affected_state_paths": [
+            "attributes.led_model",
+            "attributes.lcsc_part_number",
+            "attributes.package"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_LED_BOARD_ARRAY_E003",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E003 explicitly selects the SK6812MINI-E, LCSC C5149201, in a 3228 SMD package, directly settling the uncertain LED identity and package.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_DISPLAY_BACKLIGHT",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_DISPLAY_BACKLIGHT_E002",
+          "affected_state_paths": [
+            "attributes.series_resistor_population",
+            "attributes.series_resistor_current_rating",
+            "attributes.series_resistor_power_rating"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_INTEGRATED_DISPLAY_BACKLIGHT_E003",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E003 explicitly identifies the relevant series-resistor footprint and directs that it remain DNP because the LED strip self-limits, eliminating the need to select current or power ratings for this build.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_ESP32_BREAKOUT",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_ESP32_BREAKOUT_E001",
+          "affected_state_paths": [
+            "attributes.pin_header_pitch"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_INTEGRATED_ESP32_BREAKOUT_E002",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E002 explicitly settles the conflicting 2.54 mm versus 1.27 mm pin-header pitch by selecting and applying 1.27 mm.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_MECHANICAL_LAYOUT",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_MECHANICAL_LAYOUT_E007",
+          "affected_state_paths": [
+            "attributes.esp32_antenna_clear_area"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "No later Event settles whether the listed components may remain in the recommended antenna clear area or must be moved out.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_AXP_AUXILIARY_PINS",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_AXP_AUXILIARY_PINS_E001",
+          "affected_state_paths": [
+            "attributes.vrtc_handling"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_INTEGRATED_AXP_AUXILIARY_PINS_E003",
+          "non_resolving_intermediate_event_ids": [
+            "REQ_INTEGRATED_AXP_AUXILIARY_PINS_E002"
+          ],
+          "decision_note": "E002 changes PWROK and VBACKUP exposure but does not settle VRTC handling. E003 explicitly directs that VRTC remain unconnected because the board has no external RTC chip.",
+          "confidence": "HIGH"
+        },
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_AXP_AUXILIARY_PINS_E006",
+          "affected_state_paths": [
+            "attributes.vbackup_exposure",
+            "attributes.vrtc_handling"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "No later Event settles whether VBACKUP should use the reported 2.54 mm header instead of a small test pad or via, or whether the routed VRTC output should be removed to leave VRTC unconnected.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_POWER_ROUTING",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_POWER_ROUTING_E002",
+          "affected_state_paths": [
+            "attributes.narrow_trace_acceptance_condition",
+            "lifecycle_status"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_INTEGRATED_POWER_ROUTING_E004",
+          "non_resolving_intermediate_event_ids": [
+            "REQ_INTEGRATED_POWER_ROUTING_E003"
+          ],
+          "decision_note": "E003 defines when sub-2 mm stubs would be acceptable but does not confirm that the existing routing meets those conditions. E004 explicitly accepts the design and states that no further changes are needed, settling the compliance question.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_ENCLOSURE_DISPLAY_INTEGRATION",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_ENCLOSURE_DISPLAY_INTEGRATION_E002",
+          "affected_state_paths": [
+            "attributes.display_size",
+            "attributes.display_cutout_dimensions"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "The later AMBIGUOUS Event only indicates that 4.2 inches is probable and does not confirm the display size or final cutout dimensions.",
+          "confidence": "HIGH"
+        },
+        {
+          "ambiguity_event_id": "REQ_ENCLOSURE_DISPLAY_INTEGRATION_E003",
+          "affected_state_paths": [
+            "attributes.display_size",
+            "attributes.display_cutout_dimensions"
+          ],
+          "resolution_status": "UNRESOLVED",
+          "resolver_event_id": null,
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "No later Event confirms the display size or final cover cutout dimensions.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_POWER_BOARD_BATTERY_SAFETY",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_POWER_BOARD_BATTERY_SAFETY_E003",
+          "affected_state_paths": [
+            "attributes.additional_battery_protection_mode"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_POWER_BOARD_BATTERY_SAFETY_E004",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E004 directly settles the uncertain protection mode as thermal protection rather than hard-short protection.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_ESP32_DECOUPLING",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_ESP32_DECOUPLING_E002",
+          "affected_state_paths": [
+            "attributes.esp32_decoupling_configuration",
+            "attributes.maximum_distance_from_3v3_pin"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_INTEGRATED_ESP32_DECOUPLING_E003",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E003 directly selects leaving the existing ESP32 decoupling capacitors unchanged and removes the associated 4 mm placement constraint, resolving whether an additional nearby capacitor is required.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_POWER_MANAGEMENT",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_POWER_MANAGEMENT_E003",
+          "affected_state_paths": [
+            "attributes.power_management_component"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_INTEGRATED_POWER_MANAGEMENT_E004",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E004 explicitly resolves whether to retain or replace the AXP2101 by selecting AXP2101 as the power-management component.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_INTEGRATED_BUTTON_INPUTS",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_INTEGRATED_BUTTON_INPUTS_E001",
+          "affected_state_paths": [
+            "attributes.pull_resistor_configuration",
+            "attributes.connector_pin_1",
+            "attributes.active_level",
+            "attributes.press_behavior"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_INTEGRATED_BUTTON_INPUTS_E002",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E002 explicitly selects 3.3V pull-ups for R16/R17/R18, keeps connector pin 1 tied to GND, and defines active-low operation with a press shorting the GPIO input to GND.",
+          "confidence": "HIGH"
+        }
+      ]
+    }
+  ]
+}

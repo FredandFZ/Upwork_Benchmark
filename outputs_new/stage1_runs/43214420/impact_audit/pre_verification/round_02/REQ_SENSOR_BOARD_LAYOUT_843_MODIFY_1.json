@@ -1,0 +1,182 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_SENSOR_BOARD_LAYOUT",
+    "message_id": 843,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_BOARD_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already records the single-board architecture and removes the obsolete interboard layout constraints; no additional necessary change is established.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already marks the separate power board as absent and removes its obsolete mechanical details.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A single-board design eliminates the two connectors that formerly linked the main and sensor boards, leaving the eight external sensor/display connectors on the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          844
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "total_connector_count": 8
+        },
+        "value_removals": [
+          "main_board_input_connectors"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "SENSOR_CONNECTIONS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already captures acceptance of the proposed connector distribution subject to the constraints stated immediately beforehand.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The move to one board does not necessarily change the battery connector's electrical interface, and message 843 does not establish a replacement for its existing placement details.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already removes the obsolete interboard connection counts and destinations while retaining the connectors still needed for external devices.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The one-board architecture necessarily eliminates the separate power and signal links between the former boards, including their connector and pin-order rules.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          844
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "interboard_power_signal_links_status": "not present in the single-board design"
+        },
+        "value_removals": [
+          "connection_architecture",
+          "signal_connector_type",
+          "signal_connector_pinout",
+          "power_connector_type",
+          "power_connector_signals",
+          "power_connector_pin_order_policy",
+          "matching_physical_numbering_required"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_BOARD_CHAIN_POWER_DISTRIBUTION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A single-board design necessarily removes the former power-board-to-main-to-sensor board chain and its interboard forwarding behavior.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          844
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "board_chain_power_distribution_status": "not present in the single-board design"
+        },
+        "value_removals": [
+          "power_board_to_main_connector",
+          "power_board_to_main_rails",
+          "main_to_sensor_connector",
+          "main_to_sensor_rails",
+          "board_chain_order",
+          "main_board_distribution_behavior"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The current-coverage description still refers to a sensor board, but the source does not establish whether the integrated design preserves the same monitored electrical path or requires a different coverage rule.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The single-board decision does not necessarily remove the external charge-status connector or change the charge-status circuitry and indicator behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_ESP32_BREAKOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The move to one board does not change the independently required ESP32 full-pin through-hole breakout.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The I2C resistor value, topology, and optional population policy remain valid independently of the former multi-board mechanical arrangement.",
+      "new_event": null
+    }
+  ]
+}

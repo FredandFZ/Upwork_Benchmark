@@ -1,0 +1,220 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+    "message_id": 843,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "No additional propagation is needed because the existing message-843 MODIFY already moves the power-button connector and panel-control scope to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already removes the obsolete interboard sensor connectors and records that no separate sensor board remains.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already applies the short-edge battery-connector constraint and changes the Requirement context to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-843 MODIFY already replaces the separate sensor-board wording with integrated sensor coverage and updates the scope context.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PANEL_POWER_CONTROL",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY removes the obsolete interboard signal source but leaves the connector assigned to the former main board and retains a stale MAIN_BOARD context.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "connector_board": "integrated board"
+        },
+        "value_removals": [
+          "connection_source"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "PANEL_CONTROLS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The LED power and logic rules remain unchanged, and the existing message-843 MODIFY already updates their scope to the integrated board.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_BOARD_LAYOUT",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY removes the obsolete separate-main-board layout constraints but fails to replace the stale MAIN_BOARD scope with the integrated-board context.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "separate_main_board_status": "not present in the single-board design"
+        },
+        "value_removals": [
+          "high_pin_count_connector_placement",
+          "sensor_connector_alignment",
+          "interboard_cable_path",
+          "enclosure_board_order",
+          "cable_access",
+          "small_connector_placement",
+          "mounting_orientation",
+          "board_dimensions_mm",
+          "connector_configuration",
+          "esp32_placement",
+          "connector_orientation"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ENCLOSURE_FIT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_CONNECTOR_ASSEMBLY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Connector placement flexibility does not change the existing requirement that all integrated-board connectors use through-hole assembly.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_ESP32_BREAKOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The active full-pin breakout remains applicable, but its MAIN_BOARD scope must move to the sole integrated board after the separate-board architecture is eliminated.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "ESP32_BREAKOUT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_COST_OPTIMIZATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision is consistent with, but does not change, the existing cost goal of eliminating interboard connectors while preserving functionality.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_LIGHT_SENSOR_PORT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Flexible connector placement does not alter the required quantity, interface, type, or purpose of the integrated light-sensor port.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY correctly removes the obsolete condition involving an absent power board but leaves the Requirement scoped to the former main board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "standalone_activation_condition"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "STANDALONE_PROGRAMMING",
+            "SENSOR_DEBUGGING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

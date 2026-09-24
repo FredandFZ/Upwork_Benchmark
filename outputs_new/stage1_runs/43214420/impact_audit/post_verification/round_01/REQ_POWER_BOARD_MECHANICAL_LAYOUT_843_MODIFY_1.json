@@ -1,0 +1,242 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+    "message_id": 843,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The single-board decision invalidates the battery connector's separate-power-board placement constraints, while the adjacent integrated-board constraints confirm that J_BAT remains part of the consolidated design.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          842
+        ],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "battery_connector_placement",
+          "battery_connector_orientation",
+          "mounting_hole_clearance"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "BATTERY_CONNECTOR"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_BOARD_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a complete same-message MODIFY that marks the separate sensor board absent and removes its obsolete mechanical-layout attributes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTEGRATED_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a same-message MODIFY recording acceptance of the integrated board's connector-edge distribution under the stated constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_BOARD_LAYOUT",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 843,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event removes multiboard constraints but leaves obsolete standalone-main-board layout attributes and omits the fact that no separate main board remains.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "separate_main_board_status": "not present in the single-board design"
+        },
+        "value_removals": [
+          "mounting_orientation",
+          "high_pin_count_connector_placement",
+          "sensor_connector_alignment",
+          "interboard_cable_path",
+          "enclosure_board_order",
+          "small_connector_placement",
+          "cable_access",
+          "board_dimensions_mm",
+          "connector_configuration",
+          "esp32_placement",
+          "connector_orientation"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_USB_CONNECTOR",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The adjacent constraint explicitly retains the user-facing USB-C connector, while the single-board decision moves its applicable board context from the separate power board to the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [
+          842
+        ],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "USB_INTERFACE"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_AXP2101_TOPOLOGY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source establishes a single-board mechanical design but does not determine whether the AXP2101 topology is transferred unchanged, redesigned, or removed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "A single-board design makes the old power-board and sensor-board interconnect inventory and its derived connector count obsolete, while the remaining external connector architecture can persist.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": [
+          "jst_connector_destinations",
+          "jst_connector_count",
+          "low_pin_count_scope",
+          "sensor_board_connection_count",
+          "sensor_board_connections"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "CONNECTOR_SET"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source mentions LEDs in the single-board layout but does not establish whether the charge-status connector and power-to-main-board charge-indicator topology are retained or redesigned.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The board consolidation makes references to downstream sensor-board current potentially stale, but the source does not specify the integrated board's current-monitor topology or coverage.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_DCDC1_OUTPUT",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source does not establish whether the DCDC1 setpoint and the former main-board Schottky OR-ing compensation remain unchanged in the integrated design.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly retains buttons in the single-board connector layout, so the panel controls remain applicable but their board location and scope move from the separate main board to the integrated board.",
+      "new_event": {
+        "source_message": {
+          "message_id": 843,
+          "speaker": "client",
+          "text": "Yes, I think that should be possible. With only one board plus sensors, buttons, and LEDs that are all easy to position, I do not expect an issue wherever you place the connectors."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "power_button_connector": {
+            "connector_type": "JST-GH",
+            "pin_count": 2,
+            "board_location": "INTEGRATED_BOARD",
+            "button_location": "ENCLOSURE_PANEL",
+            "signal": "PWRON",
+            "signal_source": "J_PWR_SIG_PIN_4",
+            "connection_method": "TAP_EXISTING_LINE"
+          }
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "INTEGRATED_BOARD",
+            "PANEL_CONTROLS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_SAFETY",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "The source confirms a consolidated board and battery placement constraints but does not determine whether the prior AXP2101-based battery-protection design transfers unchanged.",
+      "new_event": null
+    }
+  ]
+}

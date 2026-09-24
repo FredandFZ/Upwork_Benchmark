@@ -1,0 +1,95 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 259,
+        "speaker": "client",
+        "text": "Thanks for checking. I originally intended it for debugging, but that LDO will not let me debug the sensors. Could we use something like ME6211A33M5 instead—what do you think?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "sensor_debugging_support": true,
+        "ldo_capacity_requirement": "The LDO must adequately power the sensors during debugging."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "POWER",
+          "HARDWARE"
+        ],
+        "contexts": [
+          "MAIN_BOARD",
+          "SENSOR_DEBUGGING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 263,
+        "speaker": "client",
+        "text": "Here is the power mapping by operating mode:\n\nWith the power board connected, the primary source is the 3.3V rail (AXP2101 DCDC1, 3.5A). It powers:\n- ESP32-S3 module\n- INA219\n- all I2C sensors on the sensor board: SCD41, BME280, and ENS160\n- I2C display\n- TTP223 and AM312 PIR\n\nControlled by ESP32 GPIO3, the 5V rail (MT3608 boost, 1200mA) powers:\n- SPS30 particulate sensor\n- ZE08-CH2O formaldehyde sensor\n- SK6812 LEDs, but only if they are wired to 5V; that depends on the version\n\nWhen USB-C is connected to the main board while the power board is absent, the 3.3V rail (ME6211A LDO, 2A) becomes active for standalone programming. It supplies the same 3.3V rail listed above; Schottky diode OR-ing allows whichever source is present to take precedence.\n\nThe 2.8–4.6V battery feeds AXP2101, which then supplies everything downstream.\n\nIn short, AXP2101 powers everything during normal operation; the LDO activates only for programming without the power board connected."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "standalone_activation_condition": "USB-C is connected to the main board while the power board is absent.",
+        "standalone_power_source": "ME6211A 3.3V LDO",
+        "ldo_current_rating": "2A",
+        "powered_scope": "The complete 3.3V rail, including the ESP32-S3, INA219, I2C sensors, I2C display, TTP223, and AM312 PIR.",
+        "standalone_programming_support": true
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": [
+          "POWER",
+          "USB",
+          "HARDWARE"
+        ],
+        "contexts": [
+          "MAIN_BOARD",
+          "STANDALONE_PROGRAMMING",
+          "SENSOR_DEBUGGING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 362,
+        "speaker": "client",
+        "text": "Three points on the schematic need checking:\n1\\. Standalone USB mode requires 2A, while LD1117S33CTR is rated for 1600mA. Will that be sufficient?\n2\\. Was the choice of 0.02Ω shunt resistors intentional? That gives 12mA resolution, compared with 1.6mA at 0.33Ω. 3. For the SK6812 level shift, the schematic uses IRLML2402; is there a pull-up on the 5V side? Given the tight SK6812 timing (~600ns), I want to make sure the edges are fast enough. Would 74AHCT1G125 be safer?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The schematic uses an LD1117S33CTR rated for 1.6A even though standalone USB mode requires 2A, leaving the selected LDO's adequacy unresolved."
+      },
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 1020,
+      "suggested_requirement_id": "REQ_INTEGRATED_NATIVE_USB",
+      "description": "The grounded USBLC6 VBUS pin concerns native USB operation on the later integrated board, not the main-board standalone LDO supply."
+    },
+    {
+      "message_id": 1030,
+      "suggested_requirement_id": "REQ_INTEGRATED_NATIVE_USB",
+      "description": "The requested USB ESD-symbol correction belongs to the integrated board's native USB interface."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

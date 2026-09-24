@@ -1,0 +1,122 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+    "message_id": 425,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_RAIL_CURRENT_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Separately controlling LED and sensor power does not change which rails are monitored or the current-monitor topology.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the use of the addressable LED chain for charge-status indication or its associated connector circuitry.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Separate LED and sensor controls do not alter the standalone USB power source, activation condition, capacity, or powered 3.3V scope.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_CONNECTOR_INVENTORY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not add, remove, or redefine any main-board connector.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change the 3.3V source OR-ing method or source-selection behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_DECOUPLING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Power-control separation does not change the requirement for local decoupling capacitors.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_PANEL_IO",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not concern panel controls, touch inputs, reset wiring, or button placement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_GPIO_ASSIGNMENTS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The source establishes separate controls but provides no GPIO assignment and does not change any existing mapped pin.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BOOST_ENABLE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "This switched 5V supply powers both the LEDs and sensors, so the explicit addition of separate controls materially changes its load-control behavior.",
+      "new_event": {
+        "source_message": {
+          "message_id": 425,
+          "speaker": "client",
+          "text": "With separate control now added for the LEDs and sensors, we might not need the shifter."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "load_control_separation": "LEDs and sensors have separate controls"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_I2C_SIGNAL_CONDITIONING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change I2C series-resistor values, placement, purpose, or population policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SENSOR_CONNECTOR_TOPOLOGY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Separate power control can be implemented upstream without changing the sensor-board connector count, types, or pinouts, and no connector change is stated.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS",
+      "decision": "HUMAN_REVIEW",
+      "event_locator": null,
+      "confidence": "LOW",
+      "reason": "Separate LED and sensor controls may require replacing the single interboard 5V_EN signal or adding another control signal, but the source does not specify whether or how the interboard connector changes.",
+      "new_event": null
+    }
+  ]
+}

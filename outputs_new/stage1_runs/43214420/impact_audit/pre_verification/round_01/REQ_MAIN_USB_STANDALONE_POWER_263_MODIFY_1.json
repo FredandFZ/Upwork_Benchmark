@@ -1,0 +1,139 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_MAIN_USB_STANDALONE_POWER",
+    "message_id": 263,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_MAIN_POWER_ORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a complete same-message MODIFY covering the Schottky OR-ing sources, source-selection behavior, and standalone LDO condition; no additional change is required.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MAIN_STATUS_LED_POWER_LOGIC",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already records the same-message 5V SK6812 supply condition and GPIO3 switching, while the standalone 3.3V LDO decision does not alter that logic.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BOOST_ENABLE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a same-message MODIFY specifying the 1200 mA boost output and its 5V loads; the standalone LDO mapping adds no further boost-supply change.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_CHARGE_STATUS_OUTPUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The power mapping does not change the charge-status indication behavior, GPIO assignment, or CHGLED connector circuit.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_INTERBOARD_POWER_SIGNAL_LINKS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The operating-mode power mapping does not change the interboard connector types, carried signals, or matching-order policy.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_I2C_BUS_ELECTRICAL",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Identifying which supply powers the I2C devices does not change the bus speed, cable length, pull-ups, or series-resistor configuration.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_INTERFACE",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly establishes the supported battery voltage range and that the battery interface feeds the AXP2101, and no matching Event exists.",
+      "new_event": {
+        "source_message": {
+          "message_id": 263,
+          "speaker": "client",
+          "text": "Here is the power mapping by operating mode:\n\nWith the power board connected, the primary source is the 3.3V rail (AXP2101 DCDC1, 3.5A). It powers:\n- ESP32-S3 module\n- INA219\n- all I2C sensors on the sensor board: SCD41, BME280, and ENS160\n- I2C display\n- TTP223 and AM312 PIR\n\nControlled by ESP32 GPIO3, the 5V rail (MT3608 boost, 1200mA) powers:\n- SPS30 particulate sensor\n- ZE08-CH2O formaldehyde sensor\n- SK6812 LEDs, but only if they are wired to 5V; that depends on the version\n\nWhen USB-C is connected to the main board while the power board is absent, the 3.3V rail (ME6211A LDO, 2A) becomes active for standalone programming. It supplies the same 3.3V rail listed above; Schottky diode OR-ing allows whichever source is present to take precedence.\n\nThe 2.8–4.6V battery feeds AXP2101, which then supplies everything downstream.\n\nIn short, AXP2101 powers everything during normal operation; the LDO activates only for programming without the power board connected."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "supported_battery_voltage_range": "2.8–4.6V",
+          "battery_connection_destination": "AXP2101"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_AXP2101_TOPOLOGY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source explicitly establishes the AXP2101 battery-input range and its downstream normal-operation power role, and no matching Event exists.",
+      "new_event": {
+        "source_message": {
+          "message_id": 263,
+          "speaker": "client",
+          "text": "Here is the power mapping by operating mode:\n\nWith the power board connected, the primary source is the 3.3V rail (AXP2101 DCDC1, 3.5A). It powers:\n- ESP32-S3 module\n- INA219\n- all I2C sensors on the sensor board: SCD41, BME280, and ENS160\n- I2C display\n- TTP223 and AM312 PIR\n\nControlled by ESP32 GPIO3, the 5V rail (MT3608 boost, 1200mA) powers:\n- SPS30 particulate sensor\n- ZE08-CH2O formaldehyde sensor\n- SK6812 LEDs, but only if they are wired to 5V; that depends on the version\n\nWhen USB-C is connected to the main board while the power board is absent, the 3.3V rail (ME6211A LDO, 2A) becomes active for standalone programming. It supplies the same 3.3V rail listed above; Schottky diode OR-ing allows whichever source is present to take precedence.\n\nThe 2.8–4.6V battery feeds AXP2101, which then supplies everything downstream.\n\nIn short, AXP2101 powers everything during normal operation; the LDO activates only for programming without the power board connected."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "battery_input_voltage_range": "2.8–4.6V",
+          "battery_power_path": "The battery feeds AXP2101, which supplies everything downstream during normal operation."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_USB_CONNECTOR",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source concerns main-board USB-C power behavior and does not change the separate power-board USB-C connector or its sourcing constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_MECHANICAL_LAYOUT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The electrical power mapping does not alter the power-board dimensions, mounting holes, connector placement, or enclosure-fit constraints.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_TEMPERATURE_MONITORING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The battery-to-AXP2101 power path does not change the NTC-based battery-temperature sensing requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_POWER_BOARD_BATTERY_SAFETY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The stated battery input range and power path do not modify the established overcharge, overdischarge, or thermal-protection rules.",
+      "new_event": null
+    }
+  ]
+}
