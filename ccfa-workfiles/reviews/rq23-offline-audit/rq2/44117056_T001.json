@@ -1,0 +1,335 @@
+{
+  "schema_version": "rq2-offline-agent-review-v1",
+  "target_id": "44117056_T001",
+  "review_method": "SINGLE_AGENT_ROLE_SEPARATED_PANEL",
+  "reviewers": [
+    "codex-structural-role",
+    "codex-semantic-role"
+  ],
+  "adjudicator": "codex-adjudication-role",
+  "adjudication_status": "ADJUDICATED",
+  "verdict": "FINALIZE",
+  "boundary_review": {
+    "pre_task_boundary_correct": true,
+    "historical_requirement_scope_correct": true,
+    "internal_ids_excluded": true
+  },
+  "reviewed_states": {
+    "REQ_ELECTRICAL_PERMIT_DRAWING_PACKAGE": {
+      "attributes": {
+        "electrical_drawing_deliverable": "permit-ready electrical drawings",
+        "electrical_pe_stamp_required": true
+      },
+      "scope": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "ELECTRICAL_DRAWINGS",
+          "PE_STAMP"
+        ],
+        "contexts": [
+          "ADDITIONAL_PERMIT_PROJECT"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": [
+        {
+          "status": "OPEN",
+          "dimension": "VALUE",
+          "description": "Whether the freelancer was responsible for creating the electrical drawings, rather than only reviewing and stamping them, required client clarification."
+        }
+      ],
+      "execution": null
+    },
+    "REQ_REQUIRED_ELECTRICAL_CALCULATIONS": {
+      "attributes": {
+        "electrical_calculation_scope": "all necessary load calculations supporting the permit-ready electrical drawings"
+      },
+      "scope": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "ELECTRICAL_CALCULATIONS"
+        ],
+        "contexts": [
+          "ADDITIONAL_PERMIT_PROJECT"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": [
+        {
+          "status": "OPEN",
+          "dimension": "VALUE",
+          "description": "It is unresolved whether the freelancer must produce the calculations or only review and stamp existing materials."
+        }
+      ],
+      "execution": null
+    },
+    "REQ_MANUAL_J_S_D_CALCULATIONS": {
+      "attributes": {
+        "hvac_sizing_calculations_required": true,
+        "title_24_required": false
+      },
+      "scope": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "HVAC_CALCULATIONS"
+        ],
+        "contexts": [
+          "ADDITIONAL_PERMIT_PROJECT"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": [
+        {
+          "status": "OPEN",
+          "dimension": "SCOPE",
+          "description": "The freelancer questions whether calculations are included because the prior understood scope covered only review and stamping."
+        }
+      ],
+      "execution": null
+    }
+  },
+  "final_field_scoring_specs": {
+    "REQ_ELECTRICAL_PERMIT_DRAWING_PACKAGE": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "electrical_drawing_deliverable": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "electrical_pe_stamp_required": {
+            "comparator": "BOOLEAN_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "UNORDERED_RECORD_F1",
+        "score": true,
+        "item_fields": {
+          "description": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "dimension": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "matching_policy": "MAX_WEIGHT_ONE_TO_ONE",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED",
+        "matching_key_fields": [
+          "dimension",
+          "description"
+        ]
+      },
+      "execution": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_REQUIRED_ELECTRICAL_CALCULATIONS": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "electrical_calculation_scope": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "UNORDERED_RECORD_F1",
+        "score": true,
+        "item_fields": {
+          "description": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "dimension": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "matching_policy": "MAX_WEIGHT_ONE_TO_ONE",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED",
+        "matching_key_fields": [
+          "dimension",
+          "description"
+        ]
+      },
+      "execution": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_MANUAL_J_S_D_CALCULATIONS": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "hvac_sizing_calculations_required": {
+            "comparator": "BOOLEAN_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "title_24_required": {
+            "comparator": "BOOLEAN_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "UNORDERED_RECORD_F1",
+        "score": true,
+        "item_fields": {
+          "description": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "dimension": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "matching_policy": "MAX_WEIGHT_ONE_TO_ONE",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED",
+        "matching_key_fields": [
+          "dimension",
+          "description"
+        ]
+      },
+      "execution": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    }
+  },
+  "review_notes": [
+    "Structural and boundary review passed.",
+    "Every scoring leaf received an explicit reviewed comparator status."
+  ]
+}

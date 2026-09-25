@@ -1,17 +1,17 @@
 {
   "schema_version": "rq-instance-v2",
   "instance_id": "42204309_T027_RQ1",
-  "input_release": "42204309-stage12-v1",
-  "target_fingerprint": "9067201ce63a0557bc6a6f648eeda3b753b5abb8923ed3af66446c13ec8f7173",
+  "input_release": "42204309-stage2-final-20260925-rq123-main-v1",
+  "target_fingerprint": "11d5c69aacc7084156a5a847f36de00f6b9bc5d2a155ce8a3bd9318efddfd85a",
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ1",
   "rq_name": "Relevant Requirement Selection",
   "target_id": "42204309_T027",
   "task_gold_id": "42204309_T027_GOLD",
-  "target_message_id": 781,
-  "turns": 780,
-  "history_turn_count": 780,
+  "target_message_id": 631,
+  "turns": 630,
+  "history_turn_count": 630,
   "difficulty": "LONG",
   "applicable_rqs": [
     "RQ1",
@@ -20,14 +20,14 @@
   ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
-    "source_message_id": 781,
+    "source_message_id": 631,
     "speaker": "client",
-    "text": "For the $900 prizes, is the method a redemption control or automatic payout, with the automatic option working like the commissions? Hey, how does the giveaway work?"
+    "text": "Could it instead be that no ticket is generated?\n\n- Generating no ticket for a 'no code buy' may be acceptable as-is, provided we slightly revise the UI notes.\n- If a ticket is generated and randomly distributed but omitted from the dashboard, that must be fixed.\n- Any randomly distributed commission must also appear on the dashboard and in the attributes.\n\nHere is the no-code purchase with a $4 tip: 0xa731d8c25e906bf414c8e729630db5fa81d74e295c60b3a917f84d620e51ac39\n\nIf tips are paid through a second transaction immediately after minting, that would explain why the tip failed, and we will need a UI note explaining it."
   },
   "history_pool": {
     "boundary": "STRICTLY_BEFORE_TARGET_MESSAGE",
     "contains_target_message": false,
-    "message_count": 780,
+    "message_count": 630,
     "messages": [
       {
         "message_id": 1,
@@ -4438,1056 +4438,6 @@
         "speaker": "freelancer",
         "text": "Please share the BaseScan URLs so I can inspect them.",
         "milestone": null
-      },
-      {
-        "message_id": 631,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Could it instead be that no ticket is generated?\n\n- Generating no ticket for a 'no code buy' may be acceptable as-is, provided we slightly revise the UI notes.\n- If a ticket is generated and randomly distributed but omitted from the dashboard, that must be fixed.\n- Any randomly distributed commission must also appear on the dashboard and in the attributes.\n\nHere is the no-code purchase with a $4 tip: 0xa731d8c25e906bf414c8e729630db5fa81d74e295c60b3a917f84d620e51ac39\n\nIf tips are paid through a second transaction immediately after minting, that would explain why the tip failed, and we will need a UI note explaining it.",
-        "milestone": null
-      },
-      {
-        "message_id": 632,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "We identified the unexpected transaction by decoding your new BaseScan tx 0xa731…ac39:\n- USDC transfer(to=0x7a14…95a1, amount=42)\n- The sender was 0x8A3c…9F6e, the Harbor Quill NFT contract.\n- Its method selector was 0x095ea7b3 for an ERC‑20 transfer.\n\nIn other words, the contract was returning 42 USDC to you; it was not a $4 tip. Your wallet displayed “Unknown Signature Type” because it does not label internal protocol transfers well.",
-        "milestone": null
-      },
-      {
-        "message_id": 633,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The reason the tip “isn’t working” is that tips are sent after minting as a separate USDC transfer from your wallet to treasuryVault. Cancelling that second tip transaction does not stop the mint, exactly as you observed, but it does prevent the tip from being sent.\n\nThe current automatic follow-up flow is also confusing: a no-referral mint can trigger a different Step 5 transaction to finalize the random referral, and that may appear as another popup.",
-        "milestone": null
-      },
-      {
-        "message_id": 634,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Yes, a “no referral code” mint is designed to award one random commission and a ticket to a random existing NFT holder through finalizeReferralDraw(drawRequestId). However, the award occurs only after a follow-up transaction emits ReferralDrawPaid and ReferralCreditsGranted. Until that transaction executes, no ticket or commission has actually been awarded, so neither can appear on the leaderboard or in the attributes.",
-        "milestone": null
-      },
-      {
-        "message_id": 635,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "To prevent any more unexpected signature requests, the mint page needs one further change. It currently attempts the follow-up random-referral finalization automatically. I’ll instead put 5 explicit buttons in the Success modal, including:\n- Send $X tip (separate tx) — optional\n- Finalize random referral (separate tx) — shown only for no-code mints when a VRF requestId is detected\n\nNeither transaction will open automatically.\n\nTell me which behavior you want me to add to the Success modal UX now:\n- Option A (recommended): display the buttons without automatic transaction popups.\n- Option B: run finalization automatically, but first show a full-screen Step 2 required prompt.",
-        "milestone": null
-      },
-      {
-        "message_id": 636,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "👍 The recommended Option C works for me.",
-        "milestone": null
-      },
-      {
-        "message_id": 637,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "okay",
-        "milestone": null
-      },
-      {
-        "message_id": 638,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "After I finish the current fix, I’ll test the Rainbow issue.\n\nMy Rainbow wallet address is:\n0xf27a1d846c90b3e514d87a296e03cb5f91a74e28",
-        "milestone": null
-      },
-      {
-        "message_id": 639,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Does this fix mean we’ll need a new contract?\n\nAlso, should I send your Rainbow wallet some $$ for testing?",
-        "milestone": null
-      },
-      {
-        "message_id": 640,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I did just create it, so yes, it’s a new wallet.",
-        "milestone": null
-      },
-      {
-        "message_id": 641,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For now, I don’t want us to create a new contract. I’ll address this first and then check whether the issue has been resolved; if it hasn’t, we’ll need to consider another alternative.",
-        "milestone": null
-      },
-      {
-        "message_id": 642,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "To your new wallet, I’ve just sent $18 ETH and $80 USDC on base.",
-        "milestone": null
-      },
-      {
-        "message_id": 643,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay, thanks",
-        "milestone": null
-      },
-      {
-        "message_id": 644,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please test this from your side now.",
-        "milestone": null
-      },
-      {
-        "message_id": 645,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Should I test a buy with referral omitted?",
-        "milestone": null
-      },
-      {
-        "message_id": 646,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "These issues failed here.",
-        "milestone": null
-      },
-      {
-        "message_id": 647,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Begin by minting with referral omitted.",
-        "milestone": null
-      },
-      {
-        "message_id": 648,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please use the Success modal to verify that a confirmation prompt opens automatically and that Review pending referral (batched tx) appears, along with Tip for eligible purchases.",
-        "milestone": null
-      },
-      {
-        "message_id": 649,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Here’s what happened when I minted with referral omitted and added a $4 tip.\n\nMinting required 4 transactions:\n0x91b5e7d2c4068fa31d79b2e54a8c016f7e32d9a568bc41e203f7a6d495c18eb0\n\nFor the tip, 3 additional transactions appeared after a short delay:\n0x25d8a1c79e430bf654a2e8d1097c36fa81b5e294d760c3a94f18b7e2056da3c1\n\nWe’ll need a UI note explaining that the tip transaction arrives after a short delay following the mint transaction.\n\nIt may have been obscured by the tip transaction, but the confirmation dialog never appeared. On the leaderboard, however, 2 new commissions and 3 tickets counted.",
-        "milestone": null
-      },
-      {
-        "message_id": 650,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Should I top up your wallet so you can perform more mints yourself?",
-        "milestone": null
-      },
-      {
-        "message_id": 651,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m checking this now, okay.",
-        "milestone": null
-      },
-      {
-        "message_id": 652,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please top it up with ETH using this address:\n\n0x5f2a8c71d9046be318c7a5d2e96b304fa17d8c52\n\nOnly assets on the Base chain should be sent there.",
-        "milestone": null
-      },
-      {
-        "message_id": 653,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Alternatively, use USDC\n\n0x5f2a8c71d9046be318c7a5d2e96b304fa17d8c52",
-        "milestone": null
-      },
-      {
-        "message_id": 654,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The Base transfer of $75 ETH has been sent.",
-        "milestone": null
-      },
-      {
-        "message_id": 655,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Thanks, I saw it.",
-        "milestone": null
-      },
-      {
-        "message_id": 656,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Are you using a Treasury wallet as the source for the tip?",
-        "milestone": null
-      },
-      {
-        "message_id": 657,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Yes—the treasury wallet was used, so it was a tip to the treasury.",
-        "milestone": null
-      },
-      {
-        "message_id": 658,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Because your wallet is the on-chain treasury wallet, the tip transaction is a treasury transfer.",
-        "milestone": null
-      },
-      {
-        "message_id": 659,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "That's the problem.",
-        "milestone": null
-      },
-      {
-        "message_id": 660,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Although the tip worked, we need a confirmation banner explaining that it is sent through a delayed follow-up transaction. Otherwise, buyers may think they’re being asked to purchase a second copy.",
-        "milestone": null
-      },
-      {
-        "message_id": 661,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m working on that UI/UX fix right now.",
-        "milestone": null
-      },
-      {
-        "message_id": 662,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Commission and ticket accounting for buys made without a referral code is the remaining problem: they are sent, but they do not appear on the leaderboard, in NFT attributes, or elsewhere.",
-        "milestone": null
-      },
-      {
-        "message_id": 663,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 664,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "In your case, the $4 tip became a self-transfer because your wallet is currently set as the on-chain founderWallet, meaning no funds move when you tip yourself. I’ve now deployed a UI safeguard that disables tipping under that condition.",
-        "milestone": null
-      },
-      {
-        "message_id": 665,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I minted nft #47 with referral identifier absent. Can you confirm whether the $9 tip reached you?",
-        "milestone": null
-      },
-      {
-        "message_id": 666,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The $9 did arrive, yes.",
-        "milestone": null
-      },
-      {
-        "message_id": 667,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Perfect",
-        "milestone": null
-      },
-      {
-        "message_id": 668,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "From my side, here is what appears.",
-        "milestone": null
-      },
-      {
-        "message_id": 669,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The leaderboard screenshot now reports the following across 31 buys:\n- 15 tickets total\n- 12 commissions\n\nThat makes me think tickets from buys without a referral code are registering now, while the commissions aren’t.\n\nThere is also a mismatch on mint #18: it has 8 tickets but only $12 in commission.",
-        "milestone": null
-      },
-      {
-        "message_id": 670,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Could I be misunderstanding it? We have 30 referrals, and those same 30 referrals show their $10 commissions there.\n\nThey appear on NFT #13, NFT #20, NFT #16 and NFT #7.",
-        "milestone": null
-      },
-      {
-        "message_id": 671,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please provide a clearer or alternative explanation of the business logic for referrals, tickets, commissions, and how each is distributed or awarded. Once I have that, I can check the system implementation again.",
-        "milestone": null
-      },
-      {
-        "message_id": 672,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "At this point, 34 mints should correspond to 34 tickets and 34 x $20 commissions.\n\nA mint still produces a ticket and commission even when no referral code is supplied.\n\nAccounting works correctly on the leaderboards and NFT attributes whenever a code is used. That part is perfect.\n\nWithout a referral code, the ticket and commission are assigned randomly, but both must still appear on the leaderboard and in the NFT attributes.\n\nSince your latest fix, the randomly assigned tickets from the last 7 mints seem to have been recorded correctly, which is great. The earlier missing tickets have not been backfilled, though.\n\nThe $18 commissions generated by these no-code buys are also still missing from the leaderboard and NFT attributes.\n\nMy screenshot shows an NFT with 9 tickets but only 4 x $20 commissions. That should be impossible because every ticket comes with a $18 commission.\n\nThe leaderboard screenshot accounts for only 15 tickets and 12 x $8 commissions from 34 total mints. Regardless of whether a referral code was supplied, 34 mints should produce 34 tickets and 34 x $20 commissions.",
-        "milestone": null
-      },
-      {
-        "message_id": 673,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Because these rewards have already been minted, funded, and awarded, backfilling them correctly would require access to wallets with prior referrals that performed the transactions so I could index the commissions again.",
-        "milestone": null
-      },
-      {
-        "message_id": 674,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "As long as everything works correctly from now on, I suppose we can skip the backfill.",
-        "milestone": null
-      },
-      {
-        "message_id": 675,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Once every fix is finished and verified, the best approach is to redeploy the new contract. It will then begin with all the changes and report every figure correctly.",
-        "milestone": null
-      },
-      {
-        "message_id": 676,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Because only our wallets would be affected and the problem would not continue, redeployment optional if tickets and commissions from 'code-free purchases' are now recorded correctly.\n\nHowever, the randomly assigned commissions appear to be queued for reconciliation. Can you confirm their status?",
-        "milestone": null
-      },
-      {
-        "message_id": 677,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Regarding the randomly assigned commissions, how should their accounting work? Please give me the business logic so I can compare it with what I see on my end.",
-        "milestone": null
-      },
-      {
-        "message_id": 678,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m currently implementing a way to safe-deploy the smart contract across all modules so it can pick up the changes and the new sync. I’ll test it against the backend first; if that succeeds, I’ll tell you when we can push the deployment live.",
-        "milestone": null
-      },
-      {
-        "message_id": 679,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Here’s the intended logic: when a referral value is present, the inviting account/NFT should receive the reward entry and fee credit. When the referral field is blank, the rotation-selected account/NFT should receive the reward entry and fee credit.\n\nI’m not sure how we implement that—are you saying it isn’t possible? Since ticket accounting seems fixed, could a dedicated reconciliation pass handle the commissions?",
-        "milestone": null
-      },
-      {
-        "message_id": 680,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Let me spend 20 minutes checking something. Once it’s ready, I’ll tell you to test it.",
-        "milestone": null
-      },
-      {
-        "message_id": 681,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I still think the math is wrong 😅. Should I explain why?",
-        "milestone": null
-      },
-      {
-        "message_id": 682,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Because no prior NFTs existed for the first mint, it could not award a ticket. Therefore, with 34 total mints, the contract should report 33 tickets and $140 in referral commissions.",
-        "milestone": null
-      },
-      {
-        "message_id": 683,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Would this option make more sense to you?",
-        "milestone": null
-      },
-      {
-        "message_id": 684,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Since it is a one-off that won't affect anything in the future, yes, that's okay.",
-        "milestone": null
-      },
-      {
-        "message_id": 685,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Let me complete the implementation here, and I’ll send you an update within 2 hours.",
-        "milestone": null
-      },
-      {
-        "message_id": 686,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The temporary backend logic has now been implemented. Could you check whether the commission and tickets are reflected correctly? After that, I’ll explain what we can do next.",
-        "milestone": null
-      },
-      {
-        "message_id": 687,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Could you confirm this behavior for both the code-used and no-code flows?\n\nWhen a referral code is used, the referrer's referrerAssetId receives:\n- +4 tickets (compactTicketBalance)\n- + $35 commission (affiliateCommissionBalance)\n\nWithout a referral code, finalizeReferralDraw(drawRequestId) is executed first. The randomly selected recipientTokenKey then receives:\n- +6 tickets\n- + $12 commission\n\nDoes this logic look okay to you?",
-        "milestone": null
-      },
-      {
-        "message_id": 688,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The logic itself sounds good to me.\n\nAfter 34 mints, the leaderboard now shows 24 tickets and 19 commissions, which is perfect.\n\nThe NFT attributes are still not right, though. My screenshots show that NFT #42 has 18 tickets and 9 x $35 commissions on the leaderboard, which is correct. When I open NFT #42, the top of the page also correctly displays 18 tickets and 14 referrals. However, its attributes still report only 6 referrals and $85 in total earnings.",
-        "milestone": null
-      },
-      {
-        "message_id": 689,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’ll turn to the attributes and check them now.",
-        "milestone": null
-      },
-      {
-        "message_id": 690,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please refresh the page at this point.",
-        "milestone": null
-      },
-      {
-        "message_id": 691,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The backend metadata service now builds attributes from the live on-chain getNFTMetadata(tokenId), giving it the same source of truth as the leaderboard.",
-        "milestone": null
-      },
-      {
-        "message_id": 692,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Absolutely, that's exactly right!",
-        "milestone": null
-      },
-      {
-        "message_id": 693,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The mobile problem I found in Rainbow Wallet may be local to my side, although I still need to confirm that.",
-        "milestone": null
-      },
-      {
-        "message_id": 694,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "That makes sense, because everything is working perfectly on my side.",
-        "milestone": null
-      },
-      {
-        "message_id": 695,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "My wallet containing the NFTs remains stuck in 'read-only monitoring'. Even after entering the seedphrase to finish the import, it is still in 'read-only monitoring'.\n\nYou do not need to worry about that because it is only an issue on my side. How is the mobile reader UX?",
-        "milestone": null
-      },
-      {
-        "message_id": 696,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Before I make this contract deployment permanent, I need to apply a one-time off-chain adjustment: add 4 tickets and $12 to the token, usually tokenId #8, so the numbers balance.",
-        "milestone": null
-      },
-      {
-        "message_id": 697,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Testing has not happened yet, but I’ll check it within 2 days.",
-        "milestone": null
-      },
-      {
-        "message_id": 698,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Is the adjustment meant to balance the missing ticket and commission from mint #8?\n\nIf so, you can balance it when that is easy, but it does not have to be done because it is a recurring event that will only affect mint #8.\n\nDo the contracts still need to be redeployed? Everything appears to be working perfectly now.",
-        "milestone": null
-      },
-      {
-        "message_id": 699,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Yes, a controlled redeployment is required, and it should retain our data properly. Since the data is probably in the backend database, we will not use our main deployer wallet for this deployment.",
-        "milestone": null
-      },
-      {
-        "message_id": 700,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "First, we’ll keep the contract safely on the deployer wallet. A different wallet will then deploy the changes and contract rules, after which I’ll merge them into our existing wallet. This approach retains the same data while putting the new fixes live.",
-        "milestone": null
-      },
-      {
-        "message_id": 701,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Although the details are too technical for me to follow, the approach sounds great. Just tell me what I need to do.",
-        "milestone": null
-      },
-      {
-        "message_id": 702,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please wait 45 seconds while I finish something here.",
-        "milestone": null
-      },
-      {
-        "message_id": 703,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I can log in to Harbor Quill without difficulty, but I suspect the 'View Book' issue is connected to Lit Protocol. It may involve decryption in the browser, while mobile users need to sign in through the wallet app.\n\nCould Lit Protocol require browser-extension wallets to work?",
-        "milestone": null
-      },
-      {
-        "message_id": 704,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The mobile reader UX looks okay. However, the badge section looks strange on mobile, so I’ll work on that and fix it now.",
-        "milestone": null
-      },
-      {
-        "message_id": 705,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I'll check this.",
-        "milestone": null
-      },
-      {
-        "message_id": 706,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The error I’m seeing is 'Lit network is temporarily busy (rate-limited).' Maybe that alone explains what I’m encountering.",
-        "milestone": null
-      },
-      {
-        "message_id": 707,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m currently investigating this because the same issue is occurring on my side as well.",
-        "milestone": null
-      },
-      {
-        "message_id": 708,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Our current environment is ***datil-dev***. The Lit payment issue has now been fixed, and I have been reviewing the Lit Protocol documentation here: <https://developer.litprotocol.com/connecting-to-a-lit-network/migrating-to-datil>",
-        "milestone": null
-      },
-      {
-        "message_id": 709,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "If it is fixed on your side, please confirm so we can proceed to the next step.",
-        "milestone": null
-      },
-      {
-        "message_id": 710,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "General use on my tablet works. The failure persists, however, when I use the Metamask app on that tablet.",
-        "milestone": null
-      },
-      {
-        "message_id": 711,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Mobile should be no exception; it should be working fine there, too.",
-        "milestone": null
-      },
-      {
-        "message_id": 712,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I’m wondering whether Lit Protocol supports desktop clients but perhaps not embedded browsers. Does it work on your tablet?",
-        "milestone": null
-      },
-      {
-        "message_id": 713,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 714,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "For that screen recording, was the capture device a tablet or desktop?",
-        "milestone": null
-      },
-      {
-        "message_id": 715,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "It was my tablet.",
-        "milestone": null
-      },
-      {
-        "message_id": 716,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Can you identify the wallet app you used?",
-        "milestone": null
-      },
-      {
-        "message_id": 717,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "It's the Rainbow Wallet app.",
-        "milestone": null
-      },
-      {
-        "message_id": 718,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Rainbow is what I use on mobile. I also use the Binance mobile app.",
-        "milestone": null
-      },
-      {
-        "message_id": 719,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Before we proceed with redeploying the contract, please complete four final mints. Use referral code for them, and verify that the ticket and commission work correctly.",
-        "milestone": null
-      },
-      {
-        "message_id": 720,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "My MetaMask mobile wallet showed the sign function. Afterward, this came up.",
-        "milestone": null
-      },
-      {
-        "message_id": 721,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "With code enabled, I’ll now carry out the test on desktop.",
-        "milestone": null
-      },
-      {
-        "message_id": 722,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Because there is currently no issue with the system, the retest should work. To address the pending actions indicated by this message, clear the cache; then start again from scratch and retest.",
-        "milestone": null
-      },
-      {
-        "message_id": 723,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 724,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Worked perfectly!",
-        "milestone": null
-      },
-      {
-        "message_id": 725,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Without affecting current users, NFTs, or other existing data, I want us to safely redeploy the current changes to the replacement smart contract. We won’t use the current deployer wallet because it will hold our data. I’ll share an isolated hardware deployer wallet, and then we can merge the changes.",
-        "milestone": null
-      },
-      {
-        "message_id": 726,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I think this note should be reworded—what exactly is it meant to say?",
-        "milestone": null
-      },
-      {
-        "message_id": 727,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For deployment on Base Mainnet, send 0.08 ETH to this deployer wallet: 0xa27d4e915b60c8f314e79a2d683f05bca91e7462",
-        "milestone": null
-      },
-      {
-        "message_id": 728,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Do you want me to delete it?",
-        "milestone": null
-      },
-      {
-        "message_id": 729,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "As for the random ticket and commission, did this award them successfully?",
-        "milestone": null
-      },
-      {
-        "message_id": 730,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Hadn’t the commission and ticket already gone to a random recipient, given that I had completed the transaction?\n\nWhether that is right depends on the note’s intended meaning: it appears to say that sending the commission and ticket to a random holder requires 4 additional transactions.",
-        "milestone": null
-      },
-      {
-        "message_id": 731,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "No relevance can be assigned to the message in that situation.",
-        "milestone": null
-      },
-      {
-        "message_id": 732,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The leaderboard total shows that the ticket and commission were sent somewhere, although I’m not sure which wallet received them.\nThe transaction is 0xc481d7a29e6350bf174ac8d92e035b6f87a19d4e50c62ba391e847d26f15a0bc.",
-        "milestone": null
-      },
-      {
-        "message_id": 733,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "🤣 🤣 Within our transaction, the selection was made at random; that is the important thing.",
-        "milestone": null
-      },
-      {
-        "message_id": 734,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m checking it now and will let you know.",
-        "milestone": null
-      },
-      {
-        "message_id": 735,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I checked the result. It shows the wallet as 0x73e1b5a9c2048fd617a39e526d80bcf491e275a3.",
-        "milestone": null
-      },
-      {
-        "message_id": 736,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For a clearer comparison next time, first take a screenshot of <https://harborquill.example/leaderboard>. Once the transaction is complete, check the page again and the change should be easy to notice.",
-        "milestone": null
-      },
-      {
-        "message_id": 737,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "When it comes to handling this, what approach would you recommend?",
-        "milestone": null
-      },
-      {
-        "message_id": 738,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "My proposed copy for the modal is: &#39;No referral code used. $12 commission + $1,250 prize draw ticket has gone to a *From Workshop Floor to Fresh Start* NFT holder at random&#39; This would apply if the modal appears **before** the ticket and commission are randomly sent.",
-        "milestone": null
-      },
-      {
-        "message_id": 739,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Can you clarify the sequence? Did it show up only afterward, or had it appeared beforehand?",
-        "milestone": null
-      },
-      {
-        "message_id": 740,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Before the tx.",
-        "milestone": null
-      },
-      {
-        "message_id": 741,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The message should therefore read:\n\"No referral code used. $12 commission + $1,250 prize draw ticket has gone to a From Workshop Floor to Fresh Start NFT holder at random\"",
-        "milestone": null
-      },
-      {
-        "message_id": 742,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Whether both purchase scenarios share the same modal determines the copy. If they do, the &#39;Mint successful&#39; message will need to be more generic; otherwise, a referral-code purchase will need different copy.\n\nFor purchases without a code, the current message works nicely because it reminds buyers that simply holding the NFT could one day result in receiving a random ticket and commission too. That reminder only makes sense for mints without a referral code.\n\nSeparately, the book title looks good in small caps.",
-        "milestone": null
-      },
-      {
-        "message_id": 743,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": ".",
-        "milestone": null
-      },
-      {
-        "message_id": 744,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The message we’ve already been using should serve as the alternate copy when a referral code is used for a mint.",
-        "milestone": null
-      },
-      {
-        "message_id": 745,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Would it be better to use both messages, or one generic version?",
-        "milestone": null
-      },
-      {
-        "message_id": 746,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Cool. I propose this wording:\n&#39;$12 commission + $1,250 prize draw ticket has gone to your chosen *From Workshop Floor to Fresh Start* NFT holder&#39;\nIt would appear in the &#39;Mint successful&#39; modal whenever a code is used.",
-        "milestone": null
-      },
-      {
-        "message_id": 747,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "If implementation is easy, a Unified status message would be better.",
-        "milestone": null
-      },
-      {
-        "message_id": 748,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Sent on Base: 0.08 ETH.",
-        "milestone": null
-      },
-      {
-        "message_id": 749,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The &#39;Mint successful&#39; modals come first; I’m fixing them now, and I’ll deploy after QA sign-off.",
-        "milestone": null
-      },
-      {
-        "message_id": 750,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The mint-success flow has been updated, and I’ve removed the unnecessary “Finalize random referral” prompt.\n\nA fallback remains available if required: if the finalization transaction is rejected or fails, the modal presents a small retry section, while the main copy avoids claiming that the reward “has gone” yet.\n\nFor a **referral code mint**, this version now displays: “$12 commission + $1,250 prize draw ticket has gone to your chosen ***From Workshop Floor to Fresh Start*** NFT holder.”\n\nFor a **no referral code mint**, strict timing now applies: the “Mint successful” modal appears strictly before the random commission + ticket have actually been sent—that is, before the random-referral finalization transaction confirms. Its copy is now: “No referral code used. $12 commission + $1,250 prize draw ticket has gone to a ***From Workshop Floor to Fresh Start*** NFT holder at random.”",
-        "milestone": null
-      },
-      {
-        "message_id": 751,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Do we happen to have a Discord channel, by the way?",
-        "milestone": null
-      },
-      {
-        "message_id": 752,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "brilliant 👏",
-        "milestone": null
-      },
-      {
-        "message_id": 753,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "We don’t currently have a Discord channel, but creating one is definitely a good idea.",
-        "milestone": null
-      },
-      {
-        "message_id": 754,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Having our own community would be useful as well, so you can think about setting that up.",
-        "milestone": null
-      },
-      {
-        "message_id": 755,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "What cost and completion time would be involved?",
-        "milestone": null
-      },
-      {
-        "message_id": 756,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Creating the channel would take 25 minutes, and the setup cost is $30.",
-        "milestone": null
-      },
-      {
-        "message_id": 757,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The invitation link has already been created: <https://discord.com/invite/HarborQuill>.",
-        "milestone": null
-      },
-      {
-        "message_id": 758,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Great idea! 👍",
-        "milestone": null
-      },
-      {
-        "message_id": 759,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Because most Web3 users are on Discord, our channel could also give us a place to receive their suggestions, feedback, and similar comments.",
-        "milestone": null
-      },
-      {
-        "message_id": 760,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 761,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "That notice appears because a valid channel hasn’t been created yet.",
-        "milestone": null
-      },
-      {
-        "message_id": 762,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Would you like me to create it, or are you going to do it?",
-        "milestone": null
-      },
-      {
-        "message_id": 763,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "**Recommended: Create a Custom Invite Link**\n\nUse these steps:\n\n1\\. In the **Discord Server**, open the server menu.\n2\\. From **Server Name (top-left)**, select **Server Settings**.\n3\\. Choose **Community**.\n4\\. Select **Enable Community**.\n\nFinish the required setup, including the rules channel and moderation options.\n\n5\\. Once Community is enabled, open *Server Settings → Custom Invite Link*, enter ***harborforge***, and **Save**.\n\nThe resulting link will work as:\n**(<https://discord.com/invite/HarborQuill>)**\n\n***Growth Tip***\n\nCreate a ***#welcome*** channel and add a ***bot*** such as MEE6 / Carl-bot.\n\nSuggested automatic message:\n\n🚀 Welcome to HarborQuill!\nPlease read the rules, then introduce yourself.",
-        "milestone": null
-      },
-      {
-        "message_id": 764,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The idea is great, including welcome bots and the other setup. Since it sounds much easier for you to handle, I think you should do it.",
-        "milestone": null
-      },
-      {
-        "message_id": 765,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 766,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Would you be okay doing that, or would it be better for me to handle it?",
-        "milestone": null
-      },
-      {
-        "message_id": 767,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Once I’ve created it, I’ll send you an invitation.",
-        "milestone": null
-      },
-      {
-        "message_id": 768,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Does that mean the build is now complete?\n\nShould we begin promoting it and trying to attract traffic?",
-        "milestone": null
-      },
-      {
-        "message_id": 769,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "And when is the final payment?",
-        "milestone": null
-      },
-      {
-        "message_id": 770,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Yes",
-        "milestone": null
-      },
-      {
-        "message_id": 771,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Everything is operational and running now.",
-        "milestone": null
-      },
-      {
-        "message_id": 772,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "From here, we’ll begin monitoring traffic and performance while supporting users with any questions or help requests they submit.",
-        "milestone": null
-      },
-      {
-        "message_id": 773,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m considering adding a help, support, and contact section to the landing page.\n\nThe inquiry form would contain:\n- the user’s name\n- email address\n- phone number\n- country or location {required}\n- subject\n- a multiline text area for issues, queries, suggestions, and similar messages\n- a submit button",
-        "milestone": null
-      },
-      {
-        "message_id": 774,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Users could use this section whenever they need help, support, or want to make a general inquiry.\n\nWhat do you think? I could place the help button in the header navigation.",
-        "milestone": null
-      },
-      {
-        "message_id": 775,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Yes, I think that’s an excellent idea.",
-        "milestone": null
-      },
-      {
-        "message_id": 776,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Our server is now live on Discord; I’ve finished creating it.",
-        "milestone": null
-      },
-      {
-        "message_id": 777,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’ve been organizing the categories and channels in this format:\n\n**DISCORD CHANNEL STRUCTURE**\n*Within each category, the function, access, and description are consolidated into one entry per channel.*\n\nRead-only information (📢 INFORMATION) uses three channels:\n1 #rules — Rules and expected server conduct, with posting access limited to Admin only. The rules are designed to keep the HarborQuill community safe, respectful, and productive.\n2 #announcements — Official news covering launches, mints, and upgrades, with posting access limited to Admin / Mods only. Important HarborQuill notices, releases, and official updates appear here.\n3 #start-here — New-member onboarding that helps people understand HarborQuill and learn how to participate.\n\nCommunity discussion (💬 COMMUNITY) is divided among these channels:\n4 #general — The primary community conversation space for general discussion about HarborQuill and its ecosystem.\n5 #introductions — A place for new members to introduce themselves and explain how they discovered HarborQuill.\n6 #feedback — Members can propose ideas, improvements, and other suggestions for HarborQuill.\n\nSupport and issue handling (🛠 SUPPORT & ISSUES) are covered by two channels:\n7 #support — Help for users with accounts, minting, payments, and general problems is handled here.\n8 #bug-reports — Users can report bugs or unexpected behavior so they can be resolved quickly.\n\nProduct communication (🚀 PRODUCT) uses the following channels:\n9 #product-updates — Feature and technical updates, including system updates, product changes, and improvements.\n10 #roadmap — Plans for the future, showing members what is being built next and what is coming to HarborQuill.\n\nSystem activity (🤖 SYSTEM) has one channel:\n11 #system-logs — Production webhook messages; I will implement this feature in the future. Automated HarborQuill system notifications will appear here.\n\nVoice access (🔊 VOICE) is provided through:\n12 General Voice — Type: Voice. Purpose: Informal conversation.",
-        "milestone": null
-      },
-      {
-        "message_id": 778,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Join through <https://discord.gg/harbor-lounge-482>. Once you’re in, I’ll assign you the Moderator role.\n\nAfterwards, I’ll walk you through each feature and show you how we can customize everything further to support our needs.",
-        "milestone": null
-      },
-      {
-        "message_id": 779,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "im in!",
-        "milestone": null
-      },
-      {
-        "message_id": 780,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I can see you're here.",
-        "milestone": null
       }
     ]
   },
@@ -6125,159 +5075,9 @@
         627,
         628,
         629,
-        630,
-        631,
-        632,
-        633,
-        634,
-        635,
-        636,
-        637,
-        638,
-        639,
-        640,
-        641,
-        642,
-        643,
-        644,
-        645,
-        646,
-        647,
-        648,
-        649,
-        650,
-        651,
-        652,
-        653,
-        654,
-        655,
-        656,
-        657,
-        658,
-        659,
-        660,
-        661,
-        662,
-        663,
-        664,
-        665,
-        666,
-        667,
-        668,
-        669,
-        670,
-        671,
-        672,
-        673,
-        674,
-        675,
-        676,
-        677,
-        678,
-        679,
-        680,
-        681,
-        682,
-        683,
-        684,
-        685,
-        686,
-        687,
-        688,
-        689,
-        690,
-        691,
-        692,
-        693,
-        694,
-        695,
-        696,
-        697,
-        698,
-        699,
-        700,
-        701,
-        702,
-        703,
-        704,
-        705,
-        706,
-        707,
-        708,
-        709,
-        710,
-        711,
-        712,
-        713,
-        714,
-        715,
-        716,
-        717,
-        718,
-        719,
-        720,
-        721,
-        722,
-        723,
-        724,
-        725,
-        726,
-        727,
-        728,
-        729,
-        730,
-        731,
-        732,
-        733,
-        734,
-        735,
-        736,
-        737,
-        738,
-        739,
-        740,
-        741,
-        742,
-        743,
-        744,
-        745,
-        746,
-        747,
-        748,
-        749,
-        750,
-        751,
-        752,
-        753,
-        754,
-        755,
-        756,
-        757,
-        758,
-        759,
-        760,
-        761,
-        762,
-        763,
-        764,
-        765,
-        766,
-        767,
-        768,
-        769,
-        770,
-        771,
-        772,
-        773,
-        774,
-        775,
-        776,
-        777,
-        778,
-        779,
-        780
+        630
       ],
-      "history_message_count": 780,
+      "history_message_count": 630,
       "review_status": "DETERMINISTIC"
     },
     "C2": {
@@ -6285,20 +5085,36 @@
       "history_mode": "ORACLE_RELEVANT_HISTORY",
       "history_message_ids": [
         21,
+        27,
         143,
+        146,
         156,
-        184
+        195,
+        305,
+        448,
+        449,
+        492,
+        539,
+        565,
+        579,
+        581,
+        583,
+        587,
+        593,
+        595,
+        599,
+        605
       ],
-      "history_message_count": 4,
+      "history_message_count": 20,
       "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "fingerprints": {
-    "target": "9067201ce63a0557bc6a6f648eeda3b753b5abb8923ed3af66446c13ec8f7173",
-    "history_pool": "bf5d267bb752c009beb44622d3d5a0da9af846e47f6b6a9b32fb7e9fda94fd75",
+    "target": "11d5c69aacc7084156a5a847f36de00f6b9bc5d2a155ce8a3bd9318efddfd85a",
+    "history_pool": "efb12b12089ecd6a56207ccc2cb87f0d5a82403ed5cb08e871b2640aa093ecea",
     "condition_history": {
-      "C1": "3a84d6c27746074556dc61ccace889bd24f196b6813b7d115d82c7296f43ecc6",
-      "C2": "44ed26c433bdaa6b047d7f1c5cf0219d3918cbd5e77baa0c4244063011ac35a8"
+      "C1": "c2b272468ce765802247d69c898739f45e8afc3e2688301d32abf9e6b65000d1",
+      "C2": "b6511a3b31ae565e66ad158bf1644767c889565b94bfdb2438c2a4add269712b"
     }
   },
   "response_contract": {
@@ -6348,7 +5164,7 @@
   "source_artifacts": {
     "gold_states": {
       "path": "outputs_new/stage2/42204309/gold_states.json",
-      "sha256": "cbe17803d920a552b3d3f717c102df0407fa292a7c37540d7948b6de1b97e5db"
+      "sha256": "78a72386c044832d7aa29080e3a992e10ff4456f419a5663163f0ee6cc2d1a05"
     },
     "requirement_state_graph": {
       "path": "outputs_new/stage2/42204309/requirement_state_graph.json",
@@ -6357,6 +5173,10 @@
     "normalized_project": {
       "path": "outputs_new/stage1_runs/42204309/normalized_project.json",
       "sha256": "e83cd7e5e63e49bb3393a04040c5d47f2968292da00de05020be63b01279b19e"
+    },
+    "rq_target_exclusions": {
+      "path": "Code/config/rq_target_exclusions.json",
+      "sha256": "596e6cdf1c76a7450f035bd75d992bffd9e704436350bb8308c54c06f643444a"
     }
   },
   "construction_gold": {
@@ -6364,217 +5184,531 @@
     "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
     "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
-      "REQ_PRIZE_CLAIM_FLOW"
+      "REQ_NO_REFERRAL_TICKETS",
+      "REQ_NFT_METADATA_ACCURACY"
     ],
     "gold_requirement_atoms": {
-      "REQ_PRIZE_CLAIM_FLOW": {
-        "canonical_summary": "Prize Claim Flow",
-        "requirement_title": "Prize Claim Flow",
-        "family_id": "PRIZE_MECHANICS",
+      "REQ_NO_REFERRAL_TICKETS": {
+        "canonical_summary": "No-Referral Ticket Allocation",
+        "requirement_title": "No-Referral Ticket Allocation",
+        "family_id": "REFERRAL_REWARDS",
         "required_evidence_groups": [
           {
-            "group_id": "REQ_PRIZE_CLAIM_FLOW_EG001",
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG001",
             "acceptable_message_ids": [
               21
             ]
           },
           {
-            "group_id": "REQ_PRIZE_CLAIM_FLOW_EG002",
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG002",
+            "acceptable_message_ids": [
+              305
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG003",
+            "acceptable_message_ids": [
+              565
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG004",
+            "acceptable_message_ids": [
+              593,
+              595
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG005",
+            "acceptable_message_ids": [
+              599,
+              605
+            ]
+          }
+        ],
+        "neutral_context_message_ids": [
+          143,
+          146,
+          156,
+          184,
+          195,
+          291,
+          310,
+          313,
+          496,
+          539,
+          579,
+          581,
+          583,
+          585,
+          587,
+          590,
+          592,
+          604,
+          612,
+          613
+        ],
+        "family_trajectory_message_ids": [
+          21,
+          143,
+          146,
+          156,
+          184,
+          195,
+          291,
+          305,
+          310,
+          313,
+          496,
+          539,
+          565,
+          579,
+          581,
+          583,
+          585,
+          587,
+          590,
+          592,
+          593,
+          595,
+          599,
+          604,
+          605,
+          612,
+          613
+        ],
+        "trajectory_message_ids": [
+          21,
+          156,
+          305,
+          539,
+          565,
+          579,
+          581,
+          583,
+          587,
+          593,
+          595,
+          599,
+          605
+        ]
+      },
+      "REQ_NFT_METADATA_ACCURACY": {
+        "canonical_summary": "NFT Metadata Accuracy",
+        "requirement_title": "NFT Metadata Accuracy",
+        "family_id": "NFT_ASSET_MODEL",
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG002",
             "acceptable_message_ids": [
               143
             ]
           },
           {
-            "group_id": "REQ_PRIZE_CLAIM_FLOW_EG003",
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG003",
             "acceptable_message_ids": [
-              184
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG004",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG005",
+            "acceptable_message_ids": [
+              539
             ]
           }
         ],
         "neutral_context_message_ids": [
-          8,
           27,
-          123,
-          124,
-          125,
-          156,
-          158,
-          159,
-          190,
-          191,
-          195,
-          307,
-          308,
-          494,
-          504,
-          588,
-          634,
-          732,
-          733,
-          735,
-          746
+          240,
+          241,
+          288,
+          310,
+          313,
+          377,
+          388,
+          391,
+          392,
+          393,
+          404,
+          408,
+          411,
+          448,
+          449,
+          492,
+          538,
+          546,
+          569
         ],
         "family_trajectory_message_ids": [
-          8,
           21,
           27,
-          123,
-          124,
-          125,
           143,
-          156,
-          158,
-          159,
-          184,
-          190,
-          191,
+          146,
           195,
-          307,
-          308,
-          494,
-          504,
-          588,
-          634,
-          732,
-          733,
-          735,
-          746
+          240,
+          241,
+          288,
+          310,
+          313,
+          377,
+          388,
+          391,
+          392,
+          393,
+          404,
+          408,
+          411,
+          448,
+          449,
+          492,
+          538,
+          539,
+          546,
+          569
         ],
         "trajectory_message_ids": [
           21,
+          27,
           143,
-          156,
-          184
+          146,
+          195,
+          448,
+          449,
+          492,
+          539
         ]
       }
     },
     "directly_affected_historical_requirement_ids": [
-      "REQ_PRIZE_CLAIM_FLOW"
+      "REQ_NO_REFERRAL_TICKETS",
+      "REQ_NFT_METADATA_ACCURACY"
     ],
     "inherited_constraint_requirement_ids": [],
     "new_requirement_ids": [],
     "evidence": {
-      "REQ_PRIZE_CLAIM_FLOW": {
+      "REQ_NO_REFERRAL_TICKETS": {
         "current_support_event_ids": [
-          "REQ_PRIZE_CLAIM_FLOW_E001",
-          "REQ_PRIZE_CLAIM_FLOW_E002",
-          "REQ_PRIZE_CLAIM_FLOW_E004",
-          "REQ_PRIZE_CLAIM_FLOW_E005"
+          "REQ_NO_REFERRAL_TICKETS_E001",
+          "REQ_NO_REFERRAL_TICKETS_E003",
+          "REQ_NO_REFERRAL_TICKETS_E005",
+          "REQ_NO_REFERRAL_TICKETS_E010",
+          "REQ_NO_REFERRAL_TICKETS_E011",
+          "REQ_NO_REFERRAL_TICKETS_E013"
         ],
         "current_support_message_ids": [
           21,
-          143,
-          184
+          305,
+          565,
+          593,
+          595,
+          599,
+          605
         ],
         "trajectory_event_ids": [
-          "REQ_PRIZE_CLAIM_FLOW_E001",
-          "REQ_PRIZE_CLAIM_FLOW_E002",
-          "REQ_PRIZE_CLAIM_FLOW_E003",
-          "REQ_PRIZE_CLAIM_FLOW_E004",
-          "REQ_PRIZE_CLAIM_FLOW_E005"
+          "REQ_NO_REFERRAL_TICKETS_E001",
+          "REQ_NO_REFERRAL_TICKETS_E002",
+          "REQ_NO_REFERRAL_TICKETS_E003",
+          "REQ_NO_REFERRAL_TICKETS_E004",
+          "REQ_NO_REFERRAL_TICKETS_E005",
+          "REQ_NO_REFERRAL_TICKETS_E006",
+          "REQ_NO_REFERRAL_TICKETS_E007",
+          "REQ_NO_REFERRAL_TICKETS_E008",
+          "REQ_NO_REFERRAL_TICKETS_E009",
+          "REQ_NO_REFERRAL_TICKETS_E010",
+          "REQ_NO_REFERRAL_TICKETS_E011",
+          "REQ_NO_REFERRAL_TICKETS_E012",
+          "REQ_NO_REFERRAL_TICKETS_E013"
         ],
         "trajectory_message_ids": [
           21,
-          143,
           156,
-          184
+          305,
+          539,
+          565,
+          579,
+          581,
+          583,
+          587,
+          593,
+          595,
+          599,
+          605
         ],
         "core_message_ids": [
           21,
-          143,
-          184
+          305,
+          565,
+          593,
+          595,
+          599,
+          605
         ],
         "required_evidence_groups": [
           {
-            "group_id": "REQ_PRIZE_CLAIM_FLOW_EG001",
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG001",
             "acceptable_message_ids": [
               21
             ]
           },
           {
-            "group_id": "REQ_PRIZE_CLAIM_FLOW_EG002",
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG002",
+            "acceptable_message_ids": [
+              305
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG003",
+            "acceptable_message_ids": [
+              565
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG004",
+            "acceptable_message_ids": [
+              593,
+              595
+            ]
+          },
+          {
+            "group_id": "REQ_NO_REFERRAL_TICKETS_EG005",
+            "acceptable_message_ids": [
+              599,
+              605
+            ]
+          }
+        ],
+        "context_message_ids": [
+          143,
+          146,
+          156,
+          184,
+          195,
+          291,
+          310,
+          313,
+          496,
+          539,
+          579,
+          581,
+          583,
+          585,
+          587,
+          590,
+          592,
+          604,
+          612,
+          613
+        ],
+        "neutral_context_message_ids": [
+          143,
+          146,
+          156,
+          184,
+          195,
+          291,
+          310,
+          313,
+          496,
+          539,
+          579,
+          581,
+          583,
+          585,
+          587,
+          590,
+          592,
+          604,
+          612,
+          613
+        ],
+        "family_trajectory_message_ids": [
+          21,
+          143,
+          146,
+          156,
+          184,
+          195,
+          291,
+          305,
+          310,
+          313,
+          496,
+          539,
+          565,
+          579,
+          581,
+          583,
+          585,
+          587,
+          590,
+          592,
+          593,
+          595,
+          599,
+          604,
+          605,
+          612,
+          613
+        ],
+        "context_review_status": "DETERMINISTIC_FAMILY_TRAJECTORY_CONTEXT"
+      },
+      "REQ_NFT_METADATA_ACCURACY": {
+        "current_support_event_ids": [
+          "REQ_NFT_METADATA_ACCURACY_E001",
+          "REQ_NFT_METADATA_ACCURACY_E003",
+          "REQ_NFT_METADATA_ACCURACY_E004",
+          "REQ_NFT_METADATA_ACCURACY_E005",
+          "REQ_NFT_METADATA_ACCURACY_E008"
+        ],
+        "current_support_message_ids": [
+          21,
+          143,
+          146,
+          195,
+          539
+        ],
+        "trajectory_event_ids": [
+          "REQ_NFT_METADATA_ACCURACY_E001",
+          "REQ_NFT_METADATA_ACCURACY_E002",
+          "REQ_NFT_METADATA_ACCURACY_E003",
+          "REQ_NFT_METADATA_ACCURACY_E004",
+          "REQ_NFT_METADATA_ACCURACY_E005",
+          "REQ_NFT_METADATA_ACCURACY_E006",
+          "REQ_NFT_METADATA_ACCURACY_E007",
+          "REQ_NFT_METADATA_ACCURACY_E008"
+        ],
+        "trajectory_message_ids": [
+          21,
+          27,
+          143,
+          146,
+          195,
+          448,
+          449,
+          492,
+          539
+        ],
+        "core_message_ids": [
+          21,
+          143,
+          146,
+          195,
+          539
+        ],
+        "required_evidence_groups": [
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG001",
+            "acceptable_message_ids": [
+              21
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG002",
             "acceptable_message_ids": [
               143
             ]
           },
           {
-            "group_id": "REQ_PRIZE_CLAIM_FLOW_EG003",
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG003",
             "acceptable_message_ids": [
-              184
+              146
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG004",
+            "acceptable_message_ids": [
+              195
+            ]
+          },
+          {
+            "group_id": "REQ_NFT_METADATA_ACCURACY_EG005",
+            "acceptable_message_ids": [
+              539
             ]
           }
         ],
         "context_message_ids": [
-          8,
           27,
-          123,
-          124,
-          125,
-          156,
-          158,
-          159,
-          190,
-          191,
-          195,
-          307,
-          308,
-          494,
-          504,
-          588,
-          634,
-          732,
-          733,
-          735,
-          746
+          240,
+          241,
+          288,
+          310,
+          313,
+          377,
+          388,
+          391,
+          392,
+          393,
+          404,
+          408,
+          411,
+          448,
+          449,
+          492,
+          538,
+          546,
+          569
         ],
         "neutral_context_message_ids": [
-          8,
           27,
-          123,
-          124,
-          125,
-          156,
-          158,
-          159,
-          190,
-          191,
-          195,
-          307,
-          308,
-          494,
-          504,
-          588,
-          634,
-          732,
-          733,
-          735,
-          746
+          240,
+          241,
+          288,
+          310,
+          313,
+          377,
+          388,
+          391,
+          392,
+          393,
+          404,
+          408,
+          411,
+          448,
+          449,
+          492,
+          538,
+          546,
+          569
         ],
         "family_trajectory_message_ids": [
-          8,
           21,
           27,
-          123,
-          124,
-          125,
           143,
-          156,
-          158,
-          159,
-          184,
-          190,
-          191,
+          146,
           195,
-          307,
-          308,
-          494,
-          504,
-          588,
-          634,
-          732,
-          733,
-          735,
-          746
+          240,
+          241,
+          288,
+          310,
+          313,
+          377,
+          388,
+          391,
+          392,
+          393,
+          404,
+          408,
+          411,
+          448,
+          449,
+          492,
+          538,
+          539,
+          546,
+          569
         ],
         "context_review_status": "DETERMINISTIC_FAMILY_TRAJECTORY_CONTEXT"
       }

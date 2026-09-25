@@ -2215,7 +2215,10 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
 
 
 def build_rq_indexes(
-    collections: Mapping[str, list[dict[str, Any]]]
+    collections: Mapping[str, list[dict[str, Any]]],
+    *,
+    project_id: str | None = None,
+    input_release: str | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Build one deterministic index document per RQ folder."""
 
@@ -2227,7 +2230,9 @@ def build_rq_indexes(
     }
     if len(all_project_ids) > 1:
         raise RQInstanceError("RQ collections span multiple projects")
-    collection_project_id = next(iter(all_project_ids), None)
+    collection_project_id = next(iter(all_project_ids), project_id)
+    if project_id is not None and collection_project_id not in (None, project_id):
+        raise RQInstanceError("RQ collection project_id disagrees with requested project")
     all_releases = {
         instance.get("input_release")
         for rq_id in RQ_IDS
@@ -2235,7 +2240,9 @@ def build_rq_indexes(
     }
     if len(all_releases) > 1:
         raise RQInstanceError("RQ collections span multiple input releases")
-    collection_release = next(iter(all_releases), None)
+    collection_release = next(iter(all_releases), input_release)
+    if input_release is not None and collection_release not in (None, input_release):
+        raise RQInstanceError("RQ collection release disagrees with requested release")
     for rq_id in RQ_IDS:
         instances = list(collections.get(rq_id, []))
         if any(instance.get("rq_id") != rq_id for instance in instances):

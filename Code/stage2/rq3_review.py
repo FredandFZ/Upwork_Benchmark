@@ -7,8 +7,13 @@ from typing import Any, Mapping
 
 
 REVIEW_SCHEMA_VERSION = "rq3-human-review-v2"
+OFFLINE_AGENT_REVIEW_SCHEMA_VERSION = "rq3-offline-agent-review-v1"
 CONDITIONS = ("C1", "C2")
 DIMENSIONS = ("VALUE", "SCOPE", "LIFECYCLE", "BEHAVIOR", "DEPENDENCY", "EXECUTION")
+OFFLINE_REVIEW_METHODS = {
+    "OFFLINE_AGENT_PANEL",
+    "SINGLE_AGENT_ROLE_SEPARATED_PANEL",
+}
 
 
 class RQ3ReviewError(ValueError):
@@ -52,6 +57,22 @@ def build_review_template(instance: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def build_offline_agent_review_template(instance: Mapping[str, Any]) -> dict[str, Any]:
+    """Build the RQ3 template used by two offline reviewers and an adjudicator."""
+
+    review = build_review_template(instance)
+    review["schema_version"] = OFFLINE_AGENT_REVIEW_SCHEMA_VERSION
+    review["review_method"] = "OFFLINE_AGENT_PANEL"
+    review["adjudicator"] = None
+    review["review_instruction"] = (
+        "Two offline reviewer agents inspect each condition independently. "
+        "A distinct adjudicator resolves conflicts. ACT requires reviewed "
+        "construction after-states for every affected Requirement. CLARIFY "
+        "requires every material unresolved blocker and acceptable question facts."
+    )
+    return review
+
+
 def _text(value: Any, label: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise RQ3ReviewError(f"{label} must be a non-empty string")
@@ -59,7 +80,11 @@ def _text(value: Any, label: str) -> str:
 
 
 def validate_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> None:
-    if review.get("schema_version") != REVIEW_SCHEMA_VERSION:
+    schema_version = review.get("schema_version")
+    if schema_version not in {
+        REVIEW_SCHEMA_VERSION,
+        OFFLINE_AGENT_REVIEW_SCHEMA_VERSION,
+    }:
         raise RQ3ReviewError("invalid review schema_version")
     if str(review.get("target_id")) != str(instance.get("target_id")):
         raise RQ3ReviewError("review target_id does not match instance")
@@ -68,6 +93,14 @@ def validate_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> N
         raise RQ3ReviewError("final RQ3 Gold requires two distinct reviewers")
     if review.get("adjudication_status") != "ADJUDICATED":
         raise RQ3ReviewError("review must be ADJUDICATED")
+    if schema_version == OFFLINE_AGENT_REVIEW_SCHEMA_VERSION:
+        if review.get("review_method") not in OFFLINE_REVIEW_METHODS:
+            raise RQ3ReviewError("offline review_method is not allowed")
+        adjudicator = _text(review.get("adjudicator"), "adjudicator")
+        if adjudicator in {str(value).strip() for value in reviewers}:
+            raise RQ3ReviewError(
+                "offline adjudicator must be distinct from the two reviewers"
+            )
     conditions = review.get("conditions")
     if not isinstance(conditions, Mapping) or set(conditions) != set(CONDITIONS):
         raise RQ3ReviewError("review.conditions must contain exactly C1 and C2")
@@ -160,10 +193,21 @@ def apply_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> dict
             }
     gold["final_gold_by_condition"] = frozen
     gold["status"] = "FINAL_UPDATE_OR_CLARIFY_GOLD"
-    gold["review_status"] = "HUMAN_REVIEWED_AND_ADJUDICATED"
+    offline_agent_review = (
+        review.get("schema_version") == OFFLINE_AGENT_REVIEW_SCHEMA_VERSION
+    )
+    gold["review_status"] = (
+        "OFFLINE_AGENT_REVIEWED_AND_ADJUDICATED"
+        if offline_agent_review
+        else "HUMAN_REVIEWED_AND_ADJUDICATED"
+    )
     gold["review_metadata"] = {
-        "schema_version": REVIEW_SCHEMA_VERSION,
+        "schema_version": review["schema_version"],
+        "review_method": (
+            review.get("review_method") if offline_agent_review else "HUMAN_PANEL"
+        ),
         "reviewers": deepcopy(review["reviewers"]),
+        "adjudicator": review.get("adjudicator"),
         "adjudication_status": review["adjudication_status"],
         "condition_gold_consistent": True,
         "decision_rationales": {
@@ -171,15 +215,24 @@ def apply_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> dict
             for condition in CONDITIONS
         },
     }
+    output["readiness"] = {
+        "construction": "COMPLETE",
+        "smoke_allowed": True,
+        "formal_reasoning_allowed": True,
+        "formal_execution_allowed": False,
+        "blockers": [],
+    }
     return output
 
 
 __all__ = [
     "CONDITIONS",
     "DIMENSIONS",
+    "OFFLINE_AGENT_REVIEW_SCHEMA_VERSION",
     "REVIEW_SCHEMA_VERSION",
     "RQ3ReviewError",
     "apply_review",
+    "build_offline_agent_review_template",
     "build_review_template",
     "validate_review",
 ]

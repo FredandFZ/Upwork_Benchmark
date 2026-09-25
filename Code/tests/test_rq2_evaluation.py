@@ -10,6 +10,11 @@ from Code.evaluation.rq2 import (
     score_rq2_constant_state_baseline,
 )
 from Code.evaluation.state import score_state
+from Code.stage2.rq2_review import (
+    RQ2ReviewError,
+    apply_review as apply_rq2_review,
+    build_review_template as build_rq2_review_template,
+)
 from Code.stage2.rq_instances import build_rq_instances
 from Code.tests.test_stage2_rq_instances import _gold, _messages, _state_graph
 
@@ -42,6 +47,52 @@ def _semantic_response(request):
 
 
 class RQ2EvaluationTests(unittest.TestCase):
+    @staticmethod
+    def _adjudicated_field_review(instance):
+        review = build_rq2_review_template(instance)
+        review["reviewers"] = ["offline-reviewer-a", "offline-reviewer-b"]
+        review["adjudicator"] = "offline-adjudicator"
+        review["adjudication_status"] = "ADJUDICATED"
+        review["verdict"] = "FINALIZE"
+        review["boundary_review"] = {
+            "pre_task_boundary_correct": True,
+            "historical_requirement_scope_correct": True,
+            "internal_ids_excluded": True,
+        }
+
+        def mark(value):
+            if not isinstance(value, dict):
+                return
+            if "comparator" in value:
+                value["review_status"] = "OFFLINE_AGENT_REVIEWED"
+            for child in value.values():
+                if isinstance(child, dict):
+                    mark(child)
+
+        mark(review["final_field_scoring_specs"])
+        return review
+
+    def test_rq2_offline_review_freezes_typed_gold(self):
+        instance = build_rq_instances(_gold(), _state_graph(), _messages())["RQ2"][0]
+        frozen = apply_rq2_review(
+            instance, self._adjudicated_field_review(instance)
+        )
+        self.assertEqual(
+            frozen["construction_gold"]["status"], "FINAL_TYPED_STATE_GOLD"
+        )
+        self.assertEqual(
+            frozen["construction_gold"]["review_status"],
+            "OFFLINE_AGENT_REVIEWED_AND_ADJUDICATED",
+        )
+        self.assertTrue(frozen["readiness"]["formal_reasoning_allowed"])
+
+    def test_rq2_offline_review_requires_distinct_adjudicator(self):
+        instance = build_rq_instances(_gold(), _state_graph(), _messages())["RQ2"][0]
+        review = self._adjudicated_field_review(instance)
+        review["adjudicator"] = "offline-reviewer-a"
+        with self.assertRaises(RQ2ReviewError):
+            apply_rq2_review(instance, review)
+
     def setUp(self):
         self.instance = build_rq_instances(
             _gold(), _state_graph(), _messages()
@@ -148,6 +199,33 @@ class RQ2EvaluationTests(unittest.TestCase):
             semantic_relations=relations,
         )
         self.assertEqual(result["dimension_scores"]["ambiguity"], 0.0)
+
+    def test_ordered_list_is_order_sensitive_with_partial_credit(self):
+        state = deepcopy(self.instance["construction_gold"]["states"]["REQ_BUTTON"])
+        state["attributes"] = {"workflow": ["first", "second", "third"]}
+        specs = deepcopy(
+            self.instance["construction_gold"]["field_scoring_specs"]["REQ_BUTTON"]
+        )
+        specs["attributes"] = {
+            "comparator": "RECURSIVE_FIELDS",
+            "score": True,
+            "closed_world": True,
+            "fields": {
+                "workflow": {"comparator": "ORDERED_LIST", "score": True}
+            },
+        }
+        predicted = deepcopy(state)
+        predicted["attributes"]["workflow"] = ["second", "first", "third"]
+        result = score_state(
+            pair_id="ordered-list-test",
+            gold_state=state,
+            predicted_state=predicted,
+            scoring_specs=specs,
+        )
+        self.assertEqual(result["full_state_exact"], 0)
+        self.assertAlmostEqual(
+            result["dimension_scores"]["attributes"], 2 / 3, places=6
+        )
 
 
 if __name__ == "__main__":

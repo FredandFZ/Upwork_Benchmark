@@ -10,7 +10,8 @@ from typing import Any, Mapping
 import json
 
 
-PRIVATE_MANIFEST_SCHEMA_VERSION = "rq-private-run-manifest-v1"
+PRIVATE_MANIFEST_SCHEMA_VERSION = "rq-private-run-manifest-v2"
+LEGACY_PRIVATE_MANIFEST_SCHEMA_VERSION = "rq-private-run-manifest-v1"
 FREEZE_RECORD_SCHEMA_VERSION = "rq-phase-a-freeze-v1"
 RUN_STATUS_SCHEMA_VERSION = "rq-run-status-v1"
 PUBLIC_FILENAMES = (
@@ -266,8 +267,17 @@ def freeze_phase_a_response(
 
     private_path = Path(private_manifest_path).resolve()
     manifest = _read_object(private_path, "private run manifest")
-    if manifest.get("schema_version") != PRIVATE_MANIFEST_SCHEMA_VERSION:
+    schema_version = manifest.get("schema_version")
+    if schema_version not in {
+        PRIVATE_MANIFEST_SCHEMA_VERSION,
+        LEGACY_PRIVATE_MANIFEST_SCHEMA_VERSION,
+    }:
         raise RQPhaseAError("unsupported private run manifest schema")
+    if schema_version == PRIVATE_MANIFEST_SCHEMA_VERSION:
+        if manifest.get("manifest_kind") != "ISOLATED_AGENT_RUN":
+            raise RQPhaseAError("private manifest is not an isolated Agent run")
+        if not isinstance(manifest.get("agent_config_id"), str):
+            raise RQPhaseAError("private run manifest has no agent_config_id")
     gate = manifest.get("phase_gate")
     if not isinstance(gate, dict) or gate.get("phase_a_response_sha256") is not None:
         raise RQPhaseAError("Phase A response is already frozen or gate is malformed")
@@ -310,6 +320,9 @@ def freeze_phase_a_response(
         "run_id": run_id,
         "target_id": manifest.get("target_id"),
         "condition": manifest.get("condition"),
+        "package_id": manifest.get("package_id"),
+        "agent_config_id": manifest.get("agent_config_id"),
+        "repetition": manifest.get("repetition"),
         "decision": response["decision"],
         "response_sha256": response_sha256,
         "frozen_at": frozen_at,

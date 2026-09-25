@@ -1,0 +1,2579 @@
+{
+  "schema_version": "rq4-code-environment-project-build-plan-v1",
+  "plan_scope": "RQ4_CODE_ENVIRONMENT_RECONSTRUCTION",
+  "source_of_truth": "FROZEN_RQ3_FINAL_GOLD",
+  "project_id": "44035087",
+  "project_title": null,
+  "input_release": "44035087-stage2-final-20260925-rq123-main-v1",
+  "project_applicability": {
+    "selection_source": "USER_CURATED_PROJECT_ALLOWLIST",
+    "included_project_id": "44035087",
+    "excluded_project_policy": "NOT_IN_RQ4_BUILD_SCOPE",
+    "rationale": "Only projects whose final deliverable is suitable for a runnable, locally deterministic Code Environment are included.",
+    "source_artifact": {
+      "path": "Code/config/rq4_project_allowlist.json",
+      "file_sha256": "47502d55e5023601a68622ecc9bdb1ece0ceb8032593af45bfb27d0626059ced"
+    }
+  },
+  "unit_of_reconstruction": "PROJECT_CHRONOLOGICAL_REPLAY",
+  "snapshot_policy": "Freeze a pre-task Code Environment only at selected targets whose final C1/C2 RQ3 Gold decision is ACT. Replay every intervening State Graph event, including non-target messages and selected targets excluded from RQ4, before freezing the next snapshot.",
+  "construction_policy": "FROM_SCRATCH_NEW_RELEASE_ONLY",
+  "builder_contract": {
+    "ordered_stages": [
+      "SOURCE_AND_BOUNDARY_AUDIT",
+      "PROJECT_BASELINE_RECONSTRUCTION",
+      "CHRONOLOGICAL_STATE_REPLAY",
+      "ACT_TARGET_PRE_STATE_SNAPSHOT",
+      "POST_TRANSITION_TRACE_CHECK",
+      "BUILD_AND_REGRESSION_VALIDATION",
+      "ARCHIVE_AND_MANIFEST_FREEZE",
+      "RQ4_REPOSITORY_LEAKAGE_AUDIT"
+    ],
+    "required_project_outputs": [
+      "Code Environment/<project_id>/reports/target_index.json",
+      "Code Environment/<project_id>/reports/validation_report.json",
+      "Code Environment/<project_id>/reports/reconstruction_report.md"
+    ],
+    "required_target_outputs": [
+      "Code Environment/<project_id>/targets/<target_dir>/pre_repo.zip",
+      "Code Environment/<project_id>/targets/<target_dir>/manifest.json"
+    ],
+    "safe_replacement_policy": "Build each project in a project-scoped staging directory. Do not read or reuse any previous Code Environment. Promote the validated project atomically so targets/*/manifest.json and reports/target_index.json contain exactly the plan build targets.",
+    "manifest_required_fields": [
+      "target_id",
+      "before_message_id",
+      "repository_classification",
+      "contract_layer",
+      "web_api_layer",
+      "active_code_feature_count",
+      "tracked_requirement_count",
+      "temporal_fixture",
+      "requirements_to_code",
+      "target_event_ids",
+      "target_event_types",
+      "target_summary",
+      "pre_state_verified_against_gold",
+      "post_state_verified_against_gold",
+      "repo_sha256"
+    ],
+    "forbidden_in_agent_visible_repository": [
+      "future_or_post_task_state",
+      "acceptance_criteria",
+      "hidden_validators",
+      "reference_delivery",
+      "evaluator_only_requirement_state_event_metadata",
+      ".git",
+      "secrets"
+    ],
+    "handoff_completion_condition": "Every build-queue target has a boundary-matched manifest and safe pre_repo.zip; project validation reports pass; no RQ4 instance is declared execution-ready by the builder."
+  },
+  "post_build_gates_not_owned_by_builder": [
+    "ACCEPTANCE_CRITERIA_DESIGN",
+    "HIDDEN_VALIDATOR_IMPLEMENTATION_AND_INDEPENDENT_REVIEW",
+    "PRE_REFERENCE_PARTIAL_DELIVERY_CALIBRATION",
+    "FINAL_RQ4_ELIGIBILITY",
+    "RQ4_INSTANCE_MATERIALIZATION"
+  ],
+  "chronological_reconstruction_required": true,
+  "project_sources": {
+    "rq_instance_manifest": {
+      "path": "outputs_new/stage2/44035087/rq_instance_manifest.json",
+      "file_sha256": "ab5f4da47a4babd395c2f0c7f52515575a5d93176df59372a120f589555b726b"
+    },
+    "gold_states": {
+      "path": "outputs_new/stage2/44035087/gold_states.json",
+      "file_sha256": "28988350fb1804fab1ddd688806d53abf28cf6e839d751979c65fbd50c8ce129"
+    },
+    "requirement_state_graph": {
+      "path": "outputs_new/stage2/44035087/requirement_state_graph.json",
+      "file_sha256": "12548c4bf564ed0bbf0da9291b7d404e3de02187d306fe1f6da09a91d7fd9101"
+    },
+    "normalized_project": {
+      "path": "outputs_new/stage1_runs/44035087/normalized_project.json",
+      "file_sha256": "a99b597a45adeae657320ec6438109fca7c0be4ce3f9f0e0e345865dcc444308"
+    },
+    "stage1_annotation": {
+      "path": "outputs_new/stage1_annotations/44035087_stage1_annotation.json",
+      "file_sha256": "75f48419396b62bdeb913b248a3c3f8f853efb7af1ebb329b9d327895cf5f90e"
+    },
+    "gold_state_validation": {
+      "path": "outputs_new/stage2/44035087/target_time_selection/gold_state_validation.json",
+      "file_sha256": "fd38eae86885ec03209997052a39c996beee1f873e4122683881ce5d99c02a07"
+    },
+    "repository_profiles": {
+      "path": "Code/config/rq4_repository_profiles.json",
+      "file_sha256": "2f2e29df9c7c11840393c9216f45333ab1ac1c7617b69b32dd6075614d36af1e"
+    }
+  },
+  "repository_profile": {
+    "artifact_class": "CONTENT_AND_QUOTE_WEB_APPLICATION",
+    "renderer": "web",
+    "runtime": "PYTHON_STDLIB",
+    "contract_layer": "LOCAL_DOMAIN_SERVICE",
+    "web_api_layer": "HTTP_JSON_AND_STATIC_HTML",
+    "primary_artifacts": [
+      "dist/index.html",
+      "dist/catalog.json"
+    ],
+    "description": "Offline website implementing the currently active pricing, quote, gallery, imagery, and video behavior."
+  },
+  "summary": {
+    "selected_target_count": 10,
+    "build_target_count": 10,
+    "excluded_rq3_not_act_count": 0,
+    "rq3_decision_distribution": {
+      "ACT": 10
+    }
+  },
+  "targets": [
+    {
+      "target_id": "44035087_T001",
+      "target_message_id": 22,
+      "target_fingerprint": "c1e8f00c8b0890a5b0c2ce0796240da14f6e8623ebefe6efc1b64c7e9d498212",
+      "turns": 21,
+      "difficulty": "SHORT",
+      "target_task": {
+        "source_message_id": 22,
+        "speaker": "client",
+        "text": "Thanks so much. For now, I would like to defer the instant quote form. When the time is right to develop it, I will reach out again."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 1,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T001_before_22",
+        "archive_path": "Code Environment/44035087/targets/T001_before_22/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T001_before_22/manifest.json",
+        "before_message_id": 22,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T001_RQ3.json",
+          "file_sha256": "6fc1b9b27d60f539426c0072be3cb5453a85093c0aa415c6da25afab0a54a37a",
+          "content_sha256": "8b9435772d948e167dc0cf634e3bbb0d57184a7541f15b5ae075a5cf12535b96"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S003"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+          "event_ids": [
+            "REQ_INSTANT_QUOTE_CALCULATOR_E004"
+          ],
+          "event_types": [
+            "DEFER"
+          ],
+          "before_state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S003",
+          "after_state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "lifecycle_status"
+          ],
+          "changed_paths": [
+            "lifecycle_status"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "DEFERRED",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "QUOTE_CALCULATION"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T002",
+      "target_message_id": 30,
+      "target_fingerprint": "b521e69cfc0c25f2f27f5ab458e3f1bd0e43777846a3bc05b4cc422cfd917b69",
+      "turns": 29,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 30,
+        "speaker": "client",
+        "text": "The homepage looks great, and I also like the current gallery design. For the services page, could each listed service have a corresponding image—for example, photos, twilights, floor plans, and 3D views? Because this is primarily a photography business, every page should be highly visual and image-focused.\n\nPlease remove the monthly and annual tabs from the services page because all pricing is one-time only. For the bundles, could we have four spaces instead of 3? I would also like a large diagram showing every individual service we offer. Full pricing transparency is important so customers can see the exact breakdown and add individual items when needed. I have attached a PDF containing all items that must be included; most are categorized by both price and property square footage.\n\nThe main gallery only needs tabs for photos, twilights, videos, floor plans, and 3d tour. A smaller area could cover other photography since we sometimes accept one-off clients. During development of the actual website, could the gallery items also receive hover animations? Overall, the pages look excellent!"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 2,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T002_before_30",
+        "archive_path": "Code Environment/44035087/targets/T002_before_30/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T002_before_30/manifest.json",
+        "before_message_id": 30,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T002_RQ3.json",
+          "file_sha256": "51f5f1ab9707374a4e204d978180bb6635519a67919d42ed200f90fc3cd0e6e6",
+          "content_sha256": "5177342d8d63a5e17613815442d311080f08dd09ae9413d5a09c3b7a40bfda3e"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S001"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S001"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_HOMEPAGE_VISUAL_DESIGN"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "event_ids": [
+            "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_E002"
+          ],
+          "event_types": [
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S001",
+          "after_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "execution"
+          ],
+          "changed_paths": [
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "PRICING_PAGE",
+            "PACKAGE_PRICING"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+          "event_ids": [
+            "REQ_ITEMIZED_SERVICE_PRICING_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_ITEMIZED_SERVICE_PRICING_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INDIVIDUAL_SERVICE_PRICING"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "event_ids": [
+            "REQ_ONE_TIME_PRICING_PRESENTATION_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "SERVICES_PAGE"
+          ]
+        },
+        {
+          "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "event_ids": [
+            "REQ_GALLERY_BROWSING_AND_ORGANIZATION_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S001",
+          "after_state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.main_gallery_tabs",
+            "attributes.secondary_gallery_content"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "GALLERY"
+          ]
+        },
+        {
+          "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+          "event_ids": [
+            "REQ_GALLERY_HOVER_EFFECTS_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_GALLERY_HOVER_EFFECTS_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "GALLERY"
+          ]
+        },
+        {
+          "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "event_ids": [
+            "REQ_IMAGE_FOCUSED_SITE_DESIGN_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "SITEWIDE_VISUAL_DESIGN"
+          ]
+        },
+        {
+          "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "event_ids": [
+            "REQ_SERVICE_PAGE_IMAGE_MAPPING_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "SERVICES_PAGE"
+          ]
+        },
+        {
+          "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "event_ids": [
+            "REQ_HOMEPAGE_VISUAL_DESIGN_E004"
+          ],
+          "event_types": [
+            "RUNTIME_VERIFICATION"
+          ],
+          "before_state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S003",
+          "after_state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "execution"
+          ],
+          "changed_paths": [
+            "execution.observed_behavior",
+            "execution.status"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOMEPAGE"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T003",
+      "target_message_id": 37,
+      "target_fingerprint": "60fd4e29e918c9dcd0b515aef0365df1aca64593a74debda7d965f555664328f",
+      "turns": 36,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 37,
+        "speaker": "client",
+        "text": "The prototype looks excellent and is nearly perfect. One final revision is needed on the pricing page: could the package and bundle prices be updated so they accurately vary according to property square footage?"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 3,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T003_before_37",
+        "archive_path": "Code Environment/44035087/targets/T003_before_37/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T003_before_37/manifest.json",
+        "before_message_id": 37,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T003_RQ3.json",
+          "file_sha256": "f546ab1ff475762b934d565e98e961ff3f5b647b68f6ba312e5b251b46b80248",
+          "content_sha256": "deac885194f0b519ab79f2ffd694d848075351d4af9b20961f4bb05a37501a25"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S003"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S004"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "event_ids": [
+            "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S003",
+          "after_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.pricing_variation_basis",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "PRICING_PAGE",
+            "PACKAGE_PRICING"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T004",
+      "target_message_id": 41,
+      "target_fingerprint": "c2b9aa4ad72db8ebd533f91b4168545ee843452a18f74f56fe34b0a5ae549a65",
+      "turns": 40,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 41,
+        "speaker": "client",
+        "text": "We should use predefined pricing rather than a calculator: the display will show 4 packages with 4 prices. I will provide the required rates. The pricing categories are under 1200sqft, 1201-2400 sqft, 2401-3600 sqft, and 3600\\+ sqft."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 4,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T004_before_41",
+        "archive_path": "Code Environment/44035087/targets/T004_before_41/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T004_before_41/manifest.json",
+        "before_message_id": 41,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T004_RQ3.json",
+          "file_sha256": "72af4d8d854987a7a568d3e52457b50084b439e99f1de4a444fb3a9c22d53322",
+          "content_sha256": "2e51db1cc260369d3d0cc81a4f7786921a36bc2184b41fedb08c278fe4c080e2"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S006"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S007"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "event_ids": [
+            "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_E007"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S006",
+          "after_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S007",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.prices_per_package",
+            "attributes.pricing_model",
+            "attributes.square_footage_categories",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "PRICING_PAGE",
+            "PACKAGE_PRICING"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T005",
+      "target_message_id": 44,
+      "target_fingerprint": "540e0b1bfcd931d0fa7139847627f7610a367e1dcd487e8f4c5deaf090956cbd",
+      "turns": 43,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 44,
+        "speaker": "client",
+        "text": "Yes, sir. Much appreciated."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 5,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T005_before_44",
+        "archive_path": "Code Environment/44035087/targets/T005_before_44/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T005_before_44/manifest.json",
+        "before_message_id": 44,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T005_RQ3.json",
+          "file_sha256": "8c08496986cb23c75f67d2af5a100f4bab385551afa1f01854d38586c68c225c",
+          "content_sha256": "7e05bd92b164b0b03d70bafc04588b89ab37bbedc1695533ddf8d5627895af13"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S007"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S008"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "event_ids": [
+            "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_E008"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S007",
+          "after_state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S008",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.basic_package_prices_by_square_footage"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "PRICING_PAGE",
+            "PACKAGE_PRICING"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T006",
+      "target_message_id": 76,
+      "target_fingerprint": "e93e91f6fb579d048963e1ffdcdbad9badeac4f1511c282401c60f200d873993",
+      "turns": 75,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 76,
+        "speaker": "client",
+        "text": "Let’s leave both items as they are for now: the animations are great, and the current pricing approach works well. I’ll brainstorm the pricing layout further and update you if my preference changes.\n\nWhile I’m pulling photos from my portfolio, how many will I need to send for the gallery to be set up properly?"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 6,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T006_before_76",
+        "archive_path": "Code Environment/44035087/targets/T006_before_76/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T006_before_76/manifest.json",
+        "before_message_id": 76,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T006_RQ3.json",
+          "file_sha256": "8b7df3f6147d8eae247ceb9ed896b12e3699c757e81133da9d7b60a65028610b",
+          "content_sha256": "6d72689a18b88926bfb3addc17d76553550a64876d3012b787c941f5d616ff3d"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S003"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_MOBILE_PRICING_TABLE",
+          "REQ_GALLERY_HOVER_EFFECTS"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+          "REQ_HOMEPAGE_NAVIGATION_LINKS",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+          "event_ids": [
+            "REQ_MOBILE_PRICING_TABLE_E003",
+            "REQ_MOBILE_PRICING_TABLE_E004",
+            "REQ_MOBILE_PRICING_TABLE_E005"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RESUME",
+            "RUNTIME_VERIFICATION"
+          ],
+          "before_state_id": "REQ_MOBILE_PRICING_TABLE_S002",
+          "after_state_id": "REQ_MOBILE_PRICING_TABLE_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.mobile_pricing_layout",
+            "ambiguity",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "PRICING_PAGE",
+            "MOBILE"
+          ]
+        },
+        {
+          "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+          "event_ids": [
+            "REQ_GALLERY_HOVER_EFFECTS_E004",
+            "REQ_GALLERY_HOVER_EFFECTS_E005",
+            "REQ_GALLERY_HOVER_EFFECTS_E006"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RESUME",
+            "RUNTIME_VERIFICATION"
+          ],
+          "before_state_id": "REQ_GALLERY_HOVER_EFFECTS_S003",
+          "after_state_id": "REQ_GALLERY_HOVER_EFFECTS_S006",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.mobile_hover_animations_enabled",
+            "ambiguity",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "GALLERY"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T007",
+      "target_message_id": 87,
+      "target_fingerprint": "29190a06c6ec12a40fa3597d2058f4b405c657a82d45ff0a7c6ba000df51522c",
+      "turns": 86,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 87,
+        "speaker": "client",
+        "text": "The website looks great overall! I only found a few remaining items: could the portfolio tiles on the home page link to the gallery, and could the indicated stock photos be replaced with the supplied photos? I’d also like the home-page image changed to a photo of a house. Apart from those requests, everything is looking good. Thank you!"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 7,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T007_before_87",
+        "archive_path": "Code Environment/44035087/targets/T007_before_87/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T007_before_87/manifest.json",
+        "before_message_id": 87,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T007_RQ3.json",
+          "file_sha256": "7b70defac813436427d93f167d8b6149b0e3b4e584c0f14048f364ca8b80bce8",
+          "content_sha256": "6439184b4ce62b495c20048ed70f3b92cf5e584d22a7c1f0b46ffb82106ff300"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S001"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_CLIENT_PHOTO_USAGE",
+          "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_MOBILE_PRICING_TABLE",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+          "REQ_HOMEPAGE_NAVIGATION_LINKS",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+          "event_ids": [
+            "REQ_CLIENT_PHOTO_USAGE_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_CLIENT_PHOTO_USAGE_S002",
+          "after_state_id": "REQ_CLIENT_PHOTO_USAGE_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.homepage_image_subject",
+            "attributes.indicated_stock_photos",
+            "attributes.photo_placement_authority",
+            "attributes.photo_selection_authority",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOMEPAGE",
+            "SITEWIDE_VISUAL_DESIGN"
+          ]
+        },
+        {
+          "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+          "event_ids": [
+            "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "HOMEPAGE"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T008",
+      "target_message_id": 93,
+      "target_fingerprint": "382ddeea2e84cf491f973ebedc6906db8121b223f44dc3b99ebf28d99d7c20e2",
+      "turns": 92,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 93,
+        "speaker": "client",
+        "text": "For the gallery, integrating the videos alongside the pictures would be ideal. On the home screen, the video would work best beside the portfolio photos. Thanks!"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 8,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T008_before_93",
+        "archive_path": "Code Environment/44035087/targets/T008_before_93/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T008_before_93/manifest.json",
+        "before_message_id": 93,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T008_RQ3.json",
+          "file_sha256": "63130fddc771b4b5a4df21f5a66a916c912cc4cf85fd373a594891679a374fc5",
+          "content_sha256": "7dc2bbf3c22190faec1657c1dc65f60d86dc6380e15c8a828eaf85d7d45d8821"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+            "state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S001"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+            "state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S001"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S002"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+            "state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+            "state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S002"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_VIDEO_INTEGRATION",
+          "REQ_HOMEPAGE_VIDEO_INTEGRATION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_MOBILE_PRICING_TABLE",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_CLIENT_PHOTO_USAGE",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+          "REQ_HOMEPAGE_NAVIGATION_LINKS",
+          "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "event_ids": [
+            "REQ_GALLERY_BROWSING_AND_ORGANIZATION_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S002",
+          "after_state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.main_gallery_tabs"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "GALLERY"
+          ]
+        },
+        {
+          "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+          "event_ids": [
+            "REQ_GALLERY_VIDEO_INTEGRATION_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S001",
+          "after_state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.gallery_video_placement"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "GALLERY",
+            "VIDEO_PORTFOLIO"
+          ]
+        },
+        {
+          "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+          "event_ids": [
+            "REQ_HOMEPAGE_VIDEO_INTEGRATION_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S001",
+          "after_state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.homepage_video_placement"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOMEPAGE",
+            "VIDEO_PORTFOLIO"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T009",
+      "target_message_id": 96,
+      "target_fingerprint": "92d094dc1bfa01844cddc28355010adaf2200d89c49d906254f9df471ba96bb6",
+      "turns": 95,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 96,
+        "speaker": "client",
+        "text": "We're only using this as a temporary placeholder video; you can access it here:\n\n<https://files.silverpine-media.example/scl/fi/b8r3w6k1m9q4t7v2x5p0/Coastal-Aerial-Narration.mp4?dl=0>"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 9,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T009_before_96",
+        "archive_path": "Code Environment/44035087/targets/T009_before_96/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T009_before_96/manifest.json",
+        "before_message_id": 96,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T009_RQ3.json",
+          "file_sha256": "0b1604b23de2b3583ae860e0ec2996a8a704a7fdc9edcaf2e5a1bf0a77f2e284",
+          "content_sha256": "ef3e39e5f994a3020b7f35afd4d41510d349bb48d06724d2443131af6d10a750"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+            "state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+            "state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S002"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+            "state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+            "state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S003"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S002"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_GALLERY_VIDEO_INTEGRATION",
+          "REQ_HOMEPAGE_VIDEO_INTEGRATION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_MOBILE_PRICING_TABLE",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_CLIENT_PHOTO_USAGE",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+          "REQ_HOMEPAGE_NAVIGATION_LINKS",
+          "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+          "event_ids": [
+            "REQ_GALLERY_VIDEO_INTEGRATION_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S002",
+          "after_state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.placeholder_video_url",
+            "attributes.video_asset_role"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "GALLERY",
+            "VIDEO_PORTFOLIO"
+          ]
+        },
+        {
+          "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+          "event_ids": [
+            "REQ_HOMEPAGE_VIDEO_INTEGRATION_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S002",
+          "after_state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.video_asset_role",
+            "attributes.video_asset_url"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOMEPAGE",
+            "VIDEO_PORTFOLIO"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44035087_T010",
+      "target_message_id": 107,
+      "target_fingerprint": "27d4b9635268d31688ebe1ea3e87865f9ad7507e1430e07beeda77033fab4365",
+      "turns": 106,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 107,
+        "speaker": "client",
+        "text": "Let's go ahead with the additional page at the offered price—thank you very much. Please make it a quote page and leave out Calendly for now, since I currently schedule appointments through Google Calendar. I may switch to a dedicated scheduling tool later when our volume increases.\n\nCould the form collect Name, Company (optional), Phone Number, Email, and Job Description? Also, would you be able to style it according to the current brand guidelines?"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 10,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44035087/targets/T010_before_107",
+        "archive_path": "Code Environment/44035087/targets/T010_before_107/pre_repo.zip",
+        "manifest_path": "Code Environment/44035087/targets/T010_before_107/manifest.json",
+        "before_message_id": 107,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44035087/RQ3/44035087_T010_RQ3.json",
+          "file_sha256": "c719ee7be94c211741f90b2dd8ecdb2bd5904b124245f0bdbf85d2cc3ca91472",
+          "content_sha256": "8c278dd1f2241ecad477bafdfe72aee82ad1793c6d29ef8f315b1768e31851c7"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_BOOK_SESSION_CTA_DESTINATION",
+            "state_id": "REQ_BOOK_SESSION_CTA_DESTINATION_S001"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+            "state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S005"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+            "state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S005"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S002"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_INSTANT_QUOTE_CALCULATOR",
+            "state_id": "REQ_INSTANT_QUOTE_CALCULATOR_S004"
+          },
+          {
+            "requirement_id": "REQ_GET_QUOTE_FORM_PAGE",
+            "state_id": "REQ_GET_QUOTE_FORM_PAGE_S001"
+          },
+          {
+            "requirement_id": "REQ_BOOK_SESSION_CTA_DESTINATION",
+            "state_id": "REQ_BOOK_SESSION_CTA_DESTINATION_S003"
+          },
+          {
+            "requirement_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+            "state_id": "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING_S010"
+          },
+          {
+            "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+            "state_id": "REQ_ITEMIZED_SERVICE_PRICING_S002"
+          },
+          {
+            "requirement_id": "REQ_ONE_TIME_PRICING_PRESENTATION",
+            "state_id": "REQ_ONE_TIME_PRICING_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_MOBILE_PRICING_TABLE",
+            "state_id": "REQ_MOBILE_PRICING_TABLE_S005"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+            "state_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_HOVER_EFFECTS",
+            "state_id": "REQ_GALLERY_HOVER_EFFECTS_S006"
+          },
+          {
+            "requirement_id": "REQ_GALLERY_VIDEO_INTEGRATION",
+            "state_id": "REQ_GALLERY_VIDEO_INTEGRATION_S005"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+            "state_id": "REQ_HOMEPAGE_VIDEO_INTEGRATION_S005"
+          },
+          {
+            "requirement_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+            "state_id": "REQ_IMAGE_FOCUSED_SITE_DESIGN_S001"
+          },
+          {
+            "requirement_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+            "state_id": "REQ_SERVICE_PAGE_IMAGE_MAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+            "state_id": "REQ_CLIENT_PHOTO_USAGE_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_VISUAL_DESIGN",
+            "state_id": "REQ_HOMEPAGE_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_GALLERY_ANIMATION",
+            "state_id": "REQ_HOMEPAGE_GALLERY_ANIMATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+            "state_id": "REQ_WORDPRESS_HOSTING_ENVIRONMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "state_id": "REQ_HOMEPAGE_NAVIGATION_LINKS_S003"
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "state_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK_S002"
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "state_id": "REQ_PRICING_DETAIL_LINK_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_GET_QUOTE_FORM_PAGE",
+          "REQ_BOOK_SESSION_CTA_DESTINATION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_INSTANT_QUOTE_CALCULATOR",
+          "REQ_PACKAGE_SQUARE_FOOTAGE_PRICING",
+          "REQ_ITEMIZED_SERVICE_PRICING",
+          "REQ_ONE_TIME_PRICING_PRESENTATION",
+          "REQ_MOBILE_PRICING_TABLE",
+          "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+          "REQ_GALLERY_HOVER_EFFECTS",
+          "REQ_GALLERY_VIDEO_INTEGRATION",
+          "REQ_HOMEPAGE_VIDEO_INTEGRATION",
+          "REQ_IMAGE_FOCUSED_SITE_DESIGN",
+          "REQ_SERVICE_PAGE_IMAGE_MAPPING",
+          "REQ_CLIENT_PHOTO_USAGE",
+          "REQ_HOMEPAGE_VISUAL_DESIGN",
+          "REQ_HOMEPAGE_GALLERY_ANIMATION",
+          "REQ_WORDPRESS_HOSTING_ENVIRONMENT",
+          "REQ_HOMEPAGE_NAVIGATION_LINKS",
+          "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+          "REQ_PRICING_DETAIL_LINK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_GET_QUOTE_FORM_PAGE",
+          "event_ids": [
+            "REQ_GET_QUOTE_FORM_PAGE_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_GET_QUOTE_FORM_PAGE_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "BACKEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "QUOTE_REQUEST"
+          ]
+        },
+        {
+          "requirement_id": "REQ_BOOK_SESSION_CTA_DESTINATION",
+          "event_ids": [
+            "REQ_BOOK_SESSION_CTA_DESTINATION_E002",
+            "REQ_BOOK_SESSION_CTA_DESTINATION_E003"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RESUME"
+          ],
+          "before_state_id": "REQ_BOOK_SESSION_CTA_DESTINATION_S001",
+          "after_state_id": "REQ_BOOK_SESSION_CTA_DESTINATION_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "scope",
+            "lifecycle_status",
+            "ambiguity"
+          ],
+          "changed_paths": [
+            "attributes.destination",
+            "scope.components",
+            "scope.contexts",
+            "scope.persistence",
+            "lifecycle_status",
+            "ambiguity"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "BOOK_SESSION_CTA",
+            "QUOTE_REQUEST"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    }
+  ]
+}

@@ -7,7 +7,7 @@ Only valid, history-sensitive AI recommendations are counted. Buckets use [0,50)
 | Score threshold (>=) | 0-50 turns | 50-100 turns | 100+ turns | Total |
 |---:|---:|---:|---:|---:|
 | 5 | 0 | 1 | 0 | 1 |
-| 6 | 0 | 0 | 0 | 0 |
+| 6 | 0 | 1 | 0 | 1 |
 | 7 | 0 | 0 | 0 | 0 |
 | 8 | 0 | 0 | 0 | 0 |
 | 9 | 0 | 0 | 0 | 0 |

@@ -1,0 +1,1920 @@
+{
+  "schema_version": "rq4-code-environment-project-build-plan-v1",
+  "plan_scope": "RQ4_CODE_ENVIRONMENT_RECONSTRUCTION",
+  "source_of_truth": "FROZEN_RQ3_FINAL_GOLD",
+  "project_id": "43772711",
+  "project_title": null,
+  "input_release": "43772711-stage2-final-20260925-rq123-main-v1",
+  "project_applicability": {
+    "selection_source": "USER_CURATED_PROJECT_ALLOWLIST",
+    "included_project_id": "43772711",
+    "excluded_project_policy": "NOT_IN_RQ4_BUILD_SCOPE",
+    "rationale": "Only projects whose final deliverable is suitable for a runnable, locally deterministic Code Environment are included.",
+    "source_artifact": {
+      "path": "Code/config/rq4_project_allowlist.json",
+      "file_sha256": "47502d55e5023601a68622ecc9bdb1ece0ceb8032593af45bfb27d0626059ced"
+    }
+  },
+  "unit_of_reconstruction": "PROJECT_CHRONOLOGICAL_REPLAY",
+  "snapshot_policy": "Freeze a pre-task Code Environment only at selected targets whose final C1/C2 RQ3 Gold decision is ACT. Replay every intervening State Graph event, including non-target messages and selected targets excluded from RQ4, before freezing the next snapshot.",
+  "construction_policy": "FROM_SCRATCH_NEW_RELEASE_ONLY",
+  "builder_contract": {
+    "ordered_stages": [
+      "SOURCE_AND_BOUNDARY_AUDIT",
+      "PROJECT_BASELINE_RECONSTRUCTION",
+      "CHRONOLOGICAL_STATE_REPLAY",
+      "ACT_TARGET_PRE_STATE_SNAPSHOT",
+      "POST_TRANSITION_TRACE_CHECK",
+      "BUILD_AND_REGRESSION_VALIDATION",
+      "ARCHIVE_AND_MANIFEST_FREEZE",
+      "RQ4_REPOSITORY_LEAKAGE_AUDIT"
+    ],
+    "required_project_outputs": [
+      "Code Environment/<project_id>/reports/target_index.json",
+      "Code Environment/<project_id>/reports/validation_report.json",
+      "Code Environment/<project_id>/reports/reconstruction_report.md"
+    ],
+    "required_target_outputs": [
+      "Code Environment/<project_id>/targets/<target_dir>/pre_repo.zip",
+      "Code Environment/<project_id>/targets/<target_dir>/manifest.json"
+    ],
+    "safe_replacement_policy": "Build each project in a project-scoped staging directory. Do not read or reuse any previous Code Environment. Promote the validated project atomically so targets/*/manifest.json and reports/target_index.json contain exactly the plan build targets.",
+    "manifest_required_fields": [
+      "target_id",
+      "before_message_id",
+      "repository_classification",
+      "contract_layer",
+      "web_api_layer",
+      "active_code_feature_count",
+      "tracked_requirement_count",
+      "temporal_fixture",
+      "requirements_to_code",
+      "target_event_ids",
+      "target_event_types",
+      "target_summary",
+      "pre_state_verified_against_gold",
+      "post_state_verified_against_gold",
+      "repo_sha256"
+    ],
+    "forbidden_in_agent_visible_repository": [
+      "future_or_post_task_state",
+      "acceptance_criteria",
+      "hidden_validators",
+      "reference_delivery",
+      "evaluator_only_requirement_state_event_metadata",
+      ".git",
+      "secrets"
+    ],
+    "handoff_completion_condition": "Every build-queue target has a boundary-matched manifest and safe pre_repo.zip; project validation reports pass; no RQ4 instance is declared execution-ready by the builder."
+  },
+  "post_build_gates_not_owned_by_builder": [
+    "ACCEPTANCE_CRITERIA_DESIGN",
+    "HIDDEN_VALIDATOR_IMPLEMENTATION_AND_INDEPENDENT_REVIEW",
+    "PRE_REFERENCE_PARTIAL_DELIVERY_CALIBRATION",
+    "FINAL_RQ4_ELIGIBILITY",
+    "RQ4_INSTANCE_MATERIALIZATION"
+  ],
+  "chronological_reconstruction_required": true,
+  "project_sources": {
+    "rq_instance_manifest": {
+      "path": "outputs_new/stage2/43772711/rq_instance_manifest.json",
+      "file_sha256": "b2ac58159a504397a0e84b8488e56b2fb6b34cdd90921dd61728690191742cd0"
+    },
+    "gold_states": {
+      "path": "outputs_new/stage2/43772711/gold_states.json",
+      "file_sha256": "e39001f25029def04d28f038414b6fcb6dc66f4eeec673e978ad383a281d5ecc"
+    },
+    "requirement_state_graph": {
+      "path": "outputs_new/stage2/43772711/requirement_state_graph.json",
+      "file_sha256": "57ecfa1d7621776ed65c1564423ced692f357a88ece6641e4c3e24d66b6efece"
+    },
+    "normalized_project": {
+      "path": "outputs_new/stage1_runs/43772711/normalized_project.json",
+      "file_sha256": "f9b9df53d36e9f56861759ce96bc85735d75023b063dbe1747e6c20a016f35cc"
+    },
+    "stage1_annotation": {
+      "path": "outputs_new/stage1_annotations/43772711_stage1_annotation.json",
+      "file_sha256": "8686ff51e19d58b884f21f74f17765715e44c09380c9107fb7bcb54d636ed4e5"
+    },
+    "gold_state_validation": {
+      "path": "outputs_new/stage2/43772711/target_time_selection/gold_state_validation.json",
+      "file_sha256": "1ef7dd89b418d44278f2ecd74ef840da62f5afabeaa209e6f1bd48256b9c2e31"
+    },
+    "repository_profiles": {
+      "path": "Code/config/rq4_repository_profiles.json",
+      "file_sha256": "2f2e29df9c7c11840393c9216f45333ab1ac1c7617b69b32dd6075614d36af1e"
+    }
+  },
+  "repository_profile": {
+    "artifact_class": "SAAS_WEB_APPLICATION",
+    "renderer": "web",
+    "runtime": "PYTHON_STDLIB",
+    "contract_layer": "LOCAL_DOMAIN_SERVICE",
+    "web_api_layer": "HTTP_JSON_AND_STATIC_HTML",
+    "primary_artifacts": [
+      "dist/index.html",
+      "dist/catalog.json"
+    ],
+    "description": "Offline executable SaaS website with current landing, shared-site, access, provisioning, and admin-workspace behavior."
+  },
+  "summary": {
+    "selected_target_count": 7,
+    "build_target_count": 5,
+    "excluded_rq3_not_act_count": 2,
+    "rq3_decision_distribution": {
+      "ACT": 5,
+      "CLARIFY": 2
+    }
+  },
+  "targets": [
+    {
+      "target_id": "43772711_T001",
+      "target_message_id": 6,
+      "target_fingerprint": "eb598b7bd9e978a0a7233260160b34b9b0ef8afbaf5f3b2a2e0201d6646f9104",
+      "turns": 5,
+      "difficulty": "SHORT",
+      "target_task": {
+        "source_message_id": 6,
+        "speaker": "client",
+        "text": "Hi Marissa,\n\nThe landing-page engagement can go ahead, so I will hire you for that. We can leave the UI/UX discussion until our meeting.\n\nI probably made that second area sound broader than intended. At this stage, I only want to agree on and style the main UI-shell components—the header, side navigation panel, and footer—including their fonts, colors, icon styles, and treatment in both light and dark modes. Settings, monitoring logs, provisioning, applications, and the other screens will sit within the main canvas and evolve over time. Their styling is a separate, though very important, question.\n\nDerek"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 1,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43772711/targets/T001_before_6",
+        "archive_path": "Code Environment/43772711/targets/T001_before_6/pre_repo.zip",
+        "manifest_path": "Code Environment/43772711/targets/T001_before_6/manifest.json",
+        "before_message_id": 6,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43772711/RQ3/43772711_T001_RQ3.json",
+          "file_sha256": "9a38474d1843caee74399463145dc0cb988898aadd6226be77951a6e3de718b5",
+          "content_sha256": "1a55f1107813a4c08639e5987b072130be2c084a8ca1a0707e3642e5b2c42474"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S002"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S003"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_LANDING_PAGE_SIGNUP_CTA"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+          "event_ids": [
+            "REQ_ADMIN_WORKSPACE_SHELL_STYLING_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S002",
+          "after_state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.included_shell_components",
+            "attributes.inner_application_screen_styling",
+            "attributes.style_dimensions",
+            "attributes.theme_modes"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "ADMIN_WORKSPACE",
+            "UI_SHELL"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43772711_T002",
+      "target_message_id": 25,
+      "target_fingerprint": "1507845c864a8418fbb69181e8930aa4a55140ed6f8acfc39134ddd23ec314e2",
+      "turns": 24,
+      "difficulty": "SHORT",
+      "target_task": {
+        "source_message_id": 25,
+        "speaker": "client",
+        "text": "Marissa,\n\nDevelopment work in preparation for launch has kept me occupied for the past few days, hence the gap in communication. I would now like to resume the website work, as it will clearly be integral to the launch. The areas requiring review and planning are:\n\n1\\. Finalize the assets and layout for the initial landing-page design, including its responsive behavior.\n\n2\\. Establish the basis for later website pages: whether they share common headers and footers, use \"dark mode,\" or have a complementary \"light mode\" style. I mean separate styling, not something users can switch.\n\n3\\. Define guidance and/or rules for responsive behavior in general.\n\n4\\. Work through the layout and styling of the dashboard shell and \"canvas.\"\n\nFor context, I have attached screens from the secure signup and login flow, which uses AWS Cognito. They currently have AWS default styling, although several self-styling options are available.\n\nWhile some of this belongs within the current job, other parts sit outside its scope. What approach would you recommend from here? Would a meeting or video call be the best way to discuss it?\n\nDerek"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 2,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43772711/targets/T002_before_25",
+        "archive_path": "Code Environment/43772711/targets/T002_before_25/pre_repo.zip",
+        "manifest_path": "Code Environment/43772711/targets/T002_before_25/manifest.json",
+        "before_message_id": 25,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43772711/RQ3/43772711_T002_RQ3.json",
+          "file_sha256": "177811ae3d87284096b6ad423e76ab71ee50a2c4899104f31f8db2f4ebe30e79",
+          "content_sha256": "1de8803214a6a64e59b6d07d08401fc695dd2503db939a9279669d2eee43d977"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S003"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S003"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S003"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S004"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+          "REQ_WEBSITE_PAGE_THEME",
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_LANDING_PAGE_SIGNUP_CTA",
+          "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+          "REQ_LANDING_PAGE_HERO_PRESENTATION",
+          "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+          "REQ_LANDING_PAGE_BUILD_STACK",
+          "REQ_WEBSITE_FOOTER"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+          "event_ids": [
+            "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "LANDING_PAGE",
+            "RESPONSIVE_LAYOUT"
+          ]
+        },
+        {
+          "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+          "event_ids": [
+            "REQ_WEBSITE_PAGE_THEME_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_WEBSITE_PAGE_THEME_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "WEBSITE_PAGES"
+          ]
+        },
+        {
+          "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "event_ids": [
+            "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "DESIGN_SYSTEM",
+            "RESPONSIVE_LAYOUT"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+          "event_ids": [
+            "REQ_ADMIN_WORKSPACE_SHELL_STYLING_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S003",
+          "after_state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.canvas_design"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "ADMIN_WORKSPACE",
+            "UI_SHELL"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43772711_T003",
+      "target_message_id": 27,
+      "target_fingerprint": "1219aebb665047ad888a6f52fdc1c0c872ecc17b465818317fe31c6200f9f4e2",
+      "turns": 26,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 27,
+        "speaker": "client",
+        "text": "With the website now my highest priority, Marissa, here is where each item stands despite how busy I have been:\n\n1\\. Although I may send a few small copy revisions shortly, the top half of the landing page looks great, so please begin with that.\n2\\. Agreed: use the common headers and footers and retain the dark theme.\n3\\. The responsive breakpoint guidance is okay.\n4\\. In the attached Prototype UI, the dashboard is working with an app for agent chat. Because the dashboard has its own specialized build process, my scope at this stage is only styling guidance for the shell container. I am happy to handle that as another milestone.\n\nThe attached documents describe the website build approach I have settled on. Any feedback would be welcome and appreciated.\n\nBest,\nDerek"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 3,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43772711/targets/T003_before_27",
+        "archive_path": "Code Environment/43772711/targets/T003_before_27/pre_repo.zip",
+        "manifest_path": "Code Environment/43772711/targets/T003_before_27/manifest.json",
+        "before_message_id": 27,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43772711/RQ3/43772711_T003_RQ3.json",
+          "file_sha256": "cf2a98773e72a85444ae1c346f4aa6f91f0b1ad8763339532147c83a686b3a55",
+          "content_sha256": "d04878cac09e565b95a3225a3e5b88a6fd977150f18d232d6e230ad49af39caa"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S003"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S004"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S003"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_WEBSITE_FOOTER",
+          "REQ_WEBSITE_PAGE_THEME",
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_LANDING_PAGE_SIGNUP_CTA",
+          "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+          "REQ_LANDING_PAGE_HERO_PRESENTATION",
+          "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+          "REQ_LANDING_PAGE_BUILD_STACK"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_WEBSITE_FOOTER",
+          "event_ids": [
+            "REQ_WEBSITE_FOOTER_E002"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": "REQ_WEBSITE_FOOTER_S001",
+          "after_state_id": "REQ_WEBSITE_FOOTER_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "scope",
+            "lifecycle_status",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.applies_to",
+            "attributes.shared_component",
+            "scope.components",
+            "scope.contexts",
+            "scope.persistence",
+            "lifecycle_status",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "WEBSITE_FOOTER",
+            "WEBSITE_PAGES"
+          ]
+        },
+        {
+          "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+          "event_ids": [
+            "REQ_WEBSITE_PAGE_THEME_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_WEBSITE_PAGE_THEME_S001",
+          "after_state_id": "REQ_WEBSITE_PAGE_THEME_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "scope"
+          ],
+          "changed_paths": [
+            "attributes.page_theme",
+            "attributes.theme_reference",
+            "scope.contexts"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "WEBSITE_PAGES",
+            "DARK_THEME"
+          ]
+        },
+        {
+          "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "event_ids": [
+            "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S001",
+          "after_state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.breakpoint_basis"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "DESIGN_SYSTEM",
+            "RESPONSIVE_LAYOUT"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+          "event_ids": [
+            "REQ_ADMIN_WORKSPACE_SHELL_STYLING_E005"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S004",
+          "after_state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.canvas_design",
+            "attributes.deliverable_type"
+          ],
+          "removed_paths": [
+            "attributes.canvas_design"
+          ],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "ADMIN_WORKSPACE",
+            "UI_SHELL"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43772711_T004",
+      "target_message_id": 30,
+      "target_fingerprint": "fc1aa1adfad28fe5af25c5e3e654342e47d8da1324c6707d3d9ce850945f69a6",
+      "turns": 29,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 30,
+        "speaker": "client",
+        "text": "Using the build approach, I have now produced a framework for a website provisioning wizard; the attached skeleton page works quite well and also supports portrait mode. Claude needs guidance on these styling points:\n\n* Type scale — confirm sizes, weights, line-heights, and tracking. The heading and body values are estimates for now, while fonts use system fallbacks until the Alan Sans and Plus Jakarta Sans .woff2 files arrive.\n* Active-node accent — choosing between Signal purple and Pulse green remains the one unresolved design decision.\n* Derived values — either confirm or replace the canvas surface colour (--surface), muted text tone (--text-muted), soft hairline (--line-soft), and node glow.\n* Wizard placeholders — specify --page-x for percentage-based page margins, --wizard-panel-w at 720px, --wiz-node-size, and the portrait and landscape gaps.\n* Button states — Back and Next still lack hover and active styling because the states sheet has not arrived. Until the final chevron asset is available, my current chevron remains a stand-in SVG.\n\nNone of this is blocking me, as I will continue implementing the actual steps and platform interaction in the meantime."
+      },
+      "rq3_gold_decision": "CLARIFY",
+      "condition_scope": [],
+      "plan_status": "EXCLUDED_RQ3_NOT_ACT",
+      "build_sequence": null,
+      "exclusion_reason": "RQ3_NOT_ACT",
+      "code_environment_status": "NOT_APPLICABLE",
+      "eligibility_status": "EXCLUDED_RQ3_NOT_ACT",
+      "output_contract": null,
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43772711/RQ3/43772711_T004_RQ3.json",
+          "file_sha256": "c20f5556652cee5ad5955ac177dde7ee862a836098e145f78bf1773a47ea1c2d",
+          "content_sha256": "b28787c12f9446f764cec66434e8bc77eb55af3626d58ead8c59b5a2c3999b3a"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S003"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S001"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S003"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+            "state_id": "REQ_PROVISIONING_WIZARD_STYLING_S002"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_DESIGN_TOKEN_SPECIFICATION",
+          "REQ_WEBFONT_ASSET_DELIVERY",
+          "REQ_PROVISIONING_WIZARD_STYLING"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_LANDING_PAGE_SIGNUP_CTA",
+          "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+          "REQ_LANDING_PAGE_HERO_PRESENTATION",
+          "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+          "REQ_LANDING_PAGE_BUILD_STACK",
+          "REQ_WEBSITE_FOOTER",
+          "REQ_WEBSITE_PAGE_THEME",
+          "REQ_MAX_CONTENT_WIDTH",
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+          "event_ids": [
+            "REQ_DESIGN_TOKEN_SPECIFICATION_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S001",
+          "after_state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.required_font_families"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "DESIGN_SYSTEM",
+            "WEBSITE_IMPLEMENTATION"
+          ]
+        },
+        {
+          "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+          "event_ids": [
+            "REQ_WEBFONT_ASSET_DELIVERY_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_WEBFONT_ASSET_DELIVERY_S001",
+          "after_state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.required_font_families"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "DESIGN_HANDOFF",
+            "WEB_TYPOGRAPHY"
+          ]
+        },
+        {
+          "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+          "event_ids": [
+            "REQ_PROVISIONING_WIZARD_STYLING_E001",
+            "REQ_PROVISIONING_WIZARD_STYLING_E002"
+          ],
+          "event_types": [
+            "INTRODUCE",
+            "AMBIGUOUS"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_PROVISIONING_WIZARD_STYLING_S002",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "ACCOUNT_PROVISIONING"
+          ]
+        }
+      ]
+    },
+    {
+      "target_id": "43772711_T005",
+      "target_message_id": 56,
+      "target_fingerprint": "eeb177f761061aec8e43122b7738e08a8a93319034d2c5860aeb979053dbc167",
+      "turns": 55,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 56,
+        "speaker": "client",
+        "text": "Hi Marissa,\n\nNice pictures! I have a couple of website items to review with you.\n\nFirst, I’d like to add informational, non-marketing pages, including the Sign In page and an Account Provisioning wizard. Those pages need only a background and header logo, with perhaps the footer outlined below. To style the AWS Cognito authentication pages, I quickly created one using your landing-page background.\n\nFor the footer, I’d like more content and the following menu links. I think a solid background in the SignalCadence brand color could look good.\n\nLH block:\nLumenArc Intelligence (or logo)\nHarbor Glen\nOregon, USA\nhello@lumenarc-demo.example\n(202) 555-0146\n\nRH block (links):\nHome\nContact Us\nSupport\nCookie Notice\nPrivacy Policy\nTerms of Use\nLegal\n\nBottom center:\nSocial icons - LinkedIn, X (for now)\nCopyright (c) 2032 LumenArc Systems LLC. All rights reserved\n\nBest,\nDerek"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 4,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43772711/targets/T005_before_56",
+        "archive_path": "Code Environment/43772711/targets/T005_before_56/pre_repo.zip",
+        "manifest_path": "Code Environment/43772711/targets/T005_before_56/manifest.json",
+        "before_message_id": 56,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43772711/RQ3/43772711_T005_RQ3.json",
+          "file_sha256": "fd22fc0bfc47d6e6f4ed29b7d295b9755f7c8f4f8b22e7d2b8f5402e7e3ee56a",
+          "content_sha256": "dd2aeabe77675ba27480a5c138d5d34a4a734cd89c29d0c5681490798bb622d8"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_HEADER_NAVIGATION",
+            "state_id": "REQ_WEBSITE_HEADER_NAVIGATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S004"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_COGNITO_SIGNIN_BRANDING",
+            "state_id": "REQ_COGNITO_SIGNIN_BRANDING_S002"
+          },
+          {
+            "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+            "state_id": "REQ_PROVISIONING_WIZARD_STYLING_S002"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_HEADER_NAVIGATION",
+            "state_id": "REQ_WEBSITE_HEADER_NAVIGATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S005"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_INFORMATIONAL_PAGE_SHELL",
+            "state_id": "REQ_INFORMATIONAL_PAGE_SHELL_S001"
+          },
+          {
+            "requirement_id": "REQ_COGNITO_SIGNIN_BRANDING",
+            "state_id": "REQ_COGNITO_SIGNIN_BRANDING_S004"
+          },
+          {
+            "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+            "state_id": "REQ_PROVISIONING_WIZARD_STYLING_S002"
+          },
+          {
+            "requirement_id": "REQ_POLICY_DOCUMENT_ACCESS",
+            "state_id": "REQ_POLICY_DOCUMENT_ACCESS_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_WEBSITE_FOOTER",
+          "REQ_INFORMATIONAL_PAGE_SHELL",
+          "REQ_COGNITO_SIGNIN_BRANDING",
+          "REQ_POLICY_DOCUMENT_ACCESS"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_LANDING_PAGE_SIGNUP_CTA",
+          "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+          "REQ_LANDING_PAGE_HERO_PRESENTATION",
+          "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+          "REQ_LANDING_PAGE_BUILD_STACK",
+          "REQ_WEBSITE_HEADER_NAVIGATION",
+          "REQ_WEBSITE_PAGE_THEME",
+          "REQ_DESIGN_TOKEN_SPECIFICATION",
+          "REQ_WEBFONT_ASSET_DELIVERY",
+          "REQ_MAX_CONTENT_WIDTH",
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "REQ_PROVISIONING_WIZARD_STYLING",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_WEBSITE_FOOTER",
+          "event_ids": [
+            "REQ_WEBSITE_FOOTER_E005"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_WEBSITE_FOOTER_S004",
+          "after_state_id": "REQ_WEBSITE_FOOTER_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.copyright_notice",
+            "attributes.menu_links",
+            "attributes.organization_block",
+            "attributes.social_links"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "WEBSITE_FOOTER",
+            "WEBSITE_PAGES"
+          ]
+        },
+        {
+          "requirement_id": "REQ_INFORMATIONAL_PAGE_SHELL",
+          "event_ids": [
+            "REQ_INFORMATIONAL_PAGE_SHELL_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_INFORMATIONAL_PAGE_SHELL_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "INFORMATIONAL_PAGES"
+          ]
+        },
+        {
+          "requirement_id": "REQ_COGNITO_SIGNIN_BRANDING",
+          "event_ids": [
+            "REQ_COGNITO_SIGNIN_BRANDING_E003",
+            "REQ_COGNITO_SIGNIN_BRANDING_E004"
+          ],
+          "event_types": [
+            "MODIFY",
+            "IMPLEMENTATION_CLAIM"
+          ],
+          "before_state_id": "REQ_COGNITO_SIGNIN_BRANDING_S002",
+          "after_state_id": "REQ_COGNITO_SIGNIN_BRANDING_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.background_treatment",
+            "attributes.required_visual_elements",
+            "execution.observed_behavior",
+            "execution.status"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "AUTH",
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "SIGN_IN_PAGE"
+          ]
+        },
+        {
+          "requirement_id": "REQ_POLICY_DOCUMENT_ACCESS",
+          "event_ids": [
+            "REQ_POLICY_DOCUMENT_ACCESS_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_POLICY_DOCUMENT_ACCESS_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "LEGAL_PAGES",
+            "WEBSITE_NAVIGATION"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43772711_T006",
+      "target_message_id": 81,
+      "target_fingerprint": "c6333664fc175f525b617537aaf1a46867841875f12ee51c54c96be55d2da515",
+      "turns": 80,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 81,
+        "speaker": "client",
+        "text": "Your perspective is interesting \\[sic\\], though in the western world people's attention naturally shifts back to the left-hand side. That makes me think panels on both sides might feel somewhat unnatural.\n\nAlthough AWS Cognito generates the Sign In page, its styling can be customized; the background I created was intended for that page. To see what I mean, open <https://cdn.lumenarc-demo.example> and select Sign In. That same background is now being used for the Tenant Launch Flow. Its functionality is working, but I still need to revisit the styling, so I probably won't send it to you for 9 days. For the time being, standard pages such as Cookie and Privacy are PDFs that I can simply open in separate tabs."
+      },
+      "rq3_gold_decision": "CLARIFY",
+      "condition_scope": [],
+      "plan_status": "EXCLUDED_RQ3_NOT_ACT",
+      "build_sequence": null,
+      "exclusion_reason": "RQ3_NOT_ACT",
+      "code_environment_status": "NOT_APPLICABLE",
+      "eligibility_status": "EXCLUDED_RQ3_NOT_ACT",
+      "output_contract": null,
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43772711/RQ3/43772711_T006_RQ3.json",
+          "file_sha256": "041b158796ecd75233d129c2b94df875c6fcf5af0e978a2b697dce420dd94f37",
+          "content_sha256": "b4ea8fd30cd364e85ac5d9f20ed42221e9add37f6313c095e131ef164c1b89c4"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_HEADER_NAVIGATION",
+            "state_id": "REQ_WEBSITE_HEADER_NAVIGATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S008"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_INFORMATIONAL_PAGE_SHELL",
+            "state_id": "REQ_INFORMATIONAL_PAGE_SHELL_S001"
+          },
+          {
+            "requirement_id": "REQ_COGNITO_SIGNIN_BRANDING",
+            "state_id": "REQ_COGNITO_SIGNIN_BRANDING_S004"
+          },
+          {
+            "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+            "state_id": "REQ_PROVISIONING_WIZARD_STYLING_S002"
+          },
+          {
+            "requirement_id": "REQ_POLICY_DOCUMENT_ACCESS",
+            "state_id": "REQ_POLICY_DOCUMENT_ACCESS_S001"
+          },
+          {
+            "requirement_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE",
+            "state_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION",
+            "state_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION_S002"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_HEADER_NAVIGATION",
+            "state_id": "REQ_WEBSITE_HEADER_NAVIGATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S008"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_INFORMATIONAL_PAGE_SHELL",
+            "state_id": "REQ_INFORMATIONAL_PAGE_SHELL_S001"
+          },
+          {
+            "requirement_id": "REQ_COGNITO_SIGNIN_BRANDING",
+            "state_id": "REQ_COGNITO_SIGNIN_BRANDING_S004"
+          },
+          {
+            "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+            "state_id": "REQ_PROVISIONING_WIZARD_STYLING_S003"
+          },
+          {
+            "requirement_id": "REQ_POLICY_DOCUMENT_ACCESS",
+            "state_id": "REQ_POLICY_DOCUMENT_ACCESS_S002"
+          },
+          {
+            "requirement_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE",
+            "state_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S005"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION",
+            "state_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION_S003"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_PROVISIONING_WIZARD_STYLING",
+          "REQ_POLICY_DOCUMENT_ACCESS",
+          "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_LANDING_PAGE_SIGNUP_CTA",
+          "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+          "REQ_LANDING_PAGE_HERO_PRESENTATION",
+          "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+          "REQ_LANDING_PAGE_BUILD_STACK",
+          "REQ_WEBSITE_HEADER_NAVIGATION",
+          "REQ_WEBSITE_FOOTER",
+          "REQ_WEBSITE_PAGE_THEME",
+          "REQ_DESIGN_TOKEN_SPECIFICATION",
+          "REQ_WEBFONT_ASSET_DELIVERY",
+          "REQ_MAX_CONTENT_WIDTH",
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "REQ_INFORMATIONAL_PAGE_SHELL",
+          "REQ_COGNITO_SIGNIN_BRANDING",
+          "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+          "event_ids": [
+            "REQ_PROVISIONING_WIZARD_STYLING_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_PROVISIONING_WIZARD_STYLING_S002",
+          "after_state_id": "REQ_PROVISIONING_WIZARD_STYLING_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "scope"
+          ],
+          "changed_paths": [
+            "attributes.background_treatment",
+            "scope.contexts"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "ACCOUNT_PROVISIONING",
+            "TENANT_LAUNCH_FLOW"
+          ]
+        },
+        {
+          "requirement_id": "REQ_POLICY_DOCUMENT_ACCESS",
+          "event_ids": [
+            "REQ_POLICY_DOCUMENT_ACCESS_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_POLICY_DOCUMENT_ACCESS_S001",
+          "after_state_id": "REQ_POLICY_DOCUMENT_ACCESS_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.policy_delivery_mode",
+            "attributes.policy_document_format",
+            "attributes.policy_link_open_behavior"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "LEGAL_PAGES",
+            "WEBSITE_NAVIGATION"
+          ]
+        },
+        {
+          "requirement_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION",
+          "event_ids": [
+            "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION_E003"
+          ],
+          "event_types": [
+            "AMBIGUOUS"
+          ],
+          "before_state_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION_S002",
+          "after_state_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "ambiguity"
+          ],
+          "changed_paths": [
+            "ambiguity"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "UI_UX",
+            "FRONTEND"
+          ],
+          "after_contexts": [
+            "ADMIN_WORKSPACE",
+            "SIDE_NAVIGATION"
+          ]
+        }
+      ]
+    },
+    {
+      "target_id": "43772711_T007",
+      "target_message_id": 87,
+      "target_fingerprint": "bd883271fc289ca66d2a9c6a5ec5d8a0d2caad56d4b588e6e57f151468e63195",
+      "turns": 86,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 87,
+        "speaker": "client",
+        "text": "I've attached 7 screens showing both the light and dark themes, and I can provide more if needed. For reference, I’m also reviewing other people’s console interfaces, including chatbots, Upwork, RingCentral, and similar products; many of them use monochrome buttons. By the way, I like the purple footer."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 5,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43772711/targets/T007_before_87",
+        "archive_path": "Code Environment/43772711/targets/T007_before_87/pre_repo.zip",
+        "manifest_path": "Code Environment/43772711/targets/T007_before_87/manifest.json",
+        "before_message_id": 87,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43772711/RQ3/43772711_T007_RQ3.json",
+          "file_sha256": "7a69c12679f6b0303d8c45ed0020e270f7d4bc6abe239b03b1acbfdba5052dd4",
+          "content_sha256": "8483e32ee68b7371cac5bc22ae8e47d1e545e90afed687e13f437db20bd68f5e"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_HEADER_NAVIGATION",
+            "state_id": "REQ_WEBSITE_HEADER_NAVIGATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S008"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_INFORMATIONAL_PAGE_SHELL",
+            "state_id": "REQ_INFORMATIONAL_PAGE_SHELL_S001"
+          },
+          {
+            "requirement_id": "REQ_COGNITO_SIGNIN_BRANDING",
+            "state_id": "REQ_COGNITO_SIGNIN_BRANDING_S005"
+          },
+          {
+            "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+            "state_id": "REQ_PROVISIONING_WIZARD_STYLING_S003"
+          },
+          {
+            "requirement_id": "REQ_POLICY_DOCUMENT_ACCESS",
+            "state_id": "REQ_POLICY_DOCUMENT_ACCESS_S002"
+          },
+          {
+            "requirement_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE",
+            "state_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S006"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION",
+            "state_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION_S003"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_BUTTON_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_BUTTON_STYLING_S002"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_LANDING_PAGE_SIGNUP_CTA",
+            "state_id": "REQ_LANDING_PAGE_SIGNUP_CTA_S001"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+            "state_id": "REQ_LANDING_PAGE_VISUAL_DIRECTION_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_HERO_PRESENTATION",
+            "state_id": "REQ_LANDING_PAGE_HERO_PRESENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+            "state_id": "REQ_LANDING_PAGE_CONTENT_STRUCTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+            "state_id": "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT_S004"
+          },
+          {
+            "requirement_id": "REQ_LANDING_PAGE_BUILD_STACK",
+            "state_id": "REQ_LANDING_PAGE_BUILD_STACK_S001"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_HEADER_NAVIGATION",
+            "state_id": "REQ_WEBSITE_HEADER_NAVIGATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_FOOTER",
+            "state_id": "REQ_WEBSITE_FOOTER_S009"
+          },
+          {
+            "requirement_id": "REQ_WEBSITE_PAGE_THEME",
+            "state_id": "REQ_WEBSITE_PAGE_THEME_S002"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_TOKEN_SPECIFICATION",
+            "state_id": "REQ_DESIGN_TOKEN_SPECIFICATION_S002"
+          },
+          {
+            "requirement_id": "REQ_WEBFONT_ASSET_DELIVERY",
+            "state_id": "REQ_WEBFONT_ASSET_DELIVERY_S002"
+          },
+          {
+            "requirement_id": "REQ_MAX_CONTENT_WIDTH",
+            "state_id": "REQ_MAX_CONTENT_WIDTH_S001"
+          },
+          {
+            "requirement_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+            "state_id": "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE_S002"
+          },
+          {
+            "requirement_id": "REQ_INFORMATIONAL_PAGE_SHELL",
+            "state_id": "REQ_INFORMATIONAL_PAGE_SHELL_S001"
+          },
+          {
+            "requirement_id": "REQ_COGNITO_SIGNIN_BRANDING",
+            "state_id": "REQ_COGNITO_SIGNIN_BRANDING_S005"
+          },
+          {
+            "requirement_id": "REQ_PROVISIONING_WIZARD_STYLING",
+            "state_id": "REQ_PROVISIONING_WIZARD_STYLING_S003"
+          },
+          {
+            "requirement_id": "REQ_POLICY_DOCUMENT_ACCESS",
+            "state_id": "REQ_POLICY_DOCUMENT_ACCESS_S002"
+          },
+          {
+            "requirement_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE",
+            "state_id": "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE_S001"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_SHELL_STYLING_S006"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION",
+            "state_id": "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION_S003"
+          },
+          {
+            "requirement_id": "REQ_ADMIN_WORKSPACE_BUTTON_STYLING",
+            "state_id": "REQ_ADMIN_WORKSPACE_BUTTON_STYLING_S002"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_WEBSITE_FOOTER"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_LANDING_PAGE_SIGNUP_CTA",
+          "REQ_LANDING_PAGE_VISUAL_DIRECTION",
+          "REQ_LANDING_PAGE_HERO_PRESENTATION",
+          "REQ_LANDING_PAGE_CONTENT_STRUCTURE",
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT",
+          "REQ_LANDING_PAGE_BUILD_STACK",
+          "REQ_WEBSITE_HEADER_NAVIGATION",
+          "REQ_WEBSITE_PAGE_THEME",
+          "REQ_DESIGN_TOKEN_SPECIFICATION",
+          "REQ_WEBFONT_ASSET_DELIVERY",
+          "REQ_MAX_CONTENT_WIDTH",
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE",
+          "REQ_INFORMATIONAL_PAGE_SHELL",
+          "REQ_COGNITO_SIGNIN_BRANDING",
+          "REQ_PROVISIONING_WIZARD_STYLING",
+          "REQ_POLICY_DOCUMENT_ACCESS",
+          "REQ_ADDITIONAL_PAGE_PROTOTYPE_CODE",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING",
+          "REQ_ADMIN_WORKSPACE_PANEL_NAVIGATION",
+          "REQ_ADMIN_WORKSPACE_BUTTON_STYLING"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_WEBSITE_FOOTER",
+          "event_ids": [
+            "REQ_WEBSITE_FOOTER_E009"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_WEBSITE_FOOTER_S008",
+          "after_state_id": "REQ_WEBSITE_FOOTER_S009",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.background_color",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "WEBSITE_FOOTER",
+            "WEBSITE_PAGES"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    }
+  ]
+}

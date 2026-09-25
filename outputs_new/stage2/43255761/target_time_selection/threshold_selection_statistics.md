@@ -9,6 +9,6 @@ Only valid, history-sensitive AI recommendations are counted. Buckets use [0,50)
 | 5 | 1 | 1 | 15 | 17 |
 | 6 | 0 | 1 | 11 | 12 |
 | 7 | 0 | 1 | 6 | 7 |
-| 8 | 0 | 1 | 2 | 3 |
-| 9 | 0 | 0 | 1 | 1 |
+| 8 | 0 | 1 | 1 | 2 |
+| 9 | 0 | 0 | 0 | 0 |
 | 10 | 0 | 0 | 0 | 0 |

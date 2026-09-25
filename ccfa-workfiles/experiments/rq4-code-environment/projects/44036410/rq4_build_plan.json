@@ -1,0 +1,1243 @@
+{
+  "schema_version": "rq4-code-environment-project-build-plan-v1",
+  "plan_scope": "RQ4_CODE_ENVIRONMENT_RECONSTRUCTION",
+  "source_of_truth": "FROZEN_RQ3_FINAL_GOLD",
+  "project_id": "44036410",
+  "project_title": null,
+  "input_release": "44036410-stage2-final-20260925-rq123-main-v1",
+  "project_applicability": {
+    "selection_source": "USER_CURATED_PROJECT_ALLOWLIST",
+    "included_project_id": "44036410",
+    "excluded_project_policy": "NOT_IN_RQ4_BUILD_SCOPE",
+    "rationale": "Only projects whose final deliverable is suitable for a runnable, locally deterministic Code Environment are included.",
+    "source_artifact": {
+      "path": "Code/config/rq4_project_allowlist.json",
+      "file_sha256": "47502d55e5023601a68622ecc9bdb1ece0ceb8032593af45bfb27d0626059ced"
+    }
+  },
+  "unit_of_reconstruction": "PROJECT_CHRONOLOGICAL_REPLAY",
+  "snapshot_policy": "Freeze a pre-task Code Environment only at selected targets whose final C1/C2 RQ3 Gold decision is ACT. Replay every intervening State Graph event, including non-target messages and selected targets excluded from RQ4, before freezing the next snapshot.",
+  "construction_policy": "FROM_SCRATCH_NEW_RELEASE_ONLY",
+  "builder_contract": {
+    "ordered_stages": [
+      "SOURCE_AND_BOUNDARY_AUDIT",
+      "PROJECT_BASELINE_RECONSTRUCTION",
+      "CHRONOLOGICAL_STATE_REPLAY",
+      "ACT_TARGET_PRE_STATE_SNAPSHOT",
+      "POST_TRANSITION_TRACE_CHECK",
+      "BUILD_AND_REGRESSION_VALIDATION",
+      "ARCHIVE_AND_MANIFEST_FREEZE",
+      "RQ4_REPOSITORY_LEAKAGE_AUDIT"
+    ],
+    "required_project_outputs": [
+      "Code Environment/<project_id>/reports/target_index.json",
+      "Code Environment/<project_id>/reports/validation_report.json",
+      "Code Environment/<project_id>/reports/reconstruction_report.md"
+    ],
+    "required_target_outputs": [
+      "Code Environment/<project_id>/targets/<target_dir>/pre_repo.zip",
+      "Code Environment/<project_id>/targets/<target_dir>/manifest.json"
+    ],
+    "safe_replacement_policy": "Build each project in a project-scoped staging directory. Do not read or reuse any previous Code Environment. Promote the validated project atomically so targets/*/manifest.json and reports/target_index.json contain exactly the plan build targets.",
+    "manifest_required_fields": [
+      "target_id",
+      "before_message_id",
+      "repository_classification",
+      "contract_layer",
+      "web_api_layer",
+      "active_code_feature_count",
+      "tracked_requirement_count",
+      "temporal_fixture",
+      "requirements_to_code",
+      "target_event_ids",
+      "target_event_types",
+      "target_summary",
+      "pre_state_verified_against_gold",
+      "post_state_verified_against_gold",
+      "repo_sha256"
+    ],
+    "forbidden_in_agent_visible_repository": [
+      "future_or_post_task_state",
+      "acceptance_criteria",
+      "hidden_validators",
+      "reference_delivery",
+      "evaluator_only_requirement_state_event_metadata",
+      ".git",
+      "secrets"
+    ],
+    "handoff_completion_condition": "Every build-queue target has a boundary-matched manifest and safe pre_repo.zip; project validation reports pass; no RQ4 instance is declared execution-ready by the builder."
+  },
+  "post_build_gates_not_owned_by_builder": [
+    "ACCEPTANCE_CRITERIA_DESIGN",
+    "HIDDEN_VALIDATOR_IMPLEMENTATION_AND_INDEPENDENT_REVIEW",
+    "PRE_REFERENCE_PARTIAL_DELIVERY_CALIBRATION",
+    "FINAL_RQ4_ELIGIBILITY",
+    "RQ4_INSTANCE_MATERIALIZATION"
+  ],
+  "chronological_reconstruction_required": true,
+  "project_sources": {
+    "rq_instance_manifest": {
+      "path": "outputs_new/stage2/44036410/rq_instance_manifest.json",
+      "file_sha256": "5c2c042781d941566c2ba2d86663c6817c5ab734c334cb9be2412adc477c1a3a"
+    },
+    "gold_states": {
+      "path": "outputs_new/stage2/44036410/gold_states.json",
+      "file_sha256": "31592bdc58065037dd7030c4e6299ae0e51cb3ebbc31781354993a12d5a7acdd"
+    },
+    "requirement_state_graph": {
+      "path": "outputs_new/stage2/44036410/requirement_state_graph.json",
+      "file_sha256": "ab95ca19146285c6ed17636d7cb4ad9c936f15d6ace0bb079cc91015cd28c35b"
+    },
+    "normalized_project": {
+      "path": "outputs_new/stage1_runs/44036410/normalized_project.json",
+      "file_sha256": "56671c02727b9fb282854d1da4327a295ead2fe673e87f1c35967782035db582"
+    },
+    "stage1_annotation": {
+      "path": "outputs_new/stage1_annotations/44036410_stage1_annotation.json",
+      "file_sha256": "5d6e09c68379b45e17c27d2e9ae5c26d51e1f0cd7426960c7ce8c48696fe8bd2"
+    },
+    "gold_state_validation": {
+      "path": "outputs_new/stage2/44036410/target_time_selection/gold_state_validation.json",
+      "file_sha256": "980f743edd28d93320e892ef94ee57b4be8c29083f97cb15bf2a58f247245617"
+    },
+    "repository_profiles": {
+      "path": "Code/config/rq4_repository_profiles.json",
+      "file_sha256": "2f2e29df9c7c11840393c9216f45333ab1ac1c7617b69b32dd6075614d36af1e"
+    }
+  },
+  "repository_profile": {
+    "artifact_class": "SECURITY_REPORT_DOCUMENT",
+    "renderer": "report",
+    "runtime": "PYTHON_STDLIB",
+    "contract_layer": "DETERMINISTIC_REPORT_GENERATOR",
+    "web_api_layer": "NONE",
+    "primary_artifacts": [
+      "dist/security-report.docx",
+      "dist/security-report.pdf",
+      "dist/report-preview.html"
+    ],
+    "description": "Deterministic security-report generator implementing current report content, variants, templates, visual structure, and exports."
+  },
+  "summary": {
+    "selected_target_count": 3,
+    "build_target_count": 3,
+    "excluded_rq3_not_act_count": 0,
+    "rq3_decision_distribution": {
+      "ACT": 3
+    }
+  },
+  "targets": [
+    {
+      "target_id": "44036410_T001",
+      "target_message_id": 42,
+      "target_fingerprint": "f4bf2bddcbf14529fa95976c6bf2c63e33cd78eb8b71f79568c0988ed8179ae6",
+      "turns": 41,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 42,
+        "speaker": "client",
+        "text": "Hi,\n\nThank you for sending over the updated report design. The overall direction is much stronger now, and I'm happy with the general look and feel, so I do not want to redesign it from scratch.\n\nI would like to make a final round of refinements to improve readability, consistency, and the overall commercial finish before I sign it off.\n\nThe main changes I'd like are:\n\n1\\. Make the front-page score more dominant.\n\nPlease make the \"67/100\" score slightly larger and give it more breathing room so it feels more like the main dashboard result. The customer should immediately notice the score and risk outcome when they open the report.\n\n2\\. Rename \"Security Score\" to \"Vehicle Security Score\"\n\nOn the front page, please change the heading from \"Security Score\" to \"Vehicle Security Score\" to make it feel more complete and professional.\n\n3\\. Simplify the \"What Caused This Result\" section.\n\nThe wording is good, but the dark blue panel currently feels quite text-heavy. Please reduce this section into shorter, easier-to-scan bullet points. For example:\n\n\\- No independent immobilisation\n\\- No circular steering lock\n\\- No live-location tracking\n\\- Storage location is being overvalued\n\\- Owner security habits reduce protection\n\nThe longer explanation can remain elsewhere in the report if needed. Still, page one should feel more immediate and easy to read.\n\n4\\. Remove placeholder text\n\nPlease remove any placeholder text such as \"Click to enter a date.\" This should either be replaced with the actual assessment date or a clean editable placeholder such as \"\\[Assessment Date\\]\".\n\n5\\. Check report code consistency\n\nPlease check that the report code is consistent throughout. I noticed some areas may show \"AC-47\". This should be \"DX-17\" throughout unless there is a specific reason for using something different.\n\n6\\. Clean up the vehicle group section\n\nThe checkboxes next to Range Rover / Range Rover Sport / Defender make the section feel slightly like a form rather than a completed report. Please either make this a cleaner fixed line, such as:\n\n\"Vehicle Group: Range Rover / Range Rover Sport / Defender\"\n\nor make it customer-specific, for example:\n\n\"Vehicle Assessed: Range Rover Sport\"\n\n7\\. Add a subtle header to pages 2 onwards\n\nThe footer works well, but I'd also like a subtle header across the internal pages for consistency. Something simple would be fine, such as:\n\n\"Vehicle Theft Risk Assessment | DX-17 | Confidential\"\n\nThis should be subtle and not take up too much space.\n\n8\\. Refine the red distribution warning on the final page\n\nI like the idea of the warning section, but the red block currently feels a little too heavy. Please keep the warning, but make it slightly more refined and less visually dominant, while still making it clear that the report is confidential and for limited distribution.\n\nOverall, I'm happy with the design direction. I want this final round to focus on polish, readability, consistency and making the report feel like a premium paid assessment.\n\nPlease let me know if the above changes are clear and when you expect to send the revised version.\n\nThanks"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 1,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44036410/targets/T001_before_42",
+        "archive_path": "Code Environment/44036410/targets/T001_before_42/pre_repo.zip",
+        "manifest_path": "Code Environment/44036410/targets/T001_before_42/manifest.json",
+        "before_message_id": 42,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44036410/RQ3/44036410_T001_RQ3.json",
+          "file_sha256": "b6c4773a8b2d45643d1ddaa0d7721a7fe48d5fa76571fc2709988bd0c14cda71",
+          "content_sha256": "a0f21be9b99db763a4a1955d9e899708505942f5826d1210c3980fce3cc11a22"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_VISUAL_THEME_CONSISTENCY",
+            "state_id": "REQ_VISUAL_THEME_CONSISTENCY_S002"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_SUMMARY",
+            "state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S001"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_DRIVERS",
+            "state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S001"
+          },
+          {
+            "requirement_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+            "state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S001"
+          },
+          {
+            "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+            "state_id": "REQ_INTERNAL_PAGE_HEADERS_S001"
+          },
+          {
+            "requirement_id": "REQ_PAGE_FOOTERS",
+            "state_id": "REQ_PAGE_FOOTERS_S001"
+          },
+          {
+            "requirement_id": "REQ_TRANSPARENT_SCORING_SUMMARY",
+            "state_id": "REQ_TRANSPARENT_SCORING_SUMMARY_S001"
+          },
+          {
+            "requirement_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+            "state_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS_S001"
+          },
+          {
+            "requirement_id": "REQ_REPORT_VARIANT_SET",
+            "state_id": "REQ_REPORT_VARIANT_SET_S001"
+          },
+          {
+            "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+            "state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S001"
+          },
+          {
+            "requirement_id": "REQ_SELF_SERVICE_PDF_EXPORT",
+            "state_id": "REQ_SELF_SERVICE_PDF_EXPORT_S001"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_ASSET_PACKAGE",
+            "state_id": "REQ_DESIGN_ASSET_PACKAGE_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_VISUAL_THEME_CONSISTENCY",
+            "state_id": "REQ_VISUAL_THEME_CONSISTENCY_S003"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_SUMMARY",
+            "state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S002"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_DRIVERS",
+            "state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S002"
+          },
+          {
+            "requirement_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+            "state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S003"
+          },
+          {
+            "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+            "state_id": "REQ_INTERNAL_PAGE_HEADERS_S002"
+          },
+          {
+            "requirement_id": "REQ_PAGE_FOOTERS",
+            "state_id": "REQ_PAGE_FOOTERS_S001"
+          },
+          {
+            "requirement_id": "REQ_DISTRIBUTION_WARNING",
+            "state_id": "REQ_DISTRIBUTION_WARNING_S001"
+          },
+          {
+            "requirement_id": "REQ_TRANSPARENT_SCORING_SUMMARY",
+            "state_id": "REQ_TRANSPARENT_SCORING_SUMMARY_S001"
+          },
+          {
+            "requirement_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+            "state_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS_S001"
+          },
+          {
+            "requirement_id": "REQ_CORE_REPORT_COPY_ACCURACY",
+            "state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S002"
+          },
+          {
+            "requirement_id": "REQ_REPORT_VARIANT_SET",
+            "state_id": "REQ_REPORT_VARIANT_SET_S001"
+          },
+          {
+            "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+            "state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S002"
+          },
+          {
+            "requirement_id": "REQ_SELF_SERVICE_PDF_EXPORT",
+            "state_id": "REQ_SELF_SERVICE_PDF_EXPORT_S001"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_ASSET_PACKAGE",
+            "state_id": "REQ_DESIGN_ASSET_PACKAGE_S001"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_HEADER_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_HEADER_IDENTIFIERS_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_VISUAL_THEME_CONSISTENCY",
+          "REQ_FRONT_PAGE_RESULT_SUMMARY",
+          "REQ_FRONT_PAGE_RESULT_DRIVERS",
+          "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+          "REQ_INTERNAL_PAGE_HEADERS",
+          "REQ_DISTRIBUTION_WARNING",
+          "REQ_CORE_REPORT_COPY_ACCURACY",
+          "REQ_EDITABLE_CUSTOMER_FIELDS",
+          "REQ_VARIANT_HEADER_IDENTIFIERS"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_PAGE_FOOTERS",
+          "REQ_TRANSPARENT_SCORING_SUMMARY",
+          "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+          "REQ_REPORT_VARIANT_SET",
+          "REQ_SELF_SERVICE_PDF_EXPORT",
+          "REQ_DESIGN_ASSET_PACKAGE"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_VISUAL_THEME_CONSISTENCY",
+          "event_ids": [
+            "REQ_VISUAL_THEME_CONSISTENCY_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_VISUAL_THEME_CONSISTENCY_S002",
+          "after_state_id": "REQ_VISUAL_THEME_CONSISTENCY_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.design_direction",
+            "attributes.finish_priorities"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN"
+          ],
+          "after_contexts": [
+            "ALL_REPORT_VARIANTS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_FRONT_PAGE_RESULT_SUMMARY",
+          "event_ids": [
+            "REQ_FRONT_PAGE_RESULT_SUMMARY_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S001",
+          "after_state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.result_visibility",
+            "attributes.score_heading",
+            "attributes.score_prominence",
+            "attributes.score_spacing"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN",
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "FRONT_PAGE",
+            "ALL_REPORT_VARIANTS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_FRONT_PAGE_RESULT_DRIVERS",
+          "event_ids": [
+            "REQ_FRONT_PAGE_RESULT_DRIVERS_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S001",
+          "after_state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.front_page_detail_level",
+            "attributes.front_page_result_driver_format"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN",
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "FRONT_PAGE",
+            "ALL_REPORT_VARIANTS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+          "event_ids": [
+            "REQ_VEHICLE_IDENTIFICATION_DISPLAY_E002",
+            "REQ_VEHICLE_IDENTIFICATION_DISPLAY_E003"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S001",
+          "after_state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.display_format",
+            "attributes.displayed_identifier",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN",
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "ALL_REPORT_VARIANTS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+          "event_ids": [
+            "REQ_INTERNAL_PAGE_HEADERS_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_INTERNAL_PAGE_HEADERS_S001",
+          "after_state_id": "REQ_INTERNAL_PAGE_HEADERS_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.example_header_text",
+            "attributes.header_coverage",
+            "attributes.header_presentation",
+            "attributes.required_information"
+          ],
+          "removed_paths": [
+            "attributes.required_information"
+          ],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN"
+          ],
+          "after_contexts": [
+            "INTERNAL_PAGES",
+            "ALL_REPORT_VARIANTS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_DISTRIBUTION_WARNING",
+          "event_ids": [
+            "REQ_DISTRIBUTION_WARNING_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_DISTRIBUTION_WARNING_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN",
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "FINAL_PAGE"
+          ]
+        },
+        {
+          "requirement_id": "REQ_CORE_REPORT_COPY_ACCURACY",
+          "event_ids": [
+            "REQ_CORE_REPORT_COPY_ACCURACY_E001",
+            "REQ_CORE_REPORT_COPY_ACCURACY_E002"
+          ],
+          "event_types": [
+            "INTRODUCE",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S002",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "SHARED_REPORT_COPY"
+          ]
+        },
+        {
+          "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+          "event_ids": [
+            "REQ_EDITABLE_CUSTOMER_FIELDS_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S001",
+          "after_state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.assessment_date_field_format"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "ALL_REPORT_VARIANTS",
+            "CUSTOMER_CUSTOMIZATION"
+          ]
+        },
+        {
+          "requirement_id": "REQ_VARIANT_HEADER_IDENTIFIERS",
+          "event_ids": [
+            "REQ_VARIANT_HEADER_IDENTIFIERS_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_VARIANT_HEADER_IDENTIFIERS_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "INTERNAL_PAGE_HEADER",
+            "DX17"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44036410_T002",
+      "target_message_id": 50,
+      "target_fingerprint": "e5f403bee2e4e2e8624265b009d4d7faf24da50083d747b7dcf6c804464b2c67",
+      "turns": 49,
+      "difficulty": "MEDIUM",
+      "target_task": {
+        "source_message_id": 50,
+        "speaker": "client",
+        "text": "Hi,\n\nOnce the five amendments below are complete, I think the report will be ready for sign-off.\n\nThank you for sending the updated version. It is now much closer to what I wanted, and I am happy to retain the overall design direction. Another redesign is not needed; only a final tidy-up remains before approval.\n\nPlease make these final changes:\n\n1\\. Assessment date placeholder\n\nOn page one, replace the report’s current text:\n\n“Assessment Date: Assessment Date.”\n\nwith either:\n\n“Assessment Date: \\[Assessment Date\\]”\n\nor an editable date field that I can update for each customer.\n\n2\\. Typo correction\n\nThe wording on page 2 currently reads:\n\n“Owners often overrate gated drivers.”\n\nPlease correct it to:\n\n“Owners often overrate gated driveways.”\n\n3\\. Awkward sentence correction\n\nAlso on page 2, replace this sentence:\n\n“Assessment note: Storage is helping presentations slightly...”\n\nwith:\n\n“Assessment note: Storage slightly improves the vehicle’s security presentation, but not enough to offset the wider weaknesses in the setup.”\n\n4\\. Page 4 footer\n\nAlthough pages 1, 2 and 3 use a consistent footer, page 4 appears to be missing that same footer because of the distribution warning section. Please restore the standard footer on page 4 so it remains consistent throughout the full report.\n\n5\\. Final distribution warning section\n\nThe distribution warning works well, but at the bottom of page 4 it still feels slightly too dominant. Please reduce or refine it a little so that it stays clear and professional without overpowering the page or interfering with the footer.\n\nThanks"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 2,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44036410/targets/T002_before_50",
+        "archive_path": "Code Environment/44036410/targets/T002_before_50/pre_repo.zip",
+        "manifest_path": "Code Environment/44036410/targets/T002_before_50/manifest.json",
+        "before_message_id": 50,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44036410/RQ3/44036410_T002_RQ3.json",
+          "file_sha256": "ba129bca9f9217c7e30ebdbac9e14d211adbcdb275878d8c655f1f9c74096341",
+          "content_sha256": "d5574b9f8c3897a7618cf04d310b18f8ef359c438e3a363e53efa476b361f2b3"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_VISUAL_THEME_CONSISTENCY",
+            "state_id": "REQ_VISUAL_THEME_CONSISTENCY_S003"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_SUMMARY",
+            "state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S002"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_DRIVERS",
+            "state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S002"
+          },
+          {
+            "requirement_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+            "state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S003"
+          },
+          {
+            "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+            "state_id": "REQ_INTERNAL_PAGE_HEADERS_S002"
+          },
+          {
+            "requirement_id": "REQ_PAGE_FOOTERS",
+            "state_id": "REQ_PAGE_FOOTERS_S001"
+          },
+          {
+            "requirement_id": "REQ_DISTRIBUTION_WARNING",
+            "state_id": "REQ_DISTRIBUTION_WARNING_S001"
+          },
+          {
+            "requirement_id": "REQ_TRANSPARENT_SCORING_SUMMARY",
+            "state_id": "REQ_TRANSPARENT_SCORING_SUMMARY_S001"
+          },
+          {
+            "requirement_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+            "state_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS_S001"
+          },
+          {
+            "requirement_id": "REQ_CORE_REPORT_COPY_ACCURACY",
+            "state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S002"
+          },
+          {
+            "requirement_id": "REQ_REPORT_VARIANT_SET",
+            "state_id": "REQ_REPORT_VARIANT_SET_S001"
+          },
+          {
+            "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+            "state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S002"
+          },
+          {
+            "requirement_id": "REQ_SELF_SERVICE_PDF_EXPORT",
+            "state_id": "REQ_SELF_SERVICE_PDF_EXPORT_S001"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_ASSET_PACKAGE",
+            "state_id": "REQ_DESIGN_ASSET_PACKAGE_S001"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_HEADER_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_HEADER_IDENTIFIERS_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_VISUAL_THEME_CONSISTENCY",
+            "state_id": "REQ_VISUAL_THEME_CONSISTENCY_S003"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_SUMMARY",
+            "state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S002"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_DRIVERS",
+            "state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S002"
+          },
+          {
+            "requirement_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+            "state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S003"
+          },
+          {
+            "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+            "state_id": "REQ_INTERNAL_PAGE_HEADERS_S002"
+          },
+          {
+            "requirement_id": "REQ_PAGE_FOOTERS",
+            "state_id": "REQ_PAGE_FOOTERS_S002"
+          },
+          {
+            "requirement_id": "REQ_DISTRIBUTION_WARNING",
+            "state_id": "REQ_DISTRIBUTION_WARNING_S002"
+          },
+          {
+            "requirement_id": "REQ_TRANSPARENT_SCORING_SUMMARY",
+            "state_id": "REQ_TRANSPARENT_SCORING_SUMMARY_S001"
+          },
+          {
+            "requirement_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+            "state_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS_S001"
+          },
+          {
+            "requirement_id": "REQ_CORE_REPORT_COPY_ACCURACY",
+            "state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S004"
+          },
+          {
+            "requirement_id": "REQ_REPORT_VARIANT_SET",
+            "state_id": "REQ_REPORT_VARIANT_SET_S001"
+          },
+          {
+            "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+            "state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S003"
+          },
+          {
+            "requirement_id": "REQ_SELF_SERVICE_PDF_EXPORT",
+            "state_id": "REQ_SELF_SERVICE_PDF_EXPORT_S001"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_ASSET_PACKAGE",
+            "state_id": "REQ_DESIGN_ASSET_PACKAGE_S001"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_HEADER_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_HEADER_IDENTIFIERS_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_PAGE_FOOTERS",
+          "REQ_DISTRIBUTION_WARNING",
+          "REQ_CORE_REPORT_COPY_ACCURACY",
+          "REQ_EDITABLE_CUSTOMER_FIELDS"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_VISUAL_THEME_CONSISTENCY",
+          "REQ_FRONT_PAGE_RESULT_SUMMARY",
+          "REQ_FRONT_PAGE_RESULT_DRIVERS",
+          "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+          "REQ_INTERNAL_PAGE_HEADERS",
+          "REQ_TRANSPARENT_SCORING_SUMMARY",
+          "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+          "REQ_REPORT_VARIANT_SET",
+          "REQ_SELF_SERVICE_PDF_EXPORT",
+          "REQ_DESIGN_ASSET_PACKAGE",
+          "REQ_VARIANT_HEADER_IDENTIFIERS"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_PAGE_FOOTERS",
+          "event_ids": [
+            "REQ_PAGE_FOOTERS_E002"
+          ],
+          "event_types": [
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": "REQ_PAGE_FOOTERS_S001",
+          "after_state_id": "REQ_PAGE_FOOTERS_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "execution"
+          ],
+          "changed_paths": [
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN"
+          ],
+          "after_contexts": [
+            "ALL_PAGES",
+            "ALL_REPORT_VARIANTS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_DISTRIBUTION_WARNING",
+          "event_ids": [
+            "REQ_DISTRIBUTION_WARNING_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_DISTRIBUTION_WARNING_S001",
+          "after_state_id": "REQ_DISTRIBUTION_WARNING_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.warning_visual_treatment"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_DESIGN",
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "FINAL_PAGE"
+          ]
+        },
+        {
+          "requirement_id": "REQ_CORE_REPORT_COPY_ACCURACY",
+          "event_ids": [
+            "REQ_CORE_REPORT_COPY_ACCURACY_E003",
+            "REQ_CORE_REPORT_COPY_ACCURACY_E004"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S002",
+          "after_state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.assessment_date_copy_policy",
+            "attributes.page_2_assessment_note",
+            "attributes.page_2_gated_driveways_sentence",
+            "execution.observed_behavior"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "SHARED_REPORT_COPY"
+          ]
+        },
+        {
+          "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+          "event_ids": [
+            "REQ_EDITABLE_CUSTOMER_FIELDS_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S002",
+          "after_state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.assessment_date_field_format"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "ALL_REPORT_VARIANTS",
+            "CUSTOMER_CUSTOMIZATION"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "44036410_T003",
+      "target_message_id": 74,
+      "target_fingerprint": "8105807733d30f4490739a5c8d562cf7cc96f58783c6027a2f9c596966fd22aa",
+      "turns": 73,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 74,
+        "speaker": "client",
+        "text": "I have reviewed the changes, and everything looks good. Please now provide editable Canva templates and final PDF exports for DX17, DX18, DX19 and DX20.\n\nThe complete package should also contain all fonts, icons, logos, colour codes and other necessary design assets, allowing me to edit and export future customer reports myself. Once everything has been delivered, we can conclude the project and I will release the funds.\n\nThanks"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 3,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/44036410/targets/T003_before_74",
+        "archive_path": "Code Environment/44036410/targets/T003_before_74/pre_repo.zip",
+        "manifest_path": "Code Environment/44036410/targets/T003_before_74/manifest.json",
+        "before_message_id": 74,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/44036410/RQ3/44036410_T003_RQ3.json",
+          "file_sha256": "1a8f2ffca46f96faff3a7f3068d395837ee02b6d5fc03df128f75508754bd708",
+          "content_sha256": "825ac85e70c477d0d508b8d51ef4363fc4ac9a9dd99a0e779babd5c16f0e81fb"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_VISUAL_THEME_CONSISTENCY",
+            "state_id": "REQ_VISUAL_THEME_CONSISTENCY_S003"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_SUMMARY",
+            "state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S002"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_DRIVERS",
+            "state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S002"
+          },
+          {
+            "requirement_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+            "state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S003"
+          },
+          {
+            "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+            "state_id": "REQ_INTERNAL_PAGE_HEADERS_S002"
+          },
+          {
+            "requirement_id": "REQ_PAGE_FOOTERS",
+            "state_id": "REQ_PAGE_FOOTERS_S002"
+          },
+          {
+            "requirement_id": "REQ_DISTRIBUTION_WARNING",
+            "state_id": "REQ_DISTRIBUTION_WARNING_S002"
+          },
+          {
+            "requirement_id": "REQ_TRANSPARENT_SCORING_SUMMARY",
+            "state_id": "REQ_TRANSPARENT_SCORING_SUMMARY_S001"
+          },
+          {
+            "requirement_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+            "state_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS_S001"
+          },
+          {
+            "requirement_id": "REQ_CORE_REPORT_COPY_ACCURACY",
+            "state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S004"
+          },
+          {
+            "requirement_id": "REQ_REPORT_VARIANT_SET",
+            "state_id": "REQ_REPORT_VARIANT_SET_S001"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_RISK_BAND_TITLES",
+            "state_id": "REQ_VARIANT_RISK_BAND_TITLES_S003"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_NARRATIVE_ALIGNMENT",
+            "state_id": "REQ_VARIANT_NARRATIVE_ALIGNMENT_S006"
+          },
+          {
+            "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+            "state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S003"
+          },
+          {
+            "requirement_id": "REQ_SELF_SERVICE_PDF_EXPORT",
+            "state_id": "REQ_SELF_SERVICE_PDF_EXPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_EDITABLE_TEMPLATES",
+            "state_id": "REQ_WORD_EDITABLE_TEMPLATES_S001"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_ASSET_PACKAGE",
+            "state_id": "REQ_DESIGN_ASSET_PACKAGE_S001"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_REPORT_DETAIL_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_REPORT_DETAIL_IDENTIFIERS_S003"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_HEADER_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_HEADER_IDENTIFIERS_S003"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_FOOTER_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_FOOTER_IDENTIFIERS_S005"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_VISUAL_THEME_CONSISTENCY",
+            "state_id": "REQ_VISUAL_THEME_CONSISTENCY_S003"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_SUMMARY",
+            "state_id": "REQ_FRONT_PAGE_RESULT_SUMMARY_S002"
+          },
+          {
+            "requirement_id": "REQ_FRONT_PAGE_RESULT_DRIVERS",
+            "state_id": "REQ_FRONT_PAGE_RESULT_DRIVERS_S002"
+          },
+          {
+            "requirement_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+            "state_id": "REQ_VEHICLE_IDENTIFICATION_DISPLAY_S003"
+          },
+          {
+            "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+            "state_id": "REQ_INTERNAL_PAGE_HEADERS_S002"
+          },
+          {
+            "requirement_id": "REQ_PAGE_FOOTERS",
+            "state_id": "REQ_PAGE_FOOTERS_S002"
+          },
+          {
+            "requirement_id": "REQ_DISTRIBUTION_WARNING",
+            "state_id": "REQ_DISTRIBUTION_WARNING_S002"
+          },
+          {
+            "requirement_id": "REQ_TRANSPARENT_SCORING_SUMMARY",
+            "state_id": "REQ_TRANSPARENT_SCORING_SUMMARY_S001"
+          },
+          {
+            "requirement_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+            "state_id": "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS_S001"
+          },
+          {
+            "requirement_id": "REQ_CORE_REPORT_COPY_ACCURACY",
+            "state_id": "REQ_CORE_REPORT_COPY_ACCURACY_S004"
+          },
+          {
+            "requirement_id": "REQ_REPORT_VARIANT_SET",
+            "state_id": "REQ_REPORT_VARIANT_SET_S001"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_RISK_BAND_TITLES",
+            "state_id": "REQ_VARIANT_RISK_BAND_TITLES_S003"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_NARRATIVE_ALIGNMENT",
+            "state_id": "REQ_VARIANT_NARRATIVE_ALIGNMENT_S007"
+          },
+          {
+            "requirement_id": "REQ_EDITABLE_CUSTOMER_FIELDS",
+            "state_id": "REQ_EDITABLE_CUSTOMER_FIELDS_S003"
+          },
+          {
+            "requirement_id": "REQ_SELF_SERVICE_PDF_EXPORT",
+            "state_id": "REQ_SELF_SERVICE_PDF_EXPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_EDITABLE_TEMPLATES",
+            "state_id": "REQ_WORD_EDITABLE_TEMPLATES_S001"
+          },
+          {
+            "requirement_id": "REQ_CANVA_EDITABLE_TEMPLATES",
+            "state_id": "REQ_CANVA_EDITABLE_TEMPLATES_S001"
+          },
+          {
+            "requirement_id": "REQ_FINAL_PDF_EXPORTS",
+            "state_id": "REQ_FINAL_PDF_EXPORTS_S001"
+          },
+          {
+            "requirement_id": "REQ_DESIGN_ASSET_PACKAGE",
+            "state_id": "REQ_DESIGN_ASSET_PACKAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_REPORT_DETAIL_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_REPORT_DETAIL_IDENTIFIERS_S003"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_HEADER_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_HEADER_IDENTIFIERS_S003"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_FOOTER_IDENTIFIERS",
+            "state_id": "REQ_VARIANT_FOOTER_IDENTIFIERS_S005"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_VARIANT_NARRATIVE_ALIGNMENT",
+          "REQ_CANVA_EDITABLE_TEMPLATES",
+          "REQ_FINAL_PDF_EXPORTS",
+          "REQ_DESIGN_ASSET_PACKAGE"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_VISUAL_THEME_CONSISTENCY",
+          "REQ_FRONT_PAGE_RESULT_SUMMARY",
+          "REQ_FRONT_PAGE_RESULT_DRIVERS",
+          "REQ_VEHICLE_IDENTIFICATION_DISPLAY",
+          "REQ_INTERNAL_PAGE_HEADERS",
+          "REQ_PAGE_FOOTERS",
+          "REQ_DISTRIBUTION_WARNING",
+          "REQ_TRANSPARENT_SCORING_SUMMARY",
+          "REQ_PRIORITIZED_SECURITY_RECOMMENDATIONS",
+          "REQ_CORE_REPORT_COPY_ACCURACY",
+          "REQ_REPORT_VARIANT_SET",
+          "REQ_VARIANT_RISK_BAND_TITLES",
+          "REQ_EDITABLE_CUSTOMER_FIELDS",
+          "REQ_SELF_SERVICE_PDF_EXPORT",
+          "REQ_WORD_EDITABLE_TEMPLATES",
+          "REQ_VARIANT_REPORT_DETAIL_IDENTIFIERS",
+          "REQ_VARIANT_HEADER_IDENTIFIERS",
+          "REQ_VARIANT_FOOTER_IDENTIFIERS"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_VARIANT_NARRATIVE_ALIGNMENT",
+          "event_ids": [
+            "REQ_VARIANT_NARRATIVE_ALIGNMENT_E007"
+          ],
+          "event_types": [
+            "RUNTIME_VERIFICATION"
+          ],
+          "before_state_id": "REQ_VARIANT_NARRATIVE_ALIGNMENT_S006",
+          "after_state_id": "REQ_VARIANT_NARRATIVE_ALIGNMENT_S007",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "execution"
+          ],
+          "changed_paths": [
+            "execution.observed_behavior",
+            "execution.status"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_CONTENT"
+          ],
+          "after_contexts": [
+            "DX18",
+            "DX19",
+            "DX20",
+            "RECOMMENDATIONS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_CANVA_EDITABLE_TEMPLATES",
+          "event_ids": [
+            "REQ_CANVA_EDITABLE_TEMPLATES_E001"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_CANVA_EDITABLE_TEMPLATES_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": null,
+          "after_components": [
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "CANVA_FORMAT",
+            "DX17",
+            "DX18",
+            "DX19",
+            "DX20"
+          ]
+        },
+        {
+          "requirement_id": "REQ_FINAL_PDF_EXPORTS",
+          "event_ids": [
+            "REQ_FINAL_PDF_EXPORTS_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_FINAL_PDF_EXPORTS_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "DOCUMENT_EXPORT"
+          ],
+          "after_contexts": [
+            "PDF_FORMAT",
+            "DX17",
+            "DX18",
+            "DX19",
+            "DX20"
+          ]
+        },
+        {
+          "requirement_id": "REQ_DESIGN_ASSET_PACKAGE",
+          "event_ids": [
+            "REQ_DESIGN_ASSET_PACKAGE_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_DESIGN_ASSET_PACKAGE_S001",
+          "after_state_id": "REQ_DESIGN_ASSET_PACKAGE_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.package_contents"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ASSET_PACKAGE"
+          ],
+          "after_contexts": [
+            "FUTURE_CUSTOMER_REPORTS",
+            "ALL_REPORT_VARIANTS"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    }
+  ]
+}

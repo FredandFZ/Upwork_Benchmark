@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from stage2.rq_cohort import apply_target_exclusions, load_target_exclusions
 from stage2.rq_instances import (
     RQ_IDS,
     RQInstanceError,
@@ -84,6 +85,20 @@ def parse_args() -> argparse.Namespace:
             "Stable release label recorded in instances and manifests. When "
             "omitted, a deterministic label is derived from the three inputs."
         ),
+    )
+    parser.add_argument(
+        "--target-exclusions",
+        type=Path,
+        default=root / "Code" / "config" / "rq_target_exclusions.json",
+        help=(
+            "Audited target exclusions for the main RQ cohort. The source "
+            "Stage 2 Gold file is never modified."
+        ),
+    )
+    parser.add_argument(
+        "--ignore-target-exclusions",
+        action="store_true",
+        help="Build supplemental instances without applying the main-cohort exclusions.",
     )
     parser.add_argument("--gold-states", type=Path, help="Path to gold_states.json.")
     parser.add_argument(
@@ -177,13 +192,19 @@ def _render_summary(
     output_dir: Path,
     *,
     validate_only: bool,
+    excluded_target_count: int,
 ) -> str:
     counts = ", ".join(
         f"{rq_id}={indexes[rq_id]['instance_count']}" for rq_id in rq_ids
     )
     action = "validated" if validate_only else "generated"
     suffix = " (no files written)" if validate_only else f" -> {output_dir}"
-    return f"{project_id}: {action} RQ instances ({counts}){suffix}"
+    exclusion = (
+        f", excluded_targets={excluded_target_count}"
+        if excluded_target_count
+        else ""
+    )
+    return f"{project_id}: {action} RQ instances ({counts}{exclusion}){suffix}"
 
 
 def main() -> int:
@@ -197,7 +218,19 @@ def main() -> int:
             code_environment_dir,
             output_dir,
         ) = _resolve_paths(args)
-        gold_states = read_json(gold_path)
+        source_gold_states = read_json(gold_path)
+        source_targets = source_gold_states.get("task_gold_states")
+        if not isinstance(source_targets, list):
+            raise RQInstanceError("gold_states.task_gold_states must be an array")
+        exclusion_config = None
+        applied_exclusions: list[dict[str, Any]] = []
+        if args.ignore_target_exclusions:
+            gold_states = source_gold_states
+        else:
+            exclusion_config = load_target_exclusions(args.target_exclusions)
+            gold_states, applied_exclusions = apply_target_exclusions(
+                source_gold_states, exclusion_config
+            )
         state_graph = read_json(graph_path)
         normalized_project = read_json(messages_path)
         source_paths = {
@@ -205,6 +238,8 @@ def main() -> int:
             "requirement_state_graph": graph_path,
             "normalized_project": messages_path,
         }
+        if exclusion_config is not None:
+            source_paths["rq_target_exclusions"] = args.target_exclusions
         if code_environment_dir is not None:
             source_paths["code_environment"] = code_environment_dir
         selected_rqs = tuple(args.rq_ids)
@@ -218,7 +253,11 @@ def main() -> int:
             source_paths=source_paths,
             workspace_root=repo_root(),
         )
-        indexes = build_rq_indexes(collections)
+        indexes = build_rq_indexes(
+            collections,
+            project_id=project_id,
+            input_release=args.input_release,
+        )
         manifest = build_project_manifest(
             collections,
             indexes,
@@ -229,6 +268,21 @@ def main() -> int:
             workspace_root=repo_root(),
             output_dir=output_dir,
         )
+        manifest["cohort"] = {
+            "schema_version": (
+                exclusion_config["schema_version"]
+                if exclusion_config is not None
+                else None
+            ),
+            "scope": (
+                exclusion_config["scope"] if exclusion_config is not None else None
+            ),
+            "source_target_count": len(source_targets),
+            "included_target_count": len(gold_states["task_gold_states"]),
+            "excluded_target_count": len(applied_exclusions),
+            "excluded_targets": applied_exclusions,
+            "source_stage2_gold_preserved": True,
+        }
         if not args.validate_only:
             for rq_id in selected_rqs:
                 rq_dir = output_dir / rq_id
@@ -248,6 +302,7 @@ def main() -> int:
                 selected_rqs,
                 output_dir,
                 validate_only=args.validate_only,
+                excluded_target_count=len(applied_exclusions),
             )
         )
         return 0

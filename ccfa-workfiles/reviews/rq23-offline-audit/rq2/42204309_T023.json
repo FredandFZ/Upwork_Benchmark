@@ -1,0 +1,1216 @@
+{
+  "schema_version": "rq2-offline-agent-review-v1",
+  "target_id": "42204309_T023",
+  "review_method": "SINGLE_AGENT_ROLE_SEPARATED_PANEL",
+  "reviewers": [
+    "codex-structural-role",
+    "codex-semantic-role"
+  ],
+  "adjudicator": "codex-adjudication-role",
+  "adjudication_status": "ADJUDICATED",
+  "verdict": "FINALIZE",
+  "boundary_review": {
+    "pre_task_boundary_correct": true,
+    "historical_requirement_scope_correct": true,
+    "internal_ids_excluded": true
+  },
+  "reviewed_states": {
+    "REQ_FAQ_CONTENT": {
+      "attributes": {
+        "approved_faq_copy": "Revise referral explanations to state that only NFTs confirmed before checkout are valid; an accepted referral gives the chosen referrer a $25 credit and entry into the $2,000 reward drawing, while a missing or rejected referral assigns an $18 commission and a $900 draw entry to a random NFT owner.",
+        "faq_topics": [
+          "product mission",
+          "buyer earnings",
+          "referrals and referral codes",
+          "Small Block prizes",
+          "Chainlink VRF winner selection",
+          "prize tickets and reward claims",
+          "badges",
+          "fiat minting and wallet needs",
+          "Base network",
+          "mint and royalty fees",
+          "NFT transfers",
+          "sharing referral codes",
+          "single-level model and creator revenue",
+          "support channels"
+        ],
+        "editorial_refinement": "Minor refinement is allowed before loading the supplied FAQ copy.",
+        "fiat_buyer_rewards_faq_section": "Explain that only NFTs confirmed before checkout are valid referrals; accepted referrals provide the chosen referrer a $25 credit and entry into the $2,000 reward drawing, while missing or rejected referrals assign an $18 commission and a $900 draw entry to a random NFT owner.",
+        "beginner_rewards_collection_faq_section": "Explain the conditional referral rewards: a valid accepted referral provides the chosen referrer a $25 credit and one $2,000 drawing entry, while a missing or rejected referral assigns an $18 commission and one $900 drawing entry to a random NFT owner.",
+        "faq_draw_copy_consistency": "Use Chainlink VRF consistently throughout FAQ draw descriptions and fairness explanations."
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "FAQ"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": null
+    },
+    "REQ_NO_REFERRAL_COMMISSION": {
+      "attributes": {
+        "commission_amount_usd": 18,
+        "allocation_trigger": "referral is missing or rejected",
+        "recipient_selection": "random NFT owner"
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "NO_REFERRAL",
+          "INVALID_REFERRAL",
+          "AFFILIATE_COMMISSION"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": null
+    },
+    "REQ_NO_REFERRAL_TICKETS": {
+      "attributes": {
+        "recipient_selection": "random NFT owner",
+        "allocation_trigger": "referral is missing or rejected",
+        "draw_entries_per_missing_or_rejected_referral": 1,
+        "reward_drawing_amount_usd": 900
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "NO_REFERRAL",
+          "INVALID_REFERRAL",
+          "PRIZE_TICKETS"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": null
+    },
+    "REQ_NFT_REFERRAL_IDENTITY": {
+      "attributes": {
+        "referral_code_source": "NFT token serial",
+        "referral_code_persistence": "permanent",
+        "referral_code_display_locations": [
+          "NFT itself",
+          "NFT metadata",
+          "dashboard",
+          "confirmation email"
+        ],
+        "confirmation_email_display": "required; the confirmation email includes the mint number, which serves as the referral code"
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "NFT_METADATA",
+          "REFERRAL_IDENTITY"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The landing page displayed referral code 72,904 even though referral identities were expected to follow the mint-number sequence beginning at 25,000."
+      }
+    },
+    "REQ_USDC_WALLET_MINT": {
+      "attributes": {
+        "payment_asset": "USDC",
+        "required_behavior": "A connected wallet can directly complete an NFT mint using USDC."
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "USDC_PAYMENT"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The freelancer executed six successful USDC NFT mints using the redeployed audited contract."
+      }
+    },
+    "REQ_ETH_PRICE_AND_REFUND": {
+      "attributes": {
+        "target_mint_price": "$30 equivalent",
+        "eth_input_pricing": "dynamic with the ETH market price to track the fixed mint price",
+        "swap_mode": "exactOutputSingle",
+        "eth_input_policy": "consume only the ETH required for the fixed mint price and return the remainder",
+        "excess_refund_asset": "ETH"
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "ETH_PAYMENT",
+          "PAYMENT_REFUND"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A concrete ETH-payment test returned the excess as USDC rather than the approved ETH refund."
+      }
+    },
+    "REQ_NFT_TRANSFER_SEMANTICS": {
+      "attributes": {
+        "book_access_after_transfer": "follows the NFT to the purchaser",
+        "referral_identity_after_transfer": "the original token serial remains the NFT's referral code and follows the NFT",
+        "earned_badges_after_transfer": "all earned badges follow the NFT to the purchaser",
+        "expired_prize_ticket_state_after_transfer": "expired prize tickets remain expired",
+        "active_prize_tickets_after_transfer": "every active prize ticket follows the NFT to the purchaser"
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "SECONDARY_SALES",
+          "NFT_OWNERSHIP"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": null
+    },
+    "REQ_NFT_METADATA_ACCURACY": {
+      "attributes": {
+        "small_block_ticket_counter_visible": true,
+        "permanent_badges_visible": true,
+        "referral_code_visible_in_on_chain_metadata": true,
+        "referral_code_attribute_source": "NFT token serial",
+        "referral_code_visible_on_nft": true
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": null,
+        "contexts": [
+          "NFT_METADATA"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Freelancer reports that per-NFT referral, ticket, and earnings details were reconciled and verified."
+      }
+    },
+    "REQ_NFT_HOLDER_BOOK_ACCESS": {
+      "attributes": {
+        "access_eligibility": "NFT holders only",
+        "access_control_provider": "Lit Protocol",
+        "ownership_check": "automatic",
+        "lit_production_network": "Datil"
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "BOOK_READER",
+          "NFT_OWNERSHIP"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The unsupported-network error persisted after the claimed Lit Protocol configuration fix."
+      }
+    },
+    "REQ_OWNER_NFT_DISCOVERY": {
+      "attributes": {
+        "owner_nft_discovery_behavior": "Minted NFTs must be locatable by their owner in the wallet and Harbor Quill dashboard."
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "NFT_WALLET_VIEW",
+          "OWNER_DASHBOARD"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirms that the owned NFTs now appear on the dashboard; detail-media and book-access failures remain separate."
+      }
+    },
+    "REQ_NFT_OWNERSHIP_MINT_REPORTING": {
+      "attributes": {
+        "mint_reporting_rule": "Only finalized successful mints may contribute to the user's reported mint count."
+      },
+      "scope": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "DASHBOARD",
+          "MINT_REPORTING"
+        ]
+      },
+      "lifecycle_status": "ACTIVE",
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The owner NFT count correctly showed four, but aggregate mint reporting remained inconsistent, showing three total mints while also claiming mint number twelve."
+      }
+    },
+    "REQ_PRIZE_POOL_PLATFORM_STATS_ACCURACY": {
+      "attributes": {},
+      "scope": {
+        "persistence": null,
+        "components": null,
+        "contexts": null
+      },
+      "lifecycle_status": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The landing page showed an incorrect $30 prize-pool value and inconsistent platform mint statistics, reporting three total mints while also claiming mint number 12."
+      }
+    }
+  },
+  "final_field_scoring_specs": {
+    "REQ_FAQ_CONTENT": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "approved_faq_copy": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "faq_topics": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "editorial_refinement": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "fiat_buyer_rewards_faq_section": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "beginner_rewards_collection_faq_section": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "faq_draw_copy_consistency": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_NO_REFERRAL_COMMISSION": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "commission_amount_usd": {
+            "comparator": "NUMBER_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "allocation_trigger": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "recipient_selection": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_NO_REFERRAL_TICKETS": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "recipient_selection": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "allocation_trigger": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "draw_entries_per_missing_or_rejected_referral": {
+            "comparator": "NUMBER_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "reward_drawing_amount_usd": {
+            "comparator": "NUMBER_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_NFT_REFERRAL_IDENTITY": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "referral_code_source": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "referral_code_persistence": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "referral_code_display_locations": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "confirmation_email_display": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_USDC_WALLET_MINT": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "payment_asset": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "required_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_ETH_PRICE_AND_REFUND": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "target_mint_price": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "eth_input_pricing": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "swap_mode": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "eth_input_policy": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "excess_refund_asset": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_NFT_TRANSFER_SEMANTICS": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "book_access_after_transfer": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "referral_identity_after_transfer": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "earned_badges_after_transfer": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "expired_prize_ticket_state_after_transfer": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "active_prize_tickets_after_transfer": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_NFT_METADATA_ACCURACY": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "small_block_ticket_counter_visible": {
+            "comparator": "BOOLEAN_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "permanent_badges_visible": {
+            "comparator": "BOOLEAN_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "referral_code_visible_in_on_chain_metadata": {
+            "comparator": "BOOLEAN_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "referral_code_attribute_source": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "referral_code_visible_on_nft": {
+            "comparator": "BOOLEAN_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SKIP",
+            "score": false,
+            "null_semantics": "UNKNOWN_UNANNOTATED",
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_NFT_HOLDER_BOOK_ACCESS": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "access_eligibility": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "access_control_provider": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "ownership_check": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "lit_production_network": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_OWNER_NFT_DISCOVERY": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "owner_nft_discovery_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_NFT_OWNERSHIP_MINT_REPORTING": {
+      "attributes": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "mint_reporting_rule": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SET_F1",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "NORMALIZED_EXACT",
+        "score": true,
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    },
+    "REQ_PRIZE_POOL_PLATFORM_STATS_ACCURACY": {
+      "attributes": {
+        "comparator": "SKIP",
+        "score": false,
+        "closed_world": true,
+        "fields": {},
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "scope": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "persistence": {
+            "comparator": "SKIP",
+            "score": false,
+            "null_semantics": "UNKNOWN_UNANNOTATED",
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "components": {
+            "comparator": "SKIP",
+            "score": false,
+            "null_semantics": "UNKNOWN_UNANNOTATED",
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "contexts": {
+            "comparator": "SKIP",
+            "score": false,
+            "null_semantics": "UNKNOWN_UNANNOTATED",
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "lifecycle_status": {
+        "comparator": "SKIP",
+        "score": false,
+        "null_semantics": "UNKNOWN_UNANNOTATED",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "ambiguity": {
+        "comparator": "NULL_EXACT",
+        "score": true,
+        "null_semantics": "EXPLICIT_ABSENT",
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      },
+      "execution": {
+        "comparator": "RECURSIVE_FIELDS",
+        "score": true,
+        "closed_world": true,
+        "fields": {
+          "status": {
+            "comparator": "NORMALIZED_EXACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          },
+          "observed_behavior": {
+            "comparator": "SEMANTIC_FACT",
+            "score": true,
+            "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+          }
+        },
+        "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
+      }
+    }
+  },
+  "review_notes": [
+    "Structural and boundary review passed.",
+    "Every scoring leaf received an explicit reviewed comparator status."
+  ]
+}

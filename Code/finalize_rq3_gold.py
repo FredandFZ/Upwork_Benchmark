@@ -9,7 +9,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from stage2.rq3_review import RQ3ReviewError, apply_review, build_review_template
+from stage2.rq3_review import (
+    RQ3ReviewError,
+    apply_review,
+    build_offline_agent_review_template,
+    build_review_template,
+)
 
 
 def _read(path: Path) -> dict[str, Any]:
@@ -33,6 +38,7 @@ def _args() -> argparse.Namespace:
     parser.add_argument("--instance", type=Path, required=True)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--template-out", type=Path)
+    group.add_argument("--offline-agent-template-out", type=Path)
     group.add_argument("--review", type=Path)
     parser.add_argument(
         "--output-instance",
@@ -52,6 +58,15 @@ def main() -> int:
         if args.template_out is not None:
             _write(args.template_out, build_review_template(instance))
             print(f"RQ3 review template written: {args.template_out}")
+        elif args.offline_agent_template_out is not None:
+            _write(
+                args.offline_agent_template_out,
+                build_offline_agent_review_template(instance),
+            )
+            print(
+                "RQ3 offline-agent review template written: "
+                f"{args.offline_agent_template_out}"
+            )
         else:
             _write(args.output_instance, apply_review(instance, _read(args.review)))
             print(f"Frozen RQ3 instance written: {args.output_instance}")

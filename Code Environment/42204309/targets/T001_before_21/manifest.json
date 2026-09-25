@@ -1,0 +1,75 @@
+{
+  "schema_version": "rq4-code-environment-target-manifest-v1",
+  "project_id": "42204309",
+  "target_id": "42204309_T001",
+  "before_message_id": 21,
+  "repository_classification": "synthetic-executable-pre-state",
+  "contract_layer": "LOCAL_DOMAIN_SERVICE",
+  "web_api_layer": "HTTP_JSON_AND_STATIC_HTML",
+  "active_code_feature_count": 3,
+  "tracked_requirement_count": 4,
+  "temporal_fixture": {
+    "failed_feature_count": 0,
+    "failed_feature_keys": []
+  },
+  "requirements_to_code": [
+    {
+      "requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "state_id": "REQ_BIG_BLOCK_PRIZE_S001",
+      "code_path": "src/current_state.py",
+      "behavior_key": "big-block-prize-mechanism"
+    },
+    {
+      "requirement_id": "REQ_PROJECT_BRANDING",
+      "state_id": "REQ_PROJECT_BRANDING_S002",
+      "code_path": "src/current_state.py",
+      "behavior_key": "project-branding-and-product-name"
+    },
+    {
+      "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "state_id": "REQ_SMALL_BLOCK_PRIZE_S001",
+      "code_path": "src/current_state.py",
+      "behavior_key": "small-block-prize-mechanism"
+    }
+  ],
+  "target_event_ids": [
+    "REQ_SMALL_BLOCK_PRIZE_E002",
+    "REQ_BIG_BLOCK_PRIZE_E002",
+    "REQ_PRIZE_TICKET_LIFECYCLE_E001",
+    "REQ_PRIZE_CLAIM_FLOW_E001",
+    "REQ_CODED_REFERRAL_COMMISSION_E001",
+    "REQ_CODED_REFERRAL_TICKETS_E001",
+    "REQ_NO_REFERRAL_TICKETS_E001",
+    "REQ_NFT_METADATA_ACCURACY_E001"
+  ],
+  "target_event_types": [
+    "MODIFY",
+    "MODIFY",
+    "MODIFY",
+    "INTRODUCE",
+    "INTRODUCE",
+    "INTRODUCE",
+    "INTRODUCE",
+    "INTRODUCE"
+  ],
+  "target_summary": {
+    "source_message_id": 21,
+    "speaker": "client",
+    "text": "Marcus, I have one final mechanics adjustment. It removes the half-expiring-ticket behavior and should simplify the code.\n\nThis rule replaces the earlier ticket-lifespan description:\nWhenever someone mints using a referral code, the referrer immediately receives 7 tickets on their NFT:\n+4 Small Block Tickets\n+3 Big Block Tickets\n\nThese feed two completely independent counters: one Small Block counter and one Big Block counter.\n\nFor the Small Block ($7,200 pool ÷ 8 ÷ $900 draw), draw only from Small Block Tickets issued since the previous small block. After the draw, burn and reset all Small Block Tickets to 0.\n\nFor the Big Block ($216,000 pool ÷ 9 ÷ $24,000 draw), draw only from Big Block Tickets issued since the previous big block. After the draw, burn and reset all Big Block Tickets to 0.\n\nSmall blocks therefore stay fair and fresh because old tickets do not carry forward, while Big Block entries accumulate naturally until that block is drawn. Metadata only needs to show the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block fires when its pool reaches exactly $7,200, and the big block fires when its pool reaches exactly $216,000. Secondary royalties continue to fill the pools but do not create tickets.\n\nEverything else remains the same: the $10 commission is automatic, a ticket goes to a random existing NFT when no referral code is used, and prize claims remain manual.\n\nThis version should be easier to implement and explain. Once you confirm it is cleaner for you too, we are 100% locked.\n\nThanks!"
+  },
+  "pre_state_verified_against_gold": true,
+  "post_state_verified_against_gold": true,
+  "repo_sha256": "c717c8aca0b9e7f62bbcd30900da553d096f228569a1d74d96b1d85554829af9",
+  "archive_sha256": "d4d605fdf65c35e4541840cb1c43f3adaf863f6e531ac14a44a70f63362960ab",
+  "archive_audit": {
+    "member_count": 12,
+    "crc": "PASS",
+    "path_safety": "PASS"
+  },
+  "leakage_audit": {
+    "status": "PASS",
+    "files_checked": 12,
+    "hits": []
+  },
+  "source_plan_sha256": "2cdd1ff5ef7a5e491daa29ac9b689da733696238f77568dd6ac1a97de89492c1"
+}

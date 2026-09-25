@@ -11,7 +11,12 @@ from Code.evaluation.rq3 import (
     score_rq3,
     score_rq3_constant_decision_baseline,
 )
-from Code.stage2.rq3_review import RQ3ReviewError, apply_review, build_review_template
+from Code.stage2.rq3_review import (
+    RQ3ReviewError,
+    apply_review,
+    build_offline_agent_review_template,
+    build_review_template,
+)
 from Code.stage2.rq_instances import build_rq_instances
 from Code.tests.test_stage2_rq_instances import (
     _act_state_graph,
@@ -82,6 +87,30 @@ class RQ3EvaluationTests(unittest.TestCase):
         review["reviewers"] = ["reviewer-a"]
         with self.assertRaises(RQ3ReviewError):
             apply_review(instance, review)
+
+    def test_offline_agent_review_has_explicit_provenance(self):
+        instance = build_rq_instances(
+            _gold(), _act_state_graph(), _messages()
+        )["RQ3"][0]
+        review = build_offline_agent_review_template(instance)
+        review["reviewers"] = ["offline-reviewer-a", "offline-reviewer-b"]
+        review["adjudicator"] = "offline-adjudicator"
+        review["adjudication_status"] = "ADJUDICATED"
+        for condition in ("C1", "C2"):
+            branch = review["conditions"][condition]
+            branch["decision"] = "ACT"
+            branch["decision_rationale"] = "Reviewed unique post-task state."
+            branch["post_task_state_source"] = "CONSTRUCTION_TRANSITIONS_AFTER"
+        frozen = apply_review(instance, review)
+        self.assertEqual(
+            frozen["construction_gold"]["review_status"],
+            "OFFLINE_AGENT_REVIEWED_AND_ADJUDICATED",
+        )
+        self.assertEqual(
+            frozen["construction_gold"]["review_metadata"]["adjudicator"],
+            "offline-adjudicator",
+        )
+        self.assertTrue(frozen["readiness"]["formal_reasoning_allowed"])
 
     def test_act_branch_scores_complete_post_state(self):
         provisional = build_rq_instances(

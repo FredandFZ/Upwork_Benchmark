@@ -1,8 +1,8 @@
 {
   "schema_version": "rq-instance-v2",
   "instance_id": "42204309_T001_RQ3",
-  "input_release": "42204309-stage12-v1",
-  "target_fingerprint": "62e73e2e864c6561c648c3012ec78fd82ac743ea31cf3dba387ce956c94a1ba5",
+  "input_release": "42204309-stage2-final-20260925-rq123-main-v1",
+  "target_fingerprint": "448038d74e07bf5609479370301d3308d06967e6b6339e0f29293b53c3e71fb2",
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ3",
@@ -211,7 +211,7 @@
     }
   },
   "fingerprints": {
-    "target": "62e73e2e864c6561c648c3012ec78fd82ac743ea31cf3dba387ce956c94a1ba5",
+    "target": "448038d74e07bf5609479370301d3308d06967e6b6339e0f29293b53c3e71fb2",
     "history_pool": "063020fec92d133bdd2435fdb5cf33f4d1990e31382a9a0039cf371c7d29d891",
     "condition_history": {
       "C1": "2f4f3f6465b54e526fa88619a8d2398428887dc01421085f641419fda5509b49",
@@ -283,7 +283,7 @@
   "source_artifacts": {
     "gold_states": {
       "path": "outputs_new/stage2/42204309/gold_states.json",
-      "sha256": "cbe17803d920a552b3d3f717c102df0407fa292a7c37540d7948b6de1b97e5db"
+      "sha256": "78a72386c044832d7aa29080e3a992e10ff4456f419a5663163f0ee6cc2d1a05"
     },
     "requirement_state_graph": {
       "path": "outputs_new/stage2/42204309/requirement_state_graph.json",
@@ -292,10 +292,14 @@
     "normalized_project": {
       "path": "outputs_new/stage1_runs/42204309/normalized_project.json",
       "sha256": "e83cd7e5e63e49bb3393a04040c5d47f2968292da00de05020be63b01279b19e"
+    },
+    "rq_target_exclusions": {
+      "path": "Code/config/rq_target_exclusions.json",
+      "sha256": "596e6cdf1c76a7450f035bd75d992bffd9e704436350bb8308c54c06f643444a"
     }
   },
   "construction_gold": {
-    "status": "PENDING_HUMAN_DECISION_REVIEW",
+    "status": "FINAL_UPDATE_OR_CLARIFY_GOLD",
     "project_decision_candidate": {
       "value": "ACT",
       "is_final_gold": false,
@@ -312,8 +316,368 @@
       }
     },
     "final_gold_by_condition": {
-      "C1": null,
-      "C2": null
+      "C1": {
+        "decision": "ACT",
+        "post_task_states": {
+          "REQ_SMALL_BLOCK_PRIZE": {
+            "attributes": {
+              "winner_count": 8,
+              "prize_amount_per_winner_usd": 900,
+              "winner_eligibility": "weighted ticket holders",
+              "draw_trigger": {
+                "basis": "PRIZE_POOL_BALANCE",
+                "amount_usd": 7200
+              },
+              "secondary_royalties_contribute_to_pool": true
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND",
+                "FRONTEND"
+              ],
+              "contexts": [
+                "PRIZE_SYSTEM",
+                "SMALL_BLOCK"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_BIG_BLOCK_PRIZE": {
+            "attributes": {
+              "winner_count": 9,
+              "prize_amount_per_winner": "$24,000",
+              "pool_target": "$216,000",
+              "draw_condition": "when the Big Block pool reaches exactly $216,000",
+              "secondary_royalties_contribute_to_pool": true
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "PRIZE_SYSTEM",
+                "BIG_BLOCK"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_PRIZE_TICKET_LIFECYCLE": {
+            "attributes": {
+              "small_block_ticket_lifecycle": {
+                "eligible_tickets": "Small Block Tickets issued since the previous Small Block draw",
+                "post_draw_action": "burn and reset all Small Block Tickets to 0",
+                "carry_forward_after_draw": false
+              },
+              "big_block_ticket_lifecycle": {
+                "eligible_tickets": "Big Block Tickets issued since the previous Big Block draw",
+                "post_draw_action": "burn and reset all Big Block Tickets to 0",
+                "carry_forward_after_draw": false
+              }
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "PRIZE_SYSTEM",
+                "PRIZE_TICKETS",
+                "SMALL_BLOCK",
+                "BIG_BLOCK"
+              ]
+            },
+            "lifecycle_status": null,
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_PRIZE_CLAIM_FLOW": {
+            "attributes": {
+              "payout_mode": "manual_claim"
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "FRONTEND"
+              ],
+              "contexts": [
+                "PRIZE_CLAIM"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_CODED_REFERRAL_COMMISSION": {
+            "attributes": {
+              "commission_amount_usd": 10,
+              "distribution": "automatic"
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT"
+              ],
+              "contexts": [
+                "REFERRAL_MINT",
+                "AFFILIATE_COMMISSION"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_CODED_REFERRAL_TICKETS": {
+            "attributes": {
+              "recipient": "NFT associated with the referral code",
+              "small_block_tickets_per_referral_mint": 4,
+              "big_block_tickets_per_referral_mint": 3
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "REFERRAL_MINT",
+                "PRIZE_TICKETS"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_NO_REFERRAL_TICKETS": {
+            "attributes": {
+              "tickets_per_no_referral_mint": 1,
+              "recipient_selection": "random existing NFT"
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "NO_REFERRAL",
+                "PRIZE_TICKETS"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_NFT_METADATA_ACCURACY": {
+            "attributes": {
+              "small_block_ticket_counter_visible": true,
+              "big_block_ticket_counter_visible": true,
+              "permanent_badges_visible": true
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": null,
+              "contexts": [
+                "NFT_METADATA"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          }
+        },
+        "blocking_clarifications": []
+      },
+      "C2": {
+        "decision": "ACT",
+        "post_task_states": {
+          "REQ_SMALL_BLOCK_PRIZE": {
+            "attributes": {
+              "winner_count": 8,
+              "prize_amount_per_winner_usd": 900,
+              "winner_eligibility": "weighted ticket holders",
+              "draw_trigger": {
+                "basis": "PRIZE_POOL_BALANCE",
+                "amount_usd": 7200
+              },
+              "secondary_royalties_contribute_to_pool": true
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND",
+                "FRONTEND"
+              ],
+              "contexts": [
+                "PRIZE_SYSTEM",
+                "SMALL_BLOCK"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_BIG_BLOCK_PRIZE": {
+            "attributes": {
+              "winner_count": 9,
+              "prize_amount_per_winner": "$24,000",
+              "pool_target": "$216,000",
+              "draw_condition": "when the Big Block pool reaches exactly $216,000",
+              "secondary_royalties_contribute_to_pool": true
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "PRIZE_SYSTEM",
+                "BIG_BLOCK"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_PRIZE_TICKET_LIFECYCLE": {
+            "attributes": {
+              "small_block_ticket_lifecycle": {
+                "eligible_tickets": "Small Block Tickets issued since the previous Small Block draw",
+                "post_draw_action": "burn and reset all Small Block Tickets to 0",
+                "carry_forward_after_draw": false
+              },
+              "big_block_ticket_lifecycle": {
+                "eligible_tickets": "Big Block Tickets issued since the previous Big Block draw",
+                "post_draw_action": "burn and reset all Big Block Tickets to 0",
+                "carry_forward_after_draw": false
+              }
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "PRIZE_SYSTEM",
+                "PRIZE_TICKETS",
+                "SMALL_BLOCK",
+                "BIG_BLOCK"
+              ]
+            },
+            "lifecycle_status": null,
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_PRIZE_CLAIM_FLOW": {
+            "attributes": {
+              "payout_mode": "manual_claim"
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "FRONTEND"
+              ],
+              "contexts": [
+                "PRIZE_CLAIM"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_CODED_REFERRAL_COMMISSION": {
+            "attributes": {
+              "commission_amount_usd": 10,
+              "distribution": "automatic"
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT"
+              ],
+              "contexts": [
+                "REFERRAL_MINT",
+                "AFFILIATE_COMMISSION"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_CODED_REFERRAL_TICKETS": {
+            "attributes": {
+              "recipient": "NFT associated with the referral code",
+              "small_block_tickets_per_referral_mint": 4,
+              "big_block_tickets_per_referral_mint": 3
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "REFERRAL_MINT",
+                "PRIZE_TICKETS"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_NO_REFERRAL_TICKETS": {
+            "attributes": {
+              "tickets_per_no_referral_mint": 1,
+              "recipient_selection": "random existing NFT"
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": [
+                "SMART_CONTRACT",
+                "BACKEND"
+              ],
+              "contexts": [
+                "NO_REFERRAL",
+                "PRIZE_TICKETS"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          },
+          "REQ_NFT_METADATA_ACCURACY": {
+            "attributes": {
+              "small_block_ticket_counter_visible": true,
+              "big_block_ticket_counter_visible": true,
+              "permanent_badges_visible": true
+            },
+            "scope": {
+              "persistence": "PROJECT_PERSISTENT",
+              "components": null,
+              "contexts": [
+                "NFT_METADATA"
+              ]
+            },
+            "lifecycle_status": "ACTIVE",
+            "ambiguity": null,
+            "execution": null
+          }
+        },
+        "blocking_clarifications": []
+      }
     },
     "affected_requirement_ids": [
       "REQ_SMALL_BLOCK_PRIZE",
@@ -988,17 +1352,17 @@
             "winner_count": {
               "comparator": "NUMBER_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "prize_amount_per_winner_usd": {
               "comparator": "NUMBER_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "winner_eligibility": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "draw_trigger": {
               "comparator": "RECURSIVE_FIELDS",
@@ -1008,23 +1372,23 @@
                 "basis": {
                   "comparator": "SEMANTIC_FACT",
                   "score": true,
-                  "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 },
                 "amount_usd": {
                   "comparator": "NUMBER_EXACT",
                   "score": true,
-                  "review_status": "DETERMINISTIC"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 }
               },
-              "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "secondary_royalties_contribute_to_pool": {
               "comparator": "BOOLEAN_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1034,37 +1398,37 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "NORMALIZED_EXACT",
           "score": true,
-          "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       },
       "REQ_BIG_BLOCK_PRIZE": {
@@ -1076,30 +1440,30 @@
             "winner_count": {
               "comparator": "NUMBER_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "prize_amount_per_winner": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "pool_target": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "draw_condition": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "secondary_royalties_contribute_to_pool": {
               "comparator": "BOOLEAN_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1109,37 +1473,37 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "NORMALIZED_EXACT",
           "score": true,
-          "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       },
       "REQ_PRIZE_TICKET_LIFECYCLE": {
@@ -1156,20 +1520,20 @@
                 "eligible_tickets": {
                   "comparator": "SEMANTIC_FACT",
                   "score": true,
-                  "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 },
                 "post_draw_action": {
                   "comparator": "SEMANTIC_FACT",
                   "score": true,
-                  "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 },
                 "carry_forward_after_draw": {
                   "comparator": "BOOLEAN_EXACT",
                   "score": true,
-                  "review_status": "DETERMINISTIC"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 }
               },
-              "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "big_block_ticket_lifecycle": {
               "comparator": "RECURSIVE_FIELDS",
@@ -1179,23 +1543,23 @@
                 "eligible_tickets": {
                   "comparator": "SEMANTIC_FACT",
                   "score": true,
-                  "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 },
                 "post_draw_action": {
                   "comparator": "SEMANTIC_FACT",
                   "score": true,
-                  "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 },
                 "carry_forward_after_draw": {
                   "comparator": "BOOLEAN_EXACT",
                   "score": true,
-                  "review_status": "DETERMINISTIC"
+                  "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
                 }
               },
-              "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1205,38 +1569,38 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "SKIP",
           "score": false,
           "null_semantics": "UNKNOWN_UNANNOTATED",
-          "review_status": "REQUIRES_FIELD_REVIEW"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       },
       "REQ_PRIZE_CLAIM_FLOW": {
@@ -1248,10 +1612,10 @@
             "payout_mode": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1261,37 +1625,37 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "NORMALIZED_EXACT",
           "score": true,
-          "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       },
       "REQ_CODED_REFERRAL_COMMISSION": {
@@ -1303,15 +1667,15 @@
             "commission_amount_usd": {
               "comparator": "NUMBER_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "distribution": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1321,37 +1685,37 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "NORMALIZED_EXACT",
           "score": true,
-          "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       },
       "REQ_CODED_REFERRAL_TICKETS": {
@@ -1363,20 +1727,20 @@
             "recipient": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "small_block_tickets_per_referral_mint": {
               "comparator": "NUMBER_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "big_block_tickets_per_referral_mint": {
               "comparator": "NUMBER_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1386,37 +1750,37 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "NORMALIZED_EXACT",
           "score": true,
-          "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       },
       "REQ_NO_REFERRAL_TICKETS": {
@@ -1428,15 +1792,15 @@
             "tickets_per_no_referral_mint": {
               "comparator": "NUMBER_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "recipient_selection": {
               "comparator": "SEMANTIC_FACT",
               "score": true,
-              "review_status": "REQUIRES_FROZEN_SEMANTIC_JUDGE"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1446,37 +1810,37 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "NORMALIZED_EXACT",
           "score": true,
-          "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       },
       "REQ_NFT_METADATA_ACCURACY": {
@@ -1488,20 +1852,20 @@
             "small_block_ticket_counter_visible": {
               "comparator": "BOOLEAN_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "big_block_ticket_counter_visible": {
               "comparator": "BOOLEAN_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "permanent_badges_visible": {
               "comparator": "BOOLEAN_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "scope": {
           "comparator": "RECURSIVE_FIELDS",
@@ -1511,38 +1875,38 @@
             "persistence": {
               "comparator": "NORMALIZED_EXACT",
               "score": true,
-              "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "components": {
               "comparator": "SKIP",
               "score": false,
               "null_semantics": "UNKNOWN_UNANNOTATED",
-              "review_status": "REQUIRES_FIELD_REVIEW"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             },
             "contexts": {
               "comparator": "SET_F1",
               "score": true,
-              "review_status": "DETERMINISTIC_UNORDERED_SET"
+              "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
             }
           },
-          "review_status": "DETERMINISTIC_STRUCTURE_SEMANTIC_LEAVES"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "lifecycle_status": {
           "comparator": "NORMALIZED_EXACT",
           "score": true,
-          "review_status": "DETERMINISTIC_ENUM_OR_IDENTIFIER"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "ambiguity": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         },
         "execution": {
           "comparator": "NULL_EXACT",
           "score": true,
           "null_semantics": "EXPLICIT_ABSENT",
-          "review_status": "DETERMINISTIC_EXPLICIT_ABSENCE"
+          "review_status": "ROLE_SEPARATED_AGENT_REVIEWED"
         }
       }
     },
@@ -1550,15 +1914,29 @@
     "safe_subactions": [],
     "safe_subactions_review_status": "PENDING_MULTI_REQUIREMENT_REVIEW",
     "relevance_review_status": "DETERMINISTIC_DIRECT_AFFECTED_ONLY",
-    "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 and C2 must freeze the same semantic Gold; a disagreement indicates an Oracle-history or review defect."
+    "review_note": "An OPEN ambiguity is only a candidate. It becomes blocking Gold after materiality, task relevance, alternative implementation, and available-evidence checks. C1 and C2 must freeze the same semantic Gold; a disagreement indicates an Oracle-history or review defect.",
+    "review_status": "OFFLINE_AGENT_REVIEWED_AND_ADJUDICATED",
+    "review_metadata": {
+      "schema_version": "rq3-offline-agent-review-v1",
+      "review_method": "SINGLE_AGENT_ROLE_SEPARATED_PANEL",
+      "reviewers": [
+        "codex-structural-role",
+        "codex-semantic-role"
+      ],
+      "adjudicator": "codex-adjudication-role",
+      "adjudication_status": "ADJUDICATED",
+      "condition_gold_consistent": true,
+      "decision_rationales": {
+        "C1": "Reviewed affected transitions determine a unique post-task state.",
+        "C2": "Reviewed affected transitions determine a unique post-task state."
+      }
+    }
   },
   "readiness": {
     "construction": "COMPLETE",
     "smoke_allowed": true,
-    "formal_reasoning_allowed": false,
+    "formal_reasoning_allowed": true,
     "formal_execution_allowed": false,
-    "blockers": [
-      "HUMAN_DECISION_REVIEW_REQUIRED"
-    ]
+    "blockers": []
   }
 }

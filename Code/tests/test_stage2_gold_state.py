@@ -332,6 +332,56 @@ class TargetSelectionTests(unittest.TestCase):
         pre_state = context["pre_task_requirement_states"][0]["state"]
         self.assertIn("REQ_A_E002", pre_state["ambiguity"])
 
+    def test_context_hides_target_and_future_supporting_messages(self) -> None:
+        stage1 = annotation(
+            requirement(
+                "REQ_A",
+                [
+                    event(
+                        "REQ_A",
+                        1,
+                        1,
+                        "INTRODUCE",
+                        value_updates={"a": 1},
+                        supporting_message_ids=[3],
+                    ),
+                    event(
+                        "REQ_A",
+                        2,
+                        2,
+                        "MODIFY",
+                        value_updates={"a": 2},
+                        supporting_message_ids=[1, 3],
+                    ),
+                ],
+            )
+        )
+        messages = normalized(
+            message(1, original_index=0),
+            message(2, original_index=1),
+            message(3, original_index=2),
+        )
+        graph = build_requirement_state_graph(stage1)
+        candidates = generate_candidate_tasks(stage1, messages, graph, self.config)
+        candidate = next(row for row in candidates["candidates"] if row["message_id"] == 2)
+
+        contexts = build_candidate_contexts(candidates, stage1, messages, graph)
+        context = next(
+            row
+            for row in contexts["contexts"]
+            if row["candidate_id"] == candidate["candidate_id"]
+        )
+
+        self.assertEqual(context["triggered_events"][0]["supporting_message_ids"], [1])
+        self.assertEqual(
+            context["requirement_history"][0]["events"][0]["supporting_message_ids"],
+            [],
+        )
+        self.assertEqual(
+            [row["message_id"] for row in context["historical_evidence_messages"]],
+            [1],
+        )
+
     def test_provenance_mismatch_stops_selection(self) -> None:
         stage1 = annotation(
             requirement(

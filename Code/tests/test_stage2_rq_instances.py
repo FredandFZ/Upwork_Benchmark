@@ -7,6 +7,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
+from Code.stage2.rq_cohort import apply_target_exclusions
 from Code.stage2.rq_instances import (
     RQInstanceError,
     build_project_manifest,
@@ -269,6 +270,39 @@ def _write_code_environment(
 
 
 class RQInstanceTests(unittest.TestCase):
+    def test_main_cohort_exclusion_preserves_source_gold(self):
+        source = _gold()
+        config = {
+            "exclusions": [
+                {
+                    "project_id": "P1",
+                    "target_id": "P1_T001",
+                    "reason": "NO_COMPLETE_RQ123_CHAIN",
+                    "detail": "test exclusion",
+                }
+            ]
+        }
+
+        filtered, applied = apply_target_exclusions(source, config)
+
+        self.assertEqual(len(source["task_gold_states"]), 1)
+        self.assertEqual(filtered["task_gold_states"], [])
+        self.assertEqual(applied[0]["target_id"], "P1_T001")
+
+    def test_main_cohort_exclusion_rejects_unknown_target(self):
+        config = {
+            "exclusions": [
+                {
+                    "project_id": "P1",
+                    "target_id": "P1_T999",
+                    "reason": "NO_COMPLETE_RQ123_CHAIN",
+                    "detail": "test exclusion",
+                }
+            ]
+        }
+        with self.assertRaisesRegex(RQInstanceError, "missing P1 targets"):
+            apply_target_exclusions(_gold(), config)
+
     def test_clarify_target_builds_rq1_to_rq3_and_preserves_turns(self):
         collections = build_rq_instances(
             _gold(),
@@ -599,6 +633,16 @@ class RQInstanceTests(unittest.TestCase):
             manifest["targets"][0]["conditions"]["C2"]["active_rqs"],
             ["RQ2", "RQ3"],
         )
+
+    def test_empty_indexes_preserve_project_and_release_identity(self):
+        indexes = build_rq_indexes(
+            {rq_id: [] for rq_id in ("RQ1", "RQ2", "RQ3", "RQ4")},
+            project_id="P0",
+            input_release="P0-release-v1",
+        )
+        for rq_id in ("RQ1", "RQ2", "RQ3", "RQ4"):
+            self.assertEqual(indexes[rq_id]["project_id"], "P0")
+            self.assertEqual(indexes[rq_id]["input_release"], "P0-release-v1")
 
 
 if __name__ == "__main__":

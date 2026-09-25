@@ -1,11 +1,4 @@
-# 43214420 Reconstruction Package
+# 43214420 RQ4 Code Environment
 
-Start with `reports/reconstruction_report.md`.
-
-- `C_env/43214420_C_env_complete.zip`: completed zero-domain executable PCB baseline.
-- `targets/Txxx_before_<message>/pre_repo.zip`: runnable pre-event repository.
-- `targets/.../manifest.json`: exact state-to-code and temporal-boundary mapping.
-- `reports/replay_manifest.json`: complete atomic event replay ledger.
-- `reports/validation_report.json`: build, artifact, leakage, archive, and credential checks.
-- `tools/reconstruct_all.mjs`: deterministic generator.
-- `tools/audit_outputs.mjs`: independent Gold/archive/behavior audit.
+This project was reconstructed from the frozen new Stage 1/2 release.
+See `reports/reconstruction_report.md` and `reports/validation_report.json`.

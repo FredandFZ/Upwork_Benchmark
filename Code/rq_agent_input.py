@@ -13,7 +13,7 @@ import re
 MANIFEST_SCHEMA_VERSION = "rq-instance-manifest-v2"
 INDEX_SCHEMA_VERSION = "rq-instance-index-v2"
 INSTANCE_SCHEMA_VERSION = "rq-instance-v2"
-PRIVATE_MANIFEST_SCHEMA_VERSION = "rq-private-run-manifest-v1"
+PRIVATE_MANIFEST_SCHEMA_VERSION = "rq-private-package-manifest-v2"
 TASK_SCHEMA_VERSION = "rq-agent-task-v1"
 CONDITIONS = ("C1", "C2")
 REASONING_RQS = ("RQ1", "RQ2", "RQ3")
@@ -308,7 +308,7 @@ def materialize_reasoning_input(
         name: sha256(content.encode("utf-8")).hexdigest()
         for name, content in public_files.items()
     }
-    run_id = "run_" + _canonical_sha256(
+    package_id = "pkg_" + _canonical_sha256(
         {
             "input_release": manifest["input_release"],
             "target_fingerprint": target["target_fingerprint"],
@@ -337,7 +337,8 @@ def materialize_reasoning_input(
         }
     private_manifest = {
         "schema_version": PRIVATE_MANIFEST_SCHEMA_VERSION,
-        "run_id": run_id,
+        "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+        "package_id": package_id,
         "input_release": manifest["input_release"],
         "project_id": manifest["project_id"],
         "target_id": target_id,
@@ -356,10 +357,8 @@ def materialize_reasoning_input(
             for rq_id in views
         },
         "public_files": public_hashes,
-        "phase_gate": {
+        "phase_gate_policy": {
             "repository_visible_in_phase_a": False,
-            "phase_a_response_sha256": None,
-            "phase_a_frozen_at": None,
             "phase_b_requires_agent_act": True,
         },
         "repository": repository,
@@ -380,7 +379,7 @@ def materialize_reasoning_input(
         "score_status": "READY" if mode == "formal" else "NOT_SCORED",
     }
     return {
-        "run_id": run_id,
+        "package_id": package_id,
         "public_files": public_files,
         "private_manifest": private_manifest,
     }
@@ -401,22 +400,34 @@ def write_materialized_input(
         / private_manifest["condition"]
     )
     public_dir = base / "public"
-    private_path = base / "private" / "run_manifest.json"
+    private_path = base / "private" / "package_manifest.json"
     public_dir.mkdir(parents=True, exist_ok=True)
     private_path.parent.mkdir(parents=True, exist_ok=True)
     for name, content in materialized["public_files"].items():
         path = public_dir / name
+        encoded = content.encode("utf-8")
+        if path.exists():
+            if path.read_bytes() != encoded:
+                raise RQMaterializationError(
+                    f"immutable public package file already differs: {path}"
+                )
+            continue
         temporary = path.with_name(f".{path.name}.tmp")
         # Bytes avoid platform newline conversion so the recorded public hash
         # is identical on Windows and POSIX runners.
-        temporary.write_bytes(content.encode("utf-8"))
+        temporary.write_bytes(encoded)
         temporary.replace(path)
+    private_bytes = (
+        json.dumps(private_manifest, ensure_ascii=False, indent=2) + "\n"
+    ).encode("utf-8")
+    if private_path.exists():
+        if private_path.read_bytes() != private_bytes:
+            raise RQMaterializationError(
+                f"immutable package manifest already differs: {private_path}"
+            )
+        return public_dir, private_path
     temporary = private_path.with_name(f".{private_path.name}.tmp")
-    temporary.write_bytes(
-        (json.dumps(private_manifest, ensure_ascii=False, indent=2) + "\n").encode(
-            "utf-8"
-        )
-    )
+    temporary.write_bytes(private_bytes)
     temporary.replace(private_path)
     return public_dir, private_path
 
@@ -427,9 +438,11 @@ def stage_phase_a_workspace(
 ) -> Path:
     """Create a fresh opaque Agent-visible workspace with public files only."""
 
-    run_id = materialized.get("run_id")
-    if not isinstance(run_id, str) or not re.fullmatch(r"run_[0-9a-f]{20}", run_id):
-        raise RQMaterializationError("materialized package has an invalid run_id")
+    package_id = materialized.get("package_id")
+    if not isinstance(package_id, str) or not re.fullmatch(
+        r"pkg_[0-9a-f]{20}", package_id
+    ):
+        raise RQMaterializationError("materialized package has an invalid package_id")
     public_files = materialized.get("public_files")
     if not isinstance(public_files, Mapping) or set(public_files) != {
         "task.json",
@@ -438,7 +451,7 @@ def stage_phase_a_workspace(
         "response.schema.json",
     }:
         raise RQMaterializationError("materialized package has invalid public files")
-    destination = Path(workspace_root).resolve() / run_id
+    destination = Path(workspace_root).resolve() / package_id
     if destination.exists():
         raise RQMaterializationError(
             f"Phase A workspace already exists and will not be reused: {destination}"

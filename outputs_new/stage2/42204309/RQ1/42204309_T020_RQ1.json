@@ -1,17 +1,17 @@
 {
   "schema_version": "rq-instance-v2",
   "instance_id": "42204309_T020_RQ1",
-  "input_release": "42204309-stage12-v1",
-  "target_fingerprint": "fac116ad9bbf619746d5f8b1b67ad59b3830f781ae40a019292340592e98cbeb",
+  "input_release": "42204309-stage2-final-20260925-rq123-main-v1",
+  "target_fingerprint": "cfabf8dc2b6728f6bb934f765936de2857ca977eaca99f57fd313aa73e739451",
   "project_id": "42204309",
   "project_title": "Project Rebuild MVP – Base NFT + Referral Engine + Fiat On-Ramp",
   "rq_id": "RQ1",
   "rq_name": "Relevant Requirement Selection",
   "target_id": "42204309_T020",
   "task_gold_id": "42204309_T020_GOLD",
-  "target_message_id": 631,
-  "turns": 630,
-  "history_turn_count": 630,
+  "target_message_id": 363,
+  "turns": 362,
+  "history_turn_count": 362,
   "difficulty": "LONG",
   "applicable_rqs": [
     "RQ1",
@@ -20,14 +20,14 @@
   ],
   "question": "Using the full pre-task conversation, identify the historical requirements and message evidence that are relevant to the current client task. Exclude unrelated history and do not treat the current task itself as historical evidence.",
   "target_task": {
-    "source_message_id": 631,
+    "source_message_id": 363,
     "speaker": "client",
-    "text": "Could it instead be that no ticket is generated?\n\n- Generating no ticket for a 'no code buy' may be acceptable as-is, provided we slightly revise the UI notes.\n- If a ticket is generated and randomly distributed but omitted from the dashboard, that must be fixed.\n- Any randomly distributed commission must also appear on the dashboard and in the attributes.\n\nHere is the no-code purchase with a $4 tip: 0xa731d8c25e906bf414c8e729630db5fa81d74e295c60b3a917f84d620e51ac39\n\nIf tips are paid through a second transaction immediately after minting, that would explain why the tip failed, and we will need a UI note explaining it."
+    "text": "Cool, I’ll test it now.\n\nFirst, though, where did the ETH from my earlier successful transaction go, given that it produced no mint? Did any of it reach the prize pools or similar destinations?\nTransaction - 0x4c81d7a295e630bf1a74c8d9e2035b6f87a19d4e\n\nAlso, if 0.0125 ETH = 36.50 and the split is $12 to me, $10 for commission, and $8 for the prize pool, what happens to the remaining $6.50?"
   },
   "history_pool": {
     "boundary": "STRICTLY_BEFORE_TARGET_MESSAGE",
     "contains_target_message": false,
-    "message_count": 630,
+    "message_count": 362,
     "messages": [
       {
         "message_id": 1,
@@ -2562,1882 +2562,6 @@
         "speaker": "freelancer",
         "text": "Try it first and we’ll see how it goes. Alternatively, we can put a $25 test amount into my wallet so I can run a live production test from my side.",
         "milestone": null
-      },
-      {
-        "message_id": 363,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Cool, I’ll test it now.\n\nFirst, though, where did the ETH from my earlier successful transaction go, given that it produced no mint? Did any of it reach the prize pools or similar destinations?\nTransaction - 0x4c81d7a295e630bf1a74c8d9e2035b6f87a19d4e\n\nAlso, if 0.0125 ETH = 36.50 and the split is $12 to me, $10 for commission, and $8 for the prize pool, what happens to the remaining $6.50?",
-        "milestone": null
-      },
-      {
-        "message_id": 364,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The USDC attempt reverted and displayed the “Purchase Confirmed” modal, yet it recorded 4 mints and showed 12 USDC spent.\n\nThe ETH attempt timed out.",
-        "milestone": null
-      },
-      {
-        "message_id": 365,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "For the ETH attempt, the message shown is 'execution reverted'.",
-        "milestone": null
-      },
-      {
-        "message_id": 366,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "If you’d like, I can fund your wallet so you can carry out the testing yourself. However, I want to own mints 17, 31 & 46, so once all testing is complete, you’ll need to transfer those NFTs to me.",
-        "milestone": null
-      },
-      {
-        "message_id": 367,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "1\\. Where the 0.0125 ETH went (tx to 0x4c81d7a295e630bf1a74c8d9e2035b6f87a19d4e):\nThe destination address now holds 0.028 ETH, worth about $38.25. None of it entered the prize pools or the contract; it was transferred directly to that address and remains there, as the balance on BaseScan shows.\n\n2) Why there is an extra ~ $4.50 between 0.0125 ETH and $30:\nThe contract currently applies a minimum of 0.014 ETH through minimumETHThreshold, and a buffer is added for swap slippage and fees. If swapping to USDC yields more than the required $30, the excess should be refunded to the sender in USDC. Because the mint did not execute, none of those funds were spent, and the 0.028 ETH remains at the intermediate address.",
-        "milestone": null
-      },
-      {
-        "message_id": 368,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "3) Here’s what happened with the USDC attempt: approval completed, but auto-mint never started, while “Mint Successful” still appeared incorrectly.\n\nI’ll hard-block that modal unless both conditions are met:\n\\- A mint transaction hash exists, and\n\\- Its receipt includes a Mint event with a tokenId.\n\nBefore every attempt, I’ll also clear any stale mint state. In addition, the automatic mint following approval will correctly set and track its mint hash.",
-        "milestone": null
-      },
-      {
-        "message_id": 369,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "4) The ETH attempt failed with “simulation failed: #2741”.\nBecause #2741 is a contract revert, and the minimum is 0.014 while your attempt used 0.0128, the likely issue is the swap path or allowance/approval flow rather than the price. Possible causes are:\n\\- A failing swap-router call caused by a pool or fee-tier mismatch.\n\\- An excessively high slippage or minimum-output setting.\n\\- A totalSupply or referral edge case, although that is less likely.\n\nI’ll reduce the swap minimum-output requirement and expose clearer errors so a failure can never display the success modal.",
-        "milestone": null
-      },
-      {
-        "message_id": 370,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The fixes currently in progress are:\n\\- Require a decoded Mint event from the receipt before showing success; without that event, there is no success UI.\n\\- Clear mint and approval state at the start of every attempt so editing referral codes cannot flash stale success.\n\\- After approval triggers auto-mint, set the mint hash and wait for its receipt before presenting any success UI.\n\\- Loosen the slippage and minimum-output handling on the ETH path, and display errors clearly instead of reporting success.",
-        "milestone": null
-      },
-      {
-        "message_id": 371,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The earlier 0.028 ETH remains at 0x4c81d7a295e630bf1a74c8d9e2035b6f87a19d4e and never reached the pools. I can return it to your main wallet, but I need you to send me that wallet address.",
-        "milestone": null
-      },
-      {
-        "message_id": 372,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Use 0x7a14c9e2b6d83f105ac47e69d2b801f43e6c95a1 as my wallet address.",
-        "milestone": null
-      },
-      {
-        "message_id": 373,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 374,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Cool 👍\nGiven that Mint number 8 has 4 existing NFTs available for random selection, where will its ticket and commission be sent?",
-        "milestone": null
-      },
-      {
-        "message_id": 375,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For Mint #8, with 4 existing NFTs in place:\n\\- Commission ($12): It goes to the treasury operator's wallet after 45 minutes.\n\\- Ticket: Reserved ticket issued, with the ticket allocated manually for the eighth mint.\n\nThe reason is that the contract tests whether totalSupply &lt;= 8. When that condition is true, it sends the commission to the treasury operator and continues execution, so a VRF request is queued and a reserved ticket is issued.",
-        "milestone": null
-      },
-      {
-        "message_id": 376,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The changes have been pushed to production, so you can begin testing now.",
-        "milestone": null
-      },
-      {
-        "message_id": 377,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Here was the sequence for the USDC mint attempt: the approval transaction executed → the “Mint Successful” modal appeared → the mint transaction appeared and executed → the “Mint Successful” modal appeared again. The NFT certificate works, the mint was counted, and the pool contribution was made, but I still can’t locate the NFT in either my wallet or our dashboard.\nTransaction - 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c",
-        "milestone": null
-      },
-      {
-        "message_id": 378,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The ETH mint attempt was unsuccessful.",
-        "milestone": null
-      },
-      {
-        "message_id": 379,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Those remaining issues are what I’m checking now.",
-        "milestone": null
-      },
-      {
-        "message_id": 380,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For this issue, do you have an error message or a transaction URL?",
-        "milestone": null
-      },
-      {
-        "message_id": 381,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The ETH transaction failed: 0x4d82a1f7c9306be518d4a762b05e39c17f2486ade513c9b062a7d4e891f035bc",
-        "milestone": null
-      },
-      {
-        "message_id": 382,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "What appears instead is 'simulation failed'.",
-        "milestone": null
-      },
-      {
-        "message_id": 383,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Perfect, that's what I wanted.",
-        "milestone": null
-      },
-      {
-        "message_id": 384,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "At <https://harborquill.example/account>, have you already configured your email?",
-        "milestone": null
-      },
-      {
-        "message_id": 385,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "no",
-        "milestone": null
-      },
-      {
-        "message_id": 386,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please configure the email first, then enable security Email Notifications.",
-        "milestone": null
-      },
-      {
-        "message_id": 387,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "done",
-        "milestone": null
-      },
-      {
-        "message_id": 388,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The fix is in. To view the NFT in your wallet or dashboard now, manually add it if necessary with these details:\n\\- contract: 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c\n\\- token ID: 8\n\\- chain: Base Mainnet\n\nBecause the backend already has tokenId 8 in the DB, refreshing the dashboard should render its new metadata and image, along with the PDF link.",
-        "milestone": null
-      },
-      {
-        "message_id": 389,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Testing it again should work now.",
-        "milestone": null
-      },
-      {
-        "message_id": 390,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "**Immediately after minting, verify the following**\n\\- In your wallet, look for the NFT and add it as a custom NFT if necessary.\n\\- Use contract: 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c\n\\- Take the token ID from the success modal.\n\\- Select the Base Mainnet.\n\nYou can check each resource here:\n\\- Metadata: <https://harborquill.example/metadata/>&lt;tokenId&gt;\n\\- Image: <https://harborquill.example/images/>&lt;tokenId&gt;.png\n\\- PDF: <https://harborquill.example/pdf/>&lt;tokenId&gt;\n\\- Dashboard: refresh it, and the token should appear with its image and links.\n\nFor the email confirmation, wait until the mint succeeds and then check both the inbox and spam folder for the email shown at <https://harborquill.example/account>. If nothing arrives within 12 minutes, send me the email address so I can verify it in the Brevo logs.",
-        "milestone": null
-      },
-      {
-        "message_id": 391,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Is manual NFT import going to be required for every user? Using 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c, I tried the 'import custom token' option, but it found nothing. Is there a separate 'import custom NFT' option?",
-        "milestone": null
-      },
-      {
-        "message_id": 392,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "No—the manual step only applies to the failed one.",
-        "milestone": null
-      },
-      {
-        "message_id": 393,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Once I turned off 'hide low-value NFTs' in Rabby, the NFT became visible, although it still had no image or information. I also have not managed to add it as a custom token.\n\nNext I’ll try an ETH purchase and see what happens.",
-        "milestone": null
-      },
-      {
-        "message_id": 394,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 395,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "For the ETH purchase, the contract never executed and still reports 'execution reverted'.",
-        "milestone": null
-      },
-      {
-        "message_id": 396,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Because this is an ERC‑721 NFT, use Add NFT Asset—not Add Custom Token—from the wallet’s Collectibles / NFT panel. Make sure you are on the Base Mainnet and enter:\n\\- Contract: 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c\n\\- Token ID: 8, which is the asset minted to 0x7a14c9e2b6d83f105ac47e69d2b801f43e6c95a1\n\nWhen the wallet requests both values, supply the contract and token ID. If it requests only the contract, switch to Base, enter the contract above, and then select or refresh the NFTs.\n\nThe asset can be verified as being live through these resources:\n\\- Metadata: <https://harborquill.example/metadata/8>\n\\- Image: <https://harborquill.example/images/8.png>\n\\- PDF: <https://harborquill.example/pdf/8>\n\nIf it remains hidden:\n1) Check that the selected network is the Base chain.\n2) Follow the dedicated NFT asset workflow rather than custom-token addition.\n3) Enter the contract and token ID manually.\n4) Force-reload or refresh the wallet’s NFT view.",
-        "milestone": null
-      },
-      {
-        "message_id": 397,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’ll look up this ETH activity on basescan now.",
-        "milestone": null
-      },
-      {
-        "message_id": 398,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "After buying with USDC, the purchase completed across eight transactions, but there was no 'mint successful' popup. Instead, I received emails for all of these:\n\\- new badge - 'Medal'\n\\- new badge - 'Hustler'\n\\- new badge - 'High Roller'\n\\- new badge - 'First Referral'\n\\- Referral earnings - Earnings $84, Total referrals 12\n\nThe dashboard conflicts with those emails: only the 'first referral' badge is ticked, and the NFT is still missing.",
-        "milestone": null
-      },
-      {
-        "message_id": 399,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I’m going to try it now.",
-        "milestone": null
-      },
-      {
-        "message_id": 400,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "On Rabby, there is no 'import NFT' flow that I can find.",
-        "milestone": null
-      },
-      {
-        "message_id": 401,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Findings\n\nOn Base, the ETH mint transaction 0xb842…19e6d reverted. The reason is that the on-chain swap router points to 0x7a91…4c2e rather than the Uniswap V3 SwapRouter. Since the contract sends exactInputSingle to that incorrect address, it reverts; consequently, every ETH mint will continue failing until the router is corrected on-chain.\n\nThe USDC mint does work:\n\\- token #16 exists and belongs to 0x7a14c9e2b6d83f105ac47e69d2b801f43e6c95a1. Its metadata and assets resolve successfully:\n\\- Metadata: <https://harborquill.example/metadata/1>\n\\- Image: <https://harborquill.example/images/1.png>",
-        "milestone": null
-      },
-      {
-        "message_id": 402,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "We’re very close; I’m fixing this now.",
-        "milestone": null
-      },
-      {
-        "message_id": 403,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Afterward, I’ll run the owner call and point the swap router at the Uniswap address shown above.",
-        "milestone": null
-      },
-      {
-        "message_id": 404,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Although BaseScan confirms that I own the NFTs, the Harbor Quill dashboard displays a count of 1 and otherwise shows nothing, apart from ticking the trailblazer referral badge. The attached image shows what appeared when I opened those links.",
-        "milestone": null
-      },
-      {
-        "message_id": 405,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m installing the Rabby wallet now so I can inspect this.",
-        "milestone": null
-      },
-      {
-        "message_id": 406,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Would it help if I sent you some money so that you could test the minting yourself?",
-        "milestone": null
-      },
-      {
-        "message_id": 407,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Before sending anything, please wait a moment. Let’s run one test together first, because I want to fix ETH and need your help testing it.",
-        "milestone": null
-      },
-      {
-        "message_id": 408,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "On the dashboard, reconnect the wallet after performing a hard refresh with ⌘+Shift+R.\n\nOnce that is done, I’ll check the dashboard again. If it still displays 1, I’ll implement a forced refetch and bypass the ownerOf guard so the API tokenDetails appear immediately.",
-        "milestone": null
-      },
-      {
-        "message_id": 409,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Owner call required for the ETH router fix\n\nAt present, the NFT contract’s swapRouter points to a non-Uniswap router. Until the owner changes it to Uniswap V3 on Base, every mintWithETH attempt will revert.\n\\- As the contract owner, call: setSwapRouter(0xc193e7a452d80bf619a4c73e860db2f591e74a26)\n\nBelow, I’ll walk you through the process.",
-        "milestone": null
-      },
-      {
-        "message_id": 410,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "You can make the owner call yourself without changing any code:\n\n1) Open the contract’s write page on BaseScan: <https://basescan.org/address/0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c#writeContract>\n2) Connect the owner wallet—the wallet that deployed or owns the NFT contract.\n3) Locate setSwapRouter under “Write Contract”.\n4) Enter 0xc193e7a452d80bf619a4c73e860db2f591e74a26 and submit the call.\n5) Wait until it is confirmed.\n\nOnce confirmation arrives, I’ll turn ETH back on in the UI and perform a live ETH mint test.",
-        "milestone": null
-      },
-      {
-        "message_id": 411,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The NFTs now appear on my dashboard, but their images fail when I open the details. Clicking 'View Book' also does not display the book.",
-        "milestone": null
-      },
-      {
-        "message_id": 412,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I'll test this now.",
-        "milestone": null
-      },
-      {
-        "message_id": 413,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Great—I’m going to investigate that now.",
-        "milestone": null
-      },
-      {
-        "message_id": 414,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The page is preventing me from clicking 'write'.",
-        "milestone": null
-      },
-      {
-        "message_id": 415,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "First connect your wallet; otherwise, send a screenshot of the entire page so I can check whether it is connected.",
-        "milestone": null
-      },
-      {
-        "message_id": 416,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Does wallet 0x6b29f4d1a83ce7059d124fb768e3a90c5d71b246 own the NFT contract?",
-        "milestone": null
-      },
-      {
-        "message_id": 417,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Yes. The production NFT contract is owned by its deployer wallet, 0x6b29f4d1a83ce7059d124fb768e3a90c5d71b246.",
-        "milestone": null
-      },
-      {
-        "message_id": 418,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Great, that's completed.",
-        "milestone": null
-      },
-      {
-        "message_id": 419,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The current outcome is what I’m asking about. Has this completed successfully now?",
-        "milestone": null
-      },
-      {
-        "message_id": 420,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Transaction recorded: 0xd914a7c25e806bf318c4d9a762e035bf91a74e286c50d3a917b84e6205f19acd",
-        "milestone": null
-      },
-      {
-        "message_id": 421,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "My answer is yes: by now, it should have succeeded.",
-        "milestone": null
-      },
-      {
-        "message_id": 422,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Excellent. From my side, I’ll continue working now.",
-        "milestone": null
-      },
-      {
-        "message_id": 423,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please hard-refresh the app first. Then, using the new router, run a quick live ETH mint test now to verify the end-to-end UI and on-chain flow, while also confirming that images and “View Book” work without XML errors on the dashboard and NFT detail page.",
-        "milestone": null
-      },
-      {
-        "message_id": 424,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "At the moment, 'View Book' still opens a blank page, as shown in the attached screenshot. The payment options are also reversed: ETH cannot be selected, while USDC and Card can. Because Card has not been implemented yet, that should be the unavailable option instead.",
-        "milestone": null
-      },
-      {
-        "message_id": 425,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 426,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The changes appear to have deployed incorrectly, so I’m checking the issue.",
-        "milestone": null
-      },
-      {
-        "message_id": 427,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please let me know whether you’re available. After hard-refreshing the app, check the dashboard/NFT detail page for its images and “View Book,” then run a quick live ETH mint to confirm that the new router works end-to-end across the UI and on-chain.",
-        "milestone": null
-      },
-      {
-        "message_id": 428,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "You can send me some money for the USDC test at:\n0x5f2a8c71d9046be318c7a5d2e96b304fa17d8c52\n\nThis transfer is USDC on Base. Do not send assets from any network other than Base to this address.",
-        "milestone": null
-      },
-      {
-        "message_id": 429,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For the ETH transfer on Base, use:\n0x5f2a8c71d9046be318c7a5d2e96b304fa17d8c52\n\nPlease send only ETH and only through the Base network to this address.",
-        "milestone": null
-      },
-      {
-        "message_id": 430,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The screenshots show that the latest results are still wrong: the dashboard remains at mint number 7 while reporting that the prize pool is now $25, and my NFTs have disappeared from it. Although ETH is selectable as a payment method, its transaction failed.",
-        "milestone": null
-      },
-      {
-        "message_id": 431,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "This is now underway. I’m taking care of it.",
-        "milestone": null
-      },
-      {
-        "message_id": 432,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m checking it now. The cause was the database migration I made.",
-        "milestone": null
-      },
-      {
-        "message_id": 433,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The transfer is complete: $240 USDC was sent alongside $120 ETH.",
-        "milestone": null
-      },
-      {
-        "message_id": 434,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Both transfers have come through—thank you.",
-        "milestone": null
-      },
-      {
-        "message_id": 435,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’m on it—the fix is now underway.",
-        "milestone": null
-      },
-      {
-        "message_id": 436,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please refresh your dashboard now and see whether it updates.",
-        "milestone": null
-      },
-      {
-        "message_id": 437,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The prize pool balance on the dashboard is still $25. It also continues to list 1 NFT and 6 Badges.",
-        "milestone": null
-      },
-      {
-        "message_id": 438,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay... fixing",
-        "milestone": null
-      },
-      {
-        "message_id": 439,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please take a look now.",
-        "milestone": null
-      },
-      {
-        "message_id": 440,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Once it appears, try both of these:\n- Run a quick live ETH mint now to confirm\n- On the Dashboard/NFT detail, check the images and “View Book”",
-        "milestone": null
-      },
-      {
-        "message_id": 441,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The prize pool contains $80. The dashboard also says I have 7 tickets and 3 referrals, and that I’ve made $20.\n\nIt shows 6 badges, although I should have the trailblazer referral badge.\n\nThe figures now conflict: the dashboard reports that I have 7 NFTs, while total supply is 14.",
-        "milestone": null
-      },
-      {
-        "message_id": 442,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "When I tried to view the book, I became stuck at the point shown in the attachment.",
-        "milestone": null
-      },
-      {
-        "message_id": 443,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I need about 25min to fix something here; give me that time.",
-        "milestone": null
-      },
-      {
-        "message_id": 444,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "In the meantime, please review the email settings and make sure the notifications are turned off.",
-        "milestone": null
-      },
-      {
-        "message_id": 445,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Could the fact that my email has pending registration explain why the page is now showing what’s in the attachment? Earlier this morning, I tried setting up my email again, and the confirmation email was delayed and then delivered. For context, I configured the email last Friday; during my fifth buy, I also received notifications for badges already unlocked.",
-        "milestone": null
-      },
-      {
-        "message_id": 446,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "After refreshing the page, it allows me to enter my email and offers the option to update email and password, but I’m still blocked from completing the email workflow. I assume this means my email is pending registration.",
-        "milestone": null
-      },
-      {
-        "message_id": 447,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The database migrations I ran caused this, so I’m checking that issue as well.",
-        "milestone": null
-      },
-      {
-        "message_id": 448,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please test the following now:\n\nRead page: available to verified NFT custodians\nEmail: verification works for newly created emails\nStats: reconciled referral and payout totals\nDashboard: 9 referrals, $125.00 earnings, and the Trailblazer Referral badge",
-        "milestone": null
-      },
-      {
-        "message_id": 449,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Email is pending verification, referral earnings are $720,000, and the ticket count is 4. Opening the NFT shows earnings of $20, versus $125 on the dashboard. I still receive a timeout warning in Read, while the first referral badge is highlighted as complete. The dashboard itself continues to report 7 NFTs.",
-        "milestone": null
-      },
-      {
-        "message_id": 450,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’ll check these details on the server; thanks for sending them.",
-        "milestone": null
-      },
-      {
-        "message_id": 451,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Test Now",
-        "milestone": null
-      },
-      {
-        "message_id": 452,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Whether everything is reflecting correctly now is what I need you to confirm.",
-        "milestone": null
-      },
-      {
-        "message_id": 453,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "In \\~55 minutes, I’ll run the test.",
-        "milestone": null
-      },
-      {
-        "message_id": 454,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 455,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Here’s the latest result from my testing:\n\nThe dashboard still displays 7 NFTs and $125 earnings on NFT9, while the leaderboard lists 6 referrals.\n\nThe First referral badge is highlighted as complete, but View book continues to produce the same error.\n\nOpening the NFT shows 6 referrals, 11 tickets, and 720,000 USDC in referral earnings.\n\nThe Home Page reports 8 mints and $80 in the prize pool, with 24 in Top Referrals.\n\nSee the attachment.",
-        "milestone": null
-      },
-      {
-        "message_id": 456,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 457,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Hello",
-        "milestone": null
-      },
-      {
-        "message_id": 458,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’ll guide you through the process so that, together, we can password-protect the PDF. Are you there?",
-        "milestone": null
-      },
-      {
-        "message_id": 459,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I’m here—yes, let’s go ahead with it.",
-        "milestone": null
-      },
-      {
-        "message_id": 460,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "To keep the key protected so that only verified NFT custodians can obtain it, follow these steps:\n\n1\\. Open <https://harborquill.example/encrypt-key>\n\n2\\. Connect your wallet if it is not connected already\n\n3\\. Paste this key into the box: FAKE_CREDENTIAL_121E931F86AC\n\n4\\. Select \"Encrypt Key with Lit Protocol\"\n\n5\\. Sign the message when your wallet popup appears\n\n6\\. Wait until a long JSON object appears as the result\n\n7\\. Copy the entire JSON object and save it\n\nThe long JSON object you receive is your protected key; share it with me afterward.",
-        "milestone": null
-      },
-      {
-        "message_id": 461,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "It reports an 'unsupported network' error.",
-        "milestone": null
-      },
-      {
-        "message_id": 462,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The Lit Protocol network error is now fixed and the update has been deployed.\n\nThe problem was an outdated network name: the unsupported old value 'cayenne' was replaced with 'datil' for Base Mainnet.\n\nTo verify the fix:\n- Allow 8–12 minutes for the frontend to restart completely\n- Refresh <https://harborquill.example/encrypt-key>\n- Try the encryption again; it should now work",
-        "milestone": null
-      },
-      {
-        "message_id": 463,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I’ll wait 20 minutes before trying again; the network is still showing as unsupported.",
-        "milestone": null
-      },
-      {
-        "message_id": 464,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Should I use the document encryption wallet for this?",
-        "milestone": null
-      },
-      {
-        "message_id": 465,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Use the wallet holding verified active NFTs—that’s the correct one.",
-        "milestone": null
-      },
-      {
-        "message_id": 466,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "While I work on that, can you check the other issues, excluding “View book is still giving the same error”?",
-        "milestone": null
-      },
-      {
-        "message_id": 467,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I'm encountering this error now.",
-        "milestone": null
-      },
-      {
-        "message_id": 468,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "That is indeed the issue we’re currently working to fix.",
-        "milestone": null
-      },
-      {
-        "message_id": 469,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The component with the bugs is the custom PDF page reader I built. Once it’s repaired, users who have the NFT will be able to access and read the book on this page.",
-        "milestone": null
-      },
-      {
-        "message_id": 470,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Even so, I’m still blocked by the unsupported network error.",
-        "milestone": null
-      },
-      {
-        "message_id": 471,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "It’s going to be awesome once we’ve resolved the bugs.",
-        "milestone": null
-      },
-      {
-        "message_id": 472,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Yes, exactly",
-        "milestone": null
-      },
-      {
-        "message_id": 473,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The dashboard has changed again:\n- Too many badges are now marked\n- It shows 7 tickets despite displaying 4 NFTs, $80 in the prize pool, and 9 referrals\n- Total earnings are listed as $8,000,000",
-        "milestone": null
-      },
-      {
-        "message_id": 474,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 475,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Now that this error is fixed, is key rotation required?",
-        "milestone": null
-      },
-      {
-        "message_id": 476,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Although I corrected the “$8,000,000 total earnings” entry, I still need to investigate why it keeps reappearing. That value is what triggers those badges.",
-        "milestone": null
-      },
-      {
-        "message_id": 477,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "No, the current one is fine.",
-        "milestone": null
-      },
-      {
-        "message_id": 478,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Given that I have an early morning tomorrow, how long will fixing this encryption error take?",
-        "milestone": null
-      },
-      {
-        "message_id": 479,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I’ll need less than 30-45 min, please.",
-        "milestone": null
-      },
-      {
-        "message_id": 480,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "While I work on this, could you run an ETH mint test from your side?",
-        "milestone": null
-      },
-      {
-        "message_id": 481,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "cool",
-        "milestone": null
-      },
-      {
-        "message_id": 482,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The ETH mint did not execute.",
-        "milestone": null
-      },
-      {
-        "message_id": 483,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please send the transaction link so I can use it for debugging.",
-        "milestone": null
-      },
-      {
-        "message_id": 484,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Have you also been able to test the tipping feature?",
-        "milestone": null
-      },
-      {
-        "message_id": 485,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "On my next ETH attempt, I’ll test it; I haven’t done so yet.",
-        "milestone": null
-      },
-      {
-        "message_id": 486,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 487,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Were any error messages displayed there?",
-        "milestone": null
-      },
-      {
-        "message_id": 488,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please test it now.",
-        "milestone": null
-      },
-      {
-        "message_id": 489,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "I have it now.",
-        "milestone": null
-      },
-      {
-        "message_id": 490,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "During Eth minting, this appears before the transaction fails.\nTransaction: 0xb714e92c53a80fd61c47d9a2e638b5014fa72c9d805e31b796d4a28cf159e603",
-        "milestone": null
-      },
-      {
-        "message_id": 491,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The fix has been applied; please check whether everything is okay now.",
-        "milestone": null
-      },
-      {
-        "message_id": 492,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "This item has been fixed too:\n3\\. Summary Reconciled and Verified:\nTotal NFTs: 4\nTotal Referrals: 9\nPrize Draw Tickets: 19\nTotal Earnings: $125\nNFT Details: Fully verified for referrals, tickets, and earnings per NFT.",
-        "milestone": null
-      },
-      {
-        "message_id": 493,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The transaction failed because actual slippage exceeded the 12% limit. When ETH is swapped to USDC through Uniswap, market volatility and price impact can require more than 9% slippage tolerance.",
-        "milestone": null
-      },
-      {
-        "message_id": 494,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "To address the ETH issue, I redeployed a new contract.\n\nThe fix includes:\n\\* Configurable slippage tolerance, with 72 as the default retention value and 28% slippage\n\\* Owner adjustment through the setSwapSlippageTolerance() function\n\\* Reliable ETH minting even during volatile markets\n\nBefore going live, add the contract to Chainlink VRF:\n\\* Visit vrf.chain.link\n\\* Add consumer 0x3d98b2f714c65ae079d3e418b62f90ca5e17d843",
-        "milestone": null
-      },
-      {
-        "message_id": 495,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "A 9%+ slippage requirement for a $40 ETH into USDC swap on Base seems very strange. On Uniswap, I would expect it to remain &lt;2.0%.",
-        "milestone": null
-      },
-      {
-        "message_id": 496,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Here is the landing-page status.\n\nWorking correctly:\nMy NFTs - 4\nReferrals - 9\nTickets - 19\nBadges - first referral ticked\n\nStill incorrect:\nPrize pool - $30\nMy referral code - 72,904, while mint numbers should start from 25,000\n\nPlatform statistics:\nTotal mints - 3\n\nThe page also claims we have reached mint number 12. Did you mint six?\n\nView Book continues to return the same error as well.",
-        "milestone": null
-      },
-      {
-        "message_id": 497,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The figures on Base Uniswap do not support that conclusion: auto slippage is 4.8%, while a $40 ETH to USDC swap shows 0.82% price impact and a $0.08 network fee. It does not make sense that 12% slippage would be insufficient.",
-        "milestone": null
-      },
-      {
-        "message_id": 498,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "At present, the contract is attempting to charge 0.0184 ETH, equivalent to $57.89.",
-        "milestone": null
-      },
-      {
-        "message_id": 499,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Most site statistics now appear aligned with a USDC mint from a different mint contract. I will prepare the chainlink setup, but I will not change anything until you wake up and confirm, because increasing slippage to 28% still makes no sense to me.",
-        "milestone": null
-      },
-      {
-        "message_id": 500,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I'm here and awake now.",
-        "milestone": null
-      },
-      {
-        "message_id": 501,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Using USDC and the audited contract I deployed, I minted 6 NFT tokens.",
-        "milestone": null
-      },
-      {
-        "message_id": 502,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "What I reported is the result I found after researching the ETH error we have been encountering.",
-        "milestone": null
-      },
-      {
-        "message_id": 503,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "If your own research identifies a better solution and confirms that it is possible, I can implement it afterward.",
-        "milestone": null
-      },
-      {
-        "message_id": 504,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The new consumer has now been added. I will try to research another solution Friday afternoon because the current one does not make sense to me; users cannot be expected to pay $65+ for a $30 NFT.",
-        "milestone": null
-      },
-      {
-        "message_id": 505,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Since the fault appears after broadcast but before confirmation as 'Execution Reverted', I cannot see how slippage would explain it. The math also does not add up.",
-        "milestone": null
-      },
-      {
-        "message_id": 506,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For your research, use the technical document ETH Swap Failure - Remediation Notes.pdf.",
-        "milestone": null
-      },
-      {
-        "message_id": 507,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Go ahead with the research.\n\nThe previous setting was 68 with 12% slippage, which was too strict because I had hardcoded 12%.\n\nYou can also verify this calculation:\nThe contract requires minimumSwapOutput = 30 USDC \\* 68 / 80 = 25.50 USDC. With ETH currently priced at $4,820, 0.0145 ETH equals $47.80, so the swap should easily return more than $25.50 USDC.",
-        "milestone": null
-      },
-      {
-        "message_id": 508,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "When a new contract reports 'Execution Reverted' before signing and then fails after it is signed, what is generally responsible?",
-        "milestone": null
-      },
-      {
-        "message_id": 509,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Away from my computer, I briefly asked Grok what might be happening. This was the response:\n\n'Get the failed transaction hash from the site logs, or reproduce it yourself, and inspect the revert reason on <http://basescan.org|basescan.org>. Is it something like \"UniswapV3: K\" for slippage, or a different error?\n\nReplay the mint call locally with Foundry/Anvil on a Base fork. Inspect the swap parameters, including the ETH/USDC pool address for the 0.05% tier, amountOutMin = 30e6 * 0.85, decimals and deadline.\n\nFor the frontend quoter, use ethers.js to query the Uniswap quoter for 30e6 USDC out. Does the result agree with the manual checks?\n\nIf slippage is not the cause—for example, if the pool or fee tier is wrong, the oracle is stale, or there is an amount bug—apply a targeted fix. Test on Sepolia before making any changes.'\n\nThis is only an AI response, so I do not know whether it will be useful.",
-        "milestone": null
-      },
-      {
-        "message_id": 510,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Grok's potentially unhelpful assessment was:\n\n'Marcus, swapping $45 of ETH for USDC on Base Uniswap should have almost no price impact in the main pools, certainly not enough for output to fall below $30. That points toward configuration: perhaps a 0.05% or 0.25% fee tier rather than the high-liquidity 0.3% ETH/USDC pool, the wrong pool address, or routing through a low-TVL pool where even a small trade has extreme impact.\n\nTransaction 0xe318a6d49f72c05b164e8a93d2b741fc6095e83a27d14bce5f8062a9c3417de5 reverted after ETH was wrapped but before minting. The likely reason is that usdcReceived fell below $30 after fees or impact, causing the strict check to fail despite the $45 buffer.\n\nThe three $10 each splits to founder, commission, and prize require $30 in total, so an exact-output target of 28e6 USDC would not guarantee the full split. With that discrepancy still to be resolved, the proposed swap changes are:\n\\- Change mintWithETH to Uniswap V3 exactOutputSingle with amountOut=28e6 USDC and amountInMaximum=msg.value in WETH.\n\\- Refund any unused ETH.\n\\- Revert when more input is required; do not allow partial execution.\n\\- Verify fee=3000 (0.3%) and use the main ETH/USDC pool at 0xd48a1e736b90c2f514e87a39c605db2f91a74e68, or whichever pool currently has the highest TVL.\n\nFor the frontend:\n\\- Ask QuoterV2 for the amountIn required to produce exactly 28e6 USDC.\n\\- Add a buffer using queriedAmountIn \\* 1.075, representing 7.5% slip.\n\\- Display \"Approx. X ETH (~Y USD) for $30 NFT\".\n\nConfirm on a Sepolia fork that there are no impact problems, then redeploy.'",
-        "milestone": null
-      },
-      {
-        "message_id": 511,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Here is what the pool shows:\n\\- 120 WETH, which is effectively no usable ETH liquidity\n\\- $27.8M USDC\n\nIt appears one-sided, so an ETH → USDC swap would experience MASSIVE price impact because there is effectively no ETH liquidity available on the other side. I will check the remaining fee tiers.",
-        "milestone": null
-      },
-      {
-        "message_id": 512,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Does that mean we have now identified the issue?",
-        "milestone": null
-      },
-      {
-        "message_id": 513,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Liquidity checks show that the pool is excellent:\n\\- stETH: 8,750 ETH (~$38.6M)\n\\- USDC: $29.6M\n\\- Total TVL: ~$68.2M\n\\- Fee tier: 0.3%\n\nTherefore, Grok's wrong-pool or low-liquidity theory is INCORRECT; this pool has excellent liquidity.",
-        "milestone": null
-      },
-      {
-        "message_id": 514,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Based on the verified pool figures, Grok's suggestion to replace exactInputSingle with exactOutputSingle is not necessary.\n\nIn reality:\n\\- The current pool contains $68.2M in TVL\n\\- Swapping 0.0145 ETH ($45) creates only 0.002% price impact, which is negligible\n\\- exactInputSingle works perfectly well at this liquidity level\n\\- A 28% slippage tolerance is more than sufficient\n\nexactOutputSingle would only be useful if:\n\\- Liquidity were low, although $68.2M is substantial\n\\- We wanted to guarantee exactly $30 USDC, which is useful but not critical\n\\- We preferred refunding excess ETH instead of USDC as a minor UX improvement",
-        "milestone": null
-      },
-      {
-        "message_id": 515,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Two questions follow from the points about guaranteeing exactly $30 USDC and refunding excess ETH rather than USDC:\n\n- Without an excess refund, could users unknowingly pay $45?\n- If the result does not equal exactly 30 USDC, where does any surplus or shortfall go, or where is it sourced from?",
-        "milestone": null
-      },
-      {
-        "message_id": 516,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "No—people do not unknowingly pay $85 for a mint priced at $30 because the surplus is refunded.\n\nThe flow is:\nUser sends ~0.0145 ETH (~$45)\nContract swaps it into ~$44 USDC\nContract allocates $30 USDC to minting\nContract returns approximately ~$14 USDC to the user\n\nThis refund is already implemented in the contract at lines 820-832:\n// Refund excess USDC if any\nif (usdcReceived &gt; MINT\\_PRICE) {\nuint256 excess = usdcReceived - MINT\\_PRICE;\nrequire(usdc.transfer(msg.sender, excess), \"Excess refund failed\");\n}",
-        "milestone": null
-      },
-      {
-        "message_id": 517,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Cool  👍",
-        "milestone": null
-      },
-      {
-        "message_id": 518,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For surplus and shortfall, the contract behaves differently.\n\nWhen the swap returns more than $30:\n\\- Return surplus to the buyer in USDC, as implemented at line 824-828\n\\- For example, a $39 output gives the user a $9 USDC refund\n\nWhen the swap returns less than $30:\n\\- Swap shortfall cancels the call at line 819\n\\- In the supplied example, a $41 swap request returns below that threshold, so All bundled actions are rolled back\n\\- The user keeps the full balance and must submit a fresh request",
-        "milestone": null
-      },
-      {
-        "message_id": 519,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The UX problem is that the current design returns USDC rather than ETH.\n\nCurrent flow:\n\\- The user sends 0.0110 ETH ($34)\n\\- Approximately $4 USDC comes back\n\\- The user is left holding mixed tokens ❌\n\nA better flow should use exactOutputSingle:\n\\- The user sends 0.0110 ETH ($34)\n\\- The swap consumes only about 0.0097 ETH ($30)\n\\- Approximately 0.0013 ETH ($4) comes back\n\\- The user retains ETH ✅\n\nDo you understand the distinction?",
-        "milestone": null
-      },
-      {
-        "message_id": 520,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Great, that works for me 👍",
-        "milestone": null
-      },
-      {
-        "message_id": 521,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Has the oracle subscription address model produced any success yet?",
-        "milestone": null
-      },
-      {
-        "message_id": 522,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I'm currently testing something here; once it finishes, I will tell you how it went.",
-        "milestone": null
-      },
-      {
-        "message_id": 523,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please try this. Once I fix it, the View Book issue will be resolved as well.",
-        "milestone": null
-      },
-      {
-        "message_id": 524,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Should I use the contract deployer wallet or the wallet that holds the NFTs? I tested with the NFT wallet and received the attached screenshot.",
-        "milestone": null
-      },
-      {
-        "message_id": 525,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 526,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "This may actually be a Rabby problem. I will try downloading metamask next Tuesday morning, although I am unsure it will help because Rabby already disguises itself as Metamask and still fails. Alternatively, I can test coinbase wallet, but unfortunately that must wait until I get home.",
-        "milestone": null
-      },
-      {
-        "message_id": 527,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "That's fine.",
-        "milestone": null
-      },
-      {
-        "message_id": 528,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Some great news here 🤭🤭",
-        "milestone": null
-      },
-      {
-        "message_id": 529,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "ETH now works perfectly in testing.",
-        "milestone": null
-      },
-      {
-        "message_id": 530,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "In the test, I spent 0.0136845 ETH and received a refund of 12.74380 USDC.",
-        "milestone": null
-      },
-      {
-        "message_id": 531,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 532,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Great news—what caused the issue?\n\nRefunding USDC when someone pays in ETH is not ideal, although it is not a major problem. Would returning the excess in ETH be too complicated?",
-        "milestone": null
-      },
-      {
-        "message_id": 533,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Returning the surplus in ETH is possible and not excessively complicated, but it requires changing the on-chain flow. Specifically, the NFT contract's mintWithETH logic must be updated and the contract redeployed.\n\nThe current design swaps the full msg.value into USDC and then refunds any surplus in USDC, so there is no route for an ETH refund.\n\nWhy the contract must change:\n\\- mintWithETH wraps the entire msg.value as WETH\n\\- It swaps all WETH into USDC\n\\- When usdcReceived exceeds 30 USDC, the difference is returned in USDC\n\nAn ETH refund therefore requires the contract to stop swapping the full input amount.",
-        "milestone": null
-      },
-      {
-        "message_id": 534,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For clean and safe UX, the best approach is to update mintWithETH to use Uniswap V3 exactOutputSingle:\n\\- Request exactly 30\\_000\\_000 USDC as output\n\\- Set amountInMaximum to msg.value in WETH\n\\- Let the router consume only the amount required\n\\- Unwrap leftover WETH and return it to the payer as ETH\n\\- Revert if msg.value cannot produce 30 USDC\n\\- This standard flow guarantees the exact USDC mint price while returning the remainder in ETH\n\nRecommendation:\n\\- For zero user surprises, implement exactOutputSingle with an ETH refund; this requires redeployment.\n\\- To keep the current setup stable, retain the existing behavior and add a brief UI notice stating, \"Excess is refunded in USDC.\" This is the lowest-risk option.",
-        "milestone": null
-      },
-      {
-        "message_id": 535,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Would you like me to implement the exactOutputSingle version and deploy it now as the next contract upgrade? What do you think?",
-        "milestone": null
-      },
-      {
-        "message_id": 536,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The exactOutputSingle version sounds good if it isn't a major lift. Are there any drawbacks, such as failed transactions? The UI note could still be a 'good enough' solution instead.",
-        "milestone": null
-      },
-      {
-        "message_id": 537,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Changing and building it won't be a large task for me, so I can take care of it.",
-        "milestone": null
-      },
-      {
-        "message_id": 538,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "One thing to remember is that new contracts begin with fresh NFTs, draws, and so on, meaning we'll restart at #40, #41, etc. The old NFTs contract will continue to exist, but we won't use those NFTs in the systems because that would cause confusion.",
-        "milestone": null
-      },
-      {
-        "message_id": 539,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best.",
-        "milestone": null
-      },
-      {
-        "message_id": 540,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 541,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Thanks. I really appreciate it.",
-        "milestone": null
-      },
-      {
-        "message_id": 542,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For the new contract deployment, I intend to use our deployer wallet: 0x6b29f4d1a83ce7059d124fb768e3a90c5d71b246",
-        "milestone": null
-      },
-      {
-        "message_id": 543,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "To fund the deployment, please send 0.08 ETH on the Base Mainnet to this address:\n\nDeployer Wallet: 0x6b29f4d1a83ce7059d124fb768e3a90c5d71b246",
-        "milestone": null
-      },
-      {
-        "message_id": 544,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Funding is complete: 0.08 ETH was sent to the deployer wallet.",
-        "milestone": null
-      },
-      {
-        "message_id": 545,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Thanks",
-        "milestone": null
-      },
-      {
-        "message_id": 546,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Deployment of the new contract is now complete.",
-        "milestone": null
-      },
-      {
-        "message_id": 547,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "This has now been generated successfully. Meanwhile, I'm working on the PDF View logic.",
-        "milestone": null
-      },
-      {
-        "message_id": 548,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Hi, do any exist",
-        "milestone": null
-      },
-      {
-        "message_id": 549,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Everything has now been fixed, and I'm happy to report that. When you're available, let me know so I can guide you through testing it together.",
-        "milestone": null
-      },
-      {
-        "message_id": 550,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Great news. I'm available, so once you're awake, let me know and we can begin the testing.",
-        "milestone": null
-      },
-      {
-        "message_id": 551,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Am back",
-        "milestone": null
-      },
-      {
-        "message_id": 552,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Are you free?",
-        "milestone": null
-      },
-      {
-        "message_id": 553,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Yes, I'm ready.",
-        "milestone": null
-      },
-      {
-        "message_id": 554,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Perfect",
-        "milestone": null
-      },
-      {
-        "message_id": 555,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The system is now using the new contract. Can you confirm whether your dashboard shows any data, including NFTs, tickets, and so on?",
-        "milestone": null
-      },
-      {
-        "message_id": 556,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Although part of the dashboard data has been wiped, some of it remains. The data is also still present on the 'home' tab.",
-        "milestone": null
-      },
-      {
-        "message_id": 557,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Those entries belong to me because I minted them from my side.",
-        "milestone": null
-      },
-      {
-        "message_id": 558,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "First, let's test whether the book's page can be accessed without a valid NFT.",
-        "milestone": null
-      },
-      {
-        "message_id": 559,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please check whether you can access this page:\n\n<https://harborquill.example/read>",
-        "milestone": null
-      },
-      {
-        "message_id": 560,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "access denied!",
-        "milestone": null
-      },
-      {
-        "message_id": 561,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Nice",
-        "milestone": null
-      },
-      {
-        "message_id": 562,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Mint testing is available now with either USDC or ETH; let's see how each option goes.",
-        "milestone": null
-      },
-      {
-        "message_id": 563,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "If you want to use me as the referrer, you can choose 11, 24, or 39.",
-        "milestone": null
-      },
-      {
-        "message_id": 564,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please run through the entire flow so we can see how it behaves.",
-        "milestone": null
-      },
-      {
-        "message_id": 565,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "After 9 buys, why do only 8 tickets exist? Even a referral-free purchase should create 6 tickets and commission, with both allocated by weighted draw.",
-        "milestone": null
-      },
-      {
-        "message_id": 566,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Good news—I have just received $28 😊",
-        "milestone": null
-      },
-      {
-        "message_id": 567,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "",
-        "milestone": null
-      },
-      {
-        "message_id": 568,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "What behavior should this logic follow?",
-        "milestone": null
-      },
-      {
-        "message_id": 569,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "During approval of the USDC spend—not during minting—the 'successful mint' popup appeared and showed mint number 11. In this case, I had used referral code 17; the screenshot shows this with the wallet popup visible.\n\nI cancelled that purchase, then checked and found that I had no NFT. Afterward, I minted using referral code 29. There was no USDC approval signature this time: it went directly to minting and worked perfectly, the popup appeared, and the NFT is visible on the dashboard.\n\nThe book decrypted successfully after I signed a transaction, but I'm now stuck on the cover page.",
-        "milestone": null
-      },
-      {
-        "message_id": 570,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Do you mean that the cover page at this address isn't working?\n\n<https://harborquill.example/read>",
-        "milestone": null
-      },
-      {
-        "message_id": 571,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The eth mint completed perfectly, and there was no 'approve eth spend' step.",
-        "milestone": null
-      },
-      {
-        "message_id": 572,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please send the transaction URLs so I can inspect the bugs or other issues.",
-        "milestone": null
-      },
-      {
-        "message_id": 573,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "After the book loaded, I could initially click the 'next page' arrow. Once it faded, however, I couldn't make it reappear, leaving me stuck.",
-        "milestone": null
-      },
-      {
-        "message_id": 574,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Did you also try navigating with the arrow keys?",
-        "milestone": null
-      },
-      {
-        "message_id": 575,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "So far, the issues are the 'mint successful' popup appearing after USDC spending is approved but before minting, plus the 7 tickets that are missing—possibly from your purchases without referrals.",
-        "milestone": null
-      },
-      {
-        "message_id": 576,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "After reopening it, I used the arrow keys and moved through to page 27, but the arrows then faded and left me stuck on page 27. Ahhhhh, I can still navigate with my keyboard's arrow keys; I just can't click anymore with the cursor.",
-        "milestone": null
-      },
-      {
-        "message_id": 577,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Before I inspect the system's behavior and improve it, tell me more about the tickets. At what point should the tickets and commission be awarded?",
-        "milestone": null
-      },
-      {
-        "message_id": 578,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "This is what I'm fixing at the moment.",
-        "milestone": null
-      },
-      {
-        "message_id": 579,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "On another USDC purchase with the referral field left blank, I did not see a ticket batch created. For a 'blank referral' purchase, the commission and ticket are supposed to go by weighted draw to a newly registered NFT owner.",
-        "milestone": null
-      },
-      {
-        "message_id": 580,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Since my USDC mint succeeded and I even referred you as #18, could you check the result on your side?",
-        "milestone": null
-      },
-      {
-        "message_id": 581,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The USDC mint succeeded: #18 now has $35 and 4 tickets. When minting with the referral field left empty, there seem to be 4 tickets generated; however, 3 tickets and $12 commission distributed by lottery are not being allocated by weighted draw.",
-        "milestone": null
-      },
-      {
-        "message_id": 582,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I'll now try to check how the tickets are behaving.",
-        "milestone": null
-      },
-      {
-        "message_id": 583,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Whether or not a 'code-free purchase' generates 6 tickets could go either way, so a missing ticket on that kind of purchase may be acceptable.\n\nThe unresolved question is where the $10 commission goes on those no-referral mints. I would like those commissions to default to me, but that could encourage sympathetic buyers to omit their referral codes and discourage affiliates from participating. Because of that, the $10 commission from no-referral purchases has to be assigned by weighted draw.",
-        "milestone": null
-      },
-      {
-        "message_id": 584,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "That issue is being fixed right now.",
-        "milestone": null
-      },
-      {
-        "message_id": 585,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "There is also a problem with the NFT 'attributes': under 'referral code', it displays the code used for the purchase rather than the referral code, or mint number, assigned to that NFT. My screenshot shows mint #42 with 'referral code 47' in its attributes.",
-        "milestone": null
-      },
-      {
-        "message_id": 586,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": ".",
-        "milestone": null
-      },
-      {
-        "message_id": 587,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The fix is in: mints marked “Referral omitted” now produce 6 tickets and a weighted commission award.",
-        "milestone": null
-      },
-      {
-        "message_id": 588,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The frontend was not at fault. The contract already sends referralCode=99 down the “random referral via VRF” path. However, payout and ticket creation wait until VRF has fulfilled and someone then calls finalizeReferralDraw(drawRequestId). Because our backend previously did not monitor RandomnessSettled, it never sent that follow-up transaction, leaving both the ticket and random commission uncreated.",
-        "milestone": null
-      },
-      {
-        "message_id": 589,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "It seems okay to me, but tell me how it should work if that is wrong and I will change it.",
-        "milestone": null
-      },
-      {
-        "message_id": 590,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "For each NFT, please set the attribute to its assigned referral code rather than the checkout referral identifier.",
-        "milestone": null
-      },
-      {
-        "message_id": 591,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 592,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "It would be fine if this were only a frontend problem. Right now, though, 19 mints have put $140 into the prize pool, while the leaderboard lists just 9 tickets total and $48 in commission.",
-        "milestone": null
-      },
-      {
-        "message_id": 593,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Before I check, how are they supposed to be?",
-        "milestone": null
-      },
-      {
-        "message_id": 594,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "On my side, the leaderboard appears like this: <https://harborquill.example/leaderboard>",
-        "milestone": null
-      },
-      {
-        "message_id": 595,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The number of commissions and tickets should each equal the number of mints, excluding promotional mints. However, those distributed by weighted draw do not seem to be registering.",
-        "milestone": null
-      },
-      {
-        "message_id": 596,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Okay",
-        "milestone": null
-      },
-      {
-        "message_id": 597,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Here is the account page I am seeing: <https://harborquill.example/account>",
-        "milestone": null
-      },
-      {
-        "message_id": 598,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Even before minting, immediately after approving the USDC spend, the 'mint successful' popup still appears; see the attachment. It also said 'Your NFT #19 has been minted successfully,' although I would have been minting #42.",
-        "milestone": null
-      },
-      {
-        "message_id": 599,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Across the two accounts, the totals still do not match the mints. Yours shows 11 tickets and 11 commissions, while mine shows 7 tickets and 7 commissions. That gives 18 tickets and commissions in total, even though all 19 mints should each have produced both. It appears that purchases marked 'referral omitted' are not registering their tickets or commissions.",
-        "milestone": null
-      },
-      {
-        "message_id": 600,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Yes, that is the issue I said I am working on right now.",
-        "milestone": null
-      },
-      {
-        "message_id": 601,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "...",
-        "milestone": null
-      },
-      {
-        "message_id": 602,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "ahhh, cool",
-        "milestone": null
-      },
-      {
-        "message_id": 603,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "For the existing NFTs, I will check the issue and provide an update.",
-        "milestone": null
-      },
-      {
-        "message_id": 604,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The update is complete: an NFT’s “Referral Code” now always comes from its own tokenId, never the code supplied during purchase.",
-        "milestone": null
-      },
-      {
-        "message_id": 605,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "A backfill now supplies the missing tickets and commissions to existing NFTs.",
-        "milestone": null
-      },
-      {
-        "message_id": 606,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Could you verify that those fixes work?",
-        "milestone": null
-      },
-      {
-        "message_id": 607,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Yes, the fixes work now.",
-        "milestone": null
-      },
-      {
-        "message_id": 608,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "The leaderboard still reports a total of only 9 tickets and 8 commissions.",
-        "milestone": null
-      },
-      {
-        "message_id": 609,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The fix is complete. Approving USDC no longer opens a “mint successful” message. Only after the actual mint transaction confirms does the modal display the correct tokenId—for example, #31—taken from the Mint event.",
-        "milestone": null
-      },
-      {
-        "message_id": 610,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "After testing it just now, I can confirm it works fine. In the book reader, the arrow keys are permanently visible now. I would prefer them to fade while unused and return when the cursor becomes active, but the current behavior is acceptable.",
-        "milestone": null
-      },
-      {
-        "message_id": 611,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Perfect!!",
-        "milestone": null
-      },
-      {
-        "message_id": 612,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "What progress has been made on the missing tickets and commission?",
-        "milestone": null
-      },
-      {
-        "message_id": 613,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The fix is finished, and you can now test it using new mints.",
-        "milestone": null
-      },
-      {
-        "message_id": 614,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "The calculations for the previous one are still correct.",
-        "milestone": null
-      },
-      {
-        "message_id": 615,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "By accident, I just completed 7 mints. For the first, I referred to #47 and added a $4 tip, but the tip failed: 0x84c2e719d50a6bf314e8c729630db5fa91d74e285c60b3a917f84d620e51ac39\n\nFor the second, I left the referral code blank, but its ticket and commission still do not appear on the leaderboard: 0x5e91c4a27d806bf314c8e729630db5fa81d74e295c60b3a917f84d620e51ac38",
-        "milestone": null
-      },
-      {
-        "message_id": 616,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "While testing on mobile with Rainbow Wallet, I can connect to HarborQuill, but trying to view the book never gives me the transaction to sign and load it. Could this be a Rainbow Wallet issue?",
-        "milestone": null
-      },
-      {
-        "message_id": 617,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "At the moment I am outside, so I will respond once I can access my computer.",
-        "milestone": null
-      },
-      {
-        "message_id": 618,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "okay",
-        "milestone": null
-      },
-      {
-        "message_id": 619,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "I'm back now.",
-        "milestone": null
-      },
-      {
-        "message_id": 620,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Regarding the mint referred to #47 with a $4 tip, which part failed: the minting or the tipping?",
-        "milestone": null
-      },
-      {
-        "message_id": 621,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Some updates have now been deployed. Could you try minting again?",
-        "milestone": null
-      },
-      {
-        "message_id": 622,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Using 'no referral code' and a '$4 tip', I have just completed another mint.\n\n- The tip still does not work.\n\n- For 'no referral code' purchases, tickets and commissions still appear neither on the leaderboard nor in the NFT attributes.\n\nA second transaction, visible in the screenshot, appeared after the mint. I cancelled it, yet the mint completed normally. Was that extra transaction meant to send the tip, and why did it appear?",
-        "milestone": null
-      },
-      {
-        "message_id": 623,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Even when the wallet is already connected, opening the book requires you to sign in again.",
-        "milestone": null
-      },
-      {
-        "message_id": 624,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "Although HarborQuill otherwise works great on mobile with Rainbow Wallet, I cannot get the transaction needed to decrypt and 'view book'. The attempt opens Rainbow Wallet, but no transaction ever arrives.\n\nThere is also no option to receive an NFT certificate, despite my email already being verified.",
-        "milestone": null
-      },
-      {
-        "message_id": 625,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "To run a live test and trace the source of the issue, I will create a Rainbow wallet, share its address, and have us fund it.",
-        "milestone": null
-      },
-      {
-        "message_id": 626,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "If the user is already signed in, can we remove the transaction-signing requirement for viewing the book?",
-        "milestone": null
-      },
-      {
-        "message_id": 627,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "No transaction is made; it is only a signature used to check whether you hold a valid NFT.",
-        "milestone": null
-      },
-      {
-        "message_id": 628,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Had the ticket and commission problem been raised during our earlier tests on the last contract, I would have included the new changes when redeploying the smart contract. I will investigate again now. If the issue remains unresolved, we will have to deploy another new contract before the changes can take effect.",
-        "milestone": null
-      },
-      {
-        "message_id": 629,
-        "created_ts": null,
-        "speaker": "client",
-        "text": "What is the current situation, then? For 'no code buys', are the tickets and commissions reaching a random NFT holder but simply failing to appear on the dashboard?",
-        "milestone": null
-      },
-      {
-        "message_id": 630,
-        "created_ts": null,
-        "speaker": "freelancer",
-        "text": "Please share the BaseScan URLs so I can inspect them.",
-        "milestone": null
       }
     ]
   },
@@ -4807,314 +2931,29 @@
         359,
         360,
         361,
-        362,
-        363,
-        364,
-        365,
-        366,
-        367,
-        368,
-        369,
-        370,
-        371,
-        372,
-        373,
-        374,
-        375,
-        376,
-        377,
-        378,
-        379,
-        380,
-        381,
-        382,
-        383,
-        384,
-        385,
-        386,
-        387,
-        388,
-        389,
-        390,
-        391,
-        392,
-        393,
-        394,
-        395,
-        396,
-        397,
-        398,
-        399,
-        400,
-        401,
-        402,
-        403,
-        404,
-        405,
-        406,
-        407,
-        408,
-        409,
-        410,
-        411,
-        412,
-        413,
-        414,
-        415,
-        416,
-        417,
-        418,
-        419,
-        420,
-        421,
-        422,
-        423,
-        424,
-        425,
-        426,
-        427,
-        428,
-        429,
-        430,
-        431,
-        432,
-        433,
-        434,
-        435,
-        436,
-        437,
-        438,
-        439,
-        440,
-        441,
-        442,
-        443,
-        444,
-        445,
-        446,
-        447,
-        448,
-        449,
-        450,
-        451,
-        452,
-        453,
-        454,
-        455,
-        456,
-        457,
-        458,
-        459,
-        460,
-        461,
-        462,
-        463,
-        464,
-        465,
-        466,
-        467,
-        468,
-        469,
-        470,
-        471,
-        472,
-        473,
-        474,
-        475,
-        476,
-        477,
-        478,
-        479,
-        480,
-        481,
-        482,
-        483,
-        484,
-        485,
-        486,
-        487,
-        488,
-        489,
-        490,
-        491,
-        492,
-        493,
-        494,
-        495,
-        496,
-        497,
-        498,
-        499,
-        500,
-        501,
-        502,
-        503,
-        504,
-        505,
-        506,
-        507,
-        508,
-        509,
-        510,
-        511,
-        512,
-        513,
-        514,
-        515,
-        516,
-        517,
-        518,
-        519,
-        520,
-        521,
-        522,
-        523,
-        524,
-        525,
-        526,
-        527,
-        528,
-        529,
-        530,
-        531,
-        532,
-        533,
-        534,
-        535,
-        536,
-        537,
-        538,
-        539,
-        540,
-        541,
-        542,
-        543,
-        544,
-        545,
-        546,
-        547,
-        548,
-        549,
-        550,
-        551,
-        552,
-        553,
-        554,
-        555,
-        556,
-        557,
-        558,
-        559,
-        560,
-        561,
-        562,
-        563,
-        564,
-        565,
-        566,
-        567,
-        568,
-        569,
-        570,
-        571,
-        572,
-        573,
-        574,
-        575,
-        576,
-        577,
-        578,
-        579,
-        580,
-        581,
-        582,
-        583,
-        584,
-        585,
-        586,
-        587,
-        588,
-        589,
-        590,
-        591,
-        592,
-        593,
-        594,
-        595,
-        596,
-        597,
-        598,
-        599,
-        600,
-        601,
-        602,
-        603,
-        604,
-        605,
-        606,
-        607,
-        608,
-        609,
-        610,
-        611,
-        612,
-        613,
-        614,
-        615,
-        616,
-        617,
-        618,
-        619,
-        620,
-        621,
-        622,
-        623,
-        624,
-        625,
-        626,
-        627,
-        628,
-        629,
-        630
+        362
       ],
-      "history_message_count": 630,
+      "history_message_count": 362,
       "review_status": "DETERMINISTIC"
     },
     "C2": {
       "available": false,
       "history_mode": "ORACLE_RELEVANT_HISTORY",
       "history_message_ids": [
-        21,
-        27,
-        143,
-        146,
-        156,
-        195,
-        305,
-        448,
-        449,
-        492,
-        539,
-        565,
-        579,
-        581,
-        583,
-        587,
-        593,
-        595,
-        599,
-        605
+        352,
+        353,
+        357
       ],
-      "history_message_count": 20,
+      "history_message_count": 3,
       "review_status": "DETERMINISTIC_DIRECT_TRAJECTORY_ONLY"
     }
   },
   "fingerprints": {
-    "target": "fac116ad9bbf619746d5f8b1b67ad59b3830f781ae40a019292340592e98cbeb",
-    "history_pool": "efb12b12089ecd6a56207ccc2cb87f0d5a82403ed5cb08e871b2640aa093ecea",
+    "target": "cfabf8dc2b6728f6bb934f765936de2857ca977eaca99f57fd313aa73e739451",
+    "history_pool": "0679eb17a712e3333d6e62e239b4c6bad8167b3235dbd0ed08115b594ac5dc08",
     "condition_history": {
-      "C1": "c2b272468ce765802247d69c898739f45e8afc3e2688301d32abf9e6b65000d1",
-      "C2": "b6511a3b31ae565e66ad158bf1644767c889565b94bfdb2438c2a4add269712b"
+      "C1": "26d163728d8200fe4e445c7dfa4dc9d9ef6205f085445fd5179f91dedaafd41f",
+      "C2": "8eb7c051bcab929b02eb88920eb2b3c50b7138e1e12fde4096e4180e7a6c013d"
     }
   },
   "response_contract": {
@@ -5164,7 +3003,7 @@
   "source_artifacts": {
     "gold_states": {
       "path": "outputs_new/stage2/42204309/gold_states.json",
-      "sha256": "cbe17803d920a552b3d3f717c102df0407fa292a7c37540d7948b6de1b97e5db"
+      "sha256": "78a72386c044832d7aa29080e3a992e10ff4456f419a5663163f0ee6cc2d1a05"
     },
     "requirement_state_graph": {
       "path": "outputs_new/stage2/42204309/requirement_state_graph.json",
@@ -5173,6 +3012,10 @@
     "normalized_project": {
       "path": "outputs_new/stage1_runs/42204309/normalized_project.json",
       "sha256": "e83cd7e5e63e49bb3393a04040c5d47f2968292da00de05020be63b01279b19e"
+    },
+    "rq_target_exclusions": {
+      "path": "Code/config/rq_target_exclusions.json",
+      "sha256": "596e6cdf1c76a7450f035bd75d992bffd9e704436350bb8308c54c06f643444a"
     }
   },
   "construction_gold": {
@@ -5180,531 +3023,266 @@
     "gold_unit": "INDEPENDENT_REQUIREMENT_ATOM",
     "atomization_rule": "ONE_REQUIREMENT_GRAPH_EQUALS_ONE_GOLD_ATOM",
     "relevant_requirement_ids": [
-      "REQ_NO_REFERRAL_TICKETS",
-      "REQ_NFT_METADATA_ACCURACY"
+      "REQ_ETH_PRICE_AND_REFUND"
     ],
     "gold_requirement_atoms": {
-      "REQ_NO_REFERRAL_TICKETS": {
-        "canonical_summary": "No-Referral Ticket Allocation",
-        "requirement_title": "No-Referral Ticket Allocation",
-        "family_id": "REFERRAL_REWARDS",
+      "REQ_ETH_PRICE_AND_REFUND": {
+        "canonical_summary": "ETH Pricing and Excess Refund",
+        "requirement_title": "ETH Pricing and Excess Refund",
+        "family_id": "PAYMENT_AND_MINTING",
         "required_evidence_groups": [
           {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG001",
+            "group_id": "REQ_ETH_PRICE_AND_REFUND_EG001",
             "acceptable_message_ids": [
-              21
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG002",
-            "acceptable_message_ids": [
-              305
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG003",
-            "acceptable_message_ids": [
-              565
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG004",
-            "acceptable_message_ids": [
-              593,
-              595
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG005",
-            "acceptable_message_ids": [
-              599,
-              605
+              352,
+              353,
+              357
             ]
           }
         ],
         "neutral_context_message_ids": [
+          72,
+          77,
+          78,
+          140,
+          141,
+          142,
           143,
-          146,
-          156,
+          169,
+          182,
+          183,
           184,
+          188,
           195,
-          291,
-          310,
-          313,
-          496,
-          539,
-          579,
-          581,
-          583,
-          585,
-          587,
-          590,
-          592,
-          604,
-          612,
-          613
-        ],
-        "family_trajectory_message_ids": [
-          21,
-          143,
-          146,
-          156,
-          184,
-          195,
-          291,
+          220,
+          225,
+          227,
+          294,
+          298,
           305,
           310,
-          313,
-          496,
-          539,
-          565,
-          579,
-          581,
-          583,
-          585,
-          587,
-          590,
-          592,
-          593,
-          595,
-          599,
-          604,
-          605,
-          612,
-          613
-        ],
-        "trajectory_message_ids": [
-          21,
-          156,
-          305,
-          539,
-          565,
-          579,
-          581,
-          583,
-          587,
-          593,
-          595,
-          599,
-          605
-        ]
-      },
-      "REQ_NFT_METADATA_ACCURACY": {
-        "canonical_summary": "NFT Metadata Accuracy",
-        "requirement_title": "NFT Metadata Accuracy",
-        "family_id": "NFT_ASSET_MODEL",
-        "required_evidence_groups": [
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG001",
-            "acceptable_message_ids": [
-              21
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG002",
-            "acceptable_message_ids": [
-              143
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG003",
-            "acceptable_message_ids": [
-              146
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG004",
-            "acceptable_message_ids": [
-              195
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG005",
-            "acceptable_message_ids": [
-              539
-            ]
-          }
-        ],
-        "neutral_context_message_ids": [
-          27,
-          240,
-          241,
-          288,
-          310,
-          313,
-          377,
-          388,
-          391,
-          392,
-          393,
-          404,
-          408,
-          411,
-          448,
-          449,
-          492,
-          538,
-          546,
-          569
+          312,
+          316,
+          317,
+          318,
+          321,
+          323,
+          326,
+          327,
+          328,
+          330,
+          341,
+          345,
+          358,
+          359,
+          360,
+          361
         ],
         "family_trajectory_message_ids": [
-          21,
-          27,
+          72,
+          77,
+          78,
+          140,
+          141,
+          142,
           143,
-          146,
+          169,
+          182,
+          183,
+          184,
+          188,
           195,
-          240,
-          241,
-          288,
+          220,
+          225,
+          227,
+          294,
+          298,
+          305,
           310,
-          313,
-          377,
-          388,
-          391,
-          392,
-          393,
-          404,
-          408,
-          411,
-          448,
-          449,
-          492,
-          538,
-          539,
-          546,
-          569
+          312,
+          316,
+          317,
+          318,
+          321,
+          323,
+          326,
+          327,
+          328,
+          330,
+          341,
+          345,
+          352,
+          353,
+          357,
+          358,
+          359,
+          360,
+          361
         ],
         "trajectory_message_ids": [
-          21,
-          27,
-          143,
-          146,
-          195,
-          448,
-          449,
-          492,
-          539
+          352,
+          353,
+          357
         ]
       }
     },
     "directly_affected_historical_requirement_ids": [
-      "REQ_NO_REFERRAL_TICKETS",
-      "REQ_NFT_METADATA_ACCURACY"
+      "REQ_ETH_PRICE_AND_REFUND"
     ],
     "inherited_constraint_requirement_ids": [],
     "new_requirement_ids": [],
     "evidence": {
-      "REQ_NO_REFERRAL_TICKETS": {
+      "REQ_ETH_PRICE_AND_REFUND": {
         "current_support_event_ids": [
-          "REQ_NO_REFERRAL_TICKETS_E001",
-          "REQ_NO_REFERRAL_TICKETS_E003",
-          "REQ_NO_REFERRAL_TICKETS_E005",
-          "REQ_NO_REFERRAL_TICKETS_E010",
-          "REQ_NO_REFERRAL_TICKETS_E011",
-          "REQ_NO_REFERRAL_TICKETS_E013"
+          "REQ_ETH_PRICE_AND_REFUND_E001",
+          "REQ_ETH_PRICE_AND_REFUND_E003"
         ],
         "current_support_message_ids": [
-          21,
-          305,
-          565,
-          593,
-          595,
-          599,
-          605
+          352,
+          353,
+          357
         ],
         "trajectory_event_ids": [
-          "REQ_NO_REFERRAL_TICKETS_E001",
-          "REQ_NO_REFERRAL_TICKETS_E002",
-          "REQ_NO_REFERRAL_TICKETS_E003",
-          "REQ_NO_REFERRAL_TICKETS_E004",
-          "REQ_NO_REFERRAL_TICKETS_E005",
-          "REQ_NO_REFERRAL_TICKETS_E006",
-          "REQ_NO_REFERRAL_TICKETS_E007",
-          "REQ_NO_REFERRAL_TICKETS_E008",
-          "REQ_NO_REFERRAL_TICKETS_E009",
-          "REQ_NO_REFERRAL_TICKETS_E010",
-          "REQ_NO_REFERRAL_TICKETS_E011",
-          "REQ_NO_REFERRAL_TICKETS_E012",
-          "REQ_NO_REFERRAL_TICKETS_E013"
+          "REQ_ETH_PRICE_AND_REFUND_E001",
+          "REQ_ETH_PRICE_AND_REFUND_E002",
+          "REQ_ETH_PRICE_AND_REFUND_E003"
         ],
         "trajectory_message_ids": [
-          21,
-          156,
-          305,
-          539,
-          565,
-          579,
-          581,
-          583,
-          587,
-          593,
-          595,
-          599,
-          605
+          352,
+          353,
+          357
         ],
         "core_message_ids": [
-          21,
-          305,
-          565,
-          593,
-          595,
-          599,
-          605
+          352,
+          353,
+          357
         ],
         "required_evidence_groups": [
           {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG001",
+            "group_id": "REQ_ETH_PRICE_AND_REFUND_EG001",
             "acceptable_message_ids": [
-              21
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG002",
-            "acceptable_message_ids": [
-              305
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG003",
-            "acceptable_message_ids": [
-              565
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG004",
-            "acceptable_message_ids": [
-              593,
-              595
-            ]
-          },
-          {
-            "group_id": "REQ_NO_REFERRAL_TICKETS_EG005",
-            "acceptable_message_ids": [
-              599,
-              605
+              352,
+              353,
+              357
             ]
           }
         ],
         "context_message_ids": [
+          72,
+          77,
+          78,
+          140,
+          141,
+          142,
           143,
-          146,
-          156,
+          169,
+          182,
+          183,
           184,
+          188,
           195,
-          291,
-          310,
-          313,
-          496,
-          539,
-          579,
-          581,
-          583,
-          585,
-          587,
-          590,
-          592,
-          604,
-          612,
-          613
-        ],
-        "neutral_context_message_ids": [
-          143,
-          146,
-          156,
-          184,
-          195,
-          291,
-          310,
-          313,
-          496,
-          539,
-          579,
-          581,
-          583,
-          585,
-          587,
-          590,
-          592,
-          604,
-          612,
-          613
-        ],
-        "family_trajectory_message_ids": [
-          21,
-          143,
-          146,
-          156,
-          184,
-          195,
-          291,
+          220,
+          225,
+          227,
+          294,
+          298,
           305,
           310,
-          313,
-          496,
-          539,
-          565,
-          579,
-          581,
-          583,
-          585,
-          587,
-          590,
-          592,
-          593,
-          595,
-          599,
-          604,
-          605,
-          612,
-          613
-        ],
-        "context_review_status": "DETERMINISTIC_FAMILY_TRAJECTORY_CONTEXT"
-      },
-      "REQ_NFT_METADATA_ACCURACY": {
-        "current_support_event_ids": [
-          "REQ_NFT_METADATA_ACCURACY_E001",
-          "REQ_NFT_METADATA_ACCURACY_E003",
-          "REQ_NFT_METADATA_ACCURACY_E004",
-          "REQ_NFT_METADATA_ACCURACY_E005",
-          "REQ_NFT_METADATA_ACCURACY_E008"
-        ],
-        "current_support_message_ids": [
-          21,
-          143,
-          146,
-          195,
-          539
-        ],
-        "trajectory_event_ids": [
-          "REQ_NFT_METADATA_ACCURACY_E001",
-          "REQ_NFT_METADATA_ACCURACY_E002",
-          "REQ_NFT_METADATA_ACCURACY_E003",
-          "REQ_NFT_METADATA_ACCURACY_E004",
-          "REQ_NFT_METADATA_ACCURACY_E005",
-          "REQ_NFT_METADATA_ACCURACY_E006",
-          "REQ_NFT_METADATA_ACCURACY_E007",
-          "REQ_NFT_METADATA_ACCURACY_E008"
-        ],
-        "trajectory_message_ids": [
-          21,
-          27,
-          143,
-          146,
-          195,
-          448,
-          449,
-          492,
-          539
-        ],
-        "core_message_ids": [
-          21,
-          143,
-          146,
-          195,
-          539
-        ],
-        "required_evidence_groups": [
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG001",
-            "acceptable_message_ids": [
-              21
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG002",
-            "acceptable_message_ids": [
-              143
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG003",
-            "acceptable_message_ids": [
-              146
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG004",
-            "acceptable_message_ids": [
-              195
-            ]
-          },
-          {
-            "group_id": "REQ_NFT_METADATA_ACCURACY_EG005",
-            "acceptable_message_ids": [
-              539
-            ]
-          }
-        ],
-        "context_message_ids": [
-          27,
-          240,
-          241,
-          288,
-          310,
-          313,
-          377,
-          388,
-          391,
-          392,
-          393,
-          404,
-          408,
-          411,
-          448,
-          449,
-          492,
-          538,
-          546,
-          569
+          312,
+          316,
+          317,
+          318,
+          321,
+          323,
+          326,
+          327,
+          328,
+          330,
+          341,
+          345,
+          358,
+          359,
+          360,
+          361
         ],
         "neutral_context_message_ids": [
-          27,
-          240,
-          241,
-          288,
+          72,
+          77,
+          78,
+          140,
+          141,
+          142,
+          143,
+          169,
+          182,
+          183,
+          184,
+          188,
+          195,
+          220,
+          225,
+          227,
+          294,
+          298,
+          305,
           310,
-          313,
-          377,
-          388,
-          391,
-          392,
-          393,
-          404,
-          408,
-          411,
-          448,
-          449,
-          492,
-          538,
-          546,
-          569
+          312,
+          316,
+          317,
+          318,
+          321,
+          323,
+          326,
+          327,
+          328,
+          330,
+          341,
+          345,
+          358,
+          359,
+          360,
+          361
         ],
         "family_trajectory_message_ids": [
-          21,
-          27,
+          72,
+          77,
+          78,
+          140,
+          141,
+          142,
           143,
-          146,
+          169,
+          182,
+          183,
+          184,
+          188,
           195,
-          240,
-          241,
-          288,
+          220,
+          225,
+          227,
+          294,
+          298,
+          305,
           310,
-          313,
-          377,
-          388,
-          391,
-          392,
-          393,
-          404,
-          408,
-          411,
-          448,
-          449,
-          492,
-          538,
-          539,
-          546,
-          569
+          312,
+          316,
+          317,
+          318,
+          321,
+          323,
+          326,
+          327,
+          328,
+          330,
+          341,
+          345,
+          352,
+          353,
+          357,
+          358,
+          359,
+          360,
+          361
         ],
         "context_review_status": "DETERMINISTIC_FAMILY_TRAJECTORY_CONTEXT"
       }

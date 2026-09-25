@@ -69,7 +69,7 @@ def main() -> int:
             or branch.get("decision") not in {"ACT", "CLARIFY"}
         ):
             raise RQ3EvaluationError(
-                "RQ3 Gold is not human-reviewed and frozen for this condition"
+                "RQ3 Gold is not reviewed and frozen for this condition"
             )
         gold_decision = branch["decision"]
         agent_decision = response.get("decision")

@@ -1,0 +1,1686 @@
+{
+  "schema_version": "rq4-code-environment-project-build-plan-v1",
+  "plan_scope": "RQ4_CODE_ENVIRONMENT_RECONSTRUCTION",
+  "source_of_truth": "FROZEN_RQ3_FINAL_GOLD",
+  "project_id": "43804272",
+  "project_title": null,
+  "input_release": "43804272-stage2-final-20260925-rq123-main-v1",
+  "project_applicability": {
+    "selection_source": "USER_CURATED_PROJECT_ALLOWLIST",
+    "included_project_id": "43804272",
+    "excluded_project_policy": "NOT_IN_RQ4_BUILD_SCOPE",
+    "rationale": "Only projects whose final deliverable is suitable for a runnable, locally deterministic Code Environment are included.",
+    "source_artifact": {
+      "path": "Code/config/rq4_project_allowlist.json",
+      "file_sha256": "47502d55e5023601a68622ecc9bdb1ece0ceb8032593af45bfb27d0626059ced"
+    }
+  },
+  "unit_of_reconstruction": "PROJECT_CHRONOLOGICAL_REPLAY",
+  "snapshot_policy": "Freeze a pre-task Code Environment only at selected targets whose final C1/C2 RQ3 Gold decision is ACT. Replay every intervening State Graph event, including non-target messages and selected targets excluded from RQ4, before freezing the next snapshot.",
+  "construction_policy": "FROM_SCRATCH_NEW_RELEASE_ONLY",
+  "builder_contract": {
+    "ordered_stages": [
+      "SOURCE_AND_BOUNDARY_AUDIT",
+      "PROJECT_BASELINE_RECONSTRUCTION",
+      "CHRONOLOGICAL_STATE_REPLAY",
+      "ACT_TARGET_PRE_STATE_SNAPSHOT",
+      "POST_TRANSITION_TRACE_CHECK",
+      "BUILD_AND_REGRESSION_VALIDATION",
+      "ARCHIVE_AND_MANIFEST_FREEZE",
+      "RQ4_REPOSITORY_LEAKAGE_AUDIT"
+    ],
+    "required_project_outputs": [
+      "Code Environment/<project_id>/reports/target_index.json",
+      "Code Environment/<project_id>/reports/validation_report.json",
+      "Code Environment/<project_id>/reports/reconstruction_report.md"
+    ],
+    "required_target_outputs": [
+      "Code Environment/<project_id>/targets/<target_dir>/pre_repo.zip",
+      "Code Environment/<project_id>/targets/<target_dir>/manifest.json"
+    ],
+    "safe_replacement_policy": "Build each project in a project-scoped staging directory. Do not read or reuse any previous Code Environment. Promote the validated project atomically so targets/*/manifest.json and reports/target_index.json contain exactly the plan build targets.",
+    "manifest_required_fields": [
+      "target_id",
+      "before_message_id",
+      "repository_classification",
+      "contract_layer",
+      "web_api_layer",
+      "active_code_feature_count",
+      "tracked_requirement_count",
+      "temporal_fixture",
+      "requirements_to_code",
+      "target_event_ids",
+      "target_event_types",
+      "target_summary",
+      "pre_state_verified_against_gold",
+      "post_state_verified_against_gold",
+      "repo_sha256"
+    ],
+    "forbidden_in_agent_visible_repository": [
+      "future_or_post_task_state",
+      "acceptance_criteria",
+      "hidden_validators",
+      "reference_delivery",
+      "evaluator_only_requirement_state_event_metadata",
+      ".git",
+      "secrets"
+    ],
+    "handoff_completion_condition": "Every build-queue target has a boundary-matched manifest and safe pre_repo.zip; project validation reports pass; no RQ4 instance is declared execution-ready by the builder."
+  },
+  "post_build_gates_not_owned_by_builder": [
+    "ACCEPTANCE_CRITERIA_DESIGN",
+    "HIDDEN_VALIDATOR_IMPLEMENTATION_AND_INDEPENDENT_REVIEW",
+    "PRE_REFERENCE_PARTIAL_DELIVERY_CALIBRATION",
+    "FINAL_RQ4_ELIGIBILITY",
+    "RQ4_INSTANCE_MATERIALIZATION"
+  ],
+  "chronological_reconstruction_required": true,
+  "project_sources": {
+    "rq_instance_manifest": {
+      "path": "outputs_new/stage2/43804272/rq_instance_manifest.json",
+      "file_sha256": "4d02c23a02802838b6596d1446f8bca28b07b2f7f025f7626b873e768bcf73bf"
+    },
+    "gold_states": {
+      "path": "outputs_new/stage2/43804272/gold_states.json",
+      "file_sha256": "550641494ddcabb3764f3495a820c2129f567bb03e3efd74ed3d142321d5b251"
+    },
+    "requirement_state_graph": {
+      "path": "outputs_new/stage2/43804272/requirement_state_graph.json",
+      "file_sha256": "382613471620f72a410ba146fb2f998f5429535923afa22dd877078a98cf5bfc"
+    },
+    "normalized_project": {
+      "path": "outputs_new/stage1_runs/43804272/normalized_project.json",
+      "file_sha256": "16ac6d0663247bb93341ae3d6d1193ff9e7636b22c90279decb1878e23684c6f"
+    },
+    "stage1_annotation": {
+      "path": "outputs_new/stage1_annotations/43804272_stage1_annotation.json",
+      "file_sha256": "78adc196e59c05f47424a225da0bf714cbd8618459c1f5d89cd0ef7bdab5f505"
+    },
+    "gold_state_validation": {
+      "path": "outputs_new/stage2/43804272/target_time_selection/gold_state_validation.json",
+      "file_sha256": "5f6ed9716eb479f7bf6af68b88c75a9091bbc2506ad347945052702fcada861a"
+    },
+    "repository_profiles": {
+      "path": "Code/config/rq4_repository_profiles.json",
+      "file_sha256": "2f2e29df9c7c11840393c9216f45333ab1ac1c7617b69b32dd6075614d36af1e"
+    }
+  },
+  "repository_profile": {
+    "artifact_class": "CROSS_PLATFORM_MOBILE_APPLICATION",
+    "renderer": "mobile",
+    "runtime": "PYTHON_STDLIB",
+    "contract_layer": "LOCAL_MOBILE_STATE_SERVICE",
+    "web_api_layer": "HTTP_JSON_AND_MOBILE_PREVIEW",
+    "primary_artifacts": [
+      "dist/mobile-preview.html",
+      "dist/app-config.json"
+    ],
+    "description": "Offline cross-platform mobile application model covering Android/iOS modernization, localization, measurement, and store behavior."
+  },
+  "summary": {
+    "selected_target_count": 6,
+    "build_target_count": 6,
+    "excluded_rq3_not_act_count": 0,
+    "rq3_decision_distribution": {
+      "ACT": 6
+    }
+  },
+  "targets": [
+    {
+      "target_id": "43804272_T001",
+      "target_message_id": 71,
+      "target_fingerprint": "403868349aa3a4d625bad5467cffe5307f7eef9dc35796fc51c56394c6a60f65",
+      "turns": 70,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 71,
+        "speaker": "client",
+        "text": "I'll go with Option A for maximum reach: all 77 Google Play languages and all ~40 App Store languages."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 1,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43804272/targets/T001_before_71",
+        "archive_path": "Code Environment/43804272/targets/T001_before_71/pre_repo.zip",
+        "manifest_path": "Code Environment/43804272/targets/T001_before_71/manifest.json",
+        "before_message_id": 71,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43804272/RQ3/43804272_T001_RQ3.json",
+          "file_sha256": "02bb9f0b8b7aa98cfa1c2bdfb3ef744039995fbd7a87283d36e5965812766f12",
+          "content_sha256": "23a3e41a0a57cf9a99f0d49cad914aae04ce9d5d05ba19b49668c6710911c5ba"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S005"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S006"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S003"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S002"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S003"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S002"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "REQ_IOS_FULL_APP_LOCALIZATION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_ANDROID_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PRIVACY_MANIFEST",
+          "REQ_IOS_SIGNING_CONFIGURATION",
+          "REQ_ANDROID_PERMISSION_HYGIENE",
+          "REQ_RTL_LAYOUT_SUPPORT",
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "event_ids": [
+            "REQ_ANDROID_FULL_APP_LOCALIZATION_E006",
+            "REQ_ANDROID_FULL_APP_LOCALIZATION_E007"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RESUME"
+          ],
+          "before_state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S005",
+          "after_state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity"
+          ],
+          "changed_paths": [
+            "attributes.google_play_language_count",
+            "ambiguity"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ANDROID_APP",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "APP_LOCALIZATION",
+            "FULL_APP_CONTENT"
+          ]
+        },
+        {
+          "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+          "event_ids": [
+            "REQ_IOS_FULL_APP_LOCALIZATION_E007",
+            "REQ_IOS_FULL_APP_LOCALIZATION_E008"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RESUME"
+          ],
+          "before_state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S006",
+          "after_state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity"
+          ],
+          "changed_paths": [
+            "attributes.app_store_language_coverage",
+            "ambiguity"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "IOS_APP",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "APP_LOCALIZATION",
+            "FULL_APP_CONTENT"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43804272_T002",
+      "target_message_id": 82,
+      "target_fingerprint": "df56935ac390d3879a1b60c4887618e417b89361c94d950990c788ff19eaf3d5",
+      "turns": 81,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 82,
+        "speaker": "client",
+        "text": "So only these:\n\\- Maximum language coverage\n\\- Smallest possible app size"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 2,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43804272/targets/T002_before_82",
+        "archive_path": "Code Environment/43804272/targets/T002_before_82/pre_repo.zip",
+        "manifest_path": "Code Environment/43804272/targets/T002_before_82/manifest.json",
+        "before_message_id": 82,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43804272/RQ3/43804272_T002_RQ3.json",
+          "file_sha256": "825297a6172142f0ab05659d928eacb5629e46323cefe02e1fed2644b7838003",
+          "content_sha256": "4fd3700b651a6023f2e417b440a6b7d426d8ea840ad97c89f2eb2278ce8be66c"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S003"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S003"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S002"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S004"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S004"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S003"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S002"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "REQ_IOS_APP_SIZE_OPTIMIZATION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_ANDROID_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PRIVACY_MANIFEST",
+          "REQ_IOS_SIGNING_CONFIGURATION",
+          "REQ_ANDROID_PERMISSION_HYGIENE",
+          "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "REQ_IOS_FULL_APP_LOCALIZATION",
+          "REQ_RTL_LAYOUT_SUPPORT",
+          "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "event_ids": [
+            "REQ_ANDROID_APP_SIZE_OPTIMIZATION_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S003",
+          "after_state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.optimization_priority"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ANDROID_APP",
+            "BUILD_PIPELINE"
+          ],
+          "after_contexts": [
+            "ANDROID_DISTRIBUTION"
+          ]
+        },
+        {
+          "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "event_ids": [
+            "REQ_IOS_APP_SIZE_OPTIMIZATION_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S003",
+          "after_state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.optimization_priority"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "IOS_APP",
+            "BUILD_PIPELINE"
+          ],
+          "after_contexts": [
+            "IOS_DISTRIBUTION"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43804272_T003",
+      "target_message_id": 193,
+      "target_fingerprint": "a957a003c776ba36ac18bb5ebf726b50299ca0107d6feafdfe8955e67e1b6b24",
+      "turns": 192,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 193,
+        "speaker": "client",
+        "text": "Tutorial images were replaced by the youtube video in the latest version."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 3,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43804272/targets/T003_before_193",
+        "archive_path": "Code Environment/43804272/targets/T003_before_193/pre_repo.zip",
+        "manifest_path": "Code Environment/43804272/targets/T003_before_193/manifest.json",
+        "before_message_id": 193,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43804272/RQ3/43804272_T003_RQ3.json",
+          "file_sha256": "ed041e488291c8f085f971b6a50b099fafa362fc2f324a16f4766a009b5c7fb8",
+          "content_sha256": "936255c0a797951b89183efad2346fc57d40178788615fe476d934f2d81e9ea9"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S004"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S004"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S002"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S004"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S005"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S003"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_ANDROID_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PRIVACY_MANIFEST",
+          "REQ_IOS_SIGNING_CONFIGURATION",
+          "REQ_ANDROID_PERMISSION_HYGIENE",
+          "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "REQ_IOS_FULL_APP_LOCALIZATION",
+          "REQ_RTL_LAYOUT_SUPPORT",
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+          "REQ_MAGNIFIER_RULER_TRACKING",
+          "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+          "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+          "REQ_SKIN_GRAPHICS_CLEANUP",
+          "REQ_IPAD_LAYOUT_CLEANUP"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "event_ids": [
+            "REQ_IOS_APP_SIZE_OPTIMIZATION_E005"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S004",
+          "after_state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.localized_tutorial_asset_strategy"
+          ],
+          "removed_paths": [
+            "attributes.localized_tutorial_asset_strategy"
+          ],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "IOS_APP",
+            "BUILD_PIPELINE"
+          ],
+          "after_contexts": [
+            "IOS_DISTRIBUTION"
+          ]
+        },
+        {
+          "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+          "event_ids": [
+            "REQ_HOW_TO_CONTENT_DELIVERY_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S002",
+          "after_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.ios_tutorial_images_required",
+            "attributes.media_format",
+            "attributes.media_platforms",
+            "attributes.tutorial_image_strategy"
+          ],
+          "removed_paths": [
+            "attributes.tutorial_image_strategy"
+          ],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ANDROID_APP",
+            "IOS_APP",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOW_TO_USE"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43804272_T004",
+      "target_message_id": 239,
+      "target_fingerprint": "80263694c94a7c82346690abfc8d48eb0e41236e1ace5ee2949c9efdd3fc29cf",
+      "turns": 238,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 239,
+        "speaker": "client",
+        "text": "For all of them, let’s use this same video as the How To Use content."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 4,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43804272/targets/T004_before_239",
+        "archive_path": "Code Environment/43804272/targets/T004_before_239/pre_repo.zip",
+        "manifest_path": "Code Environment/43804272/targets/T004_before_239/manifest.json",
+        "before_message_id": 239,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43804272/RQ3/43804272_T004_RQ3.json",
+          "file_sha256": "31f2bc46276042a50f680f21b0b57a367fcee276aa0eb215f7bc5402ad31299e",
+          "content_sha256": "621e3cb922b52e0469d0763305907c3f3af2c20f882de952022cf61f1b9b9854"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY_S001"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S005"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S005"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S005"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS",
+            "state_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY_S001"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S006"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S005"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S006"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS",
+            "state_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_ANDROID_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PRIVACY_MANIFEST",
+          "REQ_IOS_SIGNING_CONFIGURATION",
+          "REQ_ANDROID_PERMISSION_HYGIENE",
+          "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "REQ_IOS_FULL_APP_LOCALIZATION",
+          "REQ_RTL_LAYOUT_SUPPORT",
+          "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+          "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+          "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+          "REQ_MAGNIFIER_RULER_TRACKING",
+          "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+          "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+          "REQ_SKIN_GRAPHICS_CLEANUP",
+          "REQ_IPAD_LAYOUT_CLEANUP",
+          "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "event_ids": [
+            "REQ_ANDROID_APP_SIZE_OPTIMIZATION_E006"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S005",
+          "after_state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S006",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.localized_tutorial_asset_strategy",
+            "execution"
+          ],
+          "removed_paths": [
+            "attributes.localized_tutorial_asset_strategy"
+          ],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ANDROID_APP",
+            "BUILD_PIPELINE"
+          ],
+          "after_contexts": [
+            "ANDROID_DISTRIBUTION"
+          ]
+        },
+        {
+          "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+          "event_ids": [
+            "REQ_HOW_TO_CONTENT_DELIVERY_E006"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S005",
+          "after_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S006",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.media_format",
+            "attributes.media_platforms",
+            "attributes.video_resource",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ANDROID_APP",
+            "IOS_APP",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOW_TO_USE"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43804272_T005",
+      "target_message_id": 257,
+      "target_fingerprint": "3011a5c5a2fc4d860fbde0e82c264b8a2917a9918c42dd696ad481bc2d74dc1b",
+      "turns": 256,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 257,
+        "speaker": "client",
+        "text": "Before it is used in the application, I’ll upload the video to my main youtube channel."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 5,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43804272/targets/T005_before_257",
+        "archive_path": "Code Environment/43804272/targets/T005_before_257/pre_repo.zip",
+        "manifest_path": "Code Environment/43804272/targets/T005_before_257/manifest.json",
+        "before_message_id": 257,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43804272/RQ3/43804272_T005_RQ3.json",
+          "file_sha256": "0befaf92efecb820fedd4ac6ba1f3ea5d7e81e13ec1a66b8afe8db930bae636e",
+          "content_sha256": "a8878bcdb1acead69d4b33b233d71b3e4cbea43c2b33b99161ee489bd56d4a9a"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY_S001"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S006"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S008"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS",
+            "state_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY_S001"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S006"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S009"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS",
+            "state_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_ANDROID_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PRIVACY_MANIFEST",
+          "REQ_IOS_SIGNING_CONFIGURATION",
+          "REQ_ANDROID_PERMISSION_HYGIENE",
+          "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "REQ_IOS_FULL_APP_LOCALIZATION",
+          "REQ_RTL_LAYOUT_SUPPORT",
+          "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+          "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+          "REQ_MAGNIFIER_RULER_TRACKING",
+          "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+          "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+          "REQ_SKIN_GRAPHICS_CLEANUP",
+          "REQ_IPAD_LAYOUT_CLEANUP",
+          "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+          "event_ids": [
+            "REQ_HOW_TO_CONTENT_DELIVERY_E009"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S008",
+          "after_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S009",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.video_hosting_channel"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ANDROID_APP",
+            "IOS_APP",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOW_TO_USE"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43804272_T006",
+      "target_message_id": 258,
+      "target_fingerprint": "5cb31cc45bc755b7ee6fd62b2bb45964c1917cb7ef35f83753a8c05138814c73",
+      "turns": 257,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 258,
+        "speaker": "client",
+        "text": "Application integration video: <https://cedar-meadow.example/resource/e0024>"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 6,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43804272/targets/T006_before_258",
+        "archive_path": "Code Environment/43804272/targets/T006_before_258/pre_repo.zip",
+        "manifest_path": "Code Environment/43804272/targets/T006_before_258/manifest.json",
+        "before_message_id": 258,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43804272/RQ3/43804272_T006_RQ3.json",
+          "file_sha256": "2360384516b2d56947d4d1c67e36d76173fb468b15ecc232ad25a41e6631be4e",
+          "content_sha256": "da75ab4326c619b6e79ead97ce450a00721046243bdc1ad5e39f1099354ffe53"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY_S001"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S006"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S009"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS",
+            "state_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_ANDROID_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_ANDROID_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION",
+            "state_id": "REQ_IOS_PLATFORM_MODERNIZATION_S002"
+          },
+          {
+            "requirement_id": "REQ_IOS_PRIVACY_MANIFEST",
+            "state_id": "REQ_IOS_PRIVACY_MANIFEST_S001"
+          },
+          {
+            "requirement_id": "REQ_IOS_SIGNING_CONFIGURATION",
+            "state_id": "REQ_IOS_SIGNING_CONFIGURATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+            "state_id": "REQ_ANDROID_PERMISSION_HYGIENE_S002"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_ANDROID_FULL_APP_LOCALIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_FULL_APP_LOCALIZATION",
+            "state_id": "REQ_IOS_FULL_APP_LOCALIZATION_S008"
+          },
+          {
+            "requirement_id": "REQ_RTL_LAYOUT_SUPPORT",
+            "state_id": "REQ_RTL_LAYOUT_SUPPORT_S002"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY_S001"
+          },
+          {
+            "requirement_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+            "state_id": "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION_S001"
+          },
+          {
+            "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION_S007"
+          },
+          {
+            "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION",
+            "state_id": "REQ_IOS_APP_SIZE_OPTIMIZATION_S006"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+            "state_id": "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION_S004"
+          },
+          {
+            "requirement_id": "REQ_MAGNIFIER_RULER_TRACKING",
+            "state_id": "REQ_MAGNIFIER_RULER_TRACKING_S002"
+          },
+          {
+            "requirement_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+            "state_id": "REQ_MEASUREMENT_NUMBER_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+            "state_id": "REQ_SCOLIOMETER_LABEL_VISIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_SKIN_GRAPHICS_CLEANUP",
+            "state_id": "REQ_SKIN_GRAPHICS_CLEANUP_S002"
+          },
+          {
+            "requirement_id": "REQ_IPAD_LAYOUT_CLEANUP",
+            "state_id": "REQ_IPAD_LAYOUT_CLEANUP_S001"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S010"
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS",
+            "state_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_ANDROID_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PLATFORM_MODERNIZATION",
+          "REQ_IOS_PRIVACY_MANIFEST",
+          "REQ_IOS_SIGNING_CONFIGURATION",
+          "REQ_ANDROID_PERMISSION_HYGIENE",
+          "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "REQ_IOS_FULL_APP_LOCALIZATION",
+          "REQ_RTL_LAYOUT_SUPPORT",
+          "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY",
+          "REQ_SOCIAL_MEDIA_LINK_LOCALIZATION",
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "REQ_LEGACY_YOUKU_VIDEO_INTEGRATION",
+          "REQ_MAGNIFIER_RULER_TRACKING",
+          "REQ_MEASUREMENT_NUMBER_ALIGNMENT",
+          "REQ_SCOLIOMETER_LABEL_VISIBILITY",
+          "REQ_SKIN_GRAPHICS_CLEANUP",
+          "REQ_IPAD_LAYOUT_CLEANUP",
+          "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+          "event_ids": [
+            "REQ_HOW_TO_CONTENT_DELIVERY_E010"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S009",
+          "after_state_id": "REQ_HOW_TO_CONTENT_DELIVERY_S010",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.video_resource"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "ANDROID_APP",
+            "IOS_APP",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "HOW_TO_USE"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    }
+  ]
+}

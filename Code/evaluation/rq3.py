@@ -38,7 +38,7 @@ def _gold_branch(instance: Mapping[str, Any], condition: str) -> tuple[Mapping[s
         raise RQ3EvaluationError("RQ3 condition must be C1 or C2")
     gold = instance.get("construction_gold")
     if not isinstance(gold, Mapping) or gold.get("status") != "FINAL_UPDATE_OR_CLARIFY_GOLD":
-        raise RQ3EvaluationError("RQ3 Gold is not human-reviewed and frozen")
+        raise RQ3EvaluationError("RQ3 Gold is not reviewed and frozen")
     branches = gold.get("final_gold_by_condition")
     branch = branches.get(condition) if isinstance(branches, Mapping) else None
     if not isinstance(branch, Mapping) or branch.get("decision") not in {"ACT", "CLARIFY"}:

@@ -300,14 +300,16 @@ Phase A 文件。Phase B 的任何文字输出均不重新进入 RQ1–RQ3 评�
 
 ---
 
-## 6. Private Run Manifest
+## 6. Private Package Manifest 与 Run Manifest
 
-每个公共输入包对应一个 Agent 不可见的私有 manifest：
+公共输入包与一次具体 Agent 运行必须分开标识。每个公共输入包对应一个 Agent 不可见、不可变的
+Package Manifest：
 
 ```json
 {
-  "schema_version": "rq-private-run-manifest-v1",
-  "run_id": "run_7f22c6...",
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_7f22c6...",
   "project_id": "42204309",
   "target_id": "42204309_T010",
   "condition": "C1",
@@ -321,10 +323,8 @@ Phase A 文件。Phase B 的任何文字输出均不重新进入 RQ1–RQ3 评�
     "RQ3": ".../42204309_T010_RQ3.json",
     "RQ4": ".../42204309_T010_RQ4.json"
   },
-  "phase_gate": {
+  "phase_gate_policy": {
     "repository_visible_in_phase_a": false,
-    "phase_a_response_sha256": null,
-    "phase_a_frozen_at": null,
     "phase_b_requires_agent_act": true
   },
   "repository": {
@@ -345,17 +345,52 @@ Phase A 文件。Phase B 的任何文字输出均不重新进入 RQ1–RQ3 评�
 }
 ```
 
-Private Run Manifest 的作用是：
+每次实际执行再由 Package Manifest、Agent configuration 与 repetition 构造独立 Run Manifest：
+
+```json
+{
+  "schema_version": "rq-private-run-manifest-v2",
+  "manifest_kind": "ISOLATED_AGENT_RUN",
+  "run_id": "run_35df91...",
+  "package_id": "pkg_7f22c6...",
+  "agent_config_id": "agentcfg_90ea42...",
+  "repetition": 1,
+  "agent_config": {
+    "provider": "command",
+    "runtime_version": "...",
+    "model": "...",
+    "model_version": "...",
+    "reasoning_effort": "...",
+    "tool_policy": "...",
+    "session_isolation": "NEW_PROCESS_PER_TARGET_CONDITION",
+    "persistent_conversation": false,
+    "run_prompt_sha256": "...",
+    "instructions_sha256": "...",
+    "response_schema_sha256": "..."
+  },
+  "phase_gate": {
+    "repository_visible_in_phase_a": false,
+    "phase_a_response_sha256": null,
+    "phase_a_frozen_at": null,
+    "phase_b_requires_agent_act": true
+  }
+}
+```
+
+两类 manifest 的作用是：
 
 - 把 Agent output 关联回正确的 RQ Gold；
 - 保存 `turns` 和 difficulty 以便后续分类；
 - 确定哪些 RQ/condition 应评分；
-- 记录 Phase A 无仓库、response 已冻结及其 hash/timestamp；
+- Package Manifest 固定输入身份，且冻结 response 时不得修改；
+- Run Manifest 记录模型、版本、prompt、工具策略与 repetition，并记录 response hash/timestamp；
 - 仅为 Phase B 定位同一份 pre-task repository；
 - 对 eligible RQ4 run 定位已冻结并校准的 hidden validator；
-- 保证复现实验时输入和代码版本不变。
+- 保证多模型与重复实验不覆盖，同时保持输入和代码版本可复现。
 
-该文件必须保存到 Agent sandbox 之外。
+两类文件都必须保存到 Agent sandbox 之外。`run_id` 必须由
+`package_id + agent_config_id + repetition` 计算；Judge 使用单独的 `judge_config_id`，更换 Judge
+不得迫使 Agent 重跑。
 
 ---
 
@@ -421,6 +456,12 @@ opaque workspace 和独立权限配置：
 - 使用固定模型、prompt、工具和预算；
 - 禁止访问 workspace 外的 Stage 2、Gold 和 validator 目录；
 - 不允许跨 run 继续之前的 Agent session/memory；
+- 隔离单位是 `target × condition × agent_config × repetition`；同一 target 的 C1 与 C2 也不得
+  共享 session、conversation/thread/previous-response ID、scratchpad、工具状态或 workspace；
+- 每次 Phase A 运行必须启动新进程，结束或超时后终止进程树，并在 `finally` 中删除临时
+  workspace；冻结 response、hash、配置与日志作为审计产物保留；
+- `prompt/rq_agent_run_prompt.md` 只负责启动本 case，任务定义仍来自公开包中的
+  `instructions.md` 与 `response.schema.json`；prompt 不是文件系统或网络隔离边界；
 - Agent 完成后不向其返回 hidden test 结果。
 
 Runner 回收：
@@ -540,9 +581,7 @@ validator 或正确 delivery
 
 ---
 
-## 11. 建议命令接口
-
-后续 Materializer 建议提供以下命令，但本文不假设代码已经实现：
+## 11. 已实现的命令接口
 
 单个 target/condition 的 Phase A smoke test：
 
@@ -551,7 +590,6 @@ python Code/materialize_rq_agent_inputs.py `
   --project-id 42204309 `
   --target-id 42204309_T010 `
   --condition C1 `
-  --phase reasoning `
   --mode smoke
 ```
 
@@ -560,31 +598,54 @@ python Code/materialize_rq_agent_inputs.py `
 ```powershell
 python Code/materialize_rq_agent_inputs.py `
   --project-id 42204309 `
-  --all-conditions `
-  --phase reasoning `
+  --all-targets `
+  --condition C1 --condition C2 `
   --mode smoke
 ```
 
-Phase A response 冻结后，门控创建 Phase B execution input：
+验证全部正式 RQ1--RQ3 package，不写文件：
 
 ```powershell
-python Code/materialize_rq_agent_inputs.py `
-  --project-id 42204309 `
-  --target-id 42204309_T010 `
-  --condition C1 `
-  --phase execution `
-  --frozen-response path/to/phase_a/agent_response.json `
-  --mode formal
+python Code/materialize_rq123_release.py --validate-only
 ```
 
-批量正式 Phase A：
+生成全部正式 RQ1--RQ3 package：
 
 ```powershell
-python Code/materialize_rq_agent_inputs.py `
-  --project-id 42204309 `
-  --all-conditions `
-  --phase reasoning `
-  --mode formal
+python Code/materialize_rq123_release.py `
+  --stage2-root outputs_new/stage2 `
+  --output-root outputs_new/rq_agent_inputs
+```
+
+Agent dry-run、首轮小样本与正式运行：
+
+```powershell
+python Code/run_rq123_agents.py `
+  --config path/to/experiment.json `
+  --package-root outputs_new/rq_agent_inputs `
+  --dry-run
+
+python Code/run_rq123_agents.py `
+  --config path/to/experiment.json `
+  --package-root outputs_new/rq_agent_inputs `
+  --limit 5
+
+python Code/run_rq123_agents.py `
+  --config path/to/experiment.json `
+  --package-root outputs_new/rq_agent_inputs
+```
+
+Judge、确定性评分与汇总：
+
+```powershell
+python Code/run_rq123_judges.py `
+  --config path/to/experiment.json `
+  --run-root outputs_new/rq_runs
+
+python Code/aggregate_rq123_results.py `
+  --run-root outputs_new/rq_runs `
+  --experiment-id <experiment-id-from-config> `
+  --output outputs_new/rq_results/rq123_summary.json
 ```
 
 `formal` reasoning 模式必须拒绝对应 RQ1–RQ3 的 provisional eligibility、未审核的 C2 Oracle
@@ -599,6 +660,7 @@ python Code/materialize_rq_agent_inputs.py `
 - [ ] 只按各 RQ `index.json` 发现实例；
 - [ ] 同一 target 的共享字段完成一致性检查；
 - [ ] 一个 target/condition 先生成一个不含 repository 的 Phase A Public Reasoning Input；
+- [ ] `package_id` 只标识不可变输入，`run_id` 额外绑定 Agent configuration 与 repetition；
 - [ ] C1/C2 history 按 message IDs 正确过滤并保持顺序；
 - [ ] `turns` 和 difficulty 留在私有 metadata，没有丢失；
 - [ ] 公共 task、instructions 和 response schema 不含 Gold；
@@ -609,6 +671,10 @@ python Code/materialize_rq_agent_inputs.py `
 - [ ] 进入 Phase B 的 C1/C2 使用同一 RQ4-only repository hash；
 - [ ] Phase B 结束后 Phase A response hash 保持不变；
 - [ ] Agent workspace 使用 opaque path，无法读取 evaluator assets；
+- [ ] 每个 target-condition 使用新进程和新 workspace；结束或失败后清理执行状态，C1/C2 不共享记忆；
+- [ ] Agent run prompt、benchmark instructions 与 response schema hash 均进入 Agent configuration 身份；
+- [ ] Judge provider 可在内部 Stage 1 API 与公开 OpenAI Responses API 之间替换，Judge contract 与 scorer 不变；
+- [ ] experiment ledger 限制 Judge 和汇总只读取该实验登记的 run；
 - [ ] Phase A response 与 Phase B patch、logs、final repository 分目录回收；
 - [ ] RQ4 validator 只在 Agent 停止后由 evaluator 运行；
 - [ ] RQ4 不要求 `planned_actions`，正式结果值域只有 `PASS`/`FAIL`；

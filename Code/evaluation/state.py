@@ -278,6 +278,41 @@ def _score_value(
             predicted=len(predicted_set),
             gold=len(gold_set),
         )
+    if comparator == "ORDERED_LIST":
+        if not isinstance(gold, list) or not isinstance(predicted, list):
+            return _result(0.0, False, predicted=1, gold=1)
+        gold_sequence = [_normalize(value) for value in gold]
+        predicted_sequence = [_normalize(value) for value in predicted]
+        if not gold_sequence and not predicted_sequence:
+            return _result(None, True, diagnostics={"empty_not_applicable": True})
+
+        # Longest-common-subsequence F1 is order-sensitive while still giving
+        # partial credit for a sequence that omits or inserts individual steps.
+        previous = [0] * (len(predicted_sequence) + 1)
+        for gold_value in gold_sequence:
+            current = [0]
+            for predicted_index, predicted_value in enumerate(
+                predicted_sequence, start=1
+            ):
+                if gold_value == predicted_value:
+                    current.append(previous[predicted_index - 1] + 1)
+                else:
+                    current.append(
+                        max(previous[predicted_index], current[predicted_index - 1])
+                    )
+            previous = current
+        matched = previous[-1]
+        denominator = len(gold_sequence) + len(predicted_sequence)
+        score = 2 * matched / denominator if denominator else 1.0
+        exact = gold_sequence == predicted_sequence
+        return _result(
+            score,
+            exact,
+            correct=matched,
+            predicted=len(predicted_sequence),
+            gold=len(gold_sequence),
+            diagnostics={"matching": "LONGEST_COMMON_SUBSEQUENCE_F1"},
+        )
     if comparator == "RECURSIVE_FIELDS":
         if not isinstance(gold, Mapping) or not isinstance(predicted, Mapping):
             return _result(0.0, False, predicted=1, gold=1)

@@ -1021,13 +1021,32 @@ def generate_candidate_tasks(
     }
 
 
-def _event_history_record(ref: _AnnotationEventRef) -> dict[str, Any]:
+def _event_history_record(
+    ref: _AnnotationEventRef,
+    messages: "_MessageIndex" | None = None,
+    boundary: int | None = None,
+) -> dict[str, Any]:
+    """Build the serialized record for one Event.
+
+    When `messages`/`boundary` are given, `supporting_message_ids` is
+    restricted to messages strictly before the boundary: a supporting
+    message may follow an Event's primary source (README_stage2_state_graph.md),
+    but downstream instance construction must never expose a target/future
+    supporting message to Candidate history.
+    """
     event = ref.event
+    supporting_ids = event.get("supporting_message_ids") or []
+    if messages is not None and boundary is not None:
+        supporting_ids = [
+            supporting_id
+            for supporting_id in supporting_ids
+            if messages.position(supporting_id) < boundary
+        ]
     return {
         "event_id": event["event_id"],
         "event_type": event["event_type"],
         "source_message_id": event["source_message"]["message_id"],
-        "supporting_message_ids": deepcopy(event.get("supporting_message_ids") or []),
+        "supporting_message_ids": deepcopy(supporting_ids),
         "value_updates": deepcopy(event.get("value_updates")),
         "value_removals": deepcopy(event.get("value_removals")),
         "scope_updates": deepcopy(event.get("scope_updates")),
@@ -1078,7 +1097,7 @@ def build_candidate_contexts(
             ref = annotated.events_by_id.get(str(event_id))
             if ref is None:
                 raise TaskGoldError(f"{candidate_id} references unknown Event {event_id!r}")
-            row = _event_history_record(ref)
+            row = _event_history_record(ref, messages, boundary)
             row["requirement_id"] = ref.requirement_id
             triggered_events.append(row)
         pre_states = [
@@ -1097,14 +1116,14 @@ def build_candidate_contexts(
                 source_position = messages.position(source_id)
                 if source_position >= boundary:
                     continue
-                history_events.append(_event_history_record(ref))
+                history_events.append(_event_history_record(ref, messages, boundary))
                 evidence_ids.append(source_id)
                 for supporting_id in ref.event.get("supporting_message_ids") or []:
                     if messages.position(supporting_id) >= boundary:
-                        raise TaskGoldError(
-                            f"{ref.event['event_id']} leaks current/future supporting message "
-                            f"{supporting_id!r} into {candidate_id}"
-                        )
+                        # A supporting message may follow the Event's primary
+                        # source; hide it here rather than exposing a
+                        # target/future message (README_stage2_state_graph.md).
+                        continue
                     evidence_ids.append(supporting_id)
             requirement_history.append(
                 {"requirement_id": requirement_id, "events": history_events}

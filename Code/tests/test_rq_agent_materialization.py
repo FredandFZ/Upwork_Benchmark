@@ -13,6 +13,11 @@ from Code.rq_agent_input import (
     write_materialized_input,
 )
 from Code.rq_phase_a import RQPhaseAError, freeze_phase_a_response
+from Code.rq_run_identity import (
+    build_run_manifest,
+    file_sha256,
+    normalize_agent_config,
+)
 from Code.stage2.rq_instances import (
     build_project_manifest,
     build_rq_indexes,
@@ -30,6 +35,7 @@ from Code.tests.test_stage2_rq_instances import (
 ROOT = Path(__file__).resolve().parents[2]
 INSTRUCTIONS = ROOT / "prompt" / "rq_agent_instructions.md"
 RESPONSE_SCHEMA = ROOT / "schema" / "rq_agent_response.schema.json"
+RUN_PROMPT = ROOT / "prompt" / "rq_agent_run_prompt.md"
 SELECTED_RQS = ("RQ1", "RQ2", "RQ3")
 
 
@@ -104,6 +110,37 @@ def _clarify_response(evidence_message_ids: list[int]) -> dict:
     }
 
 
+def _write_run_manifest(
+    root: Path, package: dict, *, repetition: int = 1
+) -> Path:
+    normalized = normalize_agent_config(
+        {
+            "provider": "test",
+            "runtime_version": "test-runtime",
+            "model": "fake-agent",
+            "model_version": "test-version",
+            "reasoning_effort": "test",
+            "tool_policy": "NO_TOOLS",
+            "command": ["fake-agent"],
+        },
+        run_prompt_sha256=file_sha256(RUN_PROMPT),
+        instructions_sha256=package["private_manifest"]["public_files"][
+            "instructions.md"
+        ],
+        response_schema_sha256=package["private_manifest"]["public_files"][
+            "response.schema.json"
+        ],
+    )
+    manifest = build_run_manifest(
+        package["private_manifest"],
+        normalized_agent_config=normalized,
+        repetition=repetition,
+    )
+    path = root / "private" / "run_manifest.json"
+    _write_json(path, manifest)
+    return path
+
+
 class RQAgentMaterializationTests(unittest.TestCase):
     def test_one_target_materializes_both_reasoning_conditions_without_gold(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -161,7 +198,7 @@ class RQAgentMaterializationTests(unittest.TestCase):
             self.assertNotEqual(private_path.parent, public_dir)
             self.assertNotIn("source_instances", (public_dir / "task.json").read_text())
             workspace = stage_phase_a_workspace(c1, root / "workspaces")
-            self.assertEqual(workspace.name, c1["run_id"])
+            self.assertEqual(workspace.name, c1["package_id"])
             self.assertEqual(
                 {path.name for path in workspace.iterdir()},
                 {
@@ -263,7 +300,7 @@ class RQAgentMaterializationTests(unittest.TestCase):
             with self.assertRaisesRegex(RQMaterializationError, "content hash"):
                 load_target_views(project_dir, "P1_T001")
 
-    def test_phase_a_response_is_frozen_once_and_keeps_phase_b_closed(self):
+    def test_phase_a_response_is_frozen_once_and_keeps_package_manifest_immutable(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             project_dir = root / "P1"
@@ -275,9 +312,11 @@ class RQAgentMaterializationTests(unittest.TestCase):
                 instructions_path=INSTRUCTIONS,
                 response_schema_path=RESPONSE_SCHEMA,
             )
-            public_dir, private_path = write_materialized_input(
+            public_dir, package_path = write_materialized_input(
                 package, root / "inputs"
             )
+            package_hash = file_sha256(package_path)
+            private_path = _write_run_manifest(root / "run", package)
             response_path = root / "agent_response.json"
             _write_json(response_path, _clarify_response([10]))
 
@@ -307,6 +346,7 @@ class RQAgentMaterializationTests(unittest.TestCase):
                 updated_private["phase_gate"]["phase_a_response_sha256"],
                 result["freeze_record"]["response_sha256"],
             )
+            self.assertEqual(file_sha256(package_path), package_hash)
             with self.assertRaisesRegex(RQPhaseAError, "already frozen"):
                 freeze_phase_a_response(
                     private_manifest_path=private_path,
@@ -327,9 +367,10 @@ class RQAgentMaterializationTests(unittest.TestCase):
                 instructions_path=INSTRUCTIONS,
                 response_schema_path=RESPONSE_SCHEMA,
             )
-            public_dir, private_path = write_materialized_input(
+            public_dir, _ = write_materialized_input(
                 package, root / "inputs"
             )
+            private_path = _write_run_manifest(root / "run", package)
             response_path = root / "agent_response.json"
             _write_json(response_path, _clarify_response([20]))
 

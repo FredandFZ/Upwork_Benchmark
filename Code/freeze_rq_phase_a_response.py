@@ -25,7 +25,7 @@ def parse_args() -> argparse.Namespace:
         "--private-manifest",
         type=Path,
         required=True,
-        help="Private run_manifest.json created by the input materializer.",
+        help="Per-execution run_manifest.json created by the Agent runner.",
     )
     parser.add_argument(
         "--public-dir",

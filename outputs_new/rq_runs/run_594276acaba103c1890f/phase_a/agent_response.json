@@ -1,0 +1,446 @@
+{
+  "requirements": [
+    {
+      "requirement_ref": "site_network",
+      "requirement_summary": "Select the authoritative 12-site network for the financial model.",
+      "evidence_message_ids": [
+        18,
+        22
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "network_size": 12,
+          "candidate_site_list_sources": [
+            "Demand Analysis",
+            "Business Case"
+          ],
+          "business_case_provides_capital_allocations": true,
+          "authoritative_source_status": "unconfirmed"
+        },
+        "scope": {
+          "applies_to": "12-site financial model",
+          "affected_modules": [
+            "site-level capex",
+            "site-level opex",
+            "traffic and demand assumptions"
+          ]
+        },
+        "lifecycle_status": "active; model build authorized, but site-list conflict pending resolution",
+        "ambiguity": [
+          {
+            "field": "authoritative_site_list",
+            "details": "The Demand Analysis and Business Case contain different 12-site networks."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "program_opex",
+      "requirement_summary": "Determine the program-level steady-state operating-cost assumption.",
+      "evidence_message_ids": [
+        18,
+        22
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "original_brief_candidate_range": {
+            "minimum_millions": 48,
+            "maximum_millions": 64,
+            "currency": "CAD",
+            "period": "per year"
+          },
+          "business_case_appendix_candidate_range": {
+            "minimum_millions": 4.2,
+            "maximum_millions": 5.6,
+            "currency": "CAD",
+            "period": "per year"
+          },
+          "preferred_model_currency": "AUD",
+          "model_price_base_year": 2031,
+          "selection_status": "unconfirmed"
+        },
+        "scope": {
+          "applies_to": "full 12-site network",
+          "cost_stage": "steady-state operations"
+        },
+        "lifecycle_status": "active; implementation authorized using documented assumptions, but conflicting source values pending resolution",
+        "ambiguity": [
+          {
+            "field": "annual_program_opex",
+            "details": "The two candidate ranges differ by approximately elevenfold."
+          },
+          {
+            "field": "currency_conversion",
+            "details": "The source figures are stated in CAD while the requested model currency is AUD; no exchange-rate basis is visible."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "availability_payment_sizing",
+      "requirement_summary": "Define the viability targets used to size the availability payment.",
+      "evidence_message_ids": [
+        15,
+        18,
+        22
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "candidate_payment_sizing_bases": [
+            "minimum DSCR only",
+            "minimum DSCR plus minimum equity IRR"
+          ],
+          "current_minimum_dscr_candidate": 1.65,
+          "earlier_dscr_range": {
+            "minimum": 1.55,
+            "maximum": 1.75
+          },
+          "business_case_equity_irr_range": {
+            "minimum_percent": 16,
+            "maximum_percent": 24
+          },
+          "current_sizing_method": "DSCR only",
+          "government_information_objective": "Demonstrate why availability-style payments are needed for viability and bankability"
+        },
+        "scope": {
+          "applies_to": "Case G availability-payment structure",
+          "comparison_case": "Case F user-funded structure"
+        },
+        "lifecycle_status": "active; sizing basis pending confirmation",
+        "ambiguity": [
+          {
+            "field": "binding_payment_targets",
+            "details": "It was unresolved whether DSCR alone was sufficient or whether an equity-IRR floor must also be met."
+          }
+        ],
+        "execution": {
+          "existing_result": "The DSCR-only approach reaches its coverage target but leaves equity IRR negative."
+        }
+      }
+    },
+    {
+      "requirement_ref": "shared_program_capex",
+      "requirement_summary": "Determine whether and how program-wide shared costs are included in total capex.",
+      "evidence_message_ids": [
+        18,
+        22
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "site_level_capex_millions": 201.5,
+          "shared_program_costs_millions": 18.4,
+          "shared_program_cost_examples": [
+            "digital platform",
+            "program management"
+          ],
+          "reserve_or_thirteenth_site_allowance_millions": 14,
+          "business_case_reference_total_millions": 234,
+          "scope_decision": "unconfirmed"
+        },
+        "scope": {
+          "applies_to": "12-site program capital cost",
+          "source_context": "Business Case Reference Case"
+        },
+        "lifecycle_status": "active; inclusion and presentation pending resolution",
+        "ambiguity": [
+          {
+            "field": "programwide_cost_treatment",
+            "details": "It was unresolved whether shared costs and the reserve would be included in or excluded from the 12-site financial model."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "financing_structure",
+      "requirement_summary": "Select the financing structure for the current base-case model.",
+      "evidence_message_ids": [
+        17,
+        18,
+        22
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "current_simplified_debt_percent": 55,
+          "current_simplified_equity_percent": 45,
+          "current_flat_interest_rate_percent": 9,
+          "alternative_business_case_terms": {
+            "senior_debt_capital_share_percent": {
+              "minimum": 45,
+              "maximum": 60
+            },
+            "pricing_spread_over_government_of_canada_bonds_bps": {
+              "minimum": 425,
+              "maximum": 575
+            },
+            "optional_mezzanine_debt": true
+          },
+          "lender_or_investor_commitments": false,
+          "acceptance_status": "unconfirmed"
+        },
+        "scope": {
+          "applies_to": "current-stage base-case financing",
+          "future_stage": "refinement after lender engagement"
+        },
+        "lifecycle_status": "active; financing remains provisional and pending confirmation",
+        "ambiguity": [
+          {
+            "field": "capital_stack",
+            "details": "It was unresolved whether to retain the simplified single debt tranche or add mezzanine financing."
+          }
+        ],
+        "execution": {
+          "existing_model_structure": "55/45 debt/equity with a flat 9% debt rate"
+        }
+      }
+    },
+    {
+      "requirement_ref": "tax_and_cca",
+      "requirement_summary": "Define the tax and depreciation treatment for the government-submission model.",
+      "evidence_message_ids": [
+        22
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "tax_rate_percent": 34,
+          "tax_base": "EBITDA",
+          "depreciation_or_cca": "none",
+          "sufficiency_status": "unconfirmed"
+        },
+        "scope": {
+          "applies_to": "project tax calculation, tax shield, and equity-return outputs",
+          "submission_context": "government submission"
+        },
+        "lifecycle_status": "active; adequacy of existing treatment pending resolution",
+        "ambiguity": [
+          {
+            "field": "tax_method",
+            "details": "It was unresolved whether the flat tax-on-EBITDA treatment was sufficient or whether depreciation and CCA had to be modeled."
+          }
+        ],
+        "execution": {
+          "existing_model_treatment": "A flat 34% tax is applied to EBITDA without a depreciation shield."
+        }
+      }
+    }
+  ],
+  "decision": "ACT",
+  "post_task_states": [
+    {
+      "requirement_ref": "site_network",
+      "requirement_summary": "Use the Business Case site list as the final 12-site network.",
+      "change_type": "RESOLVED",
+      "removed_attribute_keys": [
+        "candidate_site_list_sources",
+        "authoritative_source_status"
+      ],
+      "state": {
+        "attributes": {
+          "network_size": 12,
+          "authoritative_site_list_source": "Business Case",
+          "site_list_status": "final",
+          "business_case_provides_capital_allocations": true
+        },
+        "scope": {
+          "applies_to": "12-site financial model",
+          "affected_modules": [
+            "site-level capex",
+            "site-level opex",
+            "traffic and demand assumptions"
+          ]
+        },
+        "lifecycle_status": "active and approved for base-case implementation",
+        "ambiguity": null,
+        "execution": {
+          "required_action": "Configure every site-dependent model module using the Business Case network."
+        }
+      }
+    },
+    {
+      "requirement_ref": "program_opex",
+      "requirement_summary": "Use CAD 48–64 million per year as the full-network operating-cost assumption.",
+      "change_type": "RESOLVED_OVERRIDE",
+      "removed_attribute_keys": [
+        "original_brief_candidate_range",
+        "business_case_appendix_candidate_range",
+        "selection_status"
+      ],
+      "state": {
+        "attributes": {
+          "annual_program_opex_range": {
+            "minimum_millions": 48,
+            "maximum_millions": 64,
+            "currency": "CAD",
+            "period": "per year"
+          },
+          "authoritative_source": "original brief",
+          "business_case_appendix_range_permitted_for_full_network": false,
+          "preferred_model_currency": "AUD",
+          "model_price_base_year": 2031,
+          "assumption_disclosure_required": true
+        },
+        "scope": {
+          "applies_to": "full 12-site network",
+          "cost_stage": "steady-state operations"
+        },
+        "lifecycle_status": "active and approved for base-case implementation",
+        "ambiguity": [
+          {
+            "field": "currency_conversion",
+            "details": "The CAD source range must be reconciled with the AUD model presentation; the visible history supplies no exchange-rate basis, so the selected assumption must be flagged."
+          }
+        ],
+        "execution": {
+          "required_action": "Use the CAD 48–64 million annual range as the operating-cost basis and do not extrapolate the Appendix amount to represent total network opex."
+        }
+      }
+    },
+    {
+      "requirement_ref": "availability_payment_sizing",
+      "requirement_summary": "Size the availability payment to satisfy both the DSCR and equity-return targets.",
+      "change_type": "RESOLVED_OVERRIDE",
+      "removed_attribute_keys": [
+        "candidate_payment_sizing_bases",
+        "earlier_dscr_range",
+        "business_case_equity_irr_range",
+        "current_sizing_method"
+      ],
+      "state": {
+        "attributes": {
+          "minimum_dscr_target": {
+            "value": 1.65,
+            "approximate": true
+          },
+          "equity_irr_target_range_percent": {
+            "minimum": 16,
+            "maximum": 20
+          },
+          "payment_must_satisfy_both_targets": true,
+          "dscr_only_solution_with_negative_equity_returns_permitted": false,
+          "government_information_objective": "Demonstrate why availability-style payments are needed for viability and bankability"
+        },
+        "scope": {
+          "applies_to": "Case G availability-payment structure",
+          "comparison_case": "Case F user-funded structure"
+        },
+        "lifecycle_status": "active and approved for base-case implementation",
+        "ambiguity": null,
+        "execution": {
+          "required_action": "Replace the existing DSCR-only sizing result with a payment level that meets approximately 1.65x minimum DSCR and the 16–20% equity-IRR target range.",
+          "existing_dscr_only_result_status": "rejected because it produces negative equity returns"
+        }
+      }
+    },
+    {
+      "requirement_ref": "shared_program_capex",
+      "requirement_summary": "Include shared and reserve costs as distinct line items within total program capex.",
+      "change_type": "RESOLVED",
+      "removed_attribute_keys": [
+        "scope_decision"
+      ],
+      "state": {
+        "attributes": {
+          "site_level_capex_millions": 201.5,
+          "shared_program_costs_millions": 18.4,
+          "reserve_or_thirteenth_site_allowance_millions": 14,
+          "business_case_reference_total_millions": 234,
+          "required_separate_line_items": [
+            "digital platform",
+            "program management",
+            "contingency/reserve"
+          ],
+          "included_in_total_program_capex": true,
+          "excluded_from_model": false
+        },
+        "scope": {
+          "applies_to": "total program capital cost for the 12-site base case",
+          "source_context": "Business Case Reference Case"
+        },
+        "lifecycle_status": "active and approved for base-case implementation",
+        "ambiguity": [
+          {
+            "field": "digital_platform_and_program_management_split",
+            "details": "The visible history provides a combined CAD 18.4 million amount but not the allocation between the two required separate line items."
+          }
+        ],
+        "execution": {
+          "required_action": "Present digital-platform, program-management, and contingency/reserve costs separately and include them in total program capex."
+        }
+      }
+    },
+    {
+      "requirement_ref": "financing_structure",
+      "requirement_summary": "Retain the streamlined 55/45 debt/equity structure at approximately 9% without mezzanine debt.",
+      "change_type": "CONFIRMED_INTERIM_STRUCTURE",
+      "removed_attribute_keys": [
+        "alternative_business_case_terms",
+        "acceptance_status"
+      ],
+      "state": {
+        "attributes": {
+          "debt_percent": 55,
+          "equity_percent": 45,
+          "debt_interest_rate_percent": 9,
+          "interest_rate_approximate": true,
+          "debt_tranches": 1,
+          "mezzanine_debt_included": false,
+          "lender_or_investor_commitments": false,
+          "terms_status": "provisional pending lender engagement",
+          "unconfirmed_inputs_must_be_flagged": true
+        },
+        "scope": {
+          "applies_to": "current-stage base-case financing",
+          "future_stage": "refine financing after engaging lenders"
+        },
+        "lifecycle_status": "active interim structure",
+        "ambiguity": null,
+        "execution": {
+          "required_action": "Retain the existing streamlined 55/45 structure at approximately 9% and do not add a separate mezzanine layer at this stage."
+        }
+      }
+    },
+    {
+      "requirement_ref": "tax_and_cca",
+      "requirement_summary": "Replace the flat tax-on-EBITDA treatment with asset-specific Canadian CCA modeling.",
+      "change_type": "REPLACED",
+      "removed_attribute_keys": [
+        "tax_base",
+        "depreciation_or_cca",
+        "sufficiency_status"
+      ],
+      "state": {
+        "attributes": {
+          "tax_rate_percent_assumption": 34,
+          "tax_calculation_basis": "taxable income after applicable CCA deductions",
+          "flat_tax_applied_directly_to_ebitda": false,
+          "asset_specific_cca_required": true,
+          "example_asset_class_mapping": {
+            "buildings": "Class 6",
+            "clean_energy_equipment": "Class 50",
+            "furniture_and_fixtures": "Class 12"
+          },
+          "other_assets": "Assign the applicable standard Canadian CCA class by asset type",
+          "tax_shield_reflected_in_cash_flow": true,
+          "equity_returns_reflect_cca": true
+        },
+        "scope": {
+          "applies_to": "project tax calculation, tax shield, and equity-return outputs",
+          "submission_context": "government submission"
+        },
+        "lifecycle_status": "active and required for the base-case model",
+        "ambiguity": [
+          {
+            "field": "complete_asset_to_cca_class_mapping",
+            "details": "Only example mappings are visible; every remaining asset type must be assigned its applicable standard Canadian CCA class during implementation."
+          }
+        ],
+        "execution": {
+          "required_action": "Remove the direct flat tax-on-EBITDA calculation, create asset-class depreciation schedules, and calculate tax after CCA deductions."
+        }
+      }
+    }
+  ],
+  "clarifications": []
+}

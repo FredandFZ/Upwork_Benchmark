@@ -1,0 +1,4400 @@
+{
+  "schema_version": "rq4-code-environment-project-build-plan-v1",
+  "plan_scope": "RQ4_CODE_ENVIRONMENT_RECONSTRUCTION",
+  "source_of_truth": "FROZEN_RQ3_FINAL_GOLD",
+  "project_id": "43255761",
+  "project_title": null,
+  "input_release": "43255761-stage2-final-20260925-rq123-main-v1",
+  "project_applicability": {
+    "selection_source": "USER_CURATED_PROJECT_ALLOWLIST",
+    "included_project_id": "43255761",
+    "excluded_project_policy": "NOT_IN_RQ4_BUILD_SCOPE",
+    "rationale": "Only projects whose final deliverable is suitable for a runnable, locally deterministic Code Environment are included.",
+    "source_artifact": {
+      "path": "Code/config/rq4_project_allowlist.json",
+      "file_sha256": "47502d55e5023601a68622ecc9bdb1ece0ceb8032593af45bfb27d0626059ced"
+    }
+  },
+  "unit_of_reconstruction": "PROJECT_CHRONOLOGICAL_REPLAY",
+  "snapshot_policy": "Freeze a pre-task Code Environment only at selected targets whose final C1/C2 RQ3 Gold decision is ACT. Replay every intervening State Graph event, including non-target messages and selected targets excluded from RQ4, before freezing the next snapshot.",
+  "construction_policy": "FROM_SCRATCH_NEW_RELEASE_ONLY",
+  "builder_contract": {
+    "ordered_stages": [
+      "SOURCE_AND_BOUNDARY_AUDIT",
+      "PROJECT_BASELINE_RECONSTRUCTION",
+      "CHRONOLOGICAL_STATE_REPLAY",
+      "ACT_TARGET_PRE_STATE_SNAPSHOT",
+      "POST_TRANSITION_TRACE_CHECK",
+      "BUILD_AND_REGRESSION_VALIDATION",
+      "ARCHIVE_AND_MANIFEST_FREEZE",
+      "RQ4_REPOSITORY_LEAKAGE_AUDIT"
+    ],
+    "required_project_outputs": [
+      "Code Environment/<project_id>/reports/target_index.json",
+      "Code Environment/<project_id>/reports/validation_report.json",
+      "Code Environment/<project_id>/reports/reconstruction_report.md"
+    ],
+    "required_target_outputs": [
+      "Code Environment/<project_id>/targets/<target_dir>/pre_repo.zip",
+      "Code Environment/<project_id>/targets/<target_dir>/manifest.json"
+    ],
+    "safe_replacement_policy": "Build each project in a project-scoped staging directory. Do not read or reuse any previous Code Environment. Promote the validated project atomically so targets/*/manifest.json and reports/target_index.json contain exactly the plan build targets.",
+    "manifest_required_fields": [
+      "target_id",
+      "before_message_id",
+      "repository_classification",
+      "contract_layer",
+      "web_api_layer",
+      "active_code_feature_count",
+      "tracked_requirement_count",
+      "temporal_fixture",
+      "requirements_to_code",
+      "target_event_ids",
+      "target_event_types",
+      "target_summary",
+      "pre_state_verified_against_gold",
+      "post_state_verified_against_gold",
+      "repo_sha256"
+    ],
+    "forbidden_in_agent_visible_repository": [
+      "future_or_post_task_state",
+      "acceptance_criteria",
+      "hidden_validators",
+      "reference_delivery",
+      "evaluator_only_requirement_state_event_metadata",
+      ".git",
+      "secrets"
+    ],
+    "handoff_completion_condition": "Every build-queue target has a boundary-matched manifest and safe pre_repo.zip; project validation reports pass; no RQ4 instance is declared execution-ready by the builder."
+  },
+  "post_build_gates_not_owned_by_builder": [
+    "ACCEPTANCE_CRITERIA_DESIGN",
+    "HIDDEN_VALIDATOR_IMPLEMENTATION_AND_INDEPENDENT_REVIEW",
+    "PRE_REFERENCE_PARTIAL_DELIVERY_CALIBRATION",
+    "FINAL_RQ4_ELIGIBILITY",
+    "RQ4_INSTANCE_MATERIALIZATION"
+  ],
+  "chronological_reconstruction_required": true,
+  "project_sources": {
+    "rq_instance_manifest": {
+      "path": "outputs_new/stage2/43255761/rq_instance_manifest.json",
+      "file_sha256": "f52f2ad762d157471b6f1dc1b212e21de9e79156bc52662ec221822e758e425a"
+    },
+    "gold_states": {
+      "path": "outputs_new/stage2/43255761/gold_states.json",
+      "file_sha256": "ff6a714e170fd1d4497db0aa2d4e1be61f1e6e66f51c8d03e185dd5f43ede0d6"
+    },
+    "requirement_state_graph": {
+      "path": "outputs_new/stage2/43255761/requirement_state_graph.json",
+      "file_sha256": "c9916c7d87c686282d487353332d0baf2c9c0306dfa1031b3f0c9dfae1c4ea1f"
+    },
+    "normalized_project": {
+      "path": "outputs_new/stage1_runs/43255761/normalized_project.json",
+      "file_sha256": "a7d97e8b3a176f704d2122fc60c7605acd02cd74fc99c2ff1708eb031366e270"
+    },
+    "stage1_annotation": {
+      "path": "outputs_new/stage1_annotations/43255761_stage1_annotation.json",
+      "file_sha256": "9c48083e38de152d761c5d8da0f65f25d5e8dc0a5706f13ae06e7a7142a3d345"
+    },
+    "gold_state_validation": {
+      "path": "outputs_new/stage2/43255761/target_time_selection/gold_state_validation.json",
+      "file_sha256": "65b872fcc66b3babf670833aad03893920371a6f044c58d840a1b9801c3b03c5"
+    },
+    "repository_profiles": {
+      "path": "Code/config/rq4_repository_profiles.json",
+      "file_sha256": "2f2e29df9c7c11840393c9216f45333ab1ac1c7617b69b32dd6075614d36af1e"
+    }
+  },
+  "repository_profile": {
+    "artifact_class": "WORD_TEMPLATE",
+    "renderer": "docx",
+    "runtime": "PYTHON_STDLIB",
+    "contract_layer": "DETERMINISTIC_OOXML_GENERATOR",
+    "web_api_layer": "NONE",
+    "primary_artifacts": [
+      "dist/template.docx",
+      "dist/template-preview.html"
+    ],
+    "description": "Deterministic OOXML Word-template generator exposing current styles, fields, layout, localization, and interaction behavior."
+  },
+  "summary": {
+    "selected_target_count": 12,
+    "build_target_count": 11,
+    "excluded_rq3_not_act_count": 1,
+    "rq3_decision_distribution": {
+      "ACT": 11,
+      "CLARIFY": 1
+    }
+  },
+  "targets": [
+    {
+      "target_id": "43255761_T001",
+      "target_message_id": 79,
+      "target_fingerprint": "4a88fac306c5ee33b59c1b48f2806164b0bf020a42d3f7072bdac4c46c06f705",
+      "turns": 78,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 79,
+        "speaker": "client",
+        "text": "Could the style for image and table labels be called caption text?"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 1,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T001_before_79",
+        "archive_path": "Code Environment/43255761/targets/T001_before_79/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T001_before_79/manifest.json",
+        "before_message_id": 79,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T001_RQ3.json",
+          "file_sha256": "703aae92128ae6a015346ea8efcf34983816ccf49222292c6889d40e628d9078",
+          "content_sha256": "139f15f6ee687c0d7be3621fe9fd7360d95540ba5e9e64590047784d173485a4"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S002"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S002"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+          "event_ids": [
+            "REQ_STYLE_NAMING_CONVENTION_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_STYLE_NAMING_CONVENTION_S002",
+          "after_state_id": "REQ_STYLE_NAMING_CONVENTION_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.style_name_language"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "STYLE_CATALOG"
+          ]
+        },
+        {
+          "requirement_id": "REQ_CAPTION_STYLE",
+          "event_ids": [
+            "REQ_CAPTION_STYLE_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_CAPTION_STYLE_S002",
+          "after_state_id": "REQ_CAPTION_STYLE_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.style_name",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "IMAGE_CAPTIONS",
+            "TABLE_CAPTIONS"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T002",
+      "target_message_id": 104,
+      "target_fingerprint": "ebb889be9f9fbf656ee8f10d007e1785ad4414a707a043219827e6a35ce34b11",
+      "turns": 103,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 104,
+        "speaker": "client",
+        "text": "When I copy content from the old document into the new one, it looks great. There is only one minor issue: could the spacing be reduced so everything fits within three pages?"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 2,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T002_before_104",
+        "archive_path": "Code Environment/43255761/targets/T002_before_104/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T002_before_104/manifest.json",
+        "before_message_id": 104,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T002_RQ3.json",
+          "file_sha256": "cd9867889ae8abdd577f5a391650bfbfc03757e24a2874040eef62fc4c81809e",
+          "content_sha256": "dd7293c0f06b9db23b7f812c8ea55e52399abf8349aaa43f877c3b42b91b1c0d"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S003"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "event_ids": [
+            "REQ_LEGACY_CONTENT_PASTE_STABILITY_E003"
+          ],
+          "event_types": [
+            "RUNTIME_VERIFICATION"
+          ],
+          "before_state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S002",
+          "after_state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "execution"
+          ],
+          "changed_paths": [
+            "execution.observed_behavior",
+            "execution.status"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "LEGACY_TEMPLATE_MIGRATION",
+            "COPY_PASTE"
+          ]
+        },
+        {
+          "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "event_ids": [
+            "REQ_DOCUMENT_SPACING_PAGE_FIT_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "PAGE_LAYOUT",
+            "BOARD_RECOMMENDATION"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T003",
+      "target_message_id": 141,
+      "target_fingerprint": "741a9a14666830948b899ce97ba31ce5d091bd07afeebacec62fff9dc06f5594",
+      "turns": 140,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 141,
+        "speaker": "client",
+        "text": "Could the document-field setup be redesigned to be more robust?"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 3,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T003_before_141",
+        "archive_path": "Code Environment/43255761/targets/T003_before_141/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T003_before_141/manifest.json",
+        "before_message_id": 141,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T003_RQ3.json",
+          "file_sha256": "010c9ff3611d8ffdc81dd970c4253b23ac1182135f7b83d34e67124a3a76cb50",
+          "content_sha256": "f34ac61dcae62a26a6c05ce4cdc10727b0d3fe1d08cdfb2e5978245db522388e"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S001"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "event_ids": [
+            "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S001",
+          "after_state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "scope"
+          ],
+          "changed_paths": [
+            "attributes.field_setup_design",
+            "scope.contexts"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INTERACTIVE_FIELDS",
+            "WORD_TEMPLATE_SET"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T004",
+      "target_message_id": 190,
+      "target_fingerprint": "7796d772e61516047b0fd0c4947baa1e3db74e00b082d8df79ddd4581fc778c2",
+      "turns": 189,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 190,
+        "speaker": "client",
+        "text": "To preserve the purpose of each field, its label needs to match the text initially shown inside it. After users delete that text and enter something else, hovering should let them recover the field’s original intention if they forget it."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 4,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T004_before_190",
+        "archive_path": "Code Environment/43255761/targets/T004_before_190/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T004_before_190/manifest.json",
+        "before_message_id": 190,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T004_RQ3.json",
+          "file_sha256": "3e6a9d9ff931922f44acaf96c30aab562a5c2616043a345dc3b2d341d1a5d9c6",
+          "content_sha256": "816ae696a9374ac1991c53bb2078bf8c699fefa51954844cf2c0f5625506a9b9"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_FIELD_LABEL_HELP_TEXT"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+          "event_ids": [
+            "REQ_FIELD_LABEL_HELP_TEXT_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S002",
+          "after_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.hover_help_behavior",
+            "attributes.label_content_relation"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INTERACTIVE_FIELDS",
+            "CONTROL_LABELS"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T005",
+      "target_message_id": 194,
+      "target_fingerprint": "f7a6aa1c7b6205aa82809c40f88db8fc1ce113aa105862b93f0cc0f48ebfb134",
+      "turns": 193,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 194,
+        "speaker": "client",
+        "text": "The label and the field should both display it—both places."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 5,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T005_before_194",
+        "archive_path": "Code Environment/43255761/targets/T005_before_194/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T005_before_194/manifest.json",
+        "before_message_id": 194,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T005_RQ3.json",
+          "file_sha256": "36049e26f4624d6fa12aabab62cc2b906e325b7f11fd530a77b4d90b24e8198b",
+          "content_sha256": "fffc15b6825a3df3207506f13bdaffae5787d021ae3b23c618372b785dcdc8da"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S004"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_FIELD_LABEL_HELP_TEXT"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+          "event_ids": [
+            "REQ_FIELD_LABEL_HELP_TEXT_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S003",
+          "after_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.help_text_locations"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INTERACTIVE_FIELDS",
+            "CONTROL_LABELS"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T006",
+      "target_message_id": 195,
+      "target_fingerprint": "d66ed8ee3b865fb9373e824304a46675dbcfd3d4282b91fead533e76e42b50e3",
+      "turns": 194,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 195,
+        "speaker": "client",
+        "text": "Even after the field is emptied, the help text should remain available."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 6,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T006_before_195",
+        "archive_path": "Code Environment/43255761/targets/T006_before_195/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T006_before_195/manifest.json",
+        "before_message_id": 195,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T006_RQ3.json",
+          "file_sha256": "69974d26efcd369e47deb207c62d92fd6239afc3f44657dd50e6f2180bf87533",
+          "content_sha256": "4827eb16007b24b5cf4c8df6a6dda9d8e73d7b311c44c87d4d31b609bd6ed600"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S004"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_FIELD_LABEL_HELP_TEXT"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+          "event_ids": [
+            "REQ_FIELD_LABEL_HELP_TEXT_E005"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S004",
+          "after_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.help_text_persistence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INTERACTIVE_FIELDS",
+            "CONTROL_LABELS"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T007",
+      "target_message_id": 197,
+      "target_fingerprint": "76ae12fbec8d7a074b4dc4c1f785d58754aa4db0145bddd2fe391dc07218ccf2",
+      "turns": 196,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 197,
+        "speaker": "client",
+        "text": "Because an empty field would not be visible to the user, do not leave the field without visible in-field text. It’s acceptable for the help text to appear twice, in the label and in the field."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 7,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T007_before_197",
+        "archive_path": "Code Environment/43255761/targets/T007_before_197/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T007_before_197/manifest.json",
+        "before_message_id": 197,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T007_RQ3.json",
+          "file_sha256": "d14ce9208e621530c1ee36d9887f6db5a160b260eeec9aed4e81385eb90e2038",
+          "content_sha256": "5b6d800adebecc18734959eba97828029a502878040bc03a32df41b7feff0f45"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_FIELD_LABEL_HELP_TEXT",
+          "REQ_FIELD_VISUAL_CUES"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+          "event_ids": [
+            "REQ_FIELD_LABEL_HELP_TEXT_E006"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S005",
+          "after_state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.duplicate_help_text_allowed",
+            "attributes.empty_field_guidance"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INTERACTIVE_FIELDS",
+            "CONTROL_LABELS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_FIELD_VISUAL_CUES",
+          "event_ids": [
+            "REQ_FIELD_VISUAL_CUES_E004",
+            "REQ_FIELD_VISUAL_CUES_E005"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RESUME"
+          ],
+          "before_state_id": "REQ_FIELD_VISUAL_CUES_S003",
+          "after_state_id": "REQ_FIELD_VISUAL_CUES_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "ambiguity",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.editable_field_visual_cue",
+            "ambiguity",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INTERACTIVE_FIELDS"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T008",
+      "target_message_id": 238,
+      "target_fingerprint": "eb86e58952602cc43ccf44674b275749a4105371c69d22cb259e239faa21f76f",
+      "turns": 237,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 238,
+        "speaker": "client",
+        "text": "Salam Jonas,\n\nPlease let me know what you think about this first round of customer feedback, which I have grouped by issue below.\n\nField behavior and text entry:\n• Proposal (Indstilling) placeholder fields: Unlike in the Executive Summary, clicking the \"insert\" fields—Advantages, settings, attachments, headline, and date—does not automatically clear the existing text.\n• Guidance (Vejledning) reflections: Under \"(write own reflections, if any),\" the placeholder text has the same failure to clear automatically as in the Proposal fields.\n• Board Seminar (Bestyrelsesseminar) agenda: The \"(insert agenda)\" field has the same automatic-clearing issue as the Proposal fields.\n• Proposal text boxes: When the boxes on the left, including the headline, run out of room, words do not wrap automatically. The right-hand column is pushed farther to the right instead.\n• Proposal line breaks: Because automatic wrapping is missing, users are forced to insert line breaks manually. A normal line break (hard return) creates excessive spacing for continuous text, even though that spacing works well between bullet points. A soft return (Shift\\+Enter) gives the correct result, but I doubt our colleagues know how to use it.\n• Board Seminar multi-line support: Under \"Item and Title,\" users must be able to enter multiple lines, including through manual line breaks.\n\nLayout and formatting:\n• Guidance margins: The margins beneath the \"(short description)\" section are not fixed. Without manual line breaks, the \"pencil\" icon is gradually cut off. Can fixed margins be set there?\n• Guidance theme description: This has the same hard-return spacing problem as the Proposal.\n• Board Meeting (Bestyrelsesmøde) alignment: Compared with \"Topic,\" \"Proposal,\" and \"Start time,\" \"Item and Title\" is not aligned correctly.\n• Board Meeting formatting: An extra horizontal line or border appears whenever I add a line immediately after a \"Topic.\" Adding a line anywhere else works as intended.\n\nDate functionality:\n• Proposal: Could the date functionality used in the \"Board Seminar\" document also be implemented here?\n• Board Meeting: Is it possible to use the date functionality from the \"Board Seminar\" document here as well?\n\nMaster:\n• Review: Because the bullet sizes and spacing still look incorrect on my screen, we need to review them with Tariq.\n• Tables: Please provide an explanation or walkthrough showing how the tables work.\n• Color palette: The full set of currently available colors should not all be offered as options."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 8,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T008_before_238",
+        "archive_path": "Code Environment/43255761/targets/T008_before_238/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T008_before_238/manifest.json",
+        "before_message_id": 238,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T008_RQ3.json",
+          "file_sha256": "30bb26f26e8dd7da989d64f9b3b91a8fdf3f7fd7ab81e6f614a361ef6da87b10",
+          "content_sha256": "eb54543945eb762a03688b9c68b53fcca810d673196699ae1a2b6c4bca4b2f22"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S002"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S004"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S001"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S005"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S001"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S002"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S002"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_TEXT_WRAPPING",
+          "REQ_MULTILINE_FIELD_INPUT",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_GUIDANCE_FIXED_MARGINS",
+          "REQ_PARAGRAPH_RETURN_SPACING",
+          "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+          "REQ_BOARD_MEETING_ROW_INSERTION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_LABEL_HELP_TEXT",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_THEME_COLOR_PALETTE",
+          "event_ids": [
+            "REQ_THEME_COLOR_PALETTE_E003"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_THEME_COLOR_PALETTE_S002",
+          "after_state_id": "REQ_THEME_COLOR_PALETTE_S003",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.color_option_policy",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "MASTER_TEMPLATE",
+            "THEME_COLORS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+          "event_ids": [
+            "REQ_BULLET_VISUAL_DESIGN_E005"
+          ],
+          "event_types": [
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": "REQ_BULLET_VISUAL_DESIGN_S004",
+          "after_state_id": "REQ_BULLET_VISUAL_DESIGN_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "execution"
+          ],
+          "changed_paths": [
+            "execution.observed_behavior"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "BULLET_LISTS",
+            "WORD_TEMPLATE_SET"
+          ]
+        },
+        {
+          "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "event_ids": [
+            "REQ_FIELD_PLACEHOLDER_ACTIVATION_E004",
+            "REQ_FIELD_PLACEHOLDER_ACTIVATION_E005"
+          ],
+          "event_types": [
+            "MODIFY",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S003",
+          "after_state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "scope",
+            "execution"
+          ],
+          "changed_paths": [
+            "scope.contexts",
+            "execution.observed_behavior"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "INTERACTIVE_FIELDS",
+            "BOARD_RECOMMENDATION",
+            "GUIDANCE_TEMPLATE",
+            "BOARD_SEMINAR"
+          ]
+        },
+        {
+          "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+          "event_ids": [
+            "REQ_FIELD_TEXT_WRAPPING_E001",
+            "REQ_FIELD_TEXT_WRAPPING_E002"
+          ],
+          "event_types": [
+            "INTRODUCE",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_FIELD_TEXT_WRAPPING_S002",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "BOARD_RECOMMENDATION",
+            "TEXT_BOXES",
+            "COLUMNS"
+          ]
+        },
+        {
+          "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+          "event_ids": [
+            "REQ_MULTILINE_FIELD_INPUT_E001"
+          ],
+          "event_types": [
+            "INTRODUCE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_MULTILINE_FIELD_INPUT_S001",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "MULTILINE_FIELDS",
+            "BOARD_SEMINAR"
+          ]
+        },
+        {
+          "requirement_id": "REQ_DATE_FIELD_CONTROL",
+          "event_ids": [
+            "REQ_DATE_FIELD_CONTROL_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_DATE_FIELD_CONTROL_S001",
+          "after_state_id": "REQ_DATE_FIELD_CONTROL_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "scope"
+          ],
+          "changed_paths": [
+            "scope.contexts"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "DATE_FIELDS",
+            "BOARD_RECOMMENDATION",
+            "BOARD_MEETING",
+            "BOARD_SEMINAR"
+          ]
+        },
+        {
+          "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+          "event_ids": [
+            "REQ_GUIDANCE_FIXED_MARGINS_E001",
+            "REQ_GUIDANCE_FIXED_MARGINS_E002"
+          ],
+          "event_types": [
+            "INTRODUCE",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_GUIDANCE_FIXED_MARGINS_S002",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "GUIDANCE_TEMPLATE",
+            "PAGE_LAYOUT"
+          ]
+        },
+        {
+          "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+          "event_ids": [
+            "REQ_PARAGRAPH_RETURN_SPACING_E001",
+            "REQ_PARAGRAPH_RETURN_SPACING_E002"
+          ],
+          "event_types": [
+            "INTRODUCE",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "BOARD_RECOMMENDATION",
+            "GUIDANCE_TEMPLATE",
+            "PARAGRAPH_TEXT"
+          ]
+        },
+        {
+          "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+          "event_ids": [
+            "REQ_BOARD_MEETING_FIELD_ALIGNMENT_E001",
+            "REQ_BOARD_MEETING_FIELD_ALIGNMENT_E002"
+          ],
+          "event_types": [
+            "INTRODUCE",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "BOARD_MEETING"
+          ]
+        },
+        {
+          "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+          "event_ids": [
+            "REQ_BOARD_MEETING_ROW_INSERTION_E001",
+            "REQ_BOARD_MEETING_ROW_INSERTION_E002"
+          ],
+          "event_types": [
+            "INTRODUCE",
+            "RUNTIME_FAILURE"
+          ],
+          "before_state_id": null,
+          "after_state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002",
+          "change_type": "INTRODUCED",
+          "changed_fields": [
+            "existence"
+          ],
+          "changed_paths": [
+            "existence"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "BOARD_MEETING",
+            "ROW_INSERTION"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T009",
+      "target_message_id": 241,
+      "target_fingerprint": "04f2e4b754b9237e84bd8be8647dd4bef46a2b7f3a8faff4a3b85935c902eabb",
+      "turns": 240,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 241,
+        "speaker": "client",
+        "text": "What can we do to ensure everyone else sees exactly what we see?"
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 9,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T009_before_241",
+        "archive_path": "Code Environment/43255761/targets/T009_before_241/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T009_before_241/manifest.json",
+        "before_message_id": 241,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T009_RQ3.json",
+          "file_sha256": "3e76c48faf397f4a4ca9936465b187483df237caf32fa67c0c81f33a46aaba59",
+          "content_sha256": "cafa166413ea726911a717d714809f2f7409132a9b50a10701c0715aed0c45a1"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S005"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S001"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S002"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S002"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S006"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S001"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S002"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S002"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_WORD_WINDOWS_COMPATIBILITY"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_LABEL_HELP_TEXT",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_FIELD_TEXT_WRAPPING",
+          "REQ_MULTILINE_FIELD_INPUT",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_GUIDANCE_FIXED_MARGINS",
+          "REQ_PARAGRAPH_RETURN_SPACING",
+          "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+          "REQ_BOARD_MEETING_ROW_INSERTION",
+          "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+          "event_ids": [
+            "REQ_BULLET_VISUAL_DESIGN_E006"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_BULLET_VISUAL_DESIGN_S005",
+          "after_state_id": "REQ_BULLET_VISUAL_DESIGN_S006",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.cross_user_rendering_consistency",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "BULLET_LISTS",
+            "WORD_TEMPLATE_SET"
+          ]
+        },
+        {
+          "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "event_ids": [
+            "REQ_WORD_WINDOWS_COMPATIBILITY_E002"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S001",
+          "after_state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.cross_user_rendering_consistency"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "DOCUMENT_TEMPLATE"
+          ],
+          "after_contexts": [
+            "WINDOWS_PC",
+            "MULTI_USER_EDITING"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T010",
+      "target_message_id": 270,
+      "target_fingerprint": "79a6c13c6b0103ab417c46dca364eb18bce36a04c4c43b542da49afd58aa06a4",
+      "turns": 269,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 270,
+        "speaker": "client",
+        "text": "To avoid another review round, yes, please add regular Enter input to the date field."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 10,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T010_before_270",
+        "archive_path": "Code Environment/43255761/targets/T010_before_270/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T010_before_270/manifest.json",
+        "before_message_id": 270,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T010_RQ3.json",
+          "file_sha256": "226169c502c96b86b5f2d97f944b9be9c89488aa2356fef15e0f34bc367bb84b",
+          "content_sha256": "376376f91abbe0051a95440e3cb6a4efef18a3f34f2b8b718976e3f95490e3f3"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S006"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S003"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S003"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S003"
+          },
+          {
+            "requirement_id": "REQ_TEXT_BORDER_PADDING",
+            "state_id": "REQ_TEXT_BORDER_PADDING_S003"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S006"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S004"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S004"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S003"
+          },
+          {
+            "requirement_id": "REQ_TEXT_BORDER_PADDING",
+            "state_id": "REQ_TEXT_BORDER_PADDING_S003"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_MULTILINE_FIELD_INPUT",
+          "REQ_DATE_FIELD_CONTROL"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_LABEL_HELP_TEXT",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_FIELD_TEXT_WRAPPING",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_GUIDANCE_FIXED_MARGINS",
+          "REQ_TEXT_BORDER_PADDING",
+          "REQ_PARAGRAPH_RETURN_SPACING",
+          "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+          "REQ_BOARD_MEETING_ROW_INSERTION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+          "event_ids": [
+            "REQ_MULTILINE_FIELD_INPUT_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_MULTILINE_FIELD_INPUT_S003",
+          "after_state_id": "REQ_MULTILINE_FIELD_INPUT_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes",
+            "execution"
+          ],
+          "changed_paths": [
+            "attributes.date_field_regular_enter_enabled",
+            "execution"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "MULTILINE_FIELDS",
+            "BOARD_SEMINAR"
+          ]
+        },
+        {
+          "requirement_id": "REQ_DATE_FIELD_CONTROL",
+          "event_ids": [
+            "REQ_DATE_FIELD_CONTROL_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_DATE_FIELD_CONTROL_S003",
+          "after_state_id": "REQ_DATE_FIELD_CONTROL_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.date_entry_method"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "DATE_FIELDS",
+            "BOARD_RECOMMENDATION",
+            "BOARD_MEETING",
+            "BOARD_SEMINAR"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T011",
+      "target_message_id": 275,
+      "target_fingerprint": "c1010d6cf6db33133b3452d923d573761b4f56da3247b41c6ac6c513e823adc6",
+      "turns": 274,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 275,
+        "speaker": "client",
+        "text": "Yes please."
+      },
+      "rq3_gold_decision": "ACT",
+      "condition_scope": [
+        "C1",
+        "C2"
+      ],
+      "plan_status": "READY_FOR_CODE_ENV_RECONSTRUCTION",
+      "build_sequence": 11,
+      "exclusion_reason": null,
+      "code_environment_status": "NOT_BUILT_FOR_CURRENT_RELEASE",
+      "eligibility_status": "PENDING_CODE_ENV_VALIDATION_AND_VALIDATOR",
+      "output_contract": {
+        "target_directory": "Code Environment/43255761/targets/T011_before_275",
+        "archive_path": "Code Environment/43255761/targets/T011_before_275/pre_repo.zip",
+        "manifest_path": "Code Environment/43255761/targets/T011_before_275/manifest.json",
+        "before_message_id": 275,
+        "workspace_policy": "FRESH_ISOLATED_EXTRACTION_PER_RUN"
+      },
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T011_RQ3.json",
+          "file_sha256": "445a66ace18ceff2382ecb568a9254790b2909473b6a4cbdc20fc460a44ab857",
+          "content_sha256": "b35a1fba6ad1c5bb08facbe25d639c77f0a4971e34675ab2788117c45396c8ed"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S006"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S004"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S004"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S003"
+          },
+          {
+            "requirement_id": "REQ_TEXT_BORDER_PADDING",
+            "state_id": "REQ_TEXT_BORDER_PADDING_S003"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S003"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S006"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S005"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S004"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S003"
+          },
+          {
+            "requirement_id": "REQ_TEXT_BORDER_PADDING",
+            "state_id": "REQ_TEXT_BORDER_PADDING_S003"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S002"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S001"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_MULTILINE_FIELD_INPUT"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_LABEL_HELP_TEXT",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_FIELD_TEXT_WRAPPING",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_GUIDANCE_FIXED_MARGINS",
+          "REQ_TEXT_BORDER_PADDING",
+          "REQ_PARAGRAPH_RETURN_SPACING",
+          "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+          "REQ_BOARD_MEETING_ROW_INSERTION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+          "event_ids": [
+            "REQ_MULTILINE_FIELD_INPUT_E005"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_MULTILINE_FIELD_INPUT_S004",
+          "after_state_id": "REQ_MULTILINE_FIELD_INPUT_S005",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.headline_field_regular_enter_enabled"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_WORD",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "MULTILINE_FIELDS",
+            "BOARD_SEMINAR"
+          ]
+        }
+      ],
+      "builder_gates": {
+        "pre_state_matches_gold": "REQUIRED",
+        "post_transition_trace_matches_gold": "REQUIRED",
+        "build_passes": "REQUIRED",
+        "regression_passes": "REQUIRED",
+        "archive_safety_passes": "REQUIRED",
+        "future_state_leakage_absent": "REQUIRED",
+        "validator_and_reference_delivery_absent": "REQUIRED",
+        "deterministic_observable_triage": "REQUIRED_AFTER_RECONSTRUCTION"
+      }
+    },
+    {
+      "target_id": "43255761_T012",
+      "target_message_id": 335,
+      "target_fingerprint": "31bbcd1e903c547369a953b162542ec1ce42ec0cf23eef48e263aa00bca0efc0",
+      "turns": 334,
+      "difficulty": "LONG",
+      "target_task": {
+        "source_message_id": 335,
+        "speaker": "client",
+        "text": "Hi Jonas,\n\nThey have supplied an updated design, and I am close to getting them to sign. Could you quickly check whether the new design changes the budget?"
+      },
+      "rq3_gold_decision": "CLARIFY",
+      "condition_scope": [],
+      "plan_status": "EXCLUDED_RQ3_NOT_ACT",
+      "build_sequence": null,
+      "exclusion_reason": "RQ3_NOT_ACT",
+      "code_environment_status": "NOT_APPLICABLE",
+      "eligibility_status": "EXCLUDED_RQ3_NOT_ACT",
+      "output_contract": null,
+      "source_artifacts": {
+        "rq3_instance": {
+          "path": "outputs_new/stage2/43255761/RQ3/43255761_T012_RQ3.json",
+          "file_sha256": "6d63839e59f53082338950d6ecc02aeb8acd489050d0f9e3cf41fe452bd16c1e",
+          "content_sha256": "55fdc977d2034c9d063fe594728a12bd909eb44511b9cb0ab17ad8a5bdf2fea2"
+        }
+      },
+      "state_refs": {
+        "pre_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S004"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S006"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S005"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S004"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S003"
+          },
+          {
+            "requirement_id": "REQ_TEXT_BORDER_PADDING",
+            "state_id": "REQ_TEXT_BORDER_PADDING_S003"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S003"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_MASTER_TABLE_OPERABILITY",
+            "state_id": "REQ_MASTER_TABLE_OPERABILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_MASTER_TEXT_DUPLICATION_PREVENTION",
+            "state_id": "REQ_MASTER_TEXT_DUPLICATION_PREVENTION_S001"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S003"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_DYNAMIC_BULLET_LAYOUT",
+            "state_id": "REQ_POWERPOINT_DYNAMIC_BULLET_LAYOUT_S002"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "post_task": [
+          {
+            "requirement_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+            "state_id": "REQ_TEMPLATE_DEFAULT_LANGUAGE_S002"
+          },
+          {
+            "requirement_id": "REQ_DANISH_USER_FACING_TEXT",
+            "state_id": "REQ_DANISH_USER_FACING_TEXT_S004"
+          },
+          {
+            "requirement_id": "REQ_STYLE_CATALOG_IMPLEMENTATION",
+            "state_id": "REQ_STYLE_CATALOG_IMPLEMENTATION_S002"
+          },
+          {
+            "requirement_id": "REQ_STYLE_NAMING_CONVENTION",
+            "state_id": "REQ_STYLE_NAMING_CONVENTION_S003"
+          },
+          {
+            "requirement_id": "REQ_CAPTION_STYLE",
+            "state_id": "REQ_CAPTION_STYLE_S003"
+          },
+          {
+            "requirement_id": "REQ_THEME_COLOR_PALETTE",
+            "state_id": "REQ_THEME_COLOR_PALETTE_S003"
+          },
+          {
+            "requirement_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+            "state_id": "REQ_TAB_DRIVEN_LIST_HIERARCHY_S002"
+          },
+          {
+            "requirement_id": "REQ_BULLET_VISUAL_DESIGN",
+            "state_id": "REQ_BULLET_VISUAL_DESIGN_S006"
+          },
+          {
+            "requirement_id": "REQ_NUMBERED_LIST_ALIGNMENT",
+            "state_id": "REQ_NUMBERED_LIST_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_ENTER_CREATES_NEW_BULLET",
+            "state_id": "REQ_ENTER_CREATES_NEW_BULLET_S001"
+          },
+          {
+            "requirement_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+            "state_id": "REQ_LEGACY_CONTENT_PASTE_STABILITY_S004"
+          },
+          {
+            "requirement_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+            "state_id": "REQ_PASTED_TABLE_COLUMN_CONTAINMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_POST_PASTE_LINE_BREAKS",
+            "state_id": "REQ_POST_PASTE_LINE_BREAKS_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+            "state_id": "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE_S003"
+          },
+          {
+            "requirement_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+            "state_id": "REQ_FIELD_PLACEHOLDER_ACTIVATION_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_LABEL_HELP_TEXT",
+            "state_id": "REQ_FIELD_LABEL_HELP_TEXT_S006"
+          },
+          {
+            "requirement_id": "REQ_FIELD_VISUAL_CUES",
+            "state_id": "REQ_FIELD_VISUAL_CUES_S005"
+          },
+          {
+            "requirement_id": "REQ_FIELD_FORMATTING_PRESERVATION",
+            "state_id": "REQ_FIELD_FORMATTING_PRESERVATION_S002"
+          },
+          {
+            "requirement_id": "REQ_FIELD_TEXT_WRAPPING",
+            "state_id": "REQ_FIELD_TEXT_WRAPPING_S002"
+          },
+          {
+            "requirement_id": "REQ_MULTILINE_FIELD_INPUT",
+            "state_id": "REQ_MULTILINE_FIELD_INPUT_S005"
+          },
+          {
+            "requirement_id": "REQ_DATE_FIELD_CONTROL",
+            "state_id": "REQ_DATE_FIELD_CONTROL_S004"
+          },
+          {
+            "requirement_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+            "state_id": "REQ_CHECKLIST_DROPDOWN_CONTROLS_S001"
+          },
+          {
+            "requirement_id": "REQ_DOCUMENT_SPACING_PAGE_FIT",
+            "state_id": "REQ_DOCUMENT_SPACING_PAGE_FIT_S001"
+          },
+          {
+            "requirement_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+            "state_id": "REQ_FIRST_PAGE_NUMBER_SUPPRESSION_S001"
+          },
+          {
+            "requirement_id": "REQ_GUIDANCE_FIXED_MARGINS",
+            "state_id": "REQ_GUIDANCE_FIXED_MARGINS_S003"
+          },
+          {
+            "requirement_id": "REQ_TEXT_BORDER_PADDING",
+            "state_id": "REQ_TEXT_BORDER_PADDING_S003"
+          },
+          {
+            "requirement_id": "REQ_PARAGRAPH_RETURN_SPACING",
+            "state_id": "REQ_PARAGRAPH_RETURN_SPACING_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+            "state_id": "REQ_BOARD_MEETING_FIELD_ALIGNMENT_S002"
+          },
+          {
+            "requirement_id": "REQ_BOARD_MEETING_ROW_INSERTION",
+            "state_id": "REQ_BOARD_MEETING_ROW_INSERTION_S003"
+          },
+          {
+            "requirement_id": "REQ_WORD_WINDOWS_COMPATIBILITY",
+            "state_id": "REQ_WORD_WINDOWS_COMPATIBILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_MASTER_TABLE_OPERABILITY",
+            "state_id": "REQ_MASTER_TABLE_OPERABILITY_S002"
+          },
+          {
+            "requirement_id": "REQ_MASTER_TEXT_DUPLICATION_PREVENTION",
+            "state_id": "REQ_MASTER_TEXT_DUPLICATION_PREVENTION_S001"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+            "state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S004"
+          },
+          {
+            "requirement_id": "REQ_POWERPOINT_DYNAMIC_BULLET_LAYOUT",
+            "state_id": "REQ_POWERPOINT_DYNAMIC_BULLET_LAYOUT_S002"
+          },
+          {
+            "requirement_id": "REQ_TITLE_HEADING_TYPOGRAPHY",
+            "state_id": "REQ_TITLE_HEADING_TYPOGRAPHY_S003"
+          },
+          {
+            "requirement_id": "REQ_HEADING_3_TYPOGRAPHY",
+            "state_id": "REQ_HEADING_3_TYPOGRAPHY_S001"
+          }
+        ],
+        "affected_requirement_ids": [
+          "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION"
+        ],
+        "preserved_requirement_ids": [
+          "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+          "REQ_DANISH_USER_FACING_TEXT",
+          "REQ_STYLE_CATALOG_IMPLEMENTATION",
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE",
+          "REQ_THEME_COLOR_PALETTE",
+          "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+          "REQ_BULLET_VISUAL_DESIGN",
+          "REQ_NUMBERED_LIST_ALIGNMENT",
+          "REQ_ENTER_CREATES_NEW_BULLET",
+          "REQ_LEGACY_CONTENT_PASTE_STABILITY",
+          "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+          "REQ_POST_PASTE_LINE_BREAKS",
+          "REQ_FIELD_IMPLEMENTATION_ARCHITECTURE",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+          "REQ_FIELD_LABEL_HELP_TEXT",
+          "REQ_FIELD_VISUAL_CUES",
+          "REQ_FIELD_FORMATTING_PRESERVATION",
+          "REQ_FIELD_TEXT_WRAPPING",
+          "REQ_MULTILINE_FIELD_INPUT",
+          "REQ_DATE_FIELD_CONTROL",
+          "REQ_CHECKLIST_DROPDOWN_CONTROLS",
+          "REQ_DOCUMENT_SPACING_PAGE_FIT",
+          "REQ_FIRST_PAGE_NUMBER_SUPPRESSION",
+          "REQ_GUIDANCE_FIXED_MARGINS",
+          "REQ_TEXT_BORDER_PADDING",
+          "REQ_PARAGRAPH_RETURN_SPACING",
+          "REQ_BOARD_MEETING_FIELD_ALIGNMENT",
+          "REQ_BOARD_MEETING_ROW_INSERTION",
+          "REQ_WORD_WINDOWS_COMPATIBILITY",
+          "REQ_MASTER_TABLE_OPERABILITY",
+          "REQ_MASTER_TEXT_DUPLICATION_PREVENTION",
+          "REQ_POWERPOINT_DYNAMIC_BULLET_LAYOUT",
+          "REQ_TITLE_HEADING_TYPOGRAPHY",
+          "REQ_HEADING_3_TYPOGRAPHY"
+        ]
+      },
+      "affected_transition_digest": [
+        {
+          "requirement_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION",
+          "event_ids": [
+            "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_E004"
+          ],
+          "event_types": [
+            "MODIFY"
+          ],
+          "before_state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S003",
+          "after_state_id": "REQ_POWERPOINT_SLIDE_DESIGN_IMPLEMENTATION_S004",
+          "change_type": "MODIFIED",
+          "changed_fields": [
+            "attributes"
+          ],
+          "changed_paths": [
+            "attributes.design_source"
+          ],
+          "removed_paths": [],
+          "after_lifecycle_status": "ACTIVE",
+          "after_components": [
+            "MICROSOFT_POWERPOINT",
+            "DOCUMENT_TEMPLATE",
+            "UI_UX"
+          ],
+          "after_contexts": [
+            "POWERPOINT_TEMPLATE",
+            "CUSTOMER_DESIGN"
+          ]
+        }
+      ]
+    }
+  ]
+}

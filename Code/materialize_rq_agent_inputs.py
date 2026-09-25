@@ -100,7 +100,7 @@ def parse_args() -> argparse.Namespace:
         "--workspace-root",
         type=Path,
         help=(
-            "Optionally copy each public package into a fresh opaque <run_id>/ "
+            "Optionally copy each public package into a fresh opaque <package_id>/ "
             "workspace suitable for an isolated Agent launch."
         ),
     )
@@ -161,16 +161,16 @@ def main() -> int:
                             materialized, args.workspace_root
                         )
                 completed.append(
-                    (target_id, condition, materialized["run_id"], workspace)
+                    (target_id, condition, materialized["package_id"], workspace)
                 )
         action = "validated" if args.validate_only else "materialized"
         print(
             f"{manifest.get('project_id')}: {action} {len(completed)} "
             f"Phase A package(s) in {args.mode.upper()} mode"
         )
-        for target_id, condition, run_id, workspace in completed:
+        for target_id, condition, package_id, workspace in completed:
             suffix = f" -> {workspace}" if workspace is not None else ""
-            print(f"  {target_id}/{condition}: {run_id}{suffix}")
+            print(f"  {target_id}/{condition}: {package_id}{suffix}")
         return 0
     except (OSError, RQMaterializationError) as exc:
         print(f"RQ Agent input materialization failed: {exc}", file=sys.stderr)

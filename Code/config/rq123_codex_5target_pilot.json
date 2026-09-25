@@ -1,0 +1,50 @@
+{
+  "schema_version": "rq123-experiment-config-v1",
+  "experiment_id": "rq123-codex-gpt56sol-high-5target-pilot",
+  "repetitions": 1,
+  "agent": {
+    "provider": "codex_cli",
+    "runtime_version": "codex-cli 0.155.1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "tool_policy": "READ_ONLY_NO_REPOSITORY_NO_EXTERNAL_TOOLS",
+    "command": [
+      "codex.cmd",
+      "exec",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--ignore-rules",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "read-only",
+      "--model",
+      "{model_version}",
+      "-c",
+      "model_reasoning_effort=\"{reasoning_effort}\"",
+      "--output-last-message",
+      "agent_response.json",
+      "--json",
+      "-"
+    ],
+    "output_mode": "workspace_file",
+    "output_filename": "agent_response.json",
+    "timeout_seconds": 900,
+    "environment_allowlist": [
+      "CODEX_HOME",
+      "USERPROFILE",
+      "APPDATA",
+      "LOCALAPPDATA"
+    ]
+  },
+  "judge": {
+    "provider": "upwork_stage1",
+    "api_interface_version": "stage1-chat-completions-v1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "max_concurrent_requests": 4,
+    "retries": 3,
+    "timeout_seconds": 900
+  }
+}

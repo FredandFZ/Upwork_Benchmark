@@ -52,70 +52,46 @@ Phase B: eligible act + pre-task repository → execute → hidden validator
 
 ## 3. Temporal Requirement-State Reconstruction
 
-Requirements engineering has long treated requirements as artifacts whose origins, refinements, and realization must remain traceable across a system's lifecycle \citep{nuseibeh2000requirements,gotel1994analysis}. ReqMemBench uses evidence-linked requirement states as explicit evaluation targets at intermediate project takeover points. Given the preceding interaction history and current request, the agent reconstructs task-relevant pre-task states and either predicts complete post-task states for all affected requirements or identifies material ambiguities requiring clarification.
+Requirements evolve through revisions, deferrals, resumptions, and removals, so a takeover agent must recover the state that governs the project now rather than merely retrieve earlier statements. Building on requirements traceability \citep{nuseibeh2000requirements,gotel1994analysis}, ReqMemBench represents this state explicitly and evaluates its reconstruction before code execution.
 
-### 3.1 Problem Formulation
+### 3.1 Temporal State and Task-Local Gold
 
-We represent a project as $P=(H,C)$, where $H=\langle h_1,\ldots,h_n\rangle$ is the temporally ordered interaction history and $C(t)$ is the corresponding code state. The history contains client and developer messages together with recorded execution feedback. A target task $q_{t^*}$ arrives at takeover time $t^*$, inducing a strict temporal boundary: $H_{<t^*}$ contains only interactions before the target, and $C_{t^{*-}}$ denotes the code snapshot immediately before it. The pre-task requirement state is reconstructed exclusively from evidence strictly preceding the target message. For this reconstruction, the target identifies the directly affected historical requirements; its updates are incorporated only into the post-task state. We use $t^{*-}$ and $t^{*+}$ to denote the boundaries immediately before and after incorporating the target's requirement events, respectively. The latter precedes any subsequent implementation or execution feedback.
+We represent a project as $P=(H,C)$, where $H=\langle h_1,\ldots,h_n\rangle$ is the ordered interaction history and $C(t)$ is the corresponding code state. A target request $q_{t^*}$ defines a strict temporal boundary: $H_{<t^*}$ and $C_{t^{*-}}$ contain only pre-target evidence. We use $t^{*+}$ for the point after incorporating requirement changes expressed by the target but before any subsequent implementation or execution feedback.
 
-The atomic unit of state is a *Requirement Atom*. Atoms that concern the same feature may be grouped into a Requirement Family, but each atom has its own lifecycle. For an atom $r$, we define its state at time $t$ as
+The atomic unit is a *Requirement Atom*. For atom $r$, its state is
 
 $$
 G_r(t)=\bigl(A_r(t),L_r(t),S_r(t),U_r(t),X_r(t)\bigr),
 $$
 
-where $A_r$ records the requirement's attribute values, whose applicability is determined jointly by lifecycle and scope. $L_r$ denotes the lifecycle state, such as `ACTIVE`, `DEFERRED`, or `REMOVED`, and $S_r$ records persistence, component, and contextual scope. $U_r$ is the set of unresolved ambiguities and their affected dimensions. $X_r$ records the latest implementation evidence available in the history up to time $t$, represented by labels such as `CLAIMED_WORKING`, `FAILED`, or `VERIFIED_WORKING`. Fields that cannot be determined from the available evidence remain unknown.
+where $A_r$ records attribute values, $L_r$ the lifecycle, $S_r$ persistence and scope, $U_r$ unresolved ambiguities, and $X_r$ the latest implementation evidence. Unknown fields remain explicit. These dimensions are independent: an active requirement can be ambiguous or have failed implementation evidence, while a removed requirement retains its prior attributes and evidence under lifecycle `REMOVED`.
 
-The five dimensions capture distinct aspects of requirement state. An `ACTIVE` requirement may have unresolved ambiguities, and its latest implementation evidence may indicate failure. Removing a requirement changes its lifecycle while preserving its recorded attributes and implementation evidence. We reserve `CLARIFY` for the agent decision defined below; it is neither a lifecycle value nor a requirement event.
-
-ReqMemBench derives states by replaying temporally ordered Requirement Events. Let
+States are reconstructed by deterministically replaying the validated event sequence $E_r$ up to time $t$:
 
 $$
-E_r=\langle e_r^{(1)},\ldots,e_r^{(n_r)}\rangle
-$$
-
-be the validated event sequence for atom $r$, and let $G_r^{(k)}$ denote its state after applying the first $k$ events. Given this sequence, a fixed transition function $T$ deterministically updates the state:
-
-$$
-G_r^{(k)}=T\bigl(G_r^{(k-1)},e_r^{(k)}\bigr),
-\qquad
 G_r(t)=\operatorname{Replay}\bigl(E_r^{\leq t}\bigr),
 $$
 
-where $E_r^{\leq t}$ is the event prefix up to time $t$, and $T$ implements the transition rules specified in the appendix. The event vocabulary distinguishes requirement changes (`INTRODUCE`, `MODIFY`, `DEFER`, `RESUME`, and `REMOVE`), uncertainty (`AMBIGUOUS`), and implementation evidence (`IMPLEMENTATION_CLAIM`, `RUNTIME_FAILURE`, and `RUNTIME_VERIFICATION`). Each reconstructed state is accompanied by links to the events and source messages supporting its fields, preserving temporal provenance.
-
-Let $R_P(t)$ denote the set of all requirement atoms introduced by time $t$. The project state is the collection indexed by these atoms:
-
-$$
-G_P(t)=\bigl(G_r(t)\bigr)_{r\in R_P(t)}.
-$$
-
-Removed atoms remain represented with lifecycle `REMOVED`, making their invalidation explicit and enabling detection of erroneous reactivation.
-
-For each target, ReqMemBench evaluates a task-local projection of this state. Let $A_{t^*}$ be the atoms directly affected by $q_{t^*}$, including atoms first introduced by it. The relevant historical atoms and their pre-task state are
+using the transition rules in the appendix. Let $R_P(t)$ be the atoms introduced by time $t$, and let $A_{t^*}$ be all atoms affected by the target, including newly introduced ones. The task-local pre- and post-target gold states are
 
 $$
 \begin{aligned}
 R^{\mathrm{hist}}_{t^*}
     &= A_{t^*}\cap R_P(t^{*-}), \\
 G^-_{t^*}
-    &= \bigl(G_r(t^{*-})\bigr)_{r\in R^{\mathrm{hist}}_{t^*}}.
+    &= \bigl(G_r(t^{*-})\bigr)_{r\in R^{\mathrm{hist}}_{t^*}}, \\
+G^+_{t^*}
+    &= \bigl(G_r(t^{*+})\bigr)_{r\in A_{t^*}}.
 \end{aligned}
 $$
 
-Atoms introduced by $q_{t^*}$ are absent from $G^-_{t^*}$. The post-task target includes both these new atoms and the affected historical atoms:
+Thus, atoms introduced by the target are absent from $G^-_{t^*}$ but included in $G^+_{t^*}$. The task-local projection evaluates selection, reconstruction, and updating without requiring recovery of unrelated project state.
 
-$$
-G^+_{t^*}=\bigl(G_r(t^{*+})\bigr)_{r\in A_{t^*}}.
-$$
+### 3.2 Takeover Protocol and Evaluation Stages
 
-Here, $t^{*+}$ denotes the point after incorporating the requirement events supported by $q_{t^*}$ and before code execution; the resulting state may still contain unresolved ambiguities. This projection makes selection, reconstruction, and updating measurable without requiring recovery of unrelated parts of the project.
+Full History (C1) exposes $H_{<t^*}$, whereas Oracle Relevant History (C2) exposes an audited, order-preserving subsequence containing the evidence required to determine the same task-local state and action. C2 isolates reasoning over relevant evidence from the additional problem of finding that evidence in a long history.
 
-### 3.2 Takeover Task and Evaluation Stages
-
-Evaluation uses two history conditions. Full History (C1) exposes the complete pre-target history, $H^{(\mathrm{C1})}_{<t^*}=H_{<t^*}$. Oracle Relevant History (C2) exposes an audited, order-preserving subsequence $H^{(\mathrm{C2})}_{<t^*}$ that retains the requirement trajectories and contextual messages needed to determine the same pre-task state and update-or-clarify target.
-
-Evaluation consists of a history-only phase and a conditional execution phase. In Phase A, the agent has no repository access and receives only the condition-specific history and current task:
+Evaluation separates history reasoning from code execution. In Phase A, the agent receives the condition-specific history and current request, but no repository:
 
 $$
 \bigl(H^{(c)}_{<t^*},q_{t^*}\bigr)
@@ -128,21 +104,9 @@ $$
 \right),
 $$
 
-where $c\in\{\mathrm{C1},\mathrm{C2}\}$ and $\widehat{d}_{t^*}\in\{\mathrm{ACT},\mathrm{CLARIFY}\}$. Each selected historical atom is accompanied by supporting evidence groups. For an `ACT` decision, $\widehat{Z}_{t^*}$ is the complete predicted post-task state $\widehat{G}^{+}_{t^*}$ over all affected atoms. For a `CLARIFY` decision, it is a structured set $\widehat{Q}_{t^*}$ of material blocking issues and corresponding clarification questions. An ambiguity warrants `CLARIFY` only when it is material to the target, unresolved by the visible evidence, and blocks a determinate requirement update.
+where $c\in\{\mathrm{C1},\mathrm{C2}\}$ and $\widehat{d}_{t^*}\in\{\mathrm{ACT},\mathrm{CLARIFY}\}$. The output contains selected historical atoms and evidence, their reconstructed pre-task states, and either the complete predicted post-task state $\widehat{G}^{+}_{t^*}$ for `ACT` or material blocking issues and questions $\widehat{Q}_{t^*}$ for `CLARIFY`. Clarification is correct only when visible evidence leaves a target-relevant ambiguity that blocks a determinate update.
 
-The complete Phase-A response is frozen before repository access. For an RQ4-eligible target, whose gold decision is `ACT`, the run enters Phase B only if the frozen response is parseable and its decision is also `ACT`:
-
-$$
-\bigl(
-H^{(c)}_{<t^*},
-q_{t^*},
-C_{t^{*-}},
-\mathrm{FrozenResponse}_{t^*}^{(c)}
-\bigr)
-\longrightarrow \widehat{C},
-$$
-
-where $\widehat{C}$ is the final repository produced in Phase B. Withholding repository access until Phase A is frozen prevents repository-derived evidence from influencing its outputs. Hidden validators are kept outside the agent-accessible workspace throughout evaluation. The protocol therefore evaluates the frozen requirement predictions and final repository correctness separately.
+The Phase-A response is frozen before repository access. For an execution-eligible target, Phase B begins only after a parseable `ACT` response, at which point the agent receives a fresh copy of $C_{t^{*-}}$. Hidden validators remain inaccessible to the agent, separating requirement-state prediction from repository correctness.
 
 **Table 1. The four evaluation stages. C1 is Full History and C2 is Oracle Relevant History. RQ4 applies only to eligible targets.**
 
@@ -153,14 +117,7 @@ where $\widehat{C}$ is the final repository produced in Phase B. Withholding rep
 | RQ3 | Update requirements or identify material blockers | $G^+_{t^*}$ for `ACT`; blocking issues and questions for `CLARIFY` | C1/C2 | No |
 | RQ4 | Implement the requested changes | Final repository passing the frozen validator | C1/C2 | After freeze |
 
-RQ1 is evaluated only under C1 because constructing C2 from the gold requirement trajectories would expose the selection answer. RQ2 scores state correctness over successfully aligned historical atoms and reports reconstruction coverage separately, avoiding double-counting selection errors. RQ3 scores the complete post-task state over all affected atoms on `ACT` targets, or coverage of all material blockers and corresponding clarification questions on `CLARIFY` targets. RQ4 scores the final repository: a delivery passes only when the build, target-specific tests, and regression tests all pass. Eligible runs with a non-`ACT` or unparsable Phase-A response remain in the RQ4 denominator and count as failures. Together, the stages provide separate diagnostics along the evaluation sequence:
-
-$$
-\mathrm{Select}\rightarrow
-\mathrm{Reconstruct}\rightarrow
-\mathrm{Decide}\rightarrow
-\mathrm{Execute}.
-$$
+RQ1 is evaluated only under C1 because C2 is selected from the gold requirement trajectories and would therefore reveal the evidence-selection target. The remaining stages use both conditions, allowing errors to be localized across reconstruction, decision, and execution.
 
 ## 4. ReqMemBench Construction
 
