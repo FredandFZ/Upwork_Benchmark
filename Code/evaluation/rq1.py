@@ -281,7 +281,7 @@ def validate_agent_response(
         unknown = [value for value in evidence_ids if _id_key(value) not in history]
         if unknown:
             raise RQ1EvaluationError(
-                f"requirements[{position}] references non-C2 evidence IDs: {unknown}"
+                f"requirements[{position}] references evidence outside C1: {unknown}"
             )
         output.append(
             {

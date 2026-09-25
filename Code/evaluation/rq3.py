@@ -34,8 +34,8 @@ class RQ3EvaluationError(ValueError):
 def _gold_branch(instance: Mapping[str, Any], condition: str) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
     if instance.get("rq_id") != "RQ3":
         raise RQ3EvaluationError("instance.rq_id must be RQ3")
-    if condition not in {"C1", "C2", "C3"}:
-        raise RQ3EvaluationError("RQ3 condition must be C1, C2, or C3")
+    if condition not in {"C1", "C2"}:
+        raise RQ3EvaluationError("RQ3 condition must be C1 or C2")
     gold = instance.get("construction_gold")
     if not isinstance(gold, Mapping) or gold.get("status") != "FINAL_UPDATE_OR_CLARIFY_GOLD":
         raise RQ3EvaluationError("RQ3 Gold is not human-reviewed and frozen")

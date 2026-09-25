@@ -53,7 +53,7 @@ class RQ3EvaluationTests(unittest.TestCase):
         review = build_review_template(instance)
         review["reviewers"] = ["reviewer-a", "reviewer-b"]
         review["adjudication_status"] = "ADJUDICATED"
-        for condition in ("C1", "C2", "C3"):
+        for condition in ("C1", "C2"):
             branch = review["conditions"][condition]
             branch["decision"] = decision
             branch["decision_rationale"] = "Synthetic adjudicated fixture."

@@ -68,6 +68,23 @@ def parse_args() -> argparse.Namespace:
         "--project-id",
         help="Project ID used with the default input/output directory layout.",
     )
+    parser.add_argument(
+        "--rq-ids",
+        nargs="+",
+        choices=RQ_IDS,
+        default=list(RQ_IDS),
+        help=(
+            "RQ collections to construct. Use '--rq-ids RQ1 RQ2 RQ3' to "
+            "construct reasoning instances without loading Code Environment."
+        ),
+    )
+    parser.add_argument(
+        "--input-release",
+        help=(
+            "Stable release label recorded in instances and manifests. When "
+            "omitted, a deterministic label is derived from the three inputs."
+        ),
+    )
     parser.add_argument("--gold-states", type=Path, help="Path to gold_states.json.")
     parser.add_argument(
         "--state-graph", type=Path, help="Path to requirement_state_graph.json."
@@ -119,7 +136,7 @@ def parse_args() -> argparse.Namespace:
 
 def _resolve_paths(
     args: argparse.Namespace,
-) -> tuple[str, Path, Path, Path, Path, Path]:
+) -> tuple[str, Path, Path, Path, Path | None, Path]:
     project_id = str(args.project_id) if args.project_id is not None else ""
     gold_path = args.gold_states
     if not project_id:
@@ -137,9 +154,11 @@ def _resolve_paths(
         args.messages
         or args.stage1_run_root / project_id / "normalized_project.json"
     )
-    code_environment_dir = (
-        args.code_environment_dir or args.code_environment_root / project_id
-    )
+    code_environment_dir = None
+    if "RQ4" in args.rq_ids:
+        code_environment_dir = (
+            args.code_environment_dir or args.code_environment_root / project_id
+        )
     output_dir = args.output_dir or args.stage2_root / project_id
     return (
         project_id,
@@ -154,12 +173,13 @@ def _resolve_paths(
 def _render_summary(
     project_id: str,
     indexes: dict[str, dict[str, Any]],
+    rq_ids: tuple[str, ...],
     output_dir: Path,
     *,
     validate_only: bool,
 ) -> str:
     counts = ", ".join(
-        f"{rq_id}={indexes[rq_id]['instance_count']}" for rq_id in RQ_IDS
+        f"{rq_id}={indexes[rq_id]['instance_count']}" for rq_id in rq_ids
     )
     action = "validated" if validate_only else "generated"
     suffix = " (no files written)" if validate_only else f" -> {output_dir}"
@@ -184,12 +204,16 @@ def main() -> int:
             "gold_states": gold_path,
             "requirement_state_graph": graph_path,
             "normalized_project": messages_path,
-            "code_environment": code_environment_dir,
         }
+        if code_environment_dir is not None:
+            source_paths["code_environment"] = code_environment_dir
+        selected_rqs = tuple(args.rq_ids)
         collections = build_rq_instances(
             gold_states,
             state_graph,
             normalized_project,
+            rq_ids=selected_rqs,
+            input_release=args.input_release,
             code_environment_dir=code_environment_dir,
             source_paths=source_paths,
             workspace_root=repo_root(),
@@ -199,12 +223,14 @@ def main() -> int:
             collections,
             indexes,
             project_id=project_id,
+            rq_ids=selected_rqs,
+            input_release=args.input_release,
             source_paths=source_paths,
             workspace_root=repo_root(),
             output_dir=output_dir,
         )
         if not args.validate_only:
-            for rq_id in RQ_IDS:
+            for rq_id in selected_rqs:
                 rq_dir = output_dir / rq_id
                 for instance in collections[rq_id]:
                     write_json(rq_dir / f"{instance['instance_id']}.json", instance)
@@ -219,6 +245,7 @@ def main() -> int:
             _render_summary(
                 project_id,
                 indexes,
+                selected_rqs,
                 output_dir,
                 validate_only=args.validate_only,
             )

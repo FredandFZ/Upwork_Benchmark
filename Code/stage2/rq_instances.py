@@ -26,12 +26,12 @@ import stat
 import zipfile
 
 
-INSTANCE_SCHEMA_VERSION = "rq-instance-v1"
-INDEX_SCHEMA_VERSION = "rq-instance-index-v1"
-MANIFEST_SCHEMA_VERSION = "rq-instance-manifest-v1"
+INSTANCE_SCHEMA_VERSION = "rq-instance-v2"
+INDEX_SCHEMA_VERSION = "rq-instance-index-v2"
+MANIFEST_SCHEMA_VERSION = "rq-instance-manifest-v2"
 
 RQ_IDS = ("RQ1", "RQ2", "RQ3", "RQ4")
-CONDITIONS = ("C1", "C2", "C3")
+CONDITIONS = ("C1", "C2")
 
 RQ_DEFINITIONS: dict[str, dict[str, Any]] = {
     "RQ1": {
@@ -42,7 +42,7 @@ RQ_DEFINITIONS: dict[str, dict[str, Any]] = {
             "client task. Exclude unrelated history and do not treat the current "
             "task itself as historical evidence."
         ),
-        "supported_conditions": ["C2"],
+        "supported_conditions": ["C1"],
     },
     "RQ2": {
         "name": "Pre-task State Reconstruction",
@@ -51,7 +51,7 @@ RQ_DEFINITIONS: dict[str, dict[str, Any]] = {
             "task, reconstruct their last valid state immediately before the "
             "current task. Do not apply the current task to that state."
         ),
-        "supported_conditions": ["C2", "C3"],
+        "supported_conditions": ["C1", "C2"],
     },
     "RQ3": {
         "name": "Requirement Update or Clarify",
@@ -61,7 +61,7 @@ RQ_DEFINITIONS: dict[str, dict[str, Any]] = {
             "construct that state; otherwise choose CLARIFY and identify the "
             "blocking requirement field and the question that must be answered."
         ),
-        "supported_conditions": ["C1", "C2", "C3"],
+        "supported_conditions": ["C1", "C2"],
     },
     "RQ4": {
         "name": "Requirement-to-Code Execution",
@@ -71,7 +71,7 @@ RQ_DEFINITIONS: dict[str, dict[str, Any]] = {
             "repository. Clarify instead of making a speculative change when "
             "the available evidence is insufficient."
         ),
-        "supported_conditions": ["C1", "C2", "C3"],
+        "supported_conditions": ["C1", "C2"],
     },
 }
 
@@ -136,6 +136,18 @@ def _sha256_file(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _sha256_json(value: Any) -> str:
+    """Hash a JSON-compatible value using one canonical serialization."""
+
+    payload = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return sha256(payload).hexdigest()
 
 
 def _portable_path(path: Path, workspace_root: Path | None) -> str:
@@ -568,12 +580,8 @@ def _condition_inputs(
     for condition in CONDITIONS:
         available = condition in RQ_DEFINITIONS[rq_id]["supported_conditions"]
         if condition == "C1":
-            mode = "NO_HISTORY"
-            ids: list[Any] = []
-            review_status = "NOT_APPLICABLE"
-        elif condition == "C2":
             mode = "FULL_HISTORY"
-            ids = deepcopy(full_history_ids)
+            ids: list[Any] = deepcopy(full_history_ids)
             review_status = "DETERMINISTIC"
         else:
             mode = "ORACLE_RELEVANT_HISTORY"
@@ -620,7 +628,7 @@ def _response_contract(rq_id: str) -> dict[str, Any]:
                 ],
             },
             "requirement_refs_must_be_unique": True,
-            "evidence_message_ids_must_reference_c2_history": True,
+            "evidence_message_ids_must_reference_c1_history": True,
             "internal_ids_forbidden": True,
         }
     if rq_id == "RQ2":
@@ -710,14 +718,11 @@ def _response_contract(rq_id: str) -> dict[str, Any]:
             "internal_ids_forbidden": True,
         }
     return {
-        "schema_version": "rq4-agent-response-v1",
-        "required_fields": ["decision", "planned_actions"],
-        "decision_values": ["ACT", "CLARIFY"],
-        "action_values": ["IMPLEMENT", "MODIFY", "REMOVE", "PRESERVE"],
-        "repository_result": (
-            "When decision=ACT, the evaluation runner will separately capture "
-            "the patch, changed files, command logs, and repository hash."
-        ),
+        "schema_version": "rq4-repository-result-v2",
+        "scored_artifact": "FINAL_REPOSITORY",
+        "structured_agent_response_required": False,
+        "planned_actions_scored": False,
+        "result_values": ["PASS", "FAIL"],
     }
 
 
@@ -1176,6 +1181,8 @@ def _source_record(
 def _common_instance(
     *,
     rq_id: str,
+    input_release: str,
+    target_fingerprint: str,
     project_id: str,
     project_title: Any,
     gold: dict[str, Any],
@@ -1189,9 +1196,17 @@ def _common_instance(
 ) -> dict[str, Any]:
     turns = len(history)
     full_history_ids = [message["message_id"] for message in history]
+    public_history = [messages.public_message(message) for message in history]
+    condition_inputs = _condition_inputs(
+        rq_id,
+        full_history_ids,
+        relevance["oracle_history_message_ids"],
+    )
     return {
         "schema_version": INSTANCE_SCHEMA_VERSION,
         "instance_id": f"{target_id}_{rq_id}",
+        "input_release": input_release,
+        "target_fingerprint": target_fingerprint,
         "project_id": project_id,
         "project_title": deepcopy(project_title),
         "rq_id": rq_id,
@@ -1209,13 +1224,19 @@ def _common_instance(
             "boundary": "STRICTLY_BEFORE_TARGET_MESSAGE",
             "contains_target_message": False,
             "message_count": turns,
-            "messages": [messages.public_message(message) for message in history],
+            "messages": public_history,
         },
-        "condition_inputs": _condition_inputs(
-            rq_id,
-            full_history_ids,
-            relevance["oracle_history_message_ids"],
-        ),
+        "condition_inputs": condition_inputs,
+        "fingerprints": {
+            "target": target_fingerprint,
+            "history_pool": _sha256_json(public_history),
+            "condition_history": {
+                condition: _sha256_json(
+                    condition_inputs[condition]["history_message_ids"]
+                )
+                for condition in CONDITIONS
+            },
+        },
         "response_contract": _response_contract(rq_id),
         "visibility": {
             "record_kind": "RESEARCHER_SIDE_CONSTRUCTION_INSTANCE",
@@ -1558,14 +1579,10 @@ def _build_rq3_gold(
         },
         "decision_candidates_by_condition": {
             "C1": {
-                "value": None,
-                "status": "PENDING_EVIDENCE_SUFFICIENCY_REVIEW",
-            },
-            "C2": {
                 "value": project_candidate,
                 "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW",
             },
-            "C3": {
+            "C2": {
                 "value": project_candidate,
                 "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW",
             },
@@ -1585,7 +1602,8 @@ def _build_rq3_gold(
         "review_note": (
             "An OPEN ambiguity is only a candidate. It becomes blocking Gold "
             "after materiality, task relevance, alternative implementation, and "
-            "available-evidence checks. C1 must be audited independently."
+            "available-evidence checks. C1 and C2 must freeze the same semantic "
+            "Gold; a disagreement indicates an Oracle-history or review defect."
         ),
     }
 
@@ -1617,14 +1635,10 @@ def _build_rq4_gold(
         "status": "PROVISIONAL_NOT_EXECUTION_READY",
         "task_action_candidates_by_condition": {
             "C1": {
-                "value": None,
-                "status": "PENDING_EVIDENCE_SUFFICIENCY_REVIEW",
-            },
-            "C2": {
                 "value": project_candidate,
                 "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW",
             },
-            "C3": {
+            "C2": {
                 "value": project_candidate,
                 "status": "PENDING_BLOCKING_AMBIGUITY_REVIEW",
             },
@@ -1645,11 +1659,47 @@ def _build_rq4_gold(
     }
 
 
+def _instance_readiness(instance: Mapping[str, Any]) -> dict[str, Any]:
+    """Describe construction and scoring readiness without changing Gold."""
+
+    rq_id = str(instance.get("rq_id"))
+    gold = instance.get("construction_gold")
+    status = gold.get("status") if isinstance(gold, Mapping) else None
+    blockers: list[str] = []
+    formal_reasoning = False
+    formal_execution = False
+    if rq_id == "RQ1":
+        formal_reasoning = status == "DETERMINISTIC_RQ1_GOLD"
+        if not formal_reasoning:
+            blockers.append("DETERMINISTIC_RQ1_GOLD_REQUIRED")
+    elif rq_id == "RQ2":
+        formal_reasoning = status == "FINAL_TYPED_STATE_GOLD"
+        if not formal_reasoning:
+            blockers.append("FIELD_COMPARATOR_REVIEW_REQUIRED")
+    elif rq_id == "RQ3":
+        formal_reasoning = status == "FINAL_UPDATE_OR_CLARIFY_GOLD"
+        if not formal_reasoning:
+            blockers.append("HUMAN_DECISION_REVIEW_REQUIRED")
+    elif rq_id == "RQ4":
+        formal_execution = bool(
+            isinstance(gold, Mapping) and gold.get("execution_ready") is True
+        )
+        if not formal_execution:
+            raw_blockers = gold.get("execution_readiness_blockers", []) if isinstance(gold, Mapping) else []
+            blockers.extend(str(value) for value in raw_blockers)
+    return {
+        "construction": "COMPLETE",
+        "smoke_allowed": True,
+        "formal_reasoning_allowed": formal_reasoning,
+        "formal_execution_allowed": formal_execution,
+        "blockers": blockers,
+    }
+
+
 def _derive_applicable_rqs(
     *,
     relevance: dict[str, Any],
     target_event_refs: dict[str, list[dict[str, Any]]],
-    decision_candidate: str,
     code_environment_available: bool,
 ) -> list[str]:
     """Apply the benchmark's deterministic target/RQ materialization rules."""
@@ -1659,7 +1709,7 @@ def _derive_applicable_rqs(
         applicable.extend(["RQ1", "RQ2"])
     if target_event_refs:
         applicable.append("RQ3")
-    if decision_candidate == "ACT" and code_environment_available:
+    if target_event_refs and code_environment_available:
         applicable.append("RQ4")
     return applicable
 
@@ -1669,6 +1719,8 @@ def build_rq_instances(
     state_graph: dict[str, Any],
     normalized_project: dict[str, Any],
     *,
+    rq_ids: Iterable[str] | None = None,
+    input_release: str | None = None,
     code_environment_dir: str | Path | None = None,
     source_paths: Mapping[str, str | Path] | None = None,
     workspace_root: str | Path | None = None,
@@ -1685,16 +1737,39 @@ def build_rq_instances(
     messages = _MessageIndex(normalized_project)
     graph = _GraphIndex(state_graph, messages)
     project_id = _validate_project_ids(gold_states, graph, messages)
+    selected_rqs = tuple(rq_ids) if rq_ids is not None else RQ_IDS
+    if (
+        not selected_rqs
+        or len(set(selected_rqs)) != len(selected_rqs)
+        or any(rq_id not in RQ_IDS for rq_id in selected_rqs)
+    ):
+        raise RQInstanceError("rq_ids must be a non-empty unique subset of RQ1--RQ4")
+    release = input_release or (
+        f"{project_id}-"
+        f"{_sha256_json([gold_states, state_graph, normalized_project])[:16]}"
+    )
     root = Path(workspace_root).resolve() if workspace_root is not None else None
     code_env = _CodeEnvironmentIndex(
-        Path(code_environment_dir) if code_environment_dir is not None else None,
+        (
+            Path(code_environment_dir)
+            if "RQ4" in selected_rqs and code_environment_dir is not None
+            else None
+        ),
         project_id=project_id,
         workspace_root=root,
     )
     normalized_sources = {
         name: Path(path) for name, path in (source_paths or {}).items()
     }
-    sources = _source_record(normalized_sources, root)
+    reasoning_sources = _source_record(
+        {
+            name: path
+            for name, path in normalized_sources.items()
+            if name != "code_environment"
+        },
+        root,
+    )
+    execution_sources = _source_record(normalized_sources, root)
 
     collections: dict[str, list[dict[str, Any]]] = {rq_id: [] for rq_id in RQ_IDS}
     seen_targets: set[str] = set()
@@ -1734,19 +1809,37 @@ def build_rq_instances(
         ambiguity_candidates = _open_ambiguity_candidates(
             gold["affected_requirement_ids"], post_state
         )
-        decision_candidate = "CLARIFY" if ambiguity_candidates else "ACT"
         applicable_rqs = _derive_applicable_rqs(
             relevance=relevance,
             target_event_refs=target_event_refs,
-            decision_candidate=decision_candidate,
             code_environment_available=code_env.has_target(target_id),
         )
+        applicable_rqs = [
+            rq_id for rq_id in applicable_rqs if rq_id in selected_rqs
+        ]
+        public_history = [messages.public_message(message) for message in history]
+        target_fingerprint = _sha256_json(
+            {
+                "input_release": release,
+                "project_id": project_id,
+                "target_id": target_id,
+                "target_message_id": target_message_id,
+                "target_task": gold.get("target_task"),
+                "history": public_history,
+                "task_event_ids": gold.get("task_event_ids"),
+                "affected_requirement_ids": gold.get("affected_requirement_ids"),
+                "pre_task_gold_state": gold.get("pre_task_gold_state"),
+                "post_task_gold_state": gold.get("post_task_gold_state"),
+            }
+        )
 
-        for rq_id in RQ_IDS:
+        for rq_id in selected_rqs:
             if rq_id not in applicable_rqs:
                 continue
             instance = _common_instance(
                 rq_id=rq_id,
+                input_release=release,
+                target_fingerprint=target_fingerprint,
                 project_id=project_id,
                 project_title=messages.project_title,
                 gold=gold,
@@ -1756,7 +1849,9 @@ def build_rq_instances(
                 messages=messages,
                 relevance=relevance,
                 applicable_rqs=applicable_rqs,
-                sources=sources,
+                sources=(
+                    execution_sources if rq_id == "RQ4" else reasoning_sources
+                ),
             )
             if rq_id == "RQ1":
                 instance["construction_gold"] = _build_rq1_gold(
@@ -1791,6 +1886,7 @@ def build_rq_instances(
                     ambiguity_candidates=ambiguity_candidates,
                     relevance=relevance,
                 )
+            instance["readiness"] = _instance_readiness(instance)
             errors = validate_rq_instance(instance)
             if errors:
                 raise RQInstanceError(
@@ -1862,6 +1958,20 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
         return ["instance must be an object"]
     if instance.get("schema_version") != INSTANCE_SCHEMA_VERSION:
         errors.append("invalid schema_version")
+    if not isinstance(instance.get("input_release"), str) or not instance.get(
+        "input_release"
+    ):
+        errors.append("input_release must be a non-empty string")
+    target_fingerprint = instance.get("target_fingerprint")
+    if not isinstance(target_fingerprint, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", target_fingerprint
+    ):
+        errors.append("target_fingerprint must be a lowercase SHA-256")
+    fingerprints = instance.get("fingerprints")
+    if not isinstance(fingerprints, dict) or fingerprints.get(
+        "target"
+    ) != target_fingerprint:
+        errors.append("fingerprints.target must equal target_fingerprint")
     rq_id = instance.get("rq_id")
     if rq_id not in RQ_IDS:
         errors.append("invalid rq_id")
@@ -1908,39 +2018,38 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
 
     condition_inputs = instance.get("condition_inputs")
     if not isinstance(condition_inputs, dict) or set(condition_inputs) != set(CONDITIONS):
-        errors.append("condition_inputs must contain exactly C1, C2, and C3")
+        errors.append("condition_inputs must contain exactly C1 and C2")
     else:
         c1_ids = condition_inputs["C1"].get("history_message_ids")
         c2_ids = condition_inputs["C2"].get("history_message_ids")
-        c3_ids = condition_inputs["C3"].get("history_message_ids")
-        if c1_ids != []:
-            errors.append("C1 history must be empty")
-        if c2_ids != history_ids:
-            errors.append("C2 history IDs must equal the full history pool")
-        if not isinstance(c3_ids, list) or not {
-            _id_key(value) for value in c3_ids
-        }.issubset({_id_key(value) for value in history_ids}):
-            errors.append("C3 history must be a subset of C2")
+        if c1_ids != history_ids:
+            errors.append("C1 history IDs must equal the full history pool")
+        c2_is_subset = isinstance(c2_ids, list) and {
+            _id_key(value) for value in c2_ids
+        }.issubset({_id_key(value) for value in history_ids})
+        if not c2_is_subset:
+            errors.append("C2 history must be a subset of C1")
+        if c2_is_subset:
+            positions = {
+                _id_key(message_id): position
+                for position, message_id in enumerate(history_ids)
+            }
+            c2_positions = [positions[_id_key(value)] for value in c2_ids]
+            if c2_positions != sorted(c2_positions):
+                errors.append("C2 history must preserve C1 order")
         for condition in CONDITIONS:
             record = condition_inputs[condition]
             ids = record.get("history_message_ids")
             if isinstance(ids, list) and record.get("history_message_count") != len(ids):
                 errors.append(f"{condition} history_message_count is inconsistent")
     if rq_id == "RQ1" and condition_inputs and (
-        condition_inputs["C1"].get("available") is not False
-        or condition_inputs["C2"].get("available") is not True
-        or condition_inputs["C3"].get("available") is not False
+        condition_inputs["C1"].get("available") is not True
+        or condition_inputs["C2"].get("available") is not False
     ):
-        errors.append("RQ1 must be available only in C2")
-    if rq_id == "RQ2" and condition_inputs and (
-        condition_inputs["C1"].get("available") is not False
-        or condition_inputs["C2"].get("available") is not True
-        or condition_inputs["C3"].get("available") is not True
-    ):
-        errors.append("RQ2 must be available only in C2 and C3")
-    if rq_id in ("RQ3", "RQ4") and condition_inputs:
+        errors.append("RQ1 must be available only in C1")
+    if rq_id in ("RQ2", "RQ3", "RQ4") and condition_inputs:
         if not all(condition_inputs[c].get("available") is True for c in CONDITIONS):
-            errors.append(f"{rq_id} must expose C1, C2, and C3")
+            errors.append(f"{rq_id} must expose C1 and C2")
     if rq_id == "RQ4":
         code_environment = instance.get("code_environment")
         if not isinstance(code_environment, dict) or not code_environment.get("available"):
@@ -2070,9 +2179,14 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
         final = construction_gold.get("final_gold_by_condition")
         if construction_gold.get("status") == "FINAL_UPDATE_OR_CLARIFY_GOLD":
             if not isinstance(final, dict) or set(final) != set(CONDITIONS):
-                errors.append("final RQ3 Gold must contain C1, C2, and C3")
+                errors.append("final RQ3 Gold must contain C1 and C2")
             elif any(not isinstance(final[condition], dict) for condition in CONDITIONS):
                 errors.append("final RQ3 Gold cannot contain null branches")
+            elif final["C1"] != final["C2"]:
+                errors.append("final RQ3 Gold must be identical for C1 and C2")
+    readiness = instance.get("readiness")
+    if not isinstance(readiness, dict) or readiness.get("construction") != "COMPLETE":
+        errors.append("readiness must describe a complete construction record")
     return errors
 
 
@@ -2090,6 +2204,14 @@ def build_rq_indexes(
     if len(all_project_ids) > 1:
         raise RQInstanceError("RQ collections span multiple projects")
     collection_project_id = next(iter(all_project_ids), None)
+    all_releases = {
+        instance.get("input_release")
+        for rq_id in RQ_IDS
+        for instance in collections.get(rq_id, [])
+    }
+    if len(all_releases) > 1:
+        raise RQInstanceError("RQ collections span multiple input releases")
+    collection_release = next(iter(all_releases), None)
     for rq_id in RQ_IDS:
         instances = list(collections.get(rq_id, []))
         if any(instance.get("rq_id") != rq_id for instance in instances):
@@ -2101,6 +2223,7 @@ def build_rq_indexes(
         difficulties = Counter(instance["difficulty"] for instance in instances)
         indexes[rq_id] = {
             "schema_version": INDEX_SCHEMA_VERSION,
+            "input_release": collection_release,
             "project_id": next(iter(project_ids), collection_project_id),
             "rq_id": rq_id,
             "rq_name": RQ_DEFINITIONS[rq_id]["name"],
@@ -2117,11 +2240,13 @@ def build_rq_indexes(
             "instances": [
                 {
                     "instance_id": instance["instance_id"],
+                    "target_fingerprint": instance["target_fingerprint"],
                     "target_id": instance["target_id"],
                     "target_message_id": instance["target_message_id"],
                     "turns": instance["turns"],
                     "difficulty": instance["difficulty"],
                     "file": f"{instance['instance_id']}.json",
+                    "content_sha256": _sha256_json(instance),
                 }
                 for instance in instances
             ],
@@ -2134,6 +2259,8 @@ def build_project_manifest(
     indexes: Mapping[str, dict[str, Any]],
     *,
     project_id: str,
+    rq_ids: Iterable[str] | None = None,
+    input_release: str | None = None,
     source_paths: Mapping[str, str | Path] | None = None,
     workspace_root: str | Path | None = None,
     output_dir: str | Path | None = None,
@@ -2142,7 +2269,14 @@ def build_project_manifest(
     source_records = _source_record(
         {name: Path(path) for name, path in (source_paths or {}).items()}, root
     )
-    for rq_id in RQ_IDS:
+    selected_rqs = tuple(rq_ids) if rq_ids is not None else RQ_IDS
+    if (
+        not selected_rqs
+        or len(set(selected_rqs)) != len(selected_rqs)
+        or any(rq_id not in RQ_IDS for rq_id in selected_rqs)
+    ):
+        raise RQInstanceError("rq_ids must be a non-empty unique subset of RQ1--RQ4")
+    for rq_id in selected_rqs:
         if rq_id not in indexes:
             raise RQInstanceError(f"missing index for {rq_id}")
         if len(collections.get(rq_id, [])) != indexes[rq_id].get("instance_count"):
@@ -2152,14 +2286,88 @@ def build_project_manifest(
         if output_dir is not None
         else f"outputs/stage2/{project_id}"
     )
+    releases = {
+        instance.get("input_release")
+        for rq_id in selected_rqs
+        for instance in collections.get(rq_id, [])
+    }
+    if input_release is not None:
+        releases.add(input_release)
+    releases.discard(None)
+    if len(releases) != 1:
+        raise RQInstanceError("project manifest requires exactly one input_release")
+    release = next(iter(releases))
+
+    targets: dict[str, dict[str, Any]] = {}
+    for rq_id in selected_rqs:
+        for instance in collections.get(rq_id, []):
+            target_id = str(instance["target_id"])
+            target = targets.setdefault(
+                target_id,
+                {
+                    "target_id": target_id,
+                    "target_message_id": deepcopy(instance["target_message_id"]),
+                    "target_fingerprint": instance["target_fingerprint"],
+                    "turns": instance["turns"],
+                    "difficulty": instance["difficulty"],
+                    "instances": {},
+                    "conditions": {
+                        condition: {
+                            "history_mode": instance["condition_inputs"][condition][
+                                "history_mode"
+                            ],
+                            "history_sha256": instance["fingerprints"][
+                                "condition_history"
+                            ][condition],
+                            "active_rqs": [],
+                        }
+                        for condition in CONDITIONS
+                    },
+                },
+            )
+            for field in (
+                "target_message_id",
+                "target_fingerprint",
+                "turns",
+                "difficulty",
+            ):
+                if target[field] != instance[field]:
+                    raise RQInstanceError(
+                        f"target {target_id!r} has inconsistent shared field {field!r}"
+                    )
+            target["instances"][rq_id] = {
+                "file": f"{rq_id}/{instance['instance_id']}.json",
+                "content_sha256": _sha256_json(instance),
+                "readiness": deepcopy(instance["readiness"]),
+            }
+            for condition in CONDITIONS:
+                record = instance["condition_inputs"][condition]
+                condition_record = target["conditions"][condition]
+                if (
+                    condition_record["history_mode"] != record["history_mode"]
+                    or condition_record["history_sha256"]
+                    != instance["fingerprints"]["condition_history"][condition]
+                ):
+                    raise RQInstanceError(
+                        f"target {target_id!r} has inconsistent {condition} history"
+                    )
+                if record.get("available") is True:
+                    condition_record["active_rqs"].append(rq_id)
+
     return {
         "schema_version": MANIFEST_SCHEMA_VERSION,
+        "input_release": release,
         "project_id": project_id,
         "construction_scope": "RQ_INSTANCES_ONLY_NO_EVALUATION",
         "layout": {
             "project_directory": project_directory,
-            "rq_directories": list(RQ_IDS),
+            "rq_directories": list(selected_rqs),
             "one_json_file_per_target_rq_pair": True,
+        },
+        "condition_protocol": {
+            "C1": "FULL_HISTORY",
+            "C2": "ORACLE_RELEVANT_HISTORY",
+            "no_history_is_formal_condition": False,
         },
         "turns_policy": {
             "definition": "number of normalized messages strictly before target_message_id",
@@ -2172,21 +2380,22 @@ def build_project_manifest(
         "inclusion_policy": (
             "Derive applicable_rqs deterministically: RQ1 and RQ2 require a "
             "relevant historical Requirement; RQ3 requires an affected target "
-            "transition; RQ4 requires an ACT construction decision and a matching "
-            "target Code Environment."
+            "transition; an RQ4 candidate requires an affected transition and a "
+            "matching target Code Environment."
         ),
         "applicability_policy": {
             "RQ1": "HAS_RELEVANT_HISTORICAL_REQUIREMENT",
             "RQ2": "HAS_RELEVANT_HISTORICAL_REQUIREMENT",
             "RQ3": "HAS_AFFECTED_TARGET_TRANSITION",
-            "RQ4": "ACT_AND_MATCHING_CODE_ENVIRONMENT",
+            "RQ4": "AFFECTED_TRANSITION_AND_MATCHING_CODE_ENVIRONMENT",
         },
         "rq_counts": {
-            rq_id: indexes[rq_id]["instance_count"] for rq_id in RQ_IDS
+            rq_id: indexes[rq_id]["instance_count"] for rq_id in selected_rqs
         },
         "total_instance_count": sum(
-            indexes[rq_id]["instance_count"] for rq_id in RQ_IDS
+            indexes[rq_id]["instance_count"] for rq_id in selected_rqs
         ),
+        "targets": [targets[target_id] for target_id in sorted(targets)],
         "source_artifacts": source_records,
         "construction_boundaries": {
             "evaluation_implemented": {

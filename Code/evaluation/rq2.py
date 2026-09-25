@@ -55,8 +55,8 @@ def validate_agent_response(
     instance: Mapping[str, Any], response: Mapping[str, Any], *, condition: str
 ) -> list[dict[str, Any]]:
     _gold(instance)
-    if condition not in ("C2", "C3"):
-        raise RQ2EvaluationError("RQ2 condition must be C2 or C3")
+    if condition not in ("C1", "C2"):
+        raise RQ2EvaluationError("RQ2 condition must be C1 or C2")
     condition_inputs = instance.get("condition_inputs")
     if not isinstance(condition_inputs, Mapping) or not condition_inputs.get(
         condition, {}

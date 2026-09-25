@@ -652,7 +652,7 @@ REMOVED
 > **REMOVED means no longer valid, not erased from history.**
 > 
 
-`REMOVE` 保留当前 execution，并且只关闭 `resolves_ambiguity_event_ids` 中明确列出的 ambiguity。任何后续 Event 都属于非法 transition，因为当前实现不支持在 `REMOVED` 后重新引入或恢复同一个 Requirement。
+`REMOVE` 保留当前 execution，并且只关闭 `resolves_ambiguity_event_ids` 中明确列出的 ambiguity。进入 `REMOVED` 后仍允许 `IMPLEMENTATION_CLAIM`、`RUNTIME_FAILURE`、`RUNTIME_VERIFICATION`，用于记录移除动作是否被声明完成、实际失败或得到运行验证；这些 Event 只更新 execution，lifecycle 必须保持 `REMOVED`。其他后续 Event 仍属于非法 transition，因为当前实现不支持在 `REMOVED` 后重新引入、修改、暂缓或恢复同一个 Requirement。
 
 这一点对于后续 RQ3 判断历史 Requirement 是否已经失效非常重要。
 
@@ -1383,7 +1383,7 @@ Graph Construction 不重新判断 Event 是否正确，也不重新解释原始
 
 系统从 incomplete observed baseline 开始构建第一个可确定 State；无法恢复的字段保持空或 `null`。后续唯一的 `INTRODUCE` 是正式 baseline transition，不是删除早期 Nodes 的理由。
 
-进入 `REMOVED` 后出现任何后续 Event、出现第二个 `INTRODUCE`、resolution link 指向未来/其他 Requirement/非 `AMBIGUOUS` Event，均直接报告 consistency error。
+进入 `REMOVED` 后出现非 Execution Event、出现第二个 `INTRODUCE`、resolution link 指向未来/其他 Requirement/非 `AMBIGUOUS` Event，均直接报告 consistency error。`REMOVED` 后的 Execution Event 仅更新 execution 状态，不得改变 lifecycle。
 
 ---
 

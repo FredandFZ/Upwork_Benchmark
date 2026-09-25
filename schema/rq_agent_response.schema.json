@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rq-agent-response-v1",
+  "title": "ReqMemBench Phase A unified response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requirements",
+    "decision",
+    "post_task_states",
+    "clarifications"
+  ],
+  "properties": {
+    "requirements": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/requirement"}
+    },
+    "decision": {
+      "enum": ["ACT", "CLARIFY"]
+    },
+    "post_task_states": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/postTaskState"}
+        },
+        {"type": "null"}
+      ]
+    },
+    "clarifications": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/clarification"}
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "decision": {"const": "ACT"},
+        "post_task_states": {"type": "array", "minItems": 1},
+        "clarifications": {"type": "array", "maxItems": 0}
+      }
+    },
+    {
+      "properties": {
+        "decision": {"const": "CLARIFY"},
+        "post_task_states": {"type": "null"},
+        "clarifications": {"type": "array", "minItems": 1}
+      }
+    }
+  ],
+  "$defs": {
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attributes",
+        "scope",
+        "lifecycle_status",
+        "ambiguity",
+        "execution"
+      ],
+      "properties": {
+        "attributes": {"type": "object"},
+        "scope": {"type": "object"},
+        "lifecycle_status": {"type": ["string", "null"]},
+        "ambiguity": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "array", "items": {"type": "object"}}
+          ]
+        },
+        "execution": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "object"}
+          ]
+        }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_ref",
+        "requirement_summary",
+        "evidence_message_ids",
+        "pre_task_state"
+      ],
+      "properties": {
+        "requirement_ref": {"type": "string", "minLength": 1},
+        "requirement_summary": {"type": "string", "minLength": 1},
+        "evidence_message_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": ["integer", "string"]}
+        },
+        "pre_task_state": {"$ref": "#/$defs/state"}
+      }
+    },
+    "postTaskState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_ref",
+        "requirement_summary",
+        "change_type",
+        "removed_attribute_keys",
+        "state"
+      ],
+      "properties": {
+        "requirement_ref": {"type": "string", "minLength": 1},
+        "requirement_summary": {"type": "string", "minLength": 1},
+        "change_type": {"type": "string", "minLength": 1},
+        "removed_attribute_keys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "state": {"$ref": "#/$defs/state"}
+      }
+    },
+    "clarification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_ref",
+        "requirement_summary",
+        "dimension",
+        "field",
+        "missing_information",
+        "question"
+      ],
+      "properties": {
+        "requirement_ref": {"type": "string", "minLength": 1},
+        "requirement_summary": {"type": "string", "minLength": 1},
+        "dimension": {
+          "enum": [
+            "VALUE",
+            "SCOPE",
+            "LIFECYCLE",
+            "BEHAVIOR",
+            "DEPENDENCY",
+            "EXECUTION"
+          ]
+        },
+        "field": {"type": ["string", "null"]},
+        "missing_information": {"type": "string", "minLength": 1},
+        "question": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

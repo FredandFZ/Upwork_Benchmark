@@ -40,7 +40,7 @@ def _args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--instance", type=Path, required=True)
     parser.add_argument("--agent-response", type=Path, required=True)
-    parser.add_argument("--condition", choices=("C1", "C2", "C3"), required=True)
+    parser.add_argument("--condition", choices=("C1", "C2"), required=True)
     parser.add_argument("--alignment-response", type=Path)
     parser.add_argument("--semantic-response", type=Path)
     parser.add_argument("--request-out", type=Path)

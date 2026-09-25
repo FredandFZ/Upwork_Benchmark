@@ -41,6 +41,10 @@ Replay behavior:
   patching. A null scope dimension means “not updated”. Because a modification
   creates a new Requirement version, it also resets execution to null.
 - Lifecycle, ambiguity, and execution are independent state dimensions.
+- After `REMOVE`, execution Events (`IMPLEMENTATION_CLAIM`, `RUNTIME_FAILURE`,
+  and `RUNTIME_VERIFICATION`) remain replayable. They update only the execution
+  dimension while lifecycle stays `REMOVED`; this records whether the removal
+  action was claimed, failed in practice, or was verified.
 - Every Stage 1 Requirement receives one Requirement Graph. Stage 2 never
   removes a Requirement merely because `INTRODUCE` is absent.
 - A lifecycle whose first Event is `INTRODUCE` uses
@@ -66,8 +70,8 @@ Replay behavior:
 - `supporting_event_ids` contains the minimal set of Events that directly
   establish the current snapshot; the full trajectory remains available in the
   graph's edges.
-- Transitions that cannot be replayed safely (for example, an Event after
-  `REMOVE`) stop generation with a consistency error.
+- Transitions that cannot be replayed safely (for example, a non-execution
+  Event after `REMOVE`) stop generation with a consistency error.
 
 Explicit ambiguity replay:
 

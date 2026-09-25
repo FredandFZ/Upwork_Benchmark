@@ -270,14 +270,12 @@ def _write_code_environment(
 
 class RQInstanceTests(unittest.TestCase):
     def test_clarify_target_builds_rq1_to_rq3_and_preserves_turns(self):
-        with tempfile.TemporaryDirectory() as directory:
-            code_environment = _write_code_environment(Path(directory))
-            collections = build_rq_instances(
-                _gold(),
-                _state_graph(),
-                _messages(),
-                code_environment_dir=code_environment,
-            )
+        collections = build_rq_instances(
+            _gold(),
+            _state_graph(),
+            _messages(),
+            rq_ids=("RQ1", "RQ2", "RQ3"),
+        )
 
         self.assertEqual({rq: len(rows) for rq, rows in collections.items()}, {
             "RQ1": 1,
@@ -327,16 +325,22 @@ class RQInstanceTests(unittest.TestCase):
             "rq1-agent-response-v3",
         )
         self.assertEqual(
-            rq1["condition_inputs"]["C3"]["history_message_ids"], [10]
+            rq1["condition_inputs"]["C1"]["history_message_ids"], [10, 20, 30]
         )
-        self.assertFalse(rq1["condition_inputs"]["C3"]["available"])
+        self.assertTrue(rq1["condition_inputs"]["C1"]["available"])
+        self.assertEqual(
+            rq1["condition_inputs"]["C2"]["history_message_ids"], [10]
+        )
+        self.assertFalse(rq1["condition_inputs"]["C2"]["available"])
+        self.assertNotIn("code_environment", rq1["source_artifacts"])
 
         rq2 = collections["RQ2"][0]
         self.assertEqual(
             rq2["construction_gold"]["states"]["REQ_BUTTON"]["attributes"],
             {"colour": "blue"},
         )
-        self.assertFalse(rq2["condition_inputs"]["C1"]["available"])
+        self.assertTrue(rq2["condition_inputs"]["C1"]["available"])
+        self.assertTrue(rq2["condition_inputs"]["C2"]["available"])
         self.assertEqual(
             rq2["response_contract"]["schema_version"],
             "rq2-agent-response-v3",
@@ -452,7 +456,7 @@ class RQInstanceTests(unittest.TestCase):
             [10],
         )
         self.assertNotIn(40, atom["trajectory_message_ids"])
-        self.assertNotIn(40, rq1["condition_inputs"]["C3"]["history_message_ids"])
+        self.assertNotIn(40, rq1["condition_inputs"]["C2"]["history_message_ids"])
 
     def test_act_and_matching_code_environment_builds_rq4(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -559,7 +563,10 @@ class RQInstanceTests(unittest.TestCase):
         )
         indexes = build_rq_indexes(collections)
         manifest = build_project_manifest(
-            collections, indexes, project_id="P1"
+            collections,
+            indexes,
+            project_id="P1",
+            rq_ids=("RQ1", "RQ2", "RQ3"),
         )
         self.assertEqual(indexes["RQ2"]["instance_count"], 1)
         self.assertEqual(indexes["RQ2"]["instances"][0]["turns"], 3)
@@ -567,7 +574,16 @@ class RQInstanceTests(unittest.TestCase):
         self.assertEqual(manifest["total_instance_count"], 3)
         self.assertEqual(
             manifest["applicability_policy"]["RQ4"],
-            "ACT_AND_MATCHING_CODE_ENVIRONMENT",
+            "AFFECTED_TRANSITION_AND_MATCHING_CODE_ENVIRONMENT",
+        )
+        self.assertEqual(manifest["condition_protocol"]["C1"], "FULL_HISTORY")
+        self.assertEqual(
+            manifest["targets"][0]["conditions"]["C1"]["active_rqs"],
+            ["RQ1", "RQ2", "RQ3"],
+        )
+        self.assertEqual(
+            manifest["targets"][0]["conditions"]["C2"]["active_rqs"],
+            ["RQ2", "RQ3"],
         )
 
 

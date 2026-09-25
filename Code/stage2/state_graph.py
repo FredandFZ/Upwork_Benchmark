@@ -244,8 +244,13 @@ def _apply_event(
     event_id = event["event_id"]
     event_type = event["event_type"]
 
-    if state.lifecycle_status == "REMOVED":
-        raise Stage2ReplayError(f"{event_id} occurs after the Requirement was REMOVED")
+    if (
+        state.lifecycle_status == "REMOVED"
+        and event_type not in EXECUTION_STATUS_BY_EVENT
+    ):
+        raise Stage2ReplayError(
+            f"{event_id} is a non-execution Event after the Requirement was REMOVED"
+        )
     if event_type == "INTRODUCE" and introduction_seen:
         raise Stage2ReplayError(f"{event_id} is a duplicate INTRODUCE Event")
 

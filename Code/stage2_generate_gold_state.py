@@ -381,6 +381,10 @@ async def async_main(args: argparse.Namespace) -> int:
     project_id, annotation_path, messages_path, graph_path, output_dir = _resolve_paths(
         args
     )
+    print(
+        f"{project_id}: Stage 2.2 SELECT_T started (target-time selection)",
+        flush=True,
+    )
     selection_dir = output_dir / TARGET_TIME_SELECTION_DIRNAME
     annotation = read_json(annotation_path)
     normalized_project = read_json(messages_path)

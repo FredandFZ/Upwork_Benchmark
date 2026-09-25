@@ -6,8 +6,8 @@ from copy import deepcopy
 from typing import Any, Mapping
 
 
-REVIEW_SCHEMA_VERSION = "rq3-human-review-v1"
-CONDITIONS = ("C1", "C2", "C3")
+REVIEW_SCHEMA_VERSION = "rq3-human-review-v2"
+CONDITIONS = ("C1", "C2")
 DIMENSIONS = ("VALUE", "SCOPE", "LIFECYCLE", "BEHAVIOR", "DEPENDENCY", "EXECUTION")
 
 
@@ -27,7 +27,6 @@ def build_review_template(instance: Mapping[str, Any]) -> dict[str, Any]:
         "target_id": deepcopy(instance.get("target_id")),
         "reviewers": [],
         "adjudication_status": "PENDING",
-        "c2_c3_difference_reason": None,
         "conditions": {
             condition: {
                 "candidate_decision": deepcopy(
@@ -71,7 +70,7 @@ def validate_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> N
         raise RQ3ReviewError("review must be ADJUDICATED")
     conditions = review.get("conditions")
     if not isinstance(conditions, Mapping) or set(conditions) != set(CONDITIONS):
-        raise RQ3ReviewError("review.conditions must contain exactly C1, C2, and C3")
+        raise RQ3ReviewError("review.conditions must contain exactly C1 and C2")
     gold = instance.get("construction_gold")
     affected = set(gold.get("affected_requirement_ids", []))
     for condition in CONDITIONS:
@@ -128,10 +127,14 @@ def validate_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> N
                 )
             for fact in facts:
                 _text(fact, f"conditions.{condition}.acceptable_question_facts[]")
-    c2 = conditions["C2"].get("decision")
-    c3 = conditions["C3"].get("decision")
-    if c2 != c3:
-        _text(review.get("c2_c3_difference_reason"), "c2_c3_difference_reason")
+    if conditions["C1"].get("decision") != conditions["C2"].get("decision"):
+        raise RQ3ReviewError("C1 and C2 must freeze the same decision")
+    if conditions["C1"].get("blocking_clarifications") != conditions["C2"].get(
+        "blocking_clarifications"
+    ):
+        raise RQ3ReviewError(
+            "C1 and C2 must freeze the same blocking clarifications"
+        )
 
 
 def apply_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> dict[str, Any]:
@@ -162,9 +165,7 @@ def apply_review(instance: Mapping[str, Any], review: Mapping[str, Any]) -> dict
         "schema_version": REVIEW_SCHEMA_VERSION,
         "reviewers": deepcopy(review["reviewers"]),
         "adjudication_status": review["adjudication_status"],
-        "c2_c3_difference_reason": deepcopy(
-            review.get("c2_c3_difference_reason")
-        ),
+        "condition_gold_consistent": True,
         "decision_rationales": {
             condition: review["conditions"][condition]["decision_rationale"]
             for condition in CONDITIONS

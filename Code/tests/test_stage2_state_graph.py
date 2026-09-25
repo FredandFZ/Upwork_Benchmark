@@ -376,13 +376,60 @@ class RequirementStateGraphTests(unittest.TestCase):
         with self.assertRaisesRegex(Stage2ReplayError, "resolved more than once"):
             build_requirement_state_graph(annotation(events))
 
-    def test_event_after_remove_is_a_consistency_error(self) -> None:
+    def test_execution_events_after_remove_update_execution_without_reactivating(self) -> None:
+        events = [
+            event(1, "INTRODUCE", value_updates={"x": True}),
+            event(2, "REMOVE"),
+            event(
+                3,
+                "IMPLEMENTATION_CLAIM",
+                execution={
+                    "status": "CLAIMED_WORKING",
+                    "observed_behavior": "removal reported complete",
+                },
+            ),
+            event(
+                4,
+                "RUNTIME_FAILURE",
+                execution={
+                    "status": "FAILED",
+                    "observed_behavior": "removed behavior still observed",
+                },
+            ),
+            event(
+                5,
+                "RUNTIME_VERIFICATION",
+                execution={
+                    "status": "VERIFIED_WORKING",
+                    "observed_behavior": "removal verified",
+                },
+            ),
+        ]
+
+        graph = build_requirement_state_graph(annotation(events))["requirement_graphs"][0]
+
+        self.assertEqual(len(graph["nodes"]), 5)
+        for node in graph["nodes"][1:]:
+            self.assertEqual(node["lifecycle_status"], "REMOVED")
+        self.assertEqual(
+            [node["execution"]["status"] for node in graph["nodes"][2:]],
+            ["CLAIMED_WORKING", "FAILED", "VERIFIED_WORKING"],
+        )
+        self.assertEqual(
+            graph["nodes"][-1]["supporting_event_ids"],
+            ["REQ_X_E001", "REQ_X_E002", "REQ_X_E005"],
+        )
+
+    def test_non_execution_event_after_remove_is_a_consistency_error(self) -> None:
         events = [
             event(1, "INTRODUCE", value_updates={"x": True}),
             event(2, "REMOVE"),
             event(3, "MODIFY", value_updates={"x": False}),
         ]
-        with self.assertRaisesRegex(Stage2ReplayError, "after the Requirement was REMOVED"):
+        with self.assertRaisesRegex(
+            Stage2ReplayError,
+            "non-execution Event after the Requirement was REMOVED",
+        ):
             build_requirement_state_graph(annotation(events))
 
     def test_value_removals_delete_stale_attribute_and_retain_absence_provenance(self) -> None:

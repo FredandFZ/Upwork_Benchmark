@@ -1,0 +1,2378 @@
+{
+  "schema_version": "target-selection-v1",
+  "project_id": "42204309",
+  "input_fingerprint": {
+    "annotation_sha256": "39673f179a5074e0a817a1000383b34b954bcac12bd7623c3675a57242ddc650",
+    "normalized_project_sha256": "78c4ca0ab9def6c69fbb17505c72796dbc08ef9a69d801ec567add6d956ddb5d",
+    "state_graph_sha256": "39bda8eeebb3e48936c66b61d3a5beb92430ca951212fa0449e0897073ffb742"
+  },
+  "recommended_candidates": [
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_21",
+      "message_id": 21,
+      "conversation_turn_index": 21,
+      "history_turn_count": 20,
+      "speaker": "client",
+      "text": "Marcus, I have one final mechanics adjustment. It removes the half-expiring-ticket behavior and should simplify the code.\n\nThis rule replaces the earlier ticket-lifespan description:\nWhenever someone mints using a referral code, the referrer immediately receives 7 tickets on their NFT:\n+4 Small Block Tickets\n+3 Big Block Tickets\n\nThese feed two completely independent counters: one Small Block counter and one Big Block counter.\n\nFor the Small Block ($7,200 pool ÷ 8 ÷ $900 draw), draw only from Small Block Tickets issued since the previous small block. After the draw, burn and reset all Small Block Tickets to 0.\n\nFor the Big Block ($216,000 pool ÷ 9 ÷ $24,000 draw), draw only from Big Block Tickets issued since the previous big block. After the draw, burn and reset all Big Block Tickets to 0.\n\nSmall blocks therefore stay fair and fresh because old tickets do not carry forward, while Big Block entries accumulate naturally until that block is drawn. Metadata only needs to show the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block fires when its pool reaches exactly $7,200, and the big block fires when its pool reaches exactly $216,000. Secondary royalties continue to fill the pools but do not create tickets.\n\nEverything else remains the same: the $10 commission is automatic, a ticket goes to a random existing NFT when no referral code is used, and prize claims remain manual.\n\nThis version should be easier to implement and explain. Once you confirm it is cleaner for you too, we are 100% locked.\n\nThanks!",
+      "event_ids": [
+        "REQ_SMALL_BLOCK_PRIZE_E002",
+        "REQ_BIG_BLOCK_PRIZE_E002",
+        "REQ_PRIZE_TICKET_LIFECYCLE_E001",
+        "REQ_PRIZE_CLAIM_FLOW_E001",
+        "REQ_CODED_REFERRAL_COMMISSION_E001",
+        "REQ_CODED_REFERRAL_TICKETS_E001",
+        "REQ_NO_REFERRAL_TICKETS_E001",
+        "REQ_NFT_METADATA_ACCURACY_E001"
+      ],
+      "requirement_ids": [
+        "REQ_SMALL_BLOCK_PRIZE",
+        "REQ_BIG_BLOCK_PRIZE",
+        "REQ_PRIZE_TICKET_LIFECYCLE",
+        "REQ_PRIZE_CLAIM_FLOW",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_NFT_METADATA_ACCURACY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "INTRODUCE",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 21,
+        "reason": "The Task explicitly replaces only the prior ticket-lifespan rule while preserving everything else, so history is needed to retain the earlier small-block weighted-ticket and big-block highest-ranked-affiliate prize mechanics while applying the new independent counters, issuance, resets, and pool triggers. Incorrect reconstruction could replace the retained big-block ranking rule with a generic ticket draw or revive obsolete carry-forward behavior. Material clarification value also remains because the single no-referral ticket is not assigned to either of the two newly independent ticket types.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_21",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "7598a21bb0f2306dd6cf53d37192c5c9d9bb60c719919e9831743a6fd9a3f0ed",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_77",
+      "message_id": 77,
+      "conversation_turn_index": 77,
+      "history_turn_count": 76,
+      "speaker": "client",
+      "text": "It turns out Stripe isn't available for me in Portugal. Could we replace it with Coinbase Commerce for the fiat onramp?",
+      "event_ids": [
+        "REQ_TRANSAK_FIAT_MINT_E002"
+      ],
+      "requirement_ids": [
+        "REQ_TRANSAK_FIAT_MINT"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 77,
+        "reason": "The task explicitly overrides Stripe with Coinbase Commerce, but history is needed to reconstruct the unchanged fiat-mint requirements: email-based buyer access, USDC conversion, and the primary-mint payment scope. Incorrect reconstruction could retain Stripe or lose those persistent attributes. The request is actionable without material unresolved ambiguity and provides a verifiable provider-replacement implementation task.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_77",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "eb2ce6e458943638982a3f4835731d3fb99d61c3d826b2226016819d14d4b4ec",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_111",
+      "message_id": 111,
+      "conversation_turn_index": 111,
+      "history_turn_count": 110,
+      "speaker": "client",
+      "text": "Brilliant work 👏 Every design looks great. We don't need the entire set, though, so I'm happy to proceed with a curated subset.",
+      "event_ids": [
+        "REQ_BADGE_PRESENTATION_E002"
+      ],
+      "requirement_ids": [
+        "REQ_BADGE_PRESENTATION"
+      ],
+      "event_types": [
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "INTRODUCE",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": true,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 111,
+        "reason": "The prior evidence is needed to identify the referenced designs as the completed badge set, while the current message narrows usage from the full set to a curated subset. The subset's composition remains materially unspecified, testing whether the agent preserves the narrowed scope but seeks clarification rather than choosing badges without evidence.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_111",
+        "valid_task": true,
+        "reconstruction_risk": "MEDIUM",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "4f623d044d2a3c55c0802527b0af3603214f66585ad02dfd96132e8604ef3c76",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_122",
+      "message_id": 122,
+      "conversation_turn_index": 122,
+      "history_turn_count": 121,
+      "speaker": "client",
+      "text": "The strongest option I found is Stripe Atlas, which would establish the business through Canada, but it brings setup costs, delays, and tax hassles. Whether to proceed is less clear: if Harbor Quill reaches 2,000 active users, I think Stripe Atlas would probably be the best choice. I am also unsure whether there will be at least 500 non-crypto buyers, so I don't want to incur the extra cost and burden before they become necessary.\n\nFrom what I found last night, geoblocking is irrelevant under policy 39 because the business is officially based in Portugal.\n\nAnother theoretical route would be to establish it in Singapore because I have local identification, a passport, and a bank account there. However, that approach may introduce tax risks and complications.",
+      "event_ids": [
+        "REQ_PORTUGAL_GEOBLOCK_E002"
+      ],
+      "requirement_ids": [
+        "REQ_PORTUGAL_GEOBLOCK"
+      ],
+      "event_types": [
+        "REMOVE"
+      ],
+      "coverage_tags": [
+        "REMOVE",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 122,
+        "reason": "The message makes Portugal geoblocking irrelevant, removing the earlier persistent requirement to geoblock Portugal. Correct handling depends on recalling that prior requirement and distinguishing this update from the unrelated incorporation discussion; otherwise an agent could retain or revive an obsolete access restriction. The removal is clear and does not require clarification.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_122",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "9932830753ebfb6d24023dd1b820b33e3b4e9685d4f32afb85c6ea275f381976",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_123",
+      "message_id": 123,
+      "conversation_turn_index": 123,
+      "history_turn_count": 122,
+      "speaker": "client",
+      "text": "Marcus, could we revise the big block parameters by halving them to &#39;9 x $6,000 every 180,000 sales&#39;?\n\nWould that be okay?",
+      "event_ids": [
+        "REQ_BIG_BLOCK_PRIZE_E003"
+      ],
+      "requirement_ids": [
+        "REQ_BIG_BLOCK_PRIZE"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 123,
+        "reason": "The task materially overrides the active Big Block configuration: the $24,000 prize becomes $6,000 and the pool-based $216,000 trigger is replaced by a trigger every 180,000 sales, while the nine-winner setting persists. History is needed to identify the superseded trigger model and preserved attributes, creating a concrete risk of retaining obsolete values or combining old and new mechanics incorrectly.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_123",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "577b2870ac5516579f60adde1c81e61687e41bbcd9e45265f1c3298846e9f51b",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_142",
+      "message_id": 142,
+      "conversation_turn_index": 142,
+      "history_turn_count": 141,
+      "speaker": "client",
+      "text": "Although this Harbor Quill proof of concept probably doesn’t need a fiat on-ramp, it is already included in the quote, so TBH I think Transak is the best choice.",
+      "event_ids": [
+        "REQ_TRANSAK_FIAT_MINT_E004",
+        "REQ_TRANSAK_FIAT_MINT_E005"
+      ],
+      "requirement_ids": [
+        "REQ_TRANSAK_FIAT_MINT"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RESUME"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "AMBIGUITY_RESOLUTION",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 142,
+        "reason": "The client confirms Transak for the existing fiat-to-USDC mint flow, resolving the open provider ambiguity and overriding the prior Coinbase Commerce choice, which itself replaced Stripe. History is necessary to reconstruct the retained email/USDC mint scope and avoid implementing an obsolete provider; no material ambiguity remains and no explicit implementation task is issued.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_142",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "e72dfacd866a0b4f0d73e2a829cd1a996297ed2889b8dab0e63ca7c8007e4d22",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_143",
+      "message_id": 143,
+      "conversation_turn_index": 143,
+      "history_turn_count": 142,
+      "speaker": "client",
+      "text": "Below is the FAQ content to load.\n\nWhat is Harbor Quill?\nMy public mission behind Harbor Quill is to support my household’s recovery after a fraudulent property investment collapsed. The launch uses my memoir novella as an unlimited-mint NFT ebook on Base and applies my first-of-its-kind CORA (Community Outreach Response Automation).\nReaders who share it can immediately earn commissions and prizes without a set limit. If the model succeeds, it will grow into ArchiveLedger, a community-owned platform serving every independent creator.\n\nHow do buyers earn money?\n1. Receive a $10 instant commission whenever somebody mints with your referral code\n2. Get Small & Big Block prize tickets each time a mint uses your code\n3. Qualify in the future for an ArchiveLedger governance token distributed to buyers, affiliates, and tippers\n\nHow do referrals work?\nThe permanent referral code for each NFT is its token serial.\nEither of these methods works:\n→ Share the complete link\n→ Simply tell someone to “use referral 423”\nA mint made with your code immediately gives you $10 plus Small & Big Block prize tickets for the active blocks.\n\nWhere do I find my referral code?\nUse your token serial. It appears:\n- In the on-chain metadata for your NFT\n- On your Dashboard after minting\n- Optionally, in your confirmation email\n\n### What are Small Block and Big Block prizes?\nAfter roughly ~2,400 sales from mints and secondary transactions, Small Block draws 8 × $900.\nAfter approximately ~180,000 sales from those same sources, Big Block draws 9 × $6,000.\nEvery sale continues funding the pools forever.\n\n### How are winners selected?\nSelection uses Chainlink VRF, making the process fully on-chain, provably fair, and verifiable on Basescan.\n\n### What are Small & Big Block prize tickets?\nThey are one-time entries for the active Small Block and Big Block draws. A successful referral earns 4 Small + 3 Big tickets.\nTickets expire after their block is drawn; referrals made afterward count toward the following blocks.\n\n### How do I claim my rewards?\n- $10 commissions → transferred automatically to your wallet\n- Prize wins → published on the Winners page and claimable with one click at <http://harborquill.example|https://harborquill.example/>\n\n### What are badges?\nYour NFT receives on-chain badges at referral milestones of 5, 25, 125, 500+.\nFor now, they are cosmetic and provide leaderboard flex. Later, they may enable token-gated chats, discounts, airdrops, DAO weight, and similar benefits.\n\n### Can I mint with fiat (credit card)?\nYes. Transak accepts cards, Apple Pay, and Google Pay, so minting requires neither cryptocurrency nor a wallet.\n\n### Do I need a wallet to participate?\nOnly if you want affiliate commissions paid out or to trade the NFT later.\n\n### What blockchain is this on?\nIt runs on Base (Ethereum Layer 2), which is fast, inexpensive, and Coinbase-backed.\n\n### Are there any hidden fees?\nNo. A mint costs exactly $30, while secondary sales include a clearly shown $48 flat royalty.\n\n### What happens if I sell my NFT?\nThe buyer receives the book, your original token serial as their referral code, and all badges you earned. Expired prize tickets remain expired.\n\n### How do I share my referral link/code?\nFrom the Dashboard, copy either the full link or your token serial and tell people to “use referral 423”.\n\n### Is this a scam or pyramid scheme?\nNo. It is single-level only, has unlimited supply, and its full source is verified on Basescan. I receive exactly $8 from every mint and secondary sale forever.\n\n### How do I contact support?\nDiscord will not launch until there is real traction.\nUntil then, send a DM to @HarborQuill on X or email elias@harborquill.example. I respond personally and quickly.\n\nFor any remaining questions, DM @HarborQuill on X or write to elias@harborquill.example; I’m happy to help.\n\nOnce this content is loaded, the work is complete. The site will be surgically clean and difficult to misunderstand, so launch whenever you are ready—I’ll be available as soon as it goes live.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E001",
+        "REQ_CHAINLINK_VRF_SELECTION_E002",
+        "REQ_PRIZE_CLAIM_FLOW_E002",
+        "REQ_CODED_REFERRAL_COMMISSION_E002",
+        "REQ_NFT_REFERRAL_IDENTITY_E001",
+        "REQ_UNLIMITED_NFT_MINT_E001",
+        "REQ_MINT_PRICE_REVENUE_SPLIT_E001",
+        "REQ_TRANSAK_FIAT_MINT_E006",
+        "REQ_BASE_NETWORK_DEPLOYMENT_E001",
+        "REQ_SECONDARY_ROYALTY_ENFORCEMENT_E002",
+        "REQ_NFT_TRANSFER_SEMANTICS_E001",
+        "REQ_NFT_METADATA_ACCURACY_E003",
+        "REQ_BADGE_AWARDS_E001",
+        "REQ_DISCORD_COMMUNITY_SERVER_E001",
+        "REQ_DISCORD_COMMUNITY_SERVER_E002"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_CHAINLINK_VRF_SELECTION",
+        "REQ_PRIZE_CLAIM_FLOW",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_NFT_REFERRAL_IDENTITY",
+        "REQ_UNLIMITED_NFT_MINT",
+        "REQ_MINT_PRICE_REVENUE_SPLIT",
+        "REQ_TRANSAK_FIAT_MINT",
+        "REQ_BASE_NETWORK_DEPLOYMENT",
+        "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+        "REQ_NFT_TRANSFER_SEMANTICS",
+        "REQ_NFT_METADATA_ACCURACY",
+        "REQ_BADGE_AWARDS",
+        "REQ_DISCORD_COMMUNITY_SERVER"
+      ],
+      "event_types": [
+        "INTRODUCE",
+        "MODIFY",
+        "DEFER"
+      ],
+      "coverage_tags": [
+        "INTRODUCE",
+        "MODIFY",
+        "DEFER",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 143,
+        "reason": "Loading the supplied FAQ is a concrete frontend change, but history reveals a material unresolved conflict: the previously locked Big Block mechanics specify a $216,000 pool split into nine $24,000 prizes, while the new FAQ says nine $6,000 prizes after roughly 180,000 sales. The agent must select and reconstruct the relevant prize history, distinguish the resolved Transak evolution from this unresolved inconsistency, and seek clarification before publishing potentially false launch content.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_143",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "MEDIUM"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "20a0a3ffea5be4372b5ead6855222be649ebe9f84524e64ce5ae8a21341a1cd5",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_146",
+      "message_id": 146,
+      "conversation_turn_index": 146,
+      "history_turn_count": 145,
+      "speaker": "client",
+      "text": "Here is the FAQ section. Please load it after adjusting anything that needs refinement.\n\nWhat is Harbor Quill?\nAs the live proof of concept for CORA (Community Outreach Response Automation), Harbor Quill demonstrates the first system through which independent creators can sell unlimited-mint NFT ebooks while rewarding readers with real commissions and prizes for promoting it.\nThe launch features my raw memoir novella, “Against the Current: Finding the Finish Line,” on Base. It is also my public effort to support my household's recovery after a six-figure property fraud.\nIf CORA succeeds, Harbor Quill will develop into ArchiveLedger, a community-owned public-good platform available to every creator.\n\nHow do buyers earn money?\n1. Earn a $10 instant commission whenever a buyer mints with your referral code\n2. Receive Small & Big Block prize tickets whenever somebody mints using your code\n3. ***If CORA proves successful, with zero guarantee of success or value***\nBuyers, affiliates, and tippers of “Against the Current: Finding the Finish Line” will receive a future ArchiveLedger governance-token allocation.\n\nHow do referrals work?\nEach NFT uses its token serial as its permanent referral code.\nBoth approaches work:\n→ Share the entire link\n→ Tell the buyer to “use referral 423”\nWhen your code is used, you immediately receive $10 and the current Small & Big Block prize tickets.\n→ If the mint has no referral code, the commission and tickets go to a random existing NFT holder.\n\nWhere do I find my referral code?\nYour code is the token serial, shown:\n- On the NFT itself\n- Inside its NFT metadata\n- On your Dashboard after minting\n- Optionally, in the confirmation email\n\nWhat are Small Block and Big Block prizes?\nSmall Block awards 8 × $900 approximately every ~2,400 sales from mints and secondary transactions.\nBig Block awards 9 × $6,000 approximately every ~180,000 sales from those same sources.\nEvery sale funds the pools forever.\n\nHow are winners selected?\nChainlink VRF performs the selection fully on-chain, with provable fairness and Basescan verification.\n\nWhat are Small & Big Block prize tickets?\nThese are entries for the active Small & Big Block drawings. Successful referrals provide 4 Small + 3 Big tickets, and additional tickets improve the chance of winning.\nAfter a block is drawn, its tickets expire and new referrals apply to the next blocks.\n\nHow do I claim my rewards?\n- $10 commissions → automatically transferred to your wallet\n- Prize wins → posted on the Winners page and claimable with one click at <http://harborquill.example>\n\nWhat are badges?\nOn-chain badges are attached to the NFT when referrals reach 5, 25, 125, 500+.\nThey currently provide cosmetic status and leaderboard flex. In the future, they may unlock token-gated chats, discounts, and other benefits.\n\nCan I mint with fiat (credit card)?\nYes. Transak supports cards, Apple Pay, and Google Pay.\n\nDo I need a wallet to participate?\nA wallet is not needed to mint with fiat. It is required, however, if you want to receive commissions, hold prize tickets, or sell or trade the NFT later.\n\nWhat blockchain is this on?\nThe project uses Base (Ethereum Layer 2), offering fast, inexpensive, and secure transactions.\n\nAre there any hidden fees?\nNo. Each mint costs exactly $30, and secondary sales have a visible $48 flat royalty.\n\nWhat happens if I sell my NFT?\nThe purchaser receives the book, the token serial as their referral code, all earned badges, and every active prize ticket; expired tickets remain expired.\n\nHow do I share my referral link/code?\nUse the Dashboard to copy the complete link or the token serial, then tell people to “use referral 423”.\n\nIs this a scam or pyramid scheme?\nNo. It is single-level only, and the complete source is verified on Basescan. I receive $8 from every mint and secondary sale forever, minus fiat fees; everything else supports commissions and prize pools.\n\nHow do I contact support?\nDiscord is not available yet and will launch only after real traction develops.\nFor now, DM @HarborQuill on X or email elias@harborquill.example.\n\nAnyone with further questions can DM @HarborQuill on X or contact elias@harborquill.example—I’m happy to assist.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E002",
+        "REQ_NO_REFERRAL_COMMISSION_E001",
+        "REQ_NFT_REFERRAL_IDENTITY_E002",
+        "REQ_NFT_TRANSFER_SEMANTICS_E002",
+        "REQ_NFT_METADATA_ACCURACY_E004"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NFT_REFERRAL_IDENTITY",
+        "REQ_NFT_TRANSFER_SEMANTICS",
+        "REQ_NFT_METADATA_ACCURACY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "INTRODUCE",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 146,
+        "reason": "The task replaces an earlier approved FAQ while modifying referral-code display, NFT transfer behavior, metadata, and no-referral allocation. Historical reconstruction is material because the requested editorial refinement must remain consistent with previously locked mechanics, including the earlier $216,000 Big Block pool and 9 × $24,000 awards, whereas the supplied FAQ says 9 × $6,000. The agent must select relevant prior requirements, apply the revised copy without retaining obsolete wording or unintentionally overriding established mechanics, and implement the resulting FAQ in the frontend.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_146",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "4cb144b193b9e6c99607b644729e2c59dbb4c346534d4d1e1d153eabfb0060d0",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_156",
+      "message_id": 156,
+      "conversation_turn_index": 156,
+      "history_turn_count": 155,
+      "speaker": "client",
+      "text": "Before applying the following page revisions, I need one point clarified: are block prizes using automatic payout or a visible redemption control?\nIf payouts happen instantly and automatically, ignore the wording below concerning a redemption control.\n\nThe screenshot section also needs these changes.\n\nPage Title: About Harbor Quill\nSub-title: A reader-powered release where every recommendation earns rewards.\n\nWhat is Harbor Quill?\nHarbor Quill serves as the live proof of concept for CORA (Community Outreach Response Automation), the first system allowing independent creators to sell unlimited-mint NFT ebooks while paying readers genuine commissions and prize tickets for sharing them.\nIt launches on Base with my own raw memoir novella, “From Workshop Floor to Fresh Start,” and represents my public mission to help my household's recovery after a six-figure property fraud.\n\nIf CORA works here, Harbor Quill will become ArchiveLedger, a community-owned public-good platform for every creator.\n\nBuilt on Cutting-Edge Technology\n\n- Smart Contracts\nSecure, audited Solidity deployed on Base.\n- Chainlink VRF\nProvides provably fair random winner selection for prize drawings.\n- Aave Connector\nGenerates yield by depositing prize-pool funds.\n- Base Network\nCombines low fees and fast transactions with Ethereum security.\n- Decentralized\nThe logic is fully on-chain from launch, initially protected by V1 safeguards and moving toward complete decentralization after battle-testing.\n\n- Secure\nUses industry-leading protocols and best practices.\n\nHow It Works\n\nMint Your ebook NFT\nBuy the ebook NFT for $30 USD; its mint number becomes your referral code.\n\nEarn Through Referrals\nShare the link or mint number. Every mint that uses it immediately earns you $10 USD, with no limits or expiration.\nIf no code is entered, $10 and the tickets go to a random existing ticket holder.\n\nAccumulate Tickets\nEach referral also awards tickets for the active Small & Big Block prize pools. More referrals produce more tickets and therefore better odds.\n\nWin Prizes\nSmall Block: 8 × $900 after every 2,400 sales.\nBig Block: 9 × $6,000 after every 180,000 sales.\nSales include both mints and secondary transactions.\nChainlink VRF selects winners randomly and fairly.\n\nClaim Your Rewards\nCommissions are sent automatically on-chain. Prize winners appear on the Winners page and can claim with one click whenever ready.\n\nKey Features\n\nAutomatic Rewards: Smart contracts issue every payment immediately.\nFair Prize Selection: Chainlink VRF supplies true randomness.\nYield Generation: Prize pools generate yield through the Aave connector.\nGamification: Badges and leaderboards keep participation fun and competitive.\nTransparency: Every transaction and rule is on-chain and verifiable.\nLow Fees: Base provides speed with minimal transaction expenses.\n\nOur Vision\nAlthough Harbor Quill begins with one book, it is intended as only the first step.\nThe vision is a world where ebooks succeed according to merit, without gatekeepers or Amazon algorithms suppressing independent voices. Unknown and established creators alike should rise because audiences connect with their work—not because they manipulate a platform, have privileged connections, or purchase enough advertising.\nFans should be compensated for word-of-mouth promotion they previously provided for free, while anyone willing to hustle can earn after discovering a worthwhile title to share.\n\nOur goal is a self-sustaining system that serves everyone: artists receive a fair share, fans and affiliates create real income, and communities form direct relationships. In that way, one underdog’s recovery can grow into a decentralized transformation for all creators, driven by aligned incentives rather than hype.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E003",
+        "REQ_PRIZE_CLAIM_FLOW_E003",
+        "REQ_AAVE_POOL_YIELD_E001",
+        "REQ_NO_REFERRAL_COMMISSION_E002",
+        "REQ_NO_REFERRAL_TICKETS_E002",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E001",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E002"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_PRIZE_CLAIM_FLOW",
+        "REQ_AAVE_POOL_YIELD",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY",
+        "AMBIGUOUS",
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "AMBIGUOUS",
+        "INTRODUCE",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 156,
+        "reason": "Earlier evidence establishes that commissions are automatic but prize payouts use a one-click manual claim on the Winners page, so memory is sufficient to answer the client's conditional question and apply the correct About-page wording without seeking further clarification. The task also revises prior FAQ and no-referral allocation state, introduces About-page and Aave content, and requires those reconstructed requirements to be translated consistently into verifiable page changes.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_156",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "6e3f775f32515dc792a10878158435dd33009feb062774e49a805789ecc3c3d3",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_158",
+      "message_id": 158,
+      "conversation_turn_index": 158,
+      "history_turn_count": 157,
+      "speaker": "client",
+      "text": "For a smoother and more consistent flow of winners, I think the block-prize structure should change to:\n- Small = 3 x $900 every 750 sales.\n- Big = 3 x $6,000 every 35,000 sales.\n\nThe net amount awarded stays the same, but this arrangement feels cleaner, clearer, and more regular.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E004",
+        "REQ_SMALL_BLOCK_PRIZE_E003",
+        "REQ_BIG_BLOCK_PRIZE_E005",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E003"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_SMALL_BLOCK_PRIZE",
+        "REQ_BIG_BLOCK_PRIZE",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 158,
+        "reason": "The task overrides previously revised and partly implemented Small and Big Block parameters and requires the new figures to remain synchronized across prize-system behavior, the approved FAQ, and About-page copy. History is needed to identify all affected surfaces, preserve unchanged values such as per-winner amounts, and avoid retaining obsolete 8/9-winner and 2,400/180,000 or pool-balance triggers. The unrelated open payout-control ambiguity does not block this concrete update.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_158",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "d5eb961dd12d055ccb3f8ca1fe0059f7f7ab5cde044db1f60d632878c1392371",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_159",
+      "message_id": 159,
+      "conversation_turn_index": 159,
+      "history_turn_count": 158,
+      "speaker": "client",
+      "text": "Aave integration becomes quite redundant because of this tweak.",
+      "event_ids": [
+        "REQ_AAVE_POOL_YIELD_E002"
+      ],
+      "requirement_ids": [
+        "REQ_AAVE_POOL_YIELD"
+      ],
+      "event_types": [
+        "AMBIGUOUS"
+      ],
+      "coverage_tags": [
+        "AMBIGUOUS",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 159,
+        "reason": "The earlier evidence establishes an active, project-persistent Aave prize-pool yield requirement, while the current message only calls it redundant and does not explicitly retain or remove it. Correct handling requires preserving the active requirement state while recognizing the new lifecycle ambiguity and requesting clarification rather than silently deleting or implementing it.",
+        "historical_dependency": "MEDIUM",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_159",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "0b22b3504f7275067ccb8508ae2f83332e45f3696aa1bb94d2fd4242e9fcb4e6",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_184",
+      "message_id": 184,
+      "conversation_turn_index": 184,
+      "history_turn_count": 183,
+      "speaker": "client",
+      "text": "We also need a new FAQ section explaining how fiat buyers who are unfamiliar with crypto receive commissions and prizes. This is important for mainstream users because a non-custodial wallet is created behind the scenes, with the seed phrase not required, but they may not understand how to reach their rewards.\n\n\"How Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\"\n\nThe flow should reassure customers paying by fiat, such as bank transfer, Apple Pay, etc., that everything is straightforward. When the book is minted for $30 through Transak, the buyer automatically receives a non-custodial wallet behind the scenes, with the seed phrase not required. That wallet stores the buyer's NFT and receives all commissions and prizes.\n\nEarning Commissions ($10 per Referral):\nThe buyer shares a referral code, for example, \"use 8421.\" Whenever another person mints with that code, $10 is sent automatically to the wallet address.\nCollection requires no separate action. The buyer signs into <http://harborquill.example|harborquill.example> using a one-time email code or SIWE with the wallet Transak created, and the commissions appear immediately. If necessary, we can explain how to export the funds to a bank account or an exchange such as Coinbase.\n\nEarning and Winning Prizes (Tickets for $900/$6,000 Draws):\nEvery referral automatically assigns tickets for the active prize draws and ties them to the buyer's NFT/wallet.\nFair on-chain randomness runs the draws at approximately ~750 sales for $900 and ~35,000 for $6,000.\nResults are published on the Winners page and sent by email.\n\nPrize collection is automatic as well: a winner receives either $900 or $6,000 directly in the wallet and should check the dashboard or email for the notification.\n\nDuring the Purchase:\nA fiat-to-crypto conversion is completed by Transak, which then mints the NFT directly into a newly created wallet address. Nothing has to be configured manually; the process is seamless and non-custodial. The buyer owns the keys without having to manage a complicated recovery phrase immediately.\nAn email confirmation then provides the mint number, which also serves as the referral code, along with NFT details and a dashboard link at <http://harborquill.example|harborquill.example>.\n\nFor ebook access, could we use this setup?\n\nMake Login-gated preview the standard experience. The email certificate would carry a large button reading \"Read 'The Long Road Forward' Today,\" while download after verification would appear as a smaller \"Save PDF for Later\" link. The dashboard and email-linked reader should use PDF.js.\n\nDoes that work?",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E005",
+        "REQ_PRIZE_CLAIM_FLOW_E004",
+        "REQ_PRIZE_CLAIM_FLOW_E005",
+        "REQ_NFT_REFERRAL_IDENTITY_E003",
+        "REQ_TRANSAK_FIAT_MINT_E007",
+        "REQ_WALLET_AUTHENTICATION_E002",
+        "REQ_EMAIL_MAGIC_LINK_AUTH_E002",
+        "REQ_TRANSACTIONAL_EMAIL_DELIVERY_E004",
+        "REQ_BOOK_READER_UX_E001",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E004"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_PRIZE_CLAIM_FLOW",
+        "REQ_NFT_REFERRAL_IDENTITY",
+        "REQ_TRANSAK_FIAT_MINT",
+        "REQ_WALLET_AUTHENTICATION",
+        "REQ_EMAIL_MAGIC_LINK_AUTH",
+        "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+        "REQ_BOOK_READER_UX",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RESUME",
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "INTRODUCE",
+        "AMBIGUITY_RESOLUTION",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 184,
+        "reason": "The task requires coordinated changes across the existing FAQ, prize claims, Transak wallet provisioning, referral identity, authentication, transactional email, About-page copy, and a new PDF.js reader. History is material because automatic wallet payouts override the prior manual one-click claim flow and resolve its open ambiguity, while the retained FAQ must preserve later prize-figure revisions and other approved copy. Ignoring history could leave stale claim controls, outdated prize figures, or inconsistent authentication and email behavior. The current message resolves the material claim ambiguity, so clarification is not required.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_184",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "e5da8e7c0578dc24630f94975c2f1c43df447051753415fe6e97afa9b899ed0c",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_188",
+      "message_id": 188,
+      "conversation_turn_index": 188,
+      "history_turn_count": 187,
+      "speaker": "client",
+      "text": "Business registration is underway now, and because the process has a 6 - 9 day wait, the Transak work will need to remain on hold until it is finished.",
+      "event_ids": [
+        "REQ_TRANSAK_FIAT_MINT_E008"
+      ],
+      "requirement_ids": [
+        "REQ_TRANSAK_FIAT_MINT"
+      ],
+      "event_types": [
+        "DEFER"
+      ],
+      "coverage_tags": [
+        "DEFER",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 188,
+        "reason": "The current message clearly defers the previously active Transak fiat-mint requirement, but its scope and prior lifecycle are only recoverable from history. The requirement evolved from Stripe to Coinbase Commerce, passed through a provider ambiguity, was resolved and resumed with Transak, and is now placed on hold. Missing this latest lifecycle change could cause an agent to continue implementing deferred work; no material ambiguity or immediate code change is present.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_188",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "9a713ea7e11d5bb7afad86054af0cf1c94b77e412a864a2300a383e1fb308374",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_195",
+      "message_id": 195,
+      "conversation_turn_index": 195,
+      "history_turn_count": 194,
+      "speaker": "client",
+      "text": "Marcus, please remove the big blocks and redirect that extra $8 to me. The new breakdown should be:\n$30 purchase, $12 to me, $10 to the affiliate, and $8 to the block prize pool.\n\nThat should improve my bottom line without materially affecting sales, while also making the game mechanics and marketing simpler.\n\nAn even arrangement between me and each community member, together with an equal opportunity to win the continuing $900 prizes, feels consistent with the project's ethos.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E006",
+        "REQ_SMALL_BLOCK_PRIZE_E004",
+        "REQ_BIG_BLOCK_PRIZE_E006",
+        "REQ_PRIZE_TICKET_LIFECYCLE_E002",
+        "REQ_CHAINLINK_VRF_SELECTION_E003",
+        "REQ_CODED_REFERRAL_TICKETS_E002",
+        "REQ_MINT_PRICE_REVENUE_SPLIT_E002",
+        "REQ_NFT_METADATA_ACCURACY_E005",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E006"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_SMALL_BLOCK_PRIZE",
+        "REQ_BIG_BLOCK_PRIZE",
+        "REQ_PRIZE_TICKET_LIFECYCLE",
+        "REQ_CHAINLINK_VRF_SELECTION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_MINT_PRICE_REVENUE_SPLIT",
+        "REQ_NFT_METADATA_ACCURACY",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY",
+        "REMOVE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "REMOVE",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 195,
+        "reason": "The task requires removing the repeatedly revised Big Block system across contracts, tickets, metadata, FAQ, and About-page content while preserving the current Small Block mechanics and automatic payout behavior. It also overrides the prior $30 allocation from an $8 founder share to $12, assigns $8 solely to the remaining prize pool, and retains the $10 affiliate commission. Ignoring history risks leaving obsolete Big Block artifacts or altering current Small Block rules, making this a concrete multi-requirement reconstruction and implementation benchmark.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_195",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "a3d944b071e0523c7cbc8d6b4ed52eceb8be431118ef2935c3b957d37039cb5b",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_198",
+      "message_id": 198,
+      "conversation_turn_index": 198,
+      "history_turn_count": 197,
+      "speaker": "client",
+      "text": "Would it really be that involved? I expected redirecting the big-block pool to $54,000, giving me a $12 cut, and removing the related frontend content to be fairly simple, low-effort changes.\n\nFinishing after by late October would not be ideal, although the impact should be limited at the beginning. Do you genuinely expect this to cause such a large delay?",
+      "event_ids": [
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT_E002"
+      ],
+      "requirement_ids": [
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 198,
+        "reason": "The Task modifies a previously introduced landing-page requirement by hiding big-block-related frontend content while leaving the other persistent hero content active. History is needed to preserve the unrelated headline, subheadline, placement, and CTA; reconstructing the change too broadly could remove valid content, while missing it could retain obsolete prize-pool messaging. The requested frontend removal is a concrete, verifiable implementation change.",
+        "historical_dependency": "MEDIUM",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_198",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "69abb86bd8ef45f390ad60e8ef544ea50600799159ff4cdc780e352c19c68369",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_210",
+      "message_id": 210,
+      "conversation_turn_index": 210,
+      "history_turn_count": 209,
+      "speaker": "client",
+      "text": "Please revise the landing page around the following structure and copy.\n\nHero Headline: Former apprentice entrepreneur bankrupted by a supplier collapse. Now starting over with an eBook model designed to free creators from Amazon's 45% cut.\n\nSub-Headline: \"From Workshop Floor to Fresh Start\" — Unlimited NFT book ⋅ $30 forever ⋅ Base.\n\nMechanics Tease: A purchase gives the buyer ownership of the book and a referral link. Each referral then pays an instant, unlimited $10 and supplies 4 entries to a $900 random giveaway every 750 sales.\n\nCTA Button: Mint eBook NFT for $30\n\nAcross the page, make the frequency of the $900 prize the main motivator. For example, use language about recurring chances at $900 every 750 sales.\n\nFor the prize section, say: \"Win $900 every 750 sales — one ticket per referral, with a fair Chainlink VRF draw. More referrals mean more chances.\"\n\nThe mechanics teaser should also include: \"Refer for $10 and your opportunity to win $900 every 750 sales.\" Frame the experience as a continuing game for active promoters.\n\nPlease add these FAQs as well:\n\nHow Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\nA buyer using fiat, including a credit card or Apple Pay, should be reassured that the process is simple even without crypto experience. Minting the book for $30 through Transak automatically creates a non-custodial wallet behind the scenes, without requiring a seed phrase initially. The wallet holds the NFT and receives commissions or prizes.\n\nDuring the Purchase:\nThe fiat-to-crypto conversion is handled by Transak, which mints the NFT directly into a newly created wallet. No manual setup is necessary, and the process remains non-custodial: the buyer owns the keys without immediately managing a complicated seed phrase.\nThe confirmation email contains the mint number, which doubles as the referral code, along with NFT details and a dashboard link at <http://harborquill.example|harborquill.example>.\n\nEarning Commissions ($10 per Referral):\nBuyers share their referral code, such as \"use 8421.\" When another customer mints with it, $10 is transferred automatically to the wallet.\nTo view the funds, the buyer logs into <http://harborquill.example|harborquill.example> through the email link or SIWE using the wallet created by Transak. The commissions appear immediately without another action.\n\nEarning and Winning Prizes:\nEach referral automatically adds a ticket to the current prize draw and associates it with the relevant NFT and wallet.\nUsing fair on-chain randomness, the system runs a $900 draw every 750 sales. Winners appear on the Winners page and receive an email.\nIf a buyer wins, $900 goes directly to the wallet. Dashboard notifications should be accompanied by emailed, step-by-step guidance for viewing the funds or converting them to fiat, such as a link to a simple exchange guide. Access should not require a seed phrase.\n\nHow Do I Collect My Commissions and Prizes? (For Beginners)\nExplain that tracking and payouts are automatic for newcomers.\n\nEarning Commissions ($10 per Referral):\nWhenever someone uses the buyer's mint-number referral code, found in the dashboard or confirmation email, the smart contract sends $10 directly to the wallet. No collection step is required.\n\nEarning Prize Tickets:\nEvery successful referral also generates one ticket toward the $900 prize every 750 sales. Tickets are added to the NFT automatically, shown on the dashboard, recorded on-chain, and tied to the mint number.\n\nWinning and Collecting Prizes:\nOnce a pool reaches its trigger every 750 sales, Chainlink VRF selects the winners through a fair random process. The Winners page and email both announce the result.\nA winner receives $900 in the wallet immediately and gets both dashboard and email notifications.\nTickets apply only to their current draw; referrals made afterward create tickets for later blocks.\n\nOther Wording Tweaks:\nKeep the mechanics list focused on frequent $900 wins and the buyer's $10 commission, reinforcing the idea of cutting out intermediaries and directing the savings back to participants.\n\nIn the prize section, replace the existing explanation with a prominent skim-friendly headline: \"$900 every 750 sales! 3 winners are randomly selected from that sales block using Chainlink VRF for provably fair randomness. More referrals mean more chances to win.\"\n\nElsewhere, refer to 3 affiliates and a 750 sales block, and make clear that every referral contributes to the draw. Another supporting callout can repeat that the $900 opportunity recurs every 750 sales.\n\nGeneral wording should replace \"revolutionary\" with \"aligned\" or \"fair\" to reduce hype and better reflect the ethos. Add the tagline \"Help the rebuild — share to earn\" below the statistics.\n\nVisual/UI Tweaks:\nIntegrate the book cover into the hero alongside the headline.\nUse \"Mint your eBook\" or \"Mint your eBook NFT.\"\nAdd a live counter reading \"Next $900 Draw In: ~X Sales\" to create urgency around the next draw every 750 sales.\nFinally, test the mobile layout so the statistics and mechanics stack cleanly without being cut off.\n\nFor consistency, the draw descriptions should use Chainlink VRF throughout, including the beginner explanation, the prize headline, and the detailed fairness copy.",
+      "event_ids": [
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT_E003",
+        "REQ_LANDING_BOOK_COVER_PRESENTATION_E002",
+        "REQ_FAQ_CONTENT_E007",
+        "REQ_EMAIL_MAGIC_LINK_AUTH_E003",
+        "REQ_TRANSACTIONAL_EMAIL_DELIVERY_E005"
+      ],
+      "requirement_ids": [
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT",
+        "REQ_LANDING_BOOK_COVER_PRESENTATION",
+        "REQ_FAQ_CONTENT",
+        "REQ_EMAIL_MAGIC_LINK_AUTH",
+        "REQ_TRANSACTIONAL_EMAIL_DELIVERY"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 210,
+        "reason": "Correct execution requires reconstructing several evolved requirements: preserving the prior removal of Big Blocks, replacing obsolete prize figures and claim behavior, updating email-code authentication to an email link, and retaining unaffected FAQ and email requirements. The task also contains a material unresolved conflict between four entries per referral and one ticket per referral, making clarification valuable before implementing consistent landing-page and FAQ copy.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_210",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "2bfcc1ab1ff23fdbf85b0a512dfafbf82da5a41baabd75a8cab4397d689e8efe",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_212",
+      "message_id": 212,
+      "conversation_turn_index": 212,
+      "history_turn_count": 211,
+      "speaker": "client",
+      "text": "After looking again, I prefer the earlier version. The current top section feels cluttered because the oversized text and large image overlap the \"view dashboard\" button.\n\nPlease restore the previous overall layout and use Harbor Quill as the top heading with the subtitles beneath it.\n\nThe wording can still change, and it does not need to match my draft character for character if that would make the page repetitive, messy, or too sales-focused. Instead of placing selling points inside pill outlines, use underlining to emphasize them. Examples include \"$900 rotating prize every 750 sales\" and \"$10 unlimited, instant commission.\" Supporting commission details should also make the $10 amount, no cap, and immediate timing clear.\n\nPlace the ebook cover beside the headline, using unrestricted dimensions according to what best suits the design. The image I sent still needs to be cropped moderately. Can you handle that, or would you prefer me to do it?\n\nFor the giveaway copy, replace the current wording with both \"claim $900 every 750 sales!\" and the cleaner headline \"$900 prize draw every 750 sales\" where appropriate.\n\nPlease remove the line \"recurring chances at $900\" and also drop the label \"recurring prize wheel:\". The remaining explanation should read: \"3 affiliates chosen from every 750-sale block. Each referral adds another entry!\"\n\nThe supporting pool references should continue to show $900, 750 sales, a 750 sales block, and 3 affiliates where those mechanics are described.\n\nMy kids are making it difficult to focus right now, but I'll return in a little while.",
+      "event_ids": [
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT_E005",
+        "REQ_LANDING_BOOK_COVER_PRESENTATION_E003"
+      ],
+      "requirement_ids": [
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT",
+        "REQ_LANDING_BOOK_COVER_PRESENTATION"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 212,
+        "reason": "The task partially rolls back the just-implemented hero layout while overriding specific copy and presentation rules, retaining selected $900/750-sales and $10 commission mechanics, and adding cover-cropping requirements. Correct implementation requires distinguishing superseded wording from persistent mechanics across two interacting landing-page Requirements; ignoring history could preserve removed phrases, revive obsolete copy, or mis-handle the requested layout restoration.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_212",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "MEDIUM"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "df378987a53c0fadbc5bb8b133e202a4523266a2b4345c0601faccb61723c98c",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_220",
+      "message_id": 220,
+      "conversation_turn_index": 220,
+      "history_turn_count": 219,
+      "speaker": "client",
+      "text": "Now that the company incorporation has finally been finalized, we are free to begin selling and can move ahead with Transak.\n\nWould it make sense to launch with crypto only and finish implementing Transak within 10 days?",
+      "event_ids": [
+        "REQ_TRANSAK_FIAT_MINT_E009"
+      ],
+      "requirement_ids": [
+        "REQ_TRANSAK_FIAT_MINT"
+      ],
+      "event_types": [
+        "RESUME"
+      ],
+      "coverage_tags": [
+        "RESUME",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 220,
+        "reason": "The incorporation milestone explicitly lifts the prior deferment and resumes implementation, but the current message omits the accumulated Transak requirements for USDC conversion, supported fiat methods, automatic non-custodial wallet creation, and wallet-free purchase flow. The history also contains obsolete Stripe and Coinbase Commerce choices, creating substantial risk unless the latest Transak state and lifecycle are reconstructed before implementation.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_220",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "cd5ef44783b1942b82475c12182d0a61480ac4763a3b6f0270f458a1bf30b653",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_303",
+      "message_id": 303,
+      "conversation_turn_index": 303,
+      "history_turn_count": 302,
+      "speaker": "client",
+      "text": "The mechanics are the priority because minting is currently failing; the remaining work is mostly aesthetic, including making the book view 25% wider.\n\nThe failure might be related to the edge case of where the commission and ticket should go on mint 3.\n\nOther problems include:\n\\- How can the book be viewed?\n\\- The dashboard reports that I minted even though I did not\n\\- A referral code above the current mint number is being shown as rejected\n\nI’ll run another test once I can complete a real mint.",
+      "event_ids": [
+        "REQ_BOOK_READER_UX_E002"
+      ],
+      "requirement_ids": [
+        "REQ_BOOK_READER_UX"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 303,
+        "reason": "The current message requests a 25% wider book view and asks how the book is viewed, while prior persistent evidence establishes PDF.js and both dashboard and email-linked reader entry points. Correct execution requires selecting that reader history, preserving its cumulative scope, and applying a verifiable width change across the relevant experience; no material ambiguity remains.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_303",
+        "valid_task": true,
+        "reconstruction_risk": "MEDIUM",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "d0265ad01df3bda3b3f77983a8cb8e160e91bdd881553f4e3f7f916d688a717f",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_305",
+      "message_id": 305,
+      "conversation_turn_index": 305,
+      "history_turn_count": 304,
+      "speaker": "client",
+      "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E009",
+        "REQ_CODED_REFERRAL_COMMISSION_E003",
+        "REQ_CODED_REFERRAL_TICKETS_E003",
+        "REQ_NO_REFERRAL_COMMISSION_E003",
+        "REQ_NO_REFERRAL_TICKETS_E003",
+        "REQ_MINT_PRICE_REVENUE_SPLIT_E003",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E007"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_MINT_PRICE_REVENUE_SPLIT",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 305,
+        "reason": "The task replaces intertwined referral, commission, ticket, draw, revenue-allocation, FAQ, and About-page rules: prior $10/4-ticket behavior and random-ticket-holder fallback become conditional $25/$2,000 and $18/$900 outcomes. History is essential to identify and retire those obsolete values. It also exposes a material unresolved funding inconsistency with the persistent $30 price, $12 founder share, and $8 prize-pool share, making clarification judgment valuable while the requested popup change remains concretely implementable.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_305",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "069aa21f36dbf0ad0843864ce322f173e771cdde720d1edbaa97ea7bbdf0f9fe",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_312",
+      "message_id": 312,
+      "conversation_turn_index": 312,
+      "history_turn_count": 311,
+      "speaker": "client",
+      "text": "Although most of the tweaks look great, minting still fails. The dashboard also continues to show 9 NFTs, and when I click 'open' on those false NFTs, the page leads nowhere.\n\nDuring a mint attempt, there is no option to select ETH/USDC plus alternatives. My wallet has ETH and USDC enabled, but the third mint still does not work.",
+      "event_ids": [
+        "REQ_PAYMENT_METHOD_SELECTION_E001",
+        "REQ_PAYMENT_METHOD_SELECTION_E002",
+        "REQ_NFT_OWNERSHIP_MINT_REPORTING_E004"
+      ],
+      "requirement_ids": [
+        "REQ_PAYMENT_METHOD_SELECTION",
+        "REQ_NFT_OWNERSHIP_MINT_REPORTING"
+      ],
+      "event_types": [
+        "INTRODUCE",
+        "RUNTIME_FAILURE"
+      ],
+      "coverage_tags": [
+        "INTRODUCE",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 312,
+        "reason": "The task introduces payment-asset selection while also disproving the earlier claim that failed ETH mints no longer create database records. Correct work requires retaining the historical finalized-successful-mints-only rule, recognizing the claimed fix as failed rather than complete, and distinguishing that relevant history from unrelated referral and display issues. The resulting payment and reporting behavior is concrete and implementation-verifiable without a material need for clarification.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_312",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "MEDIUM"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "64715e36a1cc5e61a8323a163ab9254abf682e9a6165a307cebb69d3b79e7f13",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_313",
+      "message_id": 313,
+      "conversation_turn_index": 313,
+      "history_turn_count": 312,
+      "speaker": "client",
+      "text": "Results, reorganized by outcome:\n\n1 - Required revision: set the invalid-code response to 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner'. The response looks good, but this final wording change is still needed.\n\n2 - A possible cause is that the commission and ticket are configured for an existing NFT holder, while no such holder exists for the third mint. Third mint is still failing.\n\n3 - The Open Edition button looks good; the NFT sizing is also good.\n\n4 - If possible, use 8 on top row and 11 on bottom row. The badges look good, but the current layout has 13 on the top row and 7 on the bottom row.",
+      "event_ids": [
+        "REQ_REFERRAL_CODE_VALIDATION_E004",
+        "REQ_BADGE_PRESENTATION_E008",
+        "REQ_BADGE_PRESENTATION_E009",
+        "REQ_BADGE_PRESENTATION_E010",
+        "REQ_NFT_ASSET_RENDERING_E004"
+      ],
+      "requirement_ids": [
+        "REQ_REFERRAL_CODE_VALIDATION",
+        "REQ_BADGE_PRESENTATION",
+        "REQ_NFT_ASSET_RENDERING"
+      ],
+      "event_types": [
+        "RUNTIME_VERIFICATION",
+        "MODIFY",
+        "RESUME",
+        "RUNTIME_FAILURE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "AMBIGUITY_RESOLUTION",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 313,
+        "reason": "The task requires distinguishing verified fixes from remaining work, applying the exact referral-response revision, and reconstructing the badge decision after the earlier add-or-remove ambiguity and claimed Pathfinder removal. Incorrect reconstruction could retain the obsolete badge choice, alter accepted NFT rendering, or mis-handle the requested 19-badge layout. The third-mint failure also exposes an unresolved business rule for commission and ticket allocation when no eligible prior NFT owner exists, making clarification necessary before inventing fallback behavior. The wording and badge changes are concrete and verifiable code work.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_313",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "MEDIUM"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "a6598541d2d08d4a2b6198a875ddf92c86266511cb0e4e34a882aaf99fc6902e",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_321",
+      "message_id": 321,
+      "conversation_turn_index": 321,
+      "history_turn_count": 320,
+      "speaker": "client",
+      "text": "For a single-currency checkout—whether ETH only or USDC only—the checkout must clearly display the settlement currency. If both ETH and USDC are available instead, customers must choose.",
+      "event_ids": [
+        "REQ_PAYMENT_METHOD_SELECTION_E004",
+        "REQ_PAYMENT_METHOD_SELECTION_E005"
+      ],
+      "requirement_ids": [
+        "REQ_PAYMENT_METHOD_SELECTION"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RESUME"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 321,
+        "reason": "The task replaces the prior generic asset-selection requirement with distinct single- and multi-currency behaviors after a failed checkout and conflicting answers about accepted assets. Correct reconstruction must avoid retaining an obsolete selector for single-currency checkout, while the new conditional rule is sufficient to implement without first resolving which currency configuration is currently active.",
+        "historical_dependency": "MEDIUM",
+        "ambiguity_decision_value": "MEDIUM",
+        "candidate_id": "42204309_CANDIDATE_MSG_321",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "fa066f5c5a3aa533398ce43386e83a761bd92c3af9fd55343d1b5e856348efae",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_363",
+      "message_id": 363,
+      "conversation_turn_index": 363,
+      "history_turn_count": 362,
+      "speaker": "client",
+      "text": "Cool, I’ll test it now.\n\nFirst, though, where did the ETH from my earlier successful transaction go, given that it produced no mint? Did any of it reach the prize pools or similar destinations?\nTransaction - 0x4c81d7a295e630bf1a74c8d9e2035b6f87a19d4e\n\nAlso, if 0.0125 ETH = 36.50 and the split is $12 to me, $10 for commission, and $8 for the prize pool, what happens to the remaining $6.50?",
+      "event_ids": [
+        "REQ_ETH_PRICE_AND_REFUND_E004"
+      ],
+      "requirement_ids": [
+        "REQ_ETH_PRICE_AND_REFUND"
+      ],
+      "event_types": [
+        "AMBIGUOUS"
+      ],
+      "coverage_tags": [
+        "AMBIGUOUS",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 363,
+        "reason": "The inquiry must be reconciled with the prior $30 dynamic-price requirement, the reported 0.014 ETH contract minimum and buffer, the earlier failure, and the later unverified working claim. The current 0.0125 ETH example conflicts with that reported minimum, while the supplied evidence does not establish where excess ETH or funds from the identified transaction were routed. This tests accurate state reconstruction and recognizing that transaction/contract evidence is needed rather than inventing a destination or refund rule.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_363",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "b05e3eaa12adf7b8f7c541b6d189e5da37f5373cd37e80ed0e1421f6dde9341b",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_377",
+      "message_id": 377,
+      "conversation_turn_index": 377,
+      "history_turn_count": 376,
+      "speaker": "client",
+      "text": "Here was the sequence for the USDC mint attempt: the approval transaction executed → the “Mint Successful” modal appeared → the mint transaction appeared and executed → the “Mint Successful” modal appeared again. The NFT certificate works, the mint was counted, and the pool contribution was made, but I still can’t locate the NFT in either my wallet or our dashboard.\nTransaction - 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c",
+      "event_ids": [
+        "REQ_MINT_RESULT_FEEDBACK_E009",
+        "REQ_OWNER_NFT_DISCOVERY_E001",
+        "REQ_OWNER_NFT_DISCOVERY_E002"
+      ],
+      "requirement_ids": [
+        "REQ_MINT_RESULT_FEEDBACK",
+        "REQ_OWNER_NFT_DISCOVERY"
+      ],
+      "event_types": [
+        "RUNTIME_FAILURE",
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "INTRODUCE",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 377,
+        "reason": "The task combines a new NFT-discovery failure with a persistent success-feedback requirement whose receipt/hash gating was repeatedly claimed fixed and then observed failing. History is needed to reconstruct that approval must never trigger success and to avoid trusting obsolete fix claims. It also shows the supplied hash was previously identified as a reverted ETH transaction, creating a material ambiguity for transaction-specific diagnosis that may require clarification. The two linked failures support verifiable frontend remediation.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "MEDIUM",
+        "candidate_id": "42204309_CANDIDATE_MSG_377",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "MEDIUM"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "657ccd95c7e6dacba73c08117a1d0665c23e97c4e5e44e82150953bc30bd8dbb",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_393",
+      "message_id": 393,
+      "conversation_turn_index": 393,
+      "history_turn_count": 392,
+      "speaker": "client",
+      "text": "Once I turned off 'hide low-value NFTs' in Rabby, the NFT became visible, although it still had no image or information. I also have not managed to add it as a custom token.\n\nNext I’ll try an ETH purchase and see what happens.",
+      "event_ids": [
+        "REQ_NFT_ASSET_RENDERING_E006",
+        "REQ_NFT_ASSET_RENDERING_E007",
+        "REQ_OWNER_NFT_DISCOVERY_E004"
+      ],
+      "requirement_ids": [
+        "REQ_NFT_ASSET_RENDERING",
+        "REQ_OWNER_NFT_DISCOVERY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RUNTIME_FAILURE",
+        "RUNTIME_VERIFICATION"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 393,
+        "reason": "The feedback is an actionable runtime failure whose correct interpretation depends on prior context identifying the NFT and the claimed discovery/rendering fix. The agent must distinguish the now-verified wallet discovery behavior from the still-failing media and metadata rendering, while preserving the existing dashboard and detail-page scope. This provides a concrete implementation opportunity with substantial risk of incorrectly treating visibility as full resolution or overlooking the newly exposed wallet-rendering scope.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_393",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "f4c0c8d8f6a8364770f38836fb7ad0a34e26a91798330bbc240d88e54e9881e1",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_539",
+      "message_id": 539,
+      "conversation_turn_index": 539,
+      "history_turn_count": 538,
+      "speaker": "client",
+      "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E010",
+        "REQ_NO_REFERRAL_COMMISSION_E004",
+        "REQ_NO_REFERRAL_TICKETS_E004",
+        "REQ_NFT_REFERRAL_IDENTITY_E005",
+        "REQ_USDC_WALLET_MINT_E011",
+        "REQ_ETH_PRICE_AND_REFUND_E011",
+        "REQ_NFT_TRANSFER_SEMANTICS_E003",
+        "REQ_NFT_METADATA_ACCURACY_E008",
+        "REQ_NFT_HOLDER_BOOK_ACCESS_E009",
+        "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY_E001",
+        "REQ_OWNER_NFT_DISCOVERY_E007",
+        "REQ_NFT_OWNERSHIP_MINT_REPORTING_E008",
+        "REQ_PRIZE_POOL_PLATFORM_STATS_ACCURACY_E003"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_NFT_REFERRAL_IDENTITY",
+        "REQ_USDC_WALLET_MINT",
+        "REQ_ETH_PRICE_AND_REFUND",
+        "REQ_NFT_TRANSFER_SEMANTICS",
+        "REQ_NFT_METADATA_ACCURACY",
+        "REQ_NFT_HOLDER_BOOK_ACCESS",
+        "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY",
+        "REQ_OWNER_NFT_DISCOVERY",
+        "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+        "REQ_PRIZE_POOL_PLATFORM_STATS_ACCURACY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "INTRODUCE",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 539,
+        "reason": "The message approves an unspecified prior approach and mentions losses under an old contract, while the resulting interpretation would change contract scope, migration continuity, referral eligibility, NFT discovery, access, metadata, statistics, and payment behavior. The supplied history shows extensive evolution but omits the proposal referenced by “this way,” so an agent must recognize that the available memory is insufficient and request clarification rather than infer a fresh replacement-contract policy or exclusion of legacy NFTs.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_539",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "e9d5cb153a726e59a5e402f8fa8cf1e0bbaab7fd48464b3fab6ffef5d11c903e",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_565",
+      "message_id": 565,
+      "conversation_turn_index": 565,
+      "history_turn_count": 564,
+      "speaker": "client",
+      "text": "After 9 buys, why do only 8 tickets exist? Even a referral-free purchase should create 6 tickets and commission, with both allocated by weighted draw.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E011",
+        "REQ_NO_REFERRAL_COMMISSION_E005",
+        "REQ_NO_REFERRAL_TICKETS_E005",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E008"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 565,
+        "reason": "The task overrides the prior rule that missing or rejected referrals create one $900 entry for a randomly selected active replacement-contract NFT owner: referral-free purchases now create six tickets, and both tickets and the preserved $18 commission use a weighted draw. History is essential to retain the commission amount, replacement-contract eligibility, old-contract exclusion, and the distinct rejected-referral behavior while updating contract behavior and related FAQ/About copy. The weighting basis is not defined, creating a material clarification decision before faithful implementation.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_565",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "a40853ed839f013ce9241a1a004f7ba121714889efbc00b2f133ba2574dc4e23",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_583",
+      "message_id": 583,
+      "conversation_turn_index": 583,
+      "history_turn_count": 582,
+      "speaker": "client",
+      "text": "Whether or not a 'code-free purchase' generates 6 tickets could go either way, so a missing ticket on that kind of purchase may be acceptable.\n\nThe unresolved question is where the $10 commission goes on those no-referral mints. I would like those commissions to default to me, but that could encourage sympathetic buyers to omit their referral codes and discourage affiliates from participating. Because of that, the $10 commission from no-referral purchases has to be assigned by weighted draw.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E012",
+        "REQ_NO_REFERRAL_COMMISSION_E007",
+        "REQ_NO_REFERRAL_TICKETS_E008",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E009"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY",
+        "AMBIGUOUS"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "AMBIGUOUS",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 583,
+        "reason": "The Task overrides the prior $18 no-referral commission with $10, retains weighted selection among active replacement-contract NFT owners, and makes the former six-ticket rule unresolved rather than mandatory. Correct execution requires distinguishing missing from rejected referrals, preserving the latter's existing behavior, and updating contract behavior plus FAQ/About copy without enforcing an uncertain ticket count. This strongly tests reconstruction across repeated overrides, selective clarification for the ticket ambiguity, and verifiable implementation.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_583",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "4e33e2f3b733489ab6913314eba053765b3874b49ec2c0e2d935855e49e2aea6",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_595",
+      "message_id": 595,
+      "conversation_turn_index": 595,
+      "history_turn_count": 594,
+      "speaker": "client",
+      "text": "The number of commissions and tickets should each equal the number of mints, excluding promotional mints. However, those distributed by weighted draw do not seem to be registering.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E013",
+        "REQ_CODED_REFERRAL_COMMISSION_E004",
+        "REQ_CODED_REFERRAL_TICKETS_E004",
+        "REQ_NO_REFERRAL_COMMISSION_E009",
+        "REQ_NO_REFERRAL_TICKETS_E010",
+        "REQ_NO_REFERRAL_TICKETS_E011",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E010",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY_E004"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RESUME"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "AMBIGUITY_RESOLUTION",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 595,
+        "reason": "The task concretely changes and tests commission and ticket accounting across coded and no-referral mints: every non-promotional mint must produce one of each, with no-referral rewards allocated by weighted draw. Correct implementation requires reconstructing substantial prior evolution, including the replacement of earlier multi-ticket rules, resolution of the open no-referral ticket ambiguity, the current $10 weighted-draw commission rule, eligible-owner scope, and dashboard/content consistency. Ignoring history risks retaining obsolete six-ticket or random-allocation behavior, while the resulting counts and weighted distributions are directly verifiable.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_595",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "8245ddbb890805f013a9479d90dcbe19d451fc7f9c907d844f7c4f901e1092d8",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_598",
+      "message_id": 598,
+      "conversation_turn_index": 598,
+      "history_turn_count": 597,
+      "speaker": "client",
+      "text": "Even before minting, immediately after approving the USDC spend, the 'mint successful' popup still appears; see the attachment. It also said 'Your NFT #19 has been minted successfully,' although I would have been minting #42.",
+      "event_ids": [
+        "REQ_MINT_RESULT_FEEDBACK_E011",
+        "REQ_MINT_RESULT_FEEDBACK_E012"
+      ],
+      "requirement_ids": [
+        "REQ_MINT_RESULT_FEEDBACK"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RUNTIME_FAILURE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 598,
+        "reason": "History establishes the persistent rule that success feedback must wait for confirmation of the actual mint, despite repeated failed fixes and obsolete working claims. The current report adds that the modal must use the current confirmed mint’s token ID. Reconstructing both constraints is necessary to implement and verify the fix without merely changing the displayed ID or preserving premature approval-triggered feedback.",
+        "historical_dependency": "MEDIUM",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_598",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "20df12ee28f8b5ff3de362d7a63f8488729a600c6d6cdd9c56ef56855a617992",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_631",
+      "message_id": 631,
+      "conversation_turn_index": 631,
+      "history_turn_count": 630,
+      "speaker": "client",
+      "text": "Could it instead be that no ticket is generated?\n\n- Generating no ticket for a 'no code buy' may be acceptable as-is, provided we slightly revise the UI notes.\n- If a ticket is generated and randomly distributed but omitted from the dashboard, that must be fixed.\n- Any randomly distributed commission must also appear on the dashboard and in the attributes.\n\nHere is the no-code purchase with a $4 tip: 0xa731d8c25e906bf414c8e729630db5fa81d74e295c60b3a917f84d620e51ac39\n\nIf tips are paid through a second transaction immediately after minting, that would explain why the tip failed, and we will need a UI note explaining it.",
+      "event_ids": [
+        "REQ_NO_REFERRAL_TICKETS_E014",
+        "REQ_NFT_METADATA_ACCURACY_E009"
+      ],
+      "requirement_ids": [
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_NFT_METADATA_ACCURACY"
+      ],
+      "event_types": [
+        "AMBIGUOUS",
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "AMBIGUOUS",
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 631,
+        "reason": "Earlier evidence evolved from six tickets to a resolved rule requiring one weighted-draw ticket for every eligible no-referral mint, followed by failures and a claimed backfill. The current task reopens whether such mints may generate no ticket while conditionally requiring generated tickets and commissions to appear on the dashboard and in NFT attributes. Correct action therefore requires reconstructing the prior rule, recognizing the new material ambiguity, deciding whether investigation suffices or clarification is needed, and implementing verifiable UI/metadata fixes without silently preserving or discarding the prior ticket requirement.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_631",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "MEDIUM"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "f15c63295392082ec1b4bbaa94698ab35ca9a1177ab214ad5961d4b2ccf91c19",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_660",
+      "message_id": 660,
+      "conversation_turn_index": 660,
+      "history_turn_count": 659,
+      "speaker": "client",
+      "text": "Although the tip worked, we need a confirmation banner explaining that it is sent through a delayed follow-up transaction. Otherwise, buyers may think they’re being asked to purchase a second copy.",
+      "event_ids": [
+        "REQ_OPTIONAL_MINT_TIP_E006"
+      ],
+      "requirement_ids": [
+        "REQ_OPTIONAL_MINT_TIP"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 660,
+        "reason": "The task modifies the active optional mint-tip flow after earlier failures and now states that the delayed follow-up transaction works. Correct execution requires reconciling that current success with the prior FAILED state and adding only the specified confirmation banner, rather than reviving tip-repair or unrelated referral work. The requested UI change is concrete and verifiable, with no material unresolved ambiguity.",
+        "historical_dependency": "MEDIUM",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_660",
+        "valid_task": true,
+        "reconstruction_risk": "MEDIUM",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "92502ed08675d48d3e956d6c7d165ce5662cdcf1fa5faa72f17a047b2f9f1885",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_672",
+      "message_id": 672,
+      "conversation_turn_index": 672,
+      "history_turn_count": 671,
+      "speaker": "client",
+      "text": "At this point, 34 mints should correspond to 34 tickets and 34 x $20 commissions.\n\nA mint still produces a ticket and commission even when no referral code is supplied.\n\nAccounting works correctly on the leaderboards and NFT attributes whenever a code is used. That part is perfect.\n\nWithout a referral code, the ticket and commission are assigned randomly, but both must still appear on the leaderboard and in the NFT attributes.\n\nSince your latest fix, the randomly assigned tickets from the last 7 mints seem to have been recorded correctly, which is great. The earlier missing tickets have not been backfilled, though.\n\nThe $18 commissions generated by these no-code buys are also still missing from the leaderboard and NFT attributes.\n\nMy screenshot shows an NFT with 9 tickets but only 4 x $20 commissions. That should be impossible because every ticket comes with a $18 commission.\n\nThe leaderboard screenshot accounts for only 15 tickets and 12 x $8 commissions from 34 total mints. Regardless of whether a referral code was supplied, 34 mints should produce 34 tickets and 34 x $20 commissions.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E014",
+        "REQ_CODED_REFERRAL_COMMISSION_E005",
+        "REQ_CODED_REFERRAL_TICKETS_E005",
+        "REQ_NO_REFERRAL_COMMISSION_E012",
+        "REQ_NO_REFERRAL_TICKETS_E015",
+        "REQ_NO_REFERRAL_TICKETS_E016",
+        "REQ_MINT_PRICE_REVENUE_SPLIT_E004",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E011",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY_E007"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_MINT_PRICE_REVENUE_SPLIT",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RUNTIME_VERIFICATION",
+        "AMBIGUOUS",
+        "RESUME",
+        "RUNTIME_FAILURE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "AMBIGUOUS",
+        "RESUME",
+        "AMBIGUITY_RESOLUTION",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 672,
+        "reason": "The task requires separating coded-referral, no-code ticket, no-code commission, historical backfill, and reporting requirements after repeated value and lifecycle changes. It resolves the prior no-code ticket ambiguity and confirms recent ticket behavior, while requiring old tickets and randomly assigned commissions to appear in leaderboards and NFT attributes. However, it gives incompatible no-code commission amounts ($20, $18, and $8), so an agent must reconstruct the history, preserve the clear one-ticket/one-commission-per-mint rule, and seek clarification on the material payout value before fully implementing a verifiable fix.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_672",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "a5f64a6d0c8b936b1db626d09ec89b583ace79559e086de3e6716906b3a53663",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_688",
+      "message_id": 688,
+      "conversation_turn_index": 688,
+      "history_turn_count": 687,
+      "speaker": "client",
+      "text": "The logic itself sounds good to me.\n\nAfter 34 mints, the leaderboard now shows 24 tickets and 19 commissions, which is perfect.\n\nThe NFT attributes are still not right, though. My screenshots show that NFT #42 has 18 tickets and 9 x $35 commissions on the leaderboard, which is correct. When I open NFT #42, the top of the page also correctly displays 18 tickets and 14 referrals. However, its attributes still report only 6 referrals and $85 in total earnings.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E015",
+        "REQ_CODED_REFERRAL_COMMISSION_E007",
+        "REQ_CODED_REFERRAL_COMMISSION_E008",
+        "REQ_CODED_REFERRAL_TICKETS_E006",
+        "REQ_NO_REFERRAL_COMMISSION_E013",
+        "REQ_NO_REFERRAL_COMMISSION_E014",
+        "REQ_NO_REFERRAL_TICKETS_E017",
+        "REQ_NO_REFERRAL_TICKETS_E018",
+        "REQ_MINT_PRICE_REVENUE_SPLIT_E005",
+        "REQ_NFT_METADATA_ACCURACY_E011",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E012",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY_E009"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_MINT_PRICE_REVENUE_SPLIT",
+        "REQ_NFT_METADATA_ACCURACY",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RESUME",
+        "RUNTIME_VERIFICATION",
+        "RUNTIME_FAILURE"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "AMBIGUITY_RESOLUTION",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 688,
+        "reason": "The approval of “the logic” depends on message 687 and resolves prior conflicting reward values in favor of four tickets/$35 for coded referrals and six tickets/$12 for no-code mints. The agent must preserve the now-verified leaderboard behavior while fixing stale NFT metadata for referrals and earnings. Ignoring history risks applying obsolete $20/$10/$18 and one-ticket rules or unnecessarily requesting clarification despite the client’s confirmation.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_688",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "1dc6fae67738742de2db98560403cc14e3747ebaae730ba67d21b4d3b6007031",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_692",
+      "message_id": 692,
+      "conversation_turn_index": 692,
+      "history_turn_count": 691,
+      "speaker": "client",
+      "text": "Absolutely, that's exactly right!",
+      "event_ids": [
+        "REQ_NFT_METADATA_ACCURACY_E013"
+      ],
+      "requirement_ids": [
+        "REQ_NFT_METADATA_ACCURACY"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 692,
+        "reason": "The affirmation is meaningful only with message 691: it confirms live on-chain getNFTMetadata(tokenId) as the NFT attribute source after repeated stale-data failures and prior metadata scope changes. History is required to identify the accepted behavior and reconstruct the current metadata requirement, while the antecedent is clear and no new implementation is requested.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_692",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "caa26081c53b0dbf223394211caa26e5b2e1b6bf63305a8a7bbcb4da31b19f94",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_701",
+      "message_id": 701,
+      "conversation_turn_index": 701,
+      "history_turn_count": 700,
+      "speaker": "client",
+      "text": "Although the details are too technical for me to follow, the approach sounds great. Just tell me what I need to do.",
+      "event_ids": [
+        "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY_E003",
+        "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY_E004"
+      ],
+      "requirement_ids": [
+        "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RESUME"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "AMBIGUITY_RESOLUTION",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 701,
+        "reason": "The Task’s approval of “the approach” is not interpretable from its text alone. Correct handling requires reconstructing that the earlier fresh-state migration policy was replaced by a controlled redeployment retaining existing data, and that the prior redeployment ambiguity was resolved and work resumed. Missing that evolution could produce obsolete migration instructions, while remembering the approved approach determines whether clarification is necessary. The Task requests guidance rather than a verifiable code change.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_701",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "0a551412d48c381d0ee39cd6e0e3a60ef9008df7c6d46d924d035c534cb7d481",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_742",
+      "message_id": 742,
+      "conversation_turn_index": 742,
+      "history_turn_count": 741,
+      "speaker": "client",
+      "text": "Whether both purchase scenarios share the same modal determines the copy. If they do, the &#39;Mint successful&#39; message will need to be more generic; otherwise, a referral-code purchase will need different copy.\n\nFor purchases without a code, the current message works nicely because it reminds buyers that simply holding the NFT could one day result in receiving a random ticket and commission too. That reminder only makes sense for mints without a referral code.\n\nSeparately, the book title looks good in small caps.",
+      "event_ids": [
+        "REQ_MINT_RESULT_FEEDBACK_E015"
+      ],
+      "requirement_ids": [
+        "REQ_MINT_RESULT_FEEDBACK"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 742,
+        "reason": "The task scopes the previously proposed random-holder copy to no-referral mints, so history is required to recover the referenced current wording and preserve the established confirmation trigger and token-ID behavior. Incorrect reconstruction could apply misleading copy to referral purchases. The implementation rule is concrete, but the modal-sharing architecture and exact generic or referral-specific replacement copy remain unresolved, making inspection and potentially clarification necessary before a verifiable UI change.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_742",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "1608726525e283eeee6b84b78e0c4e5258c745add5b196aea60f0739d9cb3714",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_746",
+      "message_id": 746,
+      "conversation_turn_index": 746,
+      "history_turn_count": 745,
+      "speaker": "client",
+      "text": "Cool. I propose this wording:\n&#39;$12 commission + $1,250 prize draw ticket has gone to your chosen *From Workshop Floor to Fresh Start* NFT holder&#39;\nIt would appear in the &#39;Mint successful&#39; modal whenever a code is used.",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E016",
+        "REQ_SMALL_BLOCK_PRIZE_E005",
+        "REQ_CODED_REFERRAL_COMMISSION_E010",
+        "REQ_CODED_REFERRAL_TICKETS_E008",
+        "REQ_MINT_RESULT_FEEDBACK_E016",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT_E013"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_SMALL_BLOCK_PRIZE",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_MINT_RESULT_FEEDBACK",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 746,
+        "reason": "The exact coded-referral modal copy is supplied, but history is needed to distinguish it from the existing no-code variant, preserve the four-ticket count and no-code rewards, and retain the rule that success appears only after confirmed minting. The new $12 commission and $1,250 drawing values override repeatedly evolved $35/$2,000 or $900 values across several related reward and content Requirements, creating substantial obsolete-value and inconsistent-implementation risk.",
+        "historical_dependency": "MEDIUM",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_746",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "HIGH"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "2318ec171ace7d7ecc9e1da6aa9f5da7734c6419570416dc6b1308a3a7de74b7",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_747",
+      "message_id": 747,
+      "conversation_turn_index": 747,
+      "history_turn_count": 746,
+      "speaker": "client",
+      "text": "If implementation is easy, a Unified status message would be better.",
+      "event_ids": [
+        "REQ_MINT_RESULT_FEEDBACK_E017"
+      ],
+      "requirement_ids": [
+        "REQ_MINT_RESULT_FEEDBACK"
+      ],
+      "event_types": [
+        "AMBIGUOUS"
+      ],
+      "coverage_tags": [
+        "AMBIGUOUS",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 747,
+        "reason": "The conditional preference for a unified message is intelligible only against the recently specified referral and no-referral copy variants. It may supersede those variants, but neither that intent nor the unified wording is resolved, so acting without clarification risks discarding valid copy requirements. This strongly tests reconstruction of evolving state and the decision to clarify rather than implement an assumed override.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_747",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "1fa7615c0063e262735425541ead9e9fef3408e6943984b10e04c254dc67297b",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_764",
+      "message_id": 764,
+      "conversation_turn_index": 764,
+      "history_turn_count": 763,
+      "speaker": "client",
+      "text": "The idea is great, including welcome bots and the other setup. Since it sounds much easier for you to handle, I think you should do it.",
+      "event_ids": [
+        "REQ_DISCORD_COMMUNITY_SERVER_E003"
+      ],
+      "requirement_ids": [
+        "REQ_DISCORD_COMMUNITY_SERVER"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 764,
+        "reason": "The task implicitly authorizes the previously deferred Discord work, removing the wait-for-traction condition and requiring the welcome and moderation setup. Correct action depends on selecting the Discord requirement from largely unrelated earlier content and reconstructing its transition from deferred to active; otherwise an agent could incorrectly continue postponing it. No unresolved ambiguity is recorded, and this concerns one Requirement rather than a code change.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_764",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "e42bd6bc4c91ddbf21362004aad4310e0e63d0a29c3b95e77d604eff8f98e87e",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_775",
+      "message_id": 775,
+      "conversation_turn_index": 775,
+      "history_turn_count": 774,
+      "speaker": "client",
+      "text": "Yes, I think that’s an excellent idea.",
+      "event_ids": [
+        "REQ_SUPPORT_CONTACT_FORM_E001"
+      ],
+      "requirement_ids": [
+        "REQ_SUPPORT_CONTACT_FORM"
+      ],
+      "event_types": [
+        "INTRODUCE"
+      ],
+      "coverage_tags": [
+        "INTRODUCE",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": true,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3",
+          "RQ4"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "LOW",
+        "message_id": 775,
+        "reason": "The bare affirmation is not interpretable alone; it approves a detailed contact-form proposal attributed to supporting messages 773 and 774. Correct action requires selecting that proposal, reconstructing the newly introduced persistent scope and exact fields, deciding that the remembered proposal resolves the referent rather than asking unnecessarily, and implementing it faithfully. There is no prior lifecycle evolution or multi-Requirement interaction.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_775",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "dadb466523e0171ec2e4f0df106db0e047717c13b0f88bc49353f2e955a0d9c3",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_781",
+      "message_id": 781,
+      "conversation_turn_index": 781,
+      "history_turn_count": 780,
+      "speaker": "client",
+      "text": "For the $900 prizes, is the method a redemption control or automatic payout, with the automatic option working like the commissions? Hey, how does the giveaway work?",
+      "event_ids": [
+        "REQ_PRIZE_CLAIM_FLOW_E006"
+      ],
+      "requirement_ids": [
+        "REQ_PRIZE_CLAIM_FLOW"
+      ],
+      "event_types": [
+        "AMBIGUOUS"
+      ],
+      "coverage_tags": [
+        "AMBIGUOUS",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 781,
+        "reason": "The current question cannot be answered from its text alone. Earlier evidence evolved from manual one-click prize claims to a later explicit automatic wallet transfer that resolved the prior ambiguity and removed the claim control. Correctly selecting the latest evidence avoids giving the obsolete manual-claim answer and supports answering from memory rather than requesting clarification.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_781",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "48a236e495e9cb01178a10dfbfc537b8ddcfeefee87d63cdf7f9ba3ef2d35b6d",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_785",
+      "message_id": 785,
+      "conversation_turn_index": 785,
+      "history_turn_count": 784,
+      "speaker": "client",
+      "text": "To test this one, I guess we’ll have to wait until the 750th sale. Cool—but is this prize-claim feature all done?",
+      "event_ids": [
+        "REQ_FAQ_CONTENT_E017",
+        "REQ_PRIZE_CLAIM_FLOW_E007",
+        "REQ_PRIZE_CLAIM_FLOW_E008"
+      ],
+      "requirement_ids": [
+        "REQ_FAQ_CONTENT",
+        "REQ_PRIZE_CLAIM_FLOW"
+      ],
+      "event_types": [
+        "MODIFY",
+        "RESUME"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "RESUME",
+        "AMBIGUITY_RESOLUTION",
+        "MULTI_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ1",
+          "RQ2",
+          "RQ3"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "HIGH",
+        "message_id": 785,
+        "reason": "The deictic status question cannot be interpreted from the current message alone. Correct handling requires selecting the prize-claim and FAQ requirements, reconstructing the evolution from manual claim to automatic payout and then back to a manual redemption control visible only during the eligibility window, and recognizing that the previously open payout-mode ambiguity is now resolved. Using an obsolete state could preserve automatic-payout wording or omit the restricted claim control, while the linked FAQ requirement must remain consistent.",
+        "historical_dependency": "HIGH",
+        "ambiguity_decision_value": "HIGH",
+        "candidate_id": "42204309_CANDIDATE_MSG_785",
+        "valid_task": true,
+        "reconstruction_risk": "HIGH",
+        "multi_requirement_value": "MEDIUM"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "a4985b28e59d3ea7e1e88b55597b93af8e04f7b4dc638da4e14d116fae84e43c",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "candidate_id": "42204309_CANDIDATE_MSG_793",
+      "message_id": 793,
+      "conversation_turn_index": 793,
+      "history_turn_count": 792,
+      "speaker": "client",
+      "text": "One more thing: could you make me the owner of mint/affiliate code #27 and send it to 0x7a14c9e2b6d83f105ac47e69d2b801f43e6c95a1?",
+      "event_ids": [
+        "REQ_SPECIFIC_NFT_OWNERSHIP_TRANSFER_E002"
+      ],
+      "requirement_ids": [
+        "REQ_SPECIFIC_NFT_OWNERSHIP_TRANSFER"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "coverage_tags": [
+        "MODIFY",
+        "SINGLE_REQUIREMENT"
+      ],
+      "introduce_only": false,
+      "llm_evaluation": {
+        "recommended": true,
+        "primary_rq_targets": [
+          "RQ2"
+        ],
+        "history_sensitive": true,
+        "requirement_evolution": "MEDIUM",
+        "message_id": 793,
+        "reason": "The phrase \"One more thing\" and the MODIFY event make code #27 an addition to, not a replacement for, the active ownership-transfer requirement covering mints 17, 31, and 46. Correct reconstruction must preserve those earlier obligations while adding the explicit wallet transfer for #27; no material unresolved ambiguity or multi-requirement interaction is shown.",
+        "historical_dependency": "MEDIUM",
+        "ambiguity_decision_value": "LOW",
+        "candidate_id": "42204309_CANDIDATE_MSG_793",
+        "valid_task": true,
+        "reconstruction_risk": "MEDIUM",
+        "multi_requirement_value": "LOW"
+      },
+      "evaluation_metadata": {
+        "packet_sha256": "8cb3dbde1ef1c8c359f8926e33e0f6c06d6b7ed464b7ac041ddb783bdb4771fa",
+        "prompt_sha256": "b11f13bf0eda40d45e393252215d8b3f765a57bb0a50cb5a2117f316730b11ab",
+        "model": "gpt-5.6-sol",
+        "reasoning_effort": "high"
+      }
+    }
+  ]
+}
