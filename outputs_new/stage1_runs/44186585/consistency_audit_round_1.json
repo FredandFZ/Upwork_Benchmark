@@ -1,0 +1,92 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_HARBORLINE_THRIVE_RETENTION_AND_ELEMENTOR_MIGRATION",
+        "title": "Harborline Thrive Retention and Elementor Migration",
+        "family_id": null,
+        "definition": "Retain Thrive where required to preserve existing page styling while using Elementor for new pages and postponing full Thrive removal or migration until the replacement site is ready.",
+        "anchor_message_ids": [
+          110,
+          116,
+          117
+        ]
+      },
+      "evidence_message_ids": [
+        110,
+        116,
+        117
+      ],
+      "decision_note": "The page-builder retention and migration strategy can evolve independently from remediation of vulnerable plugins and should not remain embedded in the plugin-security Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_HARBORLINE_PLUGIN_SECURITY_MAINTENANCE",
+        "event_locator": {
+          "message_id": 117,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "thrive_apprentice_remediation": "disable_as_interim_security_measure"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "BACKEND",
+            "FRONTEND"
+          ],
+          "contexts": [
+            "HARBORLINE_PLUGIN_SECURITY"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        110,
+        116,
+        117
+      ],
+      "decision_note": "Disabling Thrive Apprentice is plugin-security remediation, but postponing removal of the Thrive page builder belongs to the separate page-builder retention and migration Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_STONEFIELD_UNAUTHORIZED_CONTENT_REMOVAL"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 167,
+          "speaker": "freelancer",
+          "text": "Current status: the site layout has been fully recovered, Wordfence has been configured for security, malware has been removed from around 34 outdated plugins, and all fake admins have been removed.\n\nFollow-up work remains. Although the pages appear fine, I cannot verify whether all the private pages work correctly. Please test every contact form and change your admin password. For the search-engine cleanup, I still need Search Console access for Stonefield as well.\n\n**Overall report**\nThere are signs of earlier, smaller-scale attacks dating back to 2022. The majority of the 14000 posts were injected on October 14th, and all of the website's pages were deleted on December 20th."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Investigation established that attackers injected the majority of approximately 14,000 Stonefield posts."
+        }
+      },
+      "evidence_message_ids": [
+        167
+      ],
+      "decision_note": "This is the first concrete failure evidence for Stonefield's injected-content cleanup and is distinct from legitimate-page recovery and malicious-code removal.",
+      "confidence": "HIGH"
+    }
+  ]
+}

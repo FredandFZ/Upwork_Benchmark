@@ -1,0 +1,138 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_BOOK_READER_UX",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 184,
+        "speaker": "client",
+        "text": "We also need a new FAQ section explaining how fiat buyers who are unfamiliar with crypto receive commissions and prizes. This is important for mainstream users because a non-custodial wallet is created behind the scenes, with the seed phrase not required, but they may not understand how to reach their rewards.\n\n\"How Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\"\n\nThe flow should reassure customers paying by fiat, such as bank transfer, Apple Pay, etc., that everything is straightforward. When the book is minted for $30 through Transak, the buyer automatically receives a non-custodial wallet behind the scenes, with the seed phrase not required. That wallet stores the buyer's NFT and receives all commissions and prizes.\n\nEarning Commissions ($10 per Referral):\nThe buyer shares a referral code, for example, \"use 8421.\" Whenever another person mints with that code, $10 is sent automatically to the wallet address.\nCollection requires no separate action. The buyer signs into <http://harborquill.example|harborquill.example> using a one-time email code or SIWE with the wallet Transak created, and the commissions appear immediately. If necessary, we can explain how to export the funds to a bank account or an exchange such as Coinbase.\n\nEarning and Winning Prizes (Tickets for $900/$6,000 Draws):\nEvery referral automatically assigns tickets for the active prize draws and ties them to the buyer's NFT/wallet.\nFair on-chain randomness runs the draws at approximately ~750 sales for $900 and ~35,000 for $6,000.\nResults are published on the Winners page and sent by email.\n\nPrize collection is automatic as well: a winner receives either $900 or $6,000 directly in the wallet and should check the dashboard or email for the notification.\n\nDuring the Purchase:\nA fiat-to-crypto conversion is completed by Transak, which then mints the NFT directly into a newly created wallet address. Nothing has to be configured manually; the process is seamless and non-custodial. The buyer owns the keys without having to manage a complicated recovery phrase immediately.\nAn email confirmation then provides the mint number, which also serves as the referral code, along with NFT details and a dashboard link at <http://harborquill.example|harborquill.example>.\n\nFor ebook access, could we use this setup?\n\nMake Login-gated preview the standard experience. The email certificate would carry a large button reading \"Read 'The Long Road Forward' Today,\" while download after verification would appear as a smaller \"Save PDF for Later\" link. The dashboard and email-linked reader should use PDF.js.\n\nDoes that work?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "reader_engine": "PDF.js",
+        "reader_entry_points": [
+          "dashboard",
+          "email-linked reader"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "BOOK_READER"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 303,
+        "speaker": "client",
+        "text": "The mechanics are the priority because minting is currently failing; the remaining work is mostly aesthetic, including making the book view 25% wider.\n\nThe failure might be related to the edge case of where the commission and ticket should go on mint 3.\n\nOther problems include:\n\\- How can the book be viewed?\n\\- The dashboard reports that I minted even though I did not\n\\- A referral code above the current mint number is being shown as rejected\n\nI’ll run another test once I can complete a real mint."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "book_view_width": "increase the current book view width by 25%"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "The NFTs now appear on my dashboard, but their images fail when I open the details. Clicking 'View Book' also does not display the book."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Clicking View Book from the dashboard did not display the ebook."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 576,
+        "speaker": "client",
+        "text": "After reopening it, I used the arrow keys and moved through to page 27, but the arrows then faded and left me stuck on page 27. Ahhhhh, I can still navigate with my keyboard's arrow keys; I just can't click anymore with the cursor."
+      },
+      "supporting_message_ids": [
+        573,
+        574
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Keyboard navigation continued to work, but the on-screen arrows faded and could no longer be clicked with the cursor."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 610,
+        "speaker": "client",
+        "text": "After testing it just now, I can confirm it works fine. In the book reader, the arrow keys are permanently visible now. I would prefer them to fade while unused and return when the cursor becomes active, but the current behavior is acceptable."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client tested the reader and confirmed that its now-permanently-visible navigation controls worked acceptably."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 560,
+      "suggested_requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+      "description": "The access-denied result verifies unauthorized-user gating rather than reader navigation."
+    },
+    {
+      "message_id": 616,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The missing Rainbow Wallet signature is a mobile-wallet access interoperability failure."
+    },
+    {
+      "message_id": 624,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The missing mobile decryption signature concerns mobile-wallet access rather than reader navigation."
+    },
+    {
+      "message_id": 703,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The suspected Lit Protocol limitation concerns book access through mobile wallet applications."
+    },
+    {
+      "message_id": 706,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The Lit network rate-limit error concerns mobile book decryption and access."
+    },
+    {
+      "message_id": 710,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The MetaMask application failure is specific to the mobile-wallet access path."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

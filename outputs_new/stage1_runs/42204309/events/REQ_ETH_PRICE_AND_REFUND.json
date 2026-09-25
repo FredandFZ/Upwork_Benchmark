@@ -1,0 +1,264 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_ETH_PRICE_AND_REFUND",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 352,
+        "speaker": "client",
+        "text": "The ETH transaction failed. While the mint page displays 0.0140 ETH ($42.60), the transaction itself shows 0.0128 ETH ($39.42).\nA swap on base shouldn’t, in my view, cost between $4.25 and $8.90.\nIs the '0.0140ETH' amount dynamic—does it move with the ETH price so that it continues to match $30?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "target_mint_price": "$30 equivalent",
+        "eth_input_pricing": "dynamic with the ETH market price to track the fixed mint price"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "ETH_PAYMENT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 352,
+        "speaker": "client",
+        "text": "The ETH transaction failed. While the mint page displays 0.0140 ETH ($42.60), the transaction itself shows 0.0128 ETH ($39.42).\nA swap on base shouldn’t, in my view, cost between $4.25 and $8.90.\nIs the '0.0140ETH' amount dynamic—does it move with the ETH price so that it continues to match $30?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The ETH checkout displayed 0.0140 ETH ($42.60), submitted 0.0128 ETH ($39.42), and the transaction failed rather than reliably tracking the $30 mint price."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 357,
+        "speaker": "freelancer",
+        "text": "The flow now works as follows:\n\n\\- After USDC approval, auto-mint runs, and the success modal appears only once the mint succeeds.\n\\- For ETH, the price is calculated dynamically, a sufficient buffer is added, and the swap should complete successfully.\n\nTo track current market rates, the displayed ETH price will fluctuate against the $30 USDC target. Because the contract minimum is 0.014 ETH (~$43.75), the frontend selects whichever is higher: that minimum or the live dynamic price.\n\nPlease hard refresh with Ctrl+Shift+R or Cmd+Shift+R, then attempt another mint. Both the USDC and ETH paths should now work correctly."
+      },
+      "supporting_message_ids": [
+        352,
+        353
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that ETH input is calculated dynamically against the $30 USDC target, with a buffer and a 0.014 ETH contract minimum."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 363,
+        "speaker": "client",
+        "text": "Cool, I’ll test it now.\n\nFirst, though, where did the ETH from my earlier successful transaction go, given that it produced no mint? Did any of it reach the prize pools or similar destinations?\nTransaction - 0x4c81d7a295e630bf1a74c8d9e2035b6f87a19d4e\n\nAlso, if 0.0125 ETH = 36.50 and the split is $12 to me, $10 for commission, and $8 for the prize pool, what happens to the remaining $6.50?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The destination and refund treatment of ETH exceeding the fixed mint allocation are unresolved."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 494,
+        "speaker": "freelancer",
+        "text": "To address the ETH issue, I redeployed a new contract.\n\nThe fix includes:\n\\* Configurable slippage tolerance, with 72 as the default retention value and 28% slippage\n\\* Owner adjustment through the setSwapSlippageTolerance() function\n\\* Reliable ETH minting even during volatile markets\n\nBefore going live, add the contract to Chainlink VRF:\n\\* Visit vrf.chain.link\n\\* Add consumer 0x3d98b2f714c65ae079d3e418b62f90ca5e17d843"
+      },
+      "supporting_message_ids": [
+        493
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports redeploying the contract with configurable slippage and a 28% default tolerance to make ETH minting reliable during volatility."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 498,
+        "speaker": "client",
+        "text": "At present, the contract is attempting to charge 0.0184 ETH, equivalent to $57.89."
+      },
+      "supporting_message_ids": [
+        494,
+        497
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the slippage-related redeployment claim, checkout attempted to charge 0.0184 ETH, equivalent to $57.89, for the $30 NFT."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 518,
+        "speaker": "freelancer",
+        "text": "For surplus and shortfall, the contract behaves differently.\n\nWhen the swap returns more than $30:\n\\- Return surplus to the buyer in USDC, as implemented at line 824-828\n\\- For example, a $39 output gives the user a $9 USDC refund\n\nWhen the swap returns less than $30:\n\\- Swap shortfall cancels the call at line 819\n\\- In the supplied example, a $41 swap request returns below that threshold, so All bundled actions are rolled back\n\\- The user keeps the full balance and must submit a fresh request"
+      },
+      "supporting_message_ids": [
+        515,
+        516
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that surplus swap output is refunded in USDC and output below $30 causes the bundled operation to revert."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 520,
+        "speaker": "client",
+        "text": "Great, that works for me 👍"
+      },
+      "supporting_message_ids": [
+        519
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "swap_mode": "exactOutputSingle",
+        "eth_input_policy": "consume only the ETH required for the fixed mint price and return the remainder",
+        "excess_refund_asset": "ETH"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "ETH_PAYMENT",
+          "PAYMENT_REFUND"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 520,
+        "speaker": "client",
+        "text": "Great, that works for me 👍"
+      },
+      "supporting_message_ids": [
+        519
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 530,
+        "speaker": "freelancer",
+        "text": "In the test, I spent 0.0136845 ETH and received a refund of 12.74380 USDC."
+      },
+      "supporting_message_ids": [
+        519,
+        520,
+        529
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A concrete ETH-payment test returned the excess as USDC rather than the approved ETH refund."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 539,
+        "speaker": "client",
+        "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best."
+      },
+      "supporting_message_ids": [
+        534,
+        535,
+        536,
+        537,
+        538
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "insufficient_eth_behavior": "revert if the supplied ETH cannot produce the exact 30 USDC mint output"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 341,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The ETH payment executed without delivering an NFT, which is primarily a failure of end-to-end ETH mint execution."
+    },
+    {
+      "message_id": 359,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The false Purchase Confirmed popup after a reverted ETH transaction belongs to mint-result feedback."
+    },
+    {
+      "message_id": 395,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The contract execution revert concerns basic ETH mint execution rather than pricing or refund behavior."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The selectable ETH method produced a failed transaction, which is an ETH mint-flow failure."
+    },
+    {
+      "message_id": 490,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The message reports another failed ETH mint transaction without a distinct pricing or refund observation."
+    },
+    {
+      "message_id": 571,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The successful ETH mint verifies end-to-end mint execution but does not verify pricing accuracy or the excess-refund asset."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

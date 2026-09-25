@@ -47,6 +47,29 @@
 | `44099875` | 99 / 99 | 8 | 8 | `CLEAN_AFTER_REPAIR` |
 | `43772711` | 101 / 101 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
 | `44036410` | 101 / 101 | 8 | 8 | `CLEAN_AFTER_REPAIR` |
+| `43255761` | 347 / 347 | 14 | 14 | `CLEAN_AFTER_REPAIR` |
+| `43424400` | 108 / 108 | 8 | 8 | `CLEAN_AFTER_REPAIR` |
+| `43503853` | 260 / 260 | 10 | 10 | `CLEAN_AFTER_REPAIR` |
+| `43796672` | 126 / 126 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
+| `43804272` | 311 / 311 | 10 | 10 | `CLEAN_AFTER_REPAIR` |
+| `43846196` | 116 / 116 | 4 | 4 | `CLEAN_AFTER_REPAIR` |
+| `43945601` | 210 / 210 | 9 | 9 | `CLEAN_AFTER_REPAIR` |
+| `43948285` | 209 / 209 | 9 | 9 | `CLEAN_AFTER_REPAIR` |
+| `44035087` | 112 / 112 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
+| `44039904` | 346 / 346 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
+| `44082218` | 314 / 314 | 10 | 10 | `CLEAN_AFTER_REPAIR` |
+| `44102153` | 194 / 194 | 8 | 8 | `CLEAN_AFTER_REPAIR` |
+| `44127283` | 104 / 104 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
+| `44128864` | 126 / 126 | 10 | 10 | `CLEAN_AFTER_REPAIR` |
+| `44133873` | 203 / 203 | 10 | 10 | `CLEAN_AFTER_REPAIR` |
+| `44138599` | 105 / 105 | 7 | 7 | `CLEAN_AFTER_REPAIR` |
+| `44151581` | 113 / 113 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
+| `44159104` | 201 / 201 | 8 | 8 | `CLEAN_AFTER_REPAIR` |
+| `44159206` | 102 / 102 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
+| `44166278` | 147 / 147 | 6 | 6 | `CLEAN_AFTER_REPAIR` |
+| `44177602` | 303 / 303 | 11 | 11 | `CLEAN_AFTER_REPAIR` |
+| `44186585` | 181 / 181 | 8 | 8 | `CLEAN_AFTER_REPAIR` |
+| `44190396` | 117 / 117 | 7 | 7 | `CLEAN_AFTER_REPAIR` |
 
 ## 项目 `35648772`
 
@@ -785,3 +808,518 @@ ordinal 90 又为签收和奖金凭空增加四小时承诺，现恢复原意。
 真实 Canva 资源路径和原配色残留扫描为零，未发现邮箱、凭据、内部占位符或乱码。Microsoft Word、
 InDesign、Canva、PowerPoint、PDF 等公共工具和格式均保留；四档风险报告的修订、编号纠错、
 页眉页脚、措辞调整、可编辑文件交付、资产补齐、签收、奖金和付款流程保持一致。
+
+## 项目 `43255761`
+
+- 审核日期：2026-09-24
+- 审核覆盖：347 / 347
+- 审核开始时发布文件指纹：`4f672f1ef2c6880026a891eecbb249d854493110af470a797daa75891a1e5c61`
+- 修复后指纹：`7a4411bd9969a61301bc22ed97bf79a973e4e36272b65de4f2f54c3a68e42c42`
+- 修改消息：69 条（0-based ordinals：0、6、25、29、34、39、43、63、66、67、70、73、84、86、87、95、105、109、112、113、114、115、117、124、125、130、133、145、146、147、159、162、193、196、203、204、205、208、209、212、213、214、215、219、222、237、243、245、261、267、280、281、282、285、294、295、296、298、304、305、308、316、327、336、342、343、344、345、346）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 14 组问题：
+
+1. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：自由职业者在 ordinals 0–154 等处为 Jonas，但 ordinals 209、215、219、222 又变成 Rahman；ordinal 237 把客户的问候语误当成姓名，生成第三个人物 “Nadia Rahman”。现统一为 Jonas，并恢复 237 的问候语。
+2. `FACT_INVENTED`（HIGH）：ordinal 6 的需求说明凭空加入 5 个私有文件链接（原文没有任何链接），ordinal 203 与 213 又为每个模板附加原文没有的下载链接和“版本号+链接”说明。现删除全部虚构链接。
+3. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：客户组织缩写在样式前缀中为 NXQ，却在 ordinal 6 另外写成 Cedar Arc，同一份样式指南在 6、70、84 被分成三种不同名称。现统一为 NXQ 前缀、`New_styles_for_implementation_nxq`，以及原文通用名称 New Styles 文档。
+4. `ENTITY_MAPPING_INCONSISTENT` / `UNNATURAL_REWRITE`（MEDIUM）：五个丹麦语通用模板名（主模板、Indstilling、Vedledning、Bestyrelsesseminar、Bestyrelsesmode）在不同消息中被映射成 Hovedskabelon/Core Layout、Afgørelse/Decision Brief、Instruktion/Process Guide、Strategy Workshop、Steering Forum 等多套名称，ordinals 87、124、125、146、147、213、295、304 还出现 “名称A (名称B)”“r29/v41/v57” 等机械拼接。ordinal 237 本身保留了原丹麦语通用文档类型名，这些名称不含身份信息，因此统一恢复为通用丹麦语模板名（ordinals 66、73、84、86、87、95、105、124、125、146、147、213、295、304、308）。
+5. `BUSINESS_VALUE_ERROR`（HIGH）：模板版本号原本按 v14→v17→v18→v19→v22→_24→v25/v2x 递进，发布文件中同一轮次模板出现 v31/v34/v35/v38/v41/v42/v44/v45/v48/v58/v63/v70 等互相冲突的值。现按统一偏移改为 v27→v30→v31→v32→v35→_37→v38/v3x，保留版本演进历史。
+6. `BUSINESS_VALUE_ERROR`（HIGH）：ordinal 0 把“几个模板”精确成 12 个，ordinal 298 又写成 12 个模板完成，与后文 4 个模板加主模板的交付不符；ordinals 67、159、208、212、243、261、280、281、294 把“这 2 个”“1 个文档”“剩 1 个”“逐个”“第 2 个文档”“再一个模板”改成 6/5/7/4 by 4/第 6 个/4 个，破坏数量与顺序关系。现全部恢复。
+7. `RELATION_CHANGED`（HIGH）：ordinals 29、34、63、66、67 把“今天是最后一天开斋节假期、明天开工、今天稍后发合同、明天不可能全部完成、今天先做两个、昨天只用了 Tab、今晚完成”改成“上周四/下周二/下周五”，导致客户在同一截止期既被告知不可能又被请求完成；ordinals 204、316、343–346 把“几小时”“今天”“现在”改成具体小时数或其他日期，ordinal 342 凭空加入“下月结束合同、下周三评价”的承诺。现恢复原时间关系。
+8. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinal 145 把“只用简单文本”反转为“用格式化文本，不用简单文本”；ordinal 25 把“先把一个模板调到 100% 完美”改成四个模板 70% 完美。现恢复。
+9. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：丹麦语标签在 162 被改成挪威语；日期格式 day/month/year 在 267 被改成 year-month-day；PowerPoint 16:9 背景在 305 被改成 4:3；Word 编号样式 (List) 在 112 被改成 (Outline)；“清除格式”黄色按钮、绿色编号样式、3 个点菜单在 113、114、205 被改成紫色/蓝色/7 个点；日期占位格式 00.00.0000 在 245 被误当作私有号码删去；ordinals 39、43 把 “10 以后编号错位”“Overskrift 3/heading 3” 改成 24 和 7。现恢复公共技术事实。
+10. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：灰色控件在 105、109、115 被改成蓝色，而 127–133 仍讨论灰色开发者字段。现统一为灰色。
+11. `RELATION_CHANGED`（HIGH）：ordinal 117 把“首页不显示页码、从第 2 页开始”改成前三页不显示、第 4 页开始；ordinals 193、196 把“标签和字段两处”“出现两次”改成四处、五次。现恢复。
+12. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinal 305 中“限制为两个项目符号 / 用户加一个而非两个 / 超过两个会缩小”被改成 6、4 与 7、超过 6，数值互相矛盾。现恢复一致的两个项目符号逻辑。
+13. `FACT_INVENTED`（MEDIUM）：ordinal 285 与 296 把流感/生病改成手腕骨折；ordinal 327 把丹麦本周公共假期改成葡萄牙下月假期，并把 Word 模板误写为 work；ordinal 336 把“稍等，他在谈价”改成请对方等他。现恢复原事实。
+14. `UNNATURAL_REWRITE`（LOW）：ordinal 130 含修复流程遗留前缀 “For clarity, the details are restated below.”，ordinal 133 附加原文没有的结论。现删除。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 347，消息顺序、`message_user_type`、仅含 `message` 与 `message_user_type` 字段、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与备份前后逐条差异一致。原人物姓名、客户组织缩写、虚构碰撞姓名和虚构私有域名残留扫描为零，未发现邮箱、非 `.example` 链接、内部占位符或乱码。Microsoft Word、PowerPoint、Upwork Zoom、Loom、PDF、Tab/Shift+Enter、content control、style ribbon 等公共工具和术语保持不变；报价 $850→PPT $1,200–1,400→修订 $950 的价格历史与原文升降关系一致。
+
+## 项目 `43424400`
+
+- 审核日期：2026-09-24
+- 审核覆盖：108 / 108
+- 审核开始时发布文件指纹：`8739cfd27ae4f3477f90bb52a350af43b9163e530a18a7f77c5f130518361809`
+- 修复后指纹：`aa835fecba989ba7914f0a4efb9ce0f16b169cc0c35d1a77e3c6a6734acfff05`
+- 修改消息：35 条（0-based ordinals：0、6、9、11、30、32、33、35、40、41、43、44、48、49、55、57、58、60、61、62、63、65、66、67、70、72、75、79、82、86、89、93、95、102、104）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 8 组问题：
+
+1. `PII_RESIDUAL`（HIGH）：场景代号在多数消息中已替换为 SQ 系列，但 ordinals 65、66、67 仍保留原场景代号。现按统一映射替换。
+2. `ENTITY_MAPPING_INCONSISTENT` / `UNNATURAL_REWRITE`（MEDIUM）：同一套场景代号被映射成 SQ4/SQ6/SQ10/SQ12/SQ14/SQ15/SQ17 等互不对应的值，同一镜头号也被改动；ordinals 6、32、33、82 还凭空附加 RF2、BL8\_2、“For reference: KT4…” 等机械参考编号。现统一为“原场景号+3”的 SQ 映射（SQ4–SQ12），镜头后缀保持原位次，删除附加编号（ordinals 6、32、33、55、57、58、61、70、82）。
+3. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：8 条共享文件夹链接虽已替换文件夹 ID，但仍指向真实可解析的公共云盘主机。现改为不可解析的 `.example` 地址，保留同一共享文件夹指向（ordinals 11、35、40、41、43、48、55、72）。
+4. `BUSINESS_VALUE_ERROR`（HIGH）：ordinal 30 把“三对图像，每对各 1 张两个角色，前两张远景、中间两张中景、第三对近景”改成六对、每对 4+3 张、前七张/后五张，结构自相矛盾；ordinals 86、89、93、95 把三个角色、改一个英雄、只尝试一次改成七个/八个/两个/四次；ordinal 75 把两张参考图改成七张；ordinal 49 把“只保留一座上方桥梁”改成四座。现恢复原对象数量与关系。
+5. `FACT_INVENTED`（MEDIUM）：ordinals 0、32、43、49、63、104 把“几处小修改”“少量剩余资金”“几秒”“几张新帧”“几个小问题”“几次动画测试”擅自精确化为 8、$90、12 秒、11、9、9；ordinal 60 把“100% 清楚方向”改成 82%。现恢复原模糊表达。
+6. `RELATION_CHANGED`（HIGH）：ordinals 62、67、79 把“明天或后天”“给我一天”改成四五天和 4 天，改变暂停时长与后续跟进关系。现恢复。
+7. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：ordinal 9 把竖版 9:16 视频比例改成 2:3。现恢复 9:16。
+8. `UNNATURAL_REWRITE` / `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：ordinal 102 在休假日期后追加一段日期不同的 “For reference” 说明；ordinals 44、49 把特定角色的图像集泛化成“角色图像集/受影响图像”，失去对象指向。现删除附加说明，并使用统一的角色虚构名 Kestrel。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 108，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原客户姓名、三个角色原名、原场景代号、真实云盘文件夹 ID 与主机残留扫描为零，未发现邮箱、内部占位符或乱码；自由职业者对客户的称呼统一为 Adrian，角色统一为 Kestrel、Red Fern、Blue Lantern。Photoshop、AI 生成、storyboard reel、voiceover 等公共工具与术语保持不变；合同金额、每个新角色报价、4 月/10 月时间对应、休假日期和“先动画、效果不佳再退回数字漫画”的决策保持一致。
+
+## 项目 `43503853`
+
+- 审核日期：2026-09-24
+- 审核覆盖：260 / 260
+- 审核开始时发布文件指纹：`e368721f784ba8e919834b96517ec33e18dd67546c48d0d2a768cd4588a83a01`
+- 修复后指纹：`b8a05a219ad212b58e1e463371c8fac10eef930de5b2c1e55dce1997fdf87c85`
+- 修改消息：55 条（0-based ordinals：3、4、5、30、35、38、39、46、55、61、80、89、91、95、100、102、104、106、114、116、118、129、131、138、139、141、142、143、147、148、159、166、167、173、187、192、195、200、204、206、207、213、215、224、226、227、228、231、235、237、246、249、254、257、259）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 10 组问题：
+
+1. `BUSINESS_VALUE_ERROR`（HIGH）：机器始终是左右两个工位（两碗、两旋钮、两出料按钮、Deck 1/Deck 2），但发布文件在 BOM（ordinal 38）中把碗、电机、联轴器等改成 4 件、搅拌头 6 件、电源 3 台、出料阀 5 件，ordinals 138、139、141、200、235、237、246、259 又写成五个槽孔、四个/五个工位、Deck 4/5、4 路管路和 4 个出料口。现恢复两工位结构；BOM 按原数量（电源 1 台、硅胶塞 5 个）等比例换算单价，总价改为与各行相加一致的 $204.67，并删除凭空加入的“更新了 304 不锈钢规格”说明（恢复 304 规格）。
+2. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：标准 120V 墙插和“像汽车电瓶一样的 12V”在 ordinals 3、4、5、38、39、80 被改成 240V/24V，与美国墙插和汽车电瓶的公共事实不符。现恢复 120V/12V；ordinal 55 把标准 90 度弯头改成 135 度，现恢复。
+3. `BUSINESS_VALUE_ERROR`（HIGH）：付款讨论中，项目原余额与首笔里程碑差额不一致（8250−1250 应显示 7000，而非 7800）；平台显示金额被写成 $950 而非首笔 $1250；首笔扣款 $842 小于其应覆盖的 $1250 里程碑，且被说成“上周”，与其余消息中的“三周前”冲突。现修正 ordinals 102、104、106、114、116、118，保持“首笔托管—次笔+奖金材料费—余额只扣一次”的关系；ordinal 100 的“上周五下午收到邮件”改回“今天早上”，避免与“昨天付款”冲突。
+4. `RELATION_CHANGED`（HIGH）：日期时间线被打乱：通牒截止日为 09/30，但之后的视频要求日为 09/18、截止日为 09/15，最后一次更新为 10/22，均早于或晚于应有顺序。现以 09/30 为锚点统一换算（ordinals 204、227、249、257、259），ordinals 166、167、226 恢复“今天/明天”。
+5. `RELATION_CHANGED`（MEDIUM）：ordinal 131 把“今晚才收到零件”写成“明天早上才收到但已全部到货”，并把“几天/本周末/下周”精确成 11 天、下周中和三周后；ordinals 147、148 把“今晚/今早发照片”改成“下周四晚/早”；ordinals 5、159、173 分别出现“下周一开工”“下周二跟进（过去时）”“下月决定挡板”等与上下文冲突的时间。现恢复原时间关系。
+6. `DECISION_OR_STATUS_CHANGED`（HIGH）：首版原型 V1/第一版在 ordinals 30、46、187、204 被改成 V3、第 3 版、v4、V4/V5；ordinal 95 把第一个里程碑改成第三个；ordinal 204 只列出两个选项，却写“四条路径中选一”。现恢复。
+7. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：按钮上的草书字母取自客户名字首字母，发布文件在 ordinals 142、143、192、195、207 保留原首字母，ordinal 206 又写成 R。客户已统一为 Elena，现统一为 E。
+8. `PUBLIC_REQUIREMENT_CHANGED`（MEDIUM）：ordinal 35 把客户选定的米色改成午夜蓝，而后续 125、127、144、189 均继续使用米色。现恢复米色。
+9. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinal 129 把底座高度改成 9¼ 英寸，大于后文实测的 7½ 英寸出口净空，使“杯子放得进出口下方”不成立。现改为 7¼ 英寸；ordinal 89、91 把“两面相同文字”改成四面拍摄、三面文字，现恢复。
+10. `FACT_INVENTED`（MEDIUM）：ordinals 61、213、215、224、228、231、254 把“两种搅拌头”“几小时/几小时”“几张照片”“几天内 100% 完成”“每天、四个侧面”“少量剩余部分”“几个月前”改成 5 种、7/6 小时、8 张、12 天 88%、每天 3 次/六面、9 处、九个月前。现恢复。
+另经核对：本项目的品牌虚构名 Elena's Chai Whisk、自由职业者 Nolan、客户 Elena Marlowe 及其家属 Adrian Marlowe 已检查为前后一致，未作改动；公共亚马逊商品链接属于公开商品页，保留。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 260，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原客户与自由职业者姓名、家属姓名、真实收货地址、邮编和电话残留扫描为零（地址、电话已为虚构 555 号码），未发现邮箱、内部占位符或乱码。PETG、PWM、solenoid valve、GHT/NPT、Upwork 托管与奖金流程、FaceTime 等公共术语保持不变；电机 450→1800→上限 2600→5200 RPM 的变更历史与原文 200→1000→1500→3000 的关系一致。
+
+## 项目 `43796672`
+
+- 审核日期：2026-09-24
+- 审核覆盖：126 / 126
+- 审核开始时发布文件指纹：`b71c0f215f69d1a341133a75f5e78ab8abe83978eb8816e7811fa974e1db664b`
+- 修复后指纹：`d8f3fc28090ca04760e2cfc907c5e9fbd44f657540e1c620475d24fb37946476`
+- 修改消息：7 条（0-based ordinals：82、90、96、98、113、116、118）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 6 组问题：
+
+1. `FACT_INVENTED` / `UNNATURAL_REWRITE`（HIGH）：ordinal 96 是客户对链接名称的建议，发布文件把儿童一次性围兜改成“咖啡馆围裙”，并加上 “Candidate wording for … Initiative 6” 这类机械前缀，改变了产品本身。现改为不含私有子域的儿童围兜/餐厅批量供货通用描述。
+2. `RELATION_CHANGED`（HIGH）：ordinal 113 把“今天是周末，我会尽量拿到信息”改成“下周五是周末、无法保证”；ordinal 116 把“今天”改成“下周二”，与自由职业者催促当天完成的上下文冲突。现恢复。
+3. `DECISION_OR_STATUS_CHANGED`（MEDIUM）：ordinal 90 把“现在可以部署吗”改成“下周一部署”。现恢复。
+4. `FACT_INVENTED`（MEDIUM）：ordinal 82 把“换成更有吸引力的照片”改成“更明亮的产品照片”，而客户此前要求的是有儿童和餐厅氛围的图片。现恢复原要求。
+5. `UNNATURAL_REWRITE`（LOW）：ordinal 98 出现 “with an Included domain” 等残缺表达。现改为自然、与原意一致的免费域名说明。
+6. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：ordinal 118 的社交主页链接仍使用真实社交平台域名。现改为不可解析的 `.example` 地址。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 126，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原客户姓名、原 netlify 子域名和社交分享 ID 残留扫描为零，部署链接均为 `.example`，未发现邮箱、内部占位符或乱码。WordPress、Elementor、Shopify、Netlify、FAQ、CTA、WhatsApp、Facebook 等公共工具保持不变；预算、主机套餐报价与交付时间关系保持一致。
+
+## 项目 `43804272`
+
+- 审核日期：2026-09-24
+- 审核覆盖：311 / 311
+- 审核开始时发布文件指纹：`4a030feb3a76ea2c98be201cf5c8f7fbe45abebcebb754629bdfada7a191c5b0`
+- 修复后指纹：`a241cba6845f5b1c289b7ff448b06ab258ed857d5440cf5161ff23293f44f10c`
+- 修改消息：37 条（0-based ordinals：27、32、35、50、51、61、70、73、81、83、95、99、104、105、106、119、131、170、173、198、209、237、255、263、265、266、268、269、271、272、274、280、287、298、300、305、306）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 10 组问题：
+
+1. `UNNATURAL_REWRITE` / `FACT_INVENTED`（HIGH）：ordinals 263–274 的闲聊中，客户机构、国家和两座城市被替换成 “Violet Summit Studio 25”“Maple Lantern, Northland 26/28/30” 等带序号的机械占位式名称；ordinals 265、268 把“我伴侣经营它”“很高兴认识你，医生”改成毫无依据的“季节 27/29 的临时家庭事务”；ordinal 269 把“长期合作”改成 18 个月。现改为自然且一致的虚构名称（SpineWell、Eastport、Westhaven，不点名国家），并恢复原语义。
+2. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：两条源码共享链接（ordinals 27、73）仍使用真实云盘主机，ordinal 237 保留了原始视频平台的真实视频 ID。现全部改为不可解析的 `.example` 地址。
+3. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 105、119 在自由职业者邮箱后附加 “For reference: …” 另一个邮箱，把客户输错的邮箱混入正确邮箱。现删除附加内容，保留各邮箱变体的既有一一映射。
+4. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：ordinal 32 把 Apple Privacy Manifest 的强制时间（2024 年 5 月）、Android 目标 API 35、iOS 15+ 改成 2025 年 8 月、不存在的 Android 42 和 iOS 18+；ordinals 61、70、198 把 Google Play 77 种语言、App Store 约 40 种语言改成 96/64。现恢复公共平台事实；同时删除 ordinal 32 凭空加入的“上周三评估”。
+5. `NON_PII_WRONGLY_CHANGED`（MEDIUM）：ordinals 83、95 把 App Store Connect / Google Play 的 admin、developer 角色改成不存在的 manager/release operator。现恢复。
+6. `BUSINESS_VALUE_ERROR`（HIGH）：ordinal 35 把 Android、iOS 两套源码改成 5 套；ordinal 131 说完成 9 个阶段却只列出 5 项；ordinals 50、51 把“每步只保留一张无字背景、只存一次”改成每步 3 张、存 3 次，并使单张图片大小 × 份数 × 步数与总大小不再相符。现恢复数量与计算关系（单图调整为约 500–600 KB 以匹配约 64 MB 总量）。
+7. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinal 173 把“工作量中到高、作为免费赠送服务”反转为“工作量低到中、额外收费 $180”。现恢复。
+8. `INTENT_OR_POLARITY_CHANGED`（MEDIUM）：ordinal 81 把客户选定“只保留语言覆盖和包体大小”两项优先级的陈述改成反问；ordinals 99、104 分别加入“仅优先语言”“仅选定上线语言”的限制，而原文问的是全部语言。现恢复。
+9. `RELATION_CHANGED`（MEDIUM）：ordinals 255、280、298、306 把“稍等/短会”精确成 8 秒、12 分钟、45 分钟、4 分钟；ordinals 287、300、305 把“这周末没上线”“今天/现在有空”改成下周初、明天和今晚。现恢复原时间关系；ordinal 209 把“生成一个视频”改成 4 个，与后文“所有语言共用一个视频”冲突，现恢复。
+10. `ENTITY_MAPPING_INCONSISTENT`（LOW）：ordinal 106 把“仓库在前开发者账号下”泛化成“供应商托管工作区”，ordinal 170 的另一款私有应用使用了 “Maple Horizon Initiative 20” 机械名称。现恢复关系并使用自然虚构名 CurveTrack。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 311，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原客户姓名、自由职业者邮箱与 GitHub 用户名、私有机构/应用名、城市与国家、云盘/视频/会议 ID 及真实服务主机残留扫描为零；所有链接和邮箱均为 `.example`，未发现内部占位符或乱码。UIWebView、Info.plist、READ\_PHONE\_STATE、App Bundle、iOS Thinning、TestFlight、ViewPager2、Canva、Photoshop、Figma、Google Meet、Claude 等公共技术保持不变；$850 预算与 APK 从 148.8 MB 降至 44.6 MB（约 70%）的计算关系一致。
+
+## 项目 `43846196`
+
+- 审核日期：2026-09-24
+- 审核覆盖：116 / 116
+- 审核开始时发布文件指纹：`c28a5ded533c7bf853efb6d32a7fd5f5b9788e980822ff51778c6298c3b7c0f4`
+- 修复后指纹：`2e399587883b44de3c95ce53ec6f27724851a1ce9f001123a6702fada03ad996`
+- 修改消息：11 条（0-based ordinals：2、8、18、21、23、52、60、67、69、81、114）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 4 组问题：
+
+1. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinal 67 把“现在结束合同并全额退款”改成“下周末结束、退款 60%”。现恢复立即结束与全额退款。
+2. `RELATION_CHANGED`（HIGH）：ordinals 2、18、23、52、60 把“现在有空/今天再试/昨天没能参加/明天告诉你时间”改成具体钟点、下周三、上周四、两小时后和下周五，其中 ordinal 60 在约定“周四通话”后却说“下周五再告诉时间”，自相矛盾；ordinal 21 的“现在不行”改成“今天下午不行”。现恢复原相对时间。
+3. `FACT_INVENTED`（MEDIUM）：ordinal 8 把凌晨时间改成晚上 8:20，又附加“对你来说是清晨”的矛盾说明；ordinal 69 把“想付一些报酬”精确成 $250；ordinal 114 把“近期”改成“下个季度恢复时”。现修正为一致的凌晨时间并恢复模糊表达。
+4. `FACT_INVENTED`（MEDIUM）：ordinal 81 把公共通用页面 Facebook.com/ID 改成一个虚构的私人主页路径，改变了操作指引。现恢复公共页面路径。
+另经核对：自由职业者（Nadia）与客户（Elias/Elias Voss）的映射、客户亲属（cousin）的替换、案件号、账号号码、会议与付款链接均前后一致，未作改动。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 116，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原双方姓名、自由职业者所在国家、账号号码、案件号、会议号与服务链接 ID 残留扫描为零；会议与付款链接为 `.example`，唯一非 `.example` 链接是原文中的公共 Facebook.com/ID 页面。Meta、Facebook Ads、2FA/Two Step Authentication、Advanced Protection、Zoom、Upwork 等公共名称保持不变；180→365 天申诉期在 85、92、95 中一致。
+
+## 项目 `43945601`
+
+- 审核日期：2026-09-24
+- 审核覆盖：210 / 210
+- 审核开始时发布文件指纹：`cd7c4069336516fb5e8bf10edad1b11d0243f0e62a283b6f6a7a0e7e6749ac23`
+- 修复后指纹：`7050e69c59cb4dc7f3d75b59e1c846b71345bf562dd77fde72ba6907afbc534c`
+- 修改消息：93 条（0-based ordinals：3、6、8、11、14、20、21、26、28、33、34、39、45、57、68、74、77、79、81、90、92、93、97、99、100、101、102、103、107、110、111、112、113、114、115、116、117、121、122、123、124、126、127、128、130、131、132、133、134、135、136、138、144、146、147、148、149、150、151、152、154、155、156、157、158、159、161、164、165、166、167、168、171、175、181、182、183、186、187、189、195、196、197、198、199、200、201、202、203、204、206、207、208）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 9 组问题：
+
+1. `RELATION_CHANGED` / `ENTITY_MAPPING_INCONSISTENT`（HIGH）：整个项目围绕品牌字标的字母结构展开（开头的主 V、E、两个 L、第二个 V、带重音的 É，以及 “VE | LL | VÉ” 分组和 V-E、L-L、L-V 等字距对），但发布文件把私有品牌名换成字母结构完全不同的 MIRAVA，导致“开头的 V”“两个 V 和重音”“擦掉其余字母”“MI | RA | VA 分组”等描述全部失效。现改用保留同一字母结构的虚构名 VEILLVÉ/Veillvé（与原名不同，也不包含原名），并同步修正分组、字距对和内部字母列表（ordinals 3、6、8、14、21 等 90 余条中涉及品牌名的位置）。
+2. `PII_RESIDUAL`（HIGH）：ordinal 99 保留了原品牌名的构词来源（挪威语 wellness 一词加法语 élevé），可据此直接还原原品牌；同时把 “wellness elevated” 改成 “vitality in balance”，ordinal 102 又沿用这一改动。现改为不含原词的构词说明，并恢复 “wellness elevated” 的含义。
+3. `BUSINESS_VALUE_ERROR`（HIGH）：多轮方案数量与后文列出的数量不符：3 个元素→7 个、2 个 V→4 个、2 张参考图→6 张、2 个框架→5 个，以及多轮“三个方案”被写成 7/8/9 个，“4–6 个方案”被写成 9–12 个，“2 个版本/6 种终端/5 个方向”被写成 5/9/11/9，“两栏”版式被写成四栏，“三条参考线/三条规则”被写成 6/7 条，还有“5 种设计语言”“再探索四轮”等（ordinals 3、11、20、26、33、34、45、57、68、147、148、151、152、155–157、161、164、165、168、175、182、186、187、198、200、203、204、206、207）。现逐条恢复为原数量。
+4. `DECISION_OR_STATUS_CHANGED`（HIGH）：客户选定的方案编号被改成三选项轮次中不存在的编号（Option 1→4、Option 2→7、Option 3→8、Option 1→6），ordinal 112 仍写 Option 2，前后矛盾（ordinals 97、99、101、111、113、115、117、121–124、126、149、150、154、166、167）。现恢复原编号。
+5. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinals 131–134 把客户明确选择的全大写字标反转为小写，与 133 中“统一高度、没有小写升降部”的理由自相矛盾。现恢复全大写。
+6. `BUSINESS_VALUE_ERROR`（MEDIUM）：里程碑结构原为 3 个，发布文件写成第 5 个、第 7 个（ordinals 158、159、183、208）；ordinal 39 声称减重 27.8%/28%，但给出的尺寸实际只减少约 22%/33%；ordinals 196–204 的高度梯度 1/2/3% 被改成 4/7/10%，随后选定值又在 7% 和 8% 之间摇摆；ordinals 148、152、171、200 把 “1:1 逐像素复制”改成 “3:2”。现恢复一致的数值关系（尺寸按所述百分比重算）。
+7. `FACT_INVENTED`（MEDIUM）：ordinals 74、81、144、146、152 在文件名后凭空附加虚构下载链接；ordinals 68、90、124、136 把“一两句话”“几小时”“100% 稳固”改成 4–6 句、6 小时/11 小时、85% 确定；ordinal 199 把“本周/下周”改成“上月/下月”。现删除链接并恢复原表达。
+8. `PUBLIC_REQUIREMENT_CHANGED`（MEDIUM）：ordinal 208 把交付格式 .SVG 改成 .EPS；ordinal 156 把 90 度直角改成 72 度；ordinal 92 在客户位于新西兰的前提下使用日本时区。现恢复 SVG、90 度，并改用新西兰时区。
+9. `ENTITY_MAPPING_INCONSISTENT`（LOW）：ordinals 195、197、200、204 把已选定的 “Balanced Flow” 字距方案和 “Satin Reflection” 材质改名为 “Poised Current”“Velvet Gleam”，与其余消息不一致。现统一为原方案名。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 210，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原双方姓名、原品牌名的各种大小写形式、构词原词、自由职业者所在国家和虚构私有链接残留扫描为零；双方统一为 Marisol（客户）与 Kenji（自由职业者），未发现邮箱、内部占位符或乱码。Upwork、.jfif/JPG/PNG、Bézier、kerning、monoline、champagne gold 等公共术语保持不变；预算、奖金金额和截止星期在全项目保持一致。
+
+## 项目 `43948285`
+
+- 审核日期：2026-09-24
+- 审核覆盖：209 / 209
+- 审核开始时发布文件指纹：`8d5e99ae911e41b4b1cebae8f4702713bfdcf0079e8f9d6eac4506ad43c730dd`
+- 修复后指纹：`fe22a984dc3fbfdcaae9a5791f5ee812301482307328138614427573052d2abb`
+- 修改消息：55 条（0-based ordinals：0、1、2、3、4、7、8、10、11、12、14、16、29、31、32、35、37、38、40、41、42、44、45、46、53、54、59、61、63、67、68、69、77、84、85、88、92、95、101、104、109、120、123、130、133、141、145、163、166、168、169、177、184、187、188）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 9 组问题：
+
+1. `UNNATURAL_REWRITE` / `ENTITY_MAPPING_INCONSISTENT`（HIGH）：私有品牌、区域品牌、三座现有城市、新店城市和未来城市被替换成 “Willow Harbor Initiative 7”“Maple Valley, Northland 2”“Juniper Harbor, Northland 6”等带序号的机械名称；同一个新店城市先后被映射成 Juniper Harbor、Cobalt Lantern、Willow Compass 三种名称，品牌又被映射成 Willow Harbor Initiative 7、Willow Haven Studio 29、Willow Haven Initiative 35、Sable Valley Initiative 36 等多套名称。现统一为自然虚构实体：品牌 Shatter House，区域站 Harbor Valley Shatter House，现有门店 Port Averly、Linden Falls，新店 Ridgehaven，后来被当作站点名的未来城市 Riverbend，竞品 RageWorks USA（ordinals 0–14、37、38、53、54、101、109、130、133、141、145、163、166、168、169 等）。
+2. `BUSINESS_VALUE_ERROR`（HIGH）：替换流程把普通数词 “one” 当成实体替换，导致“一个主站”变成三个/四个网站、“一个支付账户”变成四个、“从一个网站变成两个”变成“从三个变成六个”，并由此生成“6 个 wix 网站”“4 个支付账户”等与后文“第二个网站”相矛盾的描述（ordinals 0、1、16、31、32、35、37、40、42、44）。现恢复一个主站 + 一个独立门店站的结构。
+3. `BUSINESS_VALUE_ERROR`（HIGH）：报价历史自相矛盾：已接受的 $800 在 ordinal 40 变成 $950，“原价 800”在 45、46 变成 1000，折中价在 42、44 变成 $1,600、$1,300。现按统一比例恢复：预算 $800、第二个站点 $600、两站 $1,200、折中 $1,000，最终按原价 $800 接受，保留“先涨后回到原价”的谈判轨迹。
+4. `FACT_INVENTED` / `UNNATURAL_REWRITE`（HIGH）：ordinals 0、1、3、4、7、11、12、29、38、40、77、88、104 在链接后附加 “For reference: …” 等多余链接，ordinals 0、104 残留 “For clarity, the details are restated below.” 修复前缀，ordinal 2 还凭空加入“具体模板仍待定”。现删除，并为各网站使用一致、自然的 `.example` 域名。
+5. `RELATION_CHANGED`（HIGH）：ordinal 120 把“昨天出院、此前在治疗”改成毫无依据的“季节 33/34 的临时家庭事务”，并把“两个网站”改成六个。现改为与 ordinal 115 一致的、不含具体健康细节的休养说明，并恢复两个网站。
+6. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinal 61 把“两个邀请”改成 11 个（7+4），ordinal 69 把“只给了一个权限”改成四个；ordinals 63、68、84、85、92、95 把“接下来几周”“今天”“尽快”分别精确成 8 周、明天、下个工作日、次日早上、周末前、明天。现恢复。
+7. `PUBLIC_REQUIREMENT_CHANGED`（MEDIUM）：ordinal 188 把域名转移的 60 天锁定期改成 120 天，ordinal 187 把“按月计费”改成“每两个月”，ordinal 184 把 Wix 域名生效时间“几分钟、最长 48 小时”改成 15 分钟/72 小时。现恢复公共规则。
+8. `UNNATURAL_REWRITE`（LOW）：ordinal 59 把自由职业者邮箱写成“用户名 at 某资源链接”，ordinal 123 把 “Thanks for the checkup”（感谢问候）改成“感谢审阅”。现改为自然表达，邮箱仍为虚构 `.example` 形式。
+9. `INTENT_OR_POLARITY_CHANGED`（MEDIUM）：ordinal 14 把客户“是的，并且我还要让两地分开”改写为对前一问题的长篇确认，ordinal 2 把“从零开始建站、沿用同类模板”改成“不重构现有站点”的对比说法。现恢复原意。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 209，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原品牌、区域品牌、各城市、竞品、自由职业者用户名、原域名和原预览平台子域残留扫描为零，机械占位名残留为零；所有链接为 `.example`。Wix、Wix Bookings、SEO、Zoom、Hero Banner 等公共工具与需求保持不变；两个网站分别独立收款、主站只做导航、后期域名反向绑定与更换的事件顺序与原文一致。
+
+## 项目 `44035087`
+
+- 审核日期：2026-09-24
+- 审核覆盖：112 / 112
+- 审核开始时发布文件指纹：`b22bb66f6e98a31021f5659970fc7a6315207d53ee6f6aff9b5c2450ffa4acf1`
+- 修复后指纹：`9e41be1d8a7a5c76e72bede08eb0ca61c52b7eb485682fbc4844730fde53a3f1`
+- 修改消息：23 条（0-based ordinals：1、5、12、15、18、19、20、23、28、29、30、35、39、40、41、45、51、66、81、88、90、95、110）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 6 组问题：
+
+1. `BUSINESS_VALUE_ERROR`（HIGH）：套餐数量原为 4 个，对应 4 个面积档位，发布文件在 ordinals 19、29、39、40 改成 9 个套餐、9 个框、“9 个替换 8 个”，但后文只列出 4 个面积档位及对应价格。现恢复 4 个套餐、“四格替换三格”。
+2. `FACT_INVENTED`（HIGH）：ordinal 15 把报价计算器的档位编号 1–5 改成 10–50，重排面积区间，并附加原文没有的“档位 30 和 40 区间冲突”评论（修改后的区间实际并不冲突）。现恢复 1–5 档，保留原文中第 3、4 档区间重复这一原始歧义，并删除附加评论；照片/视频加价、超距附加费、套餐折扣和总价仍然相加一致（320+280+90−140=550）。
+3. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinal 18 说准备了四个首页方案，但只附两个链接；ordinal 19 把选中的 Option 2 改成 Option 4；ordinal 88 把客户列出的 3 项修改记成 8 项。现恢复。
+4. `FACT_INVENTED`（MEDIUM）：ordinals 1、5、20、30、90 把“几小时内”“几页灵感图”“几小时后”“一些文字小调整”“几个位置”精确成 18 小时、7 页、8 小时、12 小时、9 处和 6 处。现恢复原模糊表达。
+5. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 51、66 在邮箱和结尾后附加 “For reference: Brightforge Labs.”；ordinal 12 把客户“这是一个带交互画廊的示例”误写成“交互画廊可作为示例”。现删除附加内容并恢复原意；ordinal 41 把原文的 Basic 套餐改名为 Essentials，现恢复。
+6. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：8 条 Figma 原型链接和 2 条云盘链接虽已替换文件 ID，但仍指向真实可解析的公共服务主机（ordinals 18、23、28、35、45、81、95、110）。现改为不可解析的 `.example` 地址，保留原型节点参数的对应关系。
+另经核对：客户 Priya、自由职业者 Elias、团队名 Brightforge Labs、业务名 Silver Pine Media 的映射前后一致；cPanel 和 wp-admin 凭据已是明显无效的假值。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 112，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原双方姓名、团队名、业务名与域名、原 cPanel 用户名和密码、原 Figma 文件 ID、原云盘 ID 及真实服务主机残留扫描为零，未发现真实邮箱、内部占位符或乱码。WordPress、Elementor、Namecheap、cPanel、Calendly、Google Calendar、Figma 等公共工具保持不变；计算器 USD 540、新页面 USD 140（常规 190）、照片数量等报价与数量关系一致。
+
+## 项目 `44039904`
+
+- 审核日期：2026-09-24
+- 审核覆盖：346 / 346
+- 审核开始时发布文件指纹：`18caf4e3544243d3dafba99a4c6ea9e1388bc749d3aa0657b5b7abd4a9785be4`
+- 修复后指纹：`57cbd4052470edf84dd0b346ae035bf2027e2d8cc5644a39de7832b63c9abadc`
+- 修改消息：48 条（0-based ordinals：0、42、46、67、107、112、164、174、180、186、187、194、195、196、197、201、202、203、205、210、214、217、220、231、237、238、240、243、244、246、247、249、259、260、264、271、291、307、320、323、324、326、329、331、336、342、343、345）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 6 组问题：
+
+1. `PII_RESIDUAL`（BLOCKER）：ordinals 0、186、197、243、244、249、259 的问候语仍保留客户店铺账号的原始显示名，并以 “the private account:<数字>” 和 “For reference: <数字>:<数字>” 形式暴露内部账号标记；ordinals 107、112 也有同样的机械标记。现统一改为自然问候 “Hello Cedar Cart Team”，与其余消息一致，并删除全部账号标记。
+2. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 112、186、197、243、249 含修复流程遗留前缀 “For clarity, the details are restated below.”。现删除。
+3. `RELATION_CHANGED`（HIGH）：客户反复催促“今天/现在/明天”发布或更新，发布文件把这些时间改成下周二、周四、周五、下周三等不同日期，并把“本周工作总结”改成“上周”、“今天的博客”改成“昨天的”，导致催促与答复的时间关系混乱（ordinals 180、187、194、196、201–203、205、210、214、217、220、231、237、238、240、246、247、291、331、336）。现恢复原相对时间。
+4. `FACT_INVENTED`（MEDIUM）：“稍等”“很快”“尽快”“一些时间”被精确成 15 分钟、午饭后、45/90 分钟、2/4/6 小时、20 分钟、30 分钟、3 个工作日（ordinals 164、174、180、195、243、260、264、271、320、323、326、329）。现恢复原模糊表达。
+5. `BUSINESS_VALUE_ERROR`（HIGH）：试用价在 ordinals 36、38、39 为 $160，在 42、46 却变成 $180；ordinal 46 把两周（已换算为 5 周）的范围写成 6 周；ordinal 324 中 275/439 被标为 73.4%、164/439 被标为 26.6%，与实际比例（62.6%/37.4%）不符，“几周”被精确成 6 周；ordinals 249、307、342、343、345 把周报/月报、每月里程碑改成双周、三个月、“两个月前”“三个月后”。现恢复一致的数值与周期关系。
+6. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：ordinal 67 中关键词被替换为 “holiday craft promotion”，而对应落地页和 ordinal 280 均为 Campus Launch sale，两者不对应。现统一为 campus launch sale。
+另经核对：关键词整体替换（手工娃娃类→针织/毛绒类）在 79–122 之间前后一致；截图链接均已是 `.example`；自由职业者署名已统一为 Leena。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 346，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原店铺显示名与域名、原账号数字标记、自由职业者原名和截图服务 ID 残留扫描为零，未发现邮箱、内部占位符或乱码。SEO、GSC、Semrush、SHOPLINE、Shopify、ChatGPT、Gemini、Claude、Perplexity、Notion、ClickUp 等公共工具保持不变；博客数量 4→7–9→9 的谈判轨迹与第六至第九篇的发布顺序一致。
+
+## 项目 `44082218`
+
+- 审核日期：2026-09-24
+- 审核覆盖：314 / 314
+- 审核开始时发布文件指纹：`5200cf835b2a5cf577f3f9c4b5b02ff524f64d2c23a2792a2ccd46881b874d93`
+- 修复后指纹：`a740f30212586c78e09a4fd5c113338f0d9fb97087e3cf3788e380246d01192a`
+- 修改消息：78 条（0-based ordinals：2、3、5、11、15、18、23、25、26、28、29、30、31、33、41、45、52、58、60、62、63、69、79、80、83、84、91、92、97、98、99、104、106、112、117、119、123、127、140、142、147、149、156、157、162、163、164、167、175、178、179、181、183、186、189、190、197、198、199、200、215、222、223、226、227、251、254、256、260、265、274、275、279、286、294、306、311、313）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 10 组问题：
+
+1. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 5、11、183、256 含 “For clarity, the details are restated below.” 修复前缀；ordinals 11、181、183、256 末尾附加 “For reference: …” 字串，把人物全名、品牌账号和职位重复堆砌。现删除。
+2. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：YouTube 频道、Notion 指南、Canva 设计、Instagram Reel、Upwork 职位链接虽已替换路径，但仍使用真实可解析的公共服务主机（ordinals 3、5、18、26、69、83、84、117、140、226、294、306）；ordinal 222 的伪密码沿用了“虚构账号名+数字”的真实密码样式。现把链接统一改为 `.example`，把密码改为明显无效的 FAKE\_PASSWORD 值。
+3. `BUSINESS_VALUE_ERROR`（HIGH）：月度指标原为“先 125（换算为 180）后 100（换算为 140）条已审核短片”，发布文件在 ordinals 162、163、167、223、311 混用 240/140，ordinal 167 甚至写成“140 条已审核，不是 240 条提交”；ordinal 178 的“每天约 8–10 条”与每月 140 条不符。现统一为 140，并改为每天约 4–5 条。
+4. `BUSINESS_VALUE_ERROR`（HIGH）：多处数量关系被破坏：试稿 6 条之后交付“8 条旧稿+27 条新稿”（ordinals 33、41、45），现改为 6+30=36；ordinal 60 的付款条数与 $4/条单价相乘后不等于 $180，现改为 15+30 条；ordinal 127 共 8 条时写成“第 4 条完美、另外 6 条”，现改为“第 1 条完美、另外 7 条”；ordinals 25、52、62、63、112、142、147、286、311 把“一人晋升 Lead”“两处修改”“12 人小组”“一个礼物剪辑”“做 1 条样片”“先发 1 条”“一个视频拆 2–3 次”“一个长视频约 50 个选题”分别改成 3 人、5 处、9 人、3 个、4 条、2 条、4 条 5–7 次、4 个视频 120 个。现恢复。
+5. `RELATION_CHANGED`（HIGH）：多段时间线被改乱：先定周五截止又要求“下周一前先发一些”（ordinals 28–33）；“今天和老板通话、最迟明天到账”变成“昨天已通话、事后再更新”（ordinal 23）；B-roll 交付截止与上线日在 186/190/200 中分别是周六/周二、下一个工作日/下周一，与客户确认的“今天周三”冲突；第二轮试稿的周一截止、周日交付，以及“明早 10 点/今晚 9 点/明天周日”被改成周五、周三、下周二、下周四等（ordinals 79、80、91、98、99、104、106）；ordinal 313 把“明天满 1 个月、只交 1 条、联系 3 次”改成“下周满 4 个月、4 条、8 次”。现恢复原相对时间与事件顺序（第二轮按统一的两天偏移换算星期）。
+6. `FACT_INVENTED`（MEDIUM）：ordinals 15、119、123、149、156、157、162、164、167、175、178、179 把“明天/今天/几小时/尽快”写成下周五、7/8 小时、下周三、两小时内、18 个月合约、第二周起、第四天起、三个工作日等；ordinal 156 还把 Lead Clipper 改名为 Senior Clip Producer，ordinal 119 把“第二次机会”改成第五次。现恢复。
+7. `DECISION_OR_STATUS_CHANGED`（MEDIUM）：ordinals 251、254 把“每天发 1 条、18–21 点”改成“每天 3 条、13–17 点”，ordinals 265、274、275 随之改成 17 点前，并在 275 凭空加入“仍在截止前”的说明。现恢复原发布规则与时间。
+8. `RELATION_CHANGED`（MEDIUM）：短片时长下限原为“30 秒太短、目标 45–60 秒、低于 45 秒不批”，换算为 70–85 秒目标后，ordinals 227、260、279 写成“不要 75 秒”“低于 75 秒不批”，与 70–85 秒目标矛盾。现改为 45 秒过短、低于 70 秒不批。
+9. `RELATION_CHANGED`（LOW）：ordinals 97、215 的双方时差与此前的消息不一致；ordinal 2 把“每周与每月奖金”改成“每两周与每季度”；ordinal 92 把“100% 真实”改成 82%。现修正时差并恢复原表述。
+10. `FACT_INVENTED`（LOW）：ordinal 58 把“今天出发去某地”改成“下周六出发”；ordinal 83 把“从一个视频剪 8 条”改成“从四个视频剪 8 条”。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 314，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。自由职业者、客户经理、内容主人物的原姓名和社交账号、所在地、原各类资源 ID 与真实服务主机残留扫描为零；唯一的扫描命中是源自原文的 “<http://emberframe.example|emberframe.example>” 链接标记，已是 `.example`。Upwork、Instagram Reels、YouTube Shorts、TikTok、CapCut、Notion、Canva、Google Drive、B-roll、CPM 等公共工具与术语保持不变。
+
+## 项目 `44102153`
+
+- 审核日期：2026-09-24
+- 审核覆盖：194 / 194
+- 审核开始时发布文件指纹：`e7a03e0f00536afbaa955740f2c66fc3344fad8a9a1b0e50360ceb83fee48390`
+- 修复后指纹：`737f0e3eb0d2977032e729e9f1b154c3e6b0b613adb75d7cdc7377726a8b8605`
+- 修改消息：27 条（0-based ordinals：0、4、7、8、12、33、36、37、38、40、59、60、62、66、72、73、76、103、125、138、141、153、156、157、160、166、182）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 8 组问题：
+
+1. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：ordinal 0 把出版形式平装本改成精装本，而 ordinals 84、86 双方确认的都是 paperback。现恢复平装本。
+2. `ENTITY_MAPPING_INCONSISTENT`（HIGH）：书的主题和市场是印度家庭（ordinals 0、36，以及 INR/UPI 付款），但替换后的书名写成“智利家庭”，出版声明写成“在智利出版”（ordinals 37、72、141）。现把虚构书名改为面向印度家庭，出版声明恢复为 India，出版方继续使用虚构名 Cedar Nest Family Circle。
+3. `UNNATURAL_REWRITE`（MEDIUM）：ordinal 37 讨论的是书名中误出现的 “\n” 换行符，发布文件却给新书名配了原书名片段 “&\nWel”，与新书名对不上，并附加 “For reference: <br>”；ordinal 38 把 “\n” 改写成 `<br>`。现让换行符标记落在新书名的对应位置，并恢复 “\n” 的讨论对象。
+4. `BUSINESS_VALUE_ERROR`（HIGH）：按字数计算的总价 $82.50 本应向上取整为提案金额（原文 47.34→48），发布文件写成 $96（ordinals 4、8）；ordinal 103 把“封面+文案 $75 与上传 $120”合计成 $140。现改为 $83 和 $195。
+5. `FACT_INVENTED`（HIGH）：ordinal 7 把“一半今天、一半完成后付”改成“下周一付 35%、完成后付 65%”；ordinal 12 把“每章几张图”改成“每 3 章 12 张”；ordinal 36 凭空加入“先建议 2 张、确认 4 张”；ordinal 33 把“几乎全部接受”精确成 72%；ordinals 59、60、62、66、76 把“几小时”“剩几张”“1 张封面图”“标题和另外 2 处共 3 处修改”“几行作者介绍”改成 12 小时、9 张、3 张、6 处（含 5 处）、8 行；ordinal 40 把“这 2 处修改”改成 7 处。现恢复。
+6. `RELATION_CHANGED`（HIGH）：封面图位于第 1 页、书名页为第 2 页，发布文件在 ordinals 72、73 写成第 6、7 页；ordinal 182 把“第一页顶部是我的名字”改成第四页，并调换了清单顺序。现恢复。
+7. `LIST_OR_FORMAT_DAMAGED`（MEDIUM）：ordinal 125 的 5 项修改清单被重新排序，“四个角”被改成三个角；ordinal 182 的 4 项清单也被重排。现恢复原编号顺序。
+8. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinals 138、153、156、157、160、166 把“一页”“一个段落、一处双句号删一个”“等 5 分钟”“三处修改”“最后 2 行”“删了 2 个句号”改成 6 页、5 处/8 个句号删 3 个、20 分钟并附加原文没有的说明、8 处、7 行、7 个。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 194，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原双方姓名、原书名、原出版方名称残留扫描为零，未发现邮箱、链接、内部占位符或乱码；自由职业者统一为 Nadia，客户为 Mara。Upwork、PayPal、UPI、INR、KDP、ISBN、Word、Track changes、Claude 等公共工具与术语保持不变。
+
+## 项目 `44127283`
+
+- 审核日期：2026-09-24
+- 审核覆盖：104 / 104
+- 审核开始时发布文件指纹：`527743ba134058d0e45b346f4cd896473b1ba4143bb773cb81a1cc59e4cb044e`
+- 修复后指纹：`e338899a3f6ea0b891c2ec8b4e8bc4f92634ec3ed636295399640a4a322fe64a`
+- 修改消息：26 条（0-based ordinals：4、6、8、16、25、28、33、38、39、41、46、47、48、50、76、79、80、82、83、85、87、91、95、97、101、103）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 6 组问题：
+
+1. `NON_PII_WRONGLY_CHANGED` / `ENTITY_MAPPING_INCONSISTENT`（HIGH）：LCSW 有声书、安大略驾照手册、加拿大入籍指南、M1 摩托车、德州驾照学习指南都是公开考试或证照的学习材料名称，发布文件却在部分消息中把它们换成 “Harbor Path Clinical Audio Review”“Maple Road Permit Prep Manual”“Civic Pathways Naturalization Course” 等虚构名称，另一些消息又保留原名，导致同一任务看起来像不同任务（ordinals 33、38、41、46、50、76、80、85、87、91、95、97、101、103）。现统一恢复为公开名称，与 CHPN、NASM CPT、ALEKS 等其余公开考试名保持一致。
+2. `BUSINESS_VALUE_ERROR`（HIGH）：ordinal 4 取消的是“这两个任务”，ordinal 6 保留的是“这 2 个任务”，发布文件写成 6 个和 7 个。现恢复。
+3. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：ordinal 8 把 Word 的 Heading 2 改成 Heading 4；ordinal 16 把“每个提示只用一个项目符号”改成“恰好 4 个”；ordinals 39、47、48 把“从第 1 章开始配图”“你从第 2 章开始了”“跳过第 1 章仅限那本书”改成第 4/6/3/4 章，并在 47 加入原文没有的例外条件。现恢复。
+4. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：ordinals 25、28 原样保留了客户发送的两个 ChatGPT 登录验证码。现替换为明显无效的占位验证码。
+5. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinals 82、83 把“2 个还是只有 1 个 ChatGPT 账号”“只用 1 个账号”改成 6/3 个和“只用 3 个”，失去“只用一个”的含义。现恢复。
+6. `RELATION_CHANGED`（LOW）：ordinal 79 把额度重置后“明天早上继续”改成“下周一下午”，与随后同日完成的进度不符。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 104，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原登录验证码残留为零，虚构材料名残留为零，未发现姓名、邮箱、链接、内部占位符或乱码。截止日期整体按同一偏移换算（7 月 23 日→9 月 9 日等），各任务清单中的日期与完成顺序前后一致；ChatGPT、MS Word、PDF 等公共工具保持不变。
+
+## 项目 `44128864`
+
+- 审核日期：2026-09-24
+- 审核覆盖：126 / 126
+- 审核开始时发布文件指纹：`be10b9eacffa39e99491aab32376af8fcb45a0abfbe26c2f484eae5df8197c47`
+- 修复后指纹：`b19e22c354cb02910eced0c045b05959330377fe6f7ff0d2b77297fb1e2df9a1`
+- 修改消息：39 条（0-based ordinals：1、6、14、15、17、18、25、35、39、45、46、47、48、50、52、56、64、68、75、87、89、90、91、93、95、97、100、102、103、104、105、110、112、113、114、116、119、120、123）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 10 组问题：
+
+1. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinal 6 把“通话不收费”反转为“通话收费 $175”；ordinal 14 把“推荐你为第 1 人选”改成第 4。现恢复。
+2. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinals 46、47 把客户为降价而压缩的“只做一轮排版、一轮修改”改成三轮排版、三轮修改；ordinal 64 把“最终交付一个 PDF”改成三个 PDF；ordinal 39 把“打包成一个文档”改成四个。现恢复。
+3. `FACT_INVENTED` / `UNNATURAL_REWRITE`（HIGH）：ordinal 15 把一段外出时间改成“4 月 8–20 日离线但不影响支持、7 月 8–22 日不能支持”两段互相矛盾的安排，ordinal 17 又附加 “For reference: …” 说明和第三种日期；ordinal 17 还把 Upwork 小时合同“每周自动计费”改成“每四周”，“分三个里程碑”改成六个但只列三项；ordinal 64 附加 “For reference: PDF.”。现统一为一段外出时间（6 月 8–20 日），恢复每周计费和三个里程碑，并删除附加内容。
+4. `FACT_INVENTED`（HIGH）：ordinal 48 把“这是我作为主承包商提交的第一份标书（公司成立不到一年，独自经营）”改成“第四份、八个月、四年前成立”等互相矛盾的背景，并调换了编号清单顺序；ordinal 45 的费用清单也被重排。现恢复原事实和列表顺序。
+5. `RELATION_CHANGED`（HIGH）：ordinal 52 的草稿日期写成 8/13，与 9/15 提交、9/16 截止的一周紧凑日程脱节（ordinal 56 同样）；ordinal 50 的日期与星期不对应。现改为 9/10（周四），并修正 9 日、10 日、14 日的星期。
+6. `RELATION_CHANGED`（MEDIUM）：ordinals 18、25、35、93、100、102、104、105、110、112、113 把“今天/尽快/明天/今晚/今天下午”改成下一个工作日、48 小时内、下周一、下周初、两个工作日、三天、下周三/周四、周五中午、明早、三次通读等，ordinal 91 甚至写成“下周再检查，明天发给你”；ordinals 115、116 的两个审阅截止时间不同（3:15pm 与 8:15pm）。现恢复原相对时间。
+7. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinals 90、95 把“信函压缩到一页”改成三页，把“信函第二页的两张图”改成“第五页上的五页”；ordinal 97 把“只留一张图”改成四张；ordinals 91、104、110、112 把第一稿/v2 改成第三稿/v6；ordinal 89 把“完成一半”改成四分之三；ordinal 114 与 ordinal 98 的照片页码碰撞到同一页。现恢复并改用不冲突的页码。
+8. `PUBLIC_REQUIREMENT_CHANGED`（MEDIUM）：ordinal 120 把通用的 25MB 邮件附件上限改成 80MB。现恢复。
+9. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：RFQ 发标机构统一替换为 Civic Canopy，但其简称在 ordinals 119、123 中分别写成 NR 和 CRC。现统一为 CC；ordinal 1 的 “22+ 年”与“十多年”自相矛盾，现统一为 22+ 年。
+10. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：Google Docs、Google Drive、Canva 分享链接和 Upwork 个人主页仍使用真实可解析的公共服务主机（ordinals 15、68、75、87、91、103、112）。现改为 `.example`。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 126，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原双方姓名、工程公司及联系人、发标机构、投标方公司名、分包机构名、个人主页 ID 和真实服务主机残留扫描为零，未发现邮箱、内部占位符或乱码。RFP/RFQ、NDA、Upwork 小时/固定价合同、Canva、PDF、QA/QC、Q&A 等公共术语保持不变；$7,800 固定价、$3,100 简化报价、页数与图表数量关系前后一致。
+
+## 项目 `44133873`
+
+- 审核日期：2026-09-24
+- 审核覆盖：203 / 203
+- 审核开始时发布文件指纹：`d424b8a060edfa4a383b6654c92bec17b10ca40e8092f8d572f22b2468ceaf72`
+- 修复后指纹：`79f503f80f800537e17aba398857429ccb3024ec565c161c8369227a95155e0f`
+- 修改消息：50 条（0-based ordinals：3、6、7、10、13、17、20、25、26、33、34、35、41、43、45、47、49、51、54、56、58、61、63、65、68、69、73、79、84、86、87、88、98、101、102、104、106、107、108、112、115、116、152、159、195、196、197、198、199、202）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 10 组问题：
+
+1. `BUSINESS_VALUE_ERROR`（HIGH）：结尾的报酬讨论被改得自相矛盾：项目费在 ordinal 121 为 $425，但 195–199 又出现“只收到 $75”“到账 $210”“奖金后净得 $260”“每期 $800、每三个月一期”“$1200 预算”“收入 $2400”“从 $2400 起步”，并凭空加入具体奖金金额和“需要 $2,500 预算”。现按 $425 统一：扣费后约 $357，补足到 $425，“再加 $425 奖金”，每月每期 $425，将来增至 $1,000、$2,000；恢复“零收入、没有预算、从零开始、对方自定奖金额”。
+2. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinal 13 把“先用免费的翻页书服务”改成“付费入门版”；ordinal 6 把“小圆形作者头像”改成“大方形”，与 ordinal 30“头像太大”的反馈矛盾；ordinals 68、69 把悼念页“放在杂志末尾”改成“放在中间”，并把“姐妹”改成“兄弟”，与悼念页文件中的女性名字不符。现恢复。
+3. `RELATION_CHANGED`（HIGH）：创刊号日期与星期对不上（11 月 3 日实为周二，却写成周一，又说“周二不能发通讯”），并把“提前一周”改成“提前两周”。现改为 11 月 1 日（周日）、提前一周即 10 月 25 日，并在 ordinals 6、7、26、102、107 中保留“周五不宜发布、创刊日恰逢周末”的原逻辑。
+4. `RELATION_CHANGED`（HIGH）：发布前后的紧急时间线被推到“下周一/二/三/四”（ordinals 20、25、86、98、101、104、106、108、112），导致“今天必须上线”“已过截止时间”等上下文冲突；ordinals 104、115、116 还加入“截止已过未交付”“6 小时”“中午前必须提供”等原文没有的说法。现恢复“今天/明天/1 小时/3 天前”等原关系。
+5. `ENTITY_MAPPING_INCONSISTENT`（HIGH）：ordinal 34 把网站的 10 个栏目名全部改名，而 ordinals 41–63 仍使用 Business、Culture、America First 等原栏目名；ordinals 41–63 的文章编号被随机改成 16–61。现恢复原栏目名称和 3–15 的顺序编号。
+6. `PUBLIC_REQUIREMENT_CHANGED`（MEDIUM）：印刷 PDF 的 300 dpi 被改成 600 dpi；“低分辨率扁平 PSD”的 72 ppi 被改成 300 ppi；翻页书的“双页跨页”被改成“4 页跨页”；“页数须为偶数，即能被 2 整除”被改成“能被 4 整除”；ordinal 33 把“只有封面用红色”改成青绿色。现恢复（ordinals 3、33、87、88、101）。
+7. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 102、112 把“印刷版”替换成 “press-ready LANTERN”（误把品牌替换应用到普通词上）；ordinal 79 含修复前缀、附加 “For reference: …” 名单，并把自家品牌的广告页和营销服务广告错写成 SUMMIT LANTERN。现修正为统一的 CIVIC LANTERN，并删除附加内容。
+8. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinal 73 把“漏掉的 3 篇文章”改成 7 篇（ordinal 71 只列 3 篇）；ordinal 88 把“填空白页需要 1 个广告”改成 4 个；ordinals 35、65、86、87 把“一篇或多篇”“每月一期”“修正约 2%”“附两个备选字体”“距上线约 1 天”改成四篇以上、每三个月、35%、五个、4 天。现恢复。
+9. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：Dropbox 与 Google Drive 分享链接虽已替换 ID，但仍使用真实服务主机（ordinals 10、17、84、152、202）。现改为 `.example`；heyzine、fliphtml5、publuu 是原文中的公共工具官网，予以保留。
+10. `FACT_INVENTED`（LOW）：ordinal 159 把“稍后”精确成 90 分钟。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 203，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。原双方姓名、客户昵称、杂志品牌与域名、悼念对象原名、公众人物配偶原名和真实云盘 ID 残留扫描为零，未发现邮箱、内部占位符或乱码。InDesign 类排版术语、Docx、Interactive PDF、trim/bleed、Heyzine、MS Teams、Garamond、Inter、PSD/AI/EPS 等公共工具与术语保持不变。
+
+## 项目 `44138599`
+
+- 审核日期：2026-09-24
+- 审核覆盖：105 / 105
+- 审核开始时发布文件指纹：`e42d46e326d03ace36890e04053708253b688d486193415dc621ab0fb17a8728`
+- 修复后指纹：`41ba699c72bc1f4a4815fcc800ea1dc61186ea050144eddeb785e589c33e9ac4`
+- 修改消息：25 条（0-based ordinals：1、4、5、8、10、11、12、26、28、35、36、37、38、43、68、75、84、85、86、87、88、92、93、100、102）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 7 组问题：
+
+1. `BUSINESS_VALUE_ERROR`（HIGH）：客户原本提供 3 个视频（2 个有效、1 个失败），发布文件在 ordinals 1、4、5 写成 11 个（7 个有效、4 个失败）、第 5 个视频、分析全部 5 个、“7 个有效其实是同一视频”“两胜三负”“样本为 8”，却仍在讨论“第三个视频为什么失败”。现恢复“3 个视频、其实只有一胜一负、样本为 1”的核心诊断。
+2. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：ordinals 5、8、10、12、28、35 把 Meta 的 3 秒观看门槛改成 6 秒（且声称 7.5 秒的剪辑点在 6 秒门槛之前），把推荐的竖版 9:16 主规格和 4:5 次规格改成横版 16:9 和 1:1，与“当前比例放弃了 Reels 和 Stories 版位”的论证相反；ordinal 8 把 Meta Quality Ranking “Below Average” 对应的后 35% 改成 62%。现恢复。
+3. `BUSINESS_VALUE_ERROR`（HIGH）：ordinal 5 的音频数据互相矛盾：两者平均音量只差 5 dB 却说“低 14 dB”，“胜出视频 2 次停顿、失败视频 8 次静音”的对比被改成两者都是 5 次；ordinal 5 还凭空加入主视频文件的仓库链接。现调整失败视频平均音量为 40.8 dB 以匹配 14 dB 差距，恢复 2 次与 8 次的对比，并删除虚构链接。
+4. `BUSINESS_VALUE_ERROR`（MEDIUM）：8 个角度×2 种规格应为 16 个成片、8 次剪辑的价钱，发布文件在 ordinals 10、11 写成 12 个成片、6 次剪辑；ordinal 26 把“2 种规格”改成 3 种；ordinals 35–38 中 $120/$80 与 ₹12,500 不对应，客户“$80 就是 12500”的换算不成立。现改为 $150（₹12,500）报价、客户还价 $125。
+5. `ENTITY_MAPPING_INCONSISTENT`（HIGH）：客户产品品牌在 ordinals 5、93 映射为 Saffron Grove，但在 ordinals 68、75 被写成 “Cedarframe Studio”（另一个项目中的工作室名）。现统一为 Saffron Grove。
+6. `BUSINESS_VALUE_ERROR`（HIGH）：视频中需要出现的是两款产品（男士产品和糖尿病产品），发布文件在 ordinals 84–87、92、93 写成第 3/4 款产品和“全部五款产品”；ordinal 88 又把糖尿病改成高血压，与 ordinal 93 的“糖尿病揭示”和降糖软胶囊矛盾。现恢复两款产品和糖尿病定位。
+7. `RELATION_CHANGED`（MEDIUM）：ordinal 102 把“一周只打磨出 1 个视频”改成“三周打磨 4 个视频”，而此时尚未交付任何视频；ordinal 100 把“第一个视频”写成“第三个视频”；ordinal 43 把“再发 1 个参考视频”改成 3 个，与 ordinal 45 的单个“新参考视频”不符。现恢复。
+另经核对：其余业务数值（CPL 目标 ₹80、实际 ₹132.80 超 66%、CTR 与落地页损耗、8 个角度 ₹76,000、测试期 3 个视频后再下 5 个、16 秒/22 秒概念片、各类时限）已核对，彼此关系成立，保留。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 105，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。客户原名、自由职业者原名、原产品与品牌名残留扫描为零，未发现邮箱、非 `.example` 链接、内部占位符或乱码。Meta、Reels、Stories、Upwork、CPL、CTR、Quality Ranking、UGC、lip sync、Hindi 关键词等公共术语保持不变。
+
+## 项目 `44151581`
+
+- 审核日期：2026-09-24
+- 审核覆盖：113 / 113
+- 审核开始时发布文件指纹：`1fb9beb1e0d5ee10775c100f094e697706c738921ae3254b623d370c58528068`
+- 修复后指纹：`517c9378b58afab83515460d4c39ca246f8698a0e299726183a02ab2e80db055`
+- 修改消息：16 条（0-based ordinals：1、30、37、42、58、63、79、88、89、95、96、99、100、105、107、110）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 6 组问题：
+
+1. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinal 88 把“副标题在标题下方居中”反转为“左对齐、放在标题旁”；ordinals 89、107 把 YouTube 图标的位置“右上角”改成“左下角”，与 ordinal 79“放在右上区域”的要求矛盾。现恢复。
+2. `BUSINESS_VALUE_ERROR`（HIGH）：价格区原有 3 个方案，删掉最贵的一个后应剩 2 个，ordinal 58 却写成 5 个；同一处把“这些都是月付方案（所以“月”字要小于价格）”改成“每三个月计费”，与“月”字标记相矛盾。现恢复。
+3. `BUSINESS_VALUE_ERROR`（MEDIUM）：工作对象始终是原页面和复制页两份，发布文件在 ordinals 95、96、99、100、105 写成“四份文档/四个页面”；ordinal 110 把“第一部分缺少按钮”“两个按钮距离太远”改成第四部分、五个按钮。现恢复。
+4. `UNNATURAL_REWRITE`（MEDIUM）：ordinal 37 把要删除的课程段落说成“11-14 週 section titled 第 8-9 週…”，两个周次混杂；ordinal 79 把参考页名称写成“NimbusForge (BeaconBloom AI)”两个名称并列。现改为单一、一致的名称。
+5. `FACT_INVENTED`（MEDIUM）：ordinals 1、30、42 把“很快”“陆续发给你”“今天结束前”精确成三周内、每周两次、明天中午。现恢复。
+6. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：ordinal 63 的 Kajabi 后台链接虽已替换站点号，但仍指向真实可解析的服务主机。现改为 `.example`。
+另经核对：邮箱、两个账号密码已是 `.example` 地址和 FAKE\_PASSWORD 伪值；新旧两个 Kajabi 账号分别映射到两个不同的 `.example` 站点，映射一致；定价代码块中的价格、日期和品牌替换前后一致，保留 Google Fonts 公共引用。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 113，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。双方原名、原邮箱、两个真实密码、原 Kajabi 子域和后台站点号、原云文档 ID 与原学院名称残留扫描为零，未发现内部占位符或乱码。Kajabi、Gemini AI、YouTube、Google Fonts、HTML/CSS 等公共工具保持不变。
+
+## 项目 `44159104`
+
+- 审核日期：2026-09-24
+- 审核覆盖：201 / 201
+- 审核开始时发布文件指纹：`509ba38ad1cf223846d878f857c1f055b905c962d78d0a1d451b2cc4b935524a`
+- 修复后指纹：`d11dc5fa5321492385ad2e496d72e438f8bf57862bcfaa358ea7802838bca46b`
+- 修改消息：60 条（0-based ordinals：6、7、10、12、14、18、21、29、32、36、39、40、41、48、49、51、52、54、63、64、66、68、69、70、71、75、76、80、81、82、83、86、90、92、98、107、111、118、121、122、124、128、129、132、133、137、139、153、154、155、159、168、171、178、185、190、192、194、197、200）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 8 组问题：
+
+1. `UNNATURAL_REWRITE` / `ENTITY_MAPPING_INCONSISTENT`（HIGH）：客户产品名被替换为机械名称 “Willow Valley Initiative 19”，Firebase 站点名为 “Cedar Bridge Initiative 42”；产品主域、www、product/home/get 子域、管理后台和分享链接被分别替换成互不相关的 “sable-lantern.example/resource/e00xx” 路径，使 ordinals 159–194 中“把官网挪到子域名”“恢复主域记录”“www 从 Firebase 丢失”等 DNS 讨论完全失去意义。现统一为自然虚构产品 DriveReel 和域名 drivereel.example 及其子域（ordinals 40、41、51、63、71、80、90、98、139、159、168、171、178、185、192、194 等）。
+2. `NON_PII_WRONGLY_CHANGED`（HIGH）：客户要求逐字放到网页上的文案被改写：主标题（ordinal 48）、英雄区文案（ordinal 71，并把“一分钟内”改成 7 分钟）、Founding Dealer 板块（ordinals 80、81，标题被改成另一句而正文仍称 Founding Dealers）、表单字段名（ordinal 82）、按钮文案 Request Early Access/dealerlogin（ordinals 68、69）。现恢复原文案，仅替换产品名。
+3. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinal 68 把 dealerlogin 按钮“只放右上角”改成“左下角”；ordinal 70 把“替换第 1 部分（hero）”改成第 3 部分；ordinal 12 把“那就 850”误写成“批准后 850”。现恢复。
+4. `PUBLIC_REQUIREMENT_CHANGED`（MEDIUM）：Webflow 的 Basic 站点套餐、Site plan、Workspace plan、Site manager 角色、Dashboard 被改成 growth plan、hosting subscription、team subscription、content administrator、account overview，ordinal 92 还把 basic package 改成 premium；ordinal 128 把 404 错误改成 410。现恢复公共产品术语（ordinals 64、92、118、121、122、124、128、133、137）。
+5. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinals 6、10、14、18、32、39、52、129、190、194、200 把“第 2 期”“几张图”“几个示例/100% 满意”“几个链接”“明天给几个方案”“视频下多张图”“归档其中一个站点”“2 处删除”“还剩一件事”“几小时”“再一个小调整”改成第 5 期、9 张、8 个/85%、8 个、下周四 6 个、7 张、4 个、7 处、3 个问题、15 小时、4 个。现恢复。
+6. `RELATION_CHANGED`（MEDIUM）：ordinals 75、86、92、107、111 把“稍等/很快/今天今晚/现在/一会儿”改成 15 分钟、两个工作日内、下周二、两个工作日内等。现恢复。
+7. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：Google Docs/Drive、Figma、Loom、Webflow 后台链接虽改了路径，仍使用真实服务主机（ordinals 7、21、29、36、39、54、132、153–155）；ordinal 197 在公开作品站后凭空加入虚构路径。现改为 `.example` 地址，并恢复公开作品站的原始首页地址。
+8. `UNNATURAL_REWRITE`（LOW）：ordinal 64 含修复前缀 “For clarity, the details are restated below.”；ordinal 63 的两个表单接收邮箱为无意义编号地址。现删除前缀，并改为与 DriveReel 域名一致的虚构邮箱。
+另经核对：双方姓名映射（客户 Marcus Keene、自由职业者 Theo Mercer）、自由职业者邮箱与作品集 `.example` 链接前后一致；Go Daddy、Webflow、Firebase Hosting、Figma、Loom、SEO、QA、DNS、SSL 等公共工具与术语保持不变。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 201，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。双方原名、原产品名与域名、原邮箱、机械占位名、原云文档/设计/视频 ID 残留扫描为零；剩余非 `.example` 链接仅为公开作品站、Loom 官网与 Firebase 控制台地址，未发现内部占位符或乱码。
+
+## 项目 `44159206`
+
+- 审核日期：2026-09-24
+- 审核覆盖：102 / 102
+- 审核开始时发布文件指纹：`861541102e7a0db4b8b84d15000c22aff718973c301cf8cef9adf4814b211994`
+- 修复后指纹：`c974972a94700d7f2510e25fa78478fef0c2adb96c90badd2eb8c53663df9479`
+- 修改消息：27 条（0-based ordinals：0、1、14、18、20、21、23、24、28、29、37、40、43、46、47、49、50、51、58、71、73、76、79、84、89、99、100）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 6 组问题：
+
+1. `ENTITY_MAPPING_INCONSISTENT` / `BUSINESS_VALUE_ERROR`（HIGH）：这是把一套住宅拆成三户（1 号 2+1、2 号、3 号 1+1）的平面改造项目。发布文件把户号和户型随机改成 5/6 号 4+1、4 号、8 号 3+1，同一户在不同消息中编号不同；“两处排水管”“3 个新卫生间和 3 套厨柜”“三户入户门太近”“两个独立卫生间”“两扇门同时打开”也被改成 5 处、6 个、6 户、四个、四扇门。现恢复原编号、户型与数量（ordinals 0、1、18、20、21、28、29、40、43、47、49–51、71、73、76、79、84、89、100）。
+2. `PUBLIC_REQUIREMENT_CHANGED`（HIGH）：ordinals 14、23 把“有没有 DWG 格式的平面图”改成“有没有 DXF 而非 DWG”；ordinal 24 把“市政府给的原始文件是 TIFF 格式”改成“所谓 TIFF 实为 PNG”。现恢复 DWG 与 TIFF。
+3. `DECISION_OR_STATUS_CHANGED`（HIGH）：ordinals 37、46、58 把“进入 Review1、第一个里程碑批准后再发”“完成第二个里程碑”“启动第 3 个里程碑”改成 Review4、第四、第五、第六个里程碑，与实际的三段里程碑不符。现恢复。
+4. `INTENT_OR_POLARITY_CHANGED`（MEDIUM）：ordinal 29 把“拆掉红墙后尺寸够不够”的询问改成“如果尺寸合适就移过去”的条件请求；ordinal 99 把“开放后给 5 星”改成 3 星，并把 30 天改成 75 天。现恢复。
+5. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 20、21 把客户重复发送的同一指令（门为黄色、WC 并入 1 号区）改写成“沿用此前确定的 5 号区位置”；ordinal 100 把客户对两面待建墙的标注改成“工作清单”。现恢复原意。
+6. `BUSINESS_VALUE_ERROR`（LOW）：ordinal 51 把“把房门往前移 1 步”改成 3 步。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 102，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。本项目原文不含人名、邮箱、链接、账号或地址等 PII，发布文件也未新增此类信息；未发现内部占位符或乱码。AutoCAD、DWG、TIFF、Upwork、IBAN 等公共术语保持不变；土耳其语消息保持土耳其语，未被换成其他语言。
+
+## 项目 `44166278`
+
+- 审核日期：2026-09-24
+- 审核覆盖：147 / 147
+- 审核开始时发布文件指纹：`8b2fd89b3f89e72e00373af9c90420b9f6204fa7531d82635151f35e091f33ed`
+- 修复后指纹：`aeaf7163b2df9a679d56173374ef34ff4768e3020a45f54f9573d69f3779bbfe`
+- 修改消息：15 条（0-based ordinals：9、11、15、30、34、40、41、53、68、70、81、85、90、94、110）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 6 组问题：
+
+1. `FACT_INVENTED`（HIGH）：ordinal 85 把客户的习语“我之前没想到这一层（I was blind）”改写成“我使用轮椅出行”，凭空添加了残障健康信息。现恢复原习语含义。
+2. `INTENT_OR_POLARITY_CHANGED`（HIGH）：ordinals 40、41 把“给你 5 星”“我给所有自由职业者都打 5 星”改成 3 星，使玩笑式的承诺变成负面暗示。现恢复 5 星。
+3. `UNNATURAL_REWRITE` / `SECRET_OR_TOKEN_ERROR`（MEDIUM）：ordinal 15 的 GitHub 主页被替换成 “<the referenced site> For reference: elias-norven.”；ordinal 110 附加 “For reference: frontend.”；ordinals 9、11、70 的 Google Play 与 GitHub 链接仍指向真实服务主机。现改为自然的 `.example` 链接并删除附加内容。
+4. `FACT_INVENTED`（MEDIUM）：ordinal 30 把“需要全栈方案：网页端、移动端、管理后台”改成“全栈配送平台”；ordinal 68 把分享选项中的“链接”改成“安全门户”；ordinal 34 把“好看、优雅”改成“精致极简”。现恢复。
+5. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinal 90 把“两份文档（部署一份、已完成内容一份）”改成 11 份（4+7）；ordinal 81 凭空给出 $240 的加价金额。现恢复。
+6. `RELATION_CHANGED`（LOW）：ordinals 53、94 把“稍后发”改成“下一个工作日”“72 小时后”。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 147，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。自由职业者原 GitHub 用户名、原作品应用名与包名、原仓库名、真实商店和代码托管主机残留扫描为零，未发现邮箱、内部占位符或乱码。Claude Pro、OpenAI Codex、SendGrid、Hostinger、Vercel、Heroku、Docker、Ubuntu VPS、Flutter、Play Store、App Store 等公共工具保持不变；5/7 天工期、$10 奖金、$56 token 成本、$1000/$25 报价已按一致比例换算，保留。
+
+## 项目 `44177602`
+
+- 审核日期：2026-09-24
+- 审核覆盖：303 / 303
+- 审核开始时发布文件指纹：`34af801834f0f7321f976b2c99a93328dbd6a6fcaa96ba80516d6210b418b947`
+- 修复后指纹：`df2776b478fc8929c0a6bc2c64d511d5fd8dc39f0b02e092b4650627d59cc89d`
+- 修改消息：99 条（0-based ordinals：15、18、19、21、23、24、34、35、37、38、43、46、49、50、52、53、55、57、60、61、67、68、72、74、76、80、85、90、91、92、94、95、99、100、107、119、120、125、127、130、131、135、139、143、145、147、148、150、151、156、157、159、160、161、162、163、164、175、177、181、185、187、189、190、194、195、197、201、208、213、215、223、224、237、239、242、245、246、250、252、256、261、262、263、266、267、271、272、274、276、277、278、279、289、290、291、296、300、302）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 11 组问题：
+
+1. `SECRET_OR_TOKEN_ERROR`（BLOCKER）：ordinal 46 原样保留了一个平台账号的真实密码，ordinal 120 原样保留了 Canva 账号的真实密码，ordinals 208、213 原样保留了两次 Airbnb 登录验证码。现全部替换为明显无效的 FAKE\_PASSWORD 和占位验证码。
+2. `BUSINESS_VALUE_ERROR`（HIGH）：ordinal 15 的试用期条款被改乱：“一周带薪试用”变成三周，却以 “Week 3” 标注；试用期周薪与转正后周薪同为 $180（没有涨薪），每日时长 4/8 小时与全项目反复强调的“每天 6 小时”冲突，绩效评估时间变成 7 周到 4 个月。现恢复一周试用、每天最多 6 小时每周 6 天、试用期 $120→转正 $180→评估后至少 $250、2 周到 1 个月评估；ordinals 43、256、271、289 中的“6 小时工作日”随之恢复（此前被改成 9 小时），ordinal 147 的“前 3 小时做 CJ 任务 1、2，休息 1 小时，再做 3 小时”被改成 8+2+5 小时，现恢复。
+3. `RELATION_CHANGED`（HIGH）：各班次的开始、检查、会面和下班时间被改得互相矛盾（先约 13 点开工，又在 11 点会面、21:15 检查；“7 点到 12:30 共 9 小时”；“到 08:35 下班”等），并把“今天/明天/昨天”大量改成下周几。现恢复原时钟时间与相对日期（ordinals 18–24、34–38、53、55、57、60、61、67、68、72、74、76、95、127、135、139、143、145、156、160、162、185、189、190、195、197、201、224、250、252、261、267、278、290、291 等）。
+4. `ENTITY_MAPPING_INCONSISTENT`（HIGH）：ClickUp 中的任务编号被随机改动：Pinterest 任务 #1/#2 变成 #7/#8，CRM 任务 1 变成 “Case 8”，“任务 2 第 2 部分”变成“任务 8 第 5 部分”，CJ 任务 1/2 变成 “Work Item 7/9”，每日上传任务 3 变成 8 或 9，同一编号还指向不同任务。现恢复原编号（ordinals 85、90、92、94、99、100、107、125、130、135、143、145、147、150、151、159、161、163、164、175、177、223、263）。
+5. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：客户所在时区在 ordinals 18、19 为美东时间，ordinal 157 却写成“丹佛山地时间”，自由职业者时区在 ordinal 160 被写成“太平洋时间”，并出现 “Japan Standard Time (PKT)” 这种自相矛盾的混写；旅游业务的目标国家在外联消息中统一为马来西亚，但 ordinal 296 的 TikTok 内容流程仍写泰国。现恢复美东时间，以“我的当地时间”替代自由职业者所在国，并把 ordinal 296 统一为马来西亚。
+6. `INTENT_OR_POLARITY_CHANGED`（HIGH）：ordinal 276 把“我投入了 100% 的努力”改成 72%；ordinal 148 把“我已告诉老板你很努力，她向你问好”改成要求自由职业者自己去告诉老板；ordinal 277 把“再给一周、下周中告知、计划雇佣 1 年”改成三周、月底、3 年；ordinal 300 把 “24/7” 改成 “16/7”。现恢复。
+7. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinals 119、187、215、237、242、245、246、262、263、267 把“两个账号”“每天发布”“3 项计划任务”“一个表格”“每天 20 个产品”“这 15 个产品”“30 分钟 8 个”等改成四种方法三个账号、每天 3 次、7 项任务、4 个表格、45 个、32 个、75 分钟 21 个；ordinal 239 把“女装类目”改成“家居办公配件”；ordinal 252 把“只完成两项任务”改成七项。现恢复。
+8. `PUBLIC_REQUIREMENT_CHANGED`（MEDIUM）：ordinal 194 把 Airbnb“房东有 24 小时回复询价”改成 72 小时，并在房源标题后加入 “— floor designation 14” 机械后缀。现恢复。
+9. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 266、267 含修复前缀 “For clarity, the details are restated below.”，ordinal 296 附加 “For reference: blue\_ridge\_access.”；Content Bank 在部分消息中被改名为 “creative library”。现删除前缀和附加内容并统一名称。
+10. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：HubSpot、TikTok Business 邀请链接和 Google Docs 链接虽已替换邀请码，仍指向真实服务主机（ordinals 49、50、52、91）。现改为 `.example`。
+11. `FACT_INVENTED`（LOW）：ordinals 80、181、302 把“一分钟内”“一分钟”“过去几天”精确成 12 分钟、6 分钟、12 天。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 303，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。客户原名、自由职业者原用户名/邮箱/WhatsApp、两家企业原名及其网站与电话、两个真实密码、两个验证码、Airbnb 房东与房源原名残留扫描为零；剩余两个非 `.example` 命中分别是原文中的自动链接残片和已是 `.example` 的站点标记，未发现内部占位符或乱码。ClickUp、HubSpot、Bitwarden、Canva、Adobe Express、CJ Dropshipping、Shopify、TikTok Shop、Airbnb、Meta、WhatsApp 等公共工具保持不变。
+
+## 项目 `44186585`
+
+- 审核日期：2026-09-24
+- 审核覆盖：181 / 181
+- 审核开始时发布文件指纹：`a3ee2915d4414b21d8e6958b1f3a9987d9010cdc68b232a72af981f2a8d0d783`
+- 修复后指纹：`46fc86aed664307b21c0aeff76ff66eb1f9dee833caab3a6bb51a924f1abbc5a`
+- 修改消息：42 条（0-based ordinals：6、8、16、17、18、21、27、30、39、55、64、66、83、85、87、92、94、95、102、105、108、112、117、118、119、120、121、126、127、129、130、142、143、145、149、155、159、162、163、166、168、178）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 8 组问题：
+
+1. `UNNATURAL_REWRITE` / `ENTITY_MAPPING_INCONSISTENT`（HIGH）：客户的两个网站和测试主题被替换为 “Amber Grove Initiative 5”“Cobalt Horizon Initiative 47”“Lunar Orchard Initiative 56”“Silver Haven Initiative 55” 等机械名称，同一个主站在 ordinals 143、145 与 168 中还对应两个不同名称；网站地址被替换成互不相关的 “resource/e00xx” 路径。现统一为 Harborline（harborlineadvisors.example，测试主题 HLX 位于 /hlx）和 Stonefield（stonefieldroyalties.example）（ordinals 6、8、16–18、39、95、120、129、143、145、163、166、168、178）。
+2. `ENTITY_MAPPING_INCONSISTENT`（HIGH）：自由职业者称呼客户时，在 Elena Rowan 与 Nadia Sen 两个名字之间切换（ordinals 121、127、130）；自由职业者公司的邮箱与客户第二个网站的邮箱被映射到同一虚构域名，造成身份碰撞。现统一称呼为 Elena Rowan，自由职业者邮箱改为独立的 brightpixel-digital.example，客户邮箱分别对应各自网站域名（ordinals 21、55、66、105、155）。
+3. `UNNATURAL_REWRITE`（MEDIUM）：ordinals 8、16、17 附加 “For reference: …” 链接与名称，ordinal 149 含修复前缀，ordinals 120、149、159 给备份检查点编号加上 “ACCT-” 机械前缀，ordinal 92 凭空加入恶意文件的“仓库链接”。现删除；ordinal 16 的 wp-admin 临时登录令牌改为明显无效的占位值。
+4. `RELATION_CHANGED`（HIGH）：ordinal 92 把“两个快速方案”改成“五个方案、列出两个”，并调换了两个方案的顺序，导致 ordinal 93 客户“找 WP Engine 处理方案 #1”指向错误的方案。现恢复原数量与顺序。
+5. `RELATION_CHANGED`（MEDIUM）：ordinals 27、30 把“今天（WP Engine 尝试排障）”“本周刚搭建 HLX”改成上周五、上个月；ordinals 85、105 把“需要一天清理”“一天的排查”改成 4 天；ordinals 87、94、102、117 把“一两个小时”“几周或几个月”“再做一轮扫描、监控 24 小时”“一天前”改成 6–8 小时、6 个月、4 轮 72 小时、9 天前；ordinal 108 把“2026 年的备份”改成 2021 年。现恢复。
+6. `BUSINESS_VALUE_ERROR`（MEDIUM）：ordinal 105 的加载时间写成 “27 秒以上”和“从 31 秒降到 0.8 秒”，两处不一致，并把 7 小时工时改成 11 小时，使 ordinal 126 的工时汇总随之失真；ordinal 162 说最早可用备份是 11 月 8 日，与 ordinal 149 的最早检查点 10 月 20 日矛盾。现恢复原加载时间与工时，并改为 10 月 20 日。
+7. `FACT_INVENTED`（MEDIUM）：ordinal 83 把“已找到几个”改成“已找到 12 个、还有更多”；ordinal 119 把“最后三个下载”改成 8 个；ordinal 142 把“不一定只针对一个漏洞”改成五个；ordinal 64 把“稍等一秒”改成 12 秒。现恢复。
+8. `SECRET_OR_TOKEN_ERROR`（MEDIUM）：WP Engine 控制台和邮件链接、Google Drive 链接仍使用真实服务主机（ordinals 112、118、149、159）。现改为 `.example`。
+另经核对：恶意用户名、前管理员姓名、被入侵页面与帖子数量、各备份检查点日期、$85/$425 两份合同金额等替换值前后一致，保留。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 181，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。客户与自由职业者原名、两家企业原名与域名、原邮箱、原恶意账户名、原前管理员名、原 wp-admin 令牌、原主题代号与机械占位名残留扫描为零，未发现内部占位符或乱码。WordPress、WP Engine、Wordfence、Thrive Architect/Leads/Apprentice、Contact Form 7、GTM、Google Search Console、PageSpeed、XML-RPC、Autoptimize、Stape、Elementor、CloudFlare 等公共工具与术语保持不变。
+
+## 项目 `44190396`
+
+- 审核日期：2026-09-24
+- 审核覆盖：117 / 117
+- 审核开始时发布文件指纹：`e43e02a099823534b2c312354c8c0ffb29ad73e8805eb9111ea7e4cd4324e1b8`
+- 修复后指纹：`d071571ebe6708c1696175ab4edd00a0b66aed9991b988645e323aba612c4143`
+- 修改消息：25 条（0-based ordinals：3、7、9、15、18、26、27、29、33、35、42、43、44、52、69、75、84、86、87、93、94、106、108、109、115）
+- 最终结论：`CLEAN_AFTER_REPAIR`
+
+本节 ordinal 均为 0-based。发现并修复 7 组问题：
+
+1. `ENTITY_MAPPING_INCONSISTENT` / `UNNATURAL_REWRITE`（HIGH）：客户产品被替换为机械名称 “Violet Orchard Initiative 2”；客户使用的 AI 服务商在前半段是 “Maple Grove Studio 5”，在 ordinals 42、69 中又变成 “Lunar Grove Initiative 13”，同一服务商对应两个名称。现统一为自然虚构名 Lumen（产品）与 Veyra AI（服务商）（ordinals 3、7、9、15、18、26、27、29、33、35、42、69）。
+2. `NON_PII_WRONGLY_CHANGED`（HIGH）：通用功能名 “Styling Agent” 在 ordinals 42、69 中被当成实体替换成 “Maple Harbor Initiative 12”，而其他消息仍称 Styling Agent；ordinal 3 把 “Concierge” 丢失；ordinals 42、69 把“按提示词/按代理统计用量”改成“按请求/按工作流”。现恢复。
+3. `DECISION_OR_STATUS_CHANGED`（HIGH）：客户要求“清单内全部工作放在第 1 个里程碑，第 2 个里程碑是 Shopline”（批评对方拆成了 4 个），发布文件在 ordinals 43、44 改成“3 个里程碑、第 5 个里程碑给 Shopline、漏掉 9 项”；ordinal 42 的 4 个里程碑清单被改写成大段散文。现恢复原里程碑结构和列表格式。
+4. `BUSINESS_VALUE_ERROR`（MEDIUM）：MVP 只有前端和后端两个仓库，发布文件在 ordinals 93、108、109 写成五个、四个；ordinal 106 把“只有一个是公开的”改成“四个曾公开”。现恢复。
+5. `ENTITY_MAPPING_INCONSISTENT`（MEDIUM）：客户在 ordinal 109 用昵称称呼自由职业者，发布文件把它换成了另一个人名 “Marcus Bennett”，而自由职业者在 ordinal 55 中已映射为 Amara Ibarra。现改为 Amara。
+6. `UNNATURAL_REWRITE` / `SECRET_OR_TOKEN_ERROR`（MEDIUM）：ordinals 84、87 附加 “For reference: backend; frontend.”，并用无意义的 `.example` 路径替换仓库名；ordinal 75 的 GitHub 主页仍指向真实服务主机；ordinal 87 原为包含第三方个人用户名的仓库链接。现改为自然的虚构仓库名与 `.example` 地址。
+7. `RELATION_CHANGED`（LOW）：ordinal 52 把“凌晨 3 点，明早再处理”改成“傍晚处理”；ordinal 115 把“明天发文案”改成下周四。现恢复。
+
+校验结果：修复后 JSON 可解析，原始/发布/manifest 消息数均为 117，消息顺序、`message_user_type`、字段结构、源文件指纹、输出指纹和审核记录指纹全部一致；`changed_ordinals` 与逐条差异一致。双方原名与昵称、原产品与站点域名、原 AI 服务商名、原邮箱、原 GitHub 用户名与第三方仓库账户、机械占位名残留扫描为零；剩余非 `.example` 命中是原文中的公共检索服务 exa.ai 与句尾标点造成的正则误报，未发现内部占位符或乱码。SHOPLINE、OAuth、Supabase、DigitalOcean、Stripe、OpenAI、Tavily、node-js、blockchain 等公共工具与术语保持不变。

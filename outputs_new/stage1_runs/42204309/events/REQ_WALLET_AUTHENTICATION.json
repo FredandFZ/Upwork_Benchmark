@@ -1,0 +1,92 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_WALLET_AUTHENTICATION",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 72,
+        "speaker": "client",
+        "text": "For authentication, use a hybrid approach so both crypto and non-crypto users can participate; the fiat on-ramp is important for accessibility:\n- Wallet authentication with SIWE for crypto paths, especially mints and transfers.\n- Email-based authentication for dashboard access to referrals, tickets and prizes, supporting fiat users who do not yet use a wallet.\n- No authentication for public APIs such as leaderboards and pool values, keeping them open and transparent.\n\nThis matches the lean MVP: non-crypto users can mint through Stripe and email, while crypto users use a wallet. Keep email sign-in low-friction with magic links.\n\nBrevo remains the email service. I will create the account and provide credentials soon. A paid Starter plan is acceptable if it materially improves UX or deliverability, but the value should justify the cost.\n\nI will also create a Stripe test account and share the details shortly. For now, focus on fiat-to-USDC. We can discuss a low-cost paid add-on if it improves reliability or UX; the free tier is fine to begin with."
+      },
+      "supporting_message_ids": [
+        69
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "authentication_protocol": "Sign-In with Ethereum (SIWE)",
+        "supported_user_paths": [
+          "crypto users"
+        ],
+        "protected_flows": [
+          "wallet-based minting",
+          "NFT transfers"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "AUTH",
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "WALLET_AUTH"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 184,
+        "speaker": "client",
+        "text": "We also need a new FAQ section explaining how fiat buyers who are unfamiliar with crypto receive commissions and prizes. This is important for mainstream users because a non-custodial wallet is created behind the scenes, with the seed phrase not required, but they may not understand how to reach their rewards.\n\n\"How Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\"\n\nThe flow should reassure customers paying by fiat, such as bank transfer, Apple Pay, etc., that everything is straightforward. When the book is minted for $30 through Transak, the buyer automatically receives a non-custodial wallet behind the scenes, with the seed phrase not required. That wallet stores the buyer's NFT and receives all commissions and prizes.\n\nEarning Commissions ($10 per Referral):\nThe buyer shares a referral code, for example, \"use 8421.\" Whenever another person mints with that code, $10 is sent automatically to the wallet address.\nCollection requires no separate action. The buyer signs into <http://harborquill.example|harborquill.example> using a one-time email code or SIWE with the wallet Transak created, and the commissions appear immediately. If necessary, we can explain how to export the funds to a bank account or an exchange such as Coinbase.\n\nEarning and Winning Prizes (Tickets for $900/$6,000 Draws):\nEvery referral automatically assigns tickets for the active prize draws and ties them to the buyer's NFT/wallet.\nFair on-chain randomness runs the draws at approximately ~750 sales for $900 and ~35,000 for $6,000.\nResults are published on the Winners page and sent by email.\n\nPrize collection is automatic as well: a winner receives either $900 or $6,000 directly in the wallet and should check the dashboard or email for the notification.\n\nDuring the Purchase:\nA fiat-to-crypto conversion is completed by Transak, which then mints the NFT directly into a newly created wallet address. Nothing has to be configured manually; the process is seamless and non-custodial. The buyer owns the keys without having to manage a complicated recovery phrase immediately.\nAn email confirmation then provides the mint number, which also serves as the referral code, along with NFT details and a dashboard link at <http://harborquill.example|harborquill.example>.\n\nFor ebook access, could we use this setup?\n\nMake Login-gated preview the standard experience. The email certificate would carry a large button reading \"Read 'The Long Road Forward' Today,\" while download after verification would appear as a smaller \"Save PDF for Later\" link. The dashboard and email-linked reader should use PDF.js.\n\nDoes that work?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "transak_created_wallet_siwe_access": "Fiat buyers may use SIWE with the non-custodial wallet created by Transak to access the dashboard and view commissions and prizes."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "WALLET_AUTH",
+          "FIAT_BUYER_DASHBOARD_ACCESS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 446,
+      "suggested_requirement_id": "REQ_EMAIL_MAGIC_LINK_AUTH",
+      "description": "The blocked email-registration workflow concerns email authentication rather than SIWE wallet authentication."
+    },
+    {
+      "message_id": 616,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "Rainbow Wallet connects successfully, but the reported failure concerns the signature and decryption flow for viewing the book."
+    },
+    {
+      "message_id": 624,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The missing Rainbow Wallet transaction concerns mobile book decryption after wallet connection, not general wallet authentication."
+    },
+    {
+      "message_id": 703,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The client reports successful login and isolates the remaining problem to Lit Protocol book decryption in mobile wallet browsers."
+    },
+    {
+      "message_id": 710,
+      "suggested_requirement_id": "REQ_MOBILE_WALLET_BOOK_ACCESS",
+      "description": "The MetaMask-app failure belongs to the mobile book-access path rather than the general SIWE authentication requirement."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

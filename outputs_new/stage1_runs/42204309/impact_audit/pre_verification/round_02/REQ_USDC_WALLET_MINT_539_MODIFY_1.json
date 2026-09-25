@@ -1,0 +1,124 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_USDC_WALLET_MINT",
+    "message_id": 539,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_TRANSAK_FIAT_MINT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already limits future Transak mints to the active replacement contract; no additional change is needed.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_UNLIMITED_NFT_MINT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already records that minting the unlimited-edition NFT uses only the active replacement contract.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_ASSET_RENDERING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already excludes legacy-contract NFTs from the dashboard and limits dashboard rendering to the active replacement contract.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_OWNER_NFT_DISCOVERY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already captures that the active system discovers NFTs from the replacement contract rather than the legacy contract.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already limits active-system NFT counts and listings to the replacement contract and excludes legacy-contract NFTs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-539 MODIFY already limits metadata used by the active system to replacement-contract NFTs and excludes legacy-contract metadata.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ETH_WALLET_MINT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Proceeding with the replacement contract necessarily moves the other active wallet-mint path to that contract as well; the ETH mint Requirement has no matching lifecycle Event.",
+      "new_event": {
+        "source_message": {
+          "message_id": 539,
+          "speaker": "client",
+          "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best."
+        },
+        "supporting_message_ids": [
+          538
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "mint_contract_scope": "active replacement contract only"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Changing the mint contract does not change which payment options must be displayed, selectable, or unavailable.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ETH_PRICE_AND_REFUND",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The contract replacement does not itself change the approved ETH pricing, exact-output, refund, or insufficient-input rules; the separate message-539 update already records the supported insufficient-ETH behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The replacement-contract decision does not change the requirement that success feedback appear only after a mint transaction confirms.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_PRICE_REVENUE_SPLIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision changes which contract is active but does not change the mint price or allocation amounts.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_OPTIONAL_MINT_TIP",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The optional gratuity behavior, placement, presets, and custom amount remain valid unchanged under the replacement contract.",
+      "new_event": null
+    }
+  ]
+}

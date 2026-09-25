@@ -1,0 +1,215 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 21,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        21
+      ],
+      "decision_note": "The client establishes an automatic $10 commission as part of the referral-mint mechanics.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 143,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        143
+      ],
+      "decision_note": "The FAQ specifies that a coded mint immediately pays the associated referrer without a commission limit.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "allocation_trigger": "referral is accepted",
+          "recipient": "chosen referrer",
+          "credit_amount_usd": 25
+        },
+        "value_removals": [
+          "commission_amount_usd"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        305
+      ],
+      "decision_note": "The accepted-referral rule specifies a $25 credit for the chosen referrer, but it does not cancel the existing automatic distribution, wallet destination, timing, or uncapped behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 595,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        595
+      ],
+      "decision_note": "The client requires one commission for every eligible non-promotional mint, defining commission-counting behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "commission_amount_usd": 20
+        },
+        "value_removals": [
+          "credit_amount_usd"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        672
+      ],
+      "decision_note": "The client specifies $20 commissions for the coded flow; the superseded $25 credit key must be removed to prevent contradictory reward amounts.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 687,
+        "event_type": "AMBIGUOUS",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        672,
+        687
+      ],
+      "decision_note": "The freelancer proposes a $35 coded-referral commission that conflicts with the client's preceding $20 rule and requires client resolution.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 688,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        687,
+        688
+      ],
+      "decision_note": "The client accepts the uniquely identified proposal and confirms that nine $35 commissions for the coded recipient are correct.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 688,
+        "event_type": "RESUME",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        687,
+        688
+      ],
+      "decision_note": "The client's acceptance resolves the preceding commission-value conflict and returns the requirement to active status.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 724,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        719,
+        721,
+        724
+      ],
+      "decision_note": "Distinct desktop referral-mint verification: the client reports that the requested coded-mint ticket and commission test worked perfectly.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 746,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        744,
+        745,
+        746
+      ],
+      "decision_note": "The client specifies a $12 commission as the amount reported as awarded to the chosen NFT holder after a code-enabled mint.",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 672,
+        "speaker": "client",
+        "text": "At this point, 34 mints should correspond to 34 tickets and 34 x $20 commissions.\n\nA mint still produces a ticket and commission even when no referral code is supplied.\n\nAccounting works correctly on the leaderboards and NFT attributes whenever a code is used. That part is perfect.\n\nWithout a referral code, the ticket and commission are assigned randomly, but both must still appear on the leaderboard and in the NFT attributes.\n\nSince your latest fix, the randomly assigned tickets from the last 7 mints seem to have been recorded correctly, which is great. The earlier missing tickets have not been backfilled, though.\n\nThe $18 commissions generated by these no-code buys are also still missing from the leaderboard and NFT attributes.\n\nMy screenshot shows an NFT with 9 tickets but only 4 x $20 commissions. That should be impossible because every ticket comes with a $18 commission.\n\nThe leaderboard screenshot accounts for only 15 tickets and 12 x $8 commissions from 34 total mints. Regardless of whether a referral code was supplied, 34 mints should produce 34 tickets and 34 x $20 commissions."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client reports that commission accounting on the leaderboard and NFT attributes works correctly whenever a referral code is used."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 688,
+        "speaker": "client",
+        "text": "The logic itself sounds good to me.\n\nAfter 34 mints, the leaderboard now shows 24 tickets and 19 commissions, which is perfect.\n\nThe NFT attributes are still not right, though. My screenshots show that NFT #42 has 18 tickets and 9 x $35 commissions on the leaderboard, which is correct. When I open NFT #42, the top of the page also correctly displays 18 tickets and 14 referrals. However, its attributes still report only 6 referrals and $85 in total earnings."
+      },
+      "supporting_message_ids": [
+        687
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "After accepting the $35 coded-referral rule, the client reports that NFT #42 correctly shows nine $35 commissions on the leaderboard."
+      }
+    }
+  ]
+}

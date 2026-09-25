@@ -1,0 +1,630 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "phases": [
+    "pre_verification",
+    "post_verification"
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "source_case_count": 5,
+      "candidate_pair_count": 23,
+      "decision_count": 23,
+      "applied_patch_count": 1
+    },
+    {
+      "round": 2,
+      "source_case_count": 1,
+      "candidate_pair_count": 5,
+      "decision_count": 5,
+      "applied_patch_count": 0
+    },
+    {
+      "round": 1,
+      "source_case_count": 4,
+      "candidate_pair_count": 17,
+      "decision_count": 17,
+      "applied_patch_count": 0
+    }
+  ],
+  "decision_count": 45,
+  "applied_patch_count": 1,
+  "affected_requirement_ids": [
+    "REQ_SUBSCRIPTION_TIERS"
+  ],
+  "value_removal_reconciliations": [],
+  "records": [
+    {
+      "round": 1,
+      "phase": "pre_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_VEYRA_AI_PROVIDER",
+        "message_id": 12,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The mood-board Requirement already specifies Veyra AI. Adding the cost reason for excluding OpenAI does not change its provider, behavior, scope, or lifecycle.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The selfie-styling evaluation already uses Veyra AI. The newly stated reason for excluding OpenAI does not change the evaluation provider, method, deliverable, scope, or lifecycle.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_VEYRA_AI_PROVIDER_E002"
+    },
+    {
+      "round": 1,
+      "phase": "pre_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_VEYRA_AI_PROVIDER",
+        "message_id": 15,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The mood-board requirement already specifies Veyra AI, so excluding OpenAI from production implementation does not require any value removal, update, or scope change.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The selfie-styling evaluation already specifies Veyra AI and backend prompt testing; the production OpenAI exclusion leaves that task-local requirement unchanged.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_VEYRA_AI_PROVIDER_E003"
+    },
+    {
+      "round": 1,
+      "phase": "pre_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_AI_USAGE_LEDGER",
+        "message_id": 36,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_STRIPE_PAYMENTS",
+        "REQ_SUBSCRIPTION_TIERS",
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION",
+        "REQ_VEYRA_AI_PROVIDER",
+        "REQ_SHOPLINE_CONTENT_WIDGET"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_STRIPE_PAYMENTS",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The candidate already requires usage measurement before Stripe integration; the new ledger details do not change Stripe payment behavior or its prerequisites.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SUBSCRIPTION_TIERS",
+          "decision": "ADD_EVENT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source directly refines the tier basis from general prompt-level token measurements to real average usage measurements calculated for each prompt type.",
+          "new_event": {
+            "source_message": {
+              "message_id": 36,
+              "speaker": "freelancer",
+              "text": "The usage-tracking layer should be built first, with Stripe integration coming afterward. For every Veyra AI call, Supabase will store the user, agent, prompt type, token usage, and estimated cost. That data will let us calculate average usage for each prompt type and base the subscription tiers on real measurements rather than guesses."
+            },
+            "supporting_message_ids": [
+              34
+            ],
+            "event_type": "MODIFY",
+            "value_updates": {
+              "tier_basis": "real measurements of average Veyra AI usage for each prompt type"
+            },
+            "value_removals": null,
+            "scope_updates": null,
+            "ambiguity": null,
+            "execution": null
+          }
+        },
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "Tracking Veyra AI calls does not change the mood-board generation capability, provider, or interaction behavior.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The ledger design does not alter the selfie-styling evaluation method, provider, or required delivery of results.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_VEYRA_AI_PROVIDER",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source assumes Veyra AI usage but does not change the existing provider constraint or OpenAI exclusion.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SHOPLINE_CONTENT_WIDGET",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The Supabase usage ledger for Veyra AI calls is unrelated to the Shopline widget and its existing-platform content source.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 1,
+      "value_removal_reconciliations": [],
+      "source_event_id": null
+    },
+    {
+      "round": 1,
+      "phase": "pre_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_SHOPLINE_CONTENT_WIDGET",
+        "message_id": 29,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION",
+        "REQ_VEYRA_AI_PROVIDER"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "Using the existing platform as the Shopline widget's content source does not change the separate AI mood-board generation capability, provider, interaction mode, or scope.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The Shopline content-source decision does not alter the separate task of evaluating selfie styling through the backend and delivering the results.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_VEYRA_AI_PROVIDER",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The Shopline widget's retrieval of content from the existing platform does not change the Veyra AI provider constraint or the exclusion of OpenAI from production implementation.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_SHOPLINE_CONTENT_WIDGET_E002"
+    },
+    {
+      "round": 1,
+      "phase": "pre_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_REPOSITORY_CHANGE_ISOLATION",
+        "message_id": 115,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_LEGACY_BACKEND_REPOSITORY_CLEANUP",
+        "REQ_FRONTEND_COPY_UPDATES",
+        "REQ_FASHION_SOURCE_RETRIEVAL_COVERAGE",
+        "REQ_SHOPLINE_CONTENT_WIDGET",
+        "REQ_AFFILIATE_ATTRIBUTION_TRACKING",
+        "REQ_GOOGLE_ANALYTICS_4",
+        "REQ_MICROSOFT_CLARITY",
+        "REQ_AI_USAGE_LEDGER",
+        "REQ_STRIPE_PAYMENTS",
+        "REQ_SUBSCRIPTION_TIERS"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_LEGACY_BACKEND_REPOSITORY_CLEANUP",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The cleanup remains deferred, and permission to work only in dedicated branches of the target MVP repositories does not resume or otherwise change the deferred cleanup requirement.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_FRONTEND_COPY_UPDATES",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The repository isolation policy constrains how work is performed but does not change the requested front-end copy edits.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_FASHION_SOURCE_RETRIEVAL_COVERAGE",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source decision concerns source-control repositories and branches; it does not change fashion web-retrieval coverage.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SHOPLINE_CONTENT_WIDGET",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The Shopline widget remains deferred, and the repository policy does not alter its deliverable or content-source semantics.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_AFFILIATE_ATTRIBUTION_TRACKING",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The dedicated-branch policy does not change the required attribution tools or tracking purposes.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_GOOGLE_ANALYTICS_4",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The repository isolation decision does not change the Google Analytics 4 integration or its tracking behavior.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_MICROSOFT_CLARITY",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The repository isolation decision does not change the Microsoft Clarity integration.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_AI_USAGE_LEDGER",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source-control policy does not change the usage ledger's provider, recorded data, aggregation, or storage requirements.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_STRIPE_PAYMENTS",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The repository isolation policy does not change the Stripe payment provider, purpose, or implementation prerequisites.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SUBSCRIPTION_TIERS",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The dedicated-branch policy does not change how subscription tiers are derived from measured AI usage.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_REPOSITORY_CHANGE_ISOLATION_E002"
+    },
+    {
+      "round": 2,
+      "phase": "pre_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_SUBSCRIPTION_TIERS",
+        "message_id": 36,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_STRIPE_PAYMENTS",
+        "REQ_AI_USAGE_LEDGER",
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION",
+        "REQ_VEYRA_AI_PROVIDER"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_STRIPE_PAYMENTS",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The existing Stripe prerequisites remain valid: usage is measured before Stripe integration and measured usage informs the tiers. Aggregating those measurements by prompt type does not necessarily change the payment Requirement.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_AI_USAGE_LEDGER",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The candidate already has a same-message MODIFY recording Supabase storage, per-call dimensions and metrics, and average usage aggregation by prompt type; no additional change or removal is required.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The subscription-tier measurement basis does not change the mood-board generation capability, provider, or interaction mode.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The usage aggregation decision does not change the selfie-styling evaluation method, provider, or required result delivery.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_VEYRA_AI_PROVIDER",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source uses Veyra AI as the subject of usage tracking but does not change the existing Veyra provider constraint or OpenAI exclusion.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": null
+    },
+    {
+      "round": 1,
+      "phase": "post_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_VEYRA_AI_PROVIDER",
+        "message_id": 12,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The mood-board requirement already specifies Veyra AI; adding the cost reason for excluding OpenAI does not change its provider, capability, or scope.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The selfie-styling evaluation already specifies Veyra AI, and the stated reason for excluding OpenAI does not change the evaluation method, result delivery, provider, or scope.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_VEYRA_AI_PROVIDER_E002"
+    },
+    {
+      "round": 1,
+      "phase": "post_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_VEYRA_AI_PROVIDER",
+        "message_id": 15,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The mood-board Requirement already specifies Veyra AI as its provider, so the production-wide OpenAI exclusion does not require any change to its current attributes or feature-specific scope.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The evaluation already specifies Veyra AI and backend prompt testing; the production implementation scope decision neither changes that provider nor the task-local evaluation behavior.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_VEYRA_AI_PROVIDER_E003"
+    },
+    {
+      "round": 1,
+      "phase": "post_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_SHOPLINE_CONTENT_WIDGET",
+        "message_id": 29,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_AI_MOOD_BOARD_GENERATION",
+        "REQ_SELFIE_STYLING_EVALUATION",
+        "REQ_VEYRA_AI_PROVIDER"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The decision to retrieve Shopline content from the existing platform does not change the separate AI mood-board generation capability or its Veyra AI provider.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The Shopline content-source decision does not change the required backend evaluation of selfie styling or delivery of its test results.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_VEYRA_AI_PROVIDER",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "Fetching Shopline content from the existing platform does not alter the Veyra AI provider constraint for production AI implementation.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_SHOPLINE_CONTENT_WIDGET_E002"
+    },
+    {
+      "round": 1,
+      "phase": "post_verification",
+      "source_event_ref": {
+        "requirement_id": "REQ_REPOSITORY_CHANGE_ISOLATION",
+        "message_id": 115,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "candidate_requirement_ids": [
+        "REQ_LEGACY_BACKEND_REPOSITORY_CLEANUP",
+        "REQ_FRONTEND_COPY_UPDATES",
+        "REQ_FASHION_SOURCE_RETRIEVAL_COVERAGE",
+        "REQ_SHOPLINE_CONTENT_WIDGET",
+        "REQ_AFFILIATE_ATTRIBUTION_TRACKING",
+        "REQ_GOOGLE_ANALYTICS_4",
+        "REQ_MICROSOFT_CLARITY",
+        "REQ_AI_USAGE_LEDGER",
+        "REQ_STRIPE_PAYMENTS",
+        "REQ_SUBSCRIPTION_TIERS"
+      ],
+      "decisions": [
+        {
+          "candidate_requirement_id": "REQ_LEGACY_BACKEND_REPOSITORY_CLEANUP",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "Permission to use dedicated branches in the target MVP repositories does not resume or change the deferred cleanup of legacy backend repositories.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_FRONTEND_COPY_UPDATES",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The repository isolation policy governs where changes may be made but does not alter the requested front-end copy updates.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_FASHION_SOURCE_RETRIEVAL_COVERAGE",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The accepted repository policy does not change the required fashion-source retrieval coverage.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SHOPLINE_CONTENT_WIDGET",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source decision neither resumes the deferred Shopline widget nor changes its existing-platform content source.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_AFFILIATE_ATTRIBUTION_TRACKING",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "Repository branch isolation does not change the number or purposes of the requested attribution tools.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_GOOGLE_ANALYTICS_4",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source decision does not change the Google Analytics 4 integration requirement.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_MICROSOFT_CLARITY",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The source decision does not change the Microsoft Clarity integration requirement.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_AI_USAGE_LEDGER",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The repository isolation policy does not alter the usage provider, metric, granularity, or purpose of the AI usage ledger.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_STRIPE_PAYMENTS",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The accepted branch and repository constraints do not change the Stripe payment requirement or its implementation prerequisites.",
+          "new_event": null
+        },
+        {
+          "candidate_requirement_id": "REQ_SUBSCRIPTION_TIERS",
+          "decision": "NO_IMPACT",
+          "event_locator": null,
+          "confidence": "HIGH",
+          "reason": "The repository isolation policy does not change the usage basis of the subscription tiers.",
+          "new_event": null
+        }
+      ],
+      "applied_patch_count": 0,
+      "value_removal_reconciliations": [],
+      "source_event_id": "REQ_REPOSITORY_CHANGE_ISOLATION_E002"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_AGREEMENT_SESSION_SCHEDULE",
+        "title": "Agreement Session Schedule",
+        "family_id": "SUBCONTRACT_BUDGET_DOCUMENTATION",
+        "definition": "Populate each site's agreement with the supplied service weekdays and session time slots, independently of the date range and actual-session personnel calculation.",
+        "anchor_message_ids": [
+          1,
+          2
+        ]
+      },
+      "evidence_message_ids": [
+        1,
+        2
+      ],
+      "decision_note": "The supplied site-specific weekdays and time slots are independently required agreement content but are absent from the inventory.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_SITE_DESIGNATION"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_NCA_NH_SITE_IDENTITY",
+            "title": "NCA and NH Site Identity",
+            "family_id": "SUBCONTRACT_BUDGET_DOCUMENTATION"
+          },
+          {
+            "requirement_id": "REQ_286R_DOCUMENT_DESIGNATION",
+            "title": "286R Document Designation",
+            "family_id": "SUBCONTRACT_BUDGET_DOCUMENTATION"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        24,
+        25,
+        33,
+        34
+      ],
+      "decision_note": "The NCA/NH same-school relationship and the 286R-versus-201 document label concern different sites and have separate change and clarification trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MISSING_CONTRACT_ID_HANDLING",
+        "event_locator": {
+          "message_id": 34,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "nca_contract_id_status": "not provided",
+          "site_286r_contract_id_status": "not provided"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "DOCUMENT"
+          ],
+          "contexts": [
+            "NCA_NH",
+            "SITE_286R"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        33,
+        34
+      ],
+      "decision_note": "After the prior AMBIGUOUS event, the client resolves contract-ID availability by confirming that neither identifier was provided; the source does not explicitly state the broader normative wording originally recorded.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_MISSING_CONTRACT_ID_HANDLING"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 34,
+          "speaker": "client",
+          "text": "1\\. Follow the same approach used for HPI, but put the difference only in approved lines such as travel and consumable supplies. 2. Since she did not provide a contract ID, use 286R; it is confusing because the funding comes from one school while the program is hosted at another location. 3. The NCA contract ID is the same situation—it was not provided. 4. Use the numbers she supplied when I asked, although I don't think she knows the correct answer. 5. To keep everything consistent, apply the dates she gave us to all of the date fields. She has been especially difficult to work with and still hasn't supplied the information we need for our schedules, so hopefully the documents won't get kicked back again."
+        },
+        "supporting_message_ids": [
+          33
+        ],
+        "event_type": "RESUME",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        33,
+        34
+      ],
+      "decision_note": "The client's response resolves the material contract-ID uncertainty after recording the confirmed availability facts.",
+      "confidence": "HIGH"
+    }
+  ]
+}

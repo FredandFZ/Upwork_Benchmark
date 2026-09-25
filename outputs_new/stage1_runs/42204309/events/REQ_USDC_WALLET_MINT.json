@@ -1,0 +1,292 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_USDC_WALLET_MINT",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 294,
+        "speaker": "client",
+        "text": "USDC mint attempts are failing, although the dashboard is not recording them as purchases."
+      },
+      "supporting_message_ids": [
+        298
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "payment_asset": "USDC",
+        "required_behavior": "A connected wallet can directly complete an NFT mint using USDC."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "USDC_PAYMENT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 294,
+        "speaker": "client",
+        "text": "USDC mint attempts are failing, although the dashboard is not recording them as purchases."
+      },
+      "supporting_message_ids": [
+        298
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Direct connected-wallet USDC mint attempts failed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 310,
+        "speaker": "freelancer",
+        "text": "**Updated testing checklist**\n\nEvery fix is live and ready for testing in production.\n\n***1\\. Referral code validation***\n| Test action | Expected result |\n|---|---|\n| Enter an invalid code, such as \"47\" when only 6–9 NFTs exist | An invalid message should appear |\n| Enter a valid code, such as \"47\" when NFT #47 exists | A valid message should appear |\n| Leave the code empty | The \"No/Invalid referral code\" message should appear |\n\n***2\\. Minting***\n| Test action | Expected result |\n|---|---|\n| Perform a mint using USDC | It should succeed |\n| Review the dashboard | Only successful mints should appear |\n\n***3\\. NFT detail page***\n| Test action | Expected result |\n|---|---|\n| Open an NFT detail page | The complete book cover should be visible |\n| View the page as the owner | The \"View Book\" button should be visible |\n\n***4\\. Badges***\n| Test action | Expected result |\n|---|---|\n| Review the dashboard badge section | It should contain 11 badges after Pathfinder was removed |\n| Check different screen sizes | The responsive layout should adapt to the available width |"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The freelancer reports that production fixes are live and that a USDC mint should succeed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 341,
+        "speaker": "client",
+        "text": "With USDC, the approval transaction executed first, but no option to mint appeared afterward. With ETH, there was no approval transaction; the transaction executed and took 0.0140 ETH ($42.60), yet I received no NFT."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After USDC approval executed, the flow did not provide or initiate the NFT mint."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 357,
+        "speaker": "freelancer",
+        "text": "The flow now works as follows:\n\n\\- After USDC approval, auto-mint runs, and the success modal appears only once the mint succeeds.\n\\- For ETH, the price is calculated dynamically, a sufficient buffer is added, and the swap should complete successfully.\n\nTo track current market rates, the displayed ETH price will fluctuate against the $30 USDC target. Because the contract minimum is 0.014 ETH (~$43.75), the frontend selects whichever is higher: that minimum or the live dynamic price.\n\nPlease hard refresh with Ctrl+Shift+R or Cmd+Shift+R, then attempt another mint. Both the USDC and ETH paths should now work correctly."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The freelancer reports that USDC approval now automatically initiates minting and that the USDC path should work."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 358,
+        "speaker": "client",
+        "text": "On the USDC mint attempt, the approval transaction completed and a 'Purchase Confirmed' popup appeared, but the mint never executed and I still couldn’t mint.\nTransaction - 0x2c73a9d4e1b8605f94d2c71ab6e34809f15c827d"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the claimed auto-mint fix, USDC approval completed but the mint transaction never executed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 361,
+        "speaker": "freelancer",
+        "text": "I have just deployed to production the fixes for false “Mint Successful” modals and the broken approval-to-mint flow.\n\nThe changes are:\n\n\\- Modal gating: A success modal now appears only when the mint receipt matches the current mint hash and has not previously been shown. Adding or removing referral codes will not activate it.\n\\- New-attempt reset: Clicking mint clears the previous success state, pending parameters, and tracking references, preventing stale results from carrying into another attempt.\n\\- USDC auto-mint: Once approval completes, the USDC mint runs immediately because the stale success guard has been removed; approval by itself can no longer produce success.\n\\- ETH pricing and buffer: Dynamic ETH pricing still chooses the higher of the live value and the contract minimum of 0.014 ETH, then applies the buffer. This is unchanged from the previous hotfix.\n\nAfter a hard refresh with Cmd/Ctrl+Shift+R, please test again:\n\\- For USDC, approval should automatically initiate the mint, and the modal should wait until the mint transaction confirms.\n\\- For ETH, a failed transaction should produce no success modal; only an actual mint receipt can trigger one.\n\nIf anything else goes wrong, send the latest transaction hashes and I’ll inspect them immediately."
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The freelancer reports deploying a fix that initiates USDC minting immediately after approval and waits for the mint receipt."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 364,
+        "speaker": "client",
+        "text": "The USDC attempt reverted and displayed the “Purchase Confirmed” modal, yet it recorded 4 mints and showed 12 USDC spent.\n\nThe ETH attempt timed out."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the deployed fix, the USDC attempt reverted while the system incorrectly recorded four mints and 12 USDC spent."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 401,
+        "speaker": "freelancer",
+        "text": "Findings\n\nOn Base, the ETH mint transaction 0xb842…19e6d reverted. The reason is that the on-chain swap router points to 0x7a91…4c2e rather than the Uniswap V3 SwapRouter. Since the contract sends exactInputSingle to that incorrect address, it reverts; consequently, every ETH mint will continue failing until the router is corrected on-chain.\n\nThe USDC mint does work:\n\\- token #16 exists and belongs to 0x7a14c9e2b6d83f105ac47e69d2b801f43e6c95a1. Its metadata and assets resolve successfully:\n\\- Metadata: <https://harborquill.example/metadata/1>\n\\- Image: <https://harborquill.example/images/1.png>"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "On-chain inspection confirmed that a USDC mint produced token #16 and assigned it to the buyer's wallet."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 501,
+        "speaker": "freelancer",
+        "text": "Using USDC and the audited contract I deployed, I minted 6 NFT tokens."
+      },
+      "supporting_message_ids": [
+        494
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The freelancer executed six successful USDC NFT mints using the redeployed audited contract."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "During approval of the USDC spend—not during minting—the 'successful mint' popup appeared and showed mint number 11. In this case, I had used referral code 17; the screenshot shows this with the wallet popup visible.\n\nI cancelled that purchase, then checked and found that I had no NFT. Afterward, I minted using referral code 29. There was no USDC approval signature this time: it went directly to minting and worked perfectly, the popup appeared, and the NFT is visible on the dashboard.\n\nThe book decrypted successfully after I signed a transaction, but I'm now stuck on the cover page."
+      },
+      "supporting_message_ids": [
+        546,
+        555
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "On the newly activated contract, a USDC payment proceeded directly to minting, completed successfully, and produced an NFT visible on the dashboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 581,
+        "speaker": "client",
+        "text": "The USDC mint succeeded: #18 now has $35 and 4 tickets. When minting with the referral field left empty, there seem to be 4 tickets generated; however, 3 tickets and $12 commission distributed by lottery are not being allocated by weighted draw."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A USDC mint completed successfully on the distinct no-referral path."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 341,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The ETH payment-without-NFT clause describes a separate failure of the ETH wallet mint flow."
+    },
+    {
+      "message_id": 345,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The false Purchase Confirmed popup is independently evidence for mint-result feedback, while the approval-without-mint failure is already represented under the USDC flow."
+    },
+    {
+      "message_id": 358,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The premature Purchase Confirmed popup should also be evaluated under mint-result feedback."
+    },
+    {
+      "message_id": 364,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The Purchase Confirmed modal shown after a reverted USDC attempt is independently a mint-result-feedback failure."
+    },
+    {
+      "message_id": 377,
+      "suggested_requirement_id": "REQ_NFT_ASSET_RENDERING",
+      "description": "The inability to locate the minted NFT in the wallet or dashboard concerns NFT rendering and discovery rather than whether the USDC mint transaction executed."
+    },
+    {
+      "message_id": 377,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The success modal appearing both before and after the mint transaction concerns mint-result feedback."
+    },
+    {
+      "message_id": 401,
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "description": "The incorrect-router finding and resulting ETH reverts belong to the ETH wallet mint flow."
+    },
+    {
+      "message_id": 569,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The success popup shown during USDC approval before minting is a mint-result-feedback failure."
+    },
+    {
+      "message_id": 569,
+      "suggested_requirement_id": "REQ_BOOK_READER_UX",
+      "description": "Being stuck on the decrypted book's cover page concerns ebook reader navigation."
+    },
+    {
+      "message_id": 581,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "description": "The unallocated lottery commission on the no-referral path belongs to no-referral commission allocation."
+    },
+    {
+      "message_id": 581,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_TICKETS",
+      "description": "The weighted-draw ticket-allocation issue belongs to no-referral ticket allocation."
+    },
+    {
+      "message_id": 598,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The premature success popup and incorrect token number are mint-result-feedback failures rather than additional USDC execution failures."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

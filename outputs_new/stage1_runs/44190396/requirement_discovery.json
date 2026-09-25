@@ -1,0 +1,507 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-07-29",
+      "end": "2026-07-31",
+      "milestone": null,
+      "phase_label": "Scope definition, repository onboarding, and implementation planning"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "AI_AGENT_ENHANCEMENTS",
+      "title": "AI Agent Enhancements"
+    },
+    {
+      "family_id": "MONETIZATION_AND_USAGE",
+      "title": "Monetization and Usage Management"
+    },
+    {
+      "family_id": "ANALYTICS_INTEGRATIONS",
+      "title": "Analytics Integrations"
+    },
+    {
+      "family_id": "PLATFORM_UX",
+      "title": "Platform User Experience"
+    },
+    {
+      "family_id": "SOURCE_REPOSITORY_GOVERNANCE",
+      "title": "Source Repository Governance"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_VEYRA_AI_PROVIDER",
+      "title": "Veyra AI Provider Constraint",
+      "family_id": "AI_AGENT_ENHANCEMENTS",
+      "definition": "Use the existing Veyra AI integration for the platform's AI reasoning, retrieval, and image-generation features while excluding OpenAI from the production implementation.",
+      "anchor_message_ids": [
+        8,
+        12,
+        15,
+        16
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "WEBSITE_AGENTS",
+          "AI_FEATURES"
+        ]
+      },
+      "boundary_note": "This is the independently changeable provider and cost constraint; individual mood-board, retrieval, shopping-link, and selfie behaviors remain separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AI_MOOD_BOARD_GENERATION",
+      "title": "AI-Generated Fashion Mood Boards",
+      "family_id": "AI_AGENT_ENHANCEMENTS",
+      "definition": "Allow users to prompt the Styling Agent to generate complete fashion mood boards through Veyra AI and present the generated result in the existing interface.",
+      "anchor_message_ids": [
+        7,
+        8,
+        14,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "FRONTEND",
+          "API"
+        ],
+        "contexts": [
+          "STYLING_AGENT",
+          "MOOD_BOARD"
+        ]
+      },
+      "boundary_note": "Covers the generated mood-board behavior as one end-to-end capability; provider selection, general web retrieval, and selfie styling can change independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FASHION_SOURCE_RETRIEVAL_COVERAGE",
+      "title": "Expanded Fashion Source Retrieval",
+      "family_id": "AI_AGENT_ENHANCEMENTS",
+      "definition": "Expand the range of fashion sources retrieved from the web by the existing agent.",
+      "anchor_message_ids": [
+        7,
+        8,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "STYLING_AGENT",
+          "WEB_RETRIEVAL"
+        ]
+      },
+      "boundary_note": "Covers source coverage and retrieval breadth; returning useful shopping links is a separate output behavior that can be modified or tested independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SHOPPING_LINK_RESULTS",
+      "title": "Improved Shopping Link Results",
+      "family_id": "AI_AGENT_ENHANCEMENTS",
+      "definition": "Improve the quantity and usefulness of shopping links returned by the Styling Agent.",
+      "anchor_message_ids": [
+        7,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "FRONTEND",
+          "API"
+        ],
+        "contexts": [
+          "STYLING_AGENT",
+          "SHOPPING_LINKS"
+        ]
+      },
+      "boundary_note": "Shopping-link output has its own expected result and can fail or be improved independently of general fashion-source retrieval.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SELFIE_STYLING_EVALUATION",
+      "title": "Selfie Styling Capability Evaluation",
+      "family_id": "AI_AGENT_ENHANCEMENTS",
+      "definition": "Test selfie-based fashion image generation through the backend using Veyra AI and provide the generated results for client review before deciding whether to build the complete production feature.",
+      "anchor_message_ids": [
+        8,
+        16,
+        27,
+        43,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "STYLING_AGENT",
+          "SELFIE_STYLING"
+        ]
+      },
+      "boundary_note": "The independently requested deliverable is the backend evaluation and its results; a full production selfie-styling feature remains conditional and is not merged into this Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AI_USAGE_LEDGER",
+      "title": "Per-Account AI Usage Ledger",
+      "family_id": "MONETIZATION_AND_USAGE",
+      "definition": "Record Veyra AI consumption in Supabase by user account, agent, and prompt type, including token usage and estimated cost sufficient to measure consumption for monetization.",
+      "anchor_message_ids": [
+        7,
+        34,
+        36,
+        43,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "API"
+        ],
+        "contexts": [
+          "AI_USAGE",
+          "ACCOUNT_CONSUMPTION"
+        ]
+      },
+      "boundary_note": "User, agent, prompt type, token count, and estimated cost are attributes of one usage-recording mechanism; credit balances, subscription tiers, and Stripe payment processing remain separate Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CREDIT_USAGE_SYSTEM",
+      "title": "Credit-Based Usage System",
+      "family_id": "MONETIZATION_AND_USAGE",
+      "definition": "Convert measured AI consumption into an account-level credit system that can constrain or account for feature usage.",
+      "anchor_message_ids": [
+        7,
+        27,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "AI_USAGE",
+          "ACCOUNT_CREDITS"
+        ]
+      },
+      "boundary_note": "Credit accounting is independently operable from raw usage measurement, subscription tier definitions, and Stripe billing.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SUBSCRIPTION_TIERS",
+      "title": "Usage-Limited Subscription Tiers",
+      "family_id": "MONETIZATION_AND_USAGE",
+      "definition": "Provide multiple subscription tiers with prompt or usage limits derived from measured Veyra AI consumption.",
+      "anchor_message_ids": [
+        7,
+        34,
+        36,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "DATABASE",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "SUBSCRIPTIONS",
+          "USAGE_LIMITS"
+        ]
+      },
+      "boundary_note": "Tier definitions and usage limits form one pricing mechanism; the usage ledger supplies measurements, while Stripe independently handles payment processing.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_STRIPE_PAYMENTS",
+      "title": "Stripe Subscription Payments",
+      "family_id": "MONETIZATION_AND_USAGE",
+      "definition": "Integrate Stripe to collect payments for the platform's subscription plans after usage measurements and tier definitions are prepared.",
+      "anchor_message_ids": [
+        7,
+        27,
+        34,
+        41,
+        70
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "FRONTEND",
+          "API",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "SUBSCRIPTIONS",
+          "STRIPE_PAYMENT"
+        ]
+      },
+      "boundary_note": "Covers external payment processing only; usage measurement, credit accounting, and subscription-limit rules have independent state and implementation paths.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_GOOGLE_ANALYTICS_4",
+      "title": "Google Analytics 4 Integration",
+      "family_id": "ANALYTICS_INTEGRATIONS",
+      "definition": "Integrate Google Analytics 4 tracking into the platform.",
+      "anchor_message_ids": [
+        41,
+        42,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PLATFORM_ANALYTICS"
+        ]
+      },
+      "boundary_note": "GA4 is an independently deployable and verifiable analytics provider and is therefore separate from Clarity and affiliate-attribution tooling.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MICROSOFT_CLARITY",
+      "title": "Microsoft Clarity Integration",
+      "family_id": "ANALYTICS_INTEGRATIONS",
+      "definition": "Integrate Microsoft Clarity behavior analytics into the platform.",
+      "anchor_message_ids": [
+        41,
+        42,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PLATFORM_ANALYTICS"
+        ]
+      },
+      "boundary_note": "Clarity has a distinct integration and runtime verification path from GA4 and the additional attribution tools.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_AFFILIATE_ATTRIBUTION_TRACKING",
+      "title": "Affiliate and Campaign Attribution Tracking",
+      "family_id": "ANALYTICS_INTEGRATIONS",
+      "definition": "Integrate two or three additional analytics or attribution tools for affiliate marketing and campaign tracking.",
+      "anchor_message_ids": [
+        41,
+        42,
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "AFFILIATE_MARKETING",
+          "CAMPAIGN_ATTRIBUTION"
+        ]
+      },
+      "boundary_note": "The requested attribution-tool set is one business mechanism, but its providers are still unspecified; GA4 and Clarity are named integrations with separate Requirements.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_SHOWROOM_CONCIERGE_USABILITY",
+      "title": "Showroom and Concierge Usability",
+      "family_id": "PLATFORM_UX",
+      "definition": "Improve the showroom-to-concierge experience so users and investors can quickly understand what Lumen does and navigate into the agent functionality.",
+      "anchor_message_ids": [
+        70,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "SHOWROOM",
+          "LUMEN_CONCIERGE"
+        ]
+      },
+      "boundary_note": "Covers the cross-surface comprehension and navigation flow; Styling Agent capabilities and client-supplied copy edits remain independently changeable.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_FRONTEND_COPY_UPDATES",
+      "title": "Front-End Copy Updates",
+      "family_id": "PLATFORM_UX",
+      "definition": "Apply the small client-supplied text and copy changes to the platform front end.",
+      "anchor_message_ids": [
+        42,
+        116
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "WEBSITE_COPY"
+        ]
+      },
+      "boundary_note": "This is the concrete copy-edit obligation; exact text is pending, and it is separate from broader navigation or usability behavior.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_SHOPLINE_CONTENT_WIDGET",
+      "title": "Shopline App Store Content Widget",
+      "family_id": null,
+      "definition": "Deliver a Shopline App Store widget that retrieves and presents content from the existing Lumen platform without building a separate AI system or new web scraper.",
+      "anchor_message_ids": [
+        24,
+        25,
+        29,
+        41,
+        44,
+        45
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "SHOPLINE_APP",
+          "CONTENT_RETRIEVAL"
+        ]
+      },
+      "boundary_note": "OAuth, Shopline APIs, publishing, and compliance webhooks are currently implementation aspects of one widget mechanism; the missing one-pager may later justify more detailed Requirement boundaries.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_LEGACY_BACKEND_REPOSITORY_CLEANUP",
+      "title": "Legacy Backend Repository Cleanup",
+      "family_id": "SOURCE_REPOSITORY_GOVERNANCE",
+      "definition": "Delete obsolete backend versions from the project's repository set when repository modification is authorized.",
+      "anchor_message_ids": [
+        110,
+        112,
+        113
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "BACKEND",
+          "SOURCE_CONTROL"
+        ],
+        "contexts": [
+          "LEGACY_BACKEND_REPOSITORIES"
+        ]
+      },
+      "boundary_note": "This is a one-off executable repository-cleanup obligation; the temporary restriction on making changes is represented by the separate repository-isolation Requirement and its lifecycle evidence.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_REPOSITORY_CHANGE_ISOLATION",
+      "title": "Repository Change Isolation",
+      "family_id": "SOURCE_REPOSITORY_GOVERNANCE",
+      "definition": "Keep development changes isolated to the target MVP repositories and dedicated branches, leaving unrelated repositories unchanged.",
+      "anchor_message_ids": [
+        112,
+        113,
+        114,
+        115
+      ],
+      "scope_hypothesis": {
+        "persistence": "TASK_LOCAL",
+        "components": [
+          "SOURCE_CONTROL"
+        ],
+        "contexts": [
+          "MVP_REPOSITORIES",
+          "DEVELOPMENT_BRANCHES"
+        ]
+      },
+      "boundary_note": "Covers where current development changes may occur; it does not erase the separately stated future cleanup of obsolete backend versions.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        8,
+        27,
+        70,
+        74
+      ],
+      "description": "A complete production selfie-styling feature is conditional on the backend evaluation results. Current evidence clearly establishes the evaluation deliverable but does not yet authorize full production implementation.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        41,
+        42,
+        70,
+        74
+      ],
+      "description": "The affiliate and campaign attribution requirement calls for two or three additional tools, but the specific providers and whether they require separate Requirement atoms remain unspecified.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        24,
+        25,
+        29,
+        44,
+        45
+      ],
+      "description": "Detailed Shopline widget behavior is expected in a separate one-pager. Current evidence supports one widget Requirement but is insufficient to split OAuth, content publishing, product APIs, and compliance webhooks into independent product behaviors.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        70,
+        74,
+        83
+      ],
+      "description": "The freelancer states that Stripe can be deferred, but no supplied client message clearly accepts that lifecycle change. Event extraction should not treat message 83 alone as an authoritative deferral.",
+      "confidence": "HIGH"
+    }
+  ]
+}

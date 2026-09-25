@@ -1,0 +1,354 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY",
+            "title": "How-To Media Delivery",
+            "family_id": null
+          },
+          {
+            "requirement_id": "REQ_HOW_TO_MEASUREMENT_INSTRUCTIONS",
+            "title": "How-To Measurement Instructions",
+            "family_id": null
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        23,
+        51,
+        193,
+        194,
+        238,
+        239,
+        251,
+        257,
+        258,
+        259
+      ],
+      "decision_note": "The measurement instruction sequence can change independently from the tutorial media format, hosting, integration, and accessibility trajectory.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_IN_APP_LANGUAGE_SELECTION",
+        "title": "In-App Language Selection",
+        "family_id": "APPLICATION_LOCALIZATION",
+        "definition": "Determine whether users need an in-app control for selecting the application language independently of device-language behavior.",
+        "anchor_message_ids": [
+          212,
+          283,
+          298
+        ]
+      },
+      "evidence_message_ids": [
+        212,
+        283,
+        298
+      ],
+      "decision_note": "Repeated questions identify an independently implementable language-selector behavior absent from the frozen inventory; extraction should preserve the unresolved decision without inventing client approval.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE",
+        "event_locator": {
+          "message_id": 53,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        33,
+        53
+      ],
+      "decision_note": "The generic decision to move forward does not itself identify Android permissions and cannot be the canonical source for this target-specific Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 33,
+          "speaker": "freelancer",
+          "text": "Having completed a careful review of both Android and iOS source-code projects, I’ve organized the findings around the work required.\n\n**Submission Assessment**\n\nBoth apps work; however, neither can currently be submitted to its store without fixes.\n\n**Findings by Remediation Workstream**\n\n1\\. Repair localization and language behavior:\n\\* For iOS, the project has 34 language folders but no translation files inside them, so the app runs only in English regardless of the phone’s language setting. I would rebuild that translation system.\n\\* Synchronize the Android language files, since some languages are missing 61 strings.\n\\* Redesign the tutorial images so additional languages do not require new graphic-design updates each time.\n\n2\\. Restore store eligibility:\n\\* The iOS app uses UIWebView, which Apple removed, so Apple will reject it on submission. The Privacy Manifest required by Apple since May 2024 is also missing, and the signing certificates expired in 2021.\n\\* The supplied source omits Info.plist and the main ViewController.m file; I need both before beginning iOS work.\n\\* The fixes are to replace UIWebView on iOS, supply the required Privacy Manifest, and renew the certificates.\n\\* On Android, remove the unused dangerous permission. The app requests READ\\_PHONE\\_STATE even though it does not use that sensitive permission, which may create regional review problems with Google Play.\n\n3\\. Modernize outdated code and video playback:\n\\* On modern Android, the code still uses one removed sensor API and several other deprecated calls. The Chinese video integration through Youku also fails because of an HTTP/HTTPS compatibility issue.\n\\* The libraries are very old and remain 14+ versions behind current releases.\n\\* I would upgrade the dependencies, replace deprecated APIs, and modernize the YouTube player implementation.\n\n4\\. Reduce package size:\n\\* The Android build is 126 MB, which is much larger than necessary, and it currently has no Android App Bundle, code shrinking, or image optimization.\n\\* Move Android to the App Bundle format, enable code shrinking, and remove duplicate and unused images.\n\\* On iOS alone, I identified approximately 28 MB of duplicate files.\n\n5\\. Add right-to-left behavior if those languages remain in scope:\n\\* Arabic, Hebrew, and Persian do not currently behave correctly in RTL, but correct support can be added if needed.\n\n6\\. Adopt current platform requirements:\n\\* Target Android 35, which Google will require soon.\n\\* Set the minimum target to iOS 15+.\n\n**Unresolved Inputs Needed for Scheduling**\n\n1\\. The iOS source appears incomplete because Info.plist and ViewController.m are missing. Do you have the complete project?\n2\\. The keystore password for the Android signing key was not included with the files. Is it available?\n3\\. Should the Chinese video from Youku remain, or may it be removed?\n4\\. For additional languages, should localization cover the full app or only the translated store-listing pages?\n\nOnce the missing-source, signing, video, and localization questions are resolved, I can provide a detailed plan with an exact implementation timeline."
+        },
+        "supporting_message_ids": [
+          14
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "permission_policy": "Remove unused or unjustified Android permissions",
+          "identified_permission_to_remove": "READ_PHONE_STATE"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "ANDROID_APP",
+            "STORE_CONFIGURATION"
+          ],
+          "contexts": [
+            "GOOGLE_PLAY_SUBMISSION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        14,
+        33
+      ],
+      "decision_note": "Message 33 explicitly identifies the unused Android permission and the required removal within the client-requested store-compliance work.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_PERMISSION_HYGIENE"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 33,
+          "speaker": "freelancer",
+          "text": "Having completed a careful review of both Android and iOS source-code projects, I’ve organized the findings around the work required.\n\n**Submission Assessment**\n\nBoth apps work; however, neither can currently be submitted to its store without fixes.\n\n**Findings by Remediation Workstream**\n\n1\\. Repair localization and language behavior:\n\\* For iOS, the project has 34 language folders but no translation files inside them, so the app runs only in English regardless of the phone’s language setting. I would rebuild that translation system.\n\\* Synchronize the Android language files, since some languages are missing 61 strings.\n\\* Redesign the tutorial images so additional languages do not require new graphic-design updates each time.\n\n2\\. Restore store eligibility:\n\\* The iOS app uses UIWebView, which Apple removed, so Apple will reject it on submission. The Privacy Manifest required by Apple since May 2024 is also missing, and the signing certificates expired in 2021.\n\\* The supplied source omits Info.plist and the main ViewController.m file; I need both before beginning iOS work.\n\\* The fixes are to replace UIWebView on iOS, supply the required Privacy Manifest, and renew the certificates.\n\\* On Android, remove the unused dangerous permission. The app requests READ\\_PHONE\\_STATE even though it does not use that sensitive permission, which may create regional review problems with Google Play.\n\n3\\. Modernize outdated code and video playback:\n\\* On modern Android, the code still uses one removed sensor API and several other deprecated calls. The Chinese video integration through Youku also fails because of an HTTP/HTTPS compatibility issue.\n\\* The libraries are very old and remain 14+ versions behind current releases.\n\\* I would upgrade the dependencies, replace deprecated APIs, and modernize the YouTube player implementation.\n\n4\\. Reduce package size:\n\\* The Android build is 126 MB, which is much larger than necessary, and it currently has no Android App Bundle, code shrinking, or image optimization.\n\\* Move Android to the App Bundle format, enable code shrinking, and remove duplicate and unused images.\n\\* On iOS alone, I identified approximately 28 MB of duplicate files.\n\n5\\. Add right-to-left behavior if those languages remain in scope:\n\\* Arabic, Hebrew, and Persian do not currently behave correctly in RTL, but correct support can be added if needed.\n\n6\\. Adopt current platform requirements:\n\\* Target Android 35, which Google will require soon.\n\\* Set the minimum target to iOS 15+.\n\n**Unresolved Inputs Needed for Scheduling**\n\n1\\. The iOS source appears incomplete because Info.plist and ViewController.m are missing. Do you have the complete project?\n2\\. The keystore password for the Android signing key was not included with the files. Is it available?\n3\\. Should the Chinese video from Youku remain, or may it be removed?\n4\\. For additional languages, should localization cover the full app or only the translated store-listing pages?\n\nOnce the missing-source, signing, video, and localization questions are resolved, I can provide a detailed plan with an exact implementation timeline."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Source inspection found that the Android app requests the unused sensitive READ_PHONE_STATE permission, creating Google Play review risk."
+        }
+      },
+      "evidence_message_ids": [
+        33
+      ],
+      "decision_note": "This is the first concrete observation of the unjustified permission before the later removal claim.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IOS_PLATFORM_MODERNIZATION"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 33,
+          "speaker": "freelancer",
+          "text": "Having completed a careful review of both Android and iOS source-code projects, I’ve organized the findings around the work required.\n\n**Submission Assessment**\n\nBoth apps work; however, neither can currently be submitted to its store without fixes.\n\n**Findings by Remediation Workstream**\n\n1\\. Repair localization and language behavior:\n\\* For iOS, the project has 34 language folders but no translation files inside them, so the app runs only in English regardless of the phone’s language setting. I would rebuild that translation system.\n\\* Synchronize the Android language files, since some languages are missing 61 strings.\n\\* Redesign the tutorial images so additional languages do not require new graphic-design updates each time.\n\n2\\. Restore store eligibility:\n\\* The iOS app uses UIWebView, which Apple removed, so Apple will reject it on submission. The Privacy Manifest required by Apple since May 2024 is also missing, and the signing certificates expired in 2021.\n\\* The supplied source omits Info.plist and the main ViewController.m file; I need both before beginning iOS work.\n\\* The fixes are to replace UIWebView on iOS, supply the required Privacy Manifest, and renew the certificates.\n\\* On Android, remove the unused dangerous permission. The app requests READ\\_PHONE\\_STATE even though it does not use that sensitive permission, which may create regional review problems with Google Play.\n\n3\\. Modernize outdated code and video playback:\n\\* On modern Android, the code still uses one removed sensor API and several other deprecated calls. The Chinese video integration through Youku also fails because of an HTTP/HTTPS compatibility issue.\n\\* The libraries are very old and remain 14+ versions behind current releases.\n\\* I would upgrade the dependencies, replace deprecated APIs, and modernize the YouTube player implementation.\n\n4\\. Reduce package size:\n\\* The Android build is 126 MB, which is much larger than necessary, and it currently has no Android App Bundle, code shrinking, or image optimization.\n\\* Move Android to the App Bundle format, enable code shrinking, and remove duplicate and unused images.\n\\* On iOS alone, I identified approximately 28 MB of duplicate files.\n\n5\\. Add right-to-left behavior if those languages remain in scope:\n\\* Arabic, Hebrew, and Persian do not currently behave correctly in RTL, but correct support can be added if needed.\n\n6\\. Adopt current platform requirements:\n\\* Target Android 35, which Google will require soon.\n\\* Set the minimum target to iOS 15+.\n\n**Unresolved Inputs Needed for Scheduling**\n\n1\\. The iOS source appears incomplete because Info.plist and ViewController.m are missing. Do you have the complete project?\n2\\. The keystore password for the Android signing key was not included with the files. Is it available?\n3\\. Should the Chinese video from Youku remain, or may it be removed?\n4\\. For additional languages, should localization cover the full app or only the translated store-listing pages?\n\nOnce the missing-source, signing, video, and localization questions are resolved, I can provide a detailed plan with an exact implementation timeline."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Source inspection found that the iOS app still uses the removed UIWebView API, making it ineligible for Apple submission without modernization."
+        }
+      },
+      "evidence_message_ids": [
+        33
+      ],
+      "decision_note": "This is the first concrete iOS deprecated-API failure and is distinct from the Privacy Manifest and signing findings.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 33,
+          "speaker": "freelancer",
+          "text": "Having completed a careful review of both Android and iOS source-code projects, I’ve organized the findings around the work required.\n\n**Submission Assessment**\n\nBoth apps work; however, neither can currently be submitted to its store without fixes.\n\n**Findings by Remediation Workstream**\n\n1\\. Repair localization and language behavior:\n\\* For iOS, the project has 34 language folders but no translation files inside them, so the app runs only in English regardless of the phone’s language setting. I would rebuild that translation system.\n\\* Synchronize the Android language files, since some languages are missing 61 strings.\n\\* Redesign the tutorial images so additional languages do not require new graphic-design updates each time.\n\n2\\. Restore store eligibility:\n\\* The iOS app uses UIWebView, which Apple removed, so Apple will reject it on submission. The Privacy Manifest required by Apple since May 2024 is also missing, and the signing certificates expired in 2021.\n\\* The supplied source omits Info.plist and the main ViewController.m file; I need both before beginning iOS work.\n\\* The fixes are to replace UIWebView on iOS, supply the required Privacy Manifest, and renew the certificates.\n\\* On Android, remove the unused dangerous permission. The app requests READ\\_PHONE\\_STATE even though it does not use that sensitive permission, which may create regional review problems with Google Play.\n\n3\\. Modernize outdated code and video playback:\n\\* On modern Android, the code still uses one removed sensor API and several other deprecated calls. The Chinese video integration through Youku also fails because of an HTTP/HTTPS compatibility issue.\n\\* The libraries are very old and remain 14+ versions behind current releases.\n\\* I would upgrade the dependencies, replace deprecated APIs, and modernize the YouTube player implementation.\n\n4\\. Reduce package size:\n\\* The Android build is 126 MB, which is much larger than necessary, and it currently has no Android App Bundle, code shrinking, or image optimization.\n\\* Move Android to the App Bundle format, enable code shrinking, and remove duplicate and unused images.\n\\* On iOS alone, I identified approximately 28 MB of duplicate files.\n\n5\\. Add right-to-left behavior if those languages remain in scope:\n\\* Arabic, Hebrew, and Persian do not currently behave correctly in RTL, but correct support can be added if needed.\n\n6\\. Adopt current platform requirements:\n\\* Target Android 35, which Google will require soon.\n\\* Set the minimum target to iOS 15+.\n\n**Unresolved Inputs Needed for Scheduling**\n\n1\\. The iOS source appears incomplete because Info.plist and ViewController.m are missing. Do you have the complete project?\n2\\. The keystore password for the Android signing key was not included with the files. Is it available?\n3\\. Should the Chinese video from Youku remain, or may it be removed?\n4\\. For additional languages, should localization cover the full app or only the translated store-listing pages?\n\nOnce the missing-source, signing, video, and localization questions are resolved, I can provide a detailed plan with an exact implementation timeline."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The Android build measured 126 MB and lacked App Bundle packaging, code shrinking, and image optimization."
+        }
+      },
+      "evidence_message_ids": [
+        33
+      ],
+      "decision_note": "This is the first concrete Android size failure and provides the baseline for the later 44.6 MB verification.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IOS_APP_SIZE_OPTIMIZATION"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 33,
+          "speaker": "freelancer",
+          "text": "Having completed a careful review of both Android and iOS source-code projects, I’ve organized the findings around the work required.\n\n**Submission Assessment**\n\nBoth apps work; however, neither can currently be submitted to its store without fixes.\n\n**Findings by Remediation Workstream**\n\n1\\. Repair localization and language behavior:\n\\* For iOS, the project has 34 language folders but no translation files inside them, so the app runs only in English regardless of the phone’s language setting. I would rebuild that translation system.\n\\* Synchronize the Android language files, since some languages are missing 61 strings.\n\\* Redesign the tutorial images so additional languages do not require new graphic-design updates each time.\n\n2\\. Restore store eligibility:\n\\* The iOS app uses UIWebView, which Apple removed, so Apple will reject it on submission. The Privacy Manifest required by Apple since May 2024 is also missing, and the signing certificates expired in 2021.\n\\* The supplied source omits Info.plist and the main ViewController.m file; I need both before beginning iOS work.\n\\* The fixes are to replace UIWebView on iOS, supply the required Privacy Manifest, and renew the certificates.\n\\* On Android, remove the unused dangerous permission. The app requests READ\\_PHONE\\_STATE even though it does not use that sensitive permission, which may create regional review problems with Google Play.\n\n3\\. Modernize outdated code and video playback:\n\\* On modern Android, the code still uses one removed sensor API and several other deprecated calls. The Chinese video integration through Youku also fails because of an HTTP/HTTPS compatibility issue.\n\\* The libraries are very old and remain 14+ versions behind current releases.\n\\* I would upgrade the dependencies, replace deprecated APIs, and modernize the YouTube player implementation.\n\n4\\. Reduce package size:\n\\* The Android build is 126 MB, which is much larger than necessary, and it currently has no Android App Bundle, code shrinking, or image optimization.\n\\* Move Android to the App Bundle format, enable code shrinking, and remove duplicate and unused images.\n\\* On iOS alone, I identified approximately 28 MB of duplicate files.\n\n5\\. Add right-to-left behavior if those languages remain in scope:\n\\* Arabic, Hebrew, and Persian do not currently behave correctly in RTL, but correct support can be added if needed.\n\n6\\. Adopt current platform requirements:\n\\* Target Android 35, which Google will require soon.\n\\* Set the minimum target to iOS 15+.\n\n**Unresolved Inputs Needed for Scheduling**\n\n1\\. The iOS source appears incomplete because Info.plist and ViewController.m are missing. Do you have the complete project?\n2\\. The keystore password for the Android signing key was not included with the files. Is it available?\n3\\. Should the Chinese video from Youku remain, or may it be removed?\n4\\. For additional languages, should localization cover the full app or only the translated store-listing pages?\n\nOnce the missing-source, signing, video, and localization questions are resolved, I can provide a detailed plan with an exact implementation timeline."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "Source inspection identified approximately 28 MB of duplicate files in the iOS application."
+        }
+      },
+      "evidence_message_ids": [
+        33
+      ],
+      "decision_note": "This is the first concrete iOS binary-bloat observation and is distinct from Android package-size evidence.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+        "event_locator": {
+          "message_id": 33,
+          "event_type": "AMBIGUOUS",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "SCOPE",
+          "description": "It was unresolved whether additional-language localization should cover the full Android application or only translated Google Play listing pages."
+        },
+        "execution": null
+      },
+      "evidence_message_ids": [
+        33
+      ],
+      "decision_note": "Full-app versus store-listing coverage changes where localization applies and is therefore a Scope ambiguity.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+        "event_locator": {
+          "message_id": 35,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "APP_LOCALIZATION",
+            "FULL_APP_CONTENT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        34,
+        35
+      ],
+      "decision_note": "The resolution extends localization to full application content, which is a Scope change rather than an ordinary value attribute.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_FULL_APP_LOCALIZATION",
+        "event_locator": {
+          "message_id": 211,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        211
+      ],
+      "decision_note": "The source says only that application translations are complete and does not identify Android rather than iOS; later supporting messages cannot supply the source's target semantics.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+        "event_locator": {
+          "message_id": 251,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        250,
+        251
+      ],
+      "decision_note": "The source chooses the How-To video's delivery mechanism; that product decision belongs to How-To media delivery rather than directly updating Android size state.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_SOCIAL_MEDIA_LINK_FUNCTIONALITY"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        228,
+        229,
+        230
+      ],
+      "decision_note": "Message 228 requests a general broken-link check but does not itself identify social-media links; message 230 must be reviewed to determine whether the current target and canonical INTRODUCE source are supported.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_HOW_TO_CONTENT_DELIVERY"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        208,
+        239,
+        250,
+        253
+      ],
+      "decision_note": "The supplied evidence does not safely resolve whether the shared streamed video requires localized audio, captions, or language-specific variants after the How-To Requirement is split.",
+      "confidence": "LOW"
+    }
+  ]
+}

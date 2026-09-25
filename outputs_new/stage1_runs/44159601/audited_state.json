@@ -1,0 +1,361 @@
+{
+  "input_sha256": "3fab4e6c8d0e2085879cc92e9d89b827f9aab7512761d5f239b3ec13dca7d29f",
+  "application_version": "ontology_then_events_v1",
+  "inventory": {
+    "run_mode": "REQUIREMENT_DISCOVERY",
+    "sessions": [
+      {
+        "session_id": "S1",
+        "start": null,
+        "end": null,
+        "milestone": null,
+        "phase_label": "Release 3 front-end review scoping and assessment"
+      },
+      {
+        "session_id": "S2",
+        "start": null,
+        "end": null,
+        "milestone": null,
+        "phase_label": "Connector Module reporting follow-up"
+      }
+    ],
+    "requirement_families": [
+      {
+        "family_id": "MULTI_USER_ACCESS",
+        "title": "Multi-User Access"
+      },
+      {
+        "family_id": "MEMBER_METERING",
+        "title": "Member Metering"
+      }
+    ],
+    "requirements": [
+      {
+        "requirement_id": "REQ_MULTI_USER_INVITATION_SENDING",
+        "title": "Multi-User Invitation Sending",
+        "family_id": "MULTI_USER_ACCESS",
+        "definition": "Account owners can initiate and send multi-user invitations through the front end using the available invitation API.",
+        "anchor_message_ids": [
+          21,
+          27
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "BACKEND",
+            "API"
+          ],
+          "contexts": [
+            "MULTI_USER_INVITATION"
+          ]
+        },
+        "boundary_note": "Covers invitation initiation and API invocation only; the invited user's link landing and acceptance path is independently testable and remains separate.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "requirement_id": "REQ_MULTI_USER_INVITATION_ACCEPTANCE",
+        "title": "Multi-User Invitation Acceptance",
+        "family_id": "MULTI_USER_ACCESS",
+        "definition": "An invited user can follow an invitation link to a front-end route where the invitation can be completed.",
+        "anchor_message_ids": [
+          21,
+          27
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND"
+          ],
+          "contexts": [
+            "MULTI_USER_INVITATION"
+          ]
+        },
+        "boundary_note": "The invitation landing and completion path can fail or be implemented independently of invitation sending and member administration.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "requirement_id": "REQ_MULTI_USER_MEMBER_ADMINISTRATION",
+        "title": "Multi-User Member Administration",
+        "family_id": "MULTI_USER_ACCESS",
+        "definition": "The multi-user capability provides backend operations for account owners to list members and revoke or remove their access.",
+        "anchor_message_ids": [
+          21
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "API"
+          ],
+          "contexts": [
+            "MULTI_USER_MEMBERSHIP"
+          ]
+        },
+        "boundary_note": "Member listing, revocation, and removal are provisionally grouped as one administration mechanism because the available evidence mentions them only as a single missing endpoint set and does not define their separate semantics.",
+        "confidence": "LOW"
+      },
+      {
+        "requirement_id": "REQ_INSTANT_CONNECTION_REVOCATION",
+        "title": "Instant Connection Revocation",
+        "family_id": null,
+        "definition": "A disconnect operation immediately revokes access by deleting the corresponding connection record rather than merely returning a successful response.",
+        "anchor_message_ids": [
+          21,
+          27
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "API"
+          ],
+          "contexts": [
+            "CONNECTION_REVOCATION"
+          ]
+        },
+        "boundary_note": "Covers actual connection-record deletion and resulting revocation; the front end's refusal to display false success is supporting execution evidence rather than a separate requirement from the supplied history.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "requirement_id": "REQ_OWNER_MEMBER_USAGE_VISIBILITY",
+        "title": "Owner-Facing Member Usage Visibility",
+        "family_id": "MEMBER_METERING",
+        "definition": "Account owners can access token-consumption and usage-breakdown information for individual members.",
+        "anchor_message_ids": [
+          21
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "BACKEND"
+          ],
+          "contexts": [
+            "ACCOUNT_OWNER_METERING"
+          ]
+        },
+        "boundary_note": "Per-member usage visibility is independently testable from the ability to expose or manage individual usage limits.",
+        "confidence": "MEDIUM"
+      },
+      {
+        "requirement_id": "REQ_OWNER_MEMBER_USAGE_LIMITS",
+        "title": "Owner-Facing Member Usage Limits",
+        "family_id": "MEMBER_METERING",
+        "definition": "Account owners have owner-facing access to individual usage limits for members.",
+        "anchor_message_ids": [
+          21
+        ],
+        "scope_hypothesis": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "BACKEND"
+          ],
+          "contexts": [
+            "ACCOUNT_OWNER_METERING"
+          ]
+        },
+        "boundary_note": "Individual limits are separated from usage reporting because limits can be delivered, changed, or tested without changing consumption visibility.",
+        "confidence": "MEDIUM"
+      }
+    ],
+    "unresolved_candidates": [
+      {
+        "message_ids": [
+          21,
+          26,
+          27
+        ],
+        "description": "Client answers were supplied through Slack but are absent from the observable history, so the Release 3 versus Phase 5 scope of multi-user and owner-facing metering capabilities cannot be reconstructed safely.",
+        "confidence": "LOW"
+      },
+      {
+        "message_ids": [
+          21
+        ],
+        "description": "The available evidence does not establish whether member listing, access revocation, and member removal should remain one administration mechanism or be split into independently evolving Requirements.",
+        "confidence": "LOW"
+      },
+      {
+        "message_ids": [
+          27
+        ],
+        "description": "Wallet is named as confirmed scope, but no observable message defines the intended Wallet behavior well enough to create an atomic Requirement.",
+        "confidence": "LOW"
+      }
+    ]
+  },
+  "events": {
+    "REQ_MULTI_USER_INVITATION_SENDING": [
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "invitation_sending_flow": "The front end invokes POST https://juniper-harbor.example/resource/e0011 to send multi-user invitations."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "SCOPE",
+          "description": "Whether multi-user invitation sending belongs in Release 3 requires a client product decision."
+        },
+        "execution": null
+      }
+    ],
+    "REQ_MULTI_USER_INVITATION_ACCEPTANCE": [
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "SCOPE",
+          "description": "It is unresolved whether the multi-user invitation acceptance path belongs in Release 3."
+        },
+        "execution": null
+      }
+    ],
+    "REQ_MULTI_USER_MEMBER_ADMINISTRATION": [
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "SCOPE",
+          "description": "Whether the multi-user member-administration capability belongs in Release 3 is unresolved in the visible history."
+        },
+        "execution": null
+      }
+    ],
+    "REQ_INSTANT_CONNECTION_REVOCATION": [
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "disconnect_effect": "Immediately revoke access by deleting the corresponding connection record"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "BACKEND",
+            "API"
+          ],
+          "contexts": [
+            "CONNECTION_REVOCATION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The disconnect endpoints returned success without deleting the connection record, so access was not instantly revoked."
+        }
+      }
+    ],
+    "REQ_OWNER_MEMBER_USAGE_VISIBILITY": [
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "SCOPE",
+          "description": "It is unresolved whether owner-facing token-consumption and usage-breakdown visibility belongs in Release 3 or is deferred to Phase 5."
+        },
+        "execution": null
+      }
+    ],
+    "REQ_OWNER_MEMBER_USAGE_LIMITS": [
+      {
+        "source_message": {
+          "message_id": 21,
+          "speaker": "freelancer",
+          "text": "During the front-end review, I identified three scope questions for you, Nadia Solis. All three concern product decisions rather than defects, so they belong to you rather than Elena Marlow.\n\n1\\. Does the multi-user scenario belong in Release 3? Invitation sending exists, but the front end never calls POST https://juniper-harbor.example/resource/e0011, and there is no route for the invitation link. As a result, an invited user has nowhere to land. End-to-end support would also require member-list, revoke and remove endpoints on the backend, none of which currently exist.\n\n2\\. The product description promises “instant access revocation,” yet while #1427 remains open, the disconnect endpoints return success without deleting the connection record. The front end responds correctly by refusing to report success, meaning the current behaviour does not match the claim.\n\n3\\. Per-member metering requirements from Elena Marlow—token consumption by member, usage breakdown and individual limits—exist only in the superadmin console at https://sable-compass.example/resource/e0012. Account owners cannot access any of these capabilities. Was an owner-facing view intended for R3, or has it been deferred to Phase 5?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "SCOPE",
+          "description": "It is unresolved whether account-owner access to individual member usage limits belongs in Release 3 or is deferred to Phase 5."
+        },
+        "execution": null
+      }
+    ]
+  },
+  "human_review": [
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {
+        "requirement_id": "REQ_MULTI_USER_MEMBER_ADMINISTRATION"
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        21
+      ],
+      "decision_note": "Member listing, access revocation, and member removal are independently testable operations, but the available evidence does not define their semantics well enough for a safe split.",
+      "confidence": "LOW"
+    }
+  ],
+  "audit_patch_count": 4
+}

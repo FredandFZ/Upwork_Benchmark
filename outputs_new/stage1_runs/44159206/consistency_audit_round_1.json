@@ -1,0 +1,116 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_UNIT3_BATHROOM_LAYOUT"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_UNIT3_BATHROOM_LAYOUT",
+            "title": "Unit 3 Bathroom Fixture and Spatial Layout",
+            "family_id": "BATHROOM_LAYOUTS"
+          },
+          {
+            "requirement_id": "REQ_UNIT3_BATHROOM_DOOR_CLEARANCE",
+            "title": "Unit 3 Bathroom Door and Clearance",
+            "family_id": "BATHROOM_LAYOUTS"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        29,
+        30,
+        48,
+        74
+      ],
+      "decision_note": "Unit 3 bathroom-door position and clearance can change independently of fixture placement, shower location, and bathroom dimensions; drainage remains under the existing drainage Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_UNIT3_BATHROOM_LAYOUT",
+        "event_locator": {
+          "message_id": 80,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        80
+      ],
+      "decision_note": "The source explicitly enlarges the No1 bathroom, not the Unit 3 bathroom, and the applicable change is already represented under the Unit 1 common-bathroom Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_UNIT1_BATHROOM_DOOR_CLEARANCE"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 81,
+          "speaker": "freelancer",
+          "text": "İçeriye açıldığında kapı lavaboya çarptığı ve yalnızca 82 cmlik alan kaldığı için, kapının mevcut yönünü koruyup hole açılmasını öneriyoruz."
+        },
+        "supporting_message_ids": [
+          80
+        ],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "A dimensional layout check found that the client-selected inward-opening door hits the sink and leaves only 82 cm of space."
+        }
+      },
+      "evidence_message_ids": [
+        80,
+        81
+      ],
+      "decision_note": "This is the first concrete dimensional failure after the client selected the inward-opening configuration; the separate AMBIGUOUS Event records the unresolved design decision.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        74,
+        77,
+        80,
+        81
+      ],
+      "decision_note": "The Unit 1 door sequence is target-specific at the unit level, but the supplied text does not safely establish whether every reference concerns the common bathroom or the ensuite; downstream requirement mapping may require adjudication.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        52,
+        55,
+        56
+      ],
+      "decision_note": "The red-marked shower and subsequent fixture placements may be duplicated or misallocated between the Unit 1 common bathroom and ensuite; the image-dependent evidence does not safely identify which bathroom owns every fixture.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        101
+      ],
+      "decision_note": "The routing evidence indicates a possible missed partition-wall construction change, but the raw source text needed to add and verify the Event is not supplied.",
+      "confidence": "LOW"
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_CODED_REFERRAL_TICKETS",
+    "message_id": 305,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-305 MODIFY already captures the accepted-referral commission amount, trigger, and recipient.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKETS",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing MODIFY captures the recipient and entry count but omits the explicitly stated $900 drawing amount.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "allocation_trigger": "referral is missing or rejected",
+          "recipient_selection": "random NFT owner",
+          "draw_entries_per_missing_or_rejected_referral": 1,
+          "reward_drawing_amount_usd": 900
+        },
+        "value_removals": [
+          "tickets_per_no_referral_mint"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "NO_REFERRAL",
+            "INVALID_REFERRAL",
+            "PRIZE_TICKETS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-305 MODIFY already revises the affected FAQ sections with both conditional reward outcomes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-305 MODIFY already captures the $18 commission, missing-or-rejected trigger, random-owner recipient, and expanded invalid-referral scope.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_HARBOR_QUILL_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The About-page state describes only the prior $900 prize path, while the source establishes distinct $2,000 and $900 drawing outcomes that its mechanics and collection copy must reflect.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "mechanics_topics": [
+            "Mint Your ebook NFT",
+            "Earn Through Referrals",
+            "Accumulate Reward-Drawing Entries",
+            "Win Referral-Dependent Prizes",
+            "Claim Your Rewards"
+          ],
+          "prize_mechanics_content": "Explain that an accepted valid referral gives the chosen referrer a $25 credit and entry into the $2,000 reward drawing, while a missing or rejected referral assigns an $18 commission and a $900 draw entry to a random NFT owner.",
+          "prize_mechanics_copy": "Describe the conditional referral outcomes: accepted referrals enter the chosen referrer into the $2,000 reward drawing, while missing or rejected referrals assign a $900 draw entry to a random NFT owner.",
+          "prize_collection_copy": "Prize collection remains automatic; describe the applicable $2,000 or $900 drawing outcome and wallet notification without one-click redemption-control wording.",
+          "prize_claim_copy": "Prize winners receive the applicable $2,000 or $900 reward automatically in their wallet; the About page must not present a visible or one-click redemption control."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REFERRAL_IDENTITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes referral eligibility and reward allocation, not the token-serial identity, permanence, or display locations of referral codes.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The source changes entry issuance by referral outcome but does not specify expiration, reset, carry-forward, or other lifecycle behavior for the new drawing entries.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes which drawing entry is issued for each referral outcome but does not change the existing $900 mechanism's winner count, prize amount, trigger, eligibility, or pool funding.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The source does not specify a metadata-display change, and the remaining $900 drawing can still use the existing Small Block counter; any replacement metadata for the $2,000 drawing requires another client decision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source restates the already-current pre-checkout NFT eligibility rule and therefore does not change this candidate's state.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_PAGE_CONTENT_LAYOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The landing-page state still mandates a universal $10 commission and $900-entry path, which conflicts with the newly established conditional $25/$2,000 and $18/$900 outcomes.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "referral_reward_copy_requirement": "State that only NFTs confirmed before checkout are valid referrals; an accepted referral gives the chosen referrer a $25 credit and entry into the $2,000 reward drawing, while a missing or rejected referral assigns an $18 commission and a $900 draw entry to a random NFT owner."
+        },
+        "value_removals": [
+          "mechanics_tease_text",
+          "prize_marketing_copy_requirements",
+          "commission_copy_requirement"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_PRICE_REVENUE_SPLIT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The new conditional $25 and $18 referral allocations invalidate the prior universal $10 affiliate commission and the fixed $12/$10/$8 per-mint split, while the source does not establish a complete replacement split.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "accepted_referral_credit_usd_per_mint": 25,
+          "missing_or_rejected_referral_commission_usd_per_mint": 18
+        },
+        "value_removals": [
+          "affiliate_commission_usd_per_mint",
+          "founder_share_usd_per_mint",
+          "prize_pool_destinations",
+          "prize_pool_share_usd_per_mint"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

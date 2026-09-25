@@ -1,0 +1,462 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": "2026-07-15",
+      "end": "2026-07-31",
+      "milestone": null,
+      "phase_label": "BigQuery dashboard migration, metric completion, and validation"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "DATA_SOURCE_CONFIGURATION",
+      "title": "Dashboard Data-Source Configuration"
+    },
+    {
+      "family_id": "DASHBOARD_METRICS",
+      "title": "Dashboard Metrics and Dimensions"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_JUNIPER_PRIMARY_SOURCE_REPLACEMENT",
+      "title": "Juniper Tide Primary Source Replacement",
+      "family_id": "DATA_SOURCE_CONFIGURATION",
+      "definition": "Replace the obsolete Juniper Tide Funnel Metrics COMPLETE source with JuniperTide_DataStudio_metrics for dashboard content belonging to the primary source.",
+      "anchor_message_ids": [
+        16,
+        22,
+        24,
+        87
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATABASE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Covers only the primary-source replacement; retention of auxiliary sources, individual metric behavior, and the hidden Impact page are independently changeable Requirements.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_JUNIPER_AUXILIARY_SOURCE_RETENTION",
+      "title": "Retain Juniper Tide Auxiliary Sources",
+      "family_id": "DATA_SOURCE_CONFIGURATION",
+      "definition": "Keep the Juniper Tide data sources other than the specifically replaced Funnel Metrics COMPLETE source available where their data remains needed.",
+      "anchor_message_ids": [
+        20,
+        22,
+        23,
+        27
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATABASE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Separated from primary-source replacement because the client explicitly removes one source while retaining the others, and either rule could change independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_HARBORPAWS_PRIMARY_SOURCE_REPLACEMENT",
+      "title": "HarborPaws Primary Source Replacement",
+      "family_id": "DATA_SOURCE_CONFIGURATION",
+      "definition": "Connect applicable HarborPaws dashboard content to HarborPaws_DataStudio_Metrics and remove the superseded primary source.",
+      "anchor_message_ids": [
+        37,
+        39,
+        82,
+        86
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATABASE"
+        ],
+        "contexts": [
+          "HARBORPAWS_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Covers HarborPaws primary-source replacement, excluding the independently specified routing of order-level metrics through another connector.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_HARBORPAWS_ORDER_LEVEL_SOURCE_ROUTING",
+      "title": "HarborPaws Order-Level Source Routing",
+      "family_id": "DATA_SOURCE_CONFIGURATION",
+      "definition": "Obtain HarborPaws order-level metrics from the designated separate connector rather than assuming they belong to the primary HarborPaws source.",
+      "anchor_message_ids": [
+        71,
+        72,
+        74,
+        75
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATABASE"
+        ],
+        "contexts": [
+          "HARBORPAWS_DASHBOARD",
+          "ORDER_LEVEL_METRICS"
+        ]
+      },
+      "boundary_note": "This source-routing exception can be implemented or changed independently of the HarborPaws primary-source replacement and individual metric definitions.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_GROSS_SALES_ACCURACY",
+      "title": "Gross Sales Accuracy",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "The Juniper Tide BigQuery-backed gross sales figure must match the corresponding source figure when evaluated with the applicable date range.",
+      "anchor_message_ids": [
+        30,
+        31,
+        32
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATABASE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Gross sales is independently testable and is therefore separate from gross revenue, even though both were investigated in the same exchange.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_GROSS_REVENUE_ACCURACY",
+      "title": "Gross Revenue Accuracy",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "The Juniper Tide BigQuery-backed gross revenue figure must match the corresponding source figure when evaluated with the applicable date range.",
+      "anchor_message_ids": [
+        30,
+        31,
+        32
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATABASE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Gross revenue has its own observable value and acceptance criterion, so it remains separate from gross sales accuracy.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_MAIN_DASHBOARD_AUTOMATIC_DATE_RANGE",
+      "title": "Automatic Main-Dashboard Date Range",
+      "family_id": null,
+      "definition": "Automatically apply the intended date range on the main dashboard so its displayed metrics use the correct reporting period.",
+      "anchor_message_ids": [
+        32,
+        33
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "UI_UX"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "The automatic filter is a distinct dashboard behavior rather than an attribute of any single metric.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_TOTAL_ORDERS_METRIC",
+      "title": "Total Orders Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide the total Shopify order count required by the dashboard reports, including access through the appropriate source for each dashboard.",
+      "anchor_message_ids": [
+        40,
+        41,
+        45,
+        46,
+        48,
+        74
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD",
+          "HARBORPAWS_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Represents one metric definition across supported dashboard contexts; the different HarborPaws connector path belongs to the separate source-routing Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_GOOGLE_ADS_SPEND_METRIC",
+      "title": "Google Ads Spend Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide a distinct Google Ads spend amount for the Juniper Tide dashboard.",
+      "anchor_message_ids": [
+        49,
+        51,
+        53
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD",
+          "GOOGLE_ADS"
+        ]
+      },
+      "boundary_note": "Separated from Facebook Ads spend because each channel has an independently observable metric and can fail or change separately.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_FACEBOOK_ADS_SPEND_METRIC",
+      "title": "Facebook Ads Spend Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide a distinct Facebook Ads spend amount for the Juniper Tide dashboard.",
+      "anchor_message_ids": [
+        50,
+        51,
+        53
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD",
+          "FACEBOOK_ADS"
+        ]
+      },
+      "boundary_note": "Separated from Google Ads spend because each channel has an independently observable metric and can fail or change separately.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_RETURNING_CUSTOMER_ORDERS_METRIC",
+      "title": "Returning-Customer Orders Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide the returning-customer order count needed by the dashboard.",
+      "anchor_message_ids": [
+        55,
+        61,
+        64,
+        65
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "This metric can be added, removed, or validated independently of total orders and items sold.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_ITEMS_SOLD_METRIC",
+      "title": "Items Sold Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide the sold-item quantity needed by the dashboard.",
+      "anchor_message_ids": [
+        56,
+        61,
+        64,
+        65
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Item quantity has an independent value and acceptance criterion and is not merely an attribute of the returning-customer order metric.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_NET_PROFIT_MARGIN_METRIC",
+      "title": "Net Profit Margin Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Display net profit margin as a dashboard metric when required.",
+      "anchor_message_ids": [
+        57,
+        61,
+        62
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Retained as a historical Requirement because it was requested and then explicitly removed; it is separate from Total COGS despite their shared removal message.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_TOTAL_COGS_METRIC",
+      "title": "Total COGS Metric",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Display total cost of goods sold as a dashboard metric when required.",
+      "anchor_message_ids": [
+        58,
+        61,
+        62
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "Retained as a historical Requirement because it was requested and then explicitly removed; it remains distinct from net profit margin.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_SHIPPING_CITY_DIMENSION",
+      "title": "Shipping City Dimension",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Make the shipping-city field available for dashboard reporting and geographic breakdowns.",
+      "anchor_message_ids": [
+        59,
+        63
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD"
+        ]
+      },
+      "boundary_note": "City is a report dimension with its own availability criterion, not an attribute of an order-count metric.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_CUSTOMER_ID_DIMENSION",
+      "title": "Customer ID Dimension",
+      "family_id": "DASHBOARD_METRICS",
+      "definition": "Provide customer ID in the dashboard data so customer counts can be calculated.",
+      "anchor_message_ids": [
+        67,
+        69,
+        70
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "DATA_SOURCE"
+        ],
+        "contexts": [
+          "JUNIPER_TIDE_DASHBOARD",
+          "CUSTOMER_COUNT"
+        ]
+      },
+      "boundary_note": "Customer ID is an independently requested data dimension whose purpose is customer counting; refresh timing is implementation status rather than a separate Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "requirement_id": "REQ_IMPACT_PAGE_DISABLED",
+      "title": "Keep Impact Page Disabled",
+      "family_id": "DATA_SOURCE_CONFIGURATION",
+      "definition": "Keep the Impact page hidden and switched off, without migrating that page to the BigQuery data source.",
+      "anchor_message_ids": [
+        90,
+        91
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "DASHBOARD",
+          "UI_UX",
+          "DATABASE"
+        ],
+        "contexts": [
+          "IMPACT_PAGE"
+        ]
+      },
+      "boundary_note": "The hidden state and migration exclusion are tightly coupled in the client's explicit decision; this exception can evolve independently of the active dashboard pages.",
+      "confidence": "HIGH"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        20,
+        25,
+        27,
+        28,
+        29
+      ],
+      "description": "The text establishes that Juniper Tide does not simply replace every source, but the unavailable guidance video may contain page- or chart-level source mappings that cannot be recovered from the supplied messages.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "message_ids": [
+        71,
+        72,
+        73,
+        74,
+        75,
+        78
+      ],
+      "description": "HarborPaws is said to lack most of a prior metric list, but the exchange does not identify every missing metric precisely enough to extend each named metric Requirement to HarborPaws safely.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        85,
+        86,
+        87,
+        89
+      ],
+      "description": "The client reports that unspecified fields did not update correctly after source changes; the affected fields cannot be mapped safely to individual metric Requirements from the supplied evidence.",
+      "confidence": "LOW"
+    }
+  ]
+}

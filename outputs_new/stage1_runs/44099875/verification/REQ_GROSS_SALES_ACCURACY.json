@@ -1,0 +1,65 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_GROSS_SALES_ACCURACY",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 30,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        30
+      ],
+      "decision_note": "The reported mismatch establishes the implementation-relevant accuracy rule that the BigQuery-backed gross-sales figure must match its source figure.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 30,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        30
+      ],
+      "decision_note": "First concrete failure: testing showed that the BigQuery gross-sales figure did not match the source figure.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 32,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        30,
+        32
+      ],
+      "decision_note": "The client establishes the selected date range as an implementation-relevant condition for accurately comparing the dashboard gross-sales figures; replacing the existing accuracy_rule leaves no stale key.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 32,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        30,
+        32
+      ],
+      "decision_note": "First concrete verification after the apparent failure: the client confirms that the figures match when the applicable date range is selected.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

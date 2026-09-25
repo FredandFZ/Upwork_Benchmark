@@ -1,0 +1,206 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_BLOG_CONTENT_SPECIFICATIONS"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_BLOG_CONTENT_SPECIFICATIONS",
+            "title": "Blog Word-Count Specification",
+            "family_id": "BLOG_CONTENT"
+          },
+          {
+            "requirement_id": "REQ_BLOG_AUDIENCE_TARGETING",
+            "title": "Blog Audience Targeting",
+            "family_id": "BLOG_CONTENT"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        191,
+        207
+      ],
+      "decision_note": "The AI-dolls audience constraint and the all-blog word-count target apply to different contexts and can be modified and evaluated independently.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_BACKLINK_INDEXING"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_BACKLINK_INDEXING",
+            "title": "Backlink Index Submission and Remediation",
+            "family_id": "OFF_PAGE_SEO"
+          },
+          {
+            "requirement_id": "REQ_BACKLINK_INDEX_STATUS_REPORT",
+            "title": "Backlink Index Status Report",
+            "family_id": "OFF_PAGE_SEO"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        253,
+        254,
+        275,
+        319,
+        324,
+        325,
+        333
+      ],
+      "decision_note": "Index submission and re-submission have a separate trajectory from delivery and review of the indexing-status report; message 325 verifies the report while also showing indexing failures requiring remediation.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_UNINDEXED_BACKLINK_REPLACEMENT_POLICY",
+        "title": "Unindexed Backlink Replacement Policy",
+        "family_id": "OFF_PAGE_SEO",
+        "definition": "Determine the policy for replacing campaign backlinks that remain unindexed after the stated waiting period.",
+        "anchor_message_ids": [
+          325
+        ]
+      },
+      "evidence_message_ids": [
+        325
+      ],
+      "decision_note": "The client raises an unresolved replacement policy that can evolve independently from index submission, re-submission, and status reporting.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_GUEST_POSTING",
+        "event_locator": {
+          "message_id": 40,
+          "event_type": "DEFER",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        39,
+        40
+      ],
+      "decision_note": "The source confirms inclusion of blogs in the trial but does not identify guest posting or explicitly defer it.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        8,
+        18,
+        21,
+        39,
+        40,
+        47,
+        48
+      ],
+      "decision_note": "Review whether REQ_GUEST_POSTING represents a real delivery Requirement: the visible messages clearly include guest posts in the planning artifact but do not safely establish an agreed guest-post delivery obligation or its removal.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CAMPUS_LAUNCH_PAGE_OPTIMIZATION",
+        "event_locator": {
+          "message_id": 281,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "target_page": "Campus Launch sale page",
+          "editing_interface": "Shopify backend > Apps > Smart Landing Page"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "WEBSITE",
+            "CONTENT",
+            "SEO"
+          ],
+          "contexts": [
+            "CAMPUS_LAUNCH_PAGE"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        281
+      ],
+      "decision_note": "The source creates a one-off page-editing obligation and specifies its editing interface; the assigned implementation actor is staffing information rather than Requirement state.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CAMPUS_LAUNCH_PAGE_OPTIMIZATION",
+        "event_locator": {
+          "message_id": 296,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        281,
+        296
+      ],
+      "decision_note": "Missing app permission is an implementation-access blocker, not an observed failure of the required Campus Launch page changes.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CAMPUS_LAUNCH_PAGE_OPTIMIZATION",
+        "event_locator": {
+          "message_id": 297,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        296,
+        297
+      ],
+      "decision_note": "The message reallocates implementation and hand-off responsibilities but does not change the required page behavior or content outcome.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_SITEMAP_CONFIGURATION",
+        "event_locator": {
+          "message_id": 312,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        307,
+        310,
+        312
+      ],
+      "decision_note": "This retrospective fix statement adds no lifecycle transition after the sitemap was already claimed complete and concretely verified as processed without errors.",
+      "confidence": "HIGH"
+    }
+  ]
+}

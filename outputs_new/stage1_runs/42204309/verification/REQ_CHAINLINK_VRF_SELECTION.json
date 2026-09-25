@@ -1,0 +1,123 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_CHAINLINK_VRF_SELECTION",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 27,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        27
+      ],
+      "decision_note": "Target-specific initial claim that VRF was implemented in the Base testnet smart-contract system; no concrete VRF test supports runtime verification.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 143,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "randomness_provider": "Chainlink VRF",
+          "selection_execution": "fully on-chain",
+          "fairness": "provably fair",
+          "verification_surface": "Basescan",
+          "applicable_draws": [
+            "SMALL_BLOCK",
+            "BIG_BLOCK"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "SMART_CONTRACT"
+          ],
+          "contexts": [
+            "PRIZE_SYSTEM",
+            "RANDOM_SELECTION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        143
+      ],
+      "decision_note": "The client establishes on-chain Chainlink VRF selection and Basescan verification for both prize draws; BACKEND scope is not established by this source.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 195,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        143,
+        195
+      ],
+      "decision_note": "Removing Big Block necessarily narrows the configured VRF draw applicability to Small Block without leaving a stale top-level attribute.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 308,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        307,
+        308
+      ],
+      "decision_note": "Target-specific implementation claim that the weighted-recipient path uses VRF to select among verified NFTs.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 504,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        494,
+        504
+      ],
+      "decision_note": "The client reports completion of the target-specific Chainlink consumer configuration for the replacement contract.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 733,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        588,
+        634,
+        732,
+        733,
+        735
+      ],
+      "decision_note": "First concrete verification of the no-referral VRF path: a completed transaction selected a random recipient whose wallet was subsequently identified.",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "missing_event_candidates": []
+}

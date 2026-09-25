@@ -217,8 +217,7 @@ G_r(t)=\operatorname{Replay}\bigl(E_r^{\leq t}\bigr),
 \label{eq:event-replay}
 \end{equation}
 where $E_r^{\leq t}$ is the event prefix up to time $t$, and
-$T$ implements the transition rules described in
-Section~\ref{sec:construction}.
+$T$ implements the transition rules specified in the appendix.
 The event vocabulary distinguishes requirement changes
 (\texttt{INTRODUCE}, \texttt{MODIFY}, \texttt{DEFER},
 \texttt{RESUME}, and \texttt{REMOVE}), uncertainty
@@ -326,7 +325,7 @@ throughout evaluation.
 The protocol therefore evaluates the frozen requirement predictions
 and final repository correctness separately.
 
-\begin{table}[b]
+\begin{table}[t]
 \caption{The four evaluation stages. C1 is Full History and C2 is
 Oracle Relevant History. RQ4 applies only to eligible targets.}
 \label{tab:evaluation-stages}
@@ -384,335 +383,69 @@ evaluation sequence:
 \section{ReqMemBench Construction}
 \label{sec:construction}
 
-ReqMemBench converts longitudinal project records into temporal
-requirement-state graphs, selects intermediate takeover points,
-and constructs evaluation instances under C1 and C2.
-We track the provenance of project histories, requirement
-annotations, and code environments separately.
-Gold annotations and hidden validators remain outside the agent
-workspace; the pre-task repository becomes available only when
-a run enters Phase B.
+ReqMemBench turns longitudinal project records into takeover tasks whose governing requirements can be reconstructed and tested. Construction proceeds from the project timeline to reviewed Requirement Events, from those Events to temporal Requirement States, and finally from selected takeover points to paired agent inputs and gold targets. Figure~\ref{fig:pipeline} summarizes this process. The definitions in Section~\ref{sec:formulation} determine what each instance must contain; the construction pipeline makes those objects recoverable from project evidence.
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
 \fbox{%
-\begin{minipage}{0.90\linewidth}
+\begin{minipage}{0.91\linewidth}
 \centering
 \small
-\textbf{Construction pipeline (placeholder)}
-\par\medskip
-
-Project source material
-$\rightarrow$ privacy-preserving history construction
-$\rightarrow$ reviewed Requirement Events
-$\rightarrow$ deterministic replay
-$\rightarrow$ temporal requirement-state graphs
-\par\medskip
-
-Target selection at $t^*$
-$\rightarrow$ task-local gold targets
-$\rightarrow$ evaluation instances under C1 and C2
-\par\medskip
-
-\textbf{Code environments, when available}
+Project records $\rightarrow$ reviewed Requirement Events
+$\rightarrow$ deterministic replay $\rightarrow$ temporal State Graph\\
+$\rightarrow$ target selection $\rightarrow$ task-local gold
+$\rightarrow$ C1/C2 instances
 \par\smallskip
-Project artifacts
-$\rightarrow$ recovered pre-task snapshots
-\par\smallskip
-Available project artifacts $+$ pre-task project state
-$G_P(t^{*-})$
-$\rightarrow$ reconstructed pre-task environments
-\par\medskip
-
-\emph{Responsibilities: model-assisted candidate extraction;
-human review and adjudication; deterministic validation,
-event replay, and instance construction.}
-\par\medskip
-
-\emph{The final figure will mark the temporal cutoff at $t^*$,
-connect code environments to executable instances, and distinguish
-agent-visible inputs in each phase from hidden gold annotations
-and validators.}
-\end{minipage}%
-}
-\caption{ReqMemBench construction from project source material
-to takeover evaluation instances, with separately tracked
-provenance for histories, annotations, and code environments.}
+\footnotesize
+Model-assisted proposals \(\mid\) deterministic validation and replay
+\(\mid\) human review
+\end{minipage}}
+\caption{ReqMemBench converts longitudinal project records into evidence-linked Requirement States and leakage-controlled takeover instances.}
 \label{fig:pipeline}
 \end{figure}
 
-\subsection{Data and Temporal Requirement Graph Construction}
+\subsection{Temporal Requirement Graph Construction}
 
-\paragraph{Project provenance and privacy transformation.}
-ReqMemBench draws on records from real software projects conducted
-through Upwork, including project descriptions, deliverables,
-other available artifacts, and conversations between clients
-and freelancers.
-All conversations used in the annotation pipeline undergo
-privacy-preserving rewriting and are not verbatim platform
-transcripts.
-The transformation replaces or removes direct identifiers,
-private links, account information, credentials, and
-project-specific entities. It is designed to preserve requirement
-content, decisions, negations, temporal order, cross-message
-revisions, and reported execution outcomes.
-Replacements are planned consistently at the project level,
-checked against the source meaning, and subjected to a final
-privacy audit.
-A conversation is withheld if any message retains an unresolved
-privacy concern.
-The resulting histories also contain a subset of role-played
-messages.
+Construction begins with longitudinal records of real freelance software projects. We transform the project histories to protect participant privacy while preserving the order and meaning of requirement changes. When an exact historical message or executable environment is unavailable, we reconstruct it from the surviving project evidence and the requirement state at the corresponding time. Instance-level provenance distinguishes transformed records, reconstructed messages, recovered environments, and reconstructed environments. The Ethics Statement and Data Card specify the authorization, transformation, and release procedures for these records.
 
-Code provenance is tracked separately from conversation provenance.
-Available project artifacts provide evidence about the implemented
-system and its toolchain.
-When an exact executable snapshot immediately before a target
-is unavailable, we reconstruct a pre-task code environment using
-the available artifacts and the annotated pre-task project state
-$G_P(t^{*-})$.
-Each reconstructed environment is aligned with its target boundary
-and checked for reproducibility and consistency with pre-task
-evidence.
-Researcher-side metadata distinguish recovered artifacts from
-reconstructed environments.
-A reconstructed environment is not treated as an observed
-historical repository snapshot.
-\placeholder{TODO: report final project and message counts;
-describe the role-play procedure and its relationship to source
-records, quantify affected messages and tasks, and state whether
-it introduces or changes requirement events or ambiguities.
-Report counts of recovered and reconstructed target-aligned
-environments, and specify reconstruction inputs, temporal
-filtering, and reproducibility and consistency checks.}
+The transformed timeline is then converted into the representation defined in Section~\ref{sec:formulation}. A model first proposes Requirement Atoms, state-changing Events, and links from each Event to its supporting messages. Schema checks reject malformed objects and broken references, after which human review resolves semantic errors and freezes the accepted annotations. Deterministic replay applies the reviewed Events in project order to obtain the state of every Requirement Atom after each change. An invalid transition stops replay instead of being repaired by another model call, and each resulting state retains the evidence from which it was derived. The complete annotation schema and transition rules appear in the appendix.
+\placeholder{TODO: report frozen project and message counts and the proportions of transformed histories, reconstructed messages, recovered code environments, and reconstructed code environments.}
 
-\paragraph{Requirement-event annotation.}
-The transformed histories are converted into temporal requirement
-graphs in two stages.
-In Stage 1, semantically related requirements are organized into
-optional Requirement Families and segmented into Requirement
-Atoms, each with its own lifecycle.
-State-changing evidence is then annotated using nine event types:
-\[
-\begin{aligned}
-\mathcal{E}=\{&
-\texttt{INTRODUCE},\texttt{MODIFY},\texttt{DEFER},
-\texttt{RESUME},\texttt{REMOVE},\texttt{AMBIGUOUS},\\
-&\texttt{IMPLEMENTATION\_CLAIM},\texttt{RUNTIME\_FAILURE},
-\texttt{RUNTIME\_VERIFICATION}\}.
-\end{aligned}
-\]
-Each event identifies its owning atom and an evidence-bearing
-message in the transformed history, records the message's
-normalized position, and specifies the payload needed to update
-attributes, lifecycle, scope, ambiguity, or implementation evidence.
-\texttt{CLARIFY} is an agent decision in RQ3.
-Ambiguity resolution is represented by an eligible later
-state-changing event that references the ambiguity it resolves;
-the vocabulary does not include a separate \texttt{RESOLVE} event.
-Model-assisted extraction proposes families, atoms, events, and
-evidence links. Schema checks, cross-reference validation, and
-human review determine which candidates enter the canonical
-annotation.
+\subsection{Takeover Instance Construction}
 
-\paragraph{Deterministic replay and state graphs.}
-Stage 2 takes the validated event sequence as canonical input
-without reinterpreting the conversation.
-For each atom, it applies the transition function in
-Equation~\ref{eq:event-replay}, following normalized message order
-and the validated order of events within each message.
-Graph nodes record the five-dimensional states defined in
-Equation~\ref{eq:requirement-state}, and edges record the events
-responsible for transitions.
-Supporting-event references are updated alongside state fields,
-preserving links to their historical evidence.
-Schema violations, invalid transitions, and unresolved
-cross-references cause validation failure rather than
-model-based repair.
-The atom-level trajectories are combined into a project graph
-that supports state reconstruction at multiple takeover times.
-Removed requirements remain represented with lifecycle
-\texttt{REMOVED}.
-\placeholder{TODO: specify initialization of $G_r^{(0)}$,
-validation of within-message event order, and the event types
-and conditions permitted to resolve ambiguities.}
-\subsection{Takeover Instance Construction and History Conditions}
+The temporal graph becomes a benchmark instance only at a task that both depends on earlier project context and produces a verifiable Requirement transition. All changes requested in the same client message remain within one takeover task. We exclude context-free introductions and messages that provide implementation evidence without changing a requirement. The remaining candidates pass through a fixed historical-dependence and requirement-evolution rubric, followed by human review for borderline cases. The appendix gives the rubric, threshold, and candidate flow.
 
-\paragraph{Selecting takeover points.}
-Each target candidate corresponds to one client message and
-includes all events it triggers, keeping a multi-requirement
-request within one takeover task.
-The candidate pool prioritizes state-changing messages involving
-modification, removal, deferral, resumption, ambiguity, or
-ambiguity resolution.
-Messages containing \texttt{INTRODUCE} events may also qualify
-when interpreting the request requires prior project context.
-Initial context-free introductions and messages containing only
-implementation evidence are excluded by default.
-Candidate packets contain the current message, its triggered
-events, the affected atoms' pre-task states and earlier
-trajectories, and their supporting historical evidence.
-They exclude later messages and states supported by later evidence.
+For an accepted target, deterministic replay is stopped immediately before the target and resumed through the target message. These two boundaries yield the pre-task and post-task states defined in Section~\ref{sec:formulation}. Although the graph retains the complete project state, the instance contains the task-local projection over affected Requirements. A Requirement introduced by the target therefore appears only in the post-task state, whereas a removed Requirement remains in the projection with lifecycle \texttt{REMOVED}. This alignment produces the gold objects used to evaluate historical selection, state reconstruction, and update-or-clarify decisions.
 
-A structured model assessment assigns categorical ratings for
-historical dependency, requirement evolution, reconstruction risk,
-ambiguity-decision value, and multi-requirement value.
-A fixed scoring rule maps these ratings to a selection score.
-Retained candidates must satisfy the development-task and
-historical-dependency criteria.
-They enter through threshold-based selection or human review,
-with the admission route recorded for each target.
-Code assigns stable IDs, preserves message and event order,
-groups events by message, and computes selection scores.
-Gold states are derived through deterministic replay of the
-validated semantic annotations.
-\placeholder{TODO: report the rating rubric, score mapping,
-selection threshold, and human-review policy, including which
-scoring conditions human review may override. Report candidate,
-accepted, rejected, and add-back counts.}
+We materialize each target with Full History and Oracle Relevant History. Full History preserves every admissible message before the target. Oracle Relevant History preserves message order but retains only the trajectories and contextual evidence needed to recover the same pre-task state and interpret the current request. During Phase A, the agent receives the current task and one of these two histories. Gold annotations, internal identifiers, future messages, repository artifacts, and validators remain outside its workspace. The Phase-A response is frozen before any repository is mounted. For an RQ4-eligible target, an agent that chooses \texttt{ACT} then receives a fresh copy of the same pre-task repository under both history conditions; the hidden validator remains external to the execution workspace. Consequently, the visible history is the only intended difference between the paired conditions. The appendix specifies the serialized instance schema and the checks that enforce this separation.
+\placeholder{TODO: report accepted and rejected targets, C1/C2 instance counts, and RQ4 candidate, environment, eligibility, and exclusion counts.}
 
-\paragraph{Gold boundaries and task-local projections.}
-Let $E_P$ denote the validated project event sequence.
-For a selected target $q_{t^*}$, the pre-task gold state uses
-only events anchored to messages strictly before the target.
-The post-task gold state additionally incorporates the target
-message's events in their validated order:
-\[
-G_P(t^{*-})=\operatorname{Replay}(E_P^{<t^*}),
-\qquad
-G_P(t^{*+})=\operatorname{Replay}(E_P^{\leq t^*}).
-\]
-These prefixes are defined by source-message order.
-The post-task boundary includes the current request but excludes
-subsequent execution outcomes.
-An atom first introduced by the target has no pre-task state.
-An atom removed by the target remains in the post-task graph
-with lifecycle \texttt{REMOVED}.
-Construction stores complete project states at both boundaries
-and derives the task-local projections in
-Equations~\ref{eq:pre-task-gold} and~\ref{eq:post-task-gold}.
-Gold is thus derived from the canonical event history before
-constructing the agent-facing history conditions.
+\subsection{Curation Validity and Benchmark Statistics}
 
-\paragraph{RQ-specific construction.}
-The instance constructor combines four researcher-side sources:
-the target and its pre/post state references, the project state
-graph, the transformed pre-target conversation, and, for RQ4
-candidates, a target-aligned code environment.
-RQ applicability follows deterministic rules rather than
-model-generated RQ tags.
-A target enters RQ1 and RQ2 when it directly affects at least
-one atom that existed before takeover.
-It enters RQ3 when it induces an evidence-supported
-requirement-state transition, including a change to unresolved
-ambiguity.
-It becomes an RQ4 candidate only when such a transition has
-a matching pre-task code environment.
+Validity checks follow the same boundaries as construction. Code validates schemas, references, event order, and deterministic replay, while human reviewers decide the semantic content of Requirement Events and ambiguity-sensitive gold. The annotation audit draws a stratified sample of at least 200 state transitions. A human reviewer and two independent LLM assessors label each sampled transition under the same annotation scheme; raw agreement and a coefficient matched to the final rater design quantify consistency. Disagreements are adjudicated before the benchmark snapshot is frozen. This annotation audit is distinct from calibrating the RQ1 semantic judge, adjudicating RQ3 decisions, and validating RQ4 repositories.
 
-RQ1 gold contains the directly affected historical atoms and
-deterministically derived evidence groups supporting their
-pre-task state fields.
-RQ2 gold contains the pre-task states of those historical atoms.
-Atoms introduced by the target are recorded separately and
-receive no pre-task state.
-RQ3 gold specifies either the complete post-task states of all
-affected atoms or the material blockers and corresponding
-clarification questions.
-C1 and C2 share the same frozen RQ3 branch and semantic gold.
-An RQ4 candidate becomes eligible only when its RQ3 gold decision
-is \texttt{ACT}, its pre-task environment is reproducibly
-executable, the target has locally observable acceptance criteria,
-the hidden validator has been reviewed and calibrated, and
-repository-leakage checks pass.
+A separate audit tests whether Oracle Relevant History preserves the information needed for evaluation. Its messages must form an ordered subsequence of Full History and support the same pre-task state and RQ3 gold decision. If the two views yield different gold interpretations, the oracle subset is corrected; targets that cannot be repaired without adding unavailable evidence are excluded. This prevents curation errors from appearing as an experimental effect of history selection.
 
-\paragraph{History conditions and leakage control.}
-Each instance draws from a common pool of transformed messages
-strictly before the target.
-C1 exposes the entire pool as Full History.
-C2 exposes an order-preserving Oracle Relevant History containing
-the affected atoms' trajectories and the contextual messages
-needed to interpret them.
-This subsequence is audited for sufficiency with respect to the
-shared RQ2 and RQ3 gold targets, retaining superseded statements
-when needed to interpret requirement evolution.
-RQ1 is scored only under C1 because C2 is constructed using
-the gold relevant-atom set and would expose the selection answer.
-RQ2 and RQ3 use both conditions, and eligible RQ4 runs retain
-their condition-specific history.
-No-History is not included.
-
-The materializer combines the applicable researcher-side RQ views
-into one logical run for each target--condition pair.
-Phase A exposes only the target task, selected history, common
-instructions, and response schema.
-It withholds condition labels, RQ eligibility, internal
-Requirement/Event/State identifiers, gold annotations,
-code environments, validators, and future information.
-After the structured Phase-A response is frozen and hashed,
-a run enters Phase B only if its target is RQ4-eligible and its
-frozen response is parseable with decision \texttt{ACT}.
-The runner provides a fresh copy of the target-aligned pre-task
-repository, including a reconstructed environment where
-applicable, together with a read-only copy of the frozen response.
-C1 and C2 use the same initial repository hash for each target.
-Modified repositories are never reused across runs, and the
-hidden validator executes outside the agent workspace.
-These controls preserve the history-only responses for separate
-evaluation alongside the final repositories.
-\placeholder{TODO: report RQ1--RQ4 instance counts by condition,
-with separate counts of RQ4 candidates, available code
-environments, eligible targets, and exclusions by reason.}
-
-\subsection{Annotation Quality and Benchmark Statistics}
-
-\paragraph{Annotation and quality control.}
-The final description will separate the following responsibilities:
-\begin{itemize}
-    \item \textbf{Language-model assistance:} propose requirement families, atoms, events, source evidence, or candidate target times, with all outputs treated as candidates subject to validation and review.
-    \item \textbf{Deterministic processing:} sort events, validate schemas, replay events, generate states, join histories, code, and targets, test consistency, detect future leakage, and reject impossible transitions.
-    \item \textbf{Human review:} apply stage-specific review. RQ1 uses deterministic gold and calibrated semantic alignment. RQ2 requires typed-field and comparator review. RQ3 requires two independent reviewers plus adjudication. RQ4 requires acceptance-criterion and hidden-validator review and calibration.
-    \item \textbf{Evidence retention:} trace each event and transition to source evidence and a temporal-order anchor.
-    \item \textbf{Quality reporting:} report the review sample, annotator count, training and frozen guidelines, adjudication, field-level agreement, and suitable agreement statistics.
-\end{itemize}
-A generic agreement sample will not be presented as validation for all four RQs. Any retained audit of 200 state-change steps will be reported only for the construction fields it examines, separately from RQ1 judge calibration, RQ3 gold adjudication, and RQ4 validator calibration.
-\placeholder{TODO: insert the actual annotation workflow, review scale, agreement results, error-correction procedure, and scorer/judge calibration.}
-
-\paragraph{Curation-validity checks.}
-Requirement determinacy will be reported separately for each construction layer. Stage-1 and state-graph audits test event and transition consistency, RQ2 review freezes typed fields and comparators, RQ3 uses independent review and adjudication, and RQ4 validates acceptance criteria and hidden tests against the pre-task repository, reference solution, and applicable partial deliveries. Oracle-history sufficiency will verify that C2 is an ordered subsequence of C1 and preserves every message needed to determine the same RQ2 pre-task state and RQ3 gold branch. A C1/C2 gold disagreement indicates missing oracle evidence or a gold-review error, not a condition effect.
-
-\paragraph{Benchmark statistics.}
-Table~\ref{tab:statistics} will report totals with appropriate means, medians, ranges, or quantiles.
-\begin{table}[t]
-\caption{Planned ReqMemBench statistics. Reported construction counts remain provisional until regenerated from a frozen dataset snapshot.}
+\begin{table}[h]
+\caption{ReqMemBench corpus statistics at the current construction snapshot. Evaluation counts are finalized after annotation review and eligibility checks.}
 \label{tab:statistics}
 \centering
 \small
-\begin{tabular}{@{}p{0.65in}p{3.15in}p{1.05in}@{}}
+\begin{tabular}{@{}p{0.70in}p{2.35in}p{1.00in}@{}}
 \toprule
-Level & Required statistics & Current snapshot \\
+Level & Main-text statistic & Current snapshot \\
 \midrule
-Project & Count, provenance, duration, messages, history length, and repository recoverability & 51 projects \\
-Requirement & Families, atoms, requirements per project, and populated dimensions & 859 atoms \\
-Event & Count, type distribution, events per requirement, and transitions & 2,793 events \\
-Task & Count, source projects, affected requirements, target position, and history length & 210 tasks; 39 projects \\
-RQ/\allowbreak condition & Constructed, reviewed, eligible, and evaluated instances for RQ1--RQ4 under C1/C2 & \placeholder{TBD} \\
-Difficulty & Short, medium, and long counts by project and RQ & \placeholder{TBD} \\
+Project & Projects & 51 \\
+Requirement & Requirement Atoms & 859 \\
+Event & Requirement Events & 2,793 \\
+Task & Takeover tasks and source projects & 210 tasks; 39 projects \\
+Evaluation & Reviewed/eligible instances by RQ and condition & \placeholder{TBD} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
-\begin{center}
-\fbox{\begin{minipage}{0.90\linewidth}
-\centering
-\textbf{Figure 3 placeholder: benchmark distributions}\\[0.5em]
-Project duration and history length; requirements per project; events per requirement; target positions; affected requirements; and RQ/condition/difficulty coverage.
-\end{minipage}}
-\end{center}
-\caption{Planned ReqMemBench scale and distribution summary. The final figure will expose empty or heavily imbalanced strata.}
-\label{fig:benchmark-statistics}
-\end{figure}
-
+The appendix characterizes the corpus by Requirement lifecycle, Event type, provenance category, repository recoverability, and exclusion reason.
+\placeholder{TODO: insert agreement and oracle-history audit results, correction counts, and regenerated benchmark statistics after the review freeze.}
 \section{Experiments}
 \label{sec:experiments}
 

@@ -1,0 +1,220 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+    "message_id": 305,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_CODED_REFERRAL_TICKETS",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accepted-referral rule replaces the prior four Small Block tickets with one entry into a $2,000 reward drawing for the chosen referrer.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "recipient": "chosen referrer",
+          "allocation_trigger": "referral is accepted",
+          "reward_drawing_entries_per_accepted_referral": 1,
+          "reward_drawing_amount_usd": 2000
+        },
+        "value_removals": [
+          "small_block_tickets_per_referral_mint"
+        ],
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing same-message Event captures the new amount and recipient but omits that rejected referrals now use the no-referral commission allocation.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "commission_amount_usd": 18,
+          "allocation_trigger": "referral is missing or rejected",
+          "recipient_selection": "random NFT owner"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "NO_REFERRAL",
+            "INVALID_REFERRAL",
+            "AFFILIATE_COMMISSION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_TICKETS",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 305,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing Event broadens the trigger to rejected referrals, but it leaves the obsolete no-referral-only ticket key instead of representing the new single draw-entry rule.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "draw_entries_per_missing_or_rejected_referral": 1,
+          "allocation_trigger": "referral is missing or rejected",
+          "recipient_selection": "random NFT owner"
+        },
+        "value_removals": [
+          "tickets_per_no_referral_mint"
+        ],
+        "scope_updates": {
+          "persistence": null,
+          "components": null,
+          "contexts": [
+            "NO_REFERRAL",
+            "INVALID_REFERRAL",
+            "PRIZE_TICKETS"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REFERRAL_IDENTITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The commission and reward-allocation changes do not alter the NFT token serial's role, persistence, or display as the referral code.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_LANDING_PAGE_CONTENT_LAYOUT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The landing-page state still requires $10 referral-commission wording and a mechanics tease inconsistent with the new accepted-versus-missing-or-rejected referral rules.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "mechanics_tease_text": "Distinguish accepted referrals, which give the chosen referrer a $25 credit and entry into the $2,000 reward drawing, from missing or rejected referrals, which assign an $18 commission and a $900 draw entry to a random NFT owner.",
+          "commission_copy_requirement": "State that accepted referrals provide a $25 credit to the chosen referrer, while missing or rejected referrals assign an $18 commission to a random NFT owner."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already requires referral identifiers to belong to NFTs confirmed before checkout and prohibits self-referrals; the source reiterates that rule without changing it.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The current FAQ requirements still describe automatic $10 coded-referral commissions and uniform $900 ticket issuance, which conflict with the new conditional commission and drawing-entry rules.",
+      "new_event": {
+        "source_message": {
+          "message_id": 305,
+          "speaker": "client",
+          "text": "For the ' Valid referral number' popup, please apply the following rules:\n\\- Only NFTs confirmed before checkout should be valid.\n\n\\- When the referral is accepted, display: 'Referral accepted! $25 credit + entry into the $2,000 reward drawing for your chosen referrer.'\n\n\\- When the referral is missing or rejected, display: 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner.'"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "approved_faq_copy": "Revise referral explanations to state that only NFTs confirmed before checkout are valid; an accepted referral gives the chosen referrer a $25 credit and entry into the $2,000 reward drawing, while a missing or rejected referral assigns an $18 commission and a $900 draw entry to a random NFT owner.",
+          "fiat_buyer_rewards_faq_section": "Explain that only NFTs confirmed before checkout are valid referrals; accepted referrals provide the chosen referrer a $25 credit and entry into the $2,000 reward drawing, while missing or rejected referrals assign an $18 commission and a $900 draw entry to a random NFT owner.",
+          "beginner_rewards_collection_faq_section": "Explain the conditional referral rewards: a valid accepted referral provides the chosen referrer a $25 credit and one $2,000 drawing entry, while a missing or rejected referral assigns an $18 commission and one $900 drawing entry to a random NFT owner."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source does not change email delivery, required email contents, sign-in code delivery, or winner-guidance delivery.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "MEDIUM",
+      "reason": "The source assigns a $900 draw entry for missing or rejected referrals but does not change the Small Block winner count, prize amount, draw trigger, eligibility, or pool allocation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes referral validation and reward allocation but does not change the metadata fields currently required for the Small Block counter, badges, or referral identity.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_WALLET_AUTHENTICATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The new referral rules do not alter SIWE, supported authentication paths, or protected wallet flows.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_TRANSFER_SEMANTICS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source changes initial commission and drawing-entry allocation but does not state that NFT referral identity, badges, book access, or active and expired reward entries behave differently after transfer.",
+      "new_event": null
+    }
+  ]
+}

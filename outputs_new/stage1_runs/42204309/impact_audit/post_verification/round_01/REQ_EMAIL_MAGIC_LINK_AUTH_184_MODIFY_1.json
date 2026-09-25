@@ -1,0 +1,137 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_EMAIL_MAGIC_LINK_AUTH",
+    "message_id": 184,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_WALLET_AUTHENTICATION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-184 MODIFY already captures SIWE access through the Transak-created wallet; the email-code change does not otherwise alter wallet authentication.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The existing message-184 MODIFY already includes the one-time-email-code and SIWE access explanation in the fiat-buyer FAQ section.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+      "decision": "EDIT_EVENT",
+      "event_locator": {
+        "message_id": 184,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "confidence": "HIGH",
+      "reason": "The existing message-184 email-delivery Event omits the newly required one-time email sign-in code.",
+      "new_event": {
+        "source_message": {
+          "message_id": 184,
+          "speaker": "client",
+          "text": "We also need a new FAQ section explaining how fiat buyers who are unfamiliar with crypto receive commissions and prizes. This is important for mainstream users because a non-custodial wallet is created behind the scenes, with the seed phrase not required, but they may not understand how to reach their rewards.\n\n\"How Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\"\n\nThe flow should reassure customers paying by fiat, such as bank transfer, Apple Pay, etc., that everything is straightforward. When the book is minted for $30 through Transak, the buyer automatically receives a non-custodial wallet behind the scenes, with the seed phrase not required. That wallet stores the buyer's NFT and receives all commissions and prizes.\n\nEarning Commissions ($10 per Referral):\nThe buyer shares a referral code, for example, \"use 8421.\" Whenever another person mints with that code, $10 is sent automatically to the wallet address.\nCollection requires no separate action. The buyer signs into <http://harborquill.example|harborquill.example> using a one-time email code or SIWE with the wallet Transak created, and the commissions appear immediately. If necessary, we can explain how to export the funds to a bank account or an exchange such as Coinbase.\n\nEarning and Winning Prizes (Tickets for $900/$6,000 Draws):\nEvery referral automatically assigns tickets for the active prize draws and ties them to the buyer's NFT/wallet.\nFair on-chain randomness runs the draws at approximately ~750 sales for $900 and ~35,000 for $6,000.\nResults are published on the Winners page and sent by email.\n\nPrize collection is automatic as well: a winner receives either $900 or $6,000 directly in the wallet and should check the dashboard or email for the notification.\n\nDuring the Purchase:\nA fiat-to-crypto conversion is completed by Transak, which then mints the NFT directly into a newly created wallet address. Nothing has to be configured manually; the process is seamless and non-custodial. The buyer owns the keys without having to manage a complicated recovery phrase immediately.\nAn email confirmation then provides the mint number, which also serves as the referral code, along with NFT details and a dashboard link at <http://harborquill.example|harborquill.example>.\n\nFor ebook access, could we use this setup?\n\nMake Login-gated preview the standard experience. The email certificate would carry a large button reading \"Read 'The Long Road Forward' Today,\" while download after verification would appear as a smaller \"Save PDF for Later\" link. The dashboard and email-linked reader should use PDF.js.\n\nDoes that work?"
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "authentication_email_delivery": "deliver a one-time email code for sign-in",
+          "winner_notification_channel": "email",
+          "mint_confirmation_email_contents": [
+            "mint number and referral code",
+            "NFT details",
+            "dashboard link",
+            "large \"Read 'The Long Road Forward' Today\" reader button"
+          ],
+          "ebook_access_email_contents": [
+            "large \"Read 'The Long Road Forward' Today\" button",
+            "smaller \"Save PDF for Later\" link available after verification"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_TRANSAK_FIAT_MINT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The authentication-method change affects post-purchase sign-in, not the Transak conversion, wallet provisioning, or mint-destination behavior already recorded.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ABOUT_HARBOR_QUILL_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The About-page state concerns prize and product copy and is not changed by replacing magic-link wording with a one-time email code.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PUBLIC_API_ACCESS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The one-time email code applies to authenticated dashboard access and does not change the unauthenticated status of public APIs.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REFERRAL_IDENTITY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The authentication change does not alter the token-serial referral identity or its display locations; the confirmation-email requirement is already separately recorded.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_BOOK_READER_UX",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source authentication Event establishes fiat-buyer dashboard sign-in and does not necessarily change the reader engine or reader entry points.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The change from magic-link wording to a one-time email code does not alter automatic prize payout behavior.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Authentication controls how a buyer views rewards but does not change the commission amount, trigger, recipient, timing, or wallet destination.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_TRANSFER_SEMANTICS",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The email sign-in method has no necessary effect on which NFT-linked rights, badges, referral identity, or tickets follow a transfer.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The authentication-method change does not alter any metadata counter, badge, or referral-code attribute.",
+      "new_event": null
+    }
+  ]
+}

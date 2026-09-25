@@ -1,0 +1,143 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_VARIANT_IDENTIFIER_CONSISTENCY"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_VARIANT_REPORT_DETAIL_IDENTIFIERS",
+            "title": "Correct Variant Report-Detail Identifiers",
+            "family_id": "REPORT_VARIANTS"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_HEADER_IDENTIFIERS",
+            "title": "Correct Variant Header Identifiers",
+            "family_id": "REPORT_VARIANTS"
+          },
+          {
+            "requirement_id": "REQ_VARIANT_FOOTER_IDENTIFIERS",
+            "title": "Correct Variant Footer Identifiers",
+            "family_id": "REPORT_VARIANTS"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        42,
+        59,
+        62
+      ],
+      "decision_note": "Report-detail, header, and footer identifiers have independently testable trajectories: message 62 confirms the main codes and headers while reporting that the footers remain incorrect.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_INTERNAL_PAGE_HEADERS",
+        "event_locator": {
+          "message_id": 47,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        42,
+        47
+      ],
+      "decision_note": "The generic statement that the design was updated does not specifically identify the internal-page header behavior and is separated from the broad multi-item instruction by intervening messages.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CANVA_EDITABLE_TEMPLATES"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 73,
+          "speaker": "client",
+          "text": "Although multiple formats were agreed, the delivery contains only word documents."
+        },
+        "supporting_message_ids": [
+          70
+        ],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The delivered package contained only Word documents and omitted the separately agreed Canva format."
+        }
+      },
+      "evidence_message_ids": [
+        70,
+        73
+      ],
+      "decision_note": "This is the first concrete failure of Canva-format delivery and is distinct from the later failure involving inaccessible Canva links.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CANVA_EDITABLE_TEMPLATES",
+        "event_locator": {
+          "message_id": 74,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "template_format": "Canva",
+          "editable": true,
+          "required_variants": [
+            "DX17",
+            "DX18",
+            "DX19",
+            "DX20"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "DOCUMENT_TEMPLATE"
+          ],
+          "contexts": [
+            "CANVA_FORMAT",
+            "DX17",
+            "DX18",
+            "DX19",
+            "DX20"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        70,
+        73,
+        74
+      ],
+      "decision_note": "Canva delivery was already an agreed Requirement by message 73; message 74 restates and concretizes its editable four-variant scope rather than introducing it for the first time.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        57
+      ],
+      "decision_note": "The requested changes exist only in an unavailable image, so their affected Requirements and event semantics cannot be determined from the supplied text.",
+      "confidence": "LOW"
+    }
+  ]
+}

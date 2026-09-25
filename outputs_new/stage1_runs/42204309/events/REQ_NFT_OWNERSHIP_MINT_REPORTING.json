@@ -1,0 +1,226 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Although this is very cool, I found several bugs.\n\nTwo mornings ago, I tried minting 7 times while my wallet held ETH but no USDC. The attempts seemed to fail, yet <http://harborquill.example|harborquill.example> reports that I have minted 8 times.\n\nWith the referral field left blank, I am unsure what should have happened to the commission and ticket for mint 8, since they are meant to go to a previously minted NFT owner. This is a recurring edge case I had not considered. The commission and ticket from mint 9 should have been allocated to mint 8, though perhaps that did not happen because the mint itself failed.\n\nThere is also a display problem when I open an NFT from the dashboard: the book cover is oversized and cropped on all sides. Possibly because the mint did not complete, I also cannot work out how to view the actual book.\n\nTomorrow morning, I’ll try another mint using USDC and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "mint_and_ownership_reporting_rule": "Only finalized successful mints may be counted or represented as owned NFTs."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "DATABASE",
+          "API"
+        ],
+        "contexts": [
+          "DASHBOARD",
+          "MINT_REPORTING"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Although this is very cool, I found several bugs.\n\nTwo mornings ago, I tried minting 7 times while my wallet held ETH but no USDC. The attempts seemed to fail, yet <http://harborquill.example|harborquill.example> reports that I have minted 8 times.\n\nWith the referral field left blank, I am unsure what should have happened to the commission and ticket for mint 8, since they are meant to go to a previously minted NFT owner. This is a recurring edge case I had not considered. The commission and ticket from mint 9 should have been allocated to mint 8, though perhaps that did not happen because the mint itself failed.\n\nThere is also a display problem when I open an NFT from the dashboard: the book cover is oversized and cropped on all sides. Possibly because the mint did not complete, I also cannot work out how to view the actual book.\n\nTomorrow morning, I’ll try another mint using USDC and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Seven apparently failed mint attempts were nevertheless reflected by the site as eight completed mints."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 309,
+        "speaker": "freelancer",
+        "text": "Only finalized transactions will now be registered by the system. Among the completed fixes was the correction of the main issue: failed mints caused by paying with ETH rather than USDC had still been recorded in the database."
+      },
+      "supporting_message_ids": [
+        288
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the database-registration defect was corrected so only finalized transactions are recorded."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 312,
+        "speaker": "client",
+        "text": "Although most of the tweaks look great, minting still fails. The dashboard also continues to show 9 NFTs, and when I click 'open' on those false NFTs, the page leads nowhere.\n\nDuring a mint attempt, there is no option to select ETH/USDC plus alternatives. My wallet has ETH and USDC enabled, but the third mint still does not work."
+      },
+      "supporting_message_ids": [
+        309
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the finalized-transaction fix claim, the dashboard still reported nine false NFTs whose open links led nowhere."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 377,
+        "speaker": "client",
+        "text": "Here was the sequence for the USDC mint attempt: the approval transaction executed → the “Mint Successful” modal appeared → the mint transaction appeared and executed → the “Mint Successful” modal appeared again. The NFT certificate works, the mint was counted, and the pool contribution was made, but I still can’t locate the NFT in either my wallet or our dashboard.\nTransaction - 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A completed USDC mint was counted, but the resulting NFT could not be found on the dashboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "The fix is in. To view the NFT in your wallet or dashboard now, manually add it if necessary with these details:\n\\- contract: 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c\n\\- token ID: 8\n\\- chain: Base Mainnet\n\nBecause the backend already has tokenId 8 in the DB, refreshing the dashboard should render its new metadata and image, along with the PDF link."
+      },
+      "supporting_message_ids": [
+        377
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the dashboard-display fix is in and that refreshing should render the recorded NFT."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 404,
+        "speaker": "client",
+        "text": "Although BaseScan confirms that I own the NFTs, the Harbor Quill dashboard displays a count of 1 and otherwise shows nothing, apart from ticking the trailblazer referral badge. The attached image shows what appeared when I opened those links."
+      },
+      "supporting_message_ids": [
+        388
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the dashboard-display fix claim, BaseScan confirmed NFT ownership while the dashboard reported only one NFT and did not list the owned assets."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 492,
+        "speaker": "freelancer",
+        "text": "This item has been fixed too:\n3\\. Summary Reconciled and Verified:\nTotal NFTs: 4\nTotal Referrals: 9\nPrize Draw Tickets: 19\nTotal Earnings: $125\nNFT Details: Fully verified for referrals, tickets, and earnings per NFT."
+      },
+      "supporting_message_ids": [
+        404
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the summary was reconciled and now reports four NFTs."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 496,
+        "speaker": "client",
+        "text": "Here is the landing-page status.\n\nWorking correctly:\nMy NFTs - 4\nReferrals - 9\nTickets - 19\nBadges - first referral ticked\n\nStill incorrect:\nPrize pool - $30\nMy referral code - 72,904, while mint numbers should start from 25,000\n\nPlatform statistics:\nTotal mints - 3\n\nThe page also claims we have reached mint number 12. Did you mint six?\n\nView Book continues to return the same error as well."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The owner NFT count correctly showed four, but aggregate mint reporting remained inconsistent, showing three total mints while also claiming mint number twelve."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "During approval of the USDC spend—not during minting—the 'successful mint' popup appeared and showed mint number 11. In this case, I had used referral code 17; the screenshot shows this with the wallet popup visible.\n\nI cancelled that purchase, then checked and found that I had no NFT. Afterward, I minted using referral code 29. There was no USDC approval signature this time: it went directly to minting and worked perfectly, the popup appeared, and the NFT is visible on the dashboard.\n\nThe book decrypted successfully after I signed a transaction, but I'm now stuck on the cover page."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "A completed USDC mint produced an NFT that was visible on the dashboard."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 539,
+      "suggested_requirement_id": "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY",
+      "description": "The client accepts the preceding proposal to exclude obsolete-contract NFTs and restart on the replacement contract; this is primarily a migration-continuity decision."
+    },
+    {
+      "message_id": 585,
+      "suggested_requirement_id": "REQ_NFT_REFERRAL_IDENTITY",
+      "description": "The incorrect referral-code attribute concerns each NFT's referral identity rather than ownership or mint-count reporting."
+    },
+    {
+      "message_id": 688,
+      "suggested_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "description": "The mismatch between live NFT totals and stale NFT attributes concerns metadata accuracy."
+    }
+  ],
+  "missing_requirement_candidates": [
+    {
+      "message_ids": [
+        377,
+        404,
+        496,
+        569
+      ],
+      "suggested_title": "Aggregate Mint Number and Supply Reporting",
+      "description": "The frozen target combines owner-specific NFT visibility with aggregate mint-number and supply reporting. Message 496 shows these behaviors can have different outcomes, with the owner NFT count correct while aggregate mint figures remain inconsistent."
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_USDC_WALLET_MINT",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 294,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        294,
+        298
+      ],
+      "decision_note": "The client establishes the expected connected-wallet USDC mint behavior and reports that direct USDC mint attempts fail.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 294,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        294,
+        298
+      ],
+      "decision_note": "First concrete failure of the direct connected-wallet USDC mint path.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 310,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        310
+      ],
+      "decision_note": "First target-specific post-failure claim that the production fix is live and USDC minting should succeed.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 341,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        341
+      ],
+      "decision_note": "Post-claim failure showing that USDC approval completed but did not advance to the mint transaction.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 357,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357
+      ],
+      "decision_note": "Target-specific claim that USDC approval now triggers automatic minting.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 358,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        358
+      ],
+      "decision_note": "Post-fix persistence: approval completed and displayed confirmation, but no USDC mint transaction executed.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 361,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        361
+      ],
+      "decision_note": "Target-specific deployment claim addressing the broken USDC approval-to-mint transition and receipt gating.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 364,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        364
+      ],
+      "decision_note": "Post-deployment failure showing a reverted USDC attempt and incorrect recording of multiple mints.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 401,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        401
+      ],
+      "decision_note": "First concrete verification that a USDC mint created a token assigned to the buyer's wallet.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 501,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        494,
+        501
+      ],
+      "decision_note": "Distinct contract path: six USDC mints were executed successfully using the redeployed audited contract.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "mint_contract_scope": "replacement contract, with old-contract NFTs excluded from system use"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The client accepts routing the system through the replacement contract while excluding old-contract NFTs; no prior mint_contract_scope key requires removal.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "event_locator": {
+        "message_id": 569,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        546,
+        555,
+        569
+      ],
+      "decision_note": "First concrete client verification that USDC minting completed through the newly activated contract and produced a dashboard-visible NFT.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 581,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        579,
+        580,
+        581
+      ],
+      "decision_note": "Distinct no-referral execution path: a USDC mint completed and generated NFT-linked results despite separate reward-allocation defects.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

@@ -1,0 +1,212 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NFT_ASSET_RENDERING",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Although this is very cool, I found several bugs.\n\nTwo mornings ago, I tried minting 7 times while my wallet held ETH but no USDC. The attempts seemed to fail, yet <http://harborquill.example|harborquill.example> reports that I have minted 8 times.\n\nWith the referral field left blank, I am unsure what should have happened to the commission and ticket for mint 8, since they are meant to go to a previously minted NFT owner. This is a recurring edge case I had not considered. The commission and ticket from mint 9 should have been allocated to mint 8, though perhaps that did not happen because the mint itself failed.\n\nThere is also a display problem when I open an NFT from the dashboard: the book cover is oversized and cropped on all sides. Possibly because the mint did not complete, I also cannot work out how to view the actual book.\n\nTomorrow morning, I’ll try another mint using USDC and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "dashboard_nft_detail_cover_presentation": "Display the complete book cover without oversizing or cropping."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "NFT_DETAIL_PAGE"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 288,
+        "speaker": "client",
+        "text": "Although this is very cool, I found several bugs.\n\nTwo mornings ago, I tried minting 7 times while my wallet held ETH but no USDC. The attempts seemed to fail, yet <http://harborquill.example|harborquill.example> reports that I have minted 8 times.\n\nWith the referral field left blank, I am unsure what should have happened to the commission and ticket for mint 8, since they are meant to go to a previously minted NFT owner. This is a recurring edge case I had not considered. The commission and ticket from mint 9 should have been allocated to mint 8, though perhaps that did not happen because the mint itself failed.\n\nThere is also a display problem when I open an NFT from the dashboard: the book cover is oversized and cropped on all sides. Possibly because the mint did not complete, I also cannot work out how to view the actual book.\n\nTomorrow morning, I’ll try another mint using USDC and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Opening an NFT from the dashboard displayed an oversized book cover cropped on all sides."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 310,
+        "speaker": "freelancer",
+        "text": "**Updated testing checklist**\n\nEvery fix is live and ready for testing in production.\n\n***1\\. Referral code validation***\n| Test action | Expected result |\n|---|---|\n| Enter an invalid code, such as \"47\" when only 6–9 NFTs exist | An invalid message should appear |\n| Enter a valid code, such as \"47\" when NFT #47 exists | A valid message should appear |\n| Leave the code empty | The \"No/Invalid referral code\" message should appear |\n\n***2\\. Minting***\n| Test action | Expected result |\n|---|---|\n| Perform a mint using USDC | It should succeed |\n| Review the dashboard | Only successful mints should appear |\n\n***3\\. NFT detail page***\n| Test action | Expected result |\n|---|---|\n| Open an NFT detail page | The complete book cover should be visible |\n| View the page as the owner | The \"View Book\" button should be visible |\n\n***4\\. Badges***\n| Test action | Expected result |\n|---|---|\n| Review the dashboard badge section | It should contain 11 badges after Pathfinder was removed |\n| Check different screen sizes | The responsive layout should adapt to the available width |"
+      },
+      "supporting_message_ids": [],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the NFT-detail fix is live and that opening a detail page should show the complete book cover."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 313,
+        "speaker": "client",
+        "text": "Results, reorganized by outcome:\n\n1 - Required revision: set the invalid-code response to 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner'. The response looks good, but this final wording change is still needed.\n\n2 - A possible cause is that the commission and ticket are configured for an existing NFT holder, while no such holder exists for the third mint. Third mint is still failing.\n\n3 - The Open Edition button looks good; the NFT sizing is also good.\n\n4 - If possible, use 8 on top row and 11 on bottom row. The badges look good, but the current layout has 13 on the top row and 7 on the bottom row."
+      },
+      "supporting_message_ids": [
+        310
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Client confirms that the NFT sizing on the tested detail page is good after the cover-display fix."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "The fix is in. To view the NFT in your wallet or dashboard now, manually add it if necessary with these details:\n\\- contract: 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c\n\\- token ID: 8\n\\- chain: Base Mainnet\n\nBecause the backend already has tokenId 8 in the DB, refreshing the dashboard should render its new metadata and image, along with the PDF link."
+      },
+      "supporting_message_ids": [
+        377
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports a fix and states that refreshing the dashboard should render token 8's metadata and image."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "Once I turned off 'hide low-value NFTs' in Rabby, the NFT became visible, although it still had no image or information. I also have not managed to add it as a custom token.\n\nNext I’ll try an ETH purchase and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "wallet_nft_media_presentation": "When an NFT is visible in a supported wallet, its image and NFT information should also render."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "NFT_DETAIL_PAGE",
+          "NFT_WALLET_VIEW"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "Once I turned off 'hide low-value NFTs' in Rabby, the NFT became visible, although it still had no image or information. I also have not managed to add it as a custom token.\n\nNext I’ll try an ETH purchase and see what happens."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The NFT became visible in Rabby after hidden low-value NFTs were enabled, but it displayed no image or NFT information."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "The NFTs now appear on my dashboard, but their images fail when I open the details. Clicking 'View Book' also does not display the book."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "NFTs appeared on the dashboard, but their images failed when the client opened the NFT details."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 213,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_PRESENTATION",
+      "description": "This reports cropping of the landing-page book cover, not NFT-detail media rendering."
+    },
+    {
+      "message_id": 273,
+      "suggested_requirement_id": "REQ_LANDING_BOOK_COVER_PRESENTATION",
+      "description": "The compact-size and edge-cropping failure concerns the landing-page cover."
+    },
+    {
+      "message_id": 377,
+      "suggested_requirement_id": "REQ_OWNER_NFT_DISCOVERY",
+      "description": "The minted NFT could not be located in the wallet or dashboard; this is primarily an owner-discovery failure."
+    },
+    {
+      "message_id": 398,
+      "suggested_requirement_id": "REQ_OWNER_NFT_DISCOVERY",
+      "description": "The report that the NFT remains missing from the dashboard belongs to owner NFT discovery."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_OWNER_NFT_DISCOVERY",
+      "description": "The disappearance of previously displayed NFTs from the dashboard is an owner-discovery regression."
+    },
+    {
+      "message_id": 411,
+      "suggested_requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+      "description": "The separate clause stating that View Book does not display the book belongs to gated ebook access."
+    },
+    {
+      "message_id": 585,
+      "suggested_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "description": "The incorrect referral-code attribute is a metadata-accuracy issue rather than a media-rendering failure."
+    },
+    {
+      "message_id": 688,
+      "suggested_requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "description": "Stale referral and earnings attributes belong to NFT metadata accuracy."
+    }
+  ],
+  "missing_requirement_candidates": [
+    {
+      "message_ids": [
+        288,
+        393,
+        411
+      ],
+      "suggested_title": "Wallet NFT Media Rendering",
+      "description": "Wallet-native image and information rendering fails independently from dashboard NFT-detail cover and image rendering, suggesting that the current target may combine two separately testable presentation paths."
+    }
+  ]
+}

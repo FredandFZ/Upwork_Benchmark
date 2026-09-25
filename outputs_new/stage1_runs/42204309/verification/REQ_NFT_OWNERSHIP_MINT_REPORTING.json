@@ -1,0 +1,143 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 288,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "mint_reporting_rule": "Only finalized successful mints may contribute to the user's reported mint count."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "BACKEND"
+          ],
+          "contexts": [
+            "DASHBOARD",
+            "MINT_REPORTING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        288
+      ],
+      "decision_note": "The failed-attempt report establishes that user-facing mint counts must include only finalized mints, but it does not yet establish the broader owned-NFT representation assertion.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 288,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        288
+      ],
+      "decision_note": "First concrete failure: apparently failed mint attempts increased the user's reported mint count.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 309,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        288,
+        309
+      ],
+      "decision_note": "Target-specific implementation claim: the freelancer says failed transactions will no longer be registered as finalized mints.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 312,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        309,
+        312
+      ],
+      "decision_note": "Post-fix persistence: after the registration-fix claim, the dashboard still displayed nine false NFTs from unsuccessful mints.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 404,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        404
+      ],
+      "decision_note": "Distinct ownership-reporting failure: on-chain ownership was confirmed while the dashboard reported only one NFT.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 492,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        404,
+        492
+      ],
+      "decision_note": "Target-specific reconciliation claim: the freelancer reports that the NFT summary was fixed and now reports four NFTs.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 496,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        492,
+        496
+      ],
+      "decision_note": "Post-reconciliation partial outcome: the owner NFT count showed four, but aggregate mint reporting remained inconsistent between total mints and the claimed mint sequence.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The client accepts the concrete rule that reporting and listings will use NFTs from the active replacement contract and exclude legacy-contract NFTs; no prior value key becomes obsolete.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

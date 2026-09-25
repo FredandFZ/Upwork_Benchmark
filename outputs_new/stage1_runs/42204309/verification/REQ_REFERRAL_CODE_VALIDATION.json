@@ -1,0 +1,83 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_REFERRAL_CODE_VALIDATION",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        291
+      ],
+      "decision_note": "The client establishes the checkout validation rule that referral IDs must belong to previously confirmed NFTs and must not enable self-referral.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 291,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        291
+      ],
+      "decision_note": "First concrete failure: the checkout accepted an invalid referral identifier that could enable future-token or self-referral use.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 310,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        310
+      ],
+      "decision_note": "Target-specific implementation claim: the freelancer says the validation fix is live and identifies the expected rejection and acceptance rules.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 313,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        310,
+        313
+      ],
+      "decision_note": "First concrete verification of the invalid-code path: the client confirms that the rejection response appears, while separately requesting revised product copy.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 313,
+        "speaker": "client",
+        "text": "Results, reorganized by outcome:\n\n1 - Required revision: set the invalid-code response to 'Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner'. The response looks good, but this final wording change is still needed.\n\n2 - A possible cause is that the commission and ticket are configured for an existing NFT holder, while no such holder exists for the third mint. Third mint is still failing.\n\n3 - The Open Edition button looks good; the NFT sizing is also good.\n\n4 - If possible, use 8 on top row and 11 on bottom row. The badges look good, but the current layout has 13 on the top row and 7 on the bottom row."
+      },
+      "supporting_message_ids": [
+        310
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "invalid_referral_response": "Referral unavailable! $18 commission and a $900 draw entry will be assigned to a random NFT owner"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ]
+}

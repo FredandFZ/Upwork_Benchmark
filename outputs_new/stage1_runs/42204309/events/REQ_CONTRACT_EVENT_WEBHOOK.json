@@ -1,0 +1,97 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_CONTRACT_EVENT_WEBHOOK",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 266,
+        "speaker": "freelancer",
+        "text": "Use these webhook settings:\n\\- Template: \"All events for a contract\" (recommended) or \"Custom\"\n\\- Name: Harbor Quill Contract Events\n\\- Chain: BASE → Base Mainnet\n\\- Contract Address: 0xe72a4c915d80b3f614c79e286a03db5f91c8472e\n\\- Webhook URL: <https://harborquill.example/api/webhook/contract-events>"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "webhook_name": "Harbor Quill Contract Events",
+        "network": "Base Mainnet",
+        "contract_address_filter": "0xe72a4c915d80b3f614c79e286a03db5f91c8472e",
+        "webhook_url": "https://harborquill.example/api/webhook/contract-events"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API",
+          "INFRASTRUCTURE"
+        ],
+        "contexts": [
+          "CONTRACT_EVENT_SYNC",
+          "BASE_MAINNET"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 588,
+        "speaker": "freelancer",
+        "text": "The frontend was not at fault. The contract already sends referralCode=99 down the “random referral via VRF” path. However, payout and ticket creation wait until VRF has fulfilled and someone then calls finalizeReferralDraw(drawRequestId). Because our backend previously did not monitor RandomnessSettled, it never sent that follow-up transaction, leaving both the ticket and random commission uncreated."
+      },
+      "supporting_message_ids": [
+        579,
+        587
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "The backend did not monitor the RandomnessSettled event, so it failed to submit the required referral-finalization transaction."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 803,
+        "speaker": "freelancer",
+        "text": "Here is the query with the contract filter applied:\n{\nblock {\ntimestamp,\nnumber,\nhash,\n\\# For log filtering, replace the placeholder contract address\nlogs(filter: {addresses: \\[\"0x8A3c19D4e725B601Ff48aC930d2E67b514C09F6e\"\\]}) {\ntopics,\ndata,\nindex,\ntransaction {\nstatus,\nhash,\nnonce,\nindex,\nvalue,\ngas,\ngasUsed,\ncumulativeGasUsed,\ngasPrice,\neffectiveGasPrice,\nmaxFeePerGas,\nmaxPriorityFeePerGas,\nfrom { address },\nto { address },\ncreatedContract { address }\n},\naccount { address }\n}\n}\n}"
+      },
+      "supporting_message_ids": [
+        804
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "contract_address_filter": "0x8A3c19D4e725B601Ff48aC930d2E67b514C09F6e"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 818,
+        "speaker": "client",
+        "text": "The webhook itself is finished, but I can&#39;t remember where to copy the webhook secret. How do I do that again?"
+      },
+      "supporting_message_ids": [
+        815,
+        816,
+        817
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The client reports that the production contract-event webhook setup is complete."
+      }
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

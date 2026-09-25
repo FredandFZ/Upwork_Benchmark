@@ -1,0 +1,195 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_OWNER_NFT_DISCOVERY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 377,
+        "speaker": "client",
+        "text": "Here was the sequence for the USDC mint attempt: the approval transaction executed → the “Mint Successful” modal appeared → the mint transaction appeared and executed → the “Mint Successful” modal appeared again. The NFT certificate works, the mint was counted, and the pool contribution was made, but I still can’t locate the NFT in either my wallet or our dashboard.\nTransaction - 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "owner_nft_discovery_behavior": "Minted NFTs must be discoverable by their owner in supported wallet and dashboard views."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "NFT_WALLET_VIEW",
+          "OWNER_DASHBOARD"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 377,
+        "speaker": "client",
+        "text": "Here was the sequence for the USDC mint attempt: the approval transaction executed → the “Mint Successful” modal appeared → the mint transaction appeared and executed → the “Mint Successful” modal appeared again. The NFT certificate works, the mint was counted, and the pool contribution was made, but I still can’t locate the NFT in either my wallet or our dashboard.\nTransaction - 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A completed USDC mint was counted and produced a working certificate, but the owner could not locate the NFT in either the wallet or dashboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 388,
+        "speaker": "freelancer",
+        "text": "The fix is in. To view the NFT in your wallet or dashboard now, manually add it if necessary with these details:\n\\- contract: 0x91e6c3a742bd508f6d19e84c27a5b063f8d2147c\n\\- token ID: 8\n\\- chain: Base Mainnet\n\nBecause the backend already has tokenId 8 in the DB, refreshing the dashboard should render its new metadata and image, along with the PDF link."
+      },
+      "supporting_message_ids": [
+        377
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "The freelancer reports that the NFT discovery fix is in and that refreshing the dashboard should render token 8, with manual wallet addition available if necessary."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 393,
+        "speaker": "client",
+        "text": "Once I turned off 'hide low-value NFTs' in Rabby, the NFT became visible, although it still had no image or information. I also have not managed to add it as a custom token.\n\nNext I’ll try an ETH purchase and see what happens."
+      },
+      "supporting_message_ids": [
+        388,
+        391,
+        392
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The owner located the NFT in Rabby after disabling the wallet's low-value-NFT hiding option; its media and information remained unavailable."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 404,
+        "speaker": "client",
+        "text": "Although BaseScan confirms that I own the NFTs, the Harbor Quill dashboard displays a count of 1 and otherwise shows nothing, apart from ticking the trailblazer referral badge. The attached image shows what appeared when I opened those links."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "BaseScan confirmed the client's NFT ownership, but the Harbor Quill dashboard showed only a count and did not display the owned NFT entries."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 411,
+        "speaker": "client",
+        "text": "The NFTs now appear on my dashboard, but their images fail when I open the details. Clicking 'View Book' also does not display the book."
+      },
+      "supporting_message_ids": [
+        404,
+        408
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client confirms that the owned NFTs now appear on the dashboard; detail-media and book-access failures remain separate."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 539,
+        "speaker": "client",
+        "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best."
+      },
+      "supporting_message_ids": [
+        538
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "included_nft_contract_scope": "NFTs from the active replacement contract only",
+        "legacy_contract_nfts_discoverable": false
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 569,
+        "speaker": "client",
+        "text": "During approval of the USDC spend—not during minting—the 'successful mint' popup appeared and showed mint number 11. In this case, I had used referral code 17; the screenshot shows this with the wallet popup visible.\n\nI cancelled that purchase, then checked and found that I had no NFT. Afterward, I minted using referral code 29. There was no USDC approval signature this time: it went directly to minting and worked perfectly, the popup appeared, and the NFT is visible on the dashboard.\n\nThe book decrypted successfully after I signed a transaction, but I'm now stuck on the cover page."
+      },
+      "supporting_message_ids": [
+        538,
+        539,
+        546
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "After a successful mint under the replacement-contract flow, the newly minted NFT was visible on the owner's dashboard."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 393,
+      "suggested_requirement_id": "REQ_NFT_ASSET_RENDERING",
+      "description": "The NFT's missing image and information concern asset rendering, while this Requirement only receives the wallet-discovery verification."
+    },
+    {
+      "message_id": 411,
+      "suggested_requirement_id": "REQ_NFT_ASSET_RENDERING",
+      "description": "The failed detail images concern NFT media rendering rather than owner NFT discovery."
+    },
+    {
+      "message_id": 411,
+      "suggested_requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+      "description": "The failed View Book action concerns gated ebook access rather than owner NFT discovery."
+    },
+    {
+      "message_id": 441,
+      "suggested_requirement_id": "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+      "description": "The conflict between the dashboard NFT total and total supply concerns aggregate ownership and mint reporting."
+    },
+    {
+      "message_id": 496,
+      "suggested_requirement_id": "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+      "description": "The reported My NFTs and total-mint figures concern reporting accuracy rather than discovery of individual owned NFTs."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

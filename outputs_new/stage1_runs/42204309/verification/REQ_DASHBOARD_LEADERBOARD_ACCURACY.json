@@ -1,0 +1,231 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_DASHBOARD_LEADERBOARD_ACCURACY",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 448,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        448
+      ],
+      "decision_note": "This is a target-specific claim that referral and payout totals were reconciled and that the dashboard should display specified referral, earnings, and badge figures.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 449,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        448,
+        449
+      ],
+      "decision_note": "This is the first concrete post-claim failure showing inconsistent dashboard, NFT-summary, ticket, earnings, and NFT-count figures.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 492,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "RUNTIME_VERIFICATION",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "VERIFIED_WORKING",
+          "observed_behavior": "Freelancer reports verifying a reconciled summary of 4 NFTs, 9 referrals, 19 prize-draw tickets, and $125 in total earnings, together with per-NFT referral, ticket, and earnings details."
+        }
+      },
+      "evidence_message_ids": [
+        492
+      ],
+      "decision_note": "The source reports concrete checked totals and explicitly states that the summary and per-NFT figures were verified, rather than merely claiming deployment.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The exchange authorizes migration to a replacement contract and abandonment of old NFTs, but it does not specifically establish the asserted referral, ticket, and payout reporting scope for this Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 595,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        593,
+        594,
+        595
+      ],
+      "decision_note": "The client defines an implementation-relevant reporting acceptance rule: non-promotional mints must be reflected in commission and ticket counts, including weighted-draw distributions.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 608,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        605,
+        607,
+        608
+      ],
+      "decision_note": "This demonstrates post-backfill persistence: despite a claimed fix and initial approval, the leaderboard still showed only 9 tickets and 8 commissions.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 662,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        662
+      ],
+      "decision_note": "This is the first concrete failure for the distinct no-referral path: transferred commissions and tickets were absent from the leaderboard and displayed accounting.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 672,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        669,
+        670,
+        671,
+        672
+      ],
+      "decision_note": "This adds a materially new partial outcome: coded accounting and recent no-code tickets worked, while historical tickets and no-code commissions remained missing with concrete aggregate discrepancies.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 686,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        679,
+        684,
+        686
+      ],
+      "decision_note": "This is a target-specific implementation claim that temporary backend logic was added to correct displayed commission and ticket accounting.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 688,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        686,
+        687,
+        688
+      ],
+      "decision_note": "This is the first concrete post-fix verification of the leaderboard and NFT summary figures; the separately reported NFT-attribute failure belongs to the metadata Requirement.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "source_message": {
+        "message_id": 595,
+        "speaker": "client",
+        "text": "The number of commissions and tickets should each equal the number of mints, excluding promotional mints. However, those distributed by weighted draw do not seem to be registering."
+      },
+      "supporting_message_ids": [
+        593,
+        594
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Commission and ticket entries distributed through the weighted-draw path did not appear to be registering in the reported totals."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 605,
+        "speaker": "freelancer",
+        "text": "A backfill now supplies the missing tickets and commissions to existing NFTs."
+      },
+      "supporting_message_ids": [
+        595,
+        603
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports implementing a backfill intended to supply missing ticket and commission data for existing NFTs."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 674,
+        "speaker": "client",
+        "text": "As long as everything works correctly from now on, I suppose we can skip the backfill."
+      },
+      "supporting_message_ids": [
+        672,
+        673
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "historical_no_referral_reward_backfill_required": false,
+        "prospective_no_referral_reward_reporting_required": true
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ]
+}

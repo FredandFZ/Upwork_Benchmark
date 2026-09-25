@@ -1,0 +1,320 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_NO_REFERRAL_TICKETS",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Marcus, I have one final mechanics adjustment. It removes the half-expiring-ticket behavior and should simplify the code.\n\nThis rule replaces the earlier ticket-lifespan description:\nWhenever someone mints using a referral code, the referrer immediately receives 7 tickets on their NFT:\n+4 Small Block Tickets\n+3 Big Block Tickets\n\nThese feed two completely independent counters: one Small Block counter and one Big Block counter.\n\nFor the Small Block ($7,200 pool ÷ 8 ÷ $900 draw), draw only from Small Block Tickets issued since the previous small block. After the draw, burn and reset all Small Block Tickets to 0.\n\nFor the Big Block ($216,000 pool ÷ 9 ÷ $24,000 draw), draw only from Big Block Tickets issued since the previous big block. After the draw, burn and reset all Big Block Tickets to 0.\n\nSmall blocks therefore stay fair and fresh because old tickets do not carry forward, while Big Block entries accumulate naturally until that block is drawn. Metadata only needs to show the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block fires when its pool reaches exactly $7,200, and the big block fires when its pool reaches exactly $216,000. Secondary royalties continue to fill the pools but do not create tickets.\n\nEverything else remains the same: the $10 commission is automatic, a ticket goes to a random existing NFT when no referral code is used, and prize claims remain manual.\n\nThis version should be easier to implement and explain. Once you confirm it is cleaner for you too, we are 100% locked.\n\nThanks!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "tickets_per_no_referral_mint": 1,
+        "recipient_selection": "random existing NFT"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "NO_REFERRAL",
+          "PRIZE_TICKETS"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 565,
+        "speaker": "client",
+        "text": "After 9 buys, why do only 8 tickets exist? Even a referral-free purchase should create 6 tickets and commission, with both allocated by weighted draw."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "tickets_per_no_referral_mint": 6,
+        "recipient_selection": "weighted draw"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 579,
+        "speaker": "client",
+        "text": "On another USDC purchase with the referral field left blank, I did not see a ticket batch created. For a 'blank referral' purchase, the commission and ticket are supposed to go by weighted draw to a newly registered NFT owner."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A USDC mint with the referral field blank created no visible ticket batch."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 581,
+        "speaker": "client",
+        "text": "The USDC mint succeeded: #18 now has $35 and 4 tickets. When minting with the referral field left empty, there seem to be 4 tickets generated; however, 3 tickets and $12 commission distributed by lottery are not being allocated by weighted draw."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A successful no-referral mint appeared to generate four tickets, while three additional tickets were not allocated by weighted draw."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 583,
+        "speaker": "client",
+        "text": "Whether or not a 'code-free purchase' generates 6 tickets could go either way, so a missing ticket on that kind of purchase may be acceptable.\n\nThe unresolved question is where the $10 commission goes on those no-referral mints. I would like those commissions to default to me, but that could encourage sympathetic buyers to omit their referral codes and discourage affiliates from participating. Because of that, the $10 commission from no-referral purchases has to be assigned by weighted draw."
+      },
+      "supporting_message_ids": [],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The client leaves unresolved whether a no-referral mint must generate six tickets or may generate no ticket."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 587,
+        "speaker": "freelancer",
+        "text": "The fix is in: mints marked “Referral omitted” now produce 6 tickets and a weighted commission award."
+      },
+      "supporting_message_ids": [
+        583
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that referral-omitted mints now produce six tickets."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 595,
+        "speaker": "client",
+        "text": "The number of commissions and tickets should each equal the number of mints, excluding promotional mints. However, those distributed by weighted draw do not seem to be registering."
+      },
+      "supporting_message_ids": [
+        593
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "eligible_mint_coverage": "every non-promotional mint, including mints without a referral code"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 595,
+        "speaker": "client",
+        "text": "The number of commissions and tickets should each equal the number of mints, excluding promotional mints. However, those distributed by weighted draw do not seem to be registering."
+      },
+      "supporting_message_ids": [
+        593
+      ],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 599,
+        "speaker": "client",
+        "text": "Across the two accounts, the totals still do not match the mints. Yours shows 11 tickets and 11 commissions, while mine shows 7 tickets and 7 commissions. That gives 18 tickets and commissions in total, even though all 19 mints should each have produced both. It appears that purchases marked 'referral omitted' are not registering their tickets or commissions."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "After the fix claim, referral-omitted purchases still failed to register their ticket allocations, leaving only 18 ticket records across 19 mints."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 605,
+        "speaker": "freelancer",
+        "text": "A backfill now supplies the missing tickets and commissions to existing NFTs."
+      },
+      "supporting_message_ids": [
+        599
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that a backfill now supplies the missing ticket allocations to existing NFTs."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 615,
+        "speaker": "client",
+        "text": "By accident, I just completed 7 mints. For the first, I referred to #47 and added a $4 tip, but the tip failed: 0x84c2e719d50a6bf314e8c729630db5fa91d74e285c60b3a917f84d620e51ac39\n\nFor the second, I left the referral code blank, but its ticket and commission still do not appear on the leaderboard: 0x5e91c4a27d806bf314c8e729630db5fa81d74e295c60b3a917f84d620e51ac38"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A newly completed mint with the referral code blank still had no ticket allocation visible on the leaderboard."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 631,
+        "speaker": "client",
+        "text": "Could it instead be that no ticket is generated?\n\n- Generating no ticket for a 'no code buy' may be acceptable as-is, provided we slightly revise the UI notes.\n- If a ticket is generated and randomly distributed but omitted from the dashboard, that must be fixed.\n- Any randomly distributed commission must also appear on the dashboard and in the attributes.\n\nHere is the no-code purchase with a $4 tip: 0xa731d8c25e906bf414c8e729630db5fa81d74e295c60b3a917f84d620e51ac39\n\nIf tips are paid through a second transaction immediately after minting, that would explain why the tip failed, and we will need a UI note explaining it."
+      },
+      "supporting_message_ids": [
+        629
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The client again leaves open whether no-code purchases should generate no ticket or generate a randomly distributed ticket that must be displayed."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 672,
+        "speaker": "client",
+        "text": "At this point, 34 mints should correspond to 34 tickets and 34 x $20 commissions.\n\nA mint still produces a ticket and commission even when no referral code is supplied.\n\nAccounting works correctly on the leaderboards and NFT attributes whenever a code is used. That part is perfect.\n\nWithout a referral code, the ticket and commission are assigned randomly, but both must still appear on the leaderboard and in the NFT attributes.\n\nSince your latest fix, the randomly assigned tickets from the last 7 mints seem to have been recorded correctly, which is great. The earlier missing tickets have not been backfilled, though.\n\nThe $18 commissions generated by these no-code buys are also still missing from the leaderboard and NFT attributes.\n\nMy screenshot shows an NFT with 9 tickets but only 4 x $20 commissions. That should be impossible because every ticket comes with a $18 commission.\n\nThe leaderboard screenshot accounts for only 15 tickets and 12 x $8 commissions from 34 total mints. Regardless of whether a referral code was supplied, 34 mints should produce 34 tickets and 34 x $20 commissions."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "allocation_reporting": "randomly assigned tickets must appear on the leaderboard and in NFT attributes"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 672,
+        "speaker": "client",
+        "text": "At this point, 34 mints should correspond to 34 tickets and 34 x $20 commissions.\n\nA mint still produces a ticket and commission even when no referral code is supplied.\n\nAccounting works correctly on the leaderboards and NFT attributes whenever a code is used. That part is perfect.\n\nWithout a referral code, the ticket and commission are assigned randomly, but both must still appear on the leaderboard and in the NFT attributes.\n\nSince your latest fix, the randomly assigned tickets from the last 7 mints seem to have been recorded correctly, which is great. The earlier missing tickets have not been backfilled, though.\n\nThe $18 commissions generated by these no-code buys are also still missing from the leaderboard and NFT attributes.\n\nMy screenshot shows an NFT with 9 tickets but only 4 x $20 commissions. That should be impossible because every ticket comes with a $18 commission.\n\nThe leaderboard screenshot accounts for only 15 tickets and 12 x $8 commissions from 34 total mints. Regardless of whether a referral code was supplied, 34 mints should produce 34 tickets and 34 x $20 commissions."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 672,
+        "speaker": "client",
+        "text": "At this point, 34 mints should correspond to 34 tickets and 34 x $20 commissions.\n\nA mint still produces a ticket and commission even when no referral code is supplied.\n\nAccounting works correctly on the leaderboards and NFT attributes whenever a code is used. That part is perfect.\n\nWithout a referral code, the ticket and commission are assigned randomly, but both must still appear on the leaderboard and in the NFT attributes.\n\nSince your latest fix, the randomly assigned tickets from the last 7 mints seem to have been recorded correctly, which is great. The earlier missing tickets have not been backfilled, though.\n\nThe $18 commissions generated by these no-code buys are also still missing from the leaderboard and NFT attributes.\n\nMy screenshot shows an NFT with 9 tickets but only 4 x $20 commissions. That should be impossible because every ticket comes with a $18 commission.\n\nThe leaderboard screenshot accounts for only 15 tickets and 12 x $8 commissions from 34 total mints. Regardless of whether a referral code was supplied, 34 mints should produce 34 tickets and 34 x $20 commissions."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "The client reports that randomly assigned tickets from the latest seven no-referral mints were recorded correctly."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 688,
+        "speaker": "client",
+        "text": "The logic itself sounds good to me.\n\nAfter 34 mints, the leaderboard now shows 24 tickets and 19 commissions, which is perfect.\n\nThe NFT attributes are still not right, though. My screenshots show that NFT #42 has 18 tickets and 9 x $35 commissions on the leaderboard, which is correct. When I open NFT #42, the top of the page also correctly displays 18 tickets and 14 referrals. However, its attributes still report only 6 referrals and $85 in total earnings."
+      },
+      "supporting_message_ids": [
+        687
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "After accepting the proposed no-code six-ticket flow, the client reports that the leaderboard ticket total is perfect and NFT #42 correctly shows 18 tickets."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 583,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "description": "The definitive weighted-draw decision in this message concerns the no-referral commission, while its ticket clause remains unresolved."
+    },
+    {
+      "message_id": 615,
+      "suggested_requirement_id": "REQ_OPTIONAL_MINT_TIP",
+      "description": "The failed $4 tip reported in the first paragraph belongs to the optional gratuity Requirement."
+    },
+    {
+      "message_id": 672,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "description": "The missing no-code commission accounting clauses should also be evaluated under the no-referral commission Requirement."
+    },
+    {
+      "message_id": 738,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The proposed no-referral modal wording concerns mint-result feedback rather than ticket allocation mechanics."
+    },
+    {
+      "message_id": 750,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The implemented scenario-specific success-modal copy belongs to mint-result feedback."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

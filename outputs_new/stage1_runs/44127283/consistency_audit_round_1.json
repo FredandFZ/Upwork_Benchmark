@@ -1,0 +1,98 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IMAGE_COVERAGE_FROM_CHAPTER_ONE",
+        "event_locator": {
+          "message_id": 48,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        48
+      ],
+      "decision_note": "Re-add after the same-message scope modification so replay retains the concrete failure against the broadened rule.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IMAGE_COVERAGE_FROM_CHAPTER_ONE",
+        "event_locator": {
+          "message_id": 48,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        48
+      ],
+      "decision_note": "Re-add before the same-message runtime failure to preserve the correct semantic replay order.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IMAGE_COVERAGE_FROM_CHAPTER_ONE"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 48,
+          "speaker": "client",
+          "text": "I noticed that your image work begins at chapter 2. Whenever you create images, you should always start from chapter 1."
+        },
+        "supporting_message_ids": [],
+        "event_type": "MODIFY",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": null,
+          "contexts": [
+            "IMAGE_GENERATION"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        48
+      ],
+      "decision_note": "The client broadens the chapter-1 rule from the Ontario task to all image-generation work.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_IMAGE_COVERAGE_FROM_CHAPTER_ONE"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 48,
+          "speaker": "client",
+          "text": "I noticed that your image work begins at chapter 2. Whenever you create images, you should always start from chapter 1."
+        },
+        "supporting_message_ids": [],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "The client's review found that image work began at chapter 2 instead of chapter 1."
+        }
+      },
+      "evidence_message_ids": [
+        48
+      ],
+      "decision_note": "This is the first concrete failure of the chapter-1 image-coverage rule and must follow the same-message scope modification.",
+      "confidence": "HIGH"
+    }
+  ]
+}

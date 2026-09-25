@@ -1,0 +1,199 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_NFT_HOLDER_BOOK_ACCESS",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 217,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "access_eligibility": "NFT holders only"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "AUTH",
+            "FRONTEND",
+            "BACKEND"
+          ],
+          "contexts": [
+            "BOOK_READER",
+            "NFT_OWNERSHIP"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        217
+      ],
+      "decision_note": "Establishes NFT-holder-only reader authorization; Lit and automatic-check details are still presented as a tentative approach.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 238,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "EDIT",
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "access_control_provider": "Lit Protocol",
+          "ownership_check": "automatic",
+          "lit_production_network": "Datil"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        237,
+        238
+      ],
+      "decision_note": "Configures Lit Protocol gating on Datil with an automatic Base ERC-721 ownership check when the reader opens.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 411,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        411
+      ],
+      "decision_note": "First concrete failure showing that View Book did not display the ebook.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 448,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        448
+      ],
+      "decision_note": "Target-specific implementation claim that the Read page had been made available to verified NFT custodians.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 449,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        448,
+        449
+      ],
+      "decision_note": "First concrete post-claim failure: the Read page still returned a timeout.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 461,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        460,
+        461
+      ],
+      "decision_note": "Distinct Lit encryption path failure caused by an observed unsupported-network error.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 462,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        462
+      ],
+      "decision_note": "Target-specific fix claim that the Lit network configuration was changed from cayenne to Datil and deployed.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 470,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        462,
+        470
+      ],
+      "decision_note": "Post-fix persistence showing that the unsupported-network blocker remained after the Datil deployment claim.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The accepted contract-migration decision limits system access to NFTs from the active replacement contract and excludes legacy-contract NFTs.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 560,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        558,
+        559,
+        560
+      ],
+      "decision_note": "First concrete verification of the unauthorized path: a user without a valid NFT was denied reader access.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 569,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        569
+      ],
+      "decision_note": "First concrete verification of the authorized path: an NFT holder completed the ownership interaction and decrypted the ebook successfully.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

@@ -1,0 +1,159 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_ETH_WALLET_MINT",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 327,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        325,
+        326,
+        327,
+        328
+      ],
+      "decision_note": "The freelancer explicitly commits to implementing an ETH wallet-payment option, including the required contract and frontend path, in direct response to the client's request.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 341,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        341
+      ],
+      "decision_note": "First concrete ETH-mint failure: ETH was taken but no NFT was received.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 357,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357
+      ],
+      "decision_note": "Target-specific implementation claim that updated ETH pricing and buffer logic should allow the swap and mint path to complete.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 359,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        357,
+        359
+      ],
+      "decision_note": "Post-claim persistence: the next reported ETH mint transaction reverted.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 401,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        401
+      ],
+      "decision_note": "Adds a new concrete transaction and systemic diagnosis: the configured on-chain router was incorrect, causing every ETH mint to revert.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 494,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        493,
+        494
+      ],
+      "decision_note": "Target-specific implementation claim that a redeployed contract with configurable slippage addresses the ETH-mint failure.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 529,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        529,
+        530
+      ],
+      "decision_note": "The generic success statement and adjacent payment/refund result do not establish that the NFT was received, so they do not verify the complete ETH mint requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "DELETE",
+      "replacement": null,
+      "evidence_message_ids": [
+        538,
+        539
+      ],
+      "decision_note": "The client accepts migration to a fresh contract and exclusion of old NFTs; this changes contract-migration data semantics rather than the ETH wallet mint behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 571,
+        "event_type": "RUNTIME_VERIFICATION",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        562,
+        571
+      ],
+      "decision_note": "First concrete full verification: the client reports that the ETH mint completed successfully without an ETH approval step.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": [
+    {
+      "message_ids": [
+        493
+      ],
+      "suggested_requirement_id": "REQ_ETH_WALLET_MINT",
+      "suggested_event_type": "RUNTIME_FAILURE",
+      "description": "The freelancer reports a distinct ETH transaction failure caused by actual slippage exceeding the configured limit, immediately before the slippage-related implementation claim."
+    },
+    {
+      "message_ids": [
+        538,
+        539
+      ],
+      "suggested_requirement_id": "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY",
+      "suggested_event_type": "MODIFY",
+      "description": "The client accepts use of the replacement contract with fresh NFT state and exclusion of old-contract NFTs from the active systems."
+    }
+  ]
+}

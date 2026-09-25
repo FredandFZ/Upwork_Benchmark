@@ -1,0 +1,244 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "SPLIT_REQUIREMENT",
+      "targets": {
+        "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS"
+      },
+      "replacement": {
+        "requirements": [
+          {
+            "requirement_id": "REQ_HOMEPAGE_NAVIGATION_LINKS",
+            "title": "Homepage Section Button Links",
+            "family_id": null
+          },
+          {
+            "requirement_id": "REQ_HOMEPAGE_PORTFOLIO_TILE_LINK",
+            "title": "Homepage Portfolio Tile Link",
+            "family_id": null
+          },
+          {
+            "requirement_id": "REQ_PRICING_DETAIL_LINK",
+            "title": "Detailed Pricing Link",
+            "family_id": "PRICING_PRESENTATION"
+          }
+        ]
+      },
+      "evidence_message_ids": [
+        20,
+        73,
+        75,
+        87,
+        90
+      ],
+      "decision_note": "The detailed-pricing link, homepage section buttons, and portfolio-tile link are independently targeted behaviors with separate modification and implementation trajectories.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+        "event_locator": {
+          "message_id": 20,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        20,
+        30
+      ],
+      "decision_note": "Message 20 requests navigation to detailed pricing but does not establish the itemized pricing content; that content is first explicitly required in message 30.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ITEMIZED_SERVICE_PRICING",
+        "event_locator": {
+          "message_id": 30,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "detailed_pricing_layout": "Large diagram",
+          "service_coverage": "Every individual service offered, including all items in the supplied PDF",
+          "pricing_transparency": "Show the exact breakdown so customers can understand pricing and add individual items when needed",
+          "item_classification": "Most items are categorized by both price and property square footage"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "contexts": [
+            "INDIVIDUAL_SERVICE_PRICING"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        30
+      ],
+      "decision_note": "After removal of the misrouted message-20 Event, message 30 is the first explicit establishment of the itemized-service pricing presentation.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_BOOK_SESSION_CTA_DESTINATION",
+        "event_locator": {
+          "message_id": 103,
+          "event_type": "AMBIGUOUS",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "VALUE",
+          "description": "The destination of the Book a Session button is unresolved; the agency suggests Calendly as one possible destination."
+        },
+        "execution": null
+      },
+      "evidence_message_ids": [
+        103
+      ],
+      "decision_note": "The source establishes an unresolved destination and a Calendly suggestion, but it does not itself identify a new form page as the alternative.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+        "event_locator": {
+          "message_id": 72,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        72
+      ],
+      "decision_note": "The source reports only an unspecified possible gallery glitch and provides no textual behavior showing that scrolling, organization, or another acceptance criterion failed.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_GALLERY_BROWSING_AND_ORGANIZATION",
+        "event_locator": {
+          "message_id": 86,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        72,
+        86
+      ],
+      "decision_note": "The generic statement that the gallery issue was resolved does not identify which browsing or organization behavior was implemented or fixed.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+        "event_locator": {
+          "message_id": 77,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        77
+      ],
+      "decision_note": "The client merely offers to send photos; this does not yet require their use or establish specific placement behavior.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+        "event_locator": {
+          "message_id": 84,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "photo_selection_authority": "agency discretion",
+          "photo_placement_authority": "agency discretion"
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "PROJECT_PERSISTENT",
+          "components": [
+            "FRONTEND",
+            "UI_UX"
+          ],
+          "contexts": [
+            "HOMEPAGE",
+            "SERVICES_PAGE",
+            "SITEWIDE_VISUAL_DESIGN"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        82,
+        83,
+        84
+      ],
+      "decision_note": "Message 84 is the first retained client instruction establishing selection and placement of the supplied photos as an implementation obligation.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CLIENT_PHOTO_USAGE",
+        "event_locator": {
+          "message_id": 87,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "photo_selection_authority": "Agency discretion for unspecified photos, subject to using supplied photos for indicated replacements and selecting a house photograph for the homepage",
+          "photo_placement_authority": "Agency discretion for unspecified placements, with the indicated stock-image locations and homepage image placement directed by the client",
+          "indicated_stock_photos": "replace with supplied photos",
+          "homepage_image_subject": "house"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        84,
+        87
+      ],
+      "decision_note": "The new client-directed replacements and homepage subject narrow the previously unrestricted agency discretion; the authority attributes must be updated to avoid stale contradictory state.",
+      "confidence": "HIGH"
+    }
+  ]
+}

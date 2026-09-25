@@ -1,0 +1,177 @@
+{
+  "run_mode": "EVENT_VERIFICATION",
+  "requirement_id": "REQ_ETH_PRICE_AND_REFUND",
+  "verdicts": [
+    {
+      "event_locator": {
+        "message_id": 352,
+        "event_type": "INTRODUCE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        352
+      ],
+      "decision_note": "The client establishes dynamic ETH pricing against the fixed $30 mint price across the frontend and transaction flow.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 352,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        352
+      ],
+      "decision_note": "First concrete failure: displayed and submitted ETH amounts differed, and the transaction failed instead of reliably tracking the fixed mint price.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 357,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        352,
+        357
+      ],
+      "decision_note": "Target-specific post-failure implementation claim: dynamic ETH pricing, a sufficient buffer, and the contract minimum were reported as applied.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 363,
+        "event_type": "AMBIGUOUS",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        363
+      ],
+      "decision_note": "The client identifies a material unresolved business rule concerning the destination and refund treatment of ETH exceeding the mint allocation.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 494,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        493,
+        494
+      ],
+      "decision_note": "Distinct implementation transition: the freelancer reports redeployment with configurable slippage intended to address volatile-market ETH failures.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 498,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        494,
+        497,
+        498
+      ],
+      "decision_note": "Post-fix failure: the checkout attempted to charge $57.89 in ETH for the fixed-price NFT after the slippage redeployment claim.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 518,
+        "event_type": "IMPLEMENTATION_CLAIM",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        515,
+        516,
+        518
+      ],
+      "decision_note": "Target-specific implementation claim: the freelancer reports USDC surplus refunds and transaction rollback when swap output is below $30.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 520,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        519,
+        520
+      ],
+      "decision_note": "The client unambiguously accepts exact-output swapping that consumes only required ETH and returns excess value in ETH; no prior state key becomes obsolete.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 520,
+        "event_type": "RESUME",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        519,
+        520
+      ],
+      "decision_note": "The accepted exact-output and ETH-refund policy resolves the material refund ambiguity and returns the Requirement to active status.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 530,
+        "event_type": "RUNTIME_FAILURE",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        519,
+        520,
+        529,
+        530
+      ],
+      "decision_note": "First concrete post-decision result: an ETH-payment test returned the surplus in USDC rather than the accepted ETH refund asset.",
+      "confidence": "HIGH"
+    },
+    {
+      "event_locator": {
+        "message_id": 539,
+        "event_type": "MODIFY",
+        "occurrence": 1
+      },
+      "verdict": "KEEP",
+      "replacement": null,
+      "evidence_message_ids": [
+        534,
+        535,
+        536,
+        537,
+        538,
+        539
+      ],
+      "decision_note": "The client accepts the exact-output contract upgrade, including the executable rule that insufficient ETH must revert when it cannot produce the exact 30 USDC output; no existing key conflicts with the added rule.",
+      "confidence": "HIGH"
+    }
+  ],
+  "missing_event_candidates": []
+}

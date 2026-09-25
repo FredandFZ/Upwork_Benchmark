@@ -1,0 +1,80 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Marcus, I have one final mechanics adjustment. It removes the half-expiring-ticket behavior and should simplify the code.\n\nThis rule replaces the earlier ticket-lifespan description:\nWhenever someone mints using a referral code, the referrer immediately receives 7 tickets on their NFT:\n+4 Small Block Tickets\n+3 Big Block Tickets\n\nThese feed two completely independent counters: one Small Block counter and one Big Block counter.\n\nFor the Small Block ($7,200 pool ÷ 8 ÷ $900 draw), draw only from Small Block Tickets issued since the previous small block. After the draw, burn and reset all Small Block Tickets to 0.\n\nFor the Big Block ($216,000 pool ÷ 9 ÷ $24,000 draw), draw only from Big Block Tickets issued since the previous big block. After the draw, burn and reset all Big Block Tickets to 0.\n\nSmall blocks therefore stay fair and fresh because old tickets do not carry forward, while Big Block entries accumulate naturally until that block is drawn. Metadata only needs to show the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block fires when its pool reaches exactly $7,200, and the big block fires when its pool reaches exactly $216,000. Secondary royalties continue to fill the pools but do not create tickets.\n\nEverything else remains the same: the $10 commission is automatic, a ticket goes to a random existing NFT when no referral code is used, and prize claims remain manual.\n\nThis version should be easier to implement and explain. Once you confirm it is cleaner for you too, we are 100% locked.\n\nThanks!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "small_block_ticket_lifecycle": {
+          "eligible_tickets": "Small Block Tickets issued since the previous Small Block draw",
+          "post_draw_action": "burn and reset all Small Block Tickets to 0",
+          "carry_forward_after_draw": false
+        },
+        "big_block_ticket_lifecycle": {
+          "eligible_tickets": "Big Block Tickets issued since the previous Big Block draw",
+          "post_draw_action": "burn and reset all Big Block Tickets to 0",
+          "carry_forward_after_draw": false
+        }
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND"
+        ],
+        "contexts": [
+          "PRIZE_SYSTEM",
+          "PRIZE_TICKETS",
+          "SMALL_BLOCK",
+          "BIG_BLOCK"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 195,
+        "speaker": "client",
+        "text": "Marcus, please remove the big blocks and redirect that extra $8 to me. The new breakdown should be:\n$30 purchase, $12 to me, $10 to the affiliate, and $8 to the block prize pool.\n\nThat should improve my bottom line without materially affecting sales, while also making the game mechanics and marketing simpler.\n\nAn even arrangement between me and each community member, together with an equal opportunity to win the continuing $900 prizes, feels consistent with the project's ethos."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": null,
+      "value_removals": [
+        "big_block_ticket_lifecycle"
+      ],
+      "scope_updates": {
+        "persistence": null,
+        "components": null,
+        "contexts": [
+          "PRIZE_SYSTEM",
+          "PRIZE_TICKETS",
+          "SMALL_BLOCK"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 210,
+      "suggested_requirement_id": "REQ_CODED_REFERRAL_TICKETS",
+      "description": "The change to one ticket per successful referral concerns ticket issuance quantity; the statement that tickets apply only to the current draw is consistent with the retained Small Block lifecycle."
+    },
+    {
+      "message_id": 565,
+      "suggested_requirement_id": "REQ_NO_REFERRAL_TICKETS",
+      "description": "The reported missing tickets concern whether referral-free purchases issue and allocate tickets, not what happens to issued tickets at draw boundaries."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

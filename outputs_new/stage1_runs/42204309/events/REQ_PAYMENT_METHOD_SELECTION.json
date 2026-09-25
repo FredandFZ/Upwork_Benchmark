@@ -1,0 +1,160 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 312,
+        "speaker": "client",
+        "text": "Although most of the tweaks look great, minting still fails. The dashboard also continues to show 9 NFTs, and when I click 'open' on those false NFTs, the page leads nowhere.\n\nDuring a mint attempt, there is no option to select ETH/USDC plus alternatives. My wallet has ETH and USDC enabled, but the third mint still does not work."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "payment_asset_selection": "Provide a customer-facing option to select among enabled payment assets."
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "UI_UX"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "CHECKOUT"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 312,
+        "speaker": "client",
+        "text": "Although most of the tweaks look great, minting still fails. The dashboard also continues to show 9 NFTs, and when I click 'open' on those false NFTs, the page leads nowhere.\n\nDuring a mint attempt, there is no option to select ETH/USDC plus alternatives. My wallet has ETH and USDC enabled, but the third mint still does not work."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "During checkout, no option was available to select between ETH and USDC even though both assets were enabled in the wallet."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 318,
+        "speaker": "freelancer",
+        "text": "Both ETH and USDC."
+      },
+      "supporting_message_ids": [
+        316,
+        317
+      ],
+      "event_type": "AMBIGUOUS",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": {
+        "dimension": "VALUE",
+        "description": "The freelancer gave conflicting adjacent answers about whether checkout accepted only USDC or both ETH and USDC, leaving the required disclosure and selection behavior unresolved."
+      },
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 321,
+        "speaker": "client",
+        "text": "For a single-currency checkout—whether ETH only or USDC only—the checkout must clearly display the settlement currency. If both ETH and USDC are available instead, customers must choose."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "single_currency_checkout": "Clearly display the settlement currency when only ETH or only USDC is available.",
+        "multi_currency_checkout": "Require the customer to choose when both ETH and USDC are available."
+      },
+      "value_removals": [
+        "payment_asset_selection"
+      ],
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 321,
+        "speaker": "client",
+        "text": "For a single-currency checkout—whether ETH only or USDC only—the checkout must clearly display the settlement currency. If both ETH and USDC are available instead, customers must choose."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RESUME",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 330,
+        "speaker": "client",
+        "text": "That sounds excellent 👍"
+      },
+      "supporting_message_ids": [
+        327,
+        328
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "enabled_wallet_payment_options": [
+          "ETH",
+          "USDC"
+        ],
+        "customer_facing_selection_control": true
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "At the moment, 'View Book' still opens a blank page, as shown in the attached screenshot. The payment options are also reversed: ETH cannot be selected, while USDC and Card can. Because Card has not been implemented yet, that should be the unavailable option instead."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "card_payment_option_status": "unavailable until implemented"
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 424,
+        "speaker": "client",
+        "text": "At the moment, 'View Book' still opens a blank page, as shown in the attached screenshot. The payment options are also reversed: ETH cannot be selected, while USDC and Card can. Because Card has not been implemented yet, that should be the unavailable option instead."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Checkout made the unimplemented Card option selectable while preventing selection of the enabled ETH option."
+      }
+    }
+  ],
+  "routing_warnings": [],
+  "missing_requirement_candidates": []
+}

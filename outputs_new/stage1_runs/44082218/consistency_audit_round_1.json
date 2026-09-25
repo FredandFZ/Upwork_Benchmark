@@ -1,0 +1,149 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "ADD_REQUIREMENT",
+      "targets": {},
+      "replacement": {
+        "requirement_id": "REQ_DIRECT_POST_PUBLICATION_LINK_REPORTING",
+        "title": "Direct Post-Publication Link Reporting",
+        "family_id": "INSTAGRAM_PUBLISHING",
+        "definition": "Send the published Instagram Reel link directly to the client after publication.",
+        "anchor_message_ids": [
+          291,
+          295
+        ]
+      },
+      "evidence_message_ids": [
+        291,
+        295
+      ],
+      "decision_note": "Directly reporting the live Reel link is independently requested and fulfilled, and does not establish that the date and link were recorded on the designated Notion card.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CLIP_SOURCE_SELECTION",
+        "event_locator": {
+          "message_id": 193,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "permitted_source_collection": "Any YouTube video may be selected"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        179,
+        192,
+        193
+      ],
+      "decision_note": "The new client instruction replaces the prior Arden-only source collection; updating the existing key avoids leaving contradictory source-selection attributes.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CLIP_DURATION"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 261,
+          "speaker": "client",
+          "text": "For the rest of the clips, each one must deliver a complete lesson instead of cutting it off halfway. Don't make them all 45 sec; aim for 70-85 seconde."
+        },
+        "supporting_message_ids": [
+          245,
+          258
+        ],
+        "event_type": "RUNTIME_FAILURE",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "FAILED",
+          "observed_behavior": "After revised work was submitted, the client reports that the remaining clips were still approximately 45 seconds rather than the required 70-to-85-second duration."
+        }
+      },
+      "evidence_message_ids": [
+        245,
+        258,
+        261
+      ],
+      "decision_note": "This is post-revision persistence affecting multiple remaining clips, adding a distinct duration failure beyond the earlier single 45-second clip.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CAPTION_COLOR_AND_EFFECTS"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 277,
+          "speaker": "client",
+          "text": "The only correction left is the text placement; the clips are good otherwise. Keep the text fixed in one place like in the example I sent, rather than moving it up and down."
+        },
+        "supporting_message_ids": [
+          260,
+          274
+        ],
+        "event_type": "RUNTIME_VERIFICATION",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": {
+          "status": "VERIFIED_WORKING",
+          "observed_behavior": "After the freelancer reported removing the black text outline, the client reviewed the clips and stated that caption placement was the only correction remaining."
+        }
+      },
+      "evidence_message_ids": [
+        260,
+        274,
+        277
+      ],
+      "decision_note": "This is the first concrete post-fix verification of the disallowed black text effect.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        280
+      ],
+      "decision_note": "Message 280 may add a duration acceptance rule or runtime failure for clips under 70 seconds, but its raw text and sufficient context are not supplied for a safe Event patch.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        303
+      ],
+      "decision_note": "Message 303 appears to change the minimum approved-clip posting obligation under REQ_INSTAGRAM_ROLLOUT_CADENCE, but the raw source text is unavailable for an exact MODIFY.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        314
+      ],
+      "decision_note": "The one-clip delivery report may be a runtime failure for assigned-batch or monthly output and may accompany engagement termination; raw context is required to determine the correct target and lifecycle impact.",
+      "confidence": "LOW"
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "run_mode": "AMBIGUITY_LINKING",
+  "project_id": "42204309",
+  "requirements": [
+    {
+      "requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_PRIZE_CLAIM_FLOW_E003",
+          "affected_state_paths": [
+            "attributes.payout_mode",
+            "attributes.claim_control"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_PRIZE_CLAIM_FLOW_E004",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E004 directly selects automatic wallet transfer for prize payouts and removes the claim-control fields, resolving automatic payout versus visible redemption control.",
+          "confidence": "HIGH"
+        },
+        {
+          "ambiguity_event_id": "REQ_PRIZE_CLAIM_FLOW_E006",
+          "affected_state_paths": [
+            "attributes.payout_mode",
+            "attributes.claim_control"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_PRIZE_CLAIM_FLOW_E007",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E007 directly selects a manual redemption control for prize payout and specifies that it is visible only during the eligibility window.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_AAVE_POOL_YIELD",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_AAVE_POOL_YIELD_E002",
+          "affected_state_paths": [
+            "lifecycle_status"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_AAVE_POOL_YIELD_E003",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E003 explicitly resolves whether the redundant Aave integration should be retained or removed by stating that the connector will be removed entirely.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_CODED_REFERRAL_COMMISSION_E006",
+          "affected_state_paths": [
+            "attributes.commission_amount_usd"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_CODED_REFERRAL_COMMISSION_E007",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E007 directly confirms that coded referrals receive $35 commissions, settling the conflict between the proposed $35 amount and the prior $20 amount.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_NO_REFERRAL_COMMISSION_E012",
+          "affected_state_paths": [
+            "attributes.commission_amount_usd"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_NO_REFERRAL_COMMISSION_E013",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E013 settles the conflicting $20, $18, and $8 figures by accepting the no-referral flow with a $12 commission.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_NO_REFERRAL_TICKETS",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_NO_REFERRAL_TICKETS_E008",
+          "affected_state_paths": [
+            "attributes.tickets_per_no_referral_mint"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_NO_REFERRAL_TICKETS_E010",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E010 directly settles ticket generation for missing or rejected referrals by requiring one ticket for every eligible non-promotional mint.",
+          "confidence": "HIGH"
+        },
+        {
+          "ambiguity_event_id": "REQ_NO_REFERRAL_TICKETS_E014",
+          "affected_state_paths": [
+            "attributes.tickets_per_no_referral_mint"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_NO_REFERRAL_TICKETS_E015",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E015 explicitly states that a mint still produces a ticket when no referral code is supplied, resolving ticket generation versus no ticket.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_ETH_PRICE_AND_REFUND",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_ETH_PRICE_AND_REFUND_E004",
+          "affected_state_paths": [
+            "attributes.eth_input_policy",
+            "attributes.excess_refund_asset"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_ETH_PRICE_AND_REFUND_E008",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E008 directly settles the surplus treatment by requiring consumption of only the ETH needed for the fixed mint price and returning the remainder in ETH.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_PAYMENT_METHOD_SELECTION_E003",
+          "affected_state_paths": [
+            "attributes.enabled_wallet_payment_options"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_PAYMENT_METHOD_SELECTION_E006",
+          "non_resolving_intermediate_event_ids": [
+            "REQ_PAYMENT_METHOD_SELECTION_E004",
+            "REQ_PAYMENT_METHOD_SELECTION_E005"
+          ],
+          "decision_note": "E004 conditionally defines disclosure and selection behavior but does not determine whether checkout will enable only USDC or both assets; E005 adds no value change. E006 explicitly settles the enabled payment options as ETH and USDC.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_TRANSAK_FIAT_MINT",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_TRANSAK_FIAT_MINT_E003",
+          "affected_state_paths": [
+            "attributes.fiat_onramp_provider"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_TRANSAK_FIAT_MINT_E004",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E004 directly resolves the unsettled replacement-provider choice by selecting Transak for the fiat on-ramp.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_MINT_RESULT_FEEDBACK_E017",
+          "affected_state_paths": [
+            "attributes.success_copy_variant_rule"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_MINT_RESULT_FEEDBACK_E019",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E019 explicitly selects separate scenario-specific mint-success copy for referral-code and no-referral mints, resolving whether unified copy should replace the variants.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_BADGE_PRESENTATION",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_BADGE_PRESENTATION_E006",
+          "affected_state_paths": [
+            "attributes.badge_set_size",
+            "attributes.badge_set_composition"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_BADGE_PRESENTATION_E008",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E008 selects a 19-badge set with an 8-and-11 row layout, directly settling the earlier choice between adding a nineteenth badge and using a reduced set without Pathfinder.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY_E002",
+          "affected_state_paths": [
+            "attributes.redeployment_requirement"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY_E003",
+          "non_resolving_intermediate_event_ids": [],
+          "decision_note": "E003 directly settles whether redeployment is required by selecting a controlled replacement-contract redeployment that retains existing data while applying the fixes.",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    {
+      "requirement_id": "REQ_ABOUT_HARBOR_QUILL_CONTENT",
+      "decisions": [
+        {
+          "ambiguity_event_id": "REQ_ABOUT_HARBOR_QUILL_CONTENT_E002",
+          "affected_state_paths": [
+            "attributes.prize_collection_copy",
+            "attributes.prize_claim_copy"
+          ],
+          "resolution_status": "RESOLVED",
+          "resolver_event_id": "REQ_ABOUT_HARBOR_QUILL_CONTENT_E004",
+          "non_resolving_intermediate_event_ids": [
+            "REQ_ABOUT_HARBOR_QUILL_CONTENT_E003"
+          ],
+          "decision_note": "E003 changes prize amounts and sales thresholds without settling payout behavior. E004 explicitly selects automatic wallet payment and excludes visible or one-click redemption-control wording.",
+          "confidence": "HIGH"
+        }
+      ]
+    }
+  ]
+}

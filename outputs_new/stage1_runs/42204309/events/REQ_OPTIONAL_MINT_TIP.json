@@ -1,0 +1,179 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_OPTIONAL_MINT_TIP",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 169,
+        "speaker": "client",
+        "text": "On the minting page, please add an Optional gratuity feature."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "enabled": true,
+        "optional": true,
+        "placement": "minting_page"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "PAYMENT"
+        ],
+        "contexts": [
+          "PRIMARY_MINT",
+          "OPTIONAL_TIP"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 182,
+        "speaker": "freelancer",
+        "text": "On the minting page, the tip feature now includes a custom option alongside presets of $2, $6, $14, and $30."
+      },
+      "supporting_message_ids": [
+        169
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports that the minting-page tip feature now provides $2, $6, $14, and $30 presets plus a custom amount."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 183,
+        "speaker": "client",
+        "text": "Thats great"
+      },
+      "supporting_message_ids": [
+        182
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "preset_amounts_usd": [
+          2,
+          6,
+          14,
+          30
+        ],
+        "custom_amount_enabled": true
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 615,
+        "speaker": "client",
+        "text": "By accident, I just completed 7 mints. For the first, I referred to #47 and added a $4 tip, but the tip failed: 0x84c2e719d50a6bf314e8c729630db5fa91d74e285c60b3a917f84d620e51ac39\n\nFor the second, I left the referral code blank, but its ticket and commission still do not appear on the leaderboard: 0x5e91c4a27d806bf314c8e729630db5fa81d74e295c60b3a917f84d620e51ac38"
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A mint using referral code #47 completed, but its selected $4 tip failed."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 622,
+        "speaker": "client",
+        "text": "Using 'no referral code' and a '$4 tip', I have just completed another mint.\n\n- The tip still does not work.\n\n- For 'no referral code' purchases, tickets and commissions still appear neither on the leaderboard nor in the NFT attributes.\n\nA second transaction, visible in the screenshot, appeared after the mint. I cancelled it, yet the mint completed normally. Was that extra transaction meant to send the tip, and why did it appear?"
+      },
+      "supporting_message_ids": [
+        615
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "On a no-referral mint with a $4 tip, the mint completed but the tip did not; a separate post-mint transaction appeared and was cancelled."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 660,
+        "speaker": "client",
+        "text": "Although the tip worked, we need a confirmation banner explaining that it is sent through a delayed follow-up transaction. Otherwise, buyers may think they’re being asked to purchase a second copy."
+      },
+      "supporting_message_ids": [
+        649
+      ],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "delayed_follow_up_notice": "Show a confirmation banner explaining that the tip is sent through a delayed follow-up transaction and is not a request to purchase a second copy."
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 664,
+        "speaker": "freelancer",
+        "text": "In your case, the $4 tip became a self-transfer because your wallet is currently set as the on-chain founderWallet, meaning no funds move when you tip yourself. I’ve now deployed a UI safeguard that disables tipping under that condition."
+      },
+      "supporting_message_ids": [
+        658,
+        659,
+        660
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports deploying a UI safeguard that disables tipping when the connected wallet is the on-chain founder wallet, preventing self-tips."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 666,
+        "speaker": "client",
+        "text": "The $9 did arrive, yes."
+      },
+      "supporting_message_ids": [
+        665
+      ],
+      "event_type": "RUNTIME_VERIFICATION",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "VERIFIED_WORKING",
+        "observed_behavior": "Client confirms receipt of the $9 tip."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 649,
+      "suggested_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "description": "The missing confirmation dialog concerns mint-result feedback; the same message's delayed tip transactions only provide context for the later tip-notice requirement."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

@@ -1,0 +1,84 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CALIFORNIA_ELECTRICAL_PE_CREDENTIAL",
+        "event_locator": {
+          "message_id": 24,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "pe_name": "MERCER T DANIEL",
+          "pe_license_number": "47283"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        20,
+        24
+      ],
+      "decision_note": "The freelancer supplies credential values in direct response to the California PE information request; this is a value update, not an implementation claim.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CALIFORNIA_ELECTRICAL_PE_CREDENTIAL"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 42,
+          "speaker": "client",
+          "text": "Marisol, I hope you are doing well. The client contacted me to ask whether you can stamp the changes without redlines, possibly by adding a letter describing the change you are approving. Is that feasible? If it is, I can send you the formal offer. Please also resend the PE name and license number, because I am seeing different information for Nevada PE license 47283 on the PE website. Thanks, Kieran."
+        },
+        "supporting_message_ids": [
+          20,
+          24
+        ],
+        "event_type": "AMBIGUOUS",
+        "value_updates": null,
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": {
+          "dimension": "VALUE",
+          "description": "License 47283 was supplied after the California credential request but is now identified as a Nevada license whose listed identity conflicts with official records, leaving the California credential unresolved."
+        },
+        "execution": null
+      },
+      "evidence_message_ids": [
+        20,
+        24,
+        42
+      ],
+      "decision_note": "The client's jurisdiction and identity conflict materially undermines the credential previously supplied for the California requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_CALIFORNIA_ELECTRICAL_PE_CREDENTIAL",
+        "event_locator": {
+          "message_id": 45,
+          "event_type": "AMBIGUOUS",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        42,
+        45
+      ],
+      "decision_note": "The authorship disclaimer does not independently identify or resolve the California credential and adds no material state after the stronger jurisdiction conflict at message 42.",
+      "confidence": "HIGH"
+    }
+  ]
+}

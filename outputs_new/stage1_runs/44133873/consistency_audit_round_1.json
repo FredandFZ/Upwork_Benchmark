@@ -1,0 +1,190 @@
+{
+  "run_mode": "CONSISTENCY_AUDIT",
+  "patches": [
+    {
+      "operation": "ADD_EVENT",
+      "targets": {
+        "requirement_id": "REQ_PRINT_READY_OUTPUT"
+      },
+      "replacement": {
+        "source_message": {
+          "message_id": 4,
+          "speaker": "freelancer",
+          "text": "As I understand it, you will provide the content (Docx), graphics, images, elements, and ads. I will create the template and then lay out, typeset, and format the magazine’s 160 pages.\n\nAfter that, I’ll compile everything into an Interactive PDF for the Digital Flip Book, along with a Press-Quality Print PDF at 300 dpi using precise trim and bleed settings."
+        },
+        "supporting_message_ids": [
+          3
+        ],
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "deliverable": "press-quality print PDF",
+          "resolution": "300 dpi",
+          "prepress_settings": [
+            "precise trim",
+            "bleed"
+          ]
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "PRINT_PREPRESS"
+          ],
+          "contexts": [
+            "PRINT_OUTPUT"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        4,
+        7
+      ],
+      "decision_note": "The print deliverable is explicitly stated before the client defers it in message 7, so the earlier observable introduction must be retained.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_ISSUE_LAYOUT_ASSEMBLY",
+        "event_locator": {
+          "message_id": 72,
+          "event_type": "MODIFY",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        72
+      ],
+      "decision_note": "The specified article additions and their placement are already owned by REQ_COVER_MENTIONED_ARTICLES; retaining this broad copy duplicates the same source observation.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_PRINT_READY_OUTPUT",
+        "event_locator": {
+          "message_id": 81,
+          "event_type": "RUNTIME_FAILURE",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        80,
+        81
+      ],
+      "decision_note": "The unsafe-zone, trim, bleed, and resizing failure concerns the advertisement files identified by local context and is already represented under REQ_ADVERTISEMENT_RENDERING_QUALITY.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "DELETE_EVENT",
+      "targets": {
+        "requirement_id": "REQ_DIGITAL_FLIPBOOK_PDF",
+        "event_locator": {
+          "message_id": 191,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": null,
+      "evidence_message_ids": [
+        188,
+        191
+      ],
+      "decision_note": "The message designates which supplied file should be uploaded to Heyzine; that observation is already represented under the narrower upload-file-selection Requirement.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_HEYZINE_UPLOAD_FILE_SELECTION",
+        "event_locator": {
+          "message_id": 184,
+          "event_type": "IMPLEMENTATION_CLAIM",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "MODIFY",
+        "value_updates": {
+          "preview_copy_upload_restriction": "The supplied preview-only copy must not be uploaded to Heyzine."
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        145,
+        184
+      ],
+      "decision_note": "The source establishes an artifact-selection constraint for the client-managed upload rather than claiming that implementation was completed.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "EDIT_EVENT",
+      "targets": {
+        "requirement_id": "REQ_EDITABLE_SOURCE_FILE_HANDOFF",
+        "event_locator": {
+          "message_id": 198,
+          "event_type": "INTRODUCE",
+          "occurrence": 1
+        }
+      },
+      "replacement": {
+        "event_type": "INTRODUCE",
+        "value_updates": {
+          "deliverable": "magazine template created for the issue",
+          "intended_use": "enable the client to produce a future issue",
+          "delivery_condition": "Deliver the template if the freelancer considers the compensation too low to continue producing future issues."
+        },
+        "value_removals": null,
+        "scope_updates": {
+          "persistence": "TASK_LOCAL",
+          "components": [
+            "SOURCE_FILES",
+            "EDITORIAL_LAYOUT"
+          ],
+          "contexts": [
+            "FINAL_DELIVERY",
+            "MAGAZINE_TEMPLATE"
+          ]
+        },
+        "ambiguity": null,
+        "execution": null
+      },
+      "evidence_message_ids": [
+        198
+      ],
+      "decision_note": "Message 198 introduces the handoff conditionally; the current Event incorrectly omits that material condition.",
+      "confidence": "HIGH"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        198,
+        200,
+        202,
+        203
+      ],
+      "decision_note": "Messages 200 and 202 reportedly make the source-file handoff unconditional, but their verbatim text is not supplied here. Review whether a later MODIFY must remove the delivery_condition before the delivery claim.",
+      "confidence": "LOW"
+    },
+    {
+      "operation": "HUMAN_REVIEW",
+      "targets": {},
+      "replacement": null,
+      "evidence_message_ids": [
+        4,
+        7
+      ],
+      "decision_note": "The freelancer's 160-page statement conflicts with the opening client constraint of approximately 100 pages or fewer. Determine whether issue length should be an attribute of REQ_ISSUE_LAYOUT_ASSEMBLY with an AMBIGUOUS Event.",
+      "confidence": "LOW"
+    }
+  ]
+}

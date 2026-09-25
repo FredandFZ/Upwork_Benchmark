@@ -1,0 +1,185 @@
+{
+  "run_mode": "REQUIREMENT_DISCOVERY",
+  "sessions": [
+    {
+      "session_id": "S1",
+      "start": null,
+      "end": null,
+      "milestone": null,
+      "phase_label": "Release 3 front-end review scoping and assessment"
+    },
+    {
+      "session_id": "S2",
+      "start": null,
+      "end": null,
+      "milestone": null,
+      "phase_label": "Connector Module reporting follow-up"
+    }
+  ],
+  "requirement_families": [
+    {
+      "family_id": "MULTI_USER_ACCESS",
+      "title": "Multi-User Access"
+    },
+    {
+      "family_id": "MEMBER_METERING",
+      "title": "Member Metering"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ_MULTI_USER_INVITATION_SENDING",
+      "title": "Multi-User Invitation Sending",
+      "family_id": "MULTI_USER_ACCESS",
+      "definition": "Account owners can initiate and send multi-user invitations through the front end using the available invitation API.",
+      "anchor_message_ids": [
+        21,
+        27
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "MULTI_USER_INVITATION"
+        ]
+      },
+      "boundary_note": "Covers invitation initiation and API invocation only; the invited user's link landing and acceptance path is independently testable and remains separate.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_MULTI_USER_INVITATION_ACCEPTANCE",
+      "title": "Multi-User Invitation Acceptance",
+      "family_id": "MULTI_USER_ACCESS",
+      "definition": "An invited user can follow an invitation link to a front-end route where the invitation can be completed.",
+      "anchor_message_ids": [
+        21,
+        27
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND"
+        ],
+        "contexts": [
+          "MULTI_USER_INVITATION"
+        ]
+      },
+      "boundary_note": "The invitation landing and completion path can fail or be implemented independently of invitation sending and member administration.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_MULTI_USER_MEMBER_ADMINISTRATION",
+      "title": "Multi-User Member Administration",
+      "family_id": "MULTI_USER_ACCESS",
+      "definition": "The multi-user capability provides backend operations for account owners to list members and revoke or remove their access.",
+      "anchor_message_ids": [
+        21
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "MULTI_USER_MEMBERSHIP"
+        ]
+      },
+      "boundary_note": "Member listing, revocation, and removal are provisionally grouped as one administration mechanism because the available evidence mentions them only as a single missing endpoint set and does not define their separate semantics.",
+      "confidence": "LOW"
+    },
+    {
+      "requirement_id": "REQ_INSTANT_CONNECTION_REVOCATION",
+      "title": "Instant Connection Revocation",
+      "family_id": null,
+      "definition": "A disconnect operation immediately revokes access by deleting the corresponding connection record rather than merely returning a successful response.",
+      "anchor_message_ids": [
+        21,
+        27
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "BACKEND",
+          "API"
+        ],
+        "contexts": [
+          "CONNECTION_REVOCATION"
+        ]
+      },
+      "boundary_note": "Covers actual connection-record deletion and resulting revocation; the front end's refusal to display false success is supporting execution evidence rather than a separate requirement from the supplied history.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_OWNER_MEMBER_USAGE_VISIBILITY",
+      "title": "Owner-Facing Member Usage Visibility",
+      "family_id": "MEMBER_METERING",
+      "definition": "Account owners can access token-consumption and usage-breakdown information for individual members.",
+      "anchor_message_ids": [
+        21
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "ACCOUNT_OWNER_METERING"
+        ]
+      },
+      "boundary_note": "Per-member usage visibility is independently testable from the ability to expose or manage individual usage limits.",
+      "confidence": "MEDIUM"
+    },
+    {
+      "requirement_id": "REQ_OWNER_MEMBER_USAGE_LIMITS",
+      "title": "Owner-Facing Member Usage Limits",
+      "family_id": "MEMBER_METERING",
+      "definition": "Account owners have owner-facing access to individual usage limits for members.",
+      "anchor_message_ids": [
+        21
+      ],
+      "scope_hypothesis": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "FRONTEND",
+          "BACKEND"
+        ],
+        "contexts": [
+          "ACCOUNT_OWNER_METERING"
+        ]
+      },
+      "boundary_note": "Individual limits are separated from usage reporting because limits can be delivered, changed, or tested without changing consumption visibility.",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "unresolved_candidates": [
+    {
+      "message_ids": [
+        21,
+        26,
+        27
+      ],
+      "description": "Client answers were supplied through Slack but are absent from the observable history, so the Release 3 versus Phase 5 scope of multi-user and owner-facing metering capabilities cannot be reconstructed safely.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        21
+      ],
+      "description": "The available evidence does not establish whether member listing, access revocation, and member removal should remain one administration mechanism or be split into independently evolving Requirements.",
+      "confidence": "LOW"
+    },
+    {
+      "message_ids": [
+        27
+      ],
+      "description": "Wallet is named as confirmed scope, but no observable message defines the intended Wallet behavior well enough to create an atomic Requirement.",
+      "confidence": "LOW"
+    }
+  ]
+}

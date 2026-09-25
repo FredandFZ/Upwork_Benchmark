@@ -1,0 +1,146 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 72,
+        "speaker": "client",
+        "text": "For authentication, use a hybrid approach so both crypto and non-crypto users can participate; the fiat on-ramp is important for accessibility:\n- Wallet authentication with SIWE for crypto paths, especially mints and transfers.\n- Email-based authentication for dashboard access to referrals, tickets and prizes, supporting fiat users who do not yet use a wallet.\n- No authentication for public APIs such as leaderboards and pool values, keeping them open and transparent.\n\nThis matches the lean MVP: non-crypto users can mint through Stripe and email, while crypto users use a wallet. Keep email sign-in low-friction with magic links.\n\nBrevo remains the email service. I will create the account and provide credentials soon. A paid Starter plan is acceptable if it materially improves UX or deliverability, but the value should justify the cost.\n\nI will also create a Stripe test account and share the details shortly. For now, focus on fiat-to-USDC. We can discuss a low-cost paid add-on if it improves reliability or UX; the free tier is fine to begin with."
+      },
+      "supporting_message_ids": [
+        70
+      ],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "email_service_provider": "Brevo"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "EMAIL",
+          "BACKEND"
+        ],
+        "contexts": [
+          "TRANSACTIONAL_EMAIL"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 86,
+        "speaker": "freelancer",
+        "text": "Testing the email configuration here failed because no emails arrived. Could you check the following?\n\n1\\. In the Brevo dashboard, confirm that BREVO\\_SENDER\\_EMAIL is verified\n2\\. Review the delivery status in the Brevo dashboard"
+      },
+      "supporting_message_ids": [
+        85
+      ],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A concrete Brevo configuration test produced no delivered email."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 102,
+        "speaker": "freelancer",
+        "text": "Senders &amp; IPs have now been repaired. The domain at the end of the sender address is harborquill.example, shown through http://harborquill.example and https://harborquill.example/.\n\nI therefore set BREVO\\_SENDER\\_EMAIL=marcus.notifications@harborquill.example. After that configuration, email is working well."
+      },
+      "supporting_message_ids": [
+        86,
+        92,
+        97
+      ],
+      "event_type": "IMPLEMENTATION_CLAIM",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "CLAIMED_WORKING",
+        "observed_behavior": "Freelancer reports repairing the Brevo sender and IP configuration, setting the sender address, and restoring email operation."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 184,
+        "speaker": "client",
+        "text": "We also need a new FAQ section explaining how fiat buyers who are unfamiliar with crypto receive commissions and prizes. This is important for mainstream users because a non-custodial wallet is created behind the scenes, with the seed phrase not required, but they may not understand how to reach their rewards.\n\n\"How Does a Non-Crypto Fiat Buyer Collect Commissions and Prizes?\"\n\nThe flow should reassure customers paying by fiat, such as bank transfer, Apple Pay, etc., that everything is straightforward. When the book is minted for $30 through Transak, the buyer automatically receives a non-custodial wallet behind the scenes, with the seed phrase not required. That wallet stores the buyer's NFT and receives all commissions and prizes.\n\nEarning Commissions ($10 per Referral):\nThe buyer shares a referral code, for example, \"use 8421.\" Whenever another person mints with that code, $10 is sent automatically to the wallet address.\nCollection requires no separate action. The buyer signs into <http://harborquill.example|harborquill.example> using a one-time email code or SIWE with the wallet Transak created, and the commissions appear immediately. If necessary, we can explain how to export the funds to a bank account or an exchange such as Coinbase.\n\nEarning and Winning Prizes (Tickets for $900/$6,000 Draws):\nEvery referral automatically assigns tickets for the active prize draws and ties them to the buyer's NFT/wallet.\nFair on-chain randomness runs the draws at approximately ~750 sales for $900 and ~35,000 for $6,000.\nResults are published on the Winners page and sent by email.\n\nPrize collection is automatic as well: a winner receives either $900 or $6,000 directly in the wallet and should check the dashboard or email for the notification.\n\nDuring the Purchase:\nA fiat-to-crypto conversion is completed by Transak, which then mints the NFT directly into a newly created wallet address. Nothing has to be configured manually; the process is seamless and non-custodial. The buyer owns the keys without having to manage a complicated recovery phrase immediately.\nAn email confirmation then provides the mint number, which also serves as the referral code, along with NFT details and a dashboard link at <http://harborquill.example|harborquill.example>.\n\nFor ebook access, could we use this setup?\n\nMake Login-gated preview the standard experience. The email certificate would carry a large button reading \"Read 'The Long Road Forward' Today,\" while download after verification would appear as a smaller \"Save PDF for Later\" link. The dashboard and email-linked reader should use PDF.js.\n\nDoes that work?"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "winner_notification_channel": "email",
+        "mint_confirmation_email_contents": [
+          "mint number and referral code",
+          "NFT details",
+          "dashboard link"
+        ]
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 398,
+        "speaker": "client",
+        "text": "After buying with USDC, the purchase completed across eight transactions, but there was no 'mint successful' popup. Instead, I received emails for all of these:\n\\- new badge - 'Medal'\n\\- new badge - 'Hustler'\n\\- new badge - 'High Roller'\n\\- new badge - 'First Referral'\n\\- Referral earnings - Earnings $84, Total referrals 12\n\nThe dashboard conflicts with those emails: only the 'first referral' badge is ticked, and the NFT is still missing."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "Delivered badge and referral-earnings emails reported awards and totals that conflicted with the dashboard state."
+      }
+    },
+    {
+      "source_message": {
+        "message_id": 445,
+        "speaker": "client",
+        "text": "Could the fact that my email has pending registration explain why the page is now showing what’s in the attachment? Earlier this morning, I tried setting up my email again, and the confirmation email was delayed and then delivered. For context, I configured the email last Friday; during my fifth buy, I also received notifications for badges already unlocked."
+      },
+      "supporting_message_ids": [],
+      "event_type": "RUNTIME_FAILURE",
+      "value_updates": null,
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": {
+        "status": "FAILED",
+        "observed_behavior": "A confirmation email was delayed before delivery, and a purchase generated duplicate notifications for badges that were already unlocked."
+      }
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 446,
+      "suggested_requirement_id": "REQ_EMAIL_MAGIC_LINK_AUTH",
+      "description": "The user is blocked from completing the email registration and verification workflow, which concerns email authentication rather than transactional notification delivery."
+    },
+    {
+      "message_id": 448,
+      "suggested_requirement_id": "REQ_EMAIL_MAGIC_LINK_AUTH",
+      "description": "The claim that verification works for newly created email addresses is primarily an email-authentication implementation claim."
+    },
+    {
+      "message_id": 449,
+      "suggested_requirement_id": "REQ_EMAIL_MAGIC_LINK_AUTH",
+      "description": "The pending-verification observation concerns the email authentication workflow; the remaining clauses concern dashboard accuracy and book access."
+    }
+  ],
+  "missing_requirement_candidates": []
+}

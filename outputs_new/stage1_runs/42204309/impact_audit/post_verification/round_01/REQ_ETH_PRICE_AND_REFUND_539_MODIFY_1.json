@@ -1,0 +1,159 @@
+{
+  "run_mode": "CROSS_REQUIREMENT_IMPACT_AUDIT",
+  "source_event_ref": {
+    "requirement_id": "REQ_ETH_PRICE_AND_REFUND",
+    "message_id": 539,
+    "event_type": "MODIFY",
+    "occurrence": 1
+  },
+  "decisions": [
+    {
+      "candidate_requirement_id": "REQ_USDC_WALLET_MINT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The candidate already has a same-message MODIFY limiting its mint flow to the active replacement contract, and the insufficient-ETH rule does not otherwise affect USDC minting.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_PRICE_REVENUE_SPLIT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Neither the insufficient-ETH behavior nor replacement-contract acceptance changes the confirmed mint price or revenue allocation.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_MINT_RESULT_FEEDBACK",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The decision does not change the requirement that success feedback appear only after a confirmed NFT mint.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_ETH_WALLET_MINT",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client accepts proceeding with the replacement-contract approach, so the active ETH mint flow necessarily moves to that replacement contract.",
+      "new_event": {
+        "source_message": {
+          "message_id": 539,
+          "speaker": "client",
+          "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best."
+        },
+        "supporting_message_ids": [
+          538
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "mint_contract_scope": "active replacement contract only"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_PAYMENT_METHOD_SELECTION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The source decision does not change which payment options are enabled or how checkout discloses and selects them.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_TRANSAK_FIAT_MINT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The deferred Transak flow and its fiat conversion, wallet provisioning, and mint-destination rules remain unchanged.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_UNLIMITED_NFT_MINT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Starting with fresh NFTs on a replacement contract does not change the NFT ebook format or unlimited edition supply.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_OPTIONAL_MINT_TIP",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The replacement-contract and insufficient-ETH decisions do not change the optional gratuity behavior or amounts.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_FAQ_CONTENT",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The client does not direct a FAQ revision, and propagating contract-migration or insufficient-ETH wording into approved copy would require an additional content decision.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "decision": "NO_IMPACT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The amount, trigger, recipient, and payout behavior for an accepted referral remain unchanged; referral-code eligibility belongs to the referral-identity requirement.",
+      "new_event": null
+    },
+    {
+      "candidate_requirement_id": "REQ_NFT_REFERRAL_IDENTITY",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "The accepted replacement-contract approach restarts the NFT sequence and explicitly excludes old-contract NFTs from project systems, necessarily narrowing valid referral identities.",
+      "new_event": {
+        "source_message": {
+          "message_id": 539,
+          "speaker": "client",
+          "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best."
+        },
+        "supporting_message_ids": [
+          538
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "referral_code_persistence": "permanent for NFTs in the active replacement contract; old-contract NFT referral codes are excluded",
+          "replacement_contract_token_sequence": "restart with NFT numbers #40, #41, and onward"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    },
+    {
+      "candidate_requirement_id": "REQ_NO_REFERRAL_COMMISSION",
+      "decision": "ADD_EVENT",
+      "event_locator": null,
+      "confidence": "HIGH",
+      "reason": "Because old-contract NFTs will not be used in project systems, the random recipient pool for missing or rejected referrals necessarily excludes their owners.",
+      "new_event": {
+        "source_message": {
+          "message_id": 539,
+          "speaker": "client",
+          "text": "Despite the lost copies in the old contract, which don't worry me much, I think proceeding this way would be best."
+        },
+        "supporting_message_ids": [
+          538
+        ],
+        "event_type": "MODIFY",
+        "value_updates": {
+          "recipient_selection": "random owner of an NFT from the active replacement contract; old-contract NFT owners are excluded"
+        },
+        "value_removals": null,
+        "scope_updates": null,
+        "ambiguity": null,
+        "execution": null
+      }
+    }
+  ]
+}

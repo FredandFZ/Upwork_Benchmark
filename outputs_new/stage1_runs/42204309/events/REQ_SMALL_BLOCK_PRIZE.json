@@ -1,0 +1,139 @@
+{
+  "run_mode": "EVENT_EXTRACTION",
+  "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+  "events": [
+    {
+      "source_message": {
+        "message_id": 8,
+        "speaker": "client",
+        "text": "Because a bug has just become apparent in the gameification mechanics, please eliminate &#39;milestone partner rewards&#39;. Instead, use 8 x $900 prizes for weighted ticket holders in each small block and 9 x $24k prizes for the highest-ranked affiliates in each big block.\n\nEvery additional &#39;ticket&#39; improves the odds of winning."
+      },
+      "supporting_message_ids": [],
+      "event_type": "INTRODUCE",
+      "value_updates": {
+        "winner_count": 8,
+        "prize_amount_per_winner_usd": 900,
+        "winner_eligibility": "weighted ticket holders"
+      },
+      "value_removals": null,
+      "scope_updates": {
+        "persistence": "PROJECT_PERSISTENT",
+        "components": [
+          "SMART_CONTRACT",
+          "BACKEND",
+          "FRONTEND"
+        ],
+        "contexts": [
+          "PRIZE_SYSTEM",
+          "SMALL_BLOCK"
+        ]
+      },
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 21,
+        "speaker": "client",
+        "text": "Marcus, I have one final mechanics adjustment. It removes the half-expiring-ticket behavior and should simplify the code.\n\nThis rule replaces the earlier ticket-lifespan description:\nWhenever someone mints using a referral code, the referrer immediately receives 7 tickets on their NFT:\n+4 Small Block Tickets\n+3 Big Block Tickets\n\nThese feed two completely independent counters: one Small Block counter and one Big Block counter.\n\nFor the Small Block ($7,200 pool ÷ 8 ÷ $900 draw), draw only from Small Block Tickets issued since the previous small block. After the draw, burn and reset all Small Block Tickets to 0.\n\nFor the Big Block ($216,000 pool ÷ 9 ÷ $24,000 draw), draw only from Big Block Tickets issued since the previous big block. After the draw, burn and reset all Big Block Tickets to 0.\n\nSmall blocks therefore stay fair and fresh because old tickets do not carry forward, while Big Block entries accumulate naturally until that block is drawn. Metadata only needs to show the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block fires when its pool reaches exactly $7,200, and the big block fires when its pool reaches exactly $216,000. Secondary royalties continue to fill the pools but do not create tickets.\n\nEverything else remains the same: the $10 commission is automatic, a ticket goes to a random existing NFT when no referral code is used, and prize claims remain manual.\n\nThis version should be easier to implement and explain. Once you confirm it is cleaner for you too, we are 100% locked.\n\nThanks!"
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "draw_trigger": {
+          "basis": "PRIZE_POOL_BALANCE",
+          "amount_usd": 7200
+        },
+        "secondary_royalties_contribute_to_pool": true
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 158,
+        "speaker": "client",
+        "text": "For a smoother and more consistent flow of winners, I think the block-prize structure should change to:\n- Small = 3 x $900 every 750 sales.\n- Big = 3 x $6,000 every 35,000 sales.\n\nThe net amount awarded stays the same, but this arrangement feels cleaner, clearer, and more regular."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "winner_count": 3,
+        "draw_trigger": {
+          "basis": "SALES_COUNT",
+          "count": 750
+        }
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    },
+    {
+      "source_message": {
+        "message_id": 195,
+        "speaker": "client",
+        "text": "Marcus, please remove the big blocks and redirect that extra $8 to me. The new breakdown should be:\n$30 purchase, $12 to me, $10 to the affiliate, and $8 to the block prize pool.\n\nThat should improve my bottom line without materially affecting sales, while also making the game mechanics and marketing simpler.\n\nAn even arrangement between me and each community member, together with an equal opportunity to win the continuing $900 prizes, feels consistent with the project's ethos."
+      },
+      "supporting_message_ids": [],
+      "event_type": "MODIFY",
+      "value_updates": {
+        "purchase_allocation_to_prize_pool_usd": 8
+      },
+      "value_removals": null,
+      "scope_updates": null,
+      "ambiguity": null,
+      "execution": null
+    }
+  ],
+  "routing_warnings": [
+    {
+      "message_id": 123,
+      "suggested_requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "description": "This message changes only the Big Block trigger, winner count, and prize amount."
+    },
+    {
+      "message_id": 125,
+      "suggested_requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "description": "This implementation claim explicitly concerns the revised Big Block parameters."
+    },
+    {
+      "message_id": 156,
+      "suggested_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "description": "The unresolved automatic-payout versus redemption-control question concerns prize claiming rather than the Small Block draw parameters."
+    },
+    {
+      "message_id": 184,
+      "suggested_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "description": "The automatic prize-collection statement concerns payout and claiming behavior rather than the Small Block funding or draw structure."
+    },
+    {
+      "message_id": 377,
+      "suggested_requirement_id": "REQ_MINT_PRICE_REVENUE_SPLIT",
+      "description": "The observed pool contribution verifies only the mint allocation step and does not verify the complete Small Block prize mechanism."
+    },
+    {
+      "message_id": 430,
+      "suggested_requirement_id": "REQ_DASHBOARD_LEADERBOARD_ACCURACY",
+      "description": "The incorrect displayed prize-pool amount is a platform-data accuracy failure, not evidence that the underlying Small Block draw mechanism failed."
+    },
+    {
+      "message_id": 496,
+      "suggested_requirement_id": "REQ_DASHBOARD_LEADERBOARD_ACCURACY",
+      "description": "The explicitly incorrect landing-page prize-pool value concerns displayed platform statistics rather than the underlying Small Block mechanism."
+    },
+    {
+      "message_id": 782,
+      "suggested_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "description": "The provided redemption control concerns how winners claim prizes."
+    },
+    {
+      "message_id": 784,
+      "suggested_requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "description": "Conditional claim-button visibility belongs to the prize-claim eligibility flow."
+    }
+  ],
+  "missing_requirement_candidates": []
+}
