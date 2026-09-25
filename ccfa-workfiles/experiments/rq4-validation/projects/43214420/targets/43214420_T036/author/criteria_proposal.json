@@ -1,0 +1,80 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T036",
+  "before_message_id": 719,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "8d3d907bd7b299e47b096eba1b9b912c55f084c5fadd1bd8df434fbefe5b1ce0",
+    "pre_repo_sha256": "c0328bc6ea6f2bc8a121dbdaf42663971bbf7ff3f0e58ccf8c6f2677eb906c84",
+    "target_manifest_sha256": "6534fee7ef0d0f6c285421ce0f8636b4567607bd5590b6af6da33e2b1ff54de1",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "The objective subrequirement is that ESP32 breakout pin headers are not populated while the through-hole breakout remains usable. That distinction requires real pad/hole geometry plus assembly BOM and placement/DNP observables; the current package has only a generic zero-pin breakout component and no manufacturing population artifacts.",
+      "interfaces_inspected": [
+        "dist/design.kicad_sch",
+        "dist/design.kicad_pcb",
+        "dist/design-summary.txt",
+        "stable artifact inventory"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Generate a real ESP32 breakout symbol/footprint with numbered plated-through pads and drill geometry.",
+        "Generate an assembly BOM and placement/DNP artifact that distinguishes retained holes from unpopulated pin headers."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "MISSING_ARTIFACT_GENERATOR_OR_PARSER",
+      "evidence": [
+        "The breakout component has a generic footprint and no pins or pads.",
+        "No BOM, CPL/positions, or DNP artifact exists to prove that connectors are omitted from assembly."
+      ],
+      "missing_observables": [
+        "Retained plated-through breakout holes",
+        "Absence of pin-header line items from assembly population data"
+      ],
+      "minimum_environment_repairs": [
+        "Generate a real ESP32 breakout symbol/footprint with numbered plated-through pads and drill geometry.",
+        "Generate an assembly BOM and placement/DNP artifact that distinguishes retained holes from unpopulated pin headers."
+      ],
+      "reentry_condition": "Re-author after the board and assembly outputs separately expose breakout holes and pin-header population status."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_MAIN_ESP32_BREAKOUT.attributes.pin_headers_required_for_assembly"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_MAIN_ESP32_BREAKOUT"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T036-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "The current KiCad and build outputs cannot distinguish bare breakout holes from fitted pin headers.",
+          "required_action": "Repair the stated artifact surface before validator authoring."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

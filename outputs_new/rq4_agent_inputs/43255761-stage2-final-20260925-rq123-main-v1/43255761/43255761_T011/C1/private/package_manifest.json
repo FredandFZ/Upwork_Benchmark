@@ -1,0 +1,160 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_19d033bd18a75658de73",
+  "input_release": "43255761-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T011",
+  "target_fingerprint": "c1010d6cf6db33133b3452d923d573761b4f56da3247b41c6ac6c513e823adc6",
+  "condition": "C1",
+  "turns": 274,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ1\\43255761_T011_RQ1.json",
+      "file_sha256": "4a6133f91d1a99adbbd4a4a245622c49afb676a9dc349dc10dceddb9ce775d2c",
+      "content_sha256": "32ee0f04c11c8d4ece4cf524e4d747fe59bfa50f17286f0716129222c023fd58"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ2\\43255761_T011_RQ2.json",
+      "file_sha256": "3248c54a9c424d6ecc9ca74566e17067fff3bb09c208ed01ae817bcffd391437",
+      "content_sha256": "1583680b88c72d1c25946f904dbe2648d2cdc424dec68bae9fc9be7d62d57e17"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ3\\43255761_T011_RQ3.json",
+      "file_sha256": "445a66ace18ceff2382ecb568a9254790b2909473b6a4cbdc20fc460a44ab857",
+      "content_sha256": "b35a1fba6ad1c5bb08facbe25d639c77f0a4971e34675ab2788117c45396c8ed"
+    }
+  },
+  "public_files": {
+    "task.json": "414d941322ca095c052cf7ae0791dacbca32084de62c6a389bfc288aeef93c3d",
+    "history.jsonl": "6a179b95b0ec343f7fb3c97fc8db901d35928ce6e1036743468406827174e831",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43255761/targets/T011_before_275/pre_repo.zip",
+    "archive_sha256": "a1b0bd24825ca3b512a5ed1900c41db85e254ad98b1759c7ca470fe06ed5b1bf",
+    "tree_sha256": "c7abd8f5475b2b369d751be9d39e3759de39d23d852a615321d40e89bf1c59c6",
+    "manifest_path": "Code Environment/43255761/targets/T011_before_275/manifest.json",
+    "manifest_sha256": "a35be46e6f47ae0eeb88b6e8999158024b2e373f86da5b0bcedc5399a34887dd",
+    "before_message_id": 275,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The headline field is an identifiable Word text content control configured for multiline input, and a regular paragraph break can be stored as two paragraphs inside that same control without splitting or deleting it.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx headline content control",
+            "setup": [
+              "Build dist/template.docx in a fresh workspace.",
+              "Select the content control whose normalized semantic tag identifies the headline field."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "parts": [
+                    "word/document.xml"
+                  ],
+                  "control_tag": "headline"
+                }
+              },
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "temporary headline multiline fixture DOCX",
+                "parameters": {
+                  "mutation": "replace headline w:sdtContent with two deterministic paragraphs and reopen the package"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "headline-tagged interactive content controls",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "headline control w:text/@w:multiLine",
+                "operator": "EQUALS",
+                "expected": "1"
+              },
+              {
+                "subject": "paragraphs retained inside the same headline w:sdt after multiline fixture reopen",
+                "operator": "COUNT_EQUALS",
+                "expected": 2
+              }
+            ],
+            "determinism_controls": [
+              "Identify the headline control by stable semantic w:tag, not document order or source configuration.",
+              "Mutate and reopen only a temporary DOCX copy; verify the same w:tag encloses both paragraphs."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "The headline is a single-line w:text control or plain paragraph."
+            ],
+            "action": "Inspect control type and multiline attribute.",
+            "expected_failure_or_absence": "The criterion fails before any source-level flag can be considered."
+          },
+          {
+            "case_id": "NC002",
+            "setup": [
+              "Adding a second paragraph places it outside or splits the headline control."
+            ],
+            "action": "Reopen the temporary package and count paragraphs under the original tagged w:sdt.",
+            "expected_failure_or_absence": "The criterion fails because regular Enter is not retained within the field."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "7b8ecef869218f21339aa74119791f7b19f1765344cedf4463552d085a3312cd",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

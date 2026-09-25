@@ -1,0 +1,152 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_90581287c56bacd286c7",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T006",
+  "target_fingerprint": "3163ca15e47396ded4f3a718241e3a12b2f842f375d4286a081c1c56b9def971",
+  "condition": "C2",
+  "turns": 96,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ1\\43214420_T006_RQ1.json",
+      "file_sha256": "069196d811cc11603d90a58d0d2af165ec69ccea8151d089e0f3b3623f229d7c",
+      "content_sha256": "82c8db150a0a9b9313b3d6e85de6804ed9d50ad8edd0eb07bddfde28651b4a31"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ2\\43214420_T006_RQ2.json",
+      "file_sha256": "c6b14e082c17946d081345c73fe8f96537992756ff74a50ca5f37de6e17ed819",
+      "content_sha256": "53a8c131d8b2cc082fa1fc2c06e7dc07a4acebfe7c0990030bb9e3530a7bc933"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ3\\43214420_T006_RQ3.json",
+      "file_sha256": "a2c5f0ad3a8b5bce5d443a93bc38f6c4780d84153b48e7c4517bd43ebfbf9797",
+      "content_sha256": "fce9aa3cc6b3bcde2a25a5c9a79921e68ae25243400e34e6e6f8a5d667ed1249"
+    }
+  },
+  "public_files": {
+    "task.json": "80e76487d7108f95710463127d4eca2eadde59063418e0dad579607a068f00da",
+    "history.jsonl": "53eefb08c4b5722a26e0f72b1547a83f16ebcc7bb6b1761e0e42c6d204637033",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T006_before_97/pre_repo.zip",
+    "archive_sha256": "773093438bcb424cc412dd42f4140fba3a9c3994321e76f7bffe114359178677",
+    "tree_sha256": "b3c1fc0a317fd350b58c4ce3e38702342e5c608f439d57b4ce5aa39589d914bd",
+    "manifest_path": "Code Environment/43214420/targets/T006_before_97/manifest.json",
+    "manifest_sha256": "e8e9463f3210be785b3af054f1eaab36a41813b4976e05ad8bf2a0d3f249f852",
+    "before_message_id": 97,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The J_BAT JST-PH connector is implemented with an SMD footprint: all three electrical pads are KiCad smd pads on copper/mask/paste layers and none has a drill; any mechanical hold-down pads are not counted as signal pins.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb J_BAT pad definitions",
+            "setup": [
+              "Build design.kicad_pcb and select J_BAT."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_pcb",
+                "parameters": {
+                  "reference": "J_BAT",
+                  "extract": [
+                    "footprint library id",
+                    "pad number",
+                    "pad type",
+                    "layers",
+                    "drill"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "J_BAT numbered electrical pads",
+                "operator": "COUNT_EQUALS",
+                "expected": 3
+              },
+              {
+                "subject": "J_BAT electrical pads whose type is not smd",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "J_BAT electrical pads with a drill declaration",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "J_BAT footprint library id",
+                "operator": "MATCHES_REGEX",
+                "expected": "(?i)JST[-_]?PH.*SMD"
+              }
+            ],
+            "determinism_controls": [
+              "Inspect actual PCB pad tokens rather than footprint-name text alone.",
+              "Exclude unnumbered/mechanical hold-down pads from the electrical-pad count."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "The footprint name says SMD but signal pads are thru_hole."
+            ],
+            "action": "Inspect pad types and drill fields.",
+            "expected_failure_or_absence": "The criterion fails."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "8d1cc27a659cfe136e06bb67437d5261df24627734841a25011d415850c0c808",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

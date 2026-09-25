@@ -1,0 +1,93 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T005",
+  "before_message_id": 194,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "2c8e13642fab65b67c7f1c40ce1a7ed54b0b072584869f51f5aca717b12217aa",
+    "pre_repo_sha256": "aaa6be6f08651eb5cb92ec080653d4f6a3623800f28247ee8ae1775b99e8f881",
+    "target_manifest_sha256": "42611435056193df6526ebc8fae51cdd32f5f45e1021b0f4d06018ddfe1ef5fb",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The two requested locations map to concrete OOXML: the control label is w:sdtPr/w:alias and the in-field instruction is visible text in w:sdtContent (or its referenced placeholder building block). Both can be compared per content-control tag.",
+      "interfaces_inspected": [
+        "dist/template.docx!/word/document.xml",
+        "dist/template.docx!/word/glossary/document.xml",
+        "src/artifact_runtime.py:_parse_docx"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "For every interactive content control, the same non-empty instruction is present both as the control label (w:alias) and as the initially displayed in-field text or resolved placeholder text.",
+        "gold_requirement_refs": ["REQ_FIELD_LABEL_HELP_TEXT"],
+        "gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.help_text_locations"],
+        "evidence_message_ids": [194],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx content-control label and placeholder parts",
+            "setup": ["Build dist/template.docx in a fresh workspace."],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {"resolve": ["w:sdtPr/w:alias", "w:sdtContent", "w:placeholder/w:docPart"]}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "interactive controls with empty label text", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "interactive controls with empty initial in-field/placeholder text", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "interactive controls whose normalized label and initial in-field instruction differ", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": [
+              "Resolve placeholder building-block references within the DOCX package before comparison.",
+              "Join values using the unique w:tag and compare normalized visible text, not source configuration."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": ["A control has help text only in its alias or only inside the field."],
+            "action": "Resolve both OOXML locations.",
+            "expected_failure_or_absence": "The criterion fails because both places are required."
+          }
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.help_text_locations"],
+      "covered_affected_gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.help_text_locations"],
+      "preserved_requirement_refs": [
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+        "REQ_FIELD_VISUAL_CUES",
+        "REQ_FIELD_FORMATTING_PRESERVATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

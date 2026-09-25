@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rq4-agent-judge-result-v1",
+  "title": "ReqMemBench RQ4 Agent Judge result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "target_id",
+    "criteria",
+    "judge_summary"
+  ],
+  "properties": {
+    "schema_version": {"const": "rq4-agent-judge-result-v1"},
+    "target_id": {"type": "string", "minLength": 1},
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion_id", "verdict", "evidence"],
+        "properties": {
+          "criterion_id": {"type": "string", "pattern": "^AC[0-9]{3}$"},
+          "verdict": {"enum": ["PASS", "FAIL", "UNSURE"]},
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["operation", "observation"],
+              "properties": {
+                "operation": {"type": "string", "minLength": 1},
+                "observation": {"type": "string", "minLength": 1},
+                "artifact": {"type": ["string", "null"]}
+              }
+            }
+          }
+        }
+      }
+    },
+    "judge_summary": {"type": "string", "minLength": 1}
+  }
+}

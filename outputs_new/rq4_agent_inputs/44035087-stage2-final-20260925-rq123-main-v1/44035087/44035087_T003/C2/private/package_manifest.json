@@ -1,0 +1,174 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_11b46307c2ca3489b400",
+  "input_release": "44035087-stage2-final-20260925-rq123-main-v1",
+  "project_id": "44035087",
+  "target_id": "44035087_T003",
+  "target_fingerprint": "60fd4e29e918c9dcd0b515aef0365df1aca64593a74debda7d965f555664328f",
+  "condition": "C2",
+  "turns": 36,
+  "difficulty": "MEDIUM",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ1\\44035087_T003_RQ1.json",
+      "file_sha256": "96f0611823520c474a544f1c0f68fc4dacbbca5543687ddf844064d767a3eb95",
+      "content_sha256": "0d079f6da29e3e06fbf8e9fe8ba0c50a801ea01d64b5ac10617dd819c21bf77a"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ2\\44035087_T003_RQ2.json",
+      "file_sha256": "eb5af259c3b73ce8766434a13b6dfae4cd8ad343c0e783add2d4175de5e35c36",
+      "content_sha256": "0d14d03688b49f106a45f890b166ca3fd9e71c5d4e51a7eead141612ee411d24"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ3\\44035087_T003_RQ3.json",
+      "file_sha256": "f546ab1ff475762b934d565e98e961ff3f5b647b68f6ba312e5b251b46b80248",
+      "content_sha256": "deac885194f0b519ab79f2ffd694d848075351d4af9b20961f4bb05a37501a25"
+    }
+  },
+  "public_files": {
+    "task.json": "29b36bd9e6ecd0f02ee471f7e0aa09dcfb70255ff4bdbc50cf583136932bd7ea",
+    "history.jsonl": "34a7b15d58dbeb9d96ca66994d07d036f5466575e25e924b9763af31cf42a420",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/44035087/targets/T003_before_37/pre_repo.zip",
+    "archive_sha256": "a8ff0e478f23bd03d3417ea973e929e3b9b31981cc525d14f0c4f2238582afee",
+    "tree_sha256": "f27ae68ec096b4ce99c9e7b24433c7db31b05c5ba31f0e87b57215ead846a435",
+    "manifest_path": "Code Environment/44035087/targets/T003_before_37/manifest.json",
+    "manifest_sha256": "8ceff696571bf685774562d5bdbd463f3d5569ad098708ea55a8699caffea02a",
+    "before_message_id": 37,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "For the same package, properties in distinct square-footage bands resolve through distinct band entries and the displayed quote is tied to the selected square-footage band.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "API",
+            "surface": "Public quote behavior",
+            "setup": [
+              "Create a fresh local application instance",
+              "Use one fixed package and fixtures spanning multiple positive square-footage bands"
+            ],
+            "actions": [
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "local quote interface",
+                "parameters": {
+                  "method": "POST",
+                  "cases": [
+                    1000,
+                    1800,
+                    3000,
+                    4000
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "returned category for each case",
+                "operator": "EQUALS",
+                "expected": [
+                  "under_1200_sqft",
+                  "1201_2400_sqft",
+                  "2401_3600_sqft",
+                  "3600_plus_sqft"
+                ]
+              },
+              {
+                "subject": "quote price source",
+                "operator": "EQUALS",
+                "expected": "the matrix cell for the returned square-footage category"
+              }
+            ],
+            "determinism_controls": [
+              "offline network",
+              "fresh application state",
+              "fixed numeric inputs"
+            ]
+          },
+          {
+            "observable_id": "OBS002",
+            "type": "FRONTEND_DOM",
+            "surface": "Pricing page",
+            "setup": [
+              "Build and open the pricing surface"
+            ],
+            "actions": [
+              {
+                "operation": "QUERY_DOM",
+                "target": "package pricing grouped by square-footage band",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "square-footage differentiated pricing presentation",
+                "operator": "EXISTS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "frozen browser",
+              "offline assets"
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Fresh quote service"
+            ],
+            "action": "Submit a non-positive square-footage value",
+            "expected_failure_or_absence": "The request is rejected rather than assigned an arbitrary price band."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "67c1d49ab118fe876d835aec85e11b9565e3aa412e20a87e1e6b6bba0bd130bd",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

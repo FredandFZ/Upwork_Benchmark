@@ -1,0 +1,95 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T045",
+  "before_message_id": 887,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "cfc2a726e6c2a0e58c92a81a3320416951652fac69a5f72ab792867136f22b17",
+    "pre_repo_sha256": "bef6a71ada9025fa3192b618b8eaa8844bd89b915a13ab0c8bc7acbed18d7f73",
+    "target_manifest_sha256": "6ab7e80b7efb32565a36eeda72bb774d3ed275c945c83756953e05746b387d64",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "VRTC/VBACKUP handling and the R16-R20/R25 bias networks are deterministic schematic, net, footprint, and placement facts. However, the current KiCad build represents them as zero-pin generic placeholders: it has no AXP2101 pin 27, VRTC, test pad, named resistors, button connectors, or sensor-signal connectivity to validate.",
+      "interfaces_inspected": [
+        "dist/design.kicad_sch symbols and pins",
+        "dist/design.kicad_pcb footprints, pads, nets, and positions",
+        "artifact_runtime.parse_artifacts",
+        "stable artifact inventory"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Generate a real AXP2101 symbol/footprint with numbered VBACKUP and VRTC pins plus PWROK and a placed test pad/via.",
+        "Generate R16, R17, R18, R19, R20, and R25 as real resistor components with values and pad-to-net connectivity.",
+        "Generate the button/switch and PIR/touch connectors with stable references and pin mappings.",
+        "Expose reference-linked values, positions, pins, pads, and net membership to deterministic parsing."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "MISSING_ARTIFACT_GENERATOR_OR_PARSER",
+      "evidence": [
+        "The auxiliary-pin placeholder has no pins.",
+        "The button/switch placeholder has no pins and none of R16-R20/R25 exist as KiCad components.",
+        "Parsed nets expose names only and cannot prove resistor or connector endpoints."
+      ],
+      "missing_observables": [
+        "VRTC NC and VBACKUP pin 27 to an unpopulated test pad/via beside PWROK",
+        "R16/R17/R18 from 3V3 to the three active-LOW GPIO inputs with connector pin 1 on GND",
+        "R19/R20/R25 20 kΩ pull-downs to GND on PIR/touch signal nets"
+      ],
+      "minimum_environment_repairs": [
+        "Generate a real AXP2101 symbol/footprint with numbered VBACKUP and VRTC pins plus PWROK and a placed test pad/via.",
+        "Generate R16, R17, R18, R19, R20, and R25 as real resistor components with values and pad-to-net connectivity.",
+        "Generate the button/switch and PIR/touch connectors with stable references and pin mappings.",
+        "Expose reference-linked values, positions, pins, pads, and net membership to deterministic parsing."
+      ],
+      "reentry_condition": "Re-author after the built KiCad files contain the named real components and expose their pin-level connectivity and placement."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_INTEGRATED_AXP_AUXILIARY_PINS.attributes.vbackup_exposure",
+        "REQ_INTEGRATED_AXP_AUXILIARY_PINS.attributes.vbackup_initial_population",
+        "REQ_INTEGRATED_AXP_AUXILIARY_PINS.attributes.vrtc_handling",
+        "REQ_INTEGRATED_BUTTON_INPUTS.attributes.active_level",
+        "REQ_INTEGRATED_BUTTON_INPUTS.attributes.affected_inputs",
+        "REQ_INTEGRATED_BUTTON_INPUTS.attributes.connector_pin_1",
+        "REQ_INTEGRATED_BUTTON_INPUTS.attributes.press_behavior",
+        "REQ_INTEGRATED_BUTTON_INPUTS.attributes.pull_resistor_configuration",
+        "REQ_INTEGRATED_PIR_TOUCH_INPUT_BIASING.existence"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_INTEGRATED_AXP_AUXILIARY_PINS",
+        "REQ_INTEGRATED_PIR_TOUCH_INPUT_BIASING"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T045-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "The current placeholders cannot support the required pin-level electrical assertions.",
+          "required_action": "Repair the stated artifact surface before validator authoring."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

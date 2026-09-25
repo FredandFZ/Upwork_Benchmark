@@ -1,0 +1,42 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T007",
+  "before_message_id": 139,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "d7b2b58255a3eb670217ecec407e3cf33ba1ad086c8ae6b16635636e4bb66db0",
+    "pre_repo_sha256": "aea25964d190fe382e09951e6c6fba1188bd8cfa57a948a26287892b687f89fb",
+    "target_manifest_sha256": "d92f820a426eea27bc3aaa25cbe81d05de324a982594e9884640002c227152dc",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "The requirement is a comparison between the physical pin numbering of a power-board connector and a main-board connector. The frozen build emits only one design.kicad_sch/design.kicad_pcb pair and its synthetic interboard component does not identify two board-owned connector instances, so equal ordering cannot be observed independently.",
+      "interfaces_inspected": ["dist/design.kicad_sch", "dist/design.kicad_pcb", "src/artifact_model.py:ARTIFACT_MODEL.components", "src/artifact_runtime.py:_kicad_text"],
+      "subjective_only": false,
+      "repair_requirements": ["Build separate power-board and main-board KiCad artifacts, or encode immutable board ownership for both connector instances.", "Expose each four-pin JST-PH connector's physical pad number to net mapping in parsed build output."]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "NO_EXECUTABLE_BEHAVIOR_INTERFACE",
+      "evidence": ["Only one schematic and PCB are declared as stable artifacts.", "The pre-repo contains one aggregate interboard component rather than separately addressable main-board and power-board connectors.", "No board ownership field is serialized into the KiCad output."],
+      "missing_observables": ["Power-board connector pad-to-net mapping", "Main-board connector pad-to-net mapping", "Board identity for each connector"],
+      "minimum_environment_repairs": ["Emit and parse two board artifacts or an equivalent board-scoped design package.", "Add stable connector references and board ownership to the artifact contract."],
+      "reentry_condition": "Re-author criteria when both board connector instances can be selected independently and their physical pad-to-net maps compared."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_INTERBOARD_POWER_SIGNAL_LINKS.attributes.matching_physical_numbering_required", "REQ_INTERBOARD_POWER_SIGNAL_LINKS.attributes.power_connector_pin_order_policy", "REQ_INTERBOARD_POWER_SIGNAL_LINKS.attributes.power_connector_pinout"],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": ["REQ_POWER_BOARD_BATTERY_INTERFACE", "REQ_POWER_BOARD_USB_CONNECTOR"],
+      "uncovered_items": [{"finding_id": "T007-GAP-001", "severity": "BLOCKING", "category": "ENVIRONMENT_GAP", "evidence": "The single-board output cannot distinguish or compare the two required physical connectors.", "required_action": "Repair the board-scoped build surface before validator authoring."}]
+    }
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

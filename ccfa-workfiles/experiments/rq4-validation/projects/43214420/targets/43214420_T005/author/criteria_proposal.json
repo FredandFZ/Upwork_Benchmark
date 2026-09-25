@@ -1,0 +1,42 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T005",
+  "before_message_id": 83,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "52a9da499be163509408e29ac60030300cdb4e58a8e3e80c7a9639683862bbad",
+    "pre_repo_sha256": "acaf227cbb7107d1f89c74b8133bfd0e429ae9123bb20805bebd6215b339af27",
+    "target_manifest_sha256": "8021046c3bca06c7e8c09d2ecd67470a92da9a4191a136aaae2d34c089af2ef0",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {"determination": "DETERMINISTIC_OBSERVABLE", "rationale": "Connector family, pitch, pad count, and GND/VCC/NTC mapping are directly observable from the battery connector's actual KiCad footprint and pad-to-net assignments in the built PCB, cross-checked against its schematic symbol.", "interfaces_inspected": ["dist/design.kicad_sch", "dist/design.kicad_pcb", "src/artifact_model.py:ARTIFACT_MODEL.components", "src/artifact_model.py:ARTIFACT_MODEL.nets"], "subjective_only": false, "repair_requirements": []},
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The built schematic and PCB contain one battery connector J_BAT using a JST-PH 2.00 mm three-position footprint with exactly three electrical pads, mapped one-to-one to GND, VCC, and NTC and to no additional signal net.",
+        "gold_requirement_refs": ["REQ_POWER_BOARD_BATTERY_INTERFACE"],
+        "gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_family", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_pitch", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.pin_count", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.pin_functions"],
+        "evidence_message_ids": [83],
+        "observables": [
+          {"observable_id": "OBS001", "type": "ARTIFACT", "surface": "dist/design.kicad_sch and dist/design.kicad_pcb J_BAT component", "setup": ["Build both KiCad artifacts and resolve J_BAT across schematic and PCB."], "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_sch and dist/design.kicad_pcb", "parameters": {"reference": "J_BAT", "extract": ["symbol pin map", "footprint library id", "pad types", "pad-to-net map", "pad centers"]}}], "expected_observations": [
+            {"subject": "J_BAT footprint library id", "operator": "MATCHES_REGEX", "expected": "(?i)JST[-_]?PH.*1x03.*P2[._]00mm"},
+            {"subject": "J_BAT electrical pad count", "operator": "COUNT_EQUALS", "expected": 3},
+            {"subject": "J_BAT pad-to-net value set", "operator": "EQUALS", "expected": ["GND", "VCC", "NTC"]},
+            {"subject": "distance between adjacent ordered pad centers in mm", "operator": "EQUALS", "expected": 2.0, "tolerance": 0.01}
+          ], "determinism_controls": ["Read the actual placed footprint and nets; ignore descriptive component properties.", "Canonicalize net aliases only through explicit KiCad net ties, not name guessing."]}
+        ],
+        "negative_cases": [{"case_id": "NC001", "setup": ["A generic three-pin connector has the right prose but wrong pitch or nets."], "action": "Parse footprint geometry and pad-to-net assignments.", "expected_failure_or_absence": "The criterion fails."}]
+      }
+    ],
+    "coverage_summary": {"affected_gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_family", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_pitch", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.pin_count", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.pin_functions"], "covered_affected_gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_family", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_pitch", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.pin_count", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.pin_functions"], "preserved_requirement_refs": ["REQ_POWER_BOARD_MECHANICAL_LAYOUT", "REQ_POWER_BOARD_BATTERY_TEMPERATURE_MONITORING"], "uncovered_items": []}
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

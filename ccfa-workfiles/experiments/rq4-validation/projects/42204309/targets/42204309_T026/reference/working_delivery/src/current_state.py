@@ -1,0 +1,651 @@
+# Generated current behavior. Edit this module to implement requested changes.
+PROJECT = {'artifact_class': 'HYBRID_WEB_APPLICATION',
+ 'description': 'Offline executable web application modeling the NFT, referral, prize, payment, '
+                'authentication, and ebook behavior visible at each boundary.',
+ 'primary_artifacts': ['dist/index.html', 'dist/catalog.json'],
+ 'project_id': '42204309',
+ 'renderer': 'web',
+ 'title': '42204309'}
+
+FEATURES = [{'attributes': {'key_feature_topics': ['Automatic Rewards',
+                                        'Fair Prize Selection',
+                                        'Gamification',
+                                        'Transparency',
+                                        'Low Fees'],
+                 'mechanics_topics': ['Mint Your ebook NFT',
+                                      'Earn Through Referrals',
+                                      'Accumulate Reward-Drawing Entries',
+                                      'Win Referral-Dependent Prizes',
+                                      'Claim Your Rewards'],
+                 'no_referral_rewards_copy': 'Explain that a code-free purchase does not '
+                                             'necessarily create six tickets, while its $10 '
+                                             'commission must be assigned by weighted draw among '
+                                             'eligible NFT owners.',
+                 'overview_topics': ['Harbor Quill as the live proof of concept for CORA',
+                                     'Unlimited-mint NFT ebooks that reward reader promotion',
+                                     'Launch of From Workshop Floor to Fresh Start on Base',
+                                     'Future transition from Harbor Quill to ArchiveLedger'],
+                 'page_title': 'About Harbor Quill',
+                 'prize_claim_copy': 'Prize winners receive the applicable $2,000 or $900 reward '
+                                     'automatically in their wallet; the About page must not '
+                                     'present a visible or one-click redemption control.',
+                 'prize_collection_copy': 'Prize collection remains automatic; describe the '
+                                          'applicable $2,000 or $900 drawing outcome and wallet '
+                                          'notification without one-click redemption-control '
+                                          'wording.',
+                 'prize_mechanics_content': 'Explain that an accepted valid referral gives the '
+                                            'chosen referrer a $25 credit and entry into the '
+                                            '$2,000 reward drawing. For a missing referral, '
+                                            'explain that the $10 commission is assigned by '
+                                            'weighted draw among eligible NFT owners and that six '
+                                            'tickets are not guaranteed. Preserve the existing '
+                                            'rejected-referral rule of an $18 commission and a '
+                                            '$900 draw entry assigned to a random NFT owner.',
+                 'prize_mechanics_copy': 'Describe the conditional referral outcomes: accepted '
+                                         'referrals enter the chosen referrer into the $2,000 '
+                                         'reward drawing; a missing referral assigns the $10 '
+                                         'commission by weighted draw among eligible NFT owners '
+                                         'without guaranteeing six tickets; a rejected referral '
+                                         'retains its $18 commission and $900 draw entry assigned '
+                                         'to a random NFT owner.',
+                 'section_headings': ['What is Harbor Quill?',
+                                      'Built on Cutting-Edge Technology',
+                                      'How It Works',
+                                      'Key Features',
+                                      'Our Vision'],
+                 'subtitle': 'A reader-powered release where every recommendation earns rewards.',
+                 'technology_topics': ['Smart Contracts',
+                                       'Chainlink VRF',
+                                       'Base Network',
+                                       'Decentralized',
+                                       'Secure'],
+                 'vision_theme': 'A self-sustaining, community-owned system in which independent '
+                                 'creators and promoting readers are rewarded without publishing '
+                                 'gatekeepers.'},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['ABOUT_PAGE'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'about-harbor-quill-page-content',
+  'title': 'About Harbor Quill Page Content'},
+ {'attributes': {'award_basis': 'referral milestones',
+                 'badge_attachment': 'on-chain badges attached to the NFT',
+                 'highest_threshold_applies_at_or_above': 500,
+                 'referral_milestone_thresholds': [5, 25, 125, 500]},
+  'components': ['SMART_CONTRACT'],
+  'contexts': ['BADGES'],
+  'execution': {'observed_behavior': 'The client explicitly reported the badge state as working '
+                                     'correctly, with the First Referral badge marked.',
+                'status': 'VERIFIED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'nft-badge-awards',
+  'title': 'NFT Badge Awards'},
+ {'attributes': {'badge_row_layout': {'bottom_row': 11, 'top_row': 8},
+                 'badge_set_policy': 'Use a curated subset rather than the entire designed badge '
+                                     'set.',
+                 'badge_set_size': 19,
+                 'community_orbit_icon': 'constellation',
+                 'duplicate_badge_icon_treatment': 'Use a large compass rose or similar distinct '
+                                                   'icon instead of repeating the same icon.',
+                 'genesis_mint_badge_replacement': 'trailblazer referral badge'},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['BADGES', 'DASHBOARD'],
+  'execution': {'observed_behavior': 'Client observes that the badge layout uses 13 badges on the '
+                                     'top row and 7 on the bottom instead of the requested '
+                                     '8-and-11 arrangement.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'badge-set-and-presentation',
+  'title': 'Badge Set and Presentation'},
+ {'attributes': {'blockchain_network': 'Base (Ethereum Layer 2)'},
+  'components': ['SMART_CONTRACT', 'BACKEND', 'INFRASTRUCTURE'],
+  'contexts': ['BASE_MAINNET'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'base-network-deployment',
+  'title': 'Base Network Deployment'},
+ {'attributes': {'book_view_width': 'increase the current book view width by 25%',
+                 'reader_engine': 'PDF.js',
+                 'reader_entry_points': ['dashboard', 'email-linked reader']},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['BOOK_READER'],
+  'execution': {'observed_behavior': 'Keyboard navigation continued to work, but the on-screen '
+                                     'arrows faded and could no longer be clicked with the cursor.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'ebook-reader-navigation',
+  'title': 'Ebook Reader Navigation'},
+ {'attributes': {'applicable_draws': ['SMALL_BLOCK'],
+                 'fairness': 'provably fair',
+                 'randomness_provider': 'Chainlink VRF',
+                 'selection_execution': 'fully on-chain',
+                 'verification_surface': 'Basescan'},
+  'components': ['SMART_CONTRACT'],
+  'contexts': ['PRIZE_SYSTEM', 'RANDOM_SELECTION'],
+  'execution': {'observed_behavior': 'Client reports that the replacement contract was added as a '
+                                     'consumer to the Chainlink VRF subscription.',
+                'status': 'CLAIMED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'chainlink-vrf-winner-selection',
+  'title': 'Chainlink VRF Winner Selection'},
+ {'attributes': {'allocation_trigger': 'referral is accepted',
+                 'commission_cap': 'none',
+                 'credit_amount_usd': 25,
+                 'distribution': 'automatic',
+                 'payout_destination': "referrer's wallet",
+                 'payout_timing': 'immediate',
+                 'recipient': 'chosen referrer'},
+  'components': ['SMART_CONTRACT'],
+  'contexts': ['REFERRAL_MINT', 'AFFILIATE_COMMISSION'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'coded-referral-commission',
+  'title': 'Coded-Referral Commission'},
+ {'attributes': {'allocation_trigger': 'referral is accepted',
+                 'recipient': 'chosen referrer',
+                 'reward_drawing_amount_usd': 2000,
+                 'reward_drawing_entries_per_accepted_referral': 1},
+  'components': ['SMART_CONTRACT', 'BACKEND'],
+  'contexts': ['REFERRAL_MINT', 'PRIZE_TICKETS'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'coded-referral-ticket-issuance',
+  'title': 'Coded-Referral Ticket Issuance'},
+ {'attributes': {'contract_address_filter': '0xe72a4c915d80b3f614c79e286a03db5f91c8472e',
+                 'network': 'Base Mainnet',
+                 'webhook_name': 'Harbor Quill Contract Events',
+                 'webhook_url': 'https://harborquill.example/api/webhook/contract-events'},
+  'components': ['BACKEND', 'API', 'INFRASTRUCTURE'],
+  'contexts': ['CONTRACT_EVENT_SYNC', 'BASE_MAINNET'],
+  'execution': {'observed_behavior': 'The backend did not monitor the RandomnessSettled event, so '
+                                     'it failed to submit the required referral-finalization '
+                                     'transaction.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'production-contract-event-webhook',
+  'title': 'Production Contract-Event Webhook'},
+ {'attributes': {'migration_data_policy': 'Use a fresh replacement-contract state and exclude NFTs '
+                                          'from the old contract from the active system.'},
+  'components': ['SMART_CONTRACT'],
+  'contexts': ['PRODUCTION_MIGRATION'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'contract-migration-data-continuity',
+  'title': 'Contract Migration Data Continuity'},
+ {'attributes': {},
+  'components': [],
+  'contexts': [],
+  'execution': {'observed_behavior': 'Freelancer reports verifying a reconciled summary of 4 NFTs, '
+                                     '9 referrals, 19 prize-draw tickets, and $125 in total '
+                                     'earnings, together with per-NFT referral, ticket, and '
+                                     'earnings details.',
+                'status': 'VERIFIED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'referral-reward-reporting-accuracy',
+  'title': 'Referral Reward Reporting Accuracy'},
+ {'attributes': {'authentication_method': 'low-friction email sign-in using an email link',
+                 'dashboard_access': ['referrals', 'tickets', 'prizes'],
+                 'fiat_buyer_dashboard_access': 'sign in through the email link to view '
+                                                'automatically received commissions and prizes',
+                 'fiat_buyer_email_sign_in': 'email link',
+                 'supported_users': 'fiat and non-crypto users who do not yet use a wallet'},
+  'components': ['AUTH', 'EMAIL', 'BACKEND', 'FRONTEND'],
+  'contexts': ['EMAIL_AUTH', 'DASHBOARD_ACCESS'],
+  'execution': {'observed_behavior': "After the claimed fix, the client's email account remained "
+                                     'pending verification.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'email-magic-link-authentication',
+  'title': 'Email Magic-Link Authentication'},
+ {'attributes': {'eth_input_policy': 'consume only the ETH required for the fixed mint price and '
+                                     'return the remainder',
+                 'eth_input_pricing': 'dynamic with the ETH market price to track the fixed mint '
+                                      'price',
+                 'excess_refund_asset': 'ETH',
+                 'insufficient_eth_behavior': 'revert if the supplied ETH cannot produce the exact '
+                                              '30 USDC mint output',
+                 'swap_mode': 'exactOutputSingle',
+                 'target_mint_price': '$30 equivalent'},
+  'components': ['SMART_CONTRACT', 'FRONTEND'],
+  'contexts': ['ETH_PAYMENT', 'PAYMENT_REFUND'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'eth-pricing-and-excess-refund',
+  'title': 'ETH Pricing and Excess Refund'},
+ {'attributes': {'supported_wallet_payment_asset': 'ETH'},
+  'components': ['SMART_CONTRACT', 'FRONTEND'],
+  'contexts': ['PRIMARY_MINT', 'ETH_PAYMENT'],
+  'execution': {'observed_behavior': 'The client successfully completed an ETH mint without an ETH '
+                                     'approval step.',
+                'status': 'VERIFIED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'eth-wallet-mint-flow',
+  'title': 'ETH Wallet Mint Flow'},
+ {'attributes': {'approved_faq_copy': 'Retain the approved FAQ copy, remove the assertion that a '
+                                      'referral-free purchase must create six tickets, and state '
+                                      'that its $10 commission is allocated by weighted draw among '
+                                      'eligible NFT owners.',
+                 'beginner_rewards_collection_faq_section': 'Retain the approved beginner rewards '
+                                                            'content, remove the requirement that '
+                                                            'a referral-free purchase creates six '
+                                                            'tickets, and explain that its $10 '
+                                                            'commission is allocated by weighted '
+                                                            'draw among eligible NFT owners.',
+                 'editorial_refinement': 'Minor refinement is allowed before loading the supplied '
+                                         'FAQ copy.',
+                 'faq_draw_copy_consistency': 'Use Chainlink VRF consistently throughout FAQ draw '
+                                              'descriptions and fairness explanations.',
+                 'faq_topics': ['product mission',
+                                'buyer earnings',
+                                'referrals and referral codes',
+                                'Small Block prizes',
+                                'Chainlink VRF winner selection',
+                                'prize tickets and reward claims',
+                                'badges',
+                                'fiat minting and wallet needs',
+                                'Base network',
+                                'mint and royalty fees',
+                                'NFT transfers',
+                                'sharing referral codes',
+                                'single-level model and creator revenue',
+                                'support channels'],
+                 'fiat_buyer_rewards_faq_section': 'Retain the approved fiat-buyer FAQ content, '
+                                                   'remove the requirement that a missing referral '
+                                                   'creates six tickets, and state that the $10 '
+                                                   'no-referral commission is allocated by '
+                                                   'weighted draw among eligible NFT owners.',
+                 'no_referral_rewards_faq_section': 'State that the $10 commission from a '
+                                                    'referral-free purchase is allocated by '
+                                                    'weighted draw among eligible NFT owners; do '
+                                                    'not assert a six-ticket requirement.'},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['FAQ'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'product-faq-content',
+  'title': 'Product FAQ Content'},
+ {'attributes': {'ebook_take_down_option_required': True,
+                 'storage_protocol': 'IPFS',
+                 'storage_provider': 'Pinata'},
+  'components': ['STORAGE'],
+  'contexts': ['BOOK_STORAGE'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'removable-ipfs-ebook-storage',
+  'title': 'Removable IPFS Ebook Storage'},
+ {'attributes': {'book_cover_cropping': 'none; the full cover must be visible',
+                 'book_cover_on_landing_page': True,
+                 'book_cover_placement': 'in the hero alongside the headline',
+                 'book_cover_size': 'compact'},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['LANDING_PAGE', 'BOOK_COVER'],
+  'execution': {'observed_behavior': 'The cover is now fully visible edge-to-edge, but it remains '
+                                     'larger than desired and needs to be reduced.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'landing-page-book-cover-presentation',
+  'title': 'Landing-Page Book-Cover Presentation'},
+ {'attributes': {'big_block_content_visible': False,
+                 'commission_copy_requirement': 'Make the $10 amount, unlimited nature, and '
+                                                'immediate timing clear.',
+                 'forbidden_copy': ['recurring chances at $900', 'recurring prize wheel:'],
+                 'hero_headline_text': 'Harbor Quill',
+                 'hero_placement': 'below the navigation',
+                 'hero_subheadline_text': '"From Workshop Floor to Fresh Start" — Unlimited NFT '
+                                          'book ⋅ $30 forever ⋅ Base.',
+                 'how_it_works_invitation_label': 'invite & collect rewards',
+                 'layout_direction': 'Restore the earlier uncluttered overall layout, with Harbor '
+                                     'Quill as the top heading and subtitles beneath it; prevent '
+                                     'oversized hero elements from overlapping the View Dashboard '
+                                     'button.',
+                 'live_draw_counter_text': 'Next $900 Draw In: ~X Sales',
+                 'mechanics_tease_supporting_copy': 'Refer for $10 and your opportunity to win '
+                                                    '$900 every 750 sales.',
+                 'mechanics_tease_text': 'Emphasize the $10 unlimited, instant commission and the '
+                                         'opportunity to win $900 every 750 sales without '
+                                         'repetitive or overly sales-focused wording.',
+                 'primary_cta_text': 'Mint eBook NFT for $30',
+                 'prize_marketing_copy_requirements': ['Use claim $900 every 750 sales! where '
+                                                       'appropriate.',
+                                                       'Use the headline $900 prize draw every 750 '
+                                                       'sales where appropriate.',
+                                                       'State: 3 affiliates chosen from every '
+                                                       '750-sale block. Each referral adds another '
+                                                       'entry!',
+                                                       'Continue to show $900, 750 sales, a '
+                                                       '750-sales block, and three affiliates '
+                                                       'where those mechanics are described.'],
+                 'promoter_game_framing': 'Frame the experience as a continuing game for active '
+                                          'promoters.',
+                 'responsive_layout_rule': 'On mobile, statistics and mechanics must stack cleanly '
+                                           'without being cut off.',
+                 'selling_point_emphasis': 'Use underlining rather than pill outlines.',
+                 'tagline_text': 'Help the rebuild — share to earn',
+                 'terminology_rules': ['Use Mint your eBook or Mint your eBook NFT.',
+                                       'Replace revolutionary with aligned or fair.']},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['LANDING_PAGE'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'landing-page-content-and-layout',
+  'title': 'Landing-Page Content and Layout'},
+ {'attributes': {'accepted_referral_credit_usd_per_mint': 25,
+                 'founder_share_usd_per_mint': 12,
+                 'mint_price_usd': 30,
+                 'missing_or_rejected_referral_commission_usd_per_mint': 18,
+                 'prize_pool_destinations': ['SMALL_BLOCK'],
+                 'prize_pool_share_usd_per_mint': 8},
+  'components': ['SMART_CONTRACT', 'BACKEND'],
+  'contexts': ['PRIMARY_MINT', 'PAYMENT_ALLOCATION'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'mint-price-and-revenue-split',
+  'title': 'Mint Price and Revenue Split'},
+ {'attributes': {'success_feedback_trigger': 'after the NFT mint transaction confirms'},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['PRIMARY_MINT', 'MINT_STATUS'],
+  'execution': {'observed_behavior': 'A completed USDC purchase did not display the mint-success '
+                                     'popup.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'mint-result-feedback',
+  'title': 'Mint Result Feedback'},
+ {'attributes': {'dashboard_nft_detail_cover_presentation': 'Display the complete book cover '
+                                                            'without oversizing or cropping.',
+                 'wallet_nft_media_presentation': 'When an NFT is visible in a supported wallet, '
+                                                  'its image and NFT information should also '
+                                                  'render.'},
+  'components': ['FRONTEND'],
+  'contexts': ['NFT_DETAIL_PAGE', 'NFT_WALLET_VIEW'],
+  'execution': {'observed_behavior': 'NFTs appeared on the dashboard, but their images failed when '
+                                     'the client opened the NFT details.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'nft-detail-media-rendering',
+  'title': 'NFT Detail Media Rendering'},
+ {'attributes': {'access_control_provider': 'Lit Protocol',
+                 'access_eligibility': 'NFT holders only',
+                 'access_eligible_nft_contract_scope': 'NFTs from the active replacement contract '
+                                                       'only',
+                 'legacy_contract_nfts_grant_book_access': False,
+                 'lit_production_network': 'Datil',
+                 'ownership_check': 'automatic'},
+  'components': ['AUTH', 'FRONTEND', 'BACKEND'],
+  'contexts': ['BOOK_READER', 'NFT_OWNERSHIP'],
+  'execution': {'observed_behavior': 'An NFT holder signed the ownership-check request and the '
+                                     'ebook decrypted successfully.',
+                'status': 'VERIFIED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'nft-holder-gated-book-access',
+  'title': 'NFT-Holder-Gated Book Access'},
+ {'attributes': {'active_system_metadata_contract_scope': 'NFTs from the active replacement '
+                                                          'contract only',
+                 'legacy_contract_nft_metadata_used_by_active_system': False,
+                 'permanent_badges_visible': True,
+                 'referral_code_attribute_source': 'NFT token serial',
+                 'referral_code_visible_in_on_chain_metadata': True,
+                 'referral_code_visible_on_nft': True,
+                 'small_block_ticket_counter_visible': True},
+  'components': [],
+  'contexts': ['NFT_METADATA'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'nft-metadata-accuracy',
+  'title': 'NFT Metadata Accuracy'},
+ {'attributes': {'included_nft_contract_scope': 'NFTs from the active replacement contract only',
+                 'legacy_contract_nfts_counted_or_listed': False,
+                 'mint_reporting_rule': 'Only finalized successful mints may contribute to the '
+                                        "user's reported mint count."},
+  'components': ['FRONTEND', 'BACKEND'],
+  'contexts': ['DASHBOARD', 'MINT_REPORTING'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'nft-ownership-and-mint-reporting',
+  'title': 'NFT Ownership and Mint Reporting'},
+ {'attributes': {'confirmation_email_display': 'required; the confirmation email includes the mint '
+                                               'number, which serves as the referral code',
+                 'legacy_contract_nft_referral_codes_used_by_active_system': False,
+                 'referral_code_display_locations': ['NFT itself',
+                                                     'NFT metadata',
+                                                     'dashboard',
+                                                     'confirmation email'],
+                 'referral_code_persistence': 'permanent for NFTs in the active replacement '
+                                              'contract; old-contract NFT referral codes are '
+                                              'excluded',
+                 'referral_code_source': 'NFT token serial',
+                 'referral_identity_contract_scope': 'NFTs from the active replacement contract '
+                                                     'only',
+                 'replacement_contract_token_sequence': 'restart with NFT numbers #40, #41, and '
+                                                        'onward'},
+  'components': ['SMART_CONTRACT', 'BACKEND', 'FRONTEND'],
+  'contexts': ['NFT_METADATA', 'REFERRAL_IDENTITY'],
+  'execution': {'observed_behavior': 'NFT #42 displayed checkout referral code 47 in its '
+                                     'attributes instead of its own assigned mint number.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'nft-referral-identity',
+  'title': 'NFT Referral Identity'},
+ {'attributes': {'active_prize_tickets_after_transfer': 'every active prize ticket follows the NFT '
+                                                        'to the purchaser',
+                 'book_access_after_transfer': 'follows the NFT to the purchaser',
+                 'earned_badges_after_transfer': 'all earned badges follow the NFT to the '
+                                                 'purchaser',
+                 'expired_prize_ticket_state_after_transfer': 'expired prize tickets remain '
+                                                              'expired',
+                 'referral_identity_after_transfer': "the original token serial remains the NFT's "
+                                                     'referral code and follows the NFT',
+                 'transfer_semantics_contract_scope': 'NFTs from the active replacement contract '
+                                                      'only'},
+  'components': ['SMART_CONTRACT', 'BACKEND'],
+  'contexts': ['SECONDARY_SALES', 'NFT_OWNERSHIP'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'nft-transfer-semantics',
+  'title': 'NFT Transfer Semantics'},
+ {'attributes': {'allocation_trigger': 'referral is missing or rejected',
+                 'commission_amount_usd': 10,
+                 'recipient_selection': 'weighted draw among active replacement-contract NFT '
+                                        'owners'},
+  'components': ['SMART_CONTRACT', 'BACKEND'],
+  'contexts': ['NO_REFERRAL', 'INVALID_REFERRAL', 'AFFILIATE_COMMISSION'],
+  'execution': {'observed_behavior': 'Freelancer reports that referral-omitted mints now produce a '
+                                     'weighted commission award.',
+                'status': 'CLAIMED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'no-referral-commission-allocation',
+  'title': 'No-Referral Commission Allocation'},
+ {'attributes': {'allocation_trigger': 'referral is missing or rejected',
+                 'recipient_selection': 'weighted draw among eligible NFT owners',
+                 'reward_drawing_amount_usd': 900,
+                 'tickets_per_no_referral_mint': 6},
+  'components': ['SMART_CONTRACT', 'BACKEND'],
+  'contexts': ['NO_REFERRAL', 'INVALID_REFERRAL', 'PRIZE_TICKETS'],
+  'execution': {'observed_behavior': 'Freelancer reports that referral-omitted mints now produce '
+                                     'six tickets.',
+                'status': 'CLAIMED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'no-referral-ticket-allocation',
+  'title': 'No-Referral Ticket Allocation'},
+ {'attributes': {'custom_amount_enabled': True,
+                 'enabled': True,
+                 'optional': True,
+                 'placement': 'minting_page',
+                 'preset_amounts_usd': [2, 6, 14, 30]},
+  'components': ['FRONTEND', 'PAYMENT'],
+  'contexts': ['PRIMARY_MINT', 'OPTIONAL_TIP'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'optional-mint-gratuity',
+  'title': 'Optional Mint Gratuity'},
+ {'attributes': {'included_nft_contract_scope': 'Harbor Quill owner-dashboard discovery includes '
+                                                'NFTs from the active replacement contract only',
+                 'legacy_contract_nfts_discoverable': False,
+                 'owner_nft_discovery_behavior': 'Minted NFTs must be locatable by their owner in '
+                                                 'the wallet and Harbor Quill dashboard.'},
+  'components': ['FRONTEND'],
+  'contexts': ['NFT_WALLET_VIEW', 'OWNER_DASHBOARD'],
+  'execution': {'observed_behavior': 'After a successful mint under the replacement-contract flow, '
+                                     "the newly minted NFT was visible on the owner's dashboard.",
+                'status': 'VERIFIED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'owner-nft-discovery',
+  'title': 'Owner NFT Discovery'},
+ {'attributes': {'card_payment_option_status': 'unavailable until implemented',
+                 'enabled_wallet_payment_options': ['ETH', 'USDC'],
+                 'multi_currency_checkout': 'Require the customer to choose when both ETH and USDC '
+                                            'are available.',
+                 'single_currency_checkout': 'Clearly display the settlement currency when only '
+                                             'ETH or only USDC is available.'},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['PRIMARY_MINT', 'CHECKOUT'],
+  'execution': {'observed_behavior': 'Checkout made the unimplemented Card option selectable while '
+                                     'preventing selection of the enabled ETH option.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'payment-method-selection-and-disclosure',
+  'title': 'Payment Method Selection and Disclosure'},
+ {'attributes': {'payout_mode': 'automatic_wallet_transfer'},
+  'components': ['SMART_CONTRACT', 'FRONTEND'],
+  'contexts': ['PRIZE_CLAIM', 'WINNERS_PAGE'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'prize-claim-flow',
+  'title': 'Prize Claim Flow'},
+ {'attributes': {'platform_statistics_contract_scope': 'NFT statistics from the active replacement '
+                                                       'contract only',
+                 'replacement_contract_prize_draw_state': 'fresh'},
+  'components': [],
+  'contexts': [],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'prize-pool-and-platform-statistics-accuracy',
+  'title': 'Prize-Pool and Platform Statistics Accuracy'},
+ {'attributes': {'small_block_ticket_lifecycle': {'carry_forward_after_draw': False,
+                                                  'eligible_tickets': 'Small Block Tickets issued '
+                                                                      'since the previous Small '
+                                                                      'Block draw',
+                                                  'post_draw_action': 'burn and reset all Small '
+                                                                      'Block Tickets to 0'}},
+  'components': ['SMART_CONTRACT', 'BACKEND'],
+  'contexts': ['PRIZE_SYSTEM', 'PRIZE_TICKETS', 'SMALL_BLOCK'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'prize-ticket-lifecycle',
+  'title': 'Prize-Ticket Lifecycle'},
+ {'attributes': {'current_product_name': 'Harbor Quill',
+                 'planned_future_product_name': 'ArchiveLedger'},
+  'components': ['FRONTEND', 'UI_UX'],
+  'contexts': ['PROJECT_BRANDING'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'project-branding-and-product-name',
+  'title': 'Project Branding and Product Name'},
+ {'attributes': {'authentication_required': False,
+                 'public_information': ['leaderboards', 'pool values']},
+  'components': ['API', 'BACKEND'],
+  'contexts': ['PUBLIC_API', 'LEADERBOARD', 'PRIZE_SYSTEM'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'unauthenticated-public-apis',
+  'title': 'Unauthenticated Public APIs'},
+ {'attributes': {'referral_eligibility_rule': 'A referral identifier is valid only when it belongs '
+                                              'to an NFT confirmed before checkout.',
+                 'self_referrals_allowed': False},
+  'components': [],
+  'contexts': ['REFERRAL_MINT', 'CHECKOUT_VALIDATION'],
+  'execution': {'observed_behavior': 'The client reports that the invalid-code response is '
+                                     'appearing correctly, with only its displayed wording still '
+                                     'requiring revision.',
+                'status': 'VERIFIED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'referral-code-validation',
+  'title': 'Referral-Code Validation'},
+ {'attributes': {'creator_control_framework': 'OpenSea Creator Controls',
+                 'nft_standard': 'ERC-721C',
+                 'royalty_amount': '$48',
+                 'royalty_disclosure': 'clearly shown on secondary sales',
+                 'royalty_structure': 'flat',
+                 'secondary_marketplace_policy': 'whitelisted marketplaces'},
+  'components': [],
+  'contexts': [],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'secondary-royalty-enforcement',
+  'title': 'Secondary Royalty Enforcement'},
+ {'attributes': {'draw_trigger': {'basis': 'SALES_COUNT', 'count': 750},
+                 'prize_amount_per_winner_usd': 900,
+                 'purchase_allocation_to_prize_pool_usd': 8,
+                 'secondary_royalties_contribute_to_pool': True,
+                 'winner_count': 3,
+                 'winner_eligibility': 'weighted ticket holders'},
+  'components': ['SMART_CONTRACT', 'BACKEND', 'FRONTEND'],
+  'contexts': ['PRIZE_SYSTEM', 'SMALL_BLOCK'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'small-block-prize-mechanism',
+  'title': 'Small Block Prize Mechanism'},
+ {'attributes': {'transfer_recipient': 'client', 'transfer_token_ids': [17, 31, 46]},
+  'components': ['SMART_CONTRACT'],
+  'contexts': ['NFT_OWNERSHIP_TRANSFER'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'specified-nft-ownership-transfer',
+  'title': 'Specified NFT Ownership Transfer'},
+ {'attributes': {'authentication_email_delivery': 'deliver a one-time email code for sign-in',
+                 'ebook_access_email_contents': ['large "Read \'The Long Road Forward\' Today" '
+                                                 'button',
+                                                 'smaller "Save PDF for Later" link available '
+                                                 'after verification'],
+                 'email_service_provider': 'Brevo',
+                 'mint_confirmation_email_contents': ['mint number and referral code',
+                                                      'NFT details',
+                                                      'dashboard link'],
+                 'winner_guidance_email_contents': 'Step-by-step guidance for viewing prize funds '
+                                                   'or converting them to fiat, such as a link to '
+                                                   'a simple exchange guide.',
+                 'winner_notification_channel': 'email'},
+  'components': ['EMAIL', 'BACKEND'],
+  'contexts': ['TRANSACTIONAL_EMAIL'],
+  'execution': {'observed_behavior': 'A confirmation email was delayed before delivery, and a '
+                                     'purchase generated duplicate notifications for badges that '
+                                     'were already unlocked.',
+                'status': 'FAILED'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'transactional-email-delivery',
+  'title': 'Transactional Email Delivery'},
+ {'attributes': {'asset_format': 'NFT ebook', 'edition_supply': 'unlimited'},
+  'components': ['SMART_CONTRACT', 'FRONTEND'],
+  'contexts': ['PRIMARY_MINT'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'unlimited-mint-nft-ebook',
+  'title': 'Unlimited-Mint NFT Ebook'},
+ {'attributes': {'mint_contract_scope': 'replacement contract, with old-contract NFTs excluded '
+                                        'from system use',
+                 'payment_asset': 'USDC',
+                 'required_behavior': 'A connected wallet can directly complete an NFT mint using '
+                                      'USDC.'},
+  'components': ['SMART_CONTRACT', 'FRONTEND'],
+  'contexts': ['PRIMARY_MINT', 'USDC_PAYMENT'],
+  'execution': {'observed_behavior': 'A USDC mint completed successfully on the distinct '
+                                     'no-referral path.',
+                'status': 'VERIFIED_WORKING'},
+  'lifecycle': 'ACTIVE',
+  'slug': 'usdc-wallet-mint-flow',
+  'title': 'USDC Wallet Mint Flow'},
+ {'attributes': {'authentication_protocol': 'Sign-In with Ethereum (SIWE)',
+                 'protected_flows': ['wallet-based minting',
+                                     'NFT transfers',
+                                     'fiat-buyer dashboard access'],
+                 'supported_user_paths': ['crypto users',
+                                          'fiat buyers using Transak-created wallets'],
+                 'transak_created_wallet_siwe_access': 'Fiat buyers may use SIWE with the '
+                                                       'non-custodial wallet created by Transak to '
+                                                       'access the dashboard and view commissions '
+                                                       'and prizes.'},
+  'components': ['AUTH', 'FRONTEND', 'BACKEND'],
+  'contexts': ['WALLET_AUTH', 'FIAT_BUYER_DASHBOARD_ACCESS'],
+  'execution': {},
+  'lifecycle': 'ACTIVE',
+  'slug': 'wallet-authentication',
+  'title': 'Wallet Authentication'}]

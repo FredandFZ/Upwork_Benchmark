@@ -1,0 +1,192 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_1466a490a21f660522e2",
+  "input_release": "43255761-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T004",
+  "target_fingerprint": "7796d772e61516047b0fd0c4947baa1e3db74e00b082d8df79ddd4581fc778c2",
+  "condition": "C2",
+  "turns": 189,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ1\\43255761_T004_RQ1.json",
+      "file_sha256": "da613dd1dd2fa8f0777817e17c7a372d33a361cae8789718a38205f61de8c78d",
+      "content_sha256": "354c8ec722164bea6c40d72be51b79321f8eb36760f2776c0e3f88214c77d8ea"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ2\\43255761_T004_RQ2.json",
+      "file_sha256": "5bd0891154eacacd798825345ff95f2dfe98fa40329129eca457f99ab5a10e4a",
+      "content_sha256": "f104e5f7a1ae5442c4c76ca20e449f7dc60d027161ef1fc8bfbc63f455a99536"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ3\\43255761_T004_RQ3.json",
+      "file_sha256": "3e6a9d9ff931922f44acaf96c30aab562a5c2616043a345dc3b2d341d1a5d9c6",
+      "content_sha256": "816ae696a9374ac1991c53bb2078bf8c699fefa51954844cf2c0f5625506a9b9"
+    }
+  },
+  "public_files": {
+    "task.json": "8adf0f028410a0f68e35b6ca0fe5bcf599a6f0660656c3b74d96891cc6360667",
+    "history.jsonl": "0c21d44c89d98f88baf0541430481c513d20d48f6beb0f2bf1aadcb21819c7b9",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43255761/targets/T004_before_190/pre_repo.zip",
+    "archive_sha256": "17a18dd2434c0543c066a6a15af99566b5a9ff08a9f24887b731f1c5baa193af",
+    "tree_sha256": "963031e39a6a5a6bf8239b228dfa9ccbaffd5f55f69964675d1fc80607dad398",
+    "manifest_path": "Code Environment/43255761/targets/T004_before_190/manifest.json",
+    "manifest_sha256": "e0ad1cbbbc9086742641f5eee5896da4450173e69a1bc2a42ef9db2f1c0d3922",
+    "before_message_id": 190,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Every interactive Word content control has a unique non-empty w:tag and a non-empty w:alias label exactly matching the normalized instruction initially visible inside that control.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx!/word/document.xml content controls",
+            "setup": [
+              "Build dist/template.docx in a fresh workspace."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "part": "word/document.xml",
+                  "nodes": "w:sdt"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "interactive w:sdt nodes missing a non-empty w:tag",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "duplicate normalized interactive w:tag values",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "interactive controls whose normalized w:alias differs from initial visible w:sdtContent instruction",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Classify interactive controls from their OOXML control type, not from application source declarations.",
+              "Normalize XML whitespace only; preserve case and punctuation in the equality comparison."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "One content control has alias 'Add date' but initially displays 'Choose date'."
+            ],
+            "action": "Compare normalized alias and initial visible content.",
+            "expected_failure_or_absence": "The criterion fails for that control."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "After visible content of each interactive control is replaced with fixture user text, the saved DOCX retains the original non-empty alias/help label associated with the same unique tag, so Word can expose the original purpose independently of the replacement text.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "temporary mutated DOCX!/word/document.xml",
+            "setup": [
+              "Copy the built DOCX to a temporary path.",
+              "Record each interactive control's tag and alias."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "temporary mutated DOCX",
+                "parameters": {
+                  "mutation": "replace only descendant visible text in each w:sdtContent with deterministic fixture text"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "tag-to-alias mapping after replacement",
+                "operator": "EQUALS",
+                "expected": "the pre-mutation tag-to-alias mapping"
+              },
+              {
+                "subject": "controls whose replacement content equals their retained alias",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Mutate a temporary copy only and use the unique w:tag as the join key.",
+              "Do not accept customXml prose as a substitute for w:sdtPr metadata."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC002",
+            "setup": [
+              "Replacing control text also overwrites or removes its alias."
+            ],
+            "action": "Compare tag-to-alias maps before and after replacement.",
+            "expected_failure_or_absence": "The criterion fails because the original purpose is no longer retained independently."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "f919220777f757d18c2bfd4f908c4c4232bce4c06e31ba94ebf57d4176190eb3",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

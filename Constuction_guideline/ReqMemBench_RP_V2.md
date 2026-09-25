@@ -480,16 +480,23 @@ $$
 - $C_{t^{*-}}$：执行当前任务之前的代码；
 - $C_{t^{*+}}$：Agent 完成任务之后的代码。
 
-RQ4 只在 RQ3 的 condition-specific Gold decision 为 `ACT` 且存在可确定性验证的代码行为时
-进入评分。Benchmark 作者在正式实验前人工设计并冻结 target-specific hidden tests，验证：
+RQ4 只在 RQ3 的 condition-specific Gold decision 为 `ACT`，且 Criteria Agent 已确认该时间点
+具有实质实现变化和确定性可观察结果时进入评分。当前 99 个原始时间点经过 materiality 与
+observability gate 后收缩为 40 个 RQ4 evaluation targets。每个 target 冻结少量 Acceptance
+Criteria；全部项目共用一份 Agent Judge prompt，不生成项目级或 target 级 Judge prompt。
+
+Agent 提交并冻结 repository 后，Evaluator 检查：
 
 1. repository 可以 Build；
-2. 当前 task 的必要行为全部通过 Target Tests；
-3. 既有行为通过 Regression Tests。
+2. 既有行为通过 Regression Tests；
+3. 只读 Agent Judge 实际运行程序、浏览前端或解析工件，并对每条 Acceptance Criterion 给出
+   `PASS`、`FAIL` 或 `UNSURE` 及可复核证据。
 
-三项全部通过记为 `PASS`，任一失败记为 `FAIL`。RQ4 不评分 action 文本，不比较 patch 与
-reference patch 的相似度，也不调用外部 LLM/API judge。只有配置镜像、自由文本文案或主观
-视觉语义、无法形成确定性行为测试的 target 不进入主 RQ4，并单独计入 executable coverage。
+本地 finalizer 按 `BuildPass AND RegressionPass AND every CriterionPass` 机械汇总：三项全部
+通过记为 `PASS`，任一明确失败记为 `FAIL`；`UNSURE` 或 Judge/工具故障进入复核或重跑，不直接
+进入正式分母。RQ4 不评分 action 文本，也不比较 patch 与 reference patch 的相似度。只有配置
+镜像、无实质变化、自由文本文案或没有冻结基准的主观视觉要求不进入主 RQ4，并单独计入
+executable coverage。
 
 因此，RQ4 评价的是当前 Code Environment 实际支持的、可执行验证的 Requirement-to-Code
 delivery，而不是把任意 requirement 都声称为通用代码能力测试。
@@ -518,9 +525,10 @@ RQ4 因此回答的是：
 
 > **Did the agent actually act on the correct requirement state?**
 
-这里的“正确”由预先校准的 hidden tests 判定。每个 validator 必须满足：pre-repo 上 Target
-Tests 失败，reference delivery 上 Build/Target/Regression 全部通过；包含多个必要行为时，
-只完成部分行为的 delivery 也必须失败。
+这里的“正确”由冻结 Acceptance Criteria 和通用 Agent Judge 判定。Judge 必须实际操作最终
+repository，不允许只读代码猜测，也不允许临场新增标准。已有 hidden validators、reference
+deliveries 与 partial/mutant deliveries 保留为私有抽样校准集，用于验证 Judge 能否区分未实现、
+正确实现和关键缺失实现；它们不再是 40 个 target 各自必须构造的发布材料。
 
 ---
 

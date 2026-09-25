@@ -20,6 +20,13 @@ import unicodedata
 import zipfile
 from typing import Any, Iterable, Mapping
 
+try:
+    from .rq4_repository_scaffolds_artifacts import augment_artifact_repository
+    from .rq4_repository_scaffolds_web import augment_web_repository
+except ImportError:  # Script execution from the repository root.
+    from rq4_repository_scaffolds_artifacts import augment_artifact_repository
+    from rq4_repository_scaffolds_web import augment_web_repository
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PLANS_ROOT = (
@@ -662,6 +669,10 @@ def _materialize_repository(
         destination / ".gitignore",
         "__pycache__/\n*.pyc\n.venv/\n",
     )
+    if project_id in {"42204309", "43772711", "43804272", "44035087"}:
+        augment_web_repository(destination, project_id, features, profile)
+    else:
+        augment_artifact_repository(destination, project_id, features, profile)
 
 
 def _run(command: list[str], cwd: Path) -> dict[str, Any]:

@@ -5,11 +5,16 @@ import unittest
 
 from Code.evaluation.rq2 import (
     build_alignment_request,
+    build_field_alignment_request,
     build_state_semantic_request,
     score_rq2,
     score_rq2_constant_state_baseline,
 )
-from Code.evaluation.state import score_state
+from Code.evaluation.state import (
+    build_field_alignment_request as build_raw_field_alignment_request,
+    build_semantic_fact_request,
+    score_state,
+)
 from Code.stage2.rq2_review import (
     RQ2ReviewError,
     apply_review as apply_rq2_review,
@@ -42,6 +47,24 @@ def _semantic_response(request):
         "relations": [
             {"fact_id": row["fact_id"], "relation": "EQUIVALENT"}
             for row in request["facts"]
+        ],
+    }
+
+
+def _field_alignment_response(request, same_pairs=()):
+    return {
+        "schema_version": "state-field-alignment-response-v1",
+        "relations": [
+            {
+                **pair,
+                "relation": (
+                    "SAME_STATE_VARIABLE"
+                    if (pair["prediction_field_ref"], pair["gold_field_ref"])
+                    in set(same_pairs)
+                    else "DIFFERENT_STATE_VARIABLE"
+                ),
+            }
+            for pair in request["candidate_pairs"]
         ],
     }
 
@@ -118,13 +141,18 @@ class RQ2EvaluationTests(unittest.TestCase):
         alignment = _alignment_response(
             alignment_request, {("agent-local-1", "G001")}
         )
-        semantic_request = build_state_semantic_request(
+        field_request = build_field_alignment_request(
             self.instance, self.response, alignment, condition="C2"
+        )
+        field_alignment = _field_alignment_response(field_request)
+        semantic_request = build_state_semantic_request(
+            self.instance, self.response, alignment, field_alignment, condition="C2"
         )
         result = score_rq2(
             self.instance,
             self.response,
             alignment,
+            field_alignment,
             _semantic_response(semantic_request),
             condition="C2",
         )
@@ -142,13 +170,18 @@ class RQ2EvaluationTests(unittest.TestCase):
         alignment = _alignment_response(
             alignment_request, {("agent-local-1", "G001")}
         )
-        semantic_request = build_state_semantic_request(
+        field_request = build_field_alignment_request(
             self.instance, response, alignment, condition="C2"
+        )
+        field_alignment = _field_alignment_response(field_request)
+        semantic_request = build_state_semantic_request(
+            self.instance, response, alignment, field_alignment, condition="C2"
         )
         result = score_rq2(
             self.instance,
             response,
             alignment,
+            field_alignment,
             _semantic_response(semantic_request),
             condition="C2",
         )
@@ -156,6 +189,157 @@ class RQ2EvaluationTests(unittest.TestCase):
             result["official_metrics"]["attribute_reconstruction_score"], 1.0
         )
         self.assertEqual(result["official_metrics"]["matched_full_state_exact"], 0)
+
+    def test_semantically_equivalent_attribute_name_is_aligned_before_value_scoring(self):
+        response = deepcopy(self.response)
+        attributes = response["requirements"][0]["pre_task_state"]["attributes"]
+        attributes["button_color"] = attributes.pop("colour")
+        alignment_request = build_alignment_request(
+            self.instance, response, condition="C2"
+        )
+        alignment = _alignment_response(
+            alignment_request, {("agent-local-1", "G001")}
+        )
+        field_request = build_field_alignment_request(
+            self.instance, response, alignment, condition="C2"
+        )
+        renamed_pair = next(
+            (
+                row["prediction_field_ref"],
+                row["gold_field_ref"],
+            )
+            for row in field_request["candidate_pairs"]
+            if "button_color" in row["prediction_field_ref"]
+            and "colour" in row["gold_field_ref"]
+        )
+        field_alignment = _field_alignment_response(
+            field_request, {renamed_pair}
+        )
+        semantic_request = build_state_semantic_request(
+            self.instance,
+            response,
+            alignment,
+            field_alignment,
+            condition="C2",
+        )
+        result = score_rq2(
+            self.instance,
+            response,
+            alignment,
+            field_alignment,
+            _semantic_response(semantic_request),
+            condition="C2",
+        )
+        self.assertEqual(
+            result["official_metrics"]["attribute_reconstruction_score"], 1.0
+        )
+        details = result["matched_requirement_states"][0]["dimension_details"][
+            "attributes"
+        ]["diagnostics"]
+        self.assertEqual(len(details["matched_fields"]), 1)
+        self.assertEqual(details["unmatched_prediction_paths"], [])
+        self.assertEqual(details["unmatched_gold_paths"], [])
+
+    def test_user_example_three_renamed_fields_receives_full_attribute_credit(self):
+        base = deepcopy(self.instance["construction_gold"]["states"]["REQ_BUTTON"])
+        specs = deepcopy(
+            self.instance["construction_gold"]["field_scoring_specs"]["REQ_BUTTON"]
+        )
+        base["attributes"] = {
+            "winner_count": 8,
+            "prize_amount_per_winner_usd": 900,
+            "winner_eligibility": "weighted ticket holders",
+        }
+        specs["attributes"] = {
+            "comparator": "RECURSIVE_FIELDS",
+            "score": True,
+            "closed_world": True,
+            "fields": {
+                "winner_count": {"comparator": "NUMBER_EXACT", "score": True},
+                "prize_amount_per_winner_usd": {
+                    "comparator": "NUMBER_EXACT",
+                    "score": True,
+                },
+                "winner_eligibility": {
+                    "comparator": "SEMANTIC_FACT",
+                    "score": True,
+                },
+            },
+        }
+        predicted = deepcopy(base)
+        predicted["attributes"] = {
+            "prize_count": 8,
+            "prize_amount_usd": 900,
+            "winner_selection": "weighted ticket holders",
+        }
+        pair = {
+            "pair_id": "user-example",
+            "gold_state": base,
+            "predicted_state": predicted,
+            "scoring_specs": specs,
+        }
+        field_request = build_raw_field_alignment_request(
+            target_id="example",
+            purpose="TEST",
+            state_pairs=[pair],
+        )
+        predicted_by_name = {
+            row["field_name"]: row["field_ref"]
+            for row in field_request["predicted_fields"]
+        }
+        gold_by_name = {
+            row["field_name"]: row["field_ref"]
+            for row in field_request["gold_fields"]
+        }
+        same = {
+            (predicted_by_name["prize_count"], gold_by_name["winner_count"]),
+            (
+                predicted_by_name["prize_amount_usd"],
+                gold_by_name["prize_amount_per_winner_usd"],
+            ),
+            (
+                predicted_by_name["winner_selection"],
+                gold_by_name["winner_eligibility"],
+            ),
+        }
+        field_alignment = _field_alignment_response(field_request, same)
+        semantic_request = build_semantic_fact_request(
+            target_id="example",
+            purpose="TEST_VALUES",
+            state_pairs=[pair],
+            field_alignment_response=field_alignment,
+        )
+        semantic_relations = {
+            row["fact_id"]: "EQUIVALENT" for row in semantic_request["facts"]
+        }
+        result = score_state(
+            pair_id="user-example",
+            gold_state=base,
+            predicted_state=predicted,
+            scoring_specs=specs,
+            semantic_relations=semantic_relations,
+            field_alignment_request=field_request,
+            field_alignment_response=field_alignment,
+        )
+        self.assertEqual(result["dimension_scores"]["attributes"], 1.0)
+        self.assertEqual(result["dimension_details"]["attributes"]["correct_units"], 3.0)
+
+        # Field identity is independent of value correctness: the same field
+        # alignment remains valid, but NUMBER_EXACT removes value credit.
+        wrong_value = deepcopy(predicted)
+        wrong_value["attributes"]["prize_count"] = 7
+        wrong_result = score_state(
+            pair_id="user-example",
+            gold_state=base,
+            predicted_state=wrong_value,
+            scoring_specs=specs,
+            semantic_relations=semantic_relations,
+            field_alignment_request=field_request,
+            field_alignment_response=field_alignment,
+        )
+        self.assertAlmostEqual(
+            wrong_result["dimension_scores"]["attributes"], 2 / 3, places=6
+        )
 
     def test_constant_state_baseline_is_explicit_and_not_full_exact(self):
         result = score_rq2_constant_state_baseline(self.instance)

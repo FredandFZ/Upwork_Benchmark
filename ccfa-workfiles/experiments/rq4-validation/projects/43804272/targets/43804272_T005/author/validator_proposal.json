@@ -1,0 +1,127 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T005",
+  "before_message_id": 257,
+  "author_role": "VALIDATOR_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "84a93182ee7910aee5be23a7e26d228e245ced9a0a2bcae8ad455ce0265ee92b",
+    "pre_repo_sha256": "8d2e19d44d54811bd30b06a87c0b8d382c810a857f528f6668f4be0e4ad659c3",
+    "target_manifest_sha256": "e89f557c87400965f1d650c1d8352318df64de83859da901a8068bc9c78aa8a9",
+    "upstream_proposals": [
+      {
+        "role": "CRITERIA_AUTHOR",
+        "path": "author/criteria_proposal.json",
+        "sha256": "7dbfff1726ccee1ce6f503854b16db2b4297dcd65f3db4b7f24abe8878e6ef70"
+      }
+    ]
+  },
+  "produced_files": [
+    {
+      "path": "validator/validator_core.py",
+      "sha256": "d2498e64416df887cd5d4941fc23f6f58bf12d11233f6e9f16a737bc88d3b5a9",
+      "purpose": "Generated media-manifest hosting, delivery, platform, and format validator",
+      "researcher_only": true
+    },
+    {
+      "path": "validator/run_validator.py",
+      "sha256": "e74e9ef1feffadcff280b24c42256f35e6e705f4310d64946b71cb533f2fa978",
+      "purpose": "Target-bound hidden validator entrypoint",
+      "researcher_only": true
+    }
+  ],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "acceptance_criteria_sha256": "7dbfff1726ccee1ce6f503854b16db2b4297dcd65f3db4b7f24abe8878e6ef70",
+    "harness": {
+      "language": "Python 3 stdlib platform-build/domain/runtime/generated-manifest and static-HTML validator",
+      "entrypoint": "validator/run_validator.py",
+      "build_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "build",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/build.json"
+      ],
+      "target_test_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "target",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/target.json"
+      ],
+      "regression_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "regression",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/regression.json"
+      ],
+      "timeout_seconds": 90,
+      "network_policy": "DISABLED",
+      "fresh_workspace_required": true,
+      "machine_readable_result_path": ".rq4-results/{build,target,regression}.json"
+    },
+    "criterion_coverage": [
+      {
+        "criterion_id": "AC001",
+        "test_ids": [
+          "T005-AC001-OBS001"
+        ],
+        "observable_ids": [
+          "OBS001"
+        ]
+      }
+    ],
+    "result_contract": {
+      "components": [
+        "BUILD_PASS",
+        "TARGET_TEST_PASS",
+        "REGRESSION_PASS"
+      ],
+      "final_rule": "BUILD_PASS AND TARGET_TEST_PASS AND REGRESSION_PASS",
+      "harness_error_is_agent_failure": false
+    },
+    "calibration_contract": {
+      "pre_repo_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "FAIL"
+      },
+      "reference_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "PASS"
+      },
+      "adversarial_expected": "EVERY_PARTIAL_OR_MUTANT_FAILS_TARGET_OR_REGRESSION",
+      "actual_results_may_be_written_by_author": false
+    },
+    "implementation_independence": {
+      "no_llm_judge": true,
+      "no_network": true,
+      "no_reference_patch_comparison": true,
+      "no_gold_mapping_direct_score": true,
+      "no_unrequired_internal_structure_assertion": true
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T041",
+  "before_message_id": 843,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "aaaa42ce3436bab43c52050ac2e54f2993f952ed381e47036cb30b6ab701c7a0",
+    "pre_repo_sha256": "42e25189bdb0ca945857f0a3bd850d96eec97a3b7e6cb4e5c76e6ee5cb2d124d",
+    "target_manifest_sha256": "65a5f14ea87655c63ce20805ec5a37931a9629f68db6ad3d18b9fc0c857fffc8",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "The transition to one integrated PCB and removal of separate-board links is objective, but the environment emits one synthetic PCB containing abstract records for both legacy and integrated architectures. It lacks distinct pre-change board sources, real sensor/button/LED circuitry, and reference-linked connector/net data needed to prove consolidation without loss of function.",
+      "interfaces_inspected": [
+        "stable artifact inventory",
+        "dist/design.kicad_sch component inventory",
+        "dist/design.kicad_pcb footprints, pads, nets, and outline",
+        "artifact_runtime.parse_artifacts"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Generate real board-level sources or an unambiguous integrated-board source with board identity.",
+        "Represent the sensor, button, LED, power, and controller circuits as real KiCad components and nets.",
+        "Expose reference-linked connector identities and pad-to-net membership so obsolete interboard connectors can be shown absent while local functionality remains."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "MISSING_ARTIFACT_GENERATOR_OR_PARSER",
+      "evidence": [
+        "A single generated PCB mixes abstract legacy and integrated design records rather than modeling separate physical boards.",
+        "The parser cannot associate connector references or pads with nets.",
+        "No real circuit inventory proves that sensors, buttons, and LEDs remain on the integrated board."
+      ],
+      "missing_observables": [
+        "Exactly one integrated board containing the required functional circuits",
+        "Absence of obsolete power/main/sensor/LED interboard connectors",
+        "Preserved sensor, button, LED, power, and controller connectivity"
+      ],
+      "minimum_environment_repairs": [
+        "Generate real board-level sources or an unambiguous integrated-board source with board identity.",
+        "Represent the sensor, button, LED, power, and controller circuits as real KiCad components and nets.",
+        "Expose reference-linked connector identities and pad-to-net membership so obsolete interboard connectors can be shown absent while local functionality remains."
+      ],
+      "reentry_condition": "Re-author after real integrated-board components and net connectivity can distinguish consolidation from an abstract one-file placeholder."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_BOARD_CHAIN_POWER_DISTRIBUTION.lifecycle_status",
+        "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.separate_power_board_status",
+        "REQ_POWER_BOARD_MECHANICAL_LAYOUT.scope.contexts",
+        "REQ_MAIN_BOARD_LAYOUT.lifecycle_status",
+        "REQ_SENSOR_BOARD_LAYOUT.lifecycle_status",
+        "REQ_LED_BOARD_POWER_PINOUT.attributes.separate_led_board_status",
+        "REQ_LED_BOARD_POWER_PINOUT.scope.contexts",
+        "REQ_INTEGRATED_MECHANICAL_LAYOUT.attributes.connector_edge_distribution",
+        "REQ_ENCLOSURE_COMPONENT_CAPACITY.attributes.pcb_board_count"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_INTEGRATED_MECHANICAL_LAYOUT",
+        "REQ_INTEGRATED_BUTTON_INPUTS",
+        "REQ_MAIN_ADDRESSABLE_LED_POWER_LOGIC"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T041-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "The synthetic one-file artifact cannot prove real electrical consolidation or functional preservation.",
+          "required_action": "Repair the stated artifact surface before validator authoring."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

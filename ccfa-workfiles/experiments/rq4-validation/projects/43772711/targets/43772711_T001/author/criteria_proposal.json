@@ -1,0 +1,247 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T001",
+  "before_message_id": 6,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "f07346a5f1c14d337af3ee4260b172851b42fba426e04f79d86da94e3210588d",
+    "pre_repo_sha256": "08af3351004af5e21ee88438018c5be27418969173c2500568645ce947e387e3",
+    "target_manifest_sha256": "a8f413418b996a72860c764fe0a19aaff74f71de33389e1dacf74f4fb4f2a1e5",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The frozen local shell API and browser UI expose components, theme changes, DOM landmarks, and computed styles; exact aesthetic preference is not scored.",
+      "interfaces_inspected": [
+        "GET /api/ui-shell",
+        "PATCH /api/ui-shell/theme",
+        "built workspace DOM"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The workspace shell exposes a header, side navigation panel, footer, and main canvas as distinct public UI regions.",
+        "gold_requirement_refs": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "gold_state_paths": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.included_shell_components"
+        ],
+        "evidence_message_ids": [
+          6
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_DOM",
+            "surface": "built workspace shell",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "workspace shell",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "header, navigation, main, footer",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "landmark header",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark side navigation",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark main canvas",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark footer",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Both light and dark shell modes can be selected through the public shell interaction while preserving all shell regions.",
+        "gold_requirement_refs": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "gold_state_paths": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.theme_modes"
+        ],
+        "evidence_message_ids": [
+          6
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "PATCH /api/ui-shell/theme and built shell",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/ui-shell/theme",
+                "parameters": {
+                  "method": "PATCH",
+                  "json": {
+                    "theme": "light"
+                  }
+                }
+              },
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/ui-shell/theme",
+                "parameters": {
+                  "method": "PATCH",
+                  "json": {
+                    "theme": "dark"
+                  }
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "light selection response theme",
+                "operator": "EQUALS",
+                "expected": "light"
+              },
+              {
+                "subject": "dark selection response theme",
+                "operator": "EQUALS",
+                "expected": "dark"
+              },
+              {
+                "subject": "shell landmarks after each selection",
+                "operator": "COUNT_EQUALS",
+                "expected": 4
+              }
+            ],
+            "determinism_controls": [
+              "Reset application state between theme cases.",
+              "Use the frozen local browser and disable animations."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Header, side navigation, and footer have explicit font, color, and icon treatments in each supported theme.",
+        "gold_requirement_refs": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "gold_state_paths": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.style_dimensions",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.theme_modes"
+        ],
+        "evidence_message_ids": [
+          6
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "FRONTEND_DOM",
+            "surface": "computed styles and icons for shell regions",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "workspace shell",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "shell regions in light and dark themes",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "computed font-family for every shell region",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "computed foreground/background color for every shell region",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "icon element or accessible icon label in header/navigation/footer",
+                "operator": "EXISTS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use one frozen Chromium build and fixed fonts.",
+              "Evaluate both themes at 1440x900."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.included_shell_components",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.style_dimensions",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.theme_modes",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.inner_application_screen_styling"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.included_shell_components",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.theme_modes",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.style_dimensions"
+      ],
+      "preserved_requirement_refs": [],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_16b78fb5f1714fc4a6c3",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T004",
+  "target_fingerprint": "71a4e1613f68e84449bd90418b2c179b29256161bdde85ed1e4c94592445feba",
+  "condition": "C1",
+  "turns": 76,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ1\\43214420_T004_RQ1.json",
+      "file_sha256": "dde49c14e1a359e82724964538f0bcd1df98014db91cb09004072eca1e0f51fd",
+      "content_sha256": "ae4bb30b02437a0996acbd23f3d8ee6091e75921ce802e193372d5548be1ca65"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ2\\43214420_T004_RQ2.json",
+      "file_sha256": "a3b7fe779856830650b2cfd8a440a5493464334ac46b770e90a13776123905f8",
+      "content_sha256": "42d1f80af3d621bbbed4857628817ed2fb7f8469b7d529d7b8a90b554ebbac8f"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ3\\43214420_T004_RQ3.json",
+      "file_sha256": "8409038aa216751046ea2599abac7a0d1c128dc00402164ccfa7f94eb0cf7139",
+      "content_sha256": "947a054482f3134ab90e331cabdc90f1187a3a776c980af475228a2aadea253d"
+    }
+  },
+  "public_files": {
+    "task.json": "911540136e33ae3f3238485add3f23f3ce678197ed3d2df3428000b61e1a2c96",
+    "history.jsonl": "f7ec981fcff6de061c26b175f7d4d52fc6f7ce8feb7d06745cd8ce12e516e0dd",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T004_before_77/pre_repo.zip",
+    "archive_sha256": "48930218767ff37740390a03dc95dc6bf155e8a6bb2d8ee2b59f56eeb13f3692",
+    "tree_sha256": "654f1df58cde4feba0e88fec978e263e6e073111b9cf3d55d3ae8b5042f0c4a9",
+    "manifest_path": "Code Environment/43214420/targets/T004_before_77/manifest.json",
+    "manifest_sha256": "b66693f11655ff889901987b05453c43be62c69bfe01a6a3decd25143eaf430f",
+    "before_message_id": 77,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The battery connector and USB-C connector occupy opposite parallel edge zones of the PCB: each connector courtyard is closest to a different outline segment and those two segments have opposite outward normals; both courtyards remain within the board envelope except the permitted USB shell protrusion.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb connector placement relative to Edge.Cuts",
+            "setup": [
+              "Build the PCB and resolve USB-C and battery connector courtyard/body polygons."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_pcb",
+                "parameters": {
+                  "derive": [
+                    "nearest outline segment",
+                    "edge outward normal",
+                    "courtyard containment"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "USB-C nearest edge equals battery connector nearest edge",
+                "operator": "EQUALS",
+                "expected": false
+              },
+              {
+                "subject": "dot product of the two normalized edge outward normals",
+                "operator": "EQUALS",
+                "expected": -1,
+                "tolerance": 1e-06
+              },
+              {
+                "subject": "battery connector courtyard contained by board outline",
+                "operator": "EQUALS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use transformed footprint geometry in millimetres.",
+              "Do not infer placement from model prose or reference order."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Both connectors sit near the same or adjacent board edge."
+            ],
+            "action": "Compute nearest edge segments and normals.",
+            "expected_failure_or_absence": "The criterion fails even when their coordinate distance is large."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "PRESERVED_REGRESSION",
+        "statement": "The relocated battery connector courtyard does not intersect any mounting-hole drill, copper, or keep-out envelope.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb battery connector and mounting-hole geometry",
+            "setup": [
+              "Resolve placed battery courtyard and all mounting-hole envelopes."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_pcb",
+                "parameters": {
+                  "intersection_test": true
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "battery connector to mounting-hole envelope intersections",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Apply rotation and side mirroring.",
+              "Test complete geometry rather than origins."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "5687b1ffca659170a0b401631b7c03aff65524e055de5468f7e709f34846aeb3",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

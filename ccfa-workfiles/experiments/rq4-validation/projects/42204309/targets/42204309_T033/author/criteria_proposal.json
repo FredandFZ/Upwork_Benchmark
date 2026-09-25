@@ -1,0 +1,342 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "42204309",
+  "target_id": "42204309_T033",
+  "before_message_id": 746,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "d0bcda284b0936bfb0a30acc9af4b484d1f20c95c550bd6d5c4c8ae334e2ca40",
+    "pre_repo_sha256": "56a8d105093d56a0d5f4f6831d0fd386f2aee49d07d0def06d6ab2c9ad008fb8",
+    "target_manifest_sha256": "142a10a42d105a5830043844bcdf227654a2291ede6f81742fb58236cc9506f6",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The referral registration, mint, dashboard, and local browser surfaces jointly expose the coded reward amounts and the exact post-confirmation success copy.",
+      "interfaces_inspected": [
+        "HarborQuillService.register_referral",
+        "HarborQuillService.mint",
+        "HarborQuillService.dashboard",
+        "mint-page browser interaction"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "A non-promotional mint using a valid referral gives the chosen holder one $12 commission and four tickets for the $1,250 draw.",
+        "gold_requirement_refs": [
+          "REQ_CODED_REFERRAL_COMMISSION",
+          "REQ_CODED_REFERRAL_TICKETS",
+          "REQ_SMALL_BLOCK_PRIZE"
+        ],
+        "gold_state_paths": [
+          "REQ_CODED_REFERRAL_COMMISSION.attributes.commission_amount_usd",
+          "REQ_CODED_REFERRAL_TICKETS.attributes.reward_drawing_amount_usd",
+          "REQ_CODED_REFERRAL_TICKETS.attributes.tickets_per_coded_referral_mint",
+          "REQ_SMALL_BLOCK_PRIZE.attributes.prize_amount_per_winner_usd"
+        ],
+        "evidence_message_ids": [
+          746
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FUNCTION",
+            "surface": "HarborQuillService.mint and chosen-holder dashboard",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "register_referral",
+                "parameters": {
+                  "owner": "chosen-holder",
+                  "code": "CODE"
+                }
+              },
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "mint",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": "CODE",
+                  "promotional": false
+                }
+              },
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "dashboard",
+                "parameters": {
+                  "owner": "chosen-holder"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "mint receipt referral accepted",
+                "operator": "EQUALS",
+                "expected": true
+              },
+              {
+                "subject": "commission added USD",
+                "operator": "EQUALS",
+                "expected": 12
+              },
+              {
+                "subject": "tickets added",
+                "operator": "COUNT_EQUALS",
+                "expected": 4
+              },
+              {
+                "subject": "ticket draw amount USD",
+                "operator": "EQUALS",
+                "expected": 1250
+              }
+            ],
+            "determinism_controls": [
+              "Use a fresh service instance, fixed fixtures, and no network."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The coded-referral Mint Successful feedback renders the approved sentence and emphasizes the book title without exposing markup characters.",
+        "gold_requirement_refs": [
+          "REQ_MINT_RESULT_FEEDBACK"
+        ],
+        "gold_state_paths": [
+          "REQ_MINT_RESULT_FEEDBACK.attributes.coded_referral_success_copy"
+        ],
+        "evidence_message_ids": [
+          746
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "FRONTEND_DOM",
+            "surface": "coded-referral mint success feedback",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "register_referral",
+                "parameters": {
+                  "owner": "chosen-holder",
+                  "code": "CODE"
+                }
+              },
+              {
+                "operation": "OPEN_PAGE",
+                "target": "mint page",
+                "parameters": {}
+              },
+              {
+                "operation": "SUBMIT",
+                "target": "mint form",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": "CODE"
+                }
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "Mint Successful feedback",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "visible feedback text",
+                "operator": "EQUALS",
+                "expected": "$12 commission + $1,250 prize draw ticket has gone to your chosen From Workshop Floor to Fresh Start NFT holder"
+              },
+              {
+                "subject": "emphasized book-title element text",
+                "operator": "EQUALS",
+                "expected": "From Workshop Floor to Fresh Start"
+              },
+              {
+                "subject": "literal asterisk characters",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the local browser and fixed successful coded-referral fixture."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "PRESERVED_REGRESSION",
+        "statement": "The coded-referral wording change does not replace the distinct no-code reward behavior.",
+        "gold_requirement_refs": [
+          "REQ_NO_REFERRAL_COMMISSION",
+          "REQ_NO_REFERRAL_TICKETS",
+          "REQ_MINT_RESULT_FEEDBACK"
+        ],
+        "gold_state_paths": [
+          "REQ_MINT_RESULT_FEEDBACK.attributes.coded_referral_success_copy"
+        ],
+        "evidence_message_ids": [
+          746
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "FUNCTION",
+            "surface": "no-referral mint and success feedback",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "mint",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": null,
+                  "promotional": false
+                }
+              },
+              {
+                "operation": "READ_PUBLIC_STATE",
+                "target": "no-referral receipt and feedback",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "no-referral reward recipient",
+                "operator": "NOT_EQUALS",
+                "expected": "chosen coded referrer"
+              },
+              {
+                "subject": "coded-referral approved sentence",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use seeded eligible owners for the no-referral allocation."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_FAQ_CONTENT.attributes.approved_faq_copy",
+        "REQ_FAQ_CONTENT.attributes.beginner_rewards_collection_faq_section",
+        "REQ_FAQ_CONTENT.attributes.coded_referral_commission_copy",
+        "REQ_FAQ_CONTENT.attributes.fiat_buyer_rewards_faq_section",
+        "REQ_SMALL_BLOCK_PRIZE.attributes.prize_amount_per_winner_usd",
+        "REQ_CODED_REFERRAL_COMMISSION.attributes.commission_amount_usd",
+        "REQ_CODED_REFERRAL_COMMISSION.execution",
+        "REQ_CODED_REFERRAL_TICKETS.attributes.reward_drawing_amount_usd",
+        "REQ_CODED_REFERRAL_TICKETS.execution",
+        "REQ_MINT_RESULT_FEEDBACK.attributes.coded_referral_success_copy",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT.attributes.coded_referral_commission_copy",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT.attributes.coded_referral_rewards_copy",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT.attributes.prize_claim_copy",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT.attributes.prize_collection_copy",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT.attributes.prize_mechanics_content",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT.attributes.prize_mechanics_copy"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_CODED_REFERRAL_COMMISSION.attributes.commission_amount_usd",
+        "REQ_CODED_REFERRAL_TICKETS.attributes.reward_drawing_amount_usd",
+        "REQ_CODED_REFERRAL_TICKETS.attributes.tickets_per_coded_referral_mint",
+        "REQ_SMALL_BLOCK_PRIZE.attributes.prize_amount_per_winner_usd",
+        "REQ_MINT_RESULT_FEEDBACK.attributes.coded_referral_success_copy"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_PROJECT_BRANDING",
+        "REQ_PORTUGAL_GEOBLOCK",
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT",
+        "REQ_LANDING_BOOK_COVER_PRESENTATION",
+        "REQ_MILESTONE_PARTNER_REWARDS",
+        "REQ_BIG_BLOCK_PRIZE",
+        "REQ_PRIZE_TICKET_LIFECYCLE",
+        "REQ_CHAINLINK_VRF_SELECTION",
+        "REQ_PRIZE_CLAIM_FLOW",
+        "REQ_AAVE_POOL_YIELD",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_REFERRAL_CODE_VALIDATION",
+        "REQ_NFT_REFERRAL_IDENTITY",
+        "REQ_UNLIMITED_NFT_MINT",
+        "REQ_MINT_PRICE_REVENUE_SPLIT",
+        "REQ_USDC_WALLET_MINT",
+        "REQ_ETH_WALLET_MINT",
+        "REQ_ETH_PRICE_AND_REFUND",
+        "REQ_PAYMENT_METHOD_SELECTION",
+        "REQ_TRANSAK_FIAT_MINT",
+        "REQ_OPTIONAL_MINT_TIP",
+        "REQ_BASE_NETWORK_DEPLOYMENT",
+        "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+        "REQ_NFT_TRANSFER_SEMANTICS",
+        "REQ_NFT_METADATA_ACCURACY",
+        "REQ_BADGE_AWARDS",
+        "REQ_BADGE_PRESENTATION",
+        "REQ_WALLET_AUTHENTICATION",
+        "REQ_EMAIL_MAGIC_LINK_AUTH",
+        "REQ_PUBLIC_API_ACCESS",
+        "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+        "REQ_IPFS_EBOOK_STORAGE",
+        "REQ_NFT_HOLDER_BOOK_ACCESS",
+        "REQ_BOOK_READER_UX",
+        "REQ_MOBILE_WALLET_BOOK_ACCESS",
+        "REQ_CONTRACT_EVENT_WEBHOOK",
+        "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY",
+        "REQ_DISCORD_COMMUNITY_SERVER",
+        "REQ_SPECIFIC_NFT_OWNERSHIP_TRANSFER",
+        "REQ_NFT_ASSET_RENDERING",
+        "REQ_OWNER_NFT_DISCOVERY",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY",
+        "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+        "REQ_PRIZE_POOL_PLATFORM_STATS_ACCURACY"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "F001",
+          "severity": "INFO",
+          "category": "MISSING_COVERAGE",
+          "evidence": "Derived FAQ/About copy propagation is not separately scored; the target's approved modal sentence and reward values are exercised through mint, dashboard, and browser behavior.",
+          "required_action": "Independent review must confirm these derived copy updates are outside the target behavior gate or require a future content-page environment before adding them."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

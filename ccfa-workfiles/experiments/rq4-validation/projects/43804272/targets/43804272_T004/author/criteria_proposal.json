@@ -1,0 +1,246 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T004",
+  "before_message_id": 239,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "c5dd403b8ea82f9195626ba76d221ef956d38955c8d4928d1735f0d8291c85b5",
+    "pre_repo_sha256": "1ede9c0f280cbf3869c78b069eafb0e4cad0c4962b5429b13bbfffb91761aa96",
+    "target_manifest_sha256": "e819fc8c4329b12ad94ff316969b4dc16590b05226187c28c2923480d1a96a0f",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The Android and iOS local launchers, generated media manifest, and package asset indexes expose whether both platforms use the same video and whether tutorial images were removed.",
+      "interfaces_inspected": [
+        "Android and iOS How To Use interactions",
+        "generated media manifest",
+        "platform package asset indexes"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Android and iOS How To Use interactions launch the same frozen video resource.",
+        "gold_requirement_refs": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource"
+        ],
+        "evidence_message_ids": [
+          239
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "Android and iOS How To Use controls",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "Android mobile preview",
+                "parameters": {}
+              },
+              {
+                "operation": "CLICK",
+                "target": "How To Use control",
+                "parameters": {}
+              },
+              {
+                "operation": "OPEN_PAGE",
+                "target": "iOS mobile preview",
+                "parameters": {}
+              },
+              {
+                "operation": "CLICK",
+                "target": "How To Use control",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "Android launched resource",
+                "operator": "EQUALS",
+                "expected": "https://video.cedar-meadow.example/watch/e0023"
+              },
+              {
+                "subject": "iOS launched resource",
+                "operator": "EQUALS",
+                "expected": "https://video.cedar-meadow.example/watch/e0023"
+              },
+              {
+                "subject": "resource equality across platforms",
+                "operator": "EQUALS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Intercept navigation in the frozen local launcher; do not perform an external request."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "Neither platform package contains the superseded tutorial-image assets.",
+        "gold_requirement_refs": [
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION.attributes.localized_tutorial_asset_strategy",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms"
+        ],
+        "evidence_message_ids": [
+          239
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "Android and iOS package asset indexes",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "platform package manifests and asset indexes",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "Android tutorial-image assets",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "iOS tutorial-image assets",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Inspect generated package manifests and asset indexes only."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Build both platform packages."
+            ],
+            "action": "Search each asset index for the prior tutorial image set.",
+            "expected_failure_or_absence": "The prior image set is absent from both packages."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The generated media manifest declares one shared video enabled for Android and iOS.",
+        "gold_requirement_refs": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource"
+        ],
+        "evidence_message_ids": [
+          239
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "generated How To media manifest",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "How To media manifest",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "media format",
+                "operator": "EQUALS",
+                "expected": "shared_video"
+              },
+              {
+                "subject": "enabled platform set",
+                "operator": "EQUALS",
+                "expected": [
+                  "ANDROID",
+                  "IOS"
+                ]
+              },
+              {
+                "subject": "video resource",
+                "operator": "EQUALS",
+                "expected": "https://video.cedar-meadow.example/watch/e0023"
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION.attributes.localized_tutorial_asset_strategy",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource",
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION.attributes.localized_tutorial_asset_strategy"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_IOS_APP_SIZE_OPTIMIZATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

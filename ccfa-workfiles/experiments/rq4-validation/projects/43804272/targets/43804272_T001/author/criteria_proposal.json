@@ -1,0 +1,226 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T001",
+  "before_message_id": 71,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "057716cadf70d605e8fbe7ed78824333004c66d43765c9e201b1deda9b9a4f1b",
+    "pre_repo_sha256": "e91b7621bb972f66121a8e47223f83d283b29862aa7aadfd5036f65972b0b502",
+    "target_manifest_sha256": "5e399e3cc9a4ee963ded64b9b273f7c45b129b0bb2727075730bc702a1449285",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The frozen platform-build metadata, locale resource indexes, and public locale-selection interaction jointly expose full Android and iOS localization coverage without relying on an internal Gold dictionary.",
+      "interfaces_inspected": [
+        "src/platform_build.py:PLATFORM_BUILD",
+        "Android and iOS locale resource indexes",
+        "POST /api/locales"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Android platform build contains exactly the frozen 77-language Google Play locale set with one resource entry per locale.",
+        "gold_requirement_refs": [
+          "REQ_ANDROID_FULL_APP_LOCALIZATION"
+        ],
+        "gold_state_paths": [
+          "REQ_ANDROID_FULL_APP_LOCALIZATION.attributes.google_play_language_count"
+        ],
+        "evidence_message_ids": [
+          71
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "Android platform build metadata and locale resource index",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "Android locale resource index",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "unique Android locale count",
+                "operator": "COUNT_EQUALS",
+                "expected": 77
+              },
+              {
+                "subject": "Android locale set",
+                "operator": "EQUALS",
+                "expected": "frozen Google Play 77-language fixture"
+              },
+              {
+                "subject": "missing or duplicate locale resources",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use a frozen target-era Google Play language fixture.",
+              "Sort and normalize locale tags before set comparison."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Every declared Android locale can be selected through the public app interaction and yields a valid direction.",
+        "gold_requirement_refs": [
+          "REQ_ANDROID_FULL_APP_LOCALIZATION"
+        ],
+        "gold_state_paths": [
+          "REQ_ANDROID_FULL_APP_LOCALIZATION.attributes.google_play_language_count"
+        ],
+        "evidence_message_ids": [
+          71
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "FUNCTION",
+            "surface": "CurrentMobileService.set_locale",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "set_locale",
+                "parameters": {
+                  "for_each": "Android locale resource index"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "returned locale for every call",
+                "operator": "EQUALS",
+                "expected": "normalized requested locale"
+              },
+              {
+                "subject": "returned direction for every call",
+                "operator": "MATCHES_REGEX",
+                "expected": "^(ltr|rtl)$"
+              },
+              {
+                "subject": "failed locale selections",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use the locale index produced by the same candidate build.",
+              "Reset service state between locale cases."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The iOS platform build contains the complete frozen App Store language set and every declared locale is selectable.",
+        "gold_requirement_refs": [
+          "REQ_IOS_FULL_APP_LOCALIZATION"
+        ],
+        "gold_state_paths": [
+          "REQ_IOS_FULL_APP_LOCALIZATION.attributes.app_store_language_coverage"
+        ],
+        "evidence_message_ids": [
+          71
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "iOS platform build metadata and locale resource index",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "iOS locale resource index",
+                "parameters": {}
+              },
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "set_locale",
+                "parameters": {
+                  "for_each": "iOS locale resource index"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "unique iOS locale count",
+                "operator": "COUNT_EQUALS",
+                "expected": 40
+              },
+              {
+                "subject": "iOS locale set",
+                "operator": "EQUALS",
+                "expected": "frozen target-era App Store language fixture"
+              },
+              {
+                "subject": "failed locale selections",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen target-era App Store language fixture referenced by the work item.",
+              "Normalize locale tags before set comparison."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_ANDROID_FULL_APP_LOCALIZATION.attributes.google_play_language_count",
+        "REQ_IOS_FULL_APP_LOCALIZATION.attributes.app_store_language_coverage"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_ANDROID_FULL_APP_LOCALIZATION.attributes.google_play_language_count",
+        "REQ_IOS_FULL_APP_LOCALIZATION.attributes.app_store_language_coverage"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+        "REQ_IOS_APP_SIZE_OPTIMIZATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

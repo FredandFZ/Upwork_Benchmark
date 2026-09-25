@@ -1,0 +1,86 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T010",
+  "before_message_id": 270,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "d8d7ef531d1b28091096c5c6b0e2b2bf4247f9f60723de1542938603d1bc4dcf",
+    "pre_repo_sha256": "d53bdc6663c203054dee64eec7858c82334edad76b64ef3e2d39de8e9e366ba5",
+    "target_manifest_sha256": "c29eef540a4f4381c1fa978af07f745e605924f948eb07ded19ac1e132dd6c53",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "An unlocked OOXML date content control can be inspected statically, but the requested acceptance of regular Enter is an interactive Microsoft Word behavior. The current pre-repo does not expose key input, commit behavior, or the resulting persisted date value, and the source does not define whether Enter means multiline input or keyboard commit.",
+      "interfaces_inspected": [
+        "dist/template.docx",
+        "src/artifact_runtime.py:_docx_parts",
+        "src/artifact_runtime.py:_parse_docx",
+        "work_item.post_task_observable_features"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Freeze the intended date-field interaction sequence, including the typed date and role of the Enter key.",
+        "Provide pinned Word automation that focuses the date content control, types the fixture value, presses regular Enter, saves, and exposes the persisted OOXML result."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "NO_EXECUTABLE_BEHAVIOR_INTERFACE",
+      "evidence": [
+        "src/artifact_runtime.py serializes fields but has no keyboard-interaction entrypoint.",
+        "The target requirement concerns regular Enter input rather than only the presence of w:date markup.",
+        "The work item does not disambiguate multiline Enter from committing a typed date."
+      ],
+      "missing_observables": [
+        "Focused date-control state before input",
+        "Result of pressing regular Enter after a typed valid date",
+        "Saved w:fullDate/display text after the interaction"
+      ],
+      "minimum_environment_repairs": [
+        "Add a pinned Word keyboard-automation surface and a hashed date-input fixture.",
+        "Specify the expected Enter semantics and day/month/year example."
+      ],
+      "reentry_condition": "Re-author criteria once regular Enter has a frozen interaction definition and the harness can observe the saved date-control result in Word and OOXML."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_MULTILINE_FIELD_INPUT.attributes.date_field_regular_enter_enabled",
+        "REQ_MULTILINE_FIELD_INPUT.execution",
+        "REQ_DATE_FIELD_CONTROL.attributes.date_entry_method"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_FIELD_FORMATTING_PRESERVATION",
+        "REQ_FIELD_LABEL_HELP_TEXT",
+        "REQ_DATE_FIELD_CONTROL"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T010-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "No executable Word input surface exists to distinguish a merely unlocked date control from one satisfying the requested Enter behavior.",
+          "required_action": "Add the specified Word interaction fixture before validator authoring."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

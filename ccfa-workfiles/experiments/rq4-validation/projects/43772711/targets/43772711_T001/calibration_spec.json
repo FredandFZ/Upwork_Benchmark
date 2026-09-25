@@ -1,0 +1,82 @@
+{
+  "schema_version": "rq4-calibration-spec-v1",
+  "status": "FROZEN",
+  "project_id": "43772711",
+  "target_id": "43772711_T001",
+  "validator_id": "43772711_T001-validator-v1",
+  "acceptance_criteria_sha256": "56e4f006083d1438380798c55f57598689a11a43ca10a64e34ec12f2e94fe9fd",
+  "validator_files": [
+    {
+      "path": "author/criteria_proposal.json",
+      "sha256": "56e4f006083d1438380798c55f57598689a11a43ca10a64e34ec12f2e94fe9fd"
+    },
+    {
+      "path": "validator/validator_core.py",
+      "sha256": "533a0f04ee8caef252448f2e38b42961a5b3b358ad32733fd3d9da29c511b6c4"
+    },
+    {
+      "path": "validator/run_validator.py",
+      "sha256": "a7e261f3136b270a7ebf9cb0f4bb7b62d00749e25b74a29cee05d657724fffb4"
+    }
+  ],
+  "commands": {
+    "build": [
+      "{python}",
+      "{validator_root}/validator/run_validator.py",
+      "--component",
+      "build",
+      "--repo",
+      "{repo}",
+      "--result",
+      "{repo}/.rq4-results/build.json"
+    ],
+    "target_test": [
+      "{python}",
+      "{validator_root}/validator/run_validator.py",
+      "--component",
+      "target",
+      "--repo",
+      "{repo}",
+      "--result",
+      "{repo}/.rq4-results/target.json"
+    ],
+    "regression": [
+      "{python}",
+      "{validator_root}/validator/run_validator.py",
+      "--component",
+      "regression",
+      "--repo",
+      "{repo}",
+      "--result",
+      "{repo}/.rq4-results/regression.json"
+    ]
+  },
+  "timeout_seconds": 90,
+  "network_policy": "DISABLED",
+  "fresh_workspace_required": true,
+  "environment_allowlist": [],
+  "calibration_inputs": {
+    "pre_repo": {
+      "archive_sha256": "08af3351004af5e21ee88438018c5be27418969173c2500568645ce947e387e3",
+      "tree_sha256": "73b082282f35339f82d81bd86134e2253bdf5fa612c04bc8fa9217e75a4a325a"
+    },
+    "reference_delivery": {
+      "archive_sha256": "43f13d19ead19f47d7670c6eded2ca282e97a8242c3d18705cc78158d68469bd",
+      "tree_sha256": "6248133ca2b97a3c1a9485204a63dab7ab44e0d8c2d6fdbf39e341a3ae9619ee"
+    },
+    "partial_deliveries": [
+      {
+        "delivery_id": "T001-PARTIAL-001",
+        "archive_sha256": "9d5b67c6b9be4a35908476a2da18368cbc8d6bb6006461a504cee3611e9eb93f",
+        "tree_sha256": "0bc07d749cff8ce4c7c82ed6bc80f168c7c3da7016c0ce8319a761ba3343f659",
+        "expected_result": "TARGET_TEST_FAIL"
+      },
+      {
+        "delivery_id": "T001-MUTANT-001",
+        "archive_sha256": "e7d335577df3fa353fa16f15e2ae3daabd37f4af689d551d5ca3648c343c1c35",
+        "tree_sha256": "96d3df19d3410ca35dd14f8608d6233f936056ea0602b0babc0bbc69ef091fee",
+        "expected_result": "TARGET_TEST_FAIL"
+      }
+    ]
+  }
+}

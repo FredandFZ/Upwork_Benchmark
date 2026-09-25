@@ -1,0 +1,225 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T003",
+  "before_message_id": 193,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "97140fcb99911fd90010a7b507f01e878958ef75bafa0ef7e74363be21930a56",
+    "pre_repo_sha256": "d8c9b672368e8e64977223c4af0c0fa16d9c42f91b7e3764e066737f3f40861a",
+    "target_manifest_sha256": "15052078f6bbc10e1e39fbdef7848a4f61ee1b3fcc75ec42f1c28622e73486a2",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The local mobile preview, media manifest, and package asset index can prove the iOS transition from tutorial images to video and the removal of the prior image strategy without network access.",
+      "interfaces_inspected": [
+        "iOS How To Use interaction",
+        "generated media manifest",
+        "iOS package asset index"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The iOS How To Use interaction presents video media rather than a tutorial image.",
+        "gold_requirement_refs": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.ios_tutorial_images_required",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms"
+        ],
+        "evidence_message_ids": [
+          193
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "iOS How To Use control",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "iOS mobile preview",
+                "parameters": {}
+              },
+              {
+                "operation": "CLICK",
+                "target": "How To Use control",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "opened media kind",
+                "operator": "EQUALS",
+                "expected": "youtube_video"
+              },
+              {
+                "subject": "tutorial image presentation",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the offline media launcher stub; do not contact YouTube."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "The iOS application package no longer bundles localized tutorial-image assets or references the removed image strategy.",
+        "gold_requirement_refs": [
+          "REQ_IOS_APP_SIZE_OPTIMIZATION",
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_IOS_APP_SIZE_OPTIMIZATION.attributes.localized_tutorial_asset_strategy",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.tutorial_image_strategy"
+        ],
+        "evidence_message_ids": [
+          193
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "iOS package manifest and built asset tree",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "iOS package manifest and asset index",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "localized tutorial-image assets",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "tutorial-image strategy reference",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Inspect only generated package metadata and the built asset tree."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Build the iOS package."
+            ],
+            "action": "Search the package asset index for legacy localized tutorial images.",
+            "expected_failure_or_absence": "No legacy tutorial-image asset is present."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The platform media record scopes this video replacement to iOS at this target.",
+        "gold_requirement_refs": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms"
+        ],
+        "evidence_message_ids": [
+          193
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "generated How To media manifest",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "How To media manifest",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "media format",
+                "operator": "EQUALS",
+                "expected": "youtube_video"
+              },
+              {
+                "subject": "enabled platforms",
+                "operator": "EQUALS",
+                "expected": [
+                  "IOS"
+                ]
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_IOS_APP_SIZE_OPTIMIZATION.attributes.localized_tutorial_asset_strategy",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.ios_tutorial_images_required",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.tutorial_image_strategy"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.ios_tutorial_images_required",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_format",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.media_platforms",
+        "REQ_IOS_APP_SIZE_OPTIMIZATION.attributes.localized_tutorial_asset_strategy",
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.tutorial_image_strategy"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T004",
+  "before_message_id": 190,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "b356a37fed30d1852f73045fe40de16bcc17777508fb97bffe5431f36e72ed72",
+    "pre_repo_sha256": "17a18dd2434c0543c066a6a15af99566b5a9ff08a9f24887b731f1c5baa193af",
+    "target_manifest_sha256": "e0ad1cbbbc9086742641f5eee5896da4450173e69a1bc2a42ef9db2f1c0d3922",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "Word content controls serialize their stable identity and displayed label in w:sdtPr and their initial instruction in w:sdtContent. A validator can compare those values and can replace only w:sdtContent in a temporary copy to prove the original-purpose metadata remains after user text changes.",
+      "interfaces_inspected": [
+        "dist/template.docx!/word/document.xml",
+        "src/artifact_runtime.py:_docx_parts",
+        "src/artifact_runtime.py:_parse_docx"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Every interactive Word content control has a unique non-empty w:tag and a non-empty w:alias label exactly matching the normalized instruction initially visible inside that control.",
+        "gold_requirement_refs": ["REQ_FIELD_LABEL_HELP_TEXT"],
+        "gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.label_content_relation"],
+        "evidence_message_ids": [190],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx!/word/document.xml content controls",
+            "setup": ["Build dist/template.docx in a fresh workspace."],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {"part": "word/document.xml", "nodes": "w:sdt"}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "interactive w:sdt nodes missing a non-empty w:tag", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "duplicate normalized interactive w:tag values", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "interactive controls whose normalized w:alias differs from initial visible w:sdtContent instruction", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": [
+              "Classify interactive controls from their OOXML control type, not from application source declarations.",
+              "Normalize XML whitespace only; preserve case and punctuation in the equality comparison."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": ["One content control has alias 'Add date' but initially displays 'Choose date'."],
+            "action": "Compare normalized alias and initial visible content.",
+            "expected_failure_or_absence": "The criterion fails for that control."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "After visible content of each interactive control is replaced with fixture user text, the saved DOCX retains the original non-empty alias/help label associated with the same unique tag, so Word can expose the original purpose independently of the replacement text.",
+        "gold_requirement_refs": ["REQ_FIELD_LABEL_HELP_TEXT"],
+        "gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.hover_help_behavior"],
+        "evidence_message_ids": [190],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "temporary mutated DOCX!/word/document.xml",
+            "setup": [
+              "Copy the built DOCX to a temporary path.",
+              "Record each interactive control's tag and alias."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "temporary mutated DOCX",
+                "parameters": {"mutation": "replace only descendant visible text in each w:sdtContent with deterministic fixture text"}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "tag-to-alias mapping after replacement", "operator": "EQUALS", "expected": "the pre-mutation tag-to-alias mapping"},
+              {"subject": "controls whose replacement content equals their retained alias", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": [
+              "Mutate a temporary copy only and use the unique w:tag as the join key.",
+              "Do not accept customXml prose as a substitute for w:sdtPr metadata."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC002",
+            "setup": ["Replacing control text also overwrites or removes its alias."],
+            "action": "Compare tag-to-alias maps before and after replacement.",
+            "expected_failure_or_absence": "The criterion fails because the original purpose is no longer retained independently."
+          }
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.hover_help_behavior",
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.label_content_relation"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.hover_help_behavior",
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.label_content_relation"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+        "REQ_FIELD_FORMATTING_PRESERVATION",
+        "REQ_WORD_WINDOWS_COMPATIBILITY"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

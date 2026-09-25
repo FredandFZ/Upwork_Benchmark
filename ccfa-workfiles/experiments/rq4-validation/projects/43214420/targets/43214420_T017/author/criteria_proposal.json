@@ -1,0 +1,37 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T017",
+  "before_message_id": 317,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "8fbd6a01f36edc36bbcda3beed00c9dff9e1120be4529270e55bb18530bf6586",
+    "pre_repo_sha256": "8104a7e2b516222764dc81ccbeec13bebae482fef89b8292f9d409514c84a624",
+    "target_manifest_sha256": "2d0d027ea388ef2738caa469c219adcff8cac75f44773a39bb1df6622f110896",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {"determination": "DETERMINISTIC_OBSERVABLE", "rationale": "A required slide switch is an actual schematic component and PCB footprint with a switch topology and panel/control nets. Existing reset and boot buttons can be protected as a regression by checking their real components and connectivity. The uncertain count of '2 additional buttons' is not elevated into a target criterion because it is absent from the changed gold path.", "interfaces_inspected": ["dist/design.kicad_sch panel-control components and nets", "dist/design.kicad_pcb switch/button footprints", "src/artifact_model.py:ARTIFACT_MODEL.components"], "subjective_only": false, "repair_requirements": []},
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001", "scope": "TARGET_BEHAVIOR", "statement": "The main-board design includes one populated panel slide-switch component with a matching PCB footprint, at least three electrical terminals implementing a real switch pole/throw topology, and a non-floating connection between the intended panel/control nets.",
+        "gold_requirement_refs": ["REQ_MAIN_PANEL_IO"], "gold_state_paths": ["REQ_MAIN_PANEL_IO.attributes.panel_slide_switch_required"], "evidence_message_ids": [317],
+        "observables": [{"observable_id": "OBS001", "type": "ARTIFACT", "surface": "dist/design.kicad_sch and dist/design.kicad_pcb panel slide switch", "setup": ["Build both KiCad artifacts and select the panel slide-switch reference by symbol class and stable field/reference."], "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_sch and dist/design.kicad_pcb", "parameters": {"extract": ["symbol library id", "electrical pins", "resolved nets", "matching footprint"]}}], "expected_observations": [{"subject": "populated panel slide-switch symbols", "operator": "COUNT_EQUALS", "expected": 1}, {"subject": "slide-switch electrical terminal count", "operator": "GREATER_THAN_OR_EQUAL", "expected": 3}, {"subject": "slide-switch mandatory terminals with no-connect or no net", "operator": "COUNT_EQUALS", "expected": 0}, {"subject": "slide-switch references missing a PCB footprint", "operator": "COUNT_EQUALS", "expected": 0}], "determinism_controls": ["Classify from KiCad symbol pin topology and library id, not a prose component title.", "Join schematic and PCB by reference."]}],
+        "negative_cases": [{"case_id": "NC001", "setup": ["A generic connector is renamed 'switch' but has no switch symbol topology."], "action": "Inspect symbol library and pins.", "expected_failure_or_absence": "The criterion fails."}]
+      },
+      {
+        "criterion_id": "AC002", "scope": "PRESERVED_REGRESSION", "statement": "The existing reset and boot pushbuttons remain populated, have matching PCB footprints, and each connects its controller input to the intended reference rail through the switch rather than being replaced by the new slide switch.",
+        "gold_requirement_refs": ["REQ_MAIN_PANEL_IO"], "gold_state_paths": ["REQ_MAIN_PANEL_IO.attributes.panel_input_connector_coverage", "REQ_MAIN_PANEL_IO.attributes.boot_button_present"], "evidence_message_ids": [317],
+        "observables": [{"observable_id": "OBS002", "type": "ARTIFACT", "surface": "dist/design.kicad_sch and dist/design.kicad_pcb reset/boot buttons", "setup": ["Resolve reset and boot pushbutton symbols and controller endpoints."], "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_sch and dist/design.kicad_pcb", "parameters": {"controls": ["RESET", "BOOT"]}}], "expected_observations": [{"subject": "populated reset and boot pushbutton controls", "operator": "COUNT_EQUALS", "expected": 2}, {"subject": "reset/boot controls missing matching PCB footprints", "operator": "COUNT_EQUALS", "expected": 0}, {"subject": "reset/boot controller paths that do not traverse their pushbutton", "operator": "COUNT_EQUALS", "expected": 0}], "determinism_controls": ["Identify controller input nets from actual connectivity.", "Respect DNP fields and reject synthetic pinless placeholder components."]}],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {"affected_gold_state_paths": ["REQ_MAIN_PANEL_IO.attributes.panel_slide_switch_required"], "covered_affected_gold_state_paths": ["REQ_MAIN_PANEL_IO.attributes.panel_slide_switch_required"], "preserved_requirement_refs": ["REQ_MAIN_CONNECTOR_INVENTORY", "REQ_MAIN_GPIO_ASSIGNMENTS"], "uncovered_items": [{"finding_id": "T017-GAP-001", "severity": "INFO", "category": "SUBJECTIVE_ONLY", "evidence": "'I think there are 2 additional buttons' is tentative and is not represented in the changed gold path.", "required_action": "Do not score an exact additional-button count without a later confirmation."}]}
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -140,6 +141,7 @@ def _expanded_command(
     model: str,
     model_version: str,
     reasoning_effort: str,
+    response_schema_json: str,
 ) -> list[str]:
     replacements = {
         "{workspace}": str(workspace),
@@ -148,6 +150,7 @@ def _expanded_command(
         "{model}": model,
         "{model_version}": model_version,
         "{reasoning_effort}": reasoning_effort,
+        "{response_schema_json}": response_schema_json,
     }
     expanded: list[str] = []
     for part in command:
@@ -229,6 +232,105 @@ def _parse_stdout_json(stdout: str) -> dict[str, Any]:
     return value
 
 
+def _parse_claude_structured_json(
+    stdout: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Extract benchmark output from Claude Code's JSON result envelope."""
+
+    envelope = _parse_stdout_json(stdout)
+    if envelope.get("is_error") is True or envelope.get("subtype") in {
+        "error",
+        "error_max_turns",
+        "error_max_budget_usd",
+    }:
+        message = envelope.get("result") or envelope.get("error") or "unknown error"
+        raise RQAgentRuntimeError(f"Claude Code reported an unsuccessful result: {message}")
+    response = envelope.get("structured_output")
+    if not isinstance(response, dict):
+        raise RQAgentRuntimeError(
+            "Claude Code JSON output has no object structured_output"
+        )
+    metadata = {
+        key: value
+        for key, value in envelope.items()
+        if key not in {"structured_output", "result"}
+    }
+    return response, metadata
+
+
+def _stage_private_source_instances(
+    package: Mapping[str, Any], manifest: dict[str, Any], run_dir: Path
+) -> None:
+    """Embed verified Gold source files so a frozen run is relocatable."""
+
+    source_records = package.get("source_instances")
+    if not isinstance(source_records, Mapping):
+        raise RQAgentRuntimeError("package manifest has no source_instances")
+    destination_root = run_dir / "private" / "source_instances"
+    portable: dict[str, Any] = {}
+    for rq_id, raw in source_records.items():
+        if not isinstance(rq_id, str) or not isinstance(raw, Mapping):
+            raise RQAgentRuntimeError("package source_instances is invalid")
+        source_value = raw.get("path")
+        expected_hash = raw.get("file_sha256")
+        if not isinstance(source_value, str) or not isinstance(expected_hash, str):
+            raise RQAgentRuntimeError(f"invalid {rq_id} source instance record")
+        source = Path(source_value).resolve()
+        if not source.is_file() or file_sha256(source) != expected_hash:
+            raise RQAgentRuntimeError(
+                f"{rq_id} source instance is missing or changed; rematerialize "
+                "packages on this device"
+            )
+        destination = destination_root / f"{rq_id}.json"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.exists():
+            if file_sha256(destination) != expected_hash:
+                raise RQAgentRuntimeError(
+                    f"embedded {rq_id} source instance conflicts at {destination}"
+                )
+        else:
+            temporary = destination.with_name(f".{destination.name}.tmp")
+            shutil.copyfile(source, temporary)
+            temporary.replace(destination)
+        portable[rq_id] = {
+            **deepcopy(dict(raw)),
+            "path": f"private/source_instances/{rq_id}.json",
+        }
+    manifest["source_instances"] = portable
+
+
+def _stage_private_phase_a_input(
+    package: Mapping[str, Any], manifest: dict[str, Any], public_dir: Path, run_dir: Path
+) -> None:
+    """Retain a verified private copy for a later, separately staged Phase B."""
+
+    hashes = package.get("public_files")
+    if not isinstance(hashes, Mapping):
+        raise RQAgentRuntimeError("package manifest has no public file hashes")
+    destination_root = run_dir / "private" / "phase_a_input"
+    records: dict[str, Any] = {}
+    for name in EMBEDDED_INPUT_FILENAMES:
+        source = public_dir / name
+        expected = hashes.get(name)
+        if not source.is_file() or not isinstance(expected, str):
+            raise RQAgentRuntimeError(f"missing Phase A public input {name}")
+        actual = file_sha256(source)
+        if actual != expected:
+            raise RQAgentRuntimeError(f"Phase A public input hash mismatch: {name}")
+        destination = destination_root / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.exists():
+            if file_sha256(destination) != expected:
+                raise RQAgentRuntimeError(f"conflicting retained Phase A input {name}")
+        else:
+            shutil.copyfile(source, destination)
+        records[name] = {
+            "path": f"private/phase_a_input/{name}",
+            "sha256": expected,
+        }
+    manifest["phase_a_input_files"] = records
+
+
 def run_isolated_agent_case(
     *,
     package_manifest_path: str | Path,
@@ -274,6 +376,8 @@ def run_isolated_agent_case(
             }
         raise RQAgentRuntimeError(f"conflicting frozen run exists at {run_dir}")
     run_dir.mkdir(parents=True, exist_ok=True)
+    _stage_private_source_instances(package, manifest, run_dir)
+    _stage_private_phase_a_input(package, manifest, public_dir, run_dir)
     private_path = run_dir / "private" / "run_manifest.json"
     if private_path.exists():
         existing_manifest = read_json_object(private_path)
@@ -294,6 +398,11 @@ def run_isolated_agent_case(
         model=normalized["model"],
         model_version=normalized["model_version"],
         reasoning_effort=normalized["reasoning_effort"],
+        response_schema_json=json.dumps(
+            read_json_object(public_dir / "response.schema.json"),
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
     )
     record = {
         "schema_version": "rq-agent-process-record-v1",
@@ -326,6 +435,9 @@ def run_isolated_agent_case(
             )
         if normalized["output_mode"] == "stdout_json":
             response = _parse_stdout_json(stdout)
+        elif normalized["output_mode"] == "claude_structured_json":
+            response, provider_metadata = _parse_claude_structured_json(stdout)
+            _atomic_json(agent_dir / "claude_result_metadata.json", provider_metadata)
         else:
             if not output_path.is_file():
                 raise RQAgentRuntimeError(

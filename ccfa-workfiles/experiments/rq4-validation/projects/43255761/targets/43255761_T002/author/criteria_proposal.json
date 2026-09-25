@@ -1,0 +1,93 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T002",
+  "before_message_id": 104,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "a284fcd394ca9d65604f827ac6d4d556de4ac21012a5b287c260ba517ecf30f7",
+    "pre_repo_sha256": "9999f38d9b4229522fce74dee8aec25cff0493214aee234b1046c9d632377278",
+    "target_manifest_sha256": "28130257e54ed25ed3d9493faef4d55c5cf893967bb13324ef0393d337bf7a01",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "The at-most-three-pages clause is objective, but page count after legacy-content paste is a Word layout-engine result. The frozen repository contains neither the named legacy DOCX fixtures nor a pinned Word renderer/automation surface that can perform the paste and report rendered pagination. The qualitative phrase 'spacing be reduced' is not independently testable without a numeric spacing contract.",
+      "interfaces_inspected": [
+        "dist/template.docx",
+        "src/artifact_runtime.py:build_artifacts",
+        "src/artifact_runtime.py:parse_artifacts",
+        "work_item.post_task_observable_features"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Freeze Archive_r7.docx and Archive_r12.docx as researcher-side fixtures with hashes.",
+        "Provide a pinned Microsoft Word for Windows automation image that performs the specified paste workflow and exports rendered page count.",
+        "Define the exact destination template and paste mode used for the three-page assertion."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "MISSING_ARTIFACT_GENERATOR_OR_PARSER",
+      "evidence": [
+        "The pre-repo ZIP exposes OOXML structure but no Word pagination result.",
+        "The named legacy fixtures Archive_r7.docx and Archive_r12.docx are referenced by state but absent from the frozen pre-repo.",
+        "src/artifact_runtime.py writes a synthetic DOCX and does not execute copy/paste or render pages."
+      ],
+      "missing_observables": [
+        "Rendered page count after the frozen legacy-content paste workflow",
+        "Numeric paragraph/section spacing baseline and intended post-state"
+      ],
+      "minimum_environment_repairs": [
+        "Add hashed legacy source fixtures and the exact destination template.",
+        "Add a network-disabled, version-pinned Word automation harness that returns page count and paste-operation status."
+      ],
+      "reentry_condition": "Re-author criteria after the frozen paste fixture and pinned Word renderer can deterministically show the reference delivery at no more than three pages while the pre-repo exceeds three pages."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_LEGACY_CONTENT_PASTE_STABILITY.execution.observed_behavior",
+        "REQ_LEGACY_CONTENT_PASTE_STABILITY.execution.status",
+        "REQ_DOCUMENT_SPACING_PAGE_FIT.existence"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+        "REQ_POST_PASTE_LINE_BREAKS",
+        "REQ_WORD_WINDOWS_COMPATIBILITY"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T002-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "No frozen layout engine and no legacy source fixtures are available to evaluate the objective page-count clause.",
+          "required_action": "Repair the environment as specified before validator authoring."
+        },
+        {
+          "finding_id": "T002-GAP-002",
+          "severity": "MEDIUM",
+          "category": "SUBJECTIVE_ONLY",
+          "evidence": "'spacing be reduced' supplies no numeric value or relational threshold independent of the page-count outcome.",
+          "required_action": "Exclude this wording from direct scoring and use the at-most-three-page result once the renderer is frozen."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

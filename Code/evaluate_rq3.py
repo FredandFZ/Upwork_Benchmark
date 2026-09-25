@@ -14,6 +14,7 @@ from evaluation.rq3 import (
     RQ3EvaluationError,
     build_alignment_request,
     build_clarification_semantic_request,
+    build_field_alignment_request,
     build_state_semantic_request,
     score_rq3,
 )
@@ -42,6 +43,7 @@ def _args() -> argparse.Namespace:
     parser.add_argument("--agent-response", type=Path, required=True)
     parser.add_argument("--condition", choices=("C1", "C2"), required=True)
     parser.add_argument("--alignment-response", type=Path)
+    parser.add_argument("--field-alignment-response", type=Path)
     parser.add_argument("--semantic-response", type=Path)
     parser.add_argument("--request-out", type=Path)
     parser.add_argument("--score-out", type=Path)
@@ -83,6 +85,14 @@ def main() -> int:
                 )
             value = build_alignment_request(instance, response, condition=args.condition)
             label = "RQ3 alignment request"
+        elif gold_decision == "ACT" and args.field_alignment_response is None:
+            value = build_field_alignment_request(
+                instance,
+                response,
+                _read(args.alignment_response),
+                condition=args.condition,
+            )
+            label = "RQ3 field alignment request"
         elif args.semantic_response is None:
             if args.score_out is not None:
                 raise RQ3EvaluationError(
@@ -93,6 +103,7 @@ def main() -> int:
                     instance,
                     response,
                     _read(args.alignment_response),
+                    _read(args.field_alignment_response),
                     condition=args.condition,
                 )
             else:
@@ -109,6 +120,11 @@ def main() -> int:
                 response,
                 condition=args.condition,
                 alignment_response=_read(args.alignment_response),
+                field_alignment_response=(
+                    _read(args.field_alignment_response)
+                    if args.field_alignment_response is not None
+                    else None
+                ),
                 semantic_response=_read(args.semantic_response),
             )
             label = "RQ3 score"

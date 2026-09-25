@@ -103,7 +103,7 @@ run_workspace/
 - `construction_gold`；
 - `source_artifacts` 以及任何由 `construction_gold` 派生的答案字段；
 - 内部 Requirement/Event/State ID；
-- RQ4 validator、正确答案或 reference patch；
+- RQ4 Acceptance Criteria、Judge prompt/config、校准资产、正确答案或 reference patch；
 - target 之后的消息、代码或测试；
 - 其他 Agent 的运行结果。
 
@@ -233,7 +233,7 @@ Agent 不需要猜内部 `REQ_*` ID。RQ1 Evaluator 对同一 target 的全部 P
 5. 确认 JSON response、patch、权限日志和验证日志可以保存；
 6. 再扩展到全部 targets。
 
-对项目 `42204309`，完成 RQ3 Gold 和 RQ4 validator 校准后，才能选取一个 eligible target 做
+对项目 `42204309`，完成 RQ3 Gold、RQ4 Acceptance Criteria 与通用 Judge 配置冻结后，才能选取一个 eligible target 做
 两阶段端到端 smoke test。当前 `pre_repo.zip` 只能在 Phase B 用于 RQ4，不能用于 Phase A。
 全部 25 个 targets 按统一协议运行一个 replicate 需要 `25 × 2 = 50` 个 Phase A reasoning
 runs，另加通过 Agent=`ACT` 与 RQ4 eligibility 双重门控的 Phase B execution runs。只有通过各
@@ -547,7 +547,7 @@ provenance/alignment metadata，不得混入可评分 State，也不得要求 Ag
 | integer、金额、计数 | 数值 exact；只有 Gold 明确允许时才使用 tolerance |
 | unordered set | element Precision、Recall、F1 |
 | ordered list / workflow | 顺序敏感比较；必要时使用 normalized edit score |
-| object / record | 递归到叶子字段后 macro average |
+| object / record | 递归到可评分叶子；`attributes` 使用下述字段对齐后的 closed-world soft F1 |
 | free-text requirement fact | 由冻结的 API Judge 返回 `EQUIVALENT/NOT_EQUIVALENT/UNCERTAIN`，确定性映射为 1/0/0 |
 | null / unknown / absent | 三者分开；未知且未标注的 Gold leaf 使用 `SKIP`，明确为空才用 `NULL_EXACT` |
 
@@ -556,11 +556,30 @@ provenance/alignment metadata，不得混入可评分 State，也不得要求 Ag
 确定性 comparator 判错。Judge 不处理 enum、boolean、number、set 或 null，也不覆盖 exact
 结果。Judge 返回 `UNCERTAIN` 时保守计 0；基础设施失败则整条 run 标记 `JUDGE_ERROR` 后重跑。
 
+Agent 自行命名的 attribute key 不是 canonical schema，因此不能把字符串 key exact 当作字段
+正确性的必要条件。`attributes` 在值比较前增加独立的 Field Alignment：同一路径先确定性配对；
+剩余 Prediction–Gold leaves 由 API Judge 只判定
+`SAME_STATE_VARIABLE/DIFFERENT_STATE_VARIABLE/UNCERTAIN`，再做最大基数、稳定的一对一匹配。
+Judge 必须根据字段语义与 Requirement context 判断变量身份，不得因为两个值恰好相同就认定为
+同一变量，也不得在此阶段判断值是否正确。完成配对后，值仍严格使用 Gold field 的 typed
+comparator；例如 `prize_count` 可以与 `winner_count` 对齐，但 `7` 对 Gold `8` 仍由
+`NUMBER_EXACT` 判错。
+
+设可评分的 Prediction/Gold attribute leaves 分别为 (P_r,G_r)，一对一匹配为 (M_r)，
+Gold comparator 给匹配字段的值分数为 (v(p,g)\in[0,1])，则：
+
+\[
+AttributeScore(r)=\frac{2\sum_{(p,g)\in M_r}v(p,g)}{|P_r|+|G_r|}.
+\]
+
+因此漏字段是 FN，额外字段是 FP，字段已对齐但值错误不获得 value credit；二者都为空时记
+`N/A`。`SKIP` leaf 不进入任一分母。该规则同时用于 RQ2 pre-state 与 RQ3 ACT post-state。
+
 五个 State dimensions 的比较为：
 
 | State dimension | 比较方式 |
 |---|---|
-| `attributes` | 按 field-specific typed comparator 计算，再对适用字段平均 |
+| `attributes` | exact-path + 语义字段一对一对齐，再按 field-specific typed comparator 计算 closed-world soft F1 |
 | `scope` | `persistence` exact；`components`、`contexts` 默认 set F1 |
 | `lifecycle_status` | `ACTIVE/DEFERRED/REMOVED/...` exact match |
 | `ambiguity` | `null` 或 record array；按 `(dimension, description)` 等语义字段做最大权一对一集合匹配 |
@@ -854,18 +873,22 @@ clarification。
 RQ4 只回答：
 
 > Agent 先仅依据当前 task 与 condition 对应历史冻结 RQ1–RQ3 判断；在其选择 `ACT` 后再开放
-> 同一份 pre-task repository，其最终 repository 能否通过为当前 target 预先设计的自动交付验证？
+> 同一份 pre-task repository；其最终 repository 是否满足当前 target 预先冻结的、可观察的
+> Acceptance Criteria？
 
 RQ4 评价最终 repository，不评价 Agent 对行动的文字说明、`planned_actions`、结构化 action
-label 或 patch 与 reference patch 的相似度。ACT/CLARIFY decision 由 RQ3 评价；RQ4 只运行
-对应 condition 的最终 RQ3 Gold decision 为 `ACT` 的实例。
+label 或 patch 与 reference patch 的相似度。最终 repository 由一个统一的、只读的 Agent Judge
+实际构建、运行和检查；不同 target 只替换 task、Acceptance Criteria 与 Code Environment，
+不生成项目级或 target 级 Judge prompt。ACT/CLARIFY decision 仍由 RQ3 评价；RQ4 只运行对应
+condition 的最终 RQ3 Gold decision 为 `ACT` 的实例。
 
 Gold decision 决定 RQ4 分母，Agent decision 决定是否实际开放 Phase B repository。若 Gold 为
 `ACT` 但 Agent 的冻结 decision 不是 `ACT` 或 response 无法解析，Runner 不开放 repository，并将
 该 RQ4-eligible 实例记录为 `NO_CODE_SUBMISSION` / `FAIL`；不能通过事后查看代码来修订 RQ3。
 
-RQ4 的正式结果只有 `PASS` 和 `FAIL`。实例是否可以进入评分由独立的 eligibility gate 决定，
-不把不可执行、环境故障或 validator 故障扩展为第三类 RQ4 分数。
+RQ4 的正式结果只有 `PASS` 和 `FAIL`。Judge 内部可以返回 `UNSURE`，环境或 Judge 基础设施也
+可能产生 `JUDGE_ERROR`；二者都表示该 attempt 尚不可计分，进入复核或重跑，而不是第三类
+RQ4 分数。
 
 ### 6.2 评分资格
 
@@ -873,11 +896,13 @@ RQ4 的正式结果只有 `PASS` 和 `FAIL`。实例是否可以进入评分由�
 
 1. 该 condition 的最终 RQ3 Gold decision 为 `ACT`；
 2. RQ4-only `pre_repo.zip` 可以在固定环境中完成 build 和已有 regression tests；
-3. 当前 Requirement 至少对应一个确定、可自动观察的行为或工件结果；
-4. target-specific hidden tests 已由人工提前设计并通过双人独立复核；
-5. validator 已完成 §6.6 的校准并冻结；
-6. Agent-visible repository 不含 future state、validator、reference delivery 或 evaluator-only
-   Requirement/State/Event metadata。
+3. Criteria Agent 已把该 target 判为 `DETERMINISTIC_OBSERVABLE`，并冻结至少一条具有明确
+   setup、operation、expected observation 和 determinism control 的 Acceptance Criterion；
+4. 当前 Requirement 具有实质性的代码或工件变化；纯确认、重复、metadata-only、无可观察
+   前后差异或仅含无基准主观偏好的时间点已经排除；
+5. 通用 Agent Judge 的 prompt、response schema、模型版本、工具策略和运行环境已经冻结；
+6. Agent-visible repository 不含 future/post-task state、Acceptance Criteria、Judge prompt、
+   evaluator-only Requirement/State/Event metadata 或其他答案提示。
 
 未通过 eligibility gate 的实例不启动正式 RQ4 run，也不产生 `PASS` 或 `FAIL`。它仍可用于
 RQ1–RQ3，并在私有资格记录中保存 `rq4_eligible=false` 和一个排除原因。排除原因只用于统计
@@ -888,77 +913,73 @@ Executable Coverage，不属于 RQ4 评分状态。
 ```text
 RQ3_NOT_ACT
 NO_RUNNABLE_ENVIRONMENT
+NO_MATERIAL_IMPLEMENTATION_CHANGE
 NO_DETERMINISTIC_OBSERVABLE
 CONFIG_ONLY_NO_INDEPENDENT_BEHAVIOR
 SUBJECTIVE_VISUAL_OR_SEMANTIC
-VALIDATOR_NOT_READY
+ACCEPTANCE_CRITERIA_NOT_READY
+JUDGE_CONFIGURATION_NOT_READY
 REPOSITORY_GOLD_LEAKAGE
 ```
 
-### 6.3 人工预先设计 hidden validator
+### 6.3 通用 Agent Judge
 
-Benchmark 作者根据当前 target 和 Gold Requirement，为每个 RQ4 target 编写一个专属的
-hidden validator。Validator author 先把所有必要交付结果写成 acceptance criteria，再为每项
-criterion 指定至少一个可执行断言。测试必须在任何正式 Agent run 之前完成、复核和冻结；不得
-查看某个 Agent 的提交后再增删断言。
+RQ4 使用一份通用 Judge prompt。Judge 在 Agent 提交并冻结 repository 后运行，只读访问：
 
-Validator 的行为 oracle 来自 RQ3 已冻结的 \(G(t^+)\)，而不是重新解释聊天或只根据
-Agent 输出猜测预期实现。Target Test 必须验证外部行为或生成工件，不能把 Gold attributes
-原样序列化后再做配置相等比较。同一 target 的所有模型和 C1/C2 conditions 使用同一
-validator；condition 只改变 Agent 可见历史。
+- 当前 task；
+- 当前 target 的私有 Acceptance Criteria；
+- 最终 repository 的全新副本；
+- 固定的本地构建、测试、浏览器和工件解析工具。
 
-```text
-validators/rq4/
-└── <project_id>/
-    └── <target_id>/
-        ├── validate.mjs
-        ├── target-tests/
-        ├── fixtures/
-        └── validator.json
-```
-
-`validator.json` 记录如何运行验证：
+Judge 不读取 reference delivery、future-state graph、内部 Gold ID 或其他模型的结果。它必须实际
+运行或检查产物，不能只读源代码猜测；每条 criterion 必须返回 `PASS`、`FAIL` 或 `UNSURE`，并
+附带可复核的 operation、observation 和 artifact/log reference。没有证据的结论无效。
 
 ```json
 {
-  "validator_id": "43214420_T016_v1",
-  "target_id": "43214420_T016",
-  "command": ["node", "validate.mjs", "--repo", "<agent_repo>"],
-  "acceptance_criteria_ids": ["AC001", "AC002"],
-  "calibration_complete": true
+  "target_id": "43772711_T007",
+  "build": "PASS",
+  "regression": "PASS",
+  "criteria": [
+    {
+      "criterion_id": "AC001",
+      "verdict": "PASS",
+      "evidence": [
+        {
+          "operation": "browser_dom_query",
+          "observation": "Footer exists at every required viewport.",
+          "artifact": "evidence/AC001.json"
+        }
+      ]
+    }
+  ],
+  "overall": "PASS"
 }
 ```
 
-Validator 不放入 Agent workspace，Agent 在提交代码前不能读取它。
+Judge 只能提出 criterion verdict；最终 `overall` 由本地程序重新计算，不能直接采信 Judge 自报。
+同一 target 的所有模型和 C1/C2 conditions 使用相同 Acceptance Criteria 与 Judge 配置；condition
+只改变 Agent 可见历史。
 
-### 6.4 Validator 检查三件事
+### 6.4 三类检查
 
-每个 validator 只需要完成三类检查：
+每次评价只包含三部分：
 
-1. **Build**：项目能否安装、编译或启动；
-2. **Target Test**：当前 Requirement 对应的功能是否正确；
-3. **Regression**：项目已有的基础测试是否仍然通过。
+1. **Build**：固定命令能否安装、编译或启动；
+2. **Regression**：项目原有基础测试是否仍然通过；
+3. **Acceptance Criteria**：Judge 是否用实际执行证据确认全部 criterion。
 
-Target Test 只检查当前 target 的必要交付结果。通常一个 target 使用一个 hidden test suite，
-内部包含少量关键断言；测试数量由必要行为决定，不设固定下限或上限。适用的观察方式包括：
-
-| 可观察结果 | Validator 示例 |
+| 产物类型 | Judge 的允许证据 |
 |---|---|
-| 函数行为 | 调用函数并断言返回值 |
-| 本地 API | 启动服务、发送请求并断言 response |
-| CLI | 执行命令并检查 exit code 和输出 |
-| 生成工件 | 解析 KiCad、DOCX 或 PDF，检查结构、内容、拓扑或确定性几何约束 |
-| REMOVE | 确认旧接口、元素、章节或行为已经不存在 |
-| Bug fix | 复现旧 bug，并确认修改后不再出现 |
+| 函数/API/CLI | 调用结果、退出码、结构化响应 |
+| Web 前端 | DOM、路由、交互、计算样式、响应式几何、任务范围内的可访问性、冻结区域截图 |
+| KiCad | 原理图、PCB、网络、footprint 与几何解析结果 |
+| DOCX/PDF | OOXML/PDF 结构、渲染结果、字段、布局和坐标 |
+| REMOVE/Bug fix | 旧行为复现结果与修改后的反事实执行结果 |
 
-一个 target 涉及多个必要 Requirement 时，Target Test 必须覆盖所有必要行为；任意必要行为
-失败，整个 Target Test 失败。
-
-纯配置相等不构成主 RQ4 的独立行为证据。例如，读取 feature module 后断言
-`configuration == Gold attributes` 的 target 应以
-`CONFIG_ONLY_NO_INDEPENDENT_BEHAVIOR` 排除。配置只有在被真实函数、API、CLI 或工件生成流程
-消费时，才通过最终行为进入 Target Test。自由文本只在客户明确要求逐字文案时使用 exact
-match；主观视觉或语义相似度不调用 LLM/API Judge，而是排除出 RQ4。
+纯配置镜像、没有外部消费路径的字段相等、无参考基准的“更美观”等主观要求不进入这 40 个
+target。前端任务可以评价，但必须落实为上述可观察证据；截图只能支持已经冻结的区域或几何
+criterion，不能让 Judge 临场发明审美标准。
 
 ### 6.5 PASS 与 FAIL
 
@@ -968,16 +989,9 @@ RQ4 使用简单的二元评分：
 RQ4Pass
 =
 BuildPass
-\land TargetTestPass
-\land RegressionPass.
+\land RegressionPass
+\land \bigwedge_i CriterionPass_i.
 \]
-
-也可以直接使用总验证脚本的退出码：
-
-```text
-exit code = 0      -> PASS
-exit code != 0     -> FAIL
-```
 
 保存的结果示例：
 
@@ -986,45 +1000,45 @@ exit code != 0     -> FAIL
   "target_id": "42204309_T003",
   "condition": "C1",
   "build_pass": true,
-  "target_test_pass": true,
   "regression_pass": true,
-  "exit_code": 0,
+  "criteria_passed": 3,
+  "criteria_total": 3,
+  "judge_config_id": "rq4-agent-judge-v1",
   "result": "PASS"
 }
 ```
 
-Build、Target Test 或 Regression 任一失败均为 `FAIL`。Gold 为 `ACT` 但 Agent 未选择 `ACT`、
+Build、Regression 或任一 criterion 明确失败均为 `FAIL`。出现 `UNSURE`、Judge schema 错误、
+工具故障或证据文件缺失时，该 attempt 标为 `REVIEW_REQUIRED`/`JUDGE_ERROR`，修复或复核前不进入
+正式分母。Gold 为 `ACT` 但 Agent 未选择 `ACT`、
 Phase A response 无法解析、Agent timeout，或 Agent 没有留下可测试的 repository，也记为
 `FAIL`。Phase B final message 无法解析但 repository 可测试时，忽略文字输出并
-继续验证。Agent 不修改代码但最终测试全部通过仍为 `PASS`；§6.6 的 pre-repo 校准应保证这种
-情况只在当前 task 原本已经满足或 validator 无效时出现。
+继续验证。
 
-### 6.6 Validator 校准
+### 6.6 轻量 Judge 校准
 
-每个 validator 在正式使用前必须完成以下校准：
+不再要求 40 个 target 各自构造 reference、partial、mutant 和专属 hidden validator。校准改为
+对通用 Judge 配置进行抽样验证：
 
-1. **Pre-repo**：Build 和 Regression 必须通过，Target Test 必须失败；
-2. **Reference delivery**：Build、Target Test 和 Regression 必须全部通过；
-3. **Partial delivery**：当 target 包含多个必要行为时，至少构造一个只实现部分 acceptance
-   criteria 的 delivery，并确认 Target Test 失败。单一原子行为不要求额外 partial delivery。
+1. 使用已有的 pre-repo、reference delivery、partial/mutant 和确定性 validator 组成私有校准集；
+2. 检查 Judge 是否能区分未实现、正确实现和关键缺失实现；
+3. 对 `UNSURE`、证据不足和 Judge 间分歧进行人工复核；
+4. 冻结 Judge prompt、schema、模型版本、工具版本和判定汇总器。
 
-如果 pre-task code 已经通过 Target Test，说明测试没有检查到当前新增或修改的要求；如果
-reference delivery 仍失败，或 partial delivery 意外通过，validator 不得进入正式实验。
-
-校准通过后冻结 validator ID、validator 内容版本、acceptance criteria、reference delivery
-版本和校准记录。正式实验开始后若修改 validator，必须提升版本，并重跑该 validator 产生的
-全部结果。
+已有 target-specific validators 可以作为确定性对照和失败分析，但不再是某个 target 获得
+eligibility 的必要条件。正式实验开始后若修改通用 Judge prompt、模型、工具策略、Acceptance
+Criteria 或汇总逻辑，必须提升版本并重跑受影响结果。
 
 ### 6.7 运行与环境边界
 
 只有 Phase A 的 RQ1–RQ3 response 已经冻结且 Agent decision 为 `ACT` 时，Runner 才从同一
 RQ4-only `pre_repo.zip` 全新解压，在独立 execution workspace 中开放 repository。Agent 停止后
-先冻结 repository，再由 workspace 外的 evaluator 顺序执行 Build、Target Test 和 Regression。
-Agent 不能访问 validator、acceptance criteria、reference delivery 或验证失败细节，也不能改写
+先冻结 repository，再由 workspace 外的 evaluator 执行 Build、Regression 和通用 Agent Judge。
+Agent 不能访问 Acceptance Criteria、Judge prompt、校准样本或验证失败细节，也不能改写
 Phase A 的冻结 response。
 
-环境有效性在 Agent 运行前检查：pre-repo Build、Regression 和 validator startup 必须成功。
-若环境、validator 或 harness 自身失败，当前 attempt 作废，修复后从干净 pre-repo 重跑；该
+环境有效性在 Agent 运行前检查：pre-repo Build、Regression 和 Judge toolchain startup 必须成功。
+若环境、Judge 或 harness 自身失败，当前 attempt 作废，修复后从干净 pre-repo 重跑；该
 attempt 不写入正式 RQ4 结果。最终评分数据中的 `result` 因而始终只有 `PASS` 或 `FAIL`。
 
 ### 6.8 指标与聚合
@@ -1044,10 +1058,10 @@ ExecutableCoverage =
 \]
 
 结果先在 target 内聚合，再在 project 内聚合，正式总分使用 project macro-average。Build、
-Target Test 和 Regression 的通过率可以作为失败分析，但不形成新的 RQ4 分数等级。
+Build、Regression 与逐 criterion 通过率可以作为失败分析，但不形成新的 RQ4 分数等级。
 
 C1/C2 的主要比较使用共同支持集合：同一 target 在两个 conditions 中均为 RQ3 Gold
-`ACT`、均通过 eligibility gate，并使用同一 validator。各 condition 的全量 eligible 结果和
+`ACT`、均通过 eligibility gate，并使用同一 Acceptance Criteria 与 Judge 配置。各 condition 的全量 eligible 结果和
 coverage 另行报告，不能把不同分母的差异直接解释为历史条件效果。
 
 ---
@@ -1061,31 +1075,32 @@ coverage 另行报告，不能把不同分母的差异直接解释为历史条�
 2. `agent_runner`：在独立 workspace 中调用 Agent，并保存最终 repository、patch 和日志；
 3. `requirement_aligner`：`Code/evaluation/alignment.py` 为 RQ2/RQ3 提供通用 all-pairs relation
    contract 与确定性一对一匹配；RQ1 保持自己的 v3 对齐契约与证据评分；
-4. `typed_state_scorer`：`Code/evaluation/state.py` 负责 exact/set/recursive/closed-world 评分，
-   只把自由文本语义叶交给 API Judge；
-5. `rq2_typed_state_scorer`：`Code/evaluation/rq2.py` 与 `Code/evaluate_rq2.py` 已实现两阶段离线
-   request/response、主/辅助指标、coverage 与 oracle-aligned 常量 baseline；
+4. `typed_state_scorer`：`Code/evaluation/state.py` 负责 attribute field alignment、
+   exact/set/recursive/closed-world 评分；API Judge 只返回字段身份与自由文本语义的离散关系；
+5. `rq2_typed_state_scorer`：`Code/evaluation/rq2.py` 与 `Code/evaluate_rq2.py` 已实现
+   Requirement alignment → Attribute field alignment → State semantic equivalence → deterministic scoring，
+   以及主/辅助指标、coverage 与 oracle-aligned 常量 baseline；
 6. `rq3_branch_scorer`：`Code/evaluation/rq3.py` 与 `Code/evaluate_rq3.py` 已实现 decision、ACT
    Post-state、CLARIFY blocker/question 评分及 all-ACT/all-CLARIFY baseline；
 7. `rq3_gold_review`：`Code/stage2/rq3_review.py` 与 `Code/finalize_rq3_gold.py` 生成 review template，
    并仅在双人审核和 adjudication 完成后冻结 condition-specific Gold；
-8. `rq4_eligibility_builder`：在 RQ3 Gold 冻结后，按 condition 判定 RQ4 eligibility，并记录
-   唯一的排除原因；
-9. `rq4_validator_registry`：保存人工设计的 acceptance criteria、hidden validator、版本、哈希、
-   适用 target 和 conditions；
-10. `rq4_calibration_runner`：验证 pre-repo、reference delivery，以及适用时的 partial delivery，
-    产出可审计的校准记录；
-11. `rq4_validator_runner`：对 eligible run 的最终 repository 依次运行 Build、Target Test 和
-    Regression，并只写出 `PASS` 或 `FAIL`；
+8. `rq4_eligibility_builder`：只保留 Criteria Agent 判为 `DETERMINISTIC_OBSERVABLE` 且具有实质
+   实现变化的 target，并在 RQ3 Gold 冻结后按 condition 判定 eligibility；
+9. `rq4_acceptance_criteria_registry`：保存 40 个 target 的冻结 criteria、版本、哈希和适用 conditions；
+10. `rq4_agent_judge_runner`：使用一份冻结的通用 prompt，在只读 final repository 上执行
+    Build、Regression 和逐 criterion 证据检查；
+11. `rq4_result_finalizer`：拒绝 `UNSURE`/Judge error，并机械汇总正式 `PASS` 或 `FAIL`；
 12. `rq4_aggregator`：计算 Success Rate、Executable Coverage、project macro-average 和
     condition common-support 对比。
 
 当前 RQ1 instances 已包含确定性 Atom/Evidence Gold；RQ2 使用 v3 contract，但仍保持
 `PROVISIONAL_REQUIRES_FIELD_REVIEW`，因此只能生成诊断分数；RQ3 使用 v3 contract，但 25 个
-targets 的 condition-specific Gold 仍须人工冻结；RQ4 的 `acceptance_criteria`、`validator_ids`
-仍为空且 `execution_ready=false`。对应 review/validator 完成前不能发布正式分数。任何遗留
+targets 的 condition-specific Gold 仍须人工冻结。当前 RQ4 原始集合包含 99 个时间点；Criteria
+Agent 审核后，40 个 target 为 `DETERMINISTIC_OBSERVABLE`，50 个需要环境修复，9 个没有确定性
+可观察结果。主 RQ4 固定为这 40 个 target；其 Acceptance Criteria、Judge 配置和 eligibility
+完成冻结前不能发布正式分数。任何遗留
 RQ2/RQ3 v1/v2 instance 必须先重新生成 public inputs。
 
-现有 RQ4 records 仅是候选实例：其 acceptance criteria、validator、校准记录和 repository
-leakage 检查尚未完成，因此均不具备正式 eligibility，也不能生成 `PASS`/`FAIL`。只有完成
-§6.2 和 §6.6 的全部 gate 后，才可以将对应 target-condition 纳入 RQ4 分母。
+现有 reference、partial、mutant 和 target-specific validator 是私有 Judge 校准资产，不是逐
+target 发布门槛。只有完成 §6.2 的 eligibility、repository leakage audit，并冻结 §6.6 的通用
+Judge 配置后，才可以将对应 target-condition 纳入 RQ4 分母。

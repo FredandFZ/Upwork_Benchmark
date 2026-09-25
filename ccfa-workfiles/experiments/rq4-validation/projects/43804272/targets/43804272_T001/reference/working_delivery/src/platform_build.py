@@ -1,0 +1,31 @@
+ANDROID_LOCALES = [
+    "af", "am", "ar", "bg", "bn", "ca", "cs", "da", "de", "el", "en", "en-AU",
+    "en-GB", "en-IN", "es", "es-419", "et", "eu", "fa", "fi", "fil", "fr",
+    "fr-CA", "gl", "gu", "he", "hi", "hr", "hu", "id", "is", "it", "ja", "kn",
+    "ko", "lt", "lv", "ml", "mr", "ms", "nl", "no", "pl", "pt-BR", "pt-PT",
+    "ro", "ru", "sk", "sl", "sr", "sv", "sw", "ta", "te", "th", "tr", "uk",
+    "ur", "vi", "zh-CN", "zh-TW", "zu", "ne", "si", "km", "lo", "my", "mn",
+    "mk", "sq", "bs", "hy", "az", "ka", "kk", "ky", "uz",
+]
+
+IOS_LOCALES = [
+    "ar", "ca", "zh-Hans", "zh-Hant", "hr", "cs", "da", "nl", "en", "en-AU",
+    "en-GB", "fi", "fr", "fr-CA", "de", "el", "he", "hi", "hu", "id", "it",
+    "ja", "ko", "ms", "no", "pl", "pt-BR", "pt-PT", "ro", "ru", "sk", "es",
+    "es-419", "sv", "th", "tr", "uk", "vi", "fil", "bg",
+]
+
+PLATFORM_BUILD = {
+    "schema_version": "mobile-platform-build-v1",
+    "platforms": ["android", "ios"],
+    "localization": {
+        "resource_format": "json-string-catalog",
+        "android": {"store": "google-play", "locales": ANDROID_LOCALES, "language_count": 77},
+        "ios": {"store": "app-store", "locales": IOS_LOCALES, "language_count": 40},
+        "full_app_content": True,
+    },
+    "current_capabilities": {
+        "android-full-app-localization": {"localization_required": True, "google_play_language_count": 77},
+        "ios-full-app-localization": {"localization_scale": "large-scale", "app_store_language_count": 40},
+    },
+}

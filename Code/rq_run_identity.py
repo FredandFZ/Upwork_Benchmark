@@ -96,13 +96,22 @@ def normalize_agent_config(
     if (
         not isinstance(command, list)
         or not command
-        or any(not isinstance(part, str) or not part for part in command)
+        or not isinstance(command[0], str)
+        or not command[0]
+        or any(not isinstance(part, str) for part in command[1:])
     ):
-        raise RQRunConfigError("agent.command must be a non-empty string array")
-    output_mode = value.get("output_mode", "stdout_json")
-    if output_mode not in {"stdout_json", "workspace_file"}:
         raise RQRunConfigError(
-            "agent.output_mode must be stdout_json or workspace_file"
+            "agent.command must be a string array with a non-empty executable"
+        )
+    output_mode = value.get("output_mode", "stdout_json")
+    if output_mode not in {
+        "stdout_json",
+        "workspace_file",
+        "claude_structured_json",
+    }:
+        raise RQRunConfigError(
+            "agent.output_mode must be stdout_json, workspace_file, or "
+            "claude_structured_json"
         )
     output_filename = value.get("output_filename", "agent_response.json")
     if (

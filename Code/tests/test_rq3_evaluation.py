@@ -7,6 +7,7 @@ from Code.evaluation.rq3 import (
     aggregate_rq3_results,
     build_alignment_request,
     build_clarification_semantic_request,
+    build_field_alignment_request,
     build_state_semantic_request,
     score_rq3,
     score_rq3_constant_decision_baseline,
@@ -49,6 +50,16 @@ def _state_semantic_response(request):
         "relations": [
             {"fact_id": row["fact_id"], "relation": "EQUIVALENT"}
             for row in request["facts"]
+        ],
+    }
+
+
+def _field_alignment_response(request):
+    return {
+        "schema_version": "state-field-alignment-response-v1",
+        "relations": [
+            {**row, "relation": "DIFFERENT_STATE_VARIABLE"}
+            for row in request["candidate_pairs"]
         ],
     }
 
@@ -138,14 +149,19 @@ class RQ3EvaluationTests(unittest.TestCase):
         alignment = _alignment_response(
             request, {("P001", "G001"), ("P002", "G002")}
         )
-        semantic_request = build_state_semantic_request(
+        field_request = build_field_alignment_request(
             instance, response, alignment, condition="C2"
+        )
+        field_alignment = _field_alignment_response(field_request)
+        semantic_request = build_state_semantic_request(
+            instance, response, alignment, field_alignment, condition="C2"
         )
         result = score_rq3(
             instance,
             response,
             condition="C2",
             alignment_response=alignment,
+            field_alignment_response=field_alignment,
             semantic_response=_state_semantic_response(semantic_request),
         )
         self.assertEqual(result["official_metrics"]["post_state_exact"], 1)
@@ -179,14 +195,19 @@ class RQ3EvaluationTests(unittest.TestCase):
         alignment = _alignment_response(
             request, {("P001", "G001"), ("P002", "G002")}
         )
-        semantic_request = build_state_semantic_request(
+        field_request = build_field_alignment_request(
             instance, response, alignment, condition="C2"
+        )
+        field_alignment = _field_alignment_response(field_request)
+        semantic_request = build_state_semantic_request(
+            instance, response, alignment, field_alignment, condition="C2"
         )
         result = score_rq3(
             instance,
             response,
             condition="C2",
             alignment_response=alignment,
+            field_alignment_response=field_alignment,
             semantic_response=_state_semantic_response(semantic_request),
         )
         self.assertEqual(result["official_metrics"]["post_state_exact"], 0)

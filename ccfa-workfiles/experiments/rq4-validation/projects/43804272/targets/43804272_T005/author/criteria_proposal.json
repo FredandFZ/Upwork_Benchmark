@@ -1,0 +1,114 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T005",
+  "before_message_id": 257,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "84a93182ee7910aee5be23a7e26d228e245ced9a0a2bcae8ad455ce0265ee92b",
+    "pre_repo_sha256": "8d2e19d44d54811bd30b06a87c0b8d382c810a857f528f6668f4be0e4ad659c3",
+    "target_manifest_sha256": "e89f557c87400965f1d650c1d8352318df64de83859da901a8068bc9c78aa8a9",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The hosting-channel decision is a deterministic delivery-metadata requirement exposed by the generated How To media manifest; no claim about external YouTube availability is made.",
+      "interfaces_inspected": [
+        "generated How To media manifest"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The generated How To media manifest records the client main YouTube channel as the hosting channel while retaining external shared-video delivery for both platforms.",
+        "gold_requirement_refs": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_hosting_channel"
+        ],
+        "evidence_message_ids": [
+          257
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "generated How To media manifest",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "How To media manifest",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "hosting channel",
+                "operator": "EQUALS",
+                "expected": "client_main_youtube_channel"
+              },
+              {
+                "subject": "delivery method",
+                "operator": "EQUALS",
+                "expected": "external_streaming"
+              },
+              {
+                "subject": "enabled platform set",
+                "operator": "EQUALS",
+                "expected": [
+                  "ANDROID",
+                  "IOS"
+                ]
+              },
+              {
+                "subject": "media format",
+                "operator": "EQUALS",
+                "expected": "shared_video"
+              }
+            ],
+            "determinism_controls": [
+              "No external channel lookup is performed; only the candidate build artifact is parsed."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_hosting_channel"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_hosting_channel"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+        "REQ_IOS_APP_SIZE_OPTIMIZATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

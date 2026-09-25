@@ -1,0 +1,195 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_4bf4e9e67f2a0d7f3028",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T014",
+  "target_fingerprint": "74c5b0d2c9d494e4e1f52988f2ec29d45808d679f26c561d6232b37ed276a942",
+  "condition": "C2",
+  "turns": 283,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ1\\43214420_T014_RQ1.json",
+      "file_sha256": "211f6ad9f62a7d6b34a28001185df84ad980c12e73de8fa1a8fad3c970de9ec5",
+      "content_sha256": "141f7e00109d845ba034d60202c850ccb82b1a660e4275d6b8aa7309493b23eb"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ2\\43214420_T014_RQ2.json",
+      "file_sha256": "8e82ce01542c9f1035c8295dcd701360de8e8bf00ed091b895886bcacae8bd26",
+      "content_sha256": "8a619db449426f1393cad69d1cc2328b0c7bc08a239d4ad349afff647938b67b"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ3\\43214420_T014_RQ3.json",
+      "file_sha256": "d96af0f044e36b1b88e52113e6d09956fed47c427bfc2c90b3147e68d5e825f1",
+      "content_sha256": "784b72576146de13767c8a29d35171d0a71b3f0846e6212b019614f08fbd319a"
+    }
+  },
+  "public_files": {
+    "task.json": "e0e5814f937ce19b971ded3b5c99cffcc7812cc345cb562a209e04eac266976d",
+    "history.jsonl": "8e8604be2803e885de58787beed4089d22b5b3a2f8408ea08a6fc261ce870b00",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T014_before_284/pre_repo.zip",
+    "archive_sha256": "191f4cf6f49459499fb6ca2eee6edf6f702c51604e786ba6e6483c8fa2e14e22",
+    "tree_sha256": "db16f75809af65e87443fa4d38b7c85714167fcef3efd1d8d9f73c523fa3bb3e",
+    "manifest_path": "Code Environment/43214420/targets/T014_before_284/manifest.json",
+    "manifest_sha256": "2ebd14c023f10b085afa6b976d2afa92b92cf37114bf5c5758244180d185c5d6",
+    "before_message_id": 284,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "A populated logic-level shifter/buffer component is electrically between the controller LED-data output and the first addressable LED DIN: the two endpoints are on different nets joined only through the shifter data path, the shifter high-side/logic supply is on switched 5V, and its ground and enable pins are validly connected.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_sch controller-to-LED data graph",
+            "setup": [
+              "Build schematic and identify controller LED-data pin, first LED DIN, and candidate logic-buffer symbols."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_sch",
+                "parameters": {
+                  "trace": "controller LED data to first LED DIN",
+                  "required_component_class": "level shifter or logic buffer rated for 5V output"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "qualified level-shifter components on the data path",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "controller-side and LED-side data net names",
+                "operator": "NOT_EQUALS",
+                "expected": "each other"
+              },
+              {
+                "subject": "level-shifter high-side/logic supply net",
+                "operator": "EQUALS",
+                "expected": "5V_SW"
+              },
+              {
+                "subject": "direct controller-to-LED bypass paths excluding the shifter",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "unconnected mandatory ground or enable pins",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Classify the device from a frozen KiCad symbol/library allowlist and parsed pin roles.",
+              "Require actual pin/net connectivity and a matching populated PCB footprint."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "A component named level shifter exists but the controller data bypasses it."
+            ],
+            "action": "Trace graph paths.",
+            "expected_failure_or_absence": "The criterion fails."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The addressable LED power and logic high-side supply are connected to the switched 5 V rail generated by the power-board boost domain, not to 3V3.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_sch LED power nets",
+            "setup": [
+              "Resolve first LED supply pins and level-shifter high-side supply."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_sch",
+                "parameters": {
+                  "pins": [
+                    "LED.VDD",
+                    "level_shifter.VCCB_or_VCC"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "resolved supply net for LED VDD and shifter high side",
+                "operator": "EQUALS",
+                "expected": "5V_SW"
+              },
+              {
+                "subject": "LED/shifter high-side supply pins on 3V3",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Resolve explicit net connectivity and net-ties.",
+              "Do not infer supply from textual labels detached from pins."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "eb0072ec96a5290468ece71f00ef09ae63037a894c505dcd500a1fd82a6bd46a",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

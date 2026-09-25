@@ -288,6 +288,12 @@ State Reconstruction、RQ3 Memory-or-Clarify Decision、RQ4 Requirement-to-Code
 Execution。`allowed_rq_targets` 只允许 RQ1–RQ4 的非空子集；
 `recommended: true` 时 `primary_rq_targets` 不得为空。
 
+`primary_rq_targets` 包含 `RQ4` 只表示该消息是 Requirement-to-Code 的原始候选，不直接决定
+正式 RQ4 收录。Code Environment 构建后还必须执行独立的 materiality/observability gate：只有
+具有实质实现变化、且 Criteria Agent 能冻结确定性 Acceptance Criteria 的 target 才进入 RQ4
+evaluation set。当前快照中 99 个原始时间点经该门控收缩为 40 个；该结果由私有 RQ4 eligibility
+记录维护，不能回写或改变本阶段的通用 target selection Gold。
+
 RQ 定义属于 prompt semantics。RQ prompt 发生变化时，对应 evaluation 的
 `prompt_sha256` 必须失效并触发重新评估；离线 threshold report 也必须验证当前完整
 fingerprint。

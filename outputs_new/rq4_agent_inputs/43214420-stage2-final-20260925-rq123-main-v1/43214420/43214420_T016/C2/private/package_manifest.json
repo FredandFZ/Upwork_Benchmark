@@ -1,0 +1,157 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_b6929d8861051e880768",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T016",
+  "target_fingerprint": "8f68ea3bede01562f2a66b6bfafd171496ffab5418369d30d0387088be185b57",
+  "condition": "C2",
+  "turns": 308,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ1\\43214420_T016_RQ1.json",
+      "file_sha256": "d206ab6b1b834ed57c78d496c9675795e56c05fb39d33fb8964b71353c6e9b17",
+      "content_sha256": "50f35da9901da9af4758aac7dc3baf63976d842a6ac7ed3cebabf605b1341814"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ2\\43214420_T016_RQ2.json",
+      "file_sha256": "0709a5492da1ca64722e6b88678b3ddb35cf698ac06d1b34b914cc0796abf0a1",
+      "content_sha256": "6242426ab28e3d196e8def8f98011231ef0ec751c3002f3c6a5ec90554198df2"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ3\\43214420_T016_RQ3.json",
+      "file_sha256": "e522351f65f45a644a7bf5b2af74d664386fc46c20d96f6f4048f2b667f28794",
+      "content_sha256": "b2957ac4d4ef5b29651409541769be5b38d4755acad9435a361af0572db72209"
+    }
+  },
+  "public_files": {
+    "task.json": "fa83de050acae7b6d29af3d8ddcb51f0912122152fa89d068ef577dcfa8808fb",
+    "history.jsonl": "c32d4e061413db4b5f316296de0c778152a919fbcef66e913f082fb9da7458af",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T016_before_309/pre_repo.zip",
+    "archive_sha256": "7801337231a788d539e16e2b5ec6959578c3215aa99e497818d4563d60631bbf",
+    "tree_sha256": "6edf14d908a3c0701cd1bdba1af43c5ddb38d4306ccc7e0540bf9086f943c823",
+    "manifest_path": "Code Environment/43214420/targets/T016_before_309/manifest.json",
+    "manifest_sha256": "25d6bc30099e5fee5f5e3ff78b316e43a4ec05315d76dba4f20c74b2b690bd19",
+    "before_message_id": 309,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The main-board SDA and SCL paths implement exactly one of two allowed topologies: (A) no populated series resistors and direct controller-to-bus connectivity on each signal, or (B) exactly one populated 44 Ω resistor in each signal path, with no bypass and a matching PCB footprint for both resistors.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_sch and dist/design.kicad_pcb main-board I2C paths",
+            "setup": [
+              "Build both KiCad artifacts and identify controller SDA/SCL pins plus downstream bus endpoints."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_sch and dist/design.kicad_pcb",
+                "parameters": {
+                  "evaluate_allowed_topologies": [
+                    "direct_no_series_components",
+                    "one_44ohm_series_component_per_signal"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "allowed I2C series-resistor topology predicate",
+                "operator": "EQUALS",
+                "expected": true
+              },
+              {
+                "subject": "SDA/SCL asymmetry in selected branch",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "bypass paths when populated-resistor branch is selected",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "selected branch PCB/schematic reference mismatches",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Determine presence from populated schematic references joined to PCB footprints, respecting DNP fields.",
+              "Evaluate both signals under the same branch.",
+              "Do not accept a textual optionality flag without matching connectivity."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Only SDA has a 44 Ω resistor or SCL has a different value."
+            ],
+            "action": "Evaluate the symmetric allowed-topology predicate.",
+            "expected_failure_or_absence": "The criterion fails."
+          },
+          {
+            "case_id": "NC002",
+            "setup": [
+              "44 Ω resistors are populated but bypassed by same-net wiring."
+            ],
+            "action": "Search graph paths excluding resistor edges.",
+            "expected_failure_or_absence": "The criterion fails."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "83f8f209fbdc5a3b8e83fceaa867bf1398b575259e8e4bf712cdd06b4a96e6c1",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

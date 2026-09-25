@@ -1,0 +1,159 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_5f5f3f97c088b5a9448d",
+  "input_release": "44035087-stage2-final-20260925-rq123-main-v1",
+  "project_id": "44035087",
+  "target_id": "44035087_T001",
+  "target_fingerprint": "c1e8f00c8b0890a5b0c2ce0796240da14f6e8623ebefe6efc1b64c7e9d498212",
+  "condition": "C2",
+  "turns": 21,
+  "difficulty": "SHORT",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ1\\44035087_T001_RQ1.json",
+      "file_sha256": "10a3c670b58c79aa25dbff3d06a73826966fd043ac4ed6219ad21670bb66bcd6",
+      "content_sha256": "fccf830c975f45a6f4e4b6cb2f9d0c5f7e9d88176ec60a39a91d1b8409448c3c"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ2\\44035087_T001_RQ2.json",
+      "file_sha256": "75eff27c8f580b11c42928f1d8ad0fe82dca9f867cbecefc86a0745c17b8c122",
+      "content_sha256": "bf142e263473faca520a43ee5b951fa9343f7eaa172106596f7291576ae73164"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ3\\44035087_T001_RQ3.json",
+      "file_sha256": "6fc1b9b27d60f539426c0072be3cb5453a85093c0aa415c6da25afab0a54a37a",
+      "content_sha256": "8b9435772d948e167dc0cf634e3bbb0d57184a7541f15b5ae075a5cf12535b96"
+    }
+  },
+  "public_files": {
+    "task.json": "b91ee7ebe5846971af364945f11e89f33ff3682fe4ebadec8887de5e0bc90c29",
+    "history.jsonl": "49fd24674e4db7534f5103f74de56bff89f5df8abcba6eab27df4299e9cc1d23",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/44035087/targets/T001_before_22/pre_repo.zip",
+    "archive_sha256": "d432da2a2e13a71a325a132b3dbc1fbfa8243b96226a2fb69f9fe68572f197a1",
+    "tree_sha256": "3c14b223d2f9c93ac9d860112dcf2b5d59c7448ed1d1e7faeab9378d96f411ae",
+    "manifest_path": "Code Environment/44035087/targets/T001_before_22/manifest.json",
+    "manifest_sha256": "4d7f2749b7a734ab61eb6f3d537ac949667048b2e81fdbb84dd57ecf9db6a180",
+    "before_message_id": 22,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "REMOVAL",
+        "statement": "The public site no longer exposes or routes to an instant-quote calculator, while the frozen gallery behavior and current pricing catalog remain available.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "REMOVE",
+            "surface": "Built website DOM and public application interface",
+            "setup": [
+              "Build the repository offline",
+              "Open the site with a frozen browser and clean storage",
+              "Create a fresh local application instance"
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "public site root",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "links, forms, and controls associated with instant quote",
+                "parameters": {}
+              },
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/gallery",
+                "parameters": {
+                  "method": "GET"
+                }
+              },
+              {
+                "operation": "READ_PUBLIC_STATE",
+                "target": "current pricing catalog",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "instant-quote calculator controls and navigation destinations",
+                "operator": "ABSENT",
+                "expected": true
+              },
+              {
+                "subject": "gallery response status",
+                "operator": "EQUALS",
+                "expected": 200
+              },
+              {
+                "subject": "current package pricing catalog",
+                "operator": "EXISTS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "offline network",
+              "frozen browser",
+              "clean storage",
+              "fresh application state"
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Built site"
+            ],
+            "action": "Attempt to navigate to the former instant-quote destination",
+            "expected_failure_or_absence": "No calculator is rendered and no active instant-quote route succeeds."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "b912a40f49c377602ab591a11c7c5d065e40648b8ee44de72c1de8bc40b98154",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

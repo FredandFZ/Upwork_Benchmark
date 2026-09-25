@@ -27,7 +27,7 @@ Researcher-side RQ instances
 - **Phase B RQ4 Execution Input**：只在 Phase A response 冻结后按门控开放，包含只供 RQ4 使用的
   pre-task repository 和只读 frozen response；
 - **Private Run Manifest**：Evaluator 使用的 source paths、RQ eligibility、Gold、condition、
-  `turns`、difficulty、validator 等信息。
+  `turns`、difficulty、Acceptance Criteria 与通用 Judge 配置等信息。
 
 当前 `rq-instance-v1` 文件包含 `construction_gold` 和其他答案信息，因此不能原样作为 Agent
 prompt、附件或 workspace 文件。
@@ -78,8 +78,8 @@ Private Run Manifest 按以下规则生成 `active_rqs`：
 
 当前实例仍处于 provisional 状态时，只能使用 `SMOKE` materialization：可以演练 Phase A 与
 满足模拟门控的 Phase B，但输出统一标记为 `NOT_SCORED`。`FORMAL` Phase A 必须拒绝对应
-RQ1–RQ3 Gold 尚未完成 review/freeze 的 view；`FORMAL` Phase B 还必须拒绝 RQ4 validator、
-校准或 leakage audit 未完成的 execution view。RQ4 未 ready 不影响已经 ready 的 RQ1–RQ3
+RQ1–RQ3 Gold 尚未完成 review/freeze 的 view；`FORMAL` Phase B 还必须拒绝 RQ4 Acceptance
+Criteria、通用 Judge 配置或 leakage audit 未冻结的 execution view。RQ4 未 ready 不影响已经 ready 的 RQ1–RQ3
 Phase A view 正式计分。
 
 ---
@@ -135,7 +135,7 @@ schema/rq_agent_response.schema.json
 | `rq_id`、RQ eligibility | 保存为 `active_rqs` | 否 |
 | `code_environment.archive_path` | Runner 在 Phase B 定位并解压代码 | Phase A 不可见；Phase B 只看到解压后的 repository |
 | `code_environment` 的 hashes/classification | 用于 Runner 校验 | 否 |
-| `requirements_to_code`、`temporal_fixture` | 保留给 evaluator/validator | 否 |
+| `requirements_to_code`、`temporal_fixture` | 保留给 evaluator/Judge | 否 |
 | `construction_gold` | 保留给 scorer | 否 |
 | `selection_basis`、`source_artifacts`、`visibility` | 不写入公共输入 | 否 |
 
@@ -231,8 +231,8 @@ Oracle Relevant History。
 7. 最终回答必须符合 `response.schema.json`；
 8. 不输出 private chain-of-thought，只输出结构化结论。
 
-Prompt 中不能包含 target-specific Gold、正确 Requirement 名称、预期文件路径或 hidden test
-提示，也不能暗示 Phase B 的目录结构、代码路径或 repository 内容。
+Prompt 中不能包含 target-specific Gold、正确 Requirement 名称、预期文件路径、Acceptance
+Criteria 或 Judge 判定细节等提示，也不能暗示 Phase B 的目录结构、代码路径或 repository 内容。
 
 Phase B 使用独立的 versioned execution prompt。它只要求 Agent 根据 task、可见历史、冻结的
 Phase A response 和新开放的 repository 完成代码修改；不得生成替代 response，也不得修改
@@ -296,7 +296,8 @@ Phase A 文件。Phase B 的任何文字输出均不重新进入 RQ1–RQ3 评�
 - RQ2 与 RQ3 分别按 `rq2-agent-response-v3`、`rq3-agent-response-v3` 验证；自然语言语义叶的
   API 判断与最终确定性计分分离；
 - 该 response 仅供 RQ1–RQ3 评分；RQ4 不要求 `planned_actions` 或单独的结构化回答；
-- RQ4 的唯一被评分产物是最终 repository，结果由 workspace 外的 hidden validator 确定。
+- RQ4 的唯一被评分产物是最终 repository；workspace 外的 evaluator 运行 Build、Regression 和
+  一份跨项目通用的只读 Agent Judge，并由本地程序机械汇总结果。
 
 ---
 
@@ -336,10 +337,12 @@ Package Manifest：
   },
   "rq4": {
     "eligible": true,
-    "validator_id": "42204309_T010_RQ4_V1",
-    "validator_sha256": "...",
     "acceptance_criteria_ids": ["AC001", "AC002"],
-    "calibration_record_sha256": "..."
+    "acceptance_criteria_sha256": "...",
+    "judge_config_id": "rq4-agent-judge-v1",
+    "judge_prompt_sha256": "...",
+    "judge_response_schema_sha256": "...",
+    "judge_tool_policy_sha256": "..."
   },
   "score_status": "READY"
 }
@@ -385,7 +388,7 @@ Package Manifest：
 - Package Manifest 固定输入身份，且冻结 response 时不得修改；
 - Run Manifest 记录模型、版本、prompt、工具策略与 repetition，并记录 response hash/timestamp；
 - 仅为 Phase B 定位同一份 pre-task repository；
-- 对 eligible RQ4 run 定位已冻结并校准的 hidden validator；
+- 对 eligible RQ4 run 定位已冻结的 Acceptance Criteria 和通用 Judge 配置；
 - 保证多模型与重复实验不覆盖，同时保持输入和代码版本可复现。
 
 两类文件都必须保存到 Agent sandbox 之外。`run_id` 必须由
@@ -408,7 +411,7 @@ Phase A 不执行本节，也不能读取本节引用的路径。只有 Phase A 
 - Code Environment validation 已通过。
 
 不能把 `requirements_to_code`、expected code paths 或 temporal fixture metadata 暴露给 Agent。
-RQ4 repository 必须通过 future-state、validator、reference-delivery 和 evaluator-metadata 泄漏
+RQ4 repository 必须通过 future-state、Acceptance-Criteria、Judge-prompt/calibration-asset 和 evaluator-metadata 泄漏
 审计。Pre-task 实现本身允许保留，因为它是 RQ4 的合法起点；但该 repository 永远不能回流到
 RQ1–RQ3 scorer 或用于修订 Phase A response。
 
@@ -454,7 +457,7 @@ opaque workspace 和独立权限配置：
 - 只有可解析的 Phase A decision 为 `ACT` 且 RQ4 eligible 时，才创建 Phase B workspace；
 - Phase B 只能读取 frozen response，不能覆盖、补写或重新提交 RQ1–RQ3 答案；
 - 使用固定模型、prompt、工具和预算；
-- 禁止访问 workspace 外的 Stage 2、Gold 和 validator 目录；
+- 禁止访问 workspace 外的 Stage 2、Gold、Acceptance Criteria、Judge 配置和校准资产目录；
 - 不允许跨 run 继续之前的 Agent session/memory；
 - 隔离单位是 `target × condition × agent_config × repetition`；同一 target 的 C1 与 C2 也不得
   共享 session、conversation/thread/previous-response ID、scratchpad、工具状态或 workspace；
@@ -462,7 +465,19 @@ opaque workspace 和独立权限配置：
   workspace；冻结 response、hash、配置与日志作为审计产物保留；
 - `prompt/rq_agent_run_prompt.md` 只负责启动本 case，任务定义仍来自公开包中的
   `instructions.md` 与 `response.schema.json`；prompt 不是文件系统或网络隔离边界；
-- Agent 完成后不向其返回 hidden test 结果。
+- Agent 完成后不向其返回 Judge criterion verdict 或执行证据。
+
+Claude Code Phase A 适配必须使用非交互、restricted、无 session persistence、无工具、无 MCP
+和 JSON Schema structured output 的命令配置。Runner 只接受 CLI JSON envelope 中的
+`structured_output` 作为 Agent response；CLI metadata 单独保存，不能混入 response。不得使用
+`--continue`/`--resume`，也不能依赖用户级或项目级 Claude 配置提供任务指令。具体版本、参数和
+跨设备操作见 `Code/insturctions/README_rq123_claude_code.md`。
+
+为支持“Agent 在一台设备运行、Judge 在另一台设备运行”，每个新 frozen run 必须把 package
+manifest 引用的 RQ1--RQ3 source instance 先做 SHA-256 校验，再复制到 evaluator-only 的
+`private/source_instances/`，并在 run manifest 中写相对路径。该目录不得出现在 Agent workspace
+或 stdin 中。完整 `run_*` 目录因此可以迁移；只复制 Agent response 不构成可评分产物。旧 run
+中的绝对 source path 继续兼容，但只能在路径仍有效的设备上评分。
 
 Runner 回收：
 
@@ -491,19 +506,21 @@ Agent 开放 repository。对于 RQ4 Gold-eligible 的实例，这种情况记�
 
 ### RQ4 的后处理
 
-RQ4 validator 不属于 Public Agent Input。Agent 结束并冻结代码后，Evaluator 在 sandbox 外
-运行对应的 hidden validator：
+Acceptance Criteria 与 Judge 配置不属于 Public Agent Input。Agent 结束并冻结代码后，Evaluator
+在 sandbox 外运行固定 Build、Regression 与通用 Agent Judge：
 
 ```text
-BuildPass AND TargetTestPass AND RegressionPass
-                    ↓
-              RQ4 PASS/FAIL
+BuildPass AND RegressionPass AND every CriterionPass
+                         ↓
+                   RQ4 PASS/FAIL
 ```
 
-三项全部通过才是 `PASS`，任一项失败即为 `FAIL`。环境、validator 或 harness 自身故障会使
-attempt 作废并从干净 pre-repo 重跑，不写入第三种评分状态。当前 RQ4 `execution_ready=false`
+Judge 必须实际运行或检查 repository，并为每条 criterion 写出 `PASS`、`FAIL` 或 `UNSURE` 及
+证据；本地 finalizer 重新计算总体结果，不采信 Judge 自报的 `overall`。Build、Regression 或
+任一 criterion 明确失败即为 `FAIL`；全部通过才是 `PASS`。`UNSURE`、Judge schema 错误、环境
+或工具故障使 attempt 进入复核/重跑，不能直接进入正式分母。当前 RQ4 `execution_ready=false`
 或 `rq4_eligible=false` 时，Runner 可以保存 patch 用于 smoke test，但不能生成正式 RQ4 score。
-RQ4 不调用外部 API/LLM judge，也不比较 patch 文本相似度。
+RQ4 不比较 patch 文本或 reference patch 相似度。
 
 ---
 
@@ -513,9 +530,9 @@ Materializer 写出 Phase A 公共输入及 Phase B execution input 前必须验
 
 - Phase A 公共输入中不存在 `construction_gold`、`selection_basis`、`source_artifacts`；
 - Phase A 公共输入中不存在 `REQ_*`、Event ID、State ID、affected/preserved Requirement ID；
-- 不存在 acceptance criteria、validator path/内容、reference delivery、expected code path 或 Gold decision；
+- 不存在 Acceptance Criteria、Judge prompt/config、校准资产、expected code path 或 Gold decision；
 - Phase A workspace 中不存在 repository、archive path、代码文件、代码搜索入口或 build/test 输出；
-- Phase B repository 不含 future state、validator、reference delivery 或 evaluator-only
+- Phase B repository 不含 future state、Acceptance Criteria、Judge prompt、校准资产或 evaluator-only
   Requirement/State/Event metadata；
 - `history.jsonl` 的 ID 集合与 condition 声明完全一致；
 - C1 history 等于 target 之前的完整历史；
@@ -572,11 +589,11 @@ active_rqs
 construction_gold
 Requirement/Event/State IDs
 code_environment.requirements_to_code
-validator 或正确 delivery
+Acceptance Criteria、Judge prompt/config 或校准 delivery
 ```
 
 这些信息保存在 Private Run Manifest，用于把 Phase A response 和 Phase B 最终 repository 送入
-正确的 scorers。由于当前 Gold、RQ4 validators、校准和 repository leakage audit 尚未冻结，这个例子
+正确的 scorers。由于当前 Gold、RQ4 Acceptance Criteria、通用 Judge 配置和 repository leakage audit 尚未冻结，这个例子
 只能标记为 smoke test，不能产生正式 RQ4 `PASS`/`FAIL`。
 
 ---
@@ -649,8 +666,8 @@ python Code/aggregate_rq123_results.py `
 ```
 
 `formal` reasoning 模式必须拒绝对应 RQ1–RQ3 的 provisional eligibility、未审核的 C2 Oracle
-历史或未冻结的 RQ3 decision；`formal` execution 模式必须额外拒绝 RQ4 eligibility 未通过、validator 未冻结、
-校准未完成或 repository leakage audit 未通过的 view。RQ4 execution 未 ready 不撤销已 ready
+历史或未冻结的 RQ3 decision；`formal` execution 模式必须额外拒绝 RQ4 eligibility 未通过、
+Acceptance Criteria 或通用 Judge 配置未冻结、repository leakage audit 未通过的 view。RQ4 execution 未 ready 不撤销已 ready
 的 RQ1–RQ3 reasoning view。
 
 ---
@@ -676,9 +693,10 @@ python Code/aggregate_rq123_results.py `
 - [ ] Judge provider 可在内部 Stage 1 API 与公开 OpenAI Responses API 之间替换，Judge contract 与 scorer 不变；
 - [ ] experiment ledger 限制 Judge 和汇总只读取该实验登记的 run；
 - [ ] Phase A response 与 Phase B patch、logs、final repository 分目录回收；
-- [ ] RQ4 validator 只在 Agent 停止后由 evaluator 运行；
+- [ ] 通用 RQ4 Agent Judge 只在 Agent 停止且 repository 冻结后由 evaluator 运行；
 - [ ] RQ4 不要求 `planned_actions`，正式结果值域只有 `PASS`/`FAIL`；
-- [ ] eligible RQ4 validator 已完成人工复核、三类校准和版本冻结；
-- [ ] Phase B repository 不泄漏 future state、validator、reference delivery 或 evaluator metadata；
+- [ ] 40 个 RQ4 target 均有冻结的确定性 Acceptance Criteria；
+- [ ] 通用 Judge prompt/schema/model/tool policy 已在私有抽样校准集上验证并冻结；
+- [ ] Phase B repository 不泄漏 future state、Acceptance Criteria、Judge 配置、校准资产或 evaluator metadata；
 - [ ] `SMOKE` 与 `FORMAL` 模式严格区分；
 - [ ] leakage 和 fingerprint tests 全部通过。

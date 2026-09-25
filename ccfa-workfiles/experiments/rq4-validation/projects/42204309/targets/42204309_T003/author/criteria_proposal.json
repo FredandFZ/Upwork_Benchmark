@@ -1,0 +1,99 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "42204309",
+  "target_id": "42204309_T003",
+  "before_message_id": 123,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "2fe366f6e9e7af21f016c7549fb3214b2bf9dc12062dae9a1a465670ca1d82a8",
+    "pre_repo_sha256": "1f316d275aeea7d07b66313c518e8a72a755c69f4148e9a861e83eaebf5d49d4",
+    "target_manifest_sha256": "0c2222a9816c683fbb262d175839b646f0c14e1b75d1e75c3442d4b3f308d203",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "CurrentPrizeService draws are gated by a computed USD pool target. The target changes the Big Block trigger to every 180,000 sales, but no sale counter or sale event exists.",
+      "interfaces_inspected": [
+        "CurrentPrizeService.contribute",
+        "CurrentPrizeService.draw",
+        "GET /api/prizes"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Add a deterministic sale-event interface and persisted sale counter.",
+        "Drive Big Block eligibility and draw results from sales rather than a configuration lookup."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "NO_EXECUTABLE_BEHAVIOR_INTERFACE",
+      "evidence": [
+        "CurrentPrizeService draws are gated by a computed USD pool target.",
+        "The target changes the Big Block trigger to every 180,000 sales, but no sale counter or sale event exists."
+      ],
+      "missing_observables": [
+        "Sales-count accumulation.",
+        "Big Block draw eligibility at exactly 180,000 sales.",
+        "Nine $6,000 winner payouts."
+      ],
+      "minimum_environment_repairs": [
+        "Add a deterministic sale-event interface and persisted sale counter.",
+        "Drive Big Block eligibility and draw results from sales rather than a configuration lookup."
+      ],
+      "reentry_condition": "Rebuild and re-triage the target after every listed public behavior surface is executable and frozen."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_BIG_BLOCK_PRIZE.attributes.draw_condition",
+        "REQ_BIG_BLOCK_PRIZE.attributes.pool_target",
+        "REQ_BIG_BLOCK_PRIZE.attributes.prize_amount_per_winner"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_PROJECT_BRANDING",
+        "REQ_PORTUGAL_GEOBLOCK",
+        "REQ_MILESTONE_PARTNER_REWARDS",
+        "REQ_SMALL_BLOCK_PRIZE",
+        "REQ_PRIZE_TICKET_LIFECYCLE",
+        "REQ_CHAINLINK_VRF_SELECTION",
+        "REQ_PRIZE_CLAIM_FLOW",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_TRANSAK_FIAT_MINT",
+        "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+        "REQ_NFT_METADATA_ACCURACY",
+        "REQ_BADGE_PRESENTATION",
+        "REQ_WALLET_AUTHENTICATION",
+        "REQ_EMAIL_MAGIC_LINK_AUTH",
+        "REQ_PUBLIC_API_ACCESS",
+        "REQ_TRANSACTIONAL_EMAIL_DELIVERY"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "F001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "CurrentPrizeService draws are gated by a computed USD pool target. The target changes the Big Block trigger to every 180,000 sales, but no sale counter or sale event exists.",
+          "required_action": "Add a deterministic sale-event interface and persisted sale counter. Drive Big Block eligibility and draw results from sales rather than a configuration lookup."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

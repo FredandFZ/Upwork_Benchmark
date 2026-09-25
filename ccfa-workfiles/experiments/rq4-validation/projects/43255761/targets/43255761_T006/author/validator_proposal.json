@@ -1,0 +1,127 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T006",
+  "before_message_id": 195,
+  "author_role": "VALIDATOR_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "c6a9375c6cd6f079fae59521e301a30076811809c5c723518727263dbaa2694a",
+    "pre_repo_sha256": "0aaabb86166cee4091677b70855b60fd6354f3af7e67a5a54c2b6d5e584bc719",
+    "target_manifest_sha256": "d4cd4e3f84957ada298c39ab4b541662160130abbd35b70f8e24ebff0c90867a",
+    "upstream_proposals": [
+      {
+        "role": "CRITERIA_AUTHOR",
+        "path": "author/criteria_proposal.json",
+        "sha256": "825cc7c02805ccd2f6a6fea321a5b1d69f18dd6f072b379ef8ae8045c1348431"
+      }
+    ]
+  },
+  "produced_files": [
+    {
+      "path": "validator/validator_core.py",
+      "sha256": "22daff26a9f015e16a316d90c86c20298ff48f902d31032e3947818648b38b6f",
+      "purpose": "OOXML clear-content mutation, persistent alias/tag, and resolved glossary placeholder validator",
+      "researcher_only": true
+    },
+    {
+      "path": "validator/run_validator.py",
+      "sha256": "0c1fd5e3181c438a23afaddd1ce4df83c6760a886d27f63fabdc184b41cb15c8",
+      "purpose": "Target-bound hidden validator entrypoint",
+      "researcher_only": true
+    }
+  ],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "acceptance_criteria_sha256": "825cc7c02805ccd2f6a6fea321a5b1d69f18dd6f072b379ef8ae8045c1348431",
+    "harness": {
+      "language": "Python 3 stdlib OOXML/ZIP parser and deterministic temporary-DOCX mutation roundtrip",
+      "entrypoint": "validator/run_validator.py",
+      "build_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "build",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/build.json"
+      ],
+      "target_test_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "target",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/target.json"
+      ],
+      "regression_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "regression",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/regression.json"
+      ],
+      "timeout_seconds": 90,
+      "network_policy": "DISABLED",
+      "fresh_workspace_required": true,
+      "machine_readable_result_path": ".rq4-results/{build,target,regression}.json"
+    },
+    "criterion_coverage": [
+      {
+        "criterion_id": "AC001",
+        "test_ids": [
+          "T006-AC001-OBS001"
+        ],
+        "observable_ids": [
+          "OBS001"
+        ]
+      }
+    ],
+    "result_contract": {
+      "components": [
+        "BUILD_PASS",
+        "TARGET_TEST_PASS",
+        "REGRESSION_PASS"
+      ],
+      "final_rule": "BUILD_PASS AND TARGET_TEST_PASS AND REGRESSION_PASS",
+      "harness_error_is_agent_failure": false
+    },
+    "calibration_contract": {
+      "pre_repo_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "FAIL"
+      },
+      "reference_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "PASS"
+      },
+      "adversarial_expected": "EVERY_PARTIAL_OR_MUTANT_FAILS_TARGET_OR_REGRESSION",
+      "actual_results_may_be_written_by_author": false
+    },
+    "implementation_independence": {
+      "no_llm_judge": true,
+      "no_network": true,
+      "no_reference_patch_comparison": true,
+      "no_gold_mapping_direct_score": true,
+      "no_unrequired_internal_structure_assertion": true
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "42204309",
+  "target_id": "42204309_T032",
+  "before_message_id": 742,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "12c5ec182f10e11522d510d07fdb2dc755384914e3705764b3b116b4dc0f26af",
+    "pre_repo_sha256": "d327335706f1d3c3f045daed4190505177d77447261504487ec99f23879f2a13",
+    "target_manifest_sha256": "6bfa13843ad78b39192df9a6ea94a52bb5b7626cf4282e51aeb7fb62d5e8f121",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The repository provides a working local mint form and mint API. The subjective book-title approval is ignored; the objective conditional success-copy rule can be tested after confirmed coded and no-code mints.",
+      "interfaces_inspected": [
+        "HarborQuillService.register_referral",
+        "HarborQuillService.mint",
+        "mint-page browser interaction",
+        "POST /api/mints"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The post-confirmation success feedback for a no-referral mint contains the random-holder reminder.",
+        "gold_requirement_refs": [
+          "REQ_MINT_RESULT_FEEDBACK"
+        ],
+        "gold_state_paths": [
+          "REQ_MINT_RESULT_FEEDBACK.attributes.success_copy_variant_rule"
+        ],
+        "evidence_message_ids": [
+          742
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "mint form result after a no-referral mint",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "mint page",
+                "parameters": {}
+              },
+              {
+                "operation": "SUBMIT",
+                "target": "mint form",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": ""
+                }
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "post-confirmation success feedback",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "feedback timing",
+                "operator": "EQUALS",
+                "expected": "after confirmed mint"
+              },
+              {
+                "subject": "random-holder reminder",
+                "operator": "CONTAINS",
+                "expected": "No referral code used"
+              },
+              {
+                "subject": "random ticket and commission recipient wording",
+                "operator": "CONTAINS",
+                "expected": "at random"
+              }
+            ],
+            "determinism_controls": [
+              "Use the local fetch/application bridge and a fixed confirmed-mint fixture."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "Success feedback for a coded-referral mint does not show the no-referral random-holder reminder; if one shared message is used, it is generic, otherwise a referral-specific variant is used.",
+        "gold_requirement_refs": [
+          "REQ_MINT_RESULT_FEEDBACK"
+        ],
+        "gold_state_paths": [
+          "REQ_MINT_RESULT_FEEDBACK.attributes.success_copy_variant_rule"
+        ],
+        "evidence_message_ids": [
+          742
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "mint success feedback variants",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "register_referral",
+                "parameters": {
+                  "owner": "owner",
+                  "code": "CODE"
+                }
+              },
+              {
+                "operation": "OPEN_PAGE",
+                "target": "mint page",
+                "parameters": {}
+              },
+              {
+                "operation": "SUBMIT",
+                "target": "mint form",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": "CODE"
+                }
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "post-confirmation success feedback",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "no-referral random-holder reminder",
+                "operator": "ABSENT",
+                "expected": true
+              },
+              {
+                "subject": "feedback variant classification",
+                "operator": "MATCHES_REGEX",
+                "expected": "^(generic|coded-referral-specific)$"
+              }
+            ],
+            "determinism_controls": [
+              "Use the same frozen browser and confirmed-mint fixture as OBS001."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Register a valid referral and complete a confirmed mint with it."
+            ],
+            "action": "Inspect the visible success feedback.",
+            "expected_failure_or_absence": "The no-referral random-holder reminder is absent."
+          }
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_MINT_RESULT_FEEDBACK.attributes.success_copy_variant_rule"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_MINT_RESULT_FEEDBACK.attributes.success_copy_variant_rule"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_PROJECT_BRANDING",
+        "REQ_PORTUGAL_GEOBLOCK",
+        "REQ_LANDING_PAGE_CONTENT_LAYOUT",
+        "REQ_LANDING_BOOK_COVER_PRESENTATION",
+        "REQ_FAQ_CONTENT",
+        "REQ_MILESTONE_PARTNER_REWARDS",
+        "REQ_SMALL_BLOCK_PRIZE",
+        "REQ_BIG_BLOCK_PRIZE",
+        "REQ_PRIZE_TICKET_LIFECYCLE",
+        "REQ_CHAINLINK_VRF_SELECTION",
+        "REQ_PRIZE_CLAIM_FLOW",
+        "REQ_AAVE_POOL_YIELD",
+        "REQ_CODED_REFERRAL_COMMISSION",
+        "REQ_CODED_REFERRAL_TICKETS",
+        "REQ_NO_REFERRAL_COMMISSION",
+        "REQ_NO_REFERRAL_TICKETS",
+        "REQ_REFERRAL_CODE_VALIDATION",
+        "REQ_NFT_REFERRAL_IDENTITY",
+        "REQ_UNLIMITED_NFT_MINT",
+        "REQ_MINT_PRICE_REVENUE_SPLIT",
+        "REQ_USDC_WALLET_MINT",
+        "REQ_ETH_WALLET_MINT",
+        "REQ_ETH_PRICE_AND_REFUND",
+        "REQ_PAYMENT_METHOD_SELECTION",
+        "REQ_TRANSAK_FIAT_MINT",
+        "REQ_OPTIONAL_MINT_TIP",
+        "REQ_BASE_NETWORK_DEPLOYMENT",
+        "REQ_SECONDARY_ROYALTY_ENFORCEMENT",
+        "REQ_NFT_TRANSFER_SEMANTICS",
+        "REQ_NFT_METADATA_ACCURACY",
+        "REQ_BADGE_AWARDS",
+        "REQ_BADGE_PRESENTATION",
+        "REQ_WALLET_AUTHENTICATION",
+        "REQ_EMAIL_MAGIC_LINK_AUTH",
+        "REQ_PUBLIC_API_ACCESS",
+        "REQ_TRANSACTIONAL_EMAIL_DELIVERY",
+        "REQ_IPFS_EBOOK_STORAGE",
+        "REQ_NFT_HOLDER_BOOK_ACCESS",
+        "REQ_BOOK_READER_UX",
+        "REQ_MOBILE_WALLET_BOOK_ACCESS",
+        "REQ_CONTRACT_EVENT_WEBHOOK",
+        "REQ_CONTRACT_MIGRATION_DATA_CONTINUITY",
+        "REQ_DISCORD_COMMUNITY_SERVER",
+        "REQ_SPECIFIC_NFT_OWNERSHIP_TRANSFER",
+        "REQ_ABOUT_HARBOR_QUILL_CONTENT",
+        "REQ_NFT_ASSET_RENDERING",
+        "REQ_OWNER_NFT_DISCOVERY",
+        "REQ_DASHBOARD_LEADERBOARD_ACCURACY",
+        "REQ_NFT_OWNERSHIP_MINT_REPORTING",
+        "REQ_PRIZE_POOL_PLATFORM_STATS_ACCURACY"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": "rq-agent-task-v1",
+  "task": {
+    "message_id": 263,
+    "speaker": "client",
+    "text": "Here is the power mapping by operating mode:\n\nWith the power board connected, the primary source is the 3.3V rail (AXP2101 DCDC1, 3.5A). It powers:\n- ESP32-S3 module\n- INA219\n- all I2C sensors on the sensor board: SCD41, BME280, and ENS160\n- I2C display\n- TTP223 and AM312 PIR\n\nControlled by ESP32 GPIO3, the 5V rail (MT3608 boost, 1200mA) powers:\n- SPS30 particulate sensor\n- ZE08-CH2O formaldehyde sensor\n- SK6812 LEDs, but only if they are wired to 5V; that depends on the version\n\nWhen USB-C is connected to the main board while the power board is absent, the 3.3V rail (ME6211A LDO, 2A) becomes active for standalone programming. It supplies the same 3.3V rail listed above; Schottky diode OR-ing allows whichever source is present to take precedence.\n\nThe 2.8–4.6V battery feeds AXP2101, which then supplies everything downstream.\n\nIn short, AXP2101 powers everything during normal operation; the LDO activates only for programming without the power board connected."
+  },
+  "history_file": "history.jsonl",
+  "response_schema_file": "response.schema.json"
+}

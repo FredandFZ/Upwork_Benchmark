@@ -1,0 +1,135 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T007",
+  "before_message_id": 87,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "6563e167d59c94374b47e36f1923c8d857f86b5e4b3adc2c0e39df8f6fea80b0",
+    "pre_repo_sha256": "345d5e17f23d868ad4a8ed024179f90bb79b917cbe4f52a82669be05053d9948",
+    "target_manifest_sha256": "a07cea4c0ee492e95e371b51b3bc5319910788fc674c7d9f862a275887eeefd1",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The footer background is an explicit semantic dark-purple property observable as a computed opaque color at fixed viewports; unrelated interface references and button preferences are not scored.",
+      "interfaces_inspected": [
+        "built shared footer DOM",
+        "computed CSS color at frozen viewports"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The shared footer renders with an opaque dark-purple background at desktop, tablet, and mobile viewports.",
+        "gold_requirement_refs": [
+          "REQ_WEBSITE_FOOTER"
+        ],
+        "gold_state_paths": [
+          "REQ_WEBSITE_FOOTER.attributes.background_color"
+        ],
+        "evidence_message_ids": [
+          87
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_RESPONSIVE",
+            "surface": "computed shared-footer background color",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "website page",
+                "parameters": {}
+              },
+              {
+                "operation": "RESIZE_VIEWPORT",
+                "target": "shared footer",
+                "parameters": {
+                  "viewports": [
+                    [
+                      1440,
+                      900
+                    ],
+                    [
+                      768,
+                      1024
+                    ],
+                    [
+                      390,
+                      844
+                    ]
+                  ]
+                }
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "footer computed background color",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "background alpha at every viewport",
+                "operator": "EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "background hue in HSL at every viewport",
+                "operator": "WITHIN_TOLERANCE",
+                "expected": {
+                  "center_degrees": 290,
+                  "tolerance_degrees": 30
+                }
+              },
+              {
+                "subject": "background lightness percentage at every viewport",
+                "operator": "LESS_THAN_OR_EQUAL",
+                "expected": 45
+              }
+            ],
+            "determinism_controls": [
+              "Use frozen Chromium, fixed color profile, fixed fonts, and disabled animations.",
+              "Parse the computed sRGB color into HSL before applying the declared semantic dark-purple bounds."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_WEBSITE_FOOTER.attributes.background_color"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_WEBSITE_FOOTER.attributes.background_color"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_WEBSITE_FOOTER"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

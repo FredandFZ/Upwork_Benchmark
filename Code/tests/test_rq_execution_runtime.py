@@ -8,7 +8,11 @@ import unittest
 from pathlib import Path
 
 from Code.rq_agent_input import materialize_reasoning_input, write_materialized_input
-from Code.rq_agent_runtime import run_isolated_agent_case
+from Code.rq_agent_runtime import (
+    RQAgentRuntimeError,
+    _parse_claude_structured_json,
+    run_isolated_agent_case,
+)
 from Code.aggregate_rq123_results import aggregate_run_tree
 from Code.rq_batch_evaluation import evaluate_frozen_run
 from Code.rq_judge_provider import JudgeCallResult
@@ -47,6 +51,11 @@ class _FakeJudgeProvider:
                 {"fact_id": row["fact_id"], "relation": "NOT_EQUIVALENT"}
                 for row in request["facts"]
             ]
+        elif version == "state-field-alignment-request-v1":
+            relations = [
+                {**row, "relation": "DIFFERENT_STATE_VARIABLE"}
+                for row in request["candidate_pairs"]
+            ]
         elif version == "rq3-clarification-semantic-request-v1":
             relations = [
                 {
@@ -76,6 +85,37 @@ class _FakeJudgeProvider:
 
 
 class RQExecutionRuntimeTests(unittest.TestCase):
+    def test_claude_structured_result_extracts_response_and_metadata(self):
+        response = _clarify_response([10])
+        parsed, metadata = _parse_claude_structured_json(
+            json.dumps(
+                {
+                    "type": "result",
+                    "subtype": "success",
+                    "is_error": False,
+                    "session_id": "not-persisted",
+                    "total_cost_usd": 0.01,
+                    "structured_output": response,
+                }
+            )
+        )
+        self.assertEqual(parsed, response)
+        self.assertNotIn("structured_output", metadata)
+        self.assertEqual(metadata["total_cost_usd"], 0.01)
+
+    def test_claude_structured_result_rejects_error_envelope(self):
+        with self.assertRaises(RQAgentRuntimeError):
+            _parse_claude_structured_json(
+                json.dumps(
+                    {
+                        "type": "result",
+                        "subtype": "error",
+                        "is_error": True,
+                        "result": "authentication failed",
+                    }
+                )
+            )
+
     def test_new_process_run_freezes_output_and_purges_workspace(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -126,6 +166,18 @@ class RQExecutionRuntimeTests(unittest.TestCase):
             )
             self.assertEqual(manifest["repetition"], 1)
             self.assertFalse(manifest["agent_config"]["persistent_conversation"])
+            self.assertTrue(
+                all(
+                    not Path(record["path"]).is_absolute()
+                    for record in manifest["source_instances"].values()
+                )
+            )
+            self.assertTrue(
+                all(
+                    (result["run_dir"] / record["path"]).is_file()
+                    for record in manifest["source_instances"].values()
+                )
+            )
 
             repeated = run_isolated_agent_case(
                 package_manifest_path=package_path,

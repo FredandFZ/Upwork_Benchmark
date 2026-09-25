@@ -1,0 +1,86 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T009",
+  "before_message_id": 241,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "969a13e8effe0488b408b494d57612541a0f9e3b8a865be9d22a312df20de473",
+    "pre_repo_sha256": "fd8dadd4c33e45a0c3f89b48b62d764eb5725e778a4f4133ccdcae2474959750",
+    "target_manifest_sha256": "c9f4843e91e4c382857fd4458212be254464d3d34884218ed323c338afff38e4",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "Cross-user equality of bullet size and spacing is a rendered-output property across machines. The current repository can parse OOXML declarations but cannot render the same frozen fixture under multiple pinned Word installations, font sets, printer metrics, and display settings.",
+      "interfaces_inspected": [
+        "dist/template.docx",
+        "src/artifact_runtime.py:parse_artifacts",
+        "work_item.post_task_observable_features"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Freeze a representative bullet-list DOCX fixture and exact comparison regions.",
+        "Provide at least two pinned Word-for-Windows environments with identical embedded/installed font packages and printer metrics.",
+        "Define numeric tolerances for bullet glyph bounds, baseline, indentation, and paragraph spacing."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "NONDETERMINISTIC_EXTERNAL_DEPENDENCY",
+      "evidence": [
+        "The target asks about what other users see, not only serialized OOXML values.",
+        "The pre-repo has no Word renderer or multi-environment comparison harness.",
+        "Font substitution and printer/layout metrics are not frozen by the current behavior contract."
+      ],
+      "missing_observables": [
+        "Rendered bullet glyph bounds and baselines on each supported Word environment",
+        "Rendered paragraph spacing on each supported Word environment",
+        "A declared cross-environment tolerance"
+      ],
+      "minimum_environment_repairs": [
+        "Add a network-disabled render matrix with pinned Word builds, fonts, locale, and printer driver.",
+        "Add deterministic geometry extraction and tolerance-based comparison for the frozen bullet fixture."
+      ],
+      "reentry_condition": "Re-author criteria when a frozen multi-environment Word render matrix produces comparable bullet geometry and spacing measurements."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_BULLET_VISUAL_DESIGN.attributes.cross_user_rendering_consistency",
+        "REQ_BULLET_VISUAL_DESIGN.execution",
+        "REQ_WORD_WINDOWS_COMPATIBILITY.attributes.cross_user_rendering_consistency"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_THEME_COLOR_PALETTE",
+        "REQ_TAB_DRIVEN_LIST_HIERARCHY",
+        "REQ_NUMBERED_LIST_ALIGNMENT"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T009-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "The current artifact parser cannot observe cross-user rendered equality.",
+          "required_action": "Freeze and expose a multi-environment Word render comparison before validator authoring."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,200 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_2cd6abe638b7ec2fd0d2",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T017",
+  "target_fingerprint": "22287c0dddce2dd737a5fd9bb8a10cdc6ecd36dea9272003a50ba019b7b3d52e",
+  "condition": "C1",
+  "turns": 316,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ1\\43214420_T017_RQ1.json",
+      "file_sha256": "b76790b5f0902b623baf2a85e8a7165b83ae6ad3c840e8b69e19a093ed1d6bcc",
+      "content_sha256": "f5abec11d3149e3071f47c05de88b2421112fd6ec79b41665103026959484768"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ2\\43214420_T017_RQ2.json",
+      "file_sha256": "dceea1f029e5d7231b20509937c23fba5f91ee4efab6530afb21d62897f2201c",
+      "content_sha256": "a57da9d0c4296ecd32a11c893750c599d3bd0aeb2ee4e2e78e58eb89bb900410"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ3\\43214420_T017_RQ3.json",
+      "file_sha256": "0e8e472d4885fc249174987908bba8bad7179744441da4137fcf6061b53ae7c4",
+      "content_sha256": "f2bd3fd730f61784fdabbd8a87115d0a49dfe9ba24694fc634e14bfce849f774"
+    }
+  },
+  "public_files": {
+    "task.json": "c7b05ca0d083f62e74a06a359de3d6ddfb0f513dd68b4f51a66d2236c0c6a979",
+    "history.jsonl": "43d4ac2aeb332b38e7feb01e12810b3d93375e242dca2c0ac10fb918c70e1597",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T017_before_317/pre_repo.zip",
+    "archive_sha256": "8104a7e2b516222764dc81ccbeec13bebae482fef89b8292f9d409514c84a624",
+    "tree_sha256": "3dfff2bf00b290a98fb3622b8ce21773d2059b9a4ba0841072b15c694b6be6ff",
+    "manifest_path": "Code Environment/43214420/targets/T017_before_317/manifest.json",
+    "manifest_sha256": "2d0d027ea388ef2738caa469c219adcff8cac75f44773a39bb1df6622f110896",
+    "before_message_id": 317,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The main-board design includes one populated panel slide-switch component with a matching PCB footprint, at least three electrical terminals implementing a real switch pole/throw topology, and a non-floating connection between the intended panel/control nets.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_sch and dist/design.kicad_pcb panel slide switch",
+            "setup": [
+              "Build both KiCad artifacts and select the panel slide-switch reference by symbol class and stable field/reference."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_sch and dist/design.kicad_pcb",
+                "parameters": {
+                  "extract": [
+                    "symbol library id",
+                    "electrical pins",
+                    "resolved nets",
+                    "matching footprint"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "populated panel slide-switch symbols",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "slide-switch electrical terminal count",
+                "operator": "GREATER_THAN_OR_EQUAL",
+                "expected": 3
+              },
+              {
+                "subject": "slide-switch mandatory terminals with no-connect or no net",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "slide-switch references missing a PCB footprint",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Classify from KiCad symbol pin topology and library id, not a prose component title.",
+              "Join schematic and PCB by reference."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "A generic connector is renamed 'switch' but has no switch symbol topology."
+            ],
+            "action": "Inspect symbol library and pins.",
+            "expected_failure_or_absence": "The criterion fails."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "PRESERVED_REGRESSION",
+        "statement": "The existing reset and boot pushbuttons remain populated, have matching PCB footprints, and each connects its controller input to the intended reference rail through the switch rather than being replaced by the new slide switch.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_sch and dist/design.kicad_pcb reset/boot buttons",
+            "setup": [
+              "Resolve reset and boot pushbutton symbols and controller endpoints."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_sch and dist/design.kicad_pcb",
+                "parameters": {
+                  "controls": [
+                    "RESET",
+                    "BOOT"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "populated reset and boot pushbutton controls",
+                "operator": "COUNT_EQUALS",
+                "expected": 2
+              },
+              {
+                "subject": "reset/boot controls missing matching PCB footprints",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "reset/boot controller paths that do not traverse their pushbutton",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Identify controller input nets from actual connectivity.",
+              "Respect DNP fields and reject synthetic pinless placeholder components."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "0da1b0582ce447896fb5ff4f666402a2abe8eacdd688ec88fc49f2e56a9ecccf",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

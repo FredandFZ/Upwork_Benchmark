@@ -1,0 +1,645 @@
+{
+  "schema_version": "rq4-validator-work-item-v1",
+  "visibility": "RESEARCHER_PRIVATE_NEVER_AGENT_VISIBLE_DURING_BENCHMARK",
+  "project_id": "42204309",
+  "target_id": "42204309_T001",
+  "input_release": "42204309-stage2-final-20260925-rq123-main-v1",
+  "target_message_id": 21,
+  "target_fingerprint": "448038d74e07bf5609479370301d3308d06967e6b6339e0f29293b53c3e71fb2",
+  "task": {
+    "source_message_id": 21,
+    "speaker": "client",
+    "text": "Marcus, I have one final mechanics adjustment. It removes the half-expiring-ticket behavior and should simplify the code.\n\nThis rule replaces the earlier ticket-lifespan description:\nWhenever someone mints using a referral code, the referrer immediately receives 7 tickets on their NFT:\n+4 Small Block Tickets\n+3 Big Block Tickets\n\nThese feed two completely independent counters: one Small Block counter and one Big Block counter.\n\nFor the Small Block ($7,200 pool ÷ 8 ÷ $900 draw), draw only from Small Block Tickets issued since the previous small block. After the draw, burn and reset all Small Block Tickets to 0.\n\nFor the Big Block ($216,000 pool ÷ 9 ÷ $24,000 draw), draw only from Big Block Tickets issued since the previous big block. After the draw, burn and reset all Big Block Tickets to 0.\n\nSmall blocks therefore stay fair and fresh because old tickets do not carry forward, while Big Block entries accumulate naturally until that block is drawn. Metadata only needs to show the two counters plus permanent badges.\n\nThe triggers remain pool-based: the small block fires when its pool reaches exactly $7,200, and the big block fires when its pool reaches exactly $216,000. Secondary royalties continue to fill the pools but do not create tickets.\n\nEverything else remains the same: the $10 commission is automatic, a ticket goes to a random existing NFT when no referral code is used, and prize claims remain manual.\n\nThis version should be easier to implement and explain. Once you confirm it is cleaner for you too, we are 100% locked.\n\nThanks!"
+  },
+  "repository_profile": {
+    "artifact_class": "HYBRID_WEB_APPLICATION",
+    "renderer": "web",
+    "runtime": "PYTHON_STDLIB",
+    "contract_layer": "LOCAL_DOMAIN_SERVICE",
+    "web_api_layer": "HTTP_JSON_AND_STATIC_HTML",
+    "primary_artifacts": [
+      "dist/index.html",
+      "dist/catalog.json"
+    ],
+    "description": "Offline executable web application modeling the NFT, referral, prize, payment, authentication, and ebook behavior visible at each boundary."
+  },
+  "affected_components": [
+    "BACKEND",
+    "FRONTEND",
+    "SMART_CONTRACT"
+  ],
+  "affected_requirement_ids": [
+    "REQ_SMALL_BLOCK_PRIZE",
+    "REQ_BIG_BLOCK_PRIZE",
+    "REQ_PRIZE_TICKET_LIFECYCLE",
+    "REQ_PRIZE_CLAIM_FLOW",
+    "REQ_CODED_REFERRAL_COMMISSION",
+    "REQ_CODED_REFERRAL_TICKETS",
+    "REQ_NO_REFERRAL_TICKETS",
+    "REQ_NFT_METADATA_ACCURACY"
+  ],
+  "preserved_requirement_ids": [
+    "REQ_PROJECT_BRANDING",
+    "REQ_MILESTONE_PARTNER_REWARDS"
+  ],
+  "affected_transitions": [
+    {
+      "requirement_id": "REQ_SMALL_BLOCK_PRIZE",
+      "event_ids": [
+        "REQ_SMALL_BLOCK_PRIZE_E002"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "before_state_id": "REQ_SMALL_BLOCK_PRIZE_S001",
+      "after_state_id": "REQ_SMALL_BLOCK_PRIZE_S002",
+      "change_type": "MODIFIED",
+      "changed_fields": [
+        "attributes"
+      ],
+      "changed_paths": [
+        "attributes.draw_trigger",
+        "attributes.secondary_royalties_contribute_to_pool"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": "ACTIVE",
+      "after_components": [
+        "SMART_CONTRACT",
+        "BACKEND",
+        "FRONTEND"
+      ],
+      "after_contexts": [
+        "PRIZE_SYSTEM",
+        "SMALL_BLOCK"
+      ]
+    },
+    {
+      "requirement_id": "REQ_BIG_BLOCK_PRIZE",
+      "event_ids": [
+        "REQ_BIG_BLOCK_PRIZE_E002"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "before_state_id": "REQ_BIG_BLOCK_PRIZE_S001",
+      "after_state_id": "REQ_BIG_BLOCK_PRIZE_S002",
+      "change_type": "MODIFIED",
+      "changed_fields": [
+        "attributes"
+      ],
+      "changed_paths": [
+        "attributes.draw_condition",
+        "attributes.pool_target",
+        "attributes.secondary_royalties_contribute_to_pool"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": "ACTIVE",
+      "after_components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "after_contexts": [
+        "PRIZE_SYSTEM",
+        "BIG_BLOCK"
+      ]
+    },
+    {
+      "requirement_id": "REQ_PRIZE_TICKET_LIFECYCLE",
+      "event_ids": [
+        "REQ_PRIZE_TICKET_LIFECYCLE_E001"
+      ],
+      "event_types": [
+        "MODIFY"
+      ],
+      "before_state_id": null,
+      "after_state_id": "REQ_PRIZE_TICKET_LIFECYCLE_S001",
+      "change_type": "INTRODUCED",
+      "changed_fields": [
+        "existence"
+      ],
+      "changed_paths": [
+        "existence"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": null,
+      "after_components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "after_contexts": [
+        "PRIZE_SYSTEM",
+        "PRIZE_TICKETS",
+        "SMALL_BLOCK",
+        "BIG_BLOCK"
+      ]
+    },
+    {
+      "requirement_id": "REQ_PRIZE_CLAIM_FLOW",
+      "event_ids": [
+        "REQ_PRIZE_CLAIM_FLOW_E001"
+      ],
+      "event_types": [
+        "INTRODUCE"
+      ],
+      "before_state_id": null,
+      "after_state_id": "REQ_PRIZE_CLAIM_FLOW_S001",
+      "change_type": "INTRODUCED",
+      "changed_fields": [
+        "existence"
+      ],
+      "changed_paths": [
+        "existence"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": "ACTIVE",
+      "after_components": [
+        "SMART_CONTRACT",
+        "FRONTEND"
+      ],
+      "after_contexts": [
+        "PRIZE_CLAIM"
+      ]
+    },
+    {
+      "requirement_id": "REQ_CODED_REFERRAL_COMMISSION",
+      "event_ids": [
+        "REQ_CODED_REFERRAL_COMMISSION_E001"
+      ],
+      "event_types": [
+        "INTRODUCE"
+      ],
+      "before_state_id": null,
+      "after_state_id": "REQ_CODED_REFERRAL_COMMISSION_S001",
+      "change_type": "INTRODUCED",
+      "changed_fields": [
+        "existence"
+      ],
+      "changed_paths": [
+        "existence"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": "ACTIVE",
+      "after_components": [
+        "SMART_CONTRACT"
+      ],
+      "after_contexts": [
+        "REFERRAL_MINT",
+        "AFFILIATE_COMMISSION"
+      ]
+    },
+    {
+      "requirement_id": "REQ_CODED_REFERRAL_TICKETS",
+      "event_ids": [
+        "REQ_CODED_REFERRAL_TICKETS_E001"
+      ],
+      "event_types": [
+        "INTRODUCE"
+      ],
+      "before_state_id": null,
+      "after_state_id": "REQ_CODED_REFERRAL_TICKETS_S001",
+      "change_type": "INTRODUCED",
+      "changed_fields": [
+        "existence"
+      ],
+      "changed_paths": [
+        "existence"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": "ACTIVE",
+      "after_components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "after_contexts": [
+        "REFERRAL_MINT",
+        "PRIZE_TICKETS"
+      ]
+    },
+    {
+      "requirement_id": "REQ_NO_REFERRAL_TICKETS",
+      "event_ids": [
+        "REQ_NO_REFERRAL_TICKETS_E001"
+      ],
+      "event_types": [
+        "INTRODUCE"
+      ],
+      "before_state_id": null,
+      "after_state_id": "REQ_NO_REFERRAL_TICKETS_S001",
+      "change_type": "INTRODUCED",
+      "changed_fields": [
+        "existence"
+      ],
+      "changed_paths": [
+        "existence"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": "ACTIVE",
+      "after_components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "after_contexts": [
+        "NO_REFERRAL",
+        "PRIZE_TICKETS"
+      ]
+    },
+    {
+      "requirement_id": "REQ_NFT_METADATA_ACCURACY",
+      "event_ids": [
+        "REQ_NFT_METADATA_ACCURACY_E001"
+      ],
+      "event_types": [
+        "INTRODUCE"
+      ],
+      "before_state_id": null,
+      "after_state_id": "REQ_NFT_METADATA_ACCURACY_S001",
+      "change_type": "INTRODUCED",
+      "changed_fields": [
+        "existence"
+      ],
+      "changed_paths": [
+        "existence"
+      ],
+      "removed_paths": [],
+      "after_lifecycle_status": "ACTIVE",
+      "after_components": [],
+      "after_contexts": [
+        "NFT_METADATA"
+      ]
+    }
+  ],
+  "rq3_gold": {
+    "decision_by_condition": {
+      "C1": "ACT",
+      "C2": "ACT"
+    },
+    "source_path": "outputs_new/stage2/42204309/RQ3/42204309_T001_RQ3.json",
+    "file_sha256": "39e9723ef45ce3c54b6fbb3f478c1f39de74f0e995c5954ef5ea9fc5c842b0b5",
+    "content_sha256": "ab795359bfa8462f43cd0094ef93f06ce71253126bb84a4ce6f51fa2aa400721"
+  },
+  "pre_task_state": {
+    "REQ_PROJECT_BRANDING": "REQ_PROJECT_BRANDING_S002",
+    "REQ_MILESTONE_PARTNER_REWARDS": "REQ_MILESTONE_PARTNER_REWARDS_S001",
+    "REQ_SMALL_BLOCK_PRIZE": "REQ_SMALL_BLOCK_PRIZE_S001",
+    "REQ_BIG_BLOCK_PRIZE": "REQ_BIG_BLOCK_PRIZE_S001"
+  },
+  "post_task_state": {
+    "REQ_PROJECT_BRANDING": "REQ_PROJECT_BRANDING_S002",
+    "REQ_MILESTONE_PARTNER_REWARDS": "REQ_MILESTONE_PARTNER_REWARDS_S001",
+    "REQ_SMALL_BLOCK_PRIZE": "REQ_SMALL_BLOCK_PRIZE_S002",
+    "REQ_BIG_BLOCK_PRIZE": "REQ_BIG_BLOCK_PRIZE_S002",
+    "REQ_PRIZE_TICKET_LIFECYCLE": "REQ_PRIZE_TICKET_LIFECYCLE_S001",
+    "REQ_PRIZE_CLAIM_FLOW": "REQ_PRIZE_CLAIM_FLOW_S001",
+    "REQ_CODED_REFERRAL_COMMISSION": "REQ_CODED_REFERRAL_COMMISSION_S001",
+    "REQ_CODED_REFERRAL_TICKETS": "REQ_CODED_REFERRAL_TICKETS_S001",
+    "REQ_NO_REFERRAL_TICKETS": "REQ_NO_REFERRAL_TICKETS_S001",
+    "REQ_NFT_METADATA_ACCURACY": "REQ_NFT_METADATA_ACCURACY_S001"
+  },
+  "pre_task_observable_features": {
+    "REQ_SMALL_BLOCK_PRIZE": {
+      "slug": "small-block-prize-mechanism",
+      "title": "Small Block Prize Mechanism",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "winner_count": 8,
+        "prize_amount_per_winner_usd": 900,
+        "winner_eligibility": "weighted ticket holders"
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "BACKEND",
+        "FRONTEND"
+      ],
+      "contexts": [
+        "PRIZE_SYSTEM",
+        "SMALL_BLOCK"
+      ],
+      "execution": {}
+    },
+    "REQ_BIG_BLOCK_PRIZE": {
+      "slug": "big-block-prize-mechanism",
+      "title": "Big Block Prize Mechanism",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "winner_count": 9,
+        "prize_amount_per_winner": "$24,000"
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "contexts": [
+        "PRIZE_SYSTEM",
+        "BIG_BLOCK"
+      ],
+      "execution": {}
+    },
+    "REQ_PRIZE_TICKET_LIFECYCLE": null,
+    "REQ_PRIZE_CLAIM_FLOW": null,
+    "REQ_CODED_REFERRAL_COMMISSION": null,
+    "REQ_CODED_REFERRAL_TICKETS": null,
+    "REQ_NO_REFERRAL_TICKETS": null,
+    "REQ_NFT_METADATA_ACCURACY": null
+  },
+  "post_task_observable_features": {
+    "REQ_SMALL_BLOCK_PRIZE": {
+      "slug": "small-block-prize-mechanism",
+      "title": "Small Block Prize Mechanism",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "winner_count": 8,
+        "prize_amount_per_winner_usd": 900,
+        "winner_eligibility": "weighted ticket holders",
+        "draw_trigger": {
+          "basis": "PRIZE_POOL_BALANCE",
+          "amount_usd": 7200
+        },
+        "secondary_royalties_contribute_to_pool": true
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "BACKEND",
+        "FRONTEND"
+      ],
+      "contexts": [
+        "PRIZE_SYSTEM",
+        "SMALL_BLOCK"
+      ],
+      "execution": {}
+    },
+    "REQ_BIG_BLOCK_PRIZE": {
+      "slug": "big-block-prize-mechanism",
+      "title": "Big Block Prize Mechanism",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "winner_count": 9,
+        "prize_amount_per_winner": "$24,000",
+        "pool_target": "$216,000",
+        "draw_condition": "when the Big Block pool reaches exactly $216,000",
+        "secondary_royalties_contribute_to_pool": true
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "contexts": [
+        "PRIZE_SYSTEM",
+        "BIG_BLOCK"
+      ],
+      "execution": {}
+    },
+    "REQ_PRIZE_TICKET_LIFECYCLE": {
+      "slug": "prize-ticket-lifecycle",
+      "title": "Prize-Ticket Lifecycle",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "small_block_ticket_lifecycle": {
+          "eligible_tickets": "Small Block Tickets issued since the previous Small Block draw",
+          "post_draw_action": "burn and reset all Small Block Tickets to 0",
+          "carry_forward_after_draw": false
+        },
+        "big_block_ticket_lifecycle": {
+          "eligible_tickets": "Big Block Tickets issued since the previous Big Block draw",
+          "post_draw_action": "burn and reset all Big Block Tickets to 0",
+          "carry_forward_after_draw": false
+        }
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "contexts": [
+        "PRIZE_SYSTEM",
+        "PRIZE_TICKETS",
+        "SMALL_BLOCK",
+        "BIG_BLOCK"
+      ],
+      "execution": {}
+    },
+    "REQ_PRIZE_CLAIM_FLOW": {
+      "slug": "prize-claim-flow",
+      "title": "Prize Claim Flow",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "payout_mode": "manual_claim"
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "FRONTEND"
+      ],
+      "contexts": [
+        "PRIZE_CLAIM"
+      ],
+      "execution": {}
+    },
+    "REQ_CODED_REFERRAL_COMMISSION": {
+      "slug": "coded-referral-commission",
+      "title": "Coded-Referral Commission",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "commission_amount_usd": 10,
+        "distribution": "automatic"
+      },
+      "components": [
+        "SMART_CONTRACT"
+      ],
+      "contexts": [
+        "REFERRAL_MINT",
+        "AFFILIATE_COMMISSION"
+      ],
+      "execution": {}
+    },
+    "REQ_CODED_REFERRAL_TICKETS": {
+      "slug": "coded-referral-ticket-issuance",
+      "title": "Coded-Referral Ticket Issuance",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "recipient": "NFT associated with the referral code",
+        "small_block_tickets_per_referral_mint": 4,
+        "big_block_tickets_per_referral_mint": 3
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "contexts": [
+        "REFERRAL_MINT",
+        "PRIZE_TICKETS"
+      ],
+      "execution": {}
+    },
+    "REQ_NO_REFERRAL_TICKETS": {
+      "slug": "no-referral-ticket-allocation",
+      "title": "No-Referral Ticket Allocation",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "tickets_per_no_referral_mint": 1,
+        "recipient_selection": "random existing NFT"
+      },
+      "components": [
+        "SMART_CONTRACT",
+        "BACKEND"
+      ],
+      "contexts": [
+        "NO_REFERRAL",
+        "PRIZE_TICKETS"
+      ],
+      "execution": {}
+    },
+    "REQ_NFT_METADATA_ACCURACY": {
+      "slug": "nft-metadata-accuracy",
+      "title": "NFT Metadata Accuracy",
+      "lifecycle": "ACTIVE",
+      "attributes": {
+        "small_block_ticket_counter_visible": true,
+        "big_block_ticket_counter_visible": true,
+        "permanent_badges_visible": true
+      },
+      "components": [],
+      "contexts": [
+        "NFT_METADATA"
+      ],
+      "execution": {}
+    }
+  },
+  "code_environment": {
+    "archive_path": "Code Environment/42204309/targets/T001_before_21/pre_repo.zip",
+    "archive_sha256": "c1bb9c76bb3e084b9c8e693278d21b9ab0f6a81266d6371b33db0f61fb4fe28a",
+    "manifest_path": "Code Environment/42204309/targets/T001_before_21/manifest.json",
+    "manifest_sha256": "6df6a1a7440f46ae2e3bfc6d48d367afbd2f67d6cb535d3875358f26e0310b15",
+    "repository_tree_sha256": "82e7c9082704f4cba07db48b8adda5f2a531f5ea3f9a8b62b13b075ba3fe7f7d",
+    "before_message_id": 21,
+    "behavior_contract": {
+      "actions": [
+        "prize_status",
+        "contribute",
+        "draw"
+      ],
+      "application_factory": "application.create_app",
+      "artifacts": [
+        "dist/index.html",
+        "dist/catalog.json"
+      ],
+      "availability": "Actions are enabled only by the current pre-task feature state.",
+      "domain": "current_prize_system",
+      "observable_surfaces": [
+        "domain_behavior",
+        "routes",
+        "dom_semantics",
+        "browser_interaction"
+      ],
+      "offline": true,
+      "platform_build_model": null,
+      "project_id": "42204309",
+      "request_interface": "Application.request(method, path, payload=None, query=None)",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/prizes"
+        },
+        {
+          "method": "POST",
+          "path": "/api/prizes/contributions"
+        },
+        {
+          "method": "POST",
+          "path": "/api/prizes/draws"
+        }
+      ],
+      "schema_version": "rq4-public-behavior-contract-v1",
+      "service": "domain.CurrentPrizeService"
+    }
+  },
+  "observability_triage": {
+    "status": "ELIGIBLE_FOR_VALIDATOR_AUTHORING",
+    "currently_exposed_pre_post_difference": true,
+    "subjective_clause_detected": false,
+    "current_surfaces": [
+      "BROWSER_INTERACTION",
+      "BUILD",
+      "CATALOG_API",
+      "DOMAIN_BEHAVIOR",
+      "DOM_SEMANTICS",
+      "PROJECT_BEHAVIOR_CONTRACT",
+      "REGRESSION",
+      "ROUTES",
+      "STATIC_DOM",
+      "STATIC_TEXT"
+    ],
+    "required_surfaces": [
+      "BUILD",
+      "DOMAIN_BEHAVIOR",
+      "DOM_SEMANTICS",
+      "PROJECT_BEHAVIOR_CONTRACT",
+      "REGRESSION"
+    ],
+    "missing_surfaces": [],
+    "recommended_validator_types": [
+      "API_BEHAVIOR",
+      "DOM_SEMANTICS",
+      "ROUTE_NAVIGATION",
+      "BROWSER_INTERACTION",
+      "RESPONSIVE_GEOMETRY",
+      "EXPLICIT_COMPUTED_STYLE",
+      "TASK_SCOPED_ACCESSIBILITY"
+    ],
+    "blockers": [],
+    "decision_authority": "PROPOSED_BY_AGENT_REQUIRES_INDEPENDENT_REVIEW"
+  },
+  "frontend_evaluation_policy": {
+    "deterministic_main_rq4": [
+      "DOM_SEMANTICS",
+      "ROUTE_NAVIGATION",
+      "BROWSER_INTERACTION",
+      "RESPONSIVE_GEOMETRY",
+      "EXPLICIT_COMPUTED_STYLE",
+      "RESOURCE_AND_MEDIA_BEHAVIOR",
+      "TASK_SCOPED_ACCESSIBILITY",
+      "FROZEN_SCREENSHOT_REGION"
+    ],
+    "subjective_only_excluded_from_main_rq4": true,
+    "browser_environment_must_be_frozen": true,
+    "default_candidate_viewports": [
+      {
+        "width": 1440,
+        "height": 900,
+        "device_scale_factor": 1
+      },
+      {
+        "width": 768,
+        "height": 1024,
+        "device_scale_factor": 1
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "device_scale_factor": 1
+      }
+    ],
+    "enable_only_task_relevant_viewports": true
+  },
+  "authoring_contract": {
+    "acceptance_criteria_status": "NOT_AUTHORED",
+    "validator_status": "NOT_AUTHORED",
+    "reference_delivery_status": "NOT_AUTHORED",
+    "partial_delivery_status": "NOT_AUTHORED",
+    "calibration_status": "NOT_RUN",
+    "leakage_semantic_audit_status": "NOT_RUN",
+    "eligibility_status": "NOT_DECIDED",
+    "agent_may_not_self_certify_calibration_or_eligibility": true
+  },
+  "source_artifacts": {
+    "build_plan": {
+      "path": "ccfa-workfiles/experiments/rq4-code-environment/projects/42204309/rq4_build_plan.json",
+      "sha256": "2cdd1ff5ef7a5e491daa29ac9b689da733696238f77568dd6ac1a97de89492c1"
+    },
+    "requirement_state_graph": {
+      "path": "outputs_new/stage2/42204309/requirement_state_graph.json",
+      "sha256": "84fc2288287e388242517cab8c439571d9fdd2a7276f3ca9dfc3fade79d44dcd"
+    },
+    "normalized_project": {
+      "path": "outputs_new/stage1_runs/42204309/normalized_project.json",
+      "sha256": "e83cd7e5e63e49bb3393a04040c5d47f2968292da00de05020be63b01279b19e"
+    }
+  }
+}

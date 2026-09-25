@@ -1,0 +1,136 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "44035087",
+  "target_id": "44035087_T004",
+  "before_message_id": 41,
+  "author_role": "VALIDATOR_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "192d39b9b6bec7080bb96489dc8d9dde05235ae793f420252ba2b4ad5c81ee81",
+    "pre_repo_sha256": "df436b6427db5a17fe27aa706a64b6b2066da4da231455b5b11d1fb09c0d4733",
+    "target_manifest_sha256": "06a7ad323be5ca77f8ff857c76ce372e8fc04b6feab1d0f4b44a0fe18dfc0793",
+    "upstream_proposals": [
+      {
+        "role": "CRITERIA_AUTHOR",
+        "path": "author/criteria_proposal.json",
+        "sha256": "5fa348cdaad8e4d48230aa2c0bbf4b943f016702ee7b596789688110f0d5589e"
+      }
+    ]
+  },
+  "produced_files": [
+    {
+      "path": "validator/validator_core.py",
+      "sha256": "b923329c92bc1fd563f4f1030a36ea1316082546148db84a210585330cd774c1",
+      "purpose": "Four-by-four generated pricing matrix and calculator-removal validator",
+      "researcher_only": true
+    },
+    {
+      "path": "validator/run_validator.py",
+      "sha256": "dfc9173cc432db608d8aee74336393f9f3fb8d902493b5d9fc68fb09919f8765",
+      "purpose": "Target-bound hidden validator entrypoint",
+      "researcher_only": true
+    }
+  ],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "acceptance_criteria_sha256": "5fa348cdaad8e4d48230aa2c0bbf4b943f016702ee7b596789688110f0d5589e",
+    "harness": {
+      "language": "Python 3 stdlib; frozen Chrome C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe sha256=e8bce39747ea63c9c7d4306f7635d2916c9ecb0cf913fbcf5e7acc4539b5b8a0 when browser observables are required",
+      "entrypoint": "validator/run_validator.py",
+      "build_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "build",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/build.json"
+      ],
+      "target_test_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "target",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/target.json"
+      ],
+      "regression_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "regression",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/regression.json"
+      ],
+      "timeout_seconds": 90,
+      "network_policy": "DISABLED",
+      "fresh_workspace_required": true,
+      "machine_readable_result_path": ".rq4-results/{build,target,regression}.json"
+    },
+    "criterion_coverage": [
+      {
+        "criterion_id": "AC001",
+        "test_ids": [
+          "T004-AC001-OBS001"
+        ],
+        "observable_ids": [
+          "OBS001"
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "test_ids": [
+          "T004-AC002-OBS002"
+        ],
+        "observable_ids": [
+          "OBS002"
+        ]
+      }
+    ],
+    "result_contract": {
+      "components": [
+        "BUILD_PASS",
+        "TARGET_TEST_PASS",
+        "REGRESSION_PASS"
+      ],
+      "final_rule": "BUILD_PASS AND TARGET_TEST_PASS AND REGRESSION_PASS",
+      "harness_error_is_agent_failure": false
+    },
+    "calibration_contract": {
+      "pre_repo_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "FAIL"
+      },
+      "reference_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "PASS"
+      },
+      "adversarial_expected": "EVERY_PARTIAL_OR_MUTANT_FAILS_TARGET_OR_REGRESSION",
+      "actual_results_may_be_written_by_author": false
+    },
+    "implementation_independence": {
+      "no_llm_judge": true,
+      "no_network": true,
+      "no_reference_patch_comparison": true,
+      "no_gold_mapping_direct_score": true,
+      "no_unrequired_internal_structure_assertion": true
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

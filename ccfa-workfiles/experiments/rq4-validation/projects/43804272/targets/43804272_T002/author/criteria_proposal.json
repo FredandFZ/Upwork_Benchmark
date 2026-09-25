@@ -1,0 +1,206 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T002",
+  "before_message_id": 82,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "312538b412769832166c1976c8399fa1d4bca5f6dffadee8d53a069aefe4002b",
+    "pre_repo_sha256": "578e25fef1d373b3b0fdb4fad244ef782f638128d7fff31e2470a7c6dd445399",
+    "target_manifest_sha256": "c520813e46a09bbe0ad1cb7bc743c550156be3c044eb19948890156041b9ecd3",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The repository designates platform build metadata as a public observable surface. The active production optimization priorities can be parsed deterministically while locale coverage is protected as a regression boundary.",
+      "interfaces_inspected": [
+        "src/platform_build.py:PLATFORM_BUILD",
+        "Android and iOS production build records",
+        "platform locale indexes"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Android production build metadata makes minimum package size an active optimization priority.",
+        "gold_requirement_refs": [
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION"
+        ],
+        "gold_state_paths": [
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION.attributes.optimization_priority"
+        ],
+        "evidence_message_ids": [
+          82
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "Android production platform-build record",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "Android production build metadata",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "active optimization priority",
+                "operator": "EQUALS",
+                "expected": "smallest possible app size"
+              },
+              {
+                "subject": "build variant",
+                "operator": "EQUALS",
+                "expected": "production"
+              }
+            ],
+            "determinism_controls": [
+              "Read the generated platform-build record rather than the internal Gold mapping."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The iOS production build metadata makes minimum package size an active optimization priority.",
+        "gold_requirement_refs": [
+          "REQ_IOS_APP_SIZE_OPTIMIZATION"
+        ],
+        "gold_state_paths": [
+          "REQ_IOS_APP_SIZE_OPTIMIZATION.attributes.optimization_priority"
+        ],
+        "evidence_message_ids": [
+          82
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "iOS production platform-build record",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "iOS production build metadata",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "active optimization priority",
+                "operator": "EQUALS",
+                "expected": "smallest possible app size"
+              },
+              {
+                "subject": "build variant",
+                "operator": "EQUALS",
+                "expected": "production"
+              }
+            ],
+            "determinism_controls": [
+              "Read the generated platform-build record rather than the internal Gold mapping."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "PRESERVED_REGRESSION",
+        "statement": "The size-priority change preserves the complete Android and iOS locale resource sets.",
+        "gold_requirement_refs": [
+          "REQ_ANDROID_FULL_APP_LOCALIZATION",
+          "REQ_IOS_FULL_APP_LOCALIZATION"
+        ],
+        "gold_state_paths": [
+          "REQ_ANDROID_APP_SIZE_OPTIMIZATION.attributes.optimization_priority",
+          "REQ_IOS_APP_SIZE_OPTIMIZATION.attributes.optimization_priority"
+        ],
+        "evidence_message_ids": [
+          82
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "Android and iOS locale resource indexes",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "platform locale indexes",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "unique Android locale count",
+                "operator": "COUNT_EQUALS",
+                "expected": 77
+              },
+              {
+                "subject": "unique iOS locale count",
+                "operator": "COUNT_EQUALS",
+                "expected": 40
+              },
+              {
+                "subject": "duplicate locale entries",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use the same frozen locale fixtures as the preceding localization target."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION.attributes.optimization_priority",
+        "REQ_IOS_APP_SIZE_OPTIMIZATION.attributes.optimization_priority"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION.attributes.optimization_priority",
+        "REQ_IOS_APP_SIZE_OPTIMIZATION.attributes.optimization_priority"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_ANDROID_FULL_APP_LOCALIZATION",
+        "REQ_IOS_FULL_APP_LOCALIZATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

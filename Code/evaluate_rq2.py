@@ -13,6 +13,7 @@ from evaluation.alignment import AlignmentError
 from evaluation.rq2 import (
     RQ2EvaluationError,
     build_alignment_request,
+    build_field_alignment_request,
     build_state_semantic_request,
     score_rq2,
 )
@@ -41,14 +42,17 @@ def _args() -> argparse.Namespace:
     parser.add_argument("--agent-response", type=Path, required=True)
     parser.add_argument("--condition", choices=("C1", "C2"), required=True)
     parser.add_argument("--alignment-response", type=Path)
+    parser.add_argument("--field-alignment-response", type=Path)
     parser.add_argument("--semantic-response", type=Path)
     parser.add_argument("--request-out", type=Path)
     parser.add_argument("--score-out", type=Path)
     args = parser.parse_args()
-    if args.semantic_response is not None and args.alignment_response is None:
-        parser.error("--semantic-response requires --alignment-response")
+    if args.field_alignment_response is not None and args.alignment_response is None:
+        parser.error("--field-alignment-response requires --alignment-response")
+    if args.semantic_response is not None and args.field_alignment_response is None:
+        parser.error("--semantic-response requires --field-alignment-response")
     if args.score_out is not None and args.semantic_response is None:
-        parser.error("--score-out requires both judge responses")
+        parser.error("--score-out requires all three judge responses")
     return args
 
 
@@ -60,11 +64,20 @@ def main() -> int:
         if args.alignment_response is None:
             value = build_alignment_request(instance, response, condition=args.condition)
             label = "RQ2 alignment request"
+        elif args.field_alignment_response is None:
+            value = build_field_alignment_request(
+                instance,
+                response,
+                _read(args.alignment_response),
+                condition=args.condition,
+            )
+            label = "RQ2 field alignment request"
         elif args.semantic_response is None:
             value = build_state_semantic_request(
                 instance,
                 response,
                 _read(args.alignment_response),
+                _read(args.field_alignment_response),
                 condition=args.condition,
             )
             label = "RQ2 state semantic request"
@@ -73,6 +86,7 @@ def main() -> int:
                 instance,
                 response,
                 _read(args.alignment_response),
+                _read(args.field_alignment_response),
                 _read(args.semantic_response),
                 condition=args.condition,
             )

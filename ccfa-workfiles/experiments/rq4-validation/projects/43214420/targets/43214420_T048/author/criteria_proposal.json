@@ -1,0 +1,92 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T048",
+  "before_message_id": 910,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "0f8518dc58b6acd0d96025acd6210f812f17e14a5d16ce9210ecc7703aa35666",
+    "pre_repo_sha256": "159f7924ca3a18e09b4998d40ba0c74bf27a6e1b7ead635d6ce18737544953e8",
+    "target_manifest_sha256": "020ad9422a2349d0670b748faeda835d1043b8b8a91429dff1dc16061da82e33",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "Providing the latest integrated-board version for a quote can be tested through a versioned manufacturing-package inventory and parsable outputs. The current build emits only one schematic, one PCB, and a semantic summary; it has no Gerbers, drill files, BOM, pick-and-place data, package manifest, or revision identity.",
+      "interfaces_inspected": [
+        "stable artifact inventory",
+        "dist/design.kicad_sch",
+        "dist/design.kicad_pcb",
+        "dist/design-summary.txt",
+        "artifact_runtime.build_artifacts"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Freeze the required quote-package manifest and revision identifier.",
+        "Generate real Gerber, drill, BOM, and pick-and-place artifacts from the integrated-board design.",
+        "Add deterministic parsers and cross-file reference/footprint consistency checks."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "MISSING_ARTIFACT_GENERATOR_OR_PARSER",
+      "evidence": [
+        "No manufacturing export files are present.",
+        "The production-package placeholder has no properties and is not a deliverable manifest.",
+        "Nothing binds the emitted files to a latest integrated-board revision."
+      ],
+      "missing_observables": [
+        "Versioned integrated-board source revision",
+        "Gerber and drill outputs",
+        "Assembly BOM and placement data",
+        "Machine-readable package inventory and cross-file consistency"
+      ],
+      "minimum_environment_repairs": [
+        "Freeze the required quote-package manifest and revision identifier.",
+        "Generate real Gerber, drill, BOM, and pick-and-place artifacts from the integrated-board design.",
+        "Add deterministic parsers and cross-file reference/footprint consistency checks."
+      ],
+      "reentry_condition": "Re-author after a frozen quote-package contract and complete, versioned manufacturing outputs are generated."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_INTEGRATED_BOARD_PRODUCTION_PACKAGE.attributes.required_revision",
+        "REQ_INTEGRATED_BOARD_PRODUCTION_PACKAGE.scope.components",
+        "REQ_INTEGRATED_BOARD_PRODUCTION_PACKAGE.scope.contexts",
+        "REQ_INTEGRATED_BOARD_PRODUCTION_PACKAGE.scope.persistence",
+        "REQ_INTEGRATED_BOARD_PRODUCTION_PACKAGE.lifecycle_status",
+        "REQ_INTEGRATED_BOARD_PRODUCTION_PACKAGE.execution"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_INTEGRATED_BOARD_PRODUCTION_PACKAGE",
+        "REQ_INTEGRATED_COST_OPTIMIZATION"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T048-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "The current build lacks the manufacturing package needed for an offline quote-ready assertion.",
+          "required_action": "Repair the stated artifact surface before validator authoring."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

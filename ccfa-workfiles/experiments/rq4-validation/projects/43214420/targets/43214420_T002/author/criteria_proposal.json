@@ -1,0 +1,42 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T002",
+  "before_message_id": 53,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "b95b758ddc20e64df3293174107988b7c6ec833352243b051455a5cd9bcd5d69",
+    "pre_repo_sha256": "686b0361bfabcefb0865533ca72301607745769362132194e2865874792ba626",
+    "target_manifest_sha256": "7adf743af9530fcc66e743ea760a0afecba439206be9aaf4fe18ba20a248ea70",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "Connector availability, recurring stock risk, and existence of purchasable compatible alternatives are time-varying supplier facts. The frozen KiCad artifacts can expose the selected footprint and pinout but contain no dated supplier snapshot, approved alternative MPN list, or compatibility evidence.",
+      "interfaces_inspected": ["dist/design.kicad_sch", "dist/design.kicad_pcb", "src/artifact_model.py:ARTIFACT_MODEL", "src/artifact_runtime.py:parse_artifacts"],
+      "subjective_only": false,
+      "repair_requirements": ["Freeze a dated AliExpress/supplier inventory snapshot with product identifiers and stock state.", "Freeze an approved alternative-MPN compatibility table covering footprint, pinout, USB data capability, voltage/current ratings, and mechanical envelope."]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "NONDETERMINISTIC_EXTERNAL_DEPENDENCY",
+      "evidence": ["The network-disabled pre-repo exposes no supplier data artifact.", "The KiCad component value and footprint cannot prove future or recurring inventory availability.", "No compatible-alternative MPN list or equivalence criteria are frozen."],
+      "missing_observables": ["Dated stock status for the selected USB-C connector", "At least one in-stock compatible alternative with verified electrical and mechanical equivalence", "A fixed definition of 'regularly unavailable'"],
+      "minimum_environment_repairs": ["Add hashed supplier snapshots and a machine-readable alternative-part compatibility fixture.", "Define the observation date/window and recurring-availability threshold."],
+      "reentry_condition": "Re-author criteria when supplier availability and alternative compatibility are frozen, hash-bound inputs that can be joined to the selected KiCad connector MPN."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_POWER_BOARD_USB_CONNECTOR.attributes.sourceability_requirement", "REQ_COMPONENT_SOURCEABILITY.attributes.fallback_requirement", "REQ_COMPONENT_SOURCEABILITY.attributes.recurring_availability_constraint"],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": ["REQ_POWER_BOARD_USB_CONNECTOR", "REQ_POWER_BOARD_TVS_ESD_PROTECTION"],
+      "uncovered_items": [{"finding_id": "T002-GAP-001", "severity": "BLOCKING", "category": "ENVIRONMENT_GAP", "evidence": "No frozen supplier or compatible-alternative evidence exists.", "required_action": "Add the dated sourcing fixtures before validator authoring."}]
+    }
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

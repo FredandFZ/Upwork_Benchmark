@@ -1,0 +1,141 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_c3dad7757461628e3f28",
+  "input_release": "43255761-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T006",
+  "target_fingerprint": "d66ed8ee3b865fb9373e824304a46675dbcfd3d4282b91fead533e76e42b50e3",
+  "condition": "C2",
+  "turns": 194,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ1\\43255761_T006_RQ1.json",
+      "file_sha256": "d402f4bcde52b03e5db72d443567a9fc55ba4457972faed06bd005069739bc5e",
+      "content_sha256": "dcd676bdc66a7752dd8e941fdeb6267d8ed0578a73fec0481517407b9987e66f"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ2\\43255761_T006_RQ2.json",
+      "file_sha256": "8587333c681756774c192d2c4088d96dfa54af882acd38dec079cb4d4a58779e",
+      "content_sha256": "71bf832e0839b4d16601801ec701a4186cf4c119e93169b2b5d3ca5e9f68d3d2"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ3\\43255761_T006_RQ3.json",
+      "file_sha256": "69974d26efcd369e47deb207c62d92fd6239afc3f44657dd50e6f2180bf87533",
+      "content_sha256": "4827eb16007b24b5cf4c8df6a6dda9d8e73d7b311c44c87d4d31b609bd6ed600"
+    }
+  },
+  "public_files": {
+    "task.json": "642353cb03598ce9736e0c1999d46c40fb6c1023bb68cd68b3225b550dff0bc1",
+    "history.jsonl": "84017d93826f69f9f49531c5fddf69d555c5ead76c47385037a5590087511c7b",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43255761/targets/T006_before_195/pre_repo.zip",
+    "archive_sha256": "0aaabb86166cee4091677b70855b60fd6354f3af7e67a5a54c2b6d5e584bc719",
+    "tree_sha256": "2f09120b26ab1528e09582cf42c3575afff506d1c83d92a3f9cc26b51ee43086",
+    "manifest_path": "Code Environment/43255761/targets/T006_before_195/manifest.json",
+    "manifest_sha256": "d4cd4e3f84957ada298c39ab4b541662160130abbd35b70f8e24ebff0c90867a",
+    "before_message_id": 195,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "After editable content is removed from each interactive content control in a temporary DOCX copy, that control retains its unique tag, non-empty alias/help label, valid placeholder reference, and non-empty resolved placeholder text.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "temporary cleared DOCX content-control metadata",
+            "setup": [
+              "Copy the built DOCX to a temporary path.",
+              "Record tag, alias, placeholder relationship, and resolved placeholder text for each interactive control."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "temporary cleared DOCX",
+                "parameters": {
+                  "mutation": "remove editable descendants of w:sdtContent while preserving w:sdtPr and package relationships"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "post-clear tag-to-alias mapping",
+                "operator": "EQUALS",
+                "expected": "pre-clear tag-to-alias mapping"
+              },
+              {
+                "subject": "post-clear tag-to-resolved-placeholder-text mapping",
+                "operator": "EQUALS",
+                "expected": "pre-clear tag-to-resolved-placeholder-text mapping"
+              },
+              {
+                "subject": "post-clear controls with missing or blank help metadata",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Mutate a temporary package and preserve ZIP member names and relationships.",
+              "Resolve placeholders from OOXML package parts; do not accept source configuration or custom model prose as behavioral evidence."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Clearing a field removes its only instruction text and it has no persistent alias/placeholder."
+            ],
+            "action": "Clear the field in the temporary package and resolve retained metadata.",
+            "expected_failure_or_absence": "The criterion fails for the now-unidentifiable field."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "825cc7c02805ccd2f6a6fea321a5b1d69f18dd6f072b379ef8ae8045c1348431",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

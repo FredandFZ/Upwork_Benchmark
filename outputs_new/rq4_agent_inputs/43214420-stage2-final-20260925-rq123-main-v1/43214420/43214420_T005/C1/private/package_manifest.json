@@ -1,0 +1,158 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_8356c4ce17b985a0d942",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T005",
+  "target_fingerprint": "b505873ec367d45100e17c370fb704a1b709d2946eed8d66172b643cefefe9bd",
+  "condition": "C1",
+  "turns": 82,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ1\\43214420_T005_RQ1.json",
+      "file_sha256": "9c9f120ec3d9e60f5a4c0021ede7a764311c6af2a692aba61635bd0aec138cbe",
+      "content_sha256": "994e98cce4b35288892494859fd0f754e018599928dc5277bc8de629fb38b501"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ2\\43214420_T005_RQ2.json",
+      "file_sha256": "713e989346012a91df53d94a606e79a89092e214571e92a573e143bdb401f63a",
+      "content_sha256": "0fab83d9d779d24175465dbc88ea14d2dc5ed58b2d201314c58641ab32170867"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ3\\43214420_T005_RQ3.json",
+      "file_sha256": "aa37a45cfb2f9d8c293b16bf19dddb5e6aab1f77550d939b70ede47d2a6132c2",
+      "content_sha256": "4d951aabc444cbc46498bdf5c8f7c54828796c1f0e3307f76c9e88fa59e7fc47"
+    }
+  },
+  "public_files": {
+    "task.json": "cca6907250fd6feedf8e205edb518988129a57a3dcd4ad3662b29d5e6e39faca",
+    "history.jsonl": "81307f55726cff6ebc6a2357bd79911dacc4e7232c7fd5045216a8aaa2964565",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T005_before_83/pre_repo.zip",
+    "archive_sha256": "acaf227cbb7107d1f89c74b8133bfd0e429ae9123bb20805bebd6215b339af27",
+    "tree_sha256": "fcf390886218f21fc9d381feafcdb2da5027569ee9a9a8e164c05b4eab6a5a98",
+    "manifest_path": "Code Environment/43214420/targets/T005_before_83/manifest.json",
+    "manifest_sha256": "8021046c3bca06c7e8c09d2ecd67470a92da9a4191a136aaae2d34c089af2ef0",
+    "before_message_id": 83,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The built schematic and PCB contain one battery connector J_BAT using a JST-PH 2.00 mm three-position footprint with exactly three electrical pads, mapped one-to-one to GND, VCC, and NTC and to no additional signal net.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_sch and dist/design.kicad_pcb J_BAT component",
+            "setup": [
+              "Build both KiCad artifacts and resolve J_BAT across schematic and PCB."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_sch and dist/design.kicad_pcb",
+                "parameters": {
+                  "reference": "J_BAT",
+                  "extract": [
+                    "symbol pin map",
+                    "footprint library id",
+                    "pad types",
+                    "pad-to-net map",
+                    "pad centers"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "J_BAT footprint library id",
+                "operator": "MATCHES_REGEX",
+                "expected": "(?i)JST[-_]?PH.*1x03.*P2[._]00mm"
+              },
+              {
+                "subject": "J_BAT electrical pad count",
+                "operator": "COUNT_EQUALS",
+                "expected": 3
+              },
+              {
+                "subject": "J_BAT pad-to-net value set",
+                "operator": "EQUALS",
+                "expected": [
+                  "GND",
+                  "VCC",
+                  "NTC"
+                ]
+              },
+              {
+                "subject": "distance between adjacent ordered pad centers in mm",
+                "operator": "EQUALS",
+                "expected": 2.0,
+                "tolerance": 0.01
+              }
+            ],
+            "determinism_controls": [
+              "Read the actual placed footprint and nets; ignore descriptive component properties.",
+              "Canonicalize net aliases only through explicit KiCad net ties, not name guessing."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "A generic three-pin connector has the right prose but wrong pitch or nets."
+            ],
+            "action": "Parse footprint geometry and pad-to-net assignments.",
+            "expected_failure_or_absence": "The criterion fails."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "d7d1ee3092b1edc18a114582a2ce3c1121eeca7c9c78fa40d9d0ce56ed62b9aa",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

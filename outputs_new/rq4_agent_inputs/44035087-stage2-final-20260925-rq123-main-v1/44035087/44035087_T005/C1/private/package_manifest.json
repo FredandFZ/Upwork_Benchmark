@@ -1,0 +1,175 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_589112d165947c2faf72",
+  "input_release": "44035087-stage2-final-20260925-rq123-main-v1",
+  "project_id": "44035087",
+  "target_id": "44035087_T005",
+  "target_fingerprint": "540e0b1bfcd931d0fa7139847627f7610a367e1dcd487e8f4c5deaf090956cbd",
+  "condition": "C1",
+  "turns": 43,
+  "difficulty": "MEDIUM",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ1\\44035087_T005_RQ1.json",
+      "file_sha256": "6ca9a2ef3582de5f5cfe11173d89b1cd60d007d14d159f21906559ec002a93a0",
+      "content_sha256": "fbe3b40d223bea1c81afb2131a6e05df8787006a6a51753eeffd65706367a00c"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ2\\44035087_T005_RQ2.json",
+      "file_sha256": "8344ee01a0a5258c55d9d5af56283f9b400ee72f871fe1f91d4a2730e4eb30f2",
+      "content_sha256": "a21acc6ae477eba96f745dfd471ad716a45b66678622af8e1ebbcc247e35e430"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ3\\44035087_T005_RQ3.json",
+      "file_sha256": "8c08496986cb23c75f67d2af5a100f4bab385551afa1f01854d38586c68c225c",
+      "content_sha256": "7e05bd92b164b0b03d70bafc04588b89ab37bbedc1695533ddf8d5627895af13"
+    }
+  },
+  "public_files": {
+    "task.json": "8fbef4bbff1703eeffde1e75d25f34019000292bc270d53ecfa814a0654d804c",
+    "history.jsonl": "dbed30a42eeff88f490fb3ae871bed6562045461837927f3417c716824374aad",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/44035087/targets/T005_before_44/pre_repo.zip",
+    "archive_sha256": "1db5a7090d0d1093f01d28e49dc3336865a6ad361b09f7d4aeec4042cb83c908",
+    "tree_sha256": "d322b1be3628a5f3c7425befec0098819423e1823af7ce7a6419e7bddb6b21d6",
+    "manifest_path": "Code Environment/44035087/targets/T005_before_44/manifest.json",
+    "manifest_sha256": "fed0236e41c35391354aa862b18cb550049516a39058639eee355eab96d483ab",
+    "before_message_id": 44,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Basic package uses USD 390, 620, 860, and 1120 for the four increasing square-footage bands, and both displayed and returned quotes agree.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "API",
+            "surface": "Public quote behavior",
+            "setup": [
+              "Create a fresh local application instance"
+            ],
+            "actions": [
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "local quote interface",
+                "parameters": {
+                  "method": "POST",
+                  "package": "basic",
+                  "square_feet_cases": [
+                    1200,
+                    1201,
+                    2401,
+                    3601
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "base_price_usd for ordered cases",
+                "operator": "EQUALS",
+                "expected": [
+                  390,
+                  620,
+                  860,
+                  1120
+                ]
+              }
+            ],
+            "determinism_controls": [
+              "offline network",
+              "fresh state",
+              "fixed boundary inputs"
+            ]
+          },
+          {
+            "observable_id": "OBS002",
+            "type": "FRONTEND_DOM",
+            "surface": "Basic package pricing row",
+            "setup": [
+              "Build and open the pricing surface"
+            ],
+            "actions": [
+              {
+                "operation": "QUERY_DOM",
+                "target": "Basic package prices by size band",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "displayed ordered prices",
+                "operator": "EQUALS",
+                "expected": [
+                  "USD 390",
+                  "USD 620",
+                  "USD 860",
+                  "USD 1120"
+                ]
+              }
+            ],
+            "determinism_controls": [
+              "frozen browser",
+              "offline assets"
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Fresh quote service"
+            ],
+            "action": "Request exactly 1201 square feet",
+            "expected_failure_or_absence": "The quote must not reuse the under-1200 price."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "aac6009d205a91a6374b07e4587f8e6cb7ee614bee2009005a18d6da8d2ab969",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

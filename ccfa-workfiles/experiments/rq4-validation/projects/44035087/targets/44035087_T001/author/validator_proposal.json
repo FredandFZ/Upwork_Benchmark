@@ -1,0 +1,127 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "44035087",
+  "target_id": "44035087_T001",
+  "before_message_id": 22,
+  "author_role": "VALIDATOR_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "8b98a9f63c57f8409c2fde867fb65f710e42c77188d4268e885d0b5087fa5a35",
+    "pre_repo_sha256": "d432da2a2e13a71a325a132b3dbc1fbfa8243b96226a2fb69f9fe68572f197a1",
+    "target_manifest_sha256": "4d7f2749b7a734ab61eb6f3d537ac949667048b2e81fdbb84dd57ecf9db6a180",
+    "upstream_proposals": [
+      {
+        "role": "CRITERIA_AUTHOR",
+        "path": "author/criteria_proposal.json",
+        "sha256": "b912a40f49c377602ab591a11c7c5d065e40648b8ee44de72c1de8bc40b98154"
+      }
+    ]
+  },
+  "produced_files": [
+    {
+      "path": "validator/validator_core.py",
+      "sha256": "9730c77f56ff79870297d8ef18dc816651318f7b6ae90329bb94091d6830d728",
+      "purpose": "Deferral/removal, gallery API, and generated pricing-catalog validator",
+      "researcher_only": true
+    },
+    {
+      "path": "validator/run_validator.py",
+      "sha256": "ddc1c8fbf91db794fe09e29bc9ee67286a6a6fe1d5bbd2af11a1eefc89c86ffa",
+      "purpose": "Target-bound hidden validator entrypoint",
+      "researcher_only": true
+    }
+  ],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "acceptance_criteria_sha256": "b912a40f49c377602ab591a11c7c5d065e40648b8ee44de72c1de8bc40b98154",
+    "harness": {
+      "language": "Python 3 stdlib; frozen Chrome C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe sha256=e8bce39747ea63c9c7d4306f7635d2916c9ecb0cf913fbcf5e7acc4539b5b8a0 when browser observables are required",
+      "entrypoint": "validator/run_validator.py",
+      "build_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "build",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/build.json"
+      ],
+      "target_test_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "target",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/target.json"
+      ],
+      "regression_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "regression",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/regression.json"
+      ],
+      "timeout_seconds": 90,
+      "network_policy": "DISABLED",
+      "fresh_workspace_required": true,
+      "machine_readable_result_path": ".rq4-results/{build,target,regression}.json"
+    },
+    "criterion_coverage": [
+      {
+        "criterion_id": "AC001",
+        "test_ids": [
+          "T001-AC001-OBS001"
+        ],
+        "observable_ids": [
+          "OBS001"
+        ]
+      }
+    ],
+    "result_contract": {
+      "components": [
+        "BUILD_PASS",
+        "TARGET_TEST_PASS",
+        "REGRESSION_PASS"
+      ],
+      "final_rule": "BUILD_PASS AND TARGET_TEST_PASS AND REGRESSION_PASS",
+      "harness_error_is_agent_failure": false
+    },
+    "calibration_contract": {
+      "pre_repo_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "FAIL"
+      },
+      "reference_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "PASS"
+      },
+      "adversarial_expected": "EVERY_PARTIAL_OR_MUTANT_FAILS_TARGET_OR_REGRESSION",
+      "actual_results_may_be_written_by_author": false
+    },
+    "implementation_independence": {
+      "no_llm_judge": true,
+      "no_network": true,
+      "no_reference_patch_comparison": true,
+      "no_gold_mapping_direct_score": true,
+      "no_unrequired_internal_structure_assertion": true
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

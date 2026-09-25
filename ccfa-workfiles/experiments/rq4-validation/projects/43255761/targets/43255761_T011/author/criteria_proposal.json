@@ -1,0 +1,107 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T011",
+  "before_message_id": 275,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "525ca71015aa85aa6ceb2e12dc2d751c78777ce379af992108d7527b172d723a",
+    "pre_repo_sha256": "a1b0bd24825ca3b512a5ed1900c41db85e254ad98b1759c7ca470fe06ed5b1bf",
+    "target_manifest_sha256": "a35be46e6f47ae0eeb88b6e8999158024b2e373f86da5b0bcedc5399a34887dd",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The work-item post-state disambiguates the short confirmation as enabling regular Enter in the headline field. OOXML can expose the headline control by semantic tag and require a multiline text-control declaration, then a package-level mutation can prove two paragraphs remain inside that control after save/reopen.",
+      "interfaces_inspected": [
+        "dist/template.docx!/word/document.xml",
+        "work_item.post_task_observable_features.REQ_MULTILINE_FIELD_INPUT",
+        "src/artifact_runtime.py:_parse_docx"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The headline field is an identifiable Word text content control configured for multiline input, and a regular paragraph break can be stored as two paragraphs inside that same control without splitting or deleting it.",
+        "gold_requirement_refs": ["REQ_MULTILINE_FIELD_INPUT"],
+        "gold_state_paths": ["REQ_MULTILINE_FIELD_INPUT.attributes.headline_field_regular_enter_enabled"],
+        "evidence_message_ids": [275],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx headline content control",
+            "setup": [
+              "Build dist/template.docx in a fresh workspace.",
+              "Select the content control whose normalized semantic tag identifies the headline field."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {"parts": ["word/document.xml"], "control_tag": "headline"}
+              },
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "temporary headline multiline fixture DOCX",
+                "parameters": {"mutation": "replace headline w:sdtContent with two deterministic paragraphs and reopen the package"}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "headline-tagged interactive content controls", "operator": "COUNT_EQUALS", "expected": 1},
+              {"subject": "headline control w:text/@w:multiLine", "operator": "EQUALS", "expected": "1"},
+              {"subject": "paragraphs retained inside the same headline w:sdt after multiline fixture reopen", "operator": "COUNT_EQUALS", "expected": 2}
+            ],
+            "determinism_controls": [
+              "Identify the headline control by stable semantic w:tag, not document order or source configuration.",
+              "Mutate and reopen only a temporary DOCX copy; verify the same w:tag encloses both paragraphs."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": ["The headline is a single-line w:text control or plain paragraph."],
+            "action": "Inspect control type and multiline attribute.",
+            "expected_failure_or_absence": "The criterion fails before any source-level flag can be considered."
+          },
+          {
+            "case_id": "NC002",
+            "setup": ["Adding a second paragraph places it outside or splits the headline control."],
+            "action": "Reopen the temporary package and count paragraphs under the original tagged w:sdt.",
+            "expected_failure_or_absence": "The criterion fails because regular Enter is not retained within the field."
+          }
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_MULTILINE_FIELD_INPUT.attributes.headline_field_regular_enter_enabled"],
+      "covered_affected_gold_state_paths": ["REQ_MULTILINE_FIELD_INPUT.attributes.headline_field_regular_enter_enabled"],
+      "preserved_requirement_refs": [
+        "REQ_DATE_FIELD_CONTROL",
+        "REQ_FIELD_FORMATTING_PRESERVATION",
+        "REQ_FIELD_LABEL_HELP_TEXT"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

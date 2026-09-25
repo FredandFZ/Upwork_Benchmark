@@ -1,0 +1,82 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T035",
+  "before_message_id": 703,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "ccfabbce0b5461f2602c2219ca35f81f3952cf604d51570eef176a17b87684d8",
+    "pre_repo_sha256": "e8e8072517a00b8a4db2e84ecdcf05c32ae81647c2d8ddaa372a71b64cd373c1",
+    "target_manifest_sha256": "86a58205157c0d3cb31073036523a610c610ec536f48a5c5d2817d5adb8f76f5",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "The fallback decision depends on whether a compatible lower-cost connector exists and on current unit price and minimum-order quantity. The built KiCad files can identify a selected component, but they cannot establish supplier availability, compatibility, cost, or MOQ from frozen offline evidence.",
+      "interfaces_inspected": [
+        "dist/design.kicad_sch component inventory",
+        "dist/design.kicad_pcb footprint inventory",
+        "dist/design-summary.txt",
+        "stable artifact inventory"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Add a dated, hash-bound supplier snapshot containing MPN, unit price, MOQ, and stock state.",
+        "Add a machine-readable compatibility table joining each approved alternative MPN to the selected KiCad component and its footprint/pinout."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "NONDETERMINISTIC_EXTERNAL_DEPENDENCY",
+      "evidence": [
+        "No supplier-price, MOQ, or stock artifact is present in the frozen repository.",
+        "KiCad component and footprint data cannot prove that no compatible alternative exists."
+      ],
+      "missing_observables": [
+        "A frozen list of compatible alternatives for the affected connector",
+        "Dated price, MOQ, and availability for the selected part and alternatives"
+      ],
+      "minimum_environment_repairs": [
+        "Add a dated, hash-bound supplier snapshot containing MPN, unit price, MOQ, and stock state.",
+        "Add a machine-readable compatibility table joining each approved alternative MPN to the selected KiCad component and its footprint/pinout."
+      ],
+      "reentry_condition": "Re-author after supplier and compatibility evidence are frozen and can be joined deterministically to the selected KiCad component."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_COMPONENT_SOURCEABILITY.attributes.fallback_requirement",
+        "REQ_COMPONENT_SOURCEABILITY.execution"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_POWER_BOARD_USB_CONNECTOR",
+        "REQ_INTEGRATED_COST_OPTIMIZATION"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T035-GAP-001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "External sourcing facts needed for the fallback decision are absent.",
+          "required_action": "Repair the stated artifact surface before validator authoring."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

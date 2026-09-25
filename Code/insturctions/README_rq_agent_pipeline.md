@@ -67,6 +67,15 @@ Before a real run, make sure `CODEX_HOME` points to the authenticated Codex
 configuration used for the experiment; the runner passes the variable by name
 but never records its value.
 
+For Claude Code, use
+`Code/config/rq123_claude_code_experiment.example.json` or the concrete
+Sonnet 5/high five-target pilot config. The adapter runs Claude in restricted,
+non-persistent, tool-free mode and extracts the JSON Schema result from the
+CLI `structured_output` envelope. The complete cross-device procedure,
+preflight, exact pilot cases, and artifact handoff are documented in
+`Code/insturctions/README_rq123_claude_code.md`. Do not add session resume flags
+or use Claude `--bare` with a local subscription login.
+
 The identity hierarchy is:
 
 ```text
@@ -113,6 +122,13 @@ For every target-condition, the runner:
 6. validates and freezes the response;
 7. terminates the process on timeout; and
 8. deletes the workspace in a `finally` block on success or failure.
+
+Before freezing a new run, the runner also verifies and embeds its private RQ
+source instances below `private/source_instances/`. The run manifest refers to
+those copies by paths relative to the run directory. This evaluator-only data
+never enters the Agent workspace, but makes a complete frozen run relocatable
+to a separate Judge machine. Legacy frozen runs with absolute source paths
+remain readable on their original machine.
 
 No conversation/thread/previous-response identifier is passed between cases.
 C1 and C2 of the same target are separate runs. The runner preserves frozen
@@ -205,3 +221,18 @@ immutable package manifest. It must not be pointed at
 RQ2 and RQ3 Gold are currently offline-Agent reviewed and frozen. Formal
 materialization is therefore open for all 349 retained targets. RQ4 remains a
 separate Phase B task and is not required for this RQ1--RQ3 pipeline.
+
+## 7. Zero-context operator prompts
+
+To hand the complete workflow to a fresh Agent with no conversation history,
+use exactly one provider-specific operator prompt:
+
+- `prompt/rq123_codex_full_run_operator.md`
+- `prompt/rq123_claude_code_full_run_operator.md`
+
+After reading the selected file, the Agent only needs the exact model ID,
+reasoning effort, and target count. Target count means unique targets, so C1
+and C2 produce twice as many isolated Agent calls. Both prompts freeze an
+explicit deterministic case list, keep provider output roots separate, enforce
+preflight and dry-run gates, and continue through Judge and aggregation when
+Judge credentials are available.

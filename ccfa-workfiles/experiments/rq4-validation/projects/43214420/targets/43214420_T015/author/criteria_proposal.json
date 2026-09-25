@@ -1,0 +1,39 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T015",
+  "before_message_id": 291,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "37bee5966c0f9e7f7d3b2d848988748206dda562a1ae75754a67c8ede5adc7d7",
+    "pre_repo_sha256": "fa6fa16c0187964358fe862c512a5bae958280ce80e8c54b5af855b7c6f65173",
+    "target_manifest_sha256": "6623d4d7a678c8d0e67a8c467c1ec2a075cf3a447b3ed6d342f210df0f825e99",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {"determination": "DETERMINISTIC_OBSERVABLE", "rationale": "The three GPIO changes are exact schematic connectivity facts. A validator can select the actual ESP32-S3-WROOM-1 symbol, resolve its named GPIO pins to nets, and reject the superseded mappings and any use of the stated unavailable GPIOs.", "interfaces_inspected": ["dist/design.kicad_sch ESP32 symbol pins", "dist/design.kicad_pcb nets", "src/artifact_model.py:ARTIFACT_MODEL.components"], "subjective_only": false, "repair_requirements": []},
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001", "scope": "TARGET_BEHAVIOR", "statement": "On the actual ESP32-S3-WROOM-1 symbol, GPIO5 connects to 5V_EN, GPIO38 connects to SCL0, and GPIO26 connects to SPI_MOSI; GPIO3, GPIO22, and GPIO23 do not carry those superseded functions, and GPIO22/GPIO23/GPIO25/GPIO27 are not exposed as usable WROOM-1 connections elsewhere in the design.",
+        "gold_requirement_refs": ["REQ_POWER_BOARD_BOOST_ENABLE", "REQ_MAIN_GPIO_ASSIGNMENTS", "REQ_MAIN_STATUS_LED_POWER_LOGIC"],
+        "gold_state_paths": ["REQ_POWER_BOARD_BOOST_ENABLE.attributes.enable_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.five_volt_enable_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.i2c0_scl_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.spi_mosi_gpio", "REQ_MAIN_STATUS_LED_POWER_LOGIC.attributes.power_switching"],
+        "evidence_message_ids": [291],
+        "observables": [{"observable_id": "OBS001", "type": "ARTIFACT", "surface": "dist/design.kicad_sch ESP32-S3-WROOM-1 pin-to-net map", "setup": ["Build the schematic and select the populated ESP32-S3-WROOM-1 module by library id/reference."], "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_sch", "parameters": {"extract": "ESP32 named pin to resolved net mapping", "pins": ["GPIO3", "GPIO5", "GPIO22", "GPIO23", "GPIO25", "GPIO26", "GPIO27", "GPIO38"]}}], "expected_observations": [
+          {"subject": "ESP32 GPIO5 resolved net", "operator": "EQUALS", "expected": "5V_EN"},
+          {"subject": "ESP32 GPIO38 resolved net", "operator": "EQUALS", "expected": "SCL0"},
+          {"subject": "ESP32 GPIO26 resolved net", "operator": "EQUALS", "expected": "SPI_MOSI"},
+          {"subject": "superseded pairs GPIO3=5V_EN, GPIO22=SCL0, GPIO23=SPI_MOSI", "operator": "COUNT_EQUALS", "expected": 0},
+          {"subject": "design connections using unavailable WROOM-1 GPIO22/GPIO23/GPIO25/GPIO27", "operator": "COUNT_EQUALS", "expected": 0}
+        ], "determinism_controls": ["Resolve named pins from the actual module symbol/library mapping.", "Follow labels, hierarchical labels, and net ties before comparing canonical net names.", "Ignore unconnected hidden aliases that are not exposed pins."]}],
+        "negative_cases": [{"case_id": "NC001", "setup": ["A summary component lists the new strings but the ESP32 pins retain old nets."], "action": "Parse actual symbol connectivity.", "expected_failure_or_absence": "The criterion fails."}]
+      }
+    ],
+    "coverage_summary": {"affected_gold_state_paths": ["REQ_POWER_BOARD_BOOST_ENABLE.attributes.enable_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.five_volt_enable_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.i2c0_scl_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.spi_mosi_gpio", "REQ_MAIN_STATUS_LED_POWER_LOGIC.attributes.power_switching"], "covered_affected_gold_state_paths": ["REQ_POWER_BOARD_BOOST_ENABLE.attributes.enable_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.five_volt_enable_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.i2c0_scl_gpio", "REQ_MAIN_GPIO_ASSIGNMENTS.attributes.spi_mosi_gpio", "REQ_MAIN_STATUS_LED_POWER_LOGIC.attributes.power_switching"], "preserved_requirement_refs": ["REQ_INTERBOARD_POWER_SIGNAL_LINKS", "REQ_MAIN_STATUS_LED_POWER_LOGIC"], "uncovered_items": []}
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

@@ -1,0 +1,349 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T005",
+  "before_message_id": 56,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "1690bf1d5ac29b0e6397bc1c522a5bf4daf01114c7fa5e6f5636b32946429c2d",
+    "pre_repo_sha256": "cd91fddd0452ef155bc432892944cd478b6740f8557717878b6ac24b28390e28",
+    "target_manifest_sha256": "b401a88cafc6674acfac62373d3904e029090704892b3fb48941bcbe7932ce25",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The task freezes exact page-shell elements, footer copy/link labels, policy destinations, and sign-in branding that can be checked in the local browser and route model; optional color aesthetics are excluded.",
+      "interfaces_inspected": [
+        "GET /api/pages",
+        "POST /api/auth/sessions",
+        "built Sign In and Account Provisioning DOM",
+        "footer navigation"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Sign In and Account Provisioning pages exist and each renders a background and header logo.",
+        "gold_requirement_refs": [
+          "REQ_INFORMATIONAL_PAGE_SHELL",
+          "REQ_COGNITO_SIGNIN_BRANDING"
+        ],
+        "gold_state_paths": [
+          "REQ_INFORMATIONAL_PAGE_SHELL.existence",
+          "REQ_INFORMATIONAL_PAGE_SHELL.attributes.required_shell_elements",
+          "REQ_COGNITO_SIGNIN_BRANDING.attributes.required_visual_elements",
+          "REQ_COGNITO_SIGNIN_BRANDING.attributes.background_treatment"
+        ],
+        "evidence_message_ids": [
+          56
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_DOM",
+            "surface": "Sign In and Account Provisioning pages",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "Sign In page",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "background and header logo",
+                "parameters": {}
+              },
+              {
+                "operation": "OPEN_PAGE",
+                "target": "Account Provisioning page",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "Sign In background",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "Sign In header logo",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "Account Provisioning background",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "Account Provisioning header logo",
+                "operator": "EXISTS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The shared footer exposes the specified organization block, policy/menu links, social links, and copyright text in their requested regions.",
+        "gold_requirement_refs": [
+          "REQ_WEBSITE_FOOTER"
+        ],
+        "gold_state_paths": [
+          "REQ_WEBSITE_FOOTER.attributes.organization_block",
+          "REQ_WEBSITE_FOOTER.attributes.menu_links",
+          "REQ_WEBSITE_FOOTER.attributes.social_links",
+          "REQ_WEBSITE_FOOTER.attributes.copyright_notice"
+        ],
+        "evidence_message_ids": [
+          56
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "FRONTEND_DOM",
+            "surface": "shared website footer",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "website page",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "footer organization, menu, social, and copyright regions",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "left organization block text",
+                "operator": "CONTAINS",
+                "expected": [
+                  "LumenArc Intelligence",
+                  "Harbor Glen",
+                  "Oregon, USA",
+                  "hello@lumenarc-demo.example",
+                  "(202) 555-0146"
+                ]
+              },
+              {
+                "subject": "right menu link labels",
+                "operator": "EQUALS",
+                "expected": [
+                  "Home",
+                  "Contact Us",
+                  "Support",
+                  "Cookie Notice",
+                  "Privacy Policy",
+                  "Terms of Use",
+                  "Legal"
+                ]
+              },
+              {
+                "subject": "bottom-center social labels",
+                "operator": "EQUALS",
+                "expected": [
+                  "LinkedIn",
+                  "X"
+                ]
+              },
+              {
+                "subject": "bottom-center copyright",
+                "operator": "EQUALS",
+                "expected": "Copyright (c) 2032 LumenArc Systems LLC. All rights reserved"
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Each footer policy link resolves through local navigation to its matching policy destination.",
+        "gold_requirement_refs": [
+          "REQ_POLICY_DOCUMENT_ACCESS"
+        ],
+        "gold_state_paths": [
+          "REQ_POLICY_DOCUMENT_ACCESS.existence",
+          "REQ_POLICY_DOCUMENT_ACCESS.attributes.policy_destinations",
+          "REQ_POLICY_DOCUMENT_ACCESS.attributes.access_entry_point"
+        ],
+        "evidence_message_ids": [
+          56
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "footer policy links",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "website page",
+                "parameters": {}
+              },
+              {
+                "operation": "CLICK",
+                "target": "Cookie Notice, Privacy Policy, Terms of Use, and Legal links",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "policy destination sequence",
+                "operator": "EQUALS",
+                "expected": [
+                  "Cookie Notice",
+                  "Privacy Policy",
+                  "Terms of Use",
+                  "Legal"
+                ]
+              },
+              {
+                "subject": "navigation errors",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC004",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Cognito sign-in presentation uses the landing-page background and a visible LumenArc header logo.",
+        "gold_requirement_refs": [
+          "REQ_COGNITO_SIGNIN_BRANDING"
+        ],
+        "gold_state_paths": [
+          "REQ_COGNITO_SIGNIN_BRANDING.attributes.required_visual_elements",
+          "REQ_COGNITO_SIGNIN_BRANDING.attributes.background_treatment"
+        ],
+        "evidence_message_ids": [
+          56
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS004",
+            "type": "FRONTEND_DOM",
+            "surface": "Cognito-compatible sign-in page",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "Sign In page",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "page background and header logo",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "background treatment identifier",
+                "operator": "EQUALS",
+                "expected": "landing-page background"
+              },
+              {
+                "subject": "header logo accessible name",
+                "operator": "CONTAINS",
+                "expected": "LumenArc"
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_WEBSITE_FOOTER.attributes.organization_block",
+        "REQ_WEBSITE_FOOTER.attributes.menu_links",
+        "REQ_WEBSITE_FOOTER.attributes.social_links",
+        "REQ_WEBSITE_FOOTER.attributes.copyright_notice",
+        "REQ_INFORMATIONAL_PAGE_SHELL.existence",
+        "REQ_INFORMATIONAL_PAGE_SHELL.attributes.required_shell_elements",
+        "REQ_COGNITO_SIGNIN_BRANDING.attributes.required_visual_elements",
+        "REQ_COGNITO_SIGNIN_BRANDING.attributes.background_treatment",
+        "REQ_POLICY_DOCUMENT_ACCESS.existence",
+        "REQ_POLICY_DOCUMENT_ACCESS.attributes.policy_destinations",
+        "REQ_POLICY_DOCUMENT_ACCESS.attributes.access_entry_point"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_INFORMATIONAL_PAGE_SHELL.existence",
+        "REQ_INFORMATIONAL_PAGE_SHELL.attributes.required_shell_elements",
+        "REQ_COGNITO_SIGNIN_BRANDING.attributes.required_visual_elements",
+        "REQ_COGNITO_SIGNIN_BRANDING.attributes.background_treatment",
+        "REQ_WEBSITE_FOOTER.attributes.organization_block",
+        "REQ_WEBSITE_FOOTER.attributes.menu_links",
+        "REQ_WEBSITE_FOOTER.attributes.social_links",
+        "REQ_WEBSITE_FOOTER.attributes.copyright_notice",
+        "REQ_POLICY_DOCUMENT_ACCESS.existence",
+        "REQ_POLICY_DOCUMENT_ACCESS.attributes.policy_destinations",
+        "REQ_POLICY_DOCUMENT_ACCESS.attributes.access_entry_point"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_WEBSITE_FOOTER"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "F001",
+          "severity": "INFO",
+          "category": "SUBJECTIVE_ONLY",
+          "evidence": "The suggestion that a solid brand-color footer \"could look good\" does not freeze a color value or require that optional treatment.",
+          "required_action": "Do not score footer aesthetics or an unspecified brand color; score only the explicit content, links, page-shell, and sign-in elements."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T006",
+  "before_message_id": 258,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "06a04eddcaedd87b5a8b0e8b2aff2f51b324e77f59bb04f8af1960201747e5a3",
+    "pre_repo_sha256": "a15e4ebcd31e00e17b01ae6cac69c5ad30d7e364fbffef0ae789d1a9b8e3cdad",
+    "target_manifest_sha256": "6ed62c91cabe8d0262a609e8dead15110181cdf00fe5d74e56a0d56750ad5625",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The exact replacement URL is observable through both offline platform launchers and the generated media manifest; navigation is intercepted so the external resource is never contacted.",
+      "interfaces_inspected": [
+        "Android and iOS How To Use interactions",
+        "generated How To media manifest"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Android and iOS How To Use interactions launch the newly supplied application-integration video URL.",
+        "gold_requirement_refs": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource"
+        ],
+        "evidence_message_ids": [
+          258
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "Android and iOS How To Use controls",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "Android mobile preview",
+                "parameters": {}
+              },
+              {
+                "operation": "CLICK",
+                "target": "How To Use control",
+                "parameters": {}
+              },
+              {
+                "operation": "OPEN_PAGE",
+                "target": "iOS mobile preview",
+                "parameters": {}
+              },
+              {
+                "operation": "CLICK",
+                "target": "How To Use control",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "Android launched resource",
+                "operator": "EQUALS",
+                "expected": "https://cedar-meadow.example/resource/e0024"
+              },
+              {
+                "subject": "iOS launched resource",
+                "operator": "EQUALS",
+                "expected": "https://cedar-meadow.example/resource/e0024"
+              }
+            ],
+            "determinism_controls": [
+              "Intercept navigation in the frozen local launcher; do not request the external resource."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "The superseded video URL is absent from the generated media manifest and both platform launch targets.",
+        "gold_requirement_refs": [
+          "REQ_HOW_TO_CONTENT_DELIVERY"
+        ],
+        "gold_state_paths": [
+          "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource"
+        ],
+        "evidence_message_ids": [
+          258
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "generated media manifest and launch-target records",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "How To media manifest",
+                "parameters": {}
+              },
+              {
+                "operation": "READ_PUBLIC_STATE",
+                "target": "platform launch-target records",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "https://video.cedar-meadow.example/watch/e0023",
+                "operator": "ABSENT",
+                "expected": true
+              },
+              {
+                "subject": "new resource occurrence count",
+                "operator": "COUNT_EQUALS",
+                "expected": 3
+              }
+            ],
+            "determinism_controls": [
+              "Count the manifest plus the Android and iOS launch-target records."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Build both platform variants."
+            ],
+            "action": "Search generated media and launch-target records for the prior URL.",
+            "expected_failure_or_absence": "The prior URL is absent."
+          }
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_HOW_TO_CONTENT_DELIVERY.attributes.video_resource"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_ANDROID_APP_SIZE_OPTIMIZATION",
+        "REQ_IOS_APP_SIZE_OPTIMIZATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

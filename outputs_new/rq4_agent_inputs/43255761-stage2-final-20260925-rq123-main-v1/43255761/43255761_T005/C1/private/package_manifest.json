@@ -1,0 +1,145 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_be066287d7f9316af50c",
+  "input_release": "43255761-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T005",
+  "target_fingerprint": "f7a6aa1c7b6205aa82809c40f88db8fc1ce113aa105862b93f0cc0f48ebfb134",
+  "condition": "C1",
+  "turns": 193,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ1\\43255761_T005_RQ1.json",
+      "file_sha256": "a890a93e08c1a6b29cae2cfaabc2f864638c77dbc57483c736ca442088201c28",
+      "content_sha256": "d2548ee72daa16dcd359cdeafe1054508f13467cd4b6bba4dd8c84ba82b22aff"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ2\\43255761_T005_RQ2.json",
+      "file_sha256": "73d47f914a2f824c2915355dbafd3a07af0f3f14845983d9d39fc70a120c7717",
+      "content_sha256": "fc06129932bf099d340d7e0af4e91ace1678ff4d3bc86febe08e6f658071c083"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ3\\43255761_T005_RQ3.json",
+      "file_sha256": "36049e26f4624d6fa12aabab62cc2b906e325b7f11fd530a77b4d90b24e8198b",
+      "content_sha256": "fffc15b6825a3df3207506f13bdaffae5787d021ae3b23c618372b785dcdc8da"
+    }
+  },
+  "public_files": {
+    "task.json": "ff91e806c20a08d3625eb8647a9b9dfe2bd7c7e1c1796126e05f9b83446cce8f",
+    "history.jsonl": "eba463ee35095a158aea2d6cfba7378bd5a198b36401371e4ce552b3e89684e9",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43255761/targets/T005_before_194/pre_repo.zip",
+    "archive_sha256": "aaa6be6f08651eb5cb92ec080653d4f6a3623800f28247ee8ae1775b99e8f881",
+    "tree_sha256": "b23a995f14343d51886f6334f9985c153d33c8a1ff72706a6ee39cb10808a129",
+    "manifest_path": "Code Environment/43255761/targets/T005_before_194/manifest.json",
+    "manifest_sha256": "42611435056193df6526ebc8fae51cdd32f5f45e1021b0f4d06018ddfe1ef5fb",
+    "before_message_id": 194,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "For every interactive content control, the same non-empty instruction is present both as the control label (w:alias) and as the initially displayed in-field text or resolved placeholder text.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx content-control label and placeholder parts",
+            "setup": [
+              "Build dist/template.docx in a fresh workspace."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "resolve": [
+                    "w:sdtPr/w:alias",
+                    "w:sdtContent",
+                    "w:placeholder/w:docPart"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "interactive controls with empty label text",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "interactive controls with empty initial in-field/placeholder text",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "interactive controls whose normalized label and initial in-field instruction differ",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Resolve placeholder building-block references within the DOCX package before comparison.",
+              "Join values using the unique w:tag and compare normalized visible text, not source configuration."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "A control has help text only in its alias or only inside the field."
+            ],
+            "action": "Resolve both OOXML locations.",
+            "expected_failure_or_absence": "The criterion fails because both places are required."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "134d678915c7ae208fb37c425fee4489630268385e647c9a65bb826eaa62dc9b",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

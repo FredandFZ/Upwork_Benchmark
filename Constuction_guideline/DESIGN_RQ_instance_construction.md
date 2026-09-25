@@ -1054,7 +1054,7 @@ ACT branch 的 `post_task_states` 必须从 `affected_requirement_transitions.*.
 
 ### 8.1 候选实例收录条件
 
-当且仅当同时满足以下两个条件时生成 RQ4 candidate：
+原始 RQ4 candidate 当且仅当同时满足以下两个条件时生成：
 
 1. RQ3 存在至少一个 affected Requirement transition；
 2. `Code Environment/<project_id>/` 中存在同一 `target_id` 的 C_env manifest 与 `pre_repo.zip`。
@@ -1065,8 +1065,15 @@ ACT branch 的 `post_task_states` 必须从 `affected_requirement_transitions.*.
 outputs/stage2/<project_id>/RQ4/<target_id>_RQ4.json
 ```
 
-RQ4 实例在公共 schema 基础上额外要求 `code_environment`。候选实例不进入正式分母，也不产生
-`PASS`/`FAIL`；正式 eligibility 在 §8.5 按 condition 判定。
+RQ4 实例在公共 schema 基础上额外要求 `code_environment`。随后 Criteria Agent 对原始 candidate
+执行 materiality 与 observability gate。只有 `downstream_disposition ==
+PROCEED_TO_VALIDATOR_AUTHORING`（新流程中等价于 `PROCEED_TO_AGENT_JUDGE`）且至少包含一条冻结
+Acceptance Criterion 的 target 才进入 RQ4 evaluation set；其他 target 只保存在私有排除记录中，
+不进入正式 RQ4 `index.json` 或分母。
+
+当前快照从 99 个原始时间点收缩为 40 个 evaluation targets：50 个因 Code Environment 不能
+稳定暴露所需变化而排除，9 个因没有确定性可观察结果而排除。这个筛选发生在运行任何 benchmark
+Agent 之前，不能根据某个模型的提交结果反向改变。
 
 ### 8.2 Requirement transition 构造
 
@@ -1086,10 +1093,11 @@ task_event_ids 的 Event owner 集合
 2. 读取 Post-task expanded State；
 3. 比较 `attributes`、`scope`、`lifecycle_status`、`ambiguity`、`execution`；
 4. 生成 `state_delta.change_type` 和 `changed_fields`；
-5. 保存 transition provenance，供 acceptance criteria 的人工设计和复核使用。
+5. 保存 transition provenance，供 Acceptance Criteria 的 Agent 构造和抽样复核使用。
 
-RQ4 不再派生或评分 `IMPLEMENT/MODIFY/REMOVE/PRESERVE` action。是否交付成功只由最终 repository
-上的 hidden tests 决定；transition metadata 仅是 researcher-side provenance。
+RQ4 不再派生或评分 `IMPLEMENT/MODIFY/REMOVE/PRESERVE` action。是否交付成功由最终 repository
+上的 Build、Regression 和通用 Agent Judge 对冻结 Acceptance Criteria 的逐条检查共同决定；
+transition metadata 仅是 researcher-side provenance。
 
 ### 8.3 `code_environment` schema
 
@@ -1143,8 +1151,8 @@ RQ4 不再派生或评分 `IMPLEMENT/MODIFY/REMOVE/PRESERVE` action。是否交�
   "extracted_during_instance_construction": false,
   "rq4_repository_audit": {
     "future_state_leakage": "PENDING",
-    "validator_leakage": "PENDING",
-    "reference_delivery_leakage": "PENDING",
+    "acceptance_criteria_leakage": "PENDING",
+    "judge_prompt_or_calibration_asset_leakage": "PENDING",
     "evaluator_metadata_leakage": "PENDING"
   }
 }
@@ -1153,8 +1161,8 @@ RQ4 不再派生或评分 `IMPLEMENT/MODIFY/REMOVE/PRESERVE` action。是否交�
 `requirements_to_code`、State IDs 和 audit 结果属于 researcher-side metadata，不得写入任何
 Agent workspace。`pre_repo.zip` 也不是 RQ2/RQ3 输入；即使其中的 pre-task 实现反映了部分
 历史状态，也只能在 Phase A 的 RQ1–RQ3 response 已冻结后用于 RQ4。RQ4 repository 仍须通过
-独立泄漏审计，不能包含 future/post-task state、acceptance criteria、hidden validator、reference
-delivery 或 evaluator-only Requirement/State/Event metadata。
+独立泄漏审计，不能包含 future/post-task state、Acceptance Criteria、Judge prompt、校准资产或
+evaluator-only Requirement/State/Event metadata。
 
 ### 8.4 RQ4 `construction_gold` schema
 
@@ -1200,19 +1208,20 @@ delivery 或 evaluator-only Requirement/State/Event metadata。
     }
   },
   "acceptance_criteria_ids": ["AC001", "AC002"],
-  "validator": {
-    "validator_id": "42204309_T001_RQ4_V1",
-    "validator_sha256": "...",
-    "calibration_complete": true
+  "judge": {
+    "judge_config_id": "rq4-agent-judge-v1",
+    "prompt_sha256": "...",
+    "response_schema_sha256": "...",
+    "tool_policy_sha256": "..."
   },
   "repository_leakage_check_passed": true,
   "execution_ready": true
 }
 ```
 
-`affected_requirement_transitions` 以 `requirement_id` 为动态 key。示例表示 validator 已完成人工
-设计与校准后的最终状态；在此之前，`eligibility_by_condition` 可保持 `null`，`execution_ready`
-必须为 `false`，`status` 必须为 `RQ4_CANDIDATE`，且不能运行正式实验。
+`affected_requirement_transitions` 以 `requirement_id` 为动态 key。示例表示 Acceptance Criteria
+与通用 Judge 配置均已冻结；在此之前，`eligibility_by_condition` 可保持 `null`，
+`execution_ready` 必须为 `false`，`status` 必须为 `RQ4_CANDIDATE`，且不能运行正式实验。
 
 ### 8.5 Eligibility 与完成条件
 
@@ -1220,19 +1229,22 @@ RQ3 Gold 冻结后，对每个 condition 分别检查：
 
 1. `final_gold_by_condition.decision == ACT`；
 2. pre-repo 可重复完成环境启动、Build 和 Regression；
-3. target 存在可由本地确定性测试观察的外部行为或交付 artifact；
-4. acceptance criteria 与 hidden validator 已由人工预先设计、双人复核并冻结；
-5. validator 已通过 pre-repo、reference delivery，以及适用时的 partial delivery 校准；
-6. Agent 可见 repository 已通过 future/post-task state、validator、reference delivery 和
-   evaluator-only metadata 泄漏审计。
+3. Criteria Agent 已判定 target 具有实质变化和确定性可观察结果；
+4. Acceptance Criteria 已冻结，每条 criterion 都有明确的 setup、operation、expected observation
+   和 determinism control；
+5. 一份跨所有项目通用的 Agent Judge prompt、schema、模型和工具策略已经冻结，并已在私有
+   抽样校准集上验证；
+6. Agent 可见 repository 已通过 future/post-task state、Acceptance Criteria、Judge prompt、
+   校准资产和 evaluator-only metadata 泄漏审计。
 
 全部满足时才写入 `rq4_eligible=true`。若不满足，只记录一个排除原因，不生成评分结果。允许的
-排除原因与 `DESIGN_RQ_evaluation.md` §6.2 一致。只有纯配置镜像、自由文本匹配、主观视觉判断
-或必须依赖外部语义 API 的 target 不进入主 RQ4。
+排除原因与 `DESIGN_RQ_evaluation.md` §6.2 一致。只有纯配置镜像、自由文本匹配、无冻结基准的
+主观视觉判断或没有实质实现变化的 target 不进入主 RQ4。
 
 RQ4 构造完成的最低条件是：condition-specific RQ3 Gold 已冻结、eligibility 已确定、eligible
-condition 共用同一冻结 validator、校准与泄漏审计均通过。评分只接受最终 repository，不读取
-`decision`、`planned_actions` 或 action 文本。
+condition 共用同一组冻结 Acceptance Criteria 和同一 Judge 配置，且 leakage audit 通过。
+Reference、partial、mutant 与 target-specific validator 只作为 Judge 的私有抽样校准资产，不是
+逐 target 完成条件。评分只接受最终 repository，不读取 `decision`、`planned_actions` 或 action 文本。
 
 ---
 
@@ -1353,8 +1365,9 @@ outputs/stage2/<project_id>/
   "total_instance_count": 92,
   "rq4_readiness": {
     "candidate_count": 17,
+    "agent_judge_target_count": 0,
     "eligible_target_condition_count": 0,
-    "eligibility_status": "PENDING_RQ3_GOLD_AND_VALIDATOR_CALIBRATION"
+    "eligibility_status": "PENDING_RQ3_GOLD_AC_AND_JUDGE_FREEZE"
   },
   "source_artifacts": {},
   "construction_boundaries": {
@@ -1404,9 +1417,9 @@ manifest 的 `rq_counts` 必须与四个 `index.json.instance_count` 一致，
 - RQ4-only `pre_repo.zip` 必须通过 CRC、路径穿越、符号链接和 `.git` 检查；
 - RQ4 构造阶段不得解压归档；
 - RQ4 eligibility 只能在 condition-specific RQ3 Gold 冻结后确定；
-- `rq4_eligible=true` 时必须存在冻结的 acceptance criteria、validator ID/hash、完整校准记录和
-  通过的 RQ4 future-state/validator/reference-delivery/evaluator-metadata leakage audit；
-- 同一 target 的 eligible conditions 必须使用同一 validator；
+- `rq4_eligible=true` 时必须存在冻结的 Acceptance Criteria、Judge config ID/hash，以及通过的
+  future-state/criteria/Judge/evaluator-metadata leakage audit；
+- 同一 target 的 eligible conditions 必须使用相同 Acceptance Criteria 和 Judge 配置；
 - 不得出现 `rq4_eligible=false` 却带有 `PASS`/`FAIL`，或 `rq4_eligible=true` 却缺失执行准备材料。
 
 任一硬校验失败时，生成器停止并报告 target/字段位置，不写一组看似成功但内容不完整的
@@ -1424,5 +1437,5 @@ RQ 实例。
 
 这些文件说明每个 target/RQ pair 从哪些上游事实构造而来。RQ1 保存无需人工复核的确定性
 Atom/Evidence Gold；RQ2/RQ3 可保存各自的 provisional Gold；RQ4 保存 candidate、eligibility
-和 validator provenance，但不在本阶段执行 Agent 或写入评分。Agent 如何运行、如何执行代码
+和 Judge provenance，但不在本阶段执行 Agent 或写入评分。Agent 如何运行、如何执行代码
 以及如何聚合实验结果不属于本文；各 RQ 的评分接口以 `DESIGN_RQ_evaluation.md` 为准。

@@ -1,0 +1,265 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_392e72739b3cd48ee0b9",
+  "input_release": "44035087-stage2-final-20260925-rq123-main-v1",
+  "project_id": "44035087",
+  "target_id": "44035087_T010",
+  "target_fingerprint": "27d4b9635268d31688ebe1ea3e87865f9ad7507e1430e07beeda77033fab4365",
+  "condition": "C1",
+  "turns": 106,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ1\\44035087_T010_RQ1.json",
+      "file_sha256": "4c0e93b8815cb751fc694174f7e4bab53782da50559fee1de0ab216713ec83a2",
+      "content_sha256": "9c5a67ea41981393d752ad21fd703c818c03a62cc19f0f1ea7fea9e1f37c5d6b"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ2\\44035087_T010_RQ2.json",
+      "file_sha256": "186f02ded7e93943db77c218933b164892585b260f6d468fe6c5a814ce7e9857",
+      "content_sha256": "16e9ad520d28772b3a05ac25dab1a669b765c01f638dff24f0ea6f26cd82d202"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ3\\44035087_T010_RQ3.json",
+      "file_sha256": "c719ee7be94c211741f90b2dd8ecdb2bd5904b124245f0bdbf85d2cc3ca91472",
+      "content_sha256": "8c278dd1f2241ecad477bafdfe72aee82ad1793c6d29ef8f315b1768e31851c7"
+    }
+  },
+  "public_files": {
+    "task.json": "bc10ade6b10729350712183320b4cdf21776df78181289b71943ebe9cf3e6000",
+    "history.jsonl": "f507a4309086ab6d478ccd29105c0c4f35d6217e22c2ba251c0dbcc5009db2b1",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/44035087/targets/T010_before_107/pre_repo.zip",
+    "archive_sha256": "5769502274bb55bbc0b844cbdd7ca1f7ccb933d723abdf959ac610fc2bdfcf21",
+    "tree_sha256": "9aa54edaff47c1489f69938ffd3b27c0234ed6f858bb510a718534043d4a2ad2",
+    "manifest_path": "Code Environment/44035087/targets/T010_before_107/manifest.json",
+    "manifest_sha256": "ceed06e7837c56cbe0149df56d101a5bba975b09ef47a28cd06b2a81df219bae",
+    "before_message_id": 107,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "A dedicated Get a Quote page is reachable from the Book a Session CTA and exposes Name, optional Company, Phone Number, Email, and Job Description fields with semantic labels.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "Book a Session CTA and Get a Quote page",
+            "setup": [
+              "Build and open the site in a fresh browser"
+            ],
+            "actions": [
+              {
+                "operation": "CLICK",
+                "target": "Book a Session CTA",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "Get a Quote form",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "current page",
+                "operator": "EQUALS",
+                "expected": "dedicated Get a Quote page"
+              },
+              {
+                "subject": "form accessible field names",
+                "operator": "EQUALS",
+                "expected": [
+                  "Name",
+                  "Company",
+                  "Phone Number",
+                  "Email",
+                  "Job Description"
+                ]
+              },
+              {
+                "subject": "Company required state",
+                "operator": "EQUALS",
+                "expected": false
+              },
+              {
+                "subject": "Name, Phone Number, Email, and Job Description required state",
+                "operator": "EQUALS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "frozen browser",
+              "network disabled",
+              "clean storage"
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Open quote form"
+            ],
+            "action": "Submit with Company empty and all required fields valid",
+            "expected_failure_or_absence": "Submission is accepted; Company is not treated as required."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Valid quote-form data is accepted by the local submission behavior and invalid required data is rejected deterministically.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "API",
+            "surface": "Local quote-request submission",
+            "setup": [
+              "Create a fresh local application instance"
+            ],
+            "actions": [
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "quote-request interface",
+                "parameters": {
+                  "method": "POST",
+                  "payload": {
+                    "name": "Test Customer",
+                    "company": "",
+                    "phone_number": "+1-555-0100",
+                    "email": "customer@example.test",
+                    "job_description": "Photograph a four-room property"
+                  }
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "response status",
+                "operator": "EQUALS",
+                "expected": 201
+              },
+              {
+                "subject": "stored request fields",
+                "operator": "MATCHES_SCHEMA",
+                "expected": [
+                  "name",
+                  "company",
+                  "phone_number",
+                  "email",
+                  "job_description"
+                ]
+              }
+            ],
+            "determinism_controls": [
+              "offline network",
+              "fresh application state",
+              "fixed payload"
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC002",
+            "setup": [
+              "Fresh local application"
+            ],
+            "action": "Submit without Email",
+            "expected_failure_or_absence": "The request is rejected and is not persisted."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "REMOVAL",
+        "statement": "The quote flow contains no Calendly link, embed, script, or request, and uses the existing site's frozen typography and color tokens rather than an independently invented style.",
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "REMOVE",
+            "surface": "Built quote page HTML, scripts, and browser requests",
+            "setup": [
+              "Build and open the quote page with request logging"
+            ],
+            "actions": [
+              {
+                "operation": "QUERY_DOM",
+                "target": "links, iframes, scripts, and form actions",
+                "parameters": {}
+              },
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "built quote-page assets",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "calendly.com references and requests",
+                "operator": "ABSENT",
+                "expected": true
+              },
+              {
+                "subject": "quote-page typography and primary color tokens",
+                "operator": "EQUALS",
+                "expected": "the corresponding frozen sitewide brand tokens"
+              }
+            ],
+            "determinism_controls": [
+              "network disabled",
+              "frozen browser",
+              "fixed stylesheet load order"
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "6cb6b28a572a3975dd2b6a30b761680ea3d7ec95016ac55ba33250c5f22e5c46",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

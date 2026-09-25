@@ -1,0 +1,145 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T004",
+  "before_message_id": 239,
+  "author_role": "VALIDATOR_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "c5dd403b8ea82f9195626ba76d221ef956d38955c8d4928d1735f0d8291c85b5",
+    "pre_repo_sha256": "1ede9c0f280cbf3869c78b069eafb0e4cad0c4962b5429b13bbfffb91761aa96",
+    "target_manifest_sha256": "e819fc8c4329b12ad94ff316969b4dc16590b05226187c28c2923480d1a96a0f",
+    "upstream_proposals": [
+      {
+        "role": "CRITERIA_AUTHOR",
+        "path": "author/criteria_proposal.json",
+        "sha256": "0f23e455f5b13dee9e897a16d86c6c228c700afd4ab81e5d9767b9fddadd1edb"
+      }
+    ]
+  },
+  "produced_files": [
+    {
+      "path": "validator/validator_core.py",
+      "sha256": "d2498e64416df887cd5d4941fc23f6f58bf12d11233f6e9f16a737bc88d3b5a9",
+      "purpose": "Cross-platform How-To launch, package asset-tree, and shared media-manifest validator",
+      "researcher_only": true
+    },
+    {
+      "path": "validator/run_validator.py",
+      "sha256": "4d82f8685c2cbf171caaf4045273896f7655549a959c6bb89989a9aa26c36e3f",
+      "purpose": "Target-bound hidden validator entrypoint",
+      "researcher_only": true
+    }
+  ],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "acceptance_criteria_sha256": "0f23e455f5b13dee9e897a16d86c6c228c700afd4ab81e5d9767b9fddadd1edb",
+    "harness": {
+      "language": "Python 3 stdlib platform-build/domain/runtime/generated-manifest and static-HTML validator",
+      "entrypoint": "validator/run_validator.py",
+      "build_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "build",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/build.json"
+      ],
+      "target_test_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "target",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/target.json"
+      ],
+      "regression_command": [
+        "{python}",
+        "{validator_root}/validator/run_validator.py",
+        "--component",
+        "regression",
+        "--repo",
+        "{repo}",
+        "--result",
+        "{repo}/.rq4-results/regression.json"
+      ],
+      "timeout_seconds": 90,
+      "network_policy": "DISABLED",
+      "fresh_workspace_required": true,
+      "machine_readable_result_path": ".rq4-results/{build,target,regression}.json"
+    },
+    "criterion_coverage": [
+      {
+        "criterion_id": "AC001",
+        "test_ids": [
+          "T004-AC001-OBS001"
+        ],
+        "observable_ids": [
+          "OBS001"
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "test_ids": [
+          "T004-AC002-OBS002"
+        ],
+        "observable_ids": [
+          "OBS002"
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "test_ids": [
+          "T004-AC003-OBS003"
+        ],
+        "observable_ids": [
+          "OBS003"
+        ]
+      }
+    ],
+    "result_contract": {
+      "components": [
+        "BUILD_PASS",
+        "TARGET_TEST_PASS",
+        "REGRESSION_PASS"
+      ],
+      "final_rule": "BUILD_PASS AND TARGET_TEST_PASS AND REGRESSION_PASS",
+      "harness_error_is_agent_failure": false
+    },
+    "calibration_contract": {
+      "pre_repo_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "FAIL"
+      },
+      "reference_expected": {
+        "build": "PASS",
+        "regression": "PASS",
+        "target_test": "PASS"
+      },
+      "adversarial_expected": "EVERY_PARTIAL_OR_MUTANT_FAILS_TARGET_OR_REGRESSION",
+      "actual_results_may_be_written_by_author": false
+    },
+    "implementation_independence": {
+      "no_llm_judge": true,
+      "no_network": true,
+      "no_reference_patch_comparison": true,
+      "no_gold_mapping_direct_score": true,
+      "no_unrequired_internal_structure_assertion": true
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "42204309",
+  "target_id": "42204309_T001",
+  "before_message_id": 21,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "b33d8022c866f519182a5be0f40000e88fb5a4b51a4707a7135583416f31af53",
+    "pre_repo_sha256": "c1bb9c76bb3e084b9c8e693278d21b9ab0f6a81266d6371b33db0f61fb4fe28a",
+    "target_manifest_sha256": "6df6a1a7440f46ae2e3bfc6d48d367afbd2f67d6cb535d3875358f26e0310b15",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "ENVIRONMENT_REPAIR_REQUIRED",
+      "rationale": "CurrentPrizeService exposes only prize_status, contribute, and draw. The target also requires referral mint rewards, two ticket counters, metadata visibility, no-referral allocation, and claim behavior, none of which has a public executable interface.",
+      "interfaces_inspected": [
+        "CurrentPrizeService.prize_status",
+        "CurrentPrizeService.contribute",
+        "CurrentPrizeService.draw",
+        "GET /api/prizes"
+      ],
+      "subjective_only": false,
+      "repair_requirements": [
+        "Add a deterministic mint/referral service with seeded eligible NFT owners.",
+        "Expose ticket balances, metadata, and claim state through public APIs.",
+        "Integrate prize contributions with mint events without reading current_state.py as the score."
+      ]
+    },
+    "downstream_disposition": "BLOCK_FOR_ENVIRONMENT_REPAIR",
+    "blocker_or_exclusion": {
+      "kind": "ENVIRONMENT_REPAIR_BLOCKER",
+      "reason_code": "NO_EXECUTABLE_BEHAVIOR_INTERFACE",
+      "evidence": [
+        "CurrentPrizeService exposes only prize_status, contribute, and draw.",
+        "The target also requires referral mint rewards, two ticket counters, metadata visibility, no-referral allocation, and claim behavior, none of which has a public executable interface."
+      ],
+      "missing_observables": [
+        "Referral-code mint and no-referral mint outcomes.",
+        "Independent Small/Big ticket balances and post-draw reset behavior.",
+        "NFT metadata counters and manual prize-claim behavior."
+      ],
+      "minimum_environment_repairs": [
+        "Add a deterministic mint/referral service with seeded eligible NFT owners.",
+        "Expose ticket balances, metadata, and claim state through public APIs.",
+        "Integrate prize contributions with mint events without reading current_state.py as the score."
+      ],
+      "reentry_condition": "Rebuild and re-triage the target after every listed public behavior surface is executable and frozen."
+    },
+    "acceptance_criteria": [],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_SMALL_BLOCK_PRIZE.attributes.draw_trigger",
+        "REQ_SMALL_BLOCK_PRIZE.attributes.secondary_royalties_contribute_to_pool",
+        "REQ_BIG_BLOCK_PRIZE.attributes.draw_condition",
+        "REQ_BIG_BLOCK_PRIZE.attributes.pool_target",
+        "REQ_BIG_BLOCK_PRIZE.attributes.secondary_royalties_contribute_to_pool",
+        "REQ_PRIZE_TICKET_LIFECYCLE.existence",
+        "REQ_PRIZE_CLAIM_FLOW.existence",
+        "REQ_CODED_REFERRAL_COMMISSION.existence",
+        "REQ_CODED_REFERRAL_TICKETS.existence",
+        "REQ_NO_REFERRAL_TICKETS.existence",
+        "REQ_NFT_METADATA_ACCURACY.existence"
+      ],
+      "covered_affected_gold_state_paths": [],
+      "preserved_requirement_refs": [
+        "REQ_PROJECT_BRANDING",
+        "REQ_MILESTONE_PARTNER_REWARDS"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "F001",
+          "severity": "BLOCKING",
+          "category": "ENVIRONMENT_GAP",
+          "evidence": "CurrentPrizeService exposes only prize_status, contribute, and draw. The target also requires referral mint rewards, two ticket counters, metadata visibility, no-referral allocation, and claim behavior, none of which has a public executable interface.",
+          "required_action": "Add a deterministic mint/referral service with seeded eligible NFT owners. Expose ticket balances, metadata, and claim state through public APIs. Integrate prize contributions with mint events without reading current_state.py as the score."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

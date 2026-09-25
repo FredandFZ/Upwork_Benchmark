@@ -1,0 +1,46 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T016",
+  "before_message_id": 309,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "8732842750fc06e7c6f691076757497951682a5be53f790ea97dbc0a442a479c",
+    "pre_repo_sha256": "7801337231a788d539e16e2b5ec6959578c3215aa99e497818d4563d60631bbf",
+    "target_manifest_sha256": "25d6bc30099e5fee5f5e3ff78b316e43a4ec05315d76dba4f20c74b2b690bd19",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {"determination": "DETERMINISTIC_OBSERVABLE", "rationale": "The client explicitly permits two schematic outcomes. The actual SDA/SCL graph can deterministically satisfy either an absent-resistor/direct-connection branch or a populated-pair/44-ohm series branch. The subjective phrase 'not obstructing anything' and external cable length are not separately scored.", "interfaces_inspected": ["dist/design.kicad_sch I2C graph", "dist/design.kicad_pcb resistor footprints and courtyards", "src/artifact_model.py:ARTIFACT_MODEL.nets"], "subjective_only": false, "repair_requirements": []},
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001", "scope": "TARGET_BEHAVIOR", "statement": "The main-board SDA and SCL paths implement exactly one of two allowed topologies: (A) no populated series resistors and direct controller-to-bus connectivity on each signal, or (B) exactly one populated 44 Ω resistor in each signal path, with no bypass and a matching PCB footprint for both resistors.",
+        "gold_requirement_refs": ["REQ_I2C_BUS_ELECTRICAL", "REQ_MAIN_I2C_SIGNAL_CONDITIONING"],
+        "gold_state_paths": ["REQ_I2C_BUS_ELECTRICAL.attributes.i2c_series_resistors", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_population_policy", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_purpose", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_value"],
+        "evidence_message_ids": [309],
+        "observables": [{"observable_id": "OBS001", "type": "ARTIFACT", "surface": "dist/design.kicad_sch and dist/design.kicad_pcb main-board I2C paths", "setup": ["Build both KiCad artifacts and identify controller SDA/SCL pins plus downstream bus endpoints."], "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_sch and dist/design.kicad_pcb", "parameters": {"evaluate_allowed_topologies": ["direct_no_series_components", "one_44ohm_series_component_per_signal"]}}], "expected_observations": [
+          {"subject": "allowed I2C series-resistor topology predicate", "operator": "EQUALS", "expected": true},
+          {"subject": "SDA/SCL asymmetry in selected branch", "operator": "COUNT_EQUALS", "expected": 0},
+          {"subject": "bypass paths when populated-resistor branch is selected", "operator": "COUNT_EQUALS", "expected": 0},
+          {"subject": "selected branch PCB/schematic reference mismatches", "operator": "COUNT_EQUALS", "expected": 0}
+        ], "determinism_controls": ["Determine presence from populated schematic references joined to PCB footprints, respecting DNP fields.", "Evaluate both signals under the same branch.", "Do not accept a textual optionality flag without matching connectivity."]}],
+        "negative_cases": [{"case_id": "NC001", "setup": ["Only SDA has a 44 Ω resistor or SCL has a different value."], "action": "Evaluate the symmetric allowed-topology predicate.", "expected_failure_or_absence": "The criterion fails."}, {"case_id": "NC002", "setup": ["44 Ω resistors are populated but bypassed by same-net wiring."], "action": "Search graph paths excluding resistor edges.", "expected_failure_or_absence": "The criterion fails."}]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_I2C_BUS_ELECTRICAL.attributes.i2c_series_resistors", "REQ_I2C_BUS_ELECTRICAL.attributes.interboard_cable_length", "REQ_I2C_BUS_ELECTRICAL.attributes.power_board_i2c_series_resistors", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_population_policy", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_purpose", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_value"],
+      "covered_affected_gold_state_paths": ["REQ_I2C_BUS_ELECTRICAL.attributes.i2c_series_resistors", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_population_policy", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_purpose", "REQ_MAIN_I2C_SIGNAL_CONDITIONING.attributes.series_resistor_value"],
+      "preserved_requirement_refs": ["REQ_INTERBOARD_POWER_SIGNAL_LINKS", "REQ_MAIN_GPIO_ASSIGNMENTS"],
+      "uncovered_items": [
+        {"finding_id": "T016-GAP-001", "severity": "INFO", "category": "MISSING_COVERAGE", "evidence": "The 20-40 cm cable length is an external system assumption, not an observable property of the PCB build artifact.", "required_action": "Keep it out of automated PCB scoring unless a system fixture or cable BOM is introduced."},
+        {"finding_id": "T016-GAP-002", "severity": "MEDIUM", "category": "OTHER", "evidence": "The message discusses optional 44 Ω main-board resistors but does not clearly revoke the earlier explicit instruction to retain separate power-board 0 Ω resistors.", "required_action": "Do not score removal of the power-board 0 Ω pair without independent requirement-resolution review."}
+      ]
+    }
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

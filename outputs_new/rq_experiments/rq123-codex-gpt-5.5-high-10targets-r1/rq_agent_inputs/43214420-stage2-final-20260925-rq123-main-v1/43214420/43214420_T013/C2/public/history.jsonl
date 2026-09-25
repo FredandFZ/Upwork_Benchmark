@@ -1,0 +1,31 @@
+{"message_id":14,"created_ts":null,"speaker":"freelancer","text":"One point I’m uncertain about is the boost converter: is the plan to disable it through the EN pin to prevent battery drain?","milestone":null}
+{"message_id":16,"created_ts":null,"speaker":"client","text":"By battery protection, are you referring to a hard short circuit across the battery terminals? Overcharge is already handled by the AXP2101, which cuts off at 4.45V, and its overdischarge cutoff is configurable at about ~2.4V. As for NTC, yes, we should add it to J\\_BAT.","milestone":null}
+{"message_id":19,"created_ts":null,"speaker":"client","text":"For the boost converter, connect EN to GPIO3 rather than tying it HIGH, so I can switch it off and on programmatically.","milestone":null}
+{"message_id":25,"created_ts":null,"speaker":"freelancer","text":"In that case, adding a pull-down resistor to the boost converter’s EN pin might be better.","milestone":null}
+{"message_id":26,"created_ts":null,"speaker":"client","text":"All your suggested updates are being incorporated into the v8 I’m preparing, and I’ll take the pull-down proposal into account as well. Thanks.","milestone":null}
+{"message_id":27,"created_ts":null,"speaker":"client","text":"A 330kΩ pull-down has now been placed on MT3608 EN.","milestone":null}
+{"message_id":29,"created_ts":null,"speaker":"freelancer","text":"Until the ESP32 enables it, the boost converter will therefore remain off.","milestone":null}
+{"message_id":30,"created_ts":null,"speaker":"client","text":"Yes—the boost converter supplies the sensors that require 5V.","milestone":null}
+{"message_id":31,"created_ts":null,"speaker":"client","text":"Those sensors will operate only periodically rather than running continuously.","milestone":null}
+{"message_id":66,"created_ts":null,"speaker":"client","text":"Plugging it in with this orientation would prevent me from connecting the battery underneath.","milestone":null}
+{"message_id":68,"created_ts":null,"speaker":"freelancer","text":"Vertically, like those green PCBs?","milestone":null}
+{"message_id":69,"created_ts":null,"speaker":"client","text":"Ideally, the battery JST would sit next to the board JST, with both vertical, as shown in AM\\_1.","milestone":null}
+{"message_id":72,"created_ts":null,"speaker":"client","text":"This arrangement is perfect provided it fits, leaves at least a small gap between the connectors, and does not cover the holes.","milestone":null}
+{"message_id":75,"created_ts":null,"speaker":"freelancer","text":"There is not enough room for the connectors to fit within 68mm.","milestone":null}
+{"message_id":76,"created_ts":null,"speaker":"freelancer","text":"With holes","milestone":null}
+{"message_id":77,"created_ts":null,"speaker":"client","text":"Given that fit issue, the battery connector can instead go on the back, opposite the usb-c.","milestone":null}
+{"message_id":83,"created_ts":null,"speaker":"client","text":"After looking into it, I think a 2.0mm JST-PH with 3 pins would be better, carrying GND, VCC, and NTC. Is that possible to implement?","milestone":null}
+{"message_id":84,"created_ts":null,"speaker":"client","text":"Most batteries are supplied with that connector, so the specification in my document was a mistake.","milestone":null}
+{"message_id":85,"created_ts":null,"speaker":"client","text":"Using the same connector family everywhere was my original intention, but making the battery follow that rule does not make sense.","milestone":null}
+{"message_id":87,"created_ts":null,"speaker":"freelancer","text":"JST-PH connectors are also what the batteries use.","milestone":null}
+{"message_id":90,"created_ts":null,"speaker":"client","text":"The battery is the sole exception and must use PH because that is the standard.","milestone":null}
+{"message_id":94,"created_ts":null,"speaker":"freelancer","text":"Would this candidate be suitable?\n<https://www.lcsc.com/product-detail/C157929.html?s_z=n_JST-PH%25202.0mm>","milestone":null}
+{"message_id":95,"created_ts":null,"speaker":"freelancer","text":"Here is another candidate connector to consider:\n<https://www.lcsc.com/product-detail/C265101.html?s_z=n_JST%2520S3B-PH-SM4-TB%28LF%29%28SN%29>","milestone":null}
+{"message_id":96,"created_ts":null,"speaker":"client","text":"The proposed battery connector is correct. Since my research suggests that a 13-pin connector is difficult to source, should we split the 13-pin interboard connection into separate power and signal connectors while we are updating them?","milestone":null}
+{"message_id":97,"created_ts":null,"speaker":"client","text":"An SMD implementation would be preferable for the PH connector.","milestone":null}
+{"message_id":225,"created_ts":null,"speaker":"freelancer","text":"I think I may have mislabeled the battery-connector port in one of the pictures I sent on 2031-06-15.","milestone":null}
+{"message_id":228,"created_ts":null,"speaker":"client","text":"Until we design the main board that connects to this board, the difference is not a problem because we can compensate for it on the main board.","milestone":null}
+{"message_id":229,"created_ts":null,"speaker":"client","text":"Sorry, I realized the battery connection goes directly to the battery. What is the correct battery pinout, and is this connection last, so I can update my documentation?","milestone":null}
+{"message_id":254,"created_ts":null,"speaker":"freelancer","text":"Tomas, the BAT54 specified for the Main PCB power supply is a signal diode, so it is not intended for that application.","milestone":null}
+{"message_id":255,"created_ts":null,"speaker":"client","text":"That component was merely something I had available for testing and is probably unsuitable, so please select the correct ones.","milestone":null}
+{"message_id":259,"created_ts":null,"speaker":"client","text":"Thanks for checking. I originally intended it for debugging, but that LDO will not let me debug the sensors. Could we use something like ME6211A33M5 instead—what do you think?","milestone":null}

@@ -15,6 +15,7 @@ from .alignment import (
 from .state import (
     STATE_DIMENSIONS,
     StateEvaluationError,
+    build_field_alignment_request as build_state_field_alignment_request,
     build_semantic_fact_request,
     score_state,
     validate_semantic_fact_response,
@@ -22,7 +23,7 @@ from .state import (
 
 
 AGENT_RESPONSE_SCHEMA_VERSION = "rq2-agent-response-v3"
-EVALUATION_RESULT_SCHEMA_VERSION = "rq2-evaluation-result-v1"
+EVALUATION_RESULT_SCHEMA_VERSION = "rq2-evaluation-result-v2"
 AGGREGATE_RESULT_SCHEMA_VERSION = "rq2-aggregate-result-v1"
 
 
@@ -207,6 +208,8 @@ def _matched_state_pairs(
                 "prediction_ref": row["prediction_ref"],
                 "gold_ref": row["gold_ref"],
                 "gold_requirement_id": requirement_id,
+                "predicted_requirement_summary": prediction["requirement_summary"],
+                "gold_requirement_summary": gold["requirement_summaries"][requirement_id],
                 "gold_state": gold["states"][requirement_id],
                 "predicted_state": prediction["pre_task_state"],
                 "scoring_specs": gold["field_scoring_specs"][requirement_id],
@@ -223,6 +226,7 @@ def build_state_semantic_request(
     instance: Mapping[str, Any],
     response: Mapping[str, Any],
     alignment_response: Mapping[str, Any],
+    field_alignment_response: Mapping[str, Any],
     *,
     condition: str,
 ) -> dict[str, Any]:
@@ -233,6 +237,24 @@ def build_state_semantic_request(
         target_id=instance.get("target_id"),
         purpose=f"RQ2_STATE_FACT_EQUIVALENCE_{condition}",
         state_pairs=pairs,
+        field_alignment_response=field_alignment_response,
+    )
+
+
+def build_field_alignment_request(
+    instance: Mapping[str, Any],
+    response: Mapping[str, Any],
+    alignment_response: Mapping[str, Any],
+    *,
+    condition: str,
+) -> dict[str, Any]:
+    pairs, _ = _matched_state_pairs(
+        instance, response, alignment_response, condition=condition
+    )
+    return build_state_field_alignment_request(
+        target_id=instance.get("target_id"),
+        purpose=f"RQ2_ATTRIBUTE_FIELD_ALIGNMENT_{condition}",
+        state_pairs=pairs,
     )
 
 
@@ -240,6 +262,7 @@ def score_rq2(
     instance: Mapping[str, Any],
     response: Mapping[str, Any],
     alignment_response: Mapping[str, Any],
+    field_alignment_response: Mapping[str, Any],
     semantic_response: Mapping[str, Any],
     *,
     condition: str,
@@ -248,10 +271,16 @@ def score_rq2(
     pairs, alignment = _matched_state_pairs(
         instance, response, alignment_response, condition=condition
     )
+    field_request = build_state_field_alignment_request(
+        target_id=instance.get("target_id"),
+        purpose=f"RQ2_ATTRIBUTE_FIELD_ALIGNMENT_{condition}",
+        state_pairs=pairs,
+    )
     semantic_request = build_semantic_fact_request(
         target_id=instance.get("target_id"),
         purpose=f"RQ2_STATE_FACT_EQUIVALENCE_{condition}",
         state_pairs=pairs,
+        field_alignment_response=field_alignment_response,
     )
     semantic_relations = validate_semantic_fact_response(
         semantic_request, semantic_response
@@ -266,6 +295,8 @@ def score_rq2(
                 predicted_state=pair["predicted_state"],
                 scoring_specs=pair["scoring_specs"],
                 semantic_relations=semantic_relations,
+                field_alignment_request=field_request,
+                field_alignment_response=field_alignment_response,
             ),
         }
         for pair in pairs
@@ -309,6 +340,7 @@ def score_rq2(
         "diagnostics": {
             "gold_status": gold.get("status"),
             "semantic_fact_count": len(semantic_request["facts"]),
+            "field_alignment_candidate_count": len(field_request["candidate_pairs"]),
         },
     }
 
@@ -426,6 +458,7 @@ __all__ = [
     "RQ2EvaluationError",
     "aggregate_rq2_results",
     "build_alignment_request",
+    "build_field_alignment_request",
     "build_state_semantic_request",
     "score_rq2",
     "score_rq2_constant_state_baseline",

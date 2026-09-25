@@ -160,9 +160,18 @@ def aggregate_run_tree(
             projects[(*key, project_id)].append(score)
             source = manifest.get("source_instances", {}).get(rq_id, {})
             if isinstance(source, Mapping) and isinstance(source.get("path"), str):
+                source_path = Path(source["path"])
+                if not source_path.is_absolute():
+                    source_path = (run_dir / source_path).resolve()
+                    try:
+                        source_path.relative_to(run_dir.resolve())
+                    except ValueError as exc:
+                        raise RQAggregationError(
+                            f"relative source instance escapes run directory: {source_path}"
+                        ) from exc
                 source_instances.setdefault(
                     (rq_id, str(manifest.get("target_id"))),
-                    read_json_object(source["path"]),
+                    read_json_object(source_path),
                 )
     if not groups:
         raise RQAggregationError(f"no scored v2 runs found below {root}")

@@ -1,0 +1,295 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T002",
+  "before_message_id": 25,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "8703504bd4f54ddf1bb275c2870e37a56ee621a1e1245608c2eac4b86df43073",
+    "pre_repo_sha256": "ef8f2b4b209c4906aaf6a81e1614f5389c235f198c8edaee102f74cd59e98818",
+    "target_manifest_sha256": "2e00c6024bdbaf1c9916db51c454effb5ffc816b57816c22121ab198bf93aa8c",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The local website and workspace shell expose routes, DOM, fixed viewports, and generated styling artifacts sufficient to test the four explicit planning outcomes.",
+      "interfaces_inspected": [
+        "GET /api/pages",
+        "GET /api/ui-shell",
+        "built landing page",
+        "generated responsive stylesheet"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The landing page remains usable without horizontal overflow at the frozen desktop, tablet, and mobile viewports.",
+        "gold_requirement_refs": [
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT"
+        ],
+        "gold_state_paths": [
+          "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT.existence"
+        ],
+        "evidence_message_ids": [
+          25
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_RESPONSIVE",
+            "surface": "landing page",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "landing page",
+                "parameters": {}
+              },
+              {
+                "operation": "RESIZE_VIEWPORT",
+                "target": "landing page",
+                "parameters": {
+                  "viewports": [
+                    [
+                      1440,
+                      900
+                    ],
+                    [
+                      768,
+                      1024
+                    ],
+                    [
+                      390,
+                      844
+                    ]
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "document scroll width at every viewport",
+                "operator": "LESS_THAN_OR_EQUAL",
+                "expected": "viewport width"
+              },
+              {
+                "subject": "primary content visibility at every viewport",
+                "operator": "EQUALS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use frozen Chromium, device scale factor 1, fixed fonts, and disabled animations."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "Website pages use a page-assigned light or dark style and do not expose a user theme switch.",
+        "gold_requirement_refs": [
+          "REQ_WEBSITE_PAGE_THEME"
+        ],
+        "gold_state_paths": [
+          "REQ_WEBSITE_PAGE_THEME.existence",
+          "REQ_WEBSITE_PAGE_THEME.attributes.user_switchable_theme"
+        ],
+        "evidence_message_ids": [
+          25
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "website page theme controls",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "representative website pages",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "theme switch controls",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "page theme marker",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "user-switchable theme control",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Open a representative website page."
+            ],
+            "action": "Search buttons, switches, menus, and keyboard-focusable controls for a theme toggle.",
+            "expected_failure_or_absence": "No user-operable light/dark switch exists."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The project exposes reusable responsive breakpoint rules that are applied to the built landing page.",
+        "gold_requirement_refs": [
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE"
+        ],
+        "gold_state_paths": [
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.existence",
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.attributes.responsive_behavior_guidance"
+        ],
+        "evidence_message_ids": [
+          25
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "built CSS or design-system breakpoint artifact",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "responsive stylesheet or design-system output",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "declared responsive breakpoint rules",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "rules referenced by landing-page build",
+                "operator": "EQUALS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC004",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The workspace output includes both the shell container and a distinct main canvas region.",
+        "gold_requirement_refs": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "gold_state_paths": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.canvas_design"
+        ],
+        "evidence_message_ids": [
+          25
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS004",
+            "type": "FRONTEND_DOM",
+            "surface": "workspace shell",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "workspace shell",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "shell container and main canvas",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "shell container",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "main canvas",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT.existence",
+        "REQ_WEBSITE_PAGE_THEME.existence",
+        "REQ_WEBSITE_PAGE_THEME.attributes.user_switchable_theme",
+        "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.existence",
+        "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.attributes.responsive_behavior_guidance",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.canvas_design"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_LANDING_PAGE_RESPONSIVE_LAYOUT.existence",
+        "REQ_WEBSITE_PAGE_THEME.existence",
+        "REQ_WEBSITE_PAGE_THEME.attributes.user_switchable_theme",
+        "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.existence",
+        "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.attributes.responsive_behavior_guidance",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.canvas_design"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

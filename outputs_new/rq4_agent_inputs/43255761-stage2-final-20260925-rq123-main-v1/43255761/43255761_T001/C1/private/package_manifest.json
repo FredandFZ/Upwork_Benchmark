@@ -1,0 +1,219 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_5c33f1771a27f0efe125",
+  "input_release": "43255761-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T001",
+  "target_fingerprint": "4a88fac306c5ee33b59c1b48f2806164b0bf020a42d3f7072bdac4c46c06f705",
+  "condition": "C1",
+  "turns": 78,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ1\\43255761_T001_RQ1.json",
+      "file_sha256": "bd40ceddfb6e2067c69bc038f31b8da15a12aa77f2d89f07576383b5e83dae4d",
+      "content_sha256": "e0c278500a74915e3d5849d39c073607883f41ce36c4c2946713be9f155e7884"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ2\\43255761_T001_RQ2.json",
+      "file_sha256": "77cbaf5684f084e9f354eb704719d12964d9cd523163bfe5cc492641729d3cfb",
+      "content_sha256": "2e8c18ab30aa4c051eb5ce60e38945be4b8256b18815a64c5ddcb60159314d15"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ3\\43255761_T001_RQ3.json",
+      "file_sha256": "703aae92128ae6a015346ea8efcf34983816ccf49222292c6889d40e628d9078",
+      "content_sha256": "139f15f6ee687c0d7be3621fe9fd7360d95540ba5e9e64590047784d173485a4"
+    }
+  },
+  "public_files": {
+    "task.json": "2bbc23849c61fe987c5a666bcf5e0841730e06742aac0a37a4f60e17cc5c2138",
+    "history.jsonl": "290f33eb9432c9cea6b9a775c432649a969045d4aa38ac9679e556a424279b13",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43255761/targets/T001_before_79/pre_repo.zip",
+    "archive_sha256": "c8f7b7c0e66b343df697dfe355aed0933e5d0a7a58f6e1765f562402656ea669",
+    "tree_sha256": "3c02617b91b3bf4db00b33a42add89d59cf43ed54e4ff5dfc1f597c62299b95e",
+    "manifest_path": "Code Environment/43255761/targets/T001_before_79/manifest.json",
+    "manifest_sha256": "dc943da8bbf4d9c1c8cc3faca4b67ee10cbed780f02cd877a1bae5b872b1bcbb",
+    "before_message_id": 79,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The built DOCX defines one paragraph style whose displayed name is exactly 'caption text'; the style specifies Century Gothic, italic, 11 pt text with 15 pt line spacing.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx!/word/styles.xml",
+            "setup": [
+              "Build dist/template.docx in a fresh network-disabled workspace."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "parts": [
+                    "word/styles.xml"
+                  ],
+                  "namespace": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "paragraph styles with normalized w:name/@w:val equal to 'caption text'",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "caption text effective run font",
+                "operator": "EQUALS",
+                "expected": "Century Gothic"
+              },
+              {
+                "subject": "caption text effective italic flag",
+                "operator": "EQUALS",
+                "expected": true
+              },
+              {
+                "subject": "caption text effective size in half-points",
+                "operator": "EQUALS",
+                "expected": 22
+              },
+              {
+                "subject": "caption text effective line spacing in twentieths of a point",
+                "operator": "EQUALS",
+                "expected": 300
+              }
+            ],
+            "determinism_controls": [
+              "Use namespace-aware XML parsing and resolve basedOn inheritance before comparing effective properties.",
+              "Match the displayed style name exactly after XML entity decoding; do not inspect source-code literals."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "A DOCX contains the text 'caption text' only in a body paragraph."
+            ],
+            "action": "Parse word/styles.xml and resolve paragraph styles.",
+            "expected_failure_or_absence": "The criterion fails because no paragraph style has that displayed name."
+          },
+          {
+            "case_id": "NC002",
+            "setup": [
+              "A style named 'caption text' exists but uses default typography."
+            ],
+            "action": "Resolve its effective run and paragraph properties.",
+            "expected_failure_or_absence": "The criterion fails on font, italic, size, or line spacing."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Image-label and table-label paragraphs in the built DOCX both reference the paragraph style whose displayed name is 'caption text'.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx!/word/document.xml",
+            "setup": [
+              "Build the frozen image-caption and table-caption fixture into dist/template.docx."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "parts": [
+                    "word/document.xml",
+                    "word/styles.xml"
+                  ],
+                  "fixtures": [
+                    "image_label",
+                    "table_label"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "image-label fixture effective paragraph style name",
+                "operator": "EQUALS",
+                "expected": "caption text"
+              },
+              {
+                "subject": "table-label fixture effective paragraph style name",
+                "operator": "EQUALS",
+                "expected": "caption text"
+              }
+            ],
+            "determinism_controls": [
+              "Identify fixture paragraphs by frozen semantic bookmarks/content-control tags rather than paragraph order.",
+              "Resolve w:pStyle IDs through word/styles.xml before comparing displayed names."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC003",
+            "setup": [
+              "The caption style exists but neither caption fixture references it."
+            ],
+            "action": "Resolve effective paragraph styles for both fixtures.",
+            "expected_failure_or_absence": "The criterion fails; an unused style declaration is insufficient."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "d557107a753c5013eb2dd75d81396e0eefd9760e013dfc88a164f9b889fe9c45",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

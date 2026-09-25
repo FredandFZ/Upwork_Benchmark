@@ -1,0 +1,211 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_ca43768dd1562c718d5a",
+  "input_release": "42204309-stage2-final-20260925-rq123-main-v1",
+  "project_id": "42204309",
+  "target_id": "42204309_T032",
+  "target_fingerprint": "140b1851c6ab2aeec1fdfa85a0f1baeabd4bcf35a46780dad20e783df50895c7",
+  "condition": "C2",
+  "turns": 741,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\42204309\\RQ1\\42204309_T032_RQ1.json",
+      "file_sha256": "5b54e258a44ff354f2b9065a3b373893040283a5e947b81b0aa3a147227bb297",
+      "content_sha256": "1167cf9162526c7bdf6764ecdd895e811bf4fc52ee4c54bf10f47b3cf6c64f0a"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\42204309\\RQ2\\42204309_T032_RQ2.json",
+      "file_sha256": "c5458467dce1d5ccfd1aa9a64b8c5bc83807caa6a0bb9c3d8c402a732f32e38d",
+      "content_sha256": "9b4e3612a6ac464c6e2875b6cc7f53e6c895f95e6345bc4492d37ebc5f9f2261"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\42204309\\RQ3\\42204309_T032_RQ3.json",
+      "file_sha256": "b759dba547efe4c377062dbb9a9311e5e8b5af5eff47f25a293d607e2218fc96",
+      "content_sha256": "297b8ba05b73e49d84857848222ba02d753373baab1f32068d8a2f2e9d54b3dc"
+    }
+  },
+  "public_files": {
+    "task.json": "0164dc930f7537045bdcb9b885256ba6a7654a3e684bf6968e94637ac4d30ae9",
+    "history.jsonl": "696ba9681040aecaa96f480c71949eedb11ae3cd327253eea2fee7ce86a9be99",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/42204309/targets/T032_before_742/pre_repo.zip",
+    "archive_sha256": "d327335706f1d3c3f045daed4190505177d77447261504487ec99f23879f2a13",
+    "tree_sha256": "59972b4f0682e0043f7111ccae59f24d8f3d6fc3ed8fc8611e7d060d4d952258",
+    "manifest_path": "Code Environment/42204309/targets/T032_before_742/manifest.json",
+    "manifest_sha256": "6bfa13843ad78b39192df9a6ea94a52bb5b7626cf4282e51aeb7fb62d5e8f121",
+    "before_message_id": 742,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The post-confirmation success feedback for a no-referral mint contains the random-holder reminder.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "mint form result after a no-referral mint",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "mint page",
+                "parameters": {}
+              },
+              {
+                "operation": "SUBMIT",
+                "target": "mint form",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": ""
+                }
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "post-confirmation success feedback",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "feedback timing",
+                "operator": "EQUALS",
+                "expected": "after confirmed mint"
+              },
+              {
+                "subject": "random-holder reminder",
+                "operator": "CONTAINS",
+                "expected": "No referral code used"
+              },
+              {
+                "subject": "random ticket and commission recipient wording",
+                "operator": "CONTAINS",
+                "expected": "at random"
+              }
+            ],
+            "determinism_controls": [
+              "Use the local fetch/application bridge and a fixed confirmed-mint fixture."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "Success feedback for a coded-referral mint does not show the no-referral random-holder reminder; if one shared message is used, it is generic, otherwise a referral-specific variant is used.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "mint success feedback variants",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "register_referral",
+                "parameters": {
+                  "owner": "owner",
+                  "code": "CODE"
+                }
+              },
+              {
+                "operation": "OPEN_PAGE",
+                "target": "mint page",
+                "parameters": {}
+              },
+              {
+                "operation": "SUBMIT",
+                "target": "mint form",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": "CODE"
+                }
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "post-confirmation success feedback",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "no-referral random-holder reminder",
+                "operator": "ABSENT",
+                "expected": true
+              },
+              {
+                "subject": "feedback variant classification",
+                "operator": "MATCHES_REGEX",
+                "expected": "^(generic|coded-referral-specific)$"
+              }
+            ],
+            "determinism_controls": [
+              "Use the same frozen browser and confirmed-mint fixture as OBS001."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Register a valid referral and complete a confirmed mint with it."
+            ],
+            "action": "Inspect the visible success feedback.",
+            "expected_failure_or_absence": "The no-referral random-holder reminder is absent."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "8911bfeb05103168bc4e5b6f40af27eda014b20d65a5082b042fb4ece97fa40c",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

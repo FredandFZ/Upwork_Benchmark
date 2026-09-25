@@ -1,0 +1,247 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_00cc52394280cf18cc9f",
+  "input_release": "43772711-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T001",
+  "target_fingerprint": "eb598b7bd9e978a0a7233260160b34b9b0ef8afbaf5f3b2a2e0201d6646f9104",
+  "condition": "C1",
+  "turns": 5,
+  "difficulty": "SHORT",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43772711\\RQ1\\43772711_T001_RQ1.json",
+      "file_sha256": "63a92d86e226bed595e19a860c617c9d9fad1eb7f7ffc3e0a088549311bcf7fd",
+      "content_sha256": "1f8d9d7f4a8176f0b45b2f4b35cdd9104e2ffba438fc9e2422c6a4f794d385d2"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43772711\\RQ2\\43772711_T001_RQ2.json",
+      "file_sha256": "6505e4399fa6802bcbc8700262f8af5be95a6029fbe3b87e1e19071c64717cd8",
+      "content_sha256": "87ce5b4245c2387f4a0369f6ac635ae4961973a582cc1866e47bb8d84220feac"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43772711\\RQ3\\43772711_T001_RQ3.json",
+      "file_sha256": "9a38474d1843caee74399463145dc0cb988898aadd6226be77951a6e3de718b5",
+      "content_sha256": "1a55f1107813a4c08639e5987b072130be2c084a8ca1a0707e3642e5b2c42474"
+    }
+  },
+  "public_files": {
+    "task.json": "dfc54b5c0640923aea49e7c946e1209636c2972a04b0e74d2eaf5986c50d797c",
+    "history.jsonl": "154adc14b9141b13e1b4d689ce34640d2e134f61ad2d24e392ca6bec06b2f10d",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43772711/targets/T001_before_6/pre_repo.zip",
+    "archive_sha256": "08af3351004af5e21ee88438018c5be27418969173c2500568645ce947e387e3",
+    "tree_sha256": "73b082282f35339f82d81bd86134e2253bdf5fa612c04bc8fa9217e75a4a325a",
+    "manifest_path": "Code Environment/43772711/targets/T001_before_6/manifest.json",
+    "manifest_sha256": "a8f413418b996a72860c764fe0a19aaff74f71de33389e1dacf74f4fb4f2a1e5",
+    "before_message_id": 6,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The workspace shell exposes a header, side navigation panel, footer, and main canvas as distinct public UI regions.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_DOM",
+            "surface": "built workspace shell",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "workspace shell",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "header, navigation, main, footer",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "landmark header",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark side navigation",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark main canvas",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark footer",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Both light and dark shell modes can be selected through the public shell interaction while preserving all shell regions.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "PATCH /api/ui-shell/theme and built shell",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/ui-shell/theme",
+                "parameters": {
+                  "method": "PATCH",
+                  "json": {
+                    "theme": "light"
+                  }
+                }
+              },
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/ui-shell/theme",
+                "parameters": {
+                  "method": "PATCH",
+                  "json": {
+                    "theme": "dark"
+                  }
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "light selection response theme",
+                "operator": "EQUALS",
+                "expected": "light"
+              },
+              {
+                "subject": "dark selection response theme",
+                "operator": "EQUALS",
+                "expected": "dark"
+              },
+              {
+                "subject": "shell landmarks after each selection",
+                "operator": "COUNT_EQUALS",
+                "expected": 4
+              }
+            ],
+            "determinism_controls": [
+              "Reset application state between theme cases.",
+              "Use the frozen local browser and disable animations."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Header, side navigation, and footer have explicit font, color, and icon treatments in each supported theme.",
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "FRONTEND_DOM",
+            "surface": "computed styles and icons for shell regions",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "workspace shell",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "shell regions in light and dark themes",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "computed font-family for every shell region",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "computed foreground/background color for every shell region",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "icon element or accessible icon label in header/navigation/footer",
+                "operator": "EXISTS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use one frozen Chromium build and fixed fonts.",
+              "Evaluate both themes at 1440x900."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "56e4f006083d1438380798c55f57598689a11a43ca10a64e34ec12f2e94fe9fd",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rq4-calibration-spec-v1",
+  "title": "Frozen ReqMemBench RQ4 calibration specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "project_id",
+    "target_id",
+    "validator_id",
+    "acceptance_criteria_sha256",
+    "validator_files",
+    "commands",
+    "timeout_seconds",
+    "network_policy",
+    "fresh_workspace_required",
+    "environment_allowlist",
+    "calibration_inputs"
+  ],
+  "properties": {
+    "schema_version": {"const": "rq4-calibration-spec-v1"},
+    "status": {"const": "FROZEN"},
+    "project_id": {"type": "string", "minLength": 1},
+    "target_id": {"type": "string", "minLength": 1},
+    "validator_id": {"type": "string", "minLength": 1},
+    "acceptance_criteria_sha256": {"$ref": "#/$defs/sha256"},
+    "validator_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/file"}
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["build", "target_test", "regression"],
+      "properties": {
+        "build": {"$ref": "#/$defs/command"},
+        "target_test": {"$ref": "#/$defs/command"},
+        "regression": {"$ref": "#/$defs/command"}
+      }
+    },
+    "timeout_seconds": {"type": "integer", "minimum": 1},
+    "network_policy": {"const": "DISABLED"},
+    "fresh_workspace_required": {"const": true},
+    "environment_allowlist": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "calibration_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pre_repo", "reference_delivery", "partial_deliveries"],
+      "properties": {
+        "pre_repo": {"$ref": "#/$defs/archive"},
+        "reference_delivery": {"$ref": "#/$defs/archive"},
+        "partial_deliveries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "allOf": [
+              {"$ref": "#/$defs/archive"},
+              {
+                "type": "object",
+                "required": ["delivery_id", "expected_result"],
+                "properties": {
+                  "delivery_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+                  },
+                  "expected_result": {
+                    "enum": [
+                      "TARGET_TEST_FAIL",
+                      "REGRESSION_FAIL",
+                      "TARGET_OR_REGRESSION_FAIL"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "archive": {
+      "type": "object",
+      "required": ["archive_sha256"],
+      "properties": {
+        "archive_sha256": {"$ref": "#/$defs/sha256"},
+        "tree_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

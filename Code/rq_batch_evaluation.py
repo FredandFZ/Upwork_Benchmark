@@ -10,9 +10,11 @@ try:  # Package import in tests; script import in CLIs.
     from .evaluation.rq1 import build_alignment_request as build_rq1_alignment
     from .evaluation.rq1 import score_rq1
     from .evaluation.rq2 import build_alignment_request as build_rq2_alignment
+    from .evaluation.rq2 import build_field_alignment_request as build_rq2_field_alignment
     from .evaluation.rq2 import build_state_semantic_request as build_rq2_semantic
     from .evaluation.rq2 import score_rq2
     from .evaluation.rq3 import build_alignment_request as build_rq3_alignment
+    from .evaluation.rq3 import build_field_alignment_request as build_rq3_field_alignment
     from .evaluation.rq3 import (
         build_clarification_semantic_request as build_rq3_clarification_semantic,
     )
@@ -34,9 +36,11 @@ except ImportError:  # pragma: no cover
     from evaluation.rq1 import build_alignment_request as build_rq1_alignment
     from evaluation.rq1 import score_rq1
     from evaluation.rq2 import build_alignment_request as build_rq2_alignment
+    from evaluation.rq2 import build_field_alignment_request as build_rq2_field_alignment
     from evaluation.rq2 import build_state_semantic_request as build_rq2_semantic
     from evaluation.rq2 import score_rq2
     from evaluation.rq3 import build_alignment_request as build_rq3_alignment
+    from evaluation.rq3 import build_field_alignment_request as build_rq3_field_alignment
     from evaluation.rq3 import (
         build_clarification_semantic_request as build_rq3_clarification_semantic,
     )
@@ -84,12 +88,22 @@ def _verified_agent_response(run_dir: Path, manifest: Mapping[str, Any]) -> dict
     return read_json_object(response_path)
 
 
-def _source_instance(manifest: Mapping[str, Any], rq_id: str) -> dict[str, Any]:
+def _source_instance(
+    manifest: Mapping[str, Any], rq_id: str, *, run_dir: Path
+) -> dict[str, Any]:
     sources = manifest.get("source_instances")
     record = sources.get(rq_id) if isinstance(sources, Mapping) else None
     if not isinstance(record, Mapping) or not isinstance(record.get("path"), str):
         raise RQBatchEvaluationError(f"run manifest has no {rq_id} source instance")
     path = Path(record["path"])
+    if not path.is_absolute():
+        path = (run_dir / path).resolve()
+        try:
+            path.relative_to(run_dir.resolve())
+        except ValueError as exc:
+            raise RQBatchEvaluationError(
+                f"{rq_id} relative source instance escapes run directory"
+            ) from exc
     if file_sha256(path) != record.get("file_sha256"):
         raise RQBatchEvaluationError(f"{rq_id} source instance hash mismatch")
     return read_json_object(path)
@@ -178,7 +192,7 @@ async def evaluate_frozen_run(
     }
 
     if "RQ1" in active:
-        instance = _source_instance(manifest, "RQ1")
+        instance = _source_instance(manifest, "RQ1", run_dir=directory)
         request = build_rq1_alignment(instance, response)
         alignment = await _judge_stage(
             provider,
@@ -190,7 +204,7 @@ async def evaluate_frozen_run(
         _atomic_json(score_root / "RQ1.json", scores["RQ1"])
 
     if "RQ2" in active:
-        instance = _source_instance(manifest, "RQ2")
+        instance = _source_instance(manifest, "RQ2", run_dir=directory)
         alignment_request = build_rq2_alignment(
             instance, response, condition=str(condition)
         )
@@ -200,8 +214,25 @@ async def evaluate_frozen_run(
             stage_dir=judge_root / "RQ2" / "alignment",
             metadata={**base_metadata, "rq_id": "RQ2", "judge_stage": "ALIGNMENT"},
         )
-        semantic_request = build_rq2_semantic(
+        field_request = build_rq2_field_alignment(
             instance, response, alignment, condition=str(condition)
+        )
+        field_alignment = await _judge_stage(
+            provider,
+            field_request,
+            stage_dir=judge_root / "RQ2" / "field_alignment",
+            metadata={
+                **base_metadata,
+                "rq_id": "RQ2",
+                "judge_stage": "FIELD_ALIGNMENT",
+            },
+        )
+        semantic_request = build_rq2_semantic(
+            instance,
+            response,
+            alignment,
+            field_alignment,
+            condition=str(condition),
         )
         semantic = await _judge_stage(
             provider,
@@ -217,13 +248,14 @@ async def evaluate_frozen_run(
             instance,
             response,
             alignment,
+            field_alignment,
             semantic,
             condition=str(condition),
         )
         _atomic_json(score_root / "RQ2.json", scores["RQ2"])
 
     if "RQ3" in active:
-        instance = _source_instance(manifest, "RQ3")
+        instance = _source_instance(manifest, "RQ3", run_dir=directory)
         branch = instance.get("construction_gold", {}).get(
             "final_gold_by_condition", {}
         ).get(condition, {})
@@ -247,8 +279,25 @@ async def evaluate_frozen_run(
                 },
             )
             if gold_decision == "ACT":
-                semantic_request = build_rq3_state_semantic(
+                field_request = build_rq3_field_alignment(
                     instance, response, alignment, condition=str(condition)
+                )
+                field_alignment = await _judge_stage(
+                    provider,
+                    field_request,
+                    stage_dir=judge_root / "RQ3" / "field_alignment",
+                    metadata={
+                        **base_metadata,
+                        "rq_id": "RQ3",
+                        "judge_stage": "FIELD_ALIGNMENT",
+                    },
+                )
+                semantic_request = build_rq3_state_semantic(
+                    instance,
+                    response,
+                    alignment,
+                    field_alignment,
+                    condition=str(condition),
                 )
                 stage_name = "state_semantic"
                 judge_stage = "STATE_SEMANTIC"
@@ -276,6 +325,9 @@ async def evaluate_frozen_run(
                 condition=str(condition),
                 alignment_response=alignment,
                 semantic_response=semantic,
+                field_alignment_response=(
+                    field_alignment if gold_decision == "ACT" else None
+                ),
             )
         _atomic_json(score_root / "RQ3.json", scores["RQ3"])
 

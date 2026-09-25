@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rq4-agent-judge-registry-v1",
+  "title": "ReqMemBench RQ4 Agent Judge target registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "selection", "judge_contract", "targets"],
+  "properties": {
+    "schema_version": {"const": "rq4-agent-judge-registry-v1"},
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_target_count", "included_target_count", "rule"],
+      "properties": {
+        "raw_target_count": {"type": "integer", "minimum": 1},
+        "included_target_count": {"type": "integer", "minimum": 1},
+        "rule": {"const": "CRITERIA_DISPOSITION_PROCEED_TO_VALIDATOR_AUTHORING"}
+      }
+    },
+    "judge_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_path",
+        "prompt_sha256",
+        "response_schema_path",
+        "response_schema_sha256",
+        "finalizer_version"
+      ],
+      "properties": {
+        "prompt_path": {"type": "string", "minLength": 1},
+        "prompt_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "response_schema_path": {"type": "string", "minLength": 1},
+        "response_schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "finalizer_version": {"const": "rq4-agent-judge-finalizer-v1"}
+      }
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "object"}
+    }
+  }
+}

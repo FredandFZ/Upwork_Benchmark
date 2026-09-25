@@ -1,0 +1,309 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T003",
+  "before_message_id": 27,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "1b814b646a17145aaff3951867c3b395eec850fe879853d9a1bb304141723db0",
+    "pre_repo_sha256": "11bf5f32a33cbd141266c1509258a027058eb119d22c07dd5a2b521398a8f805",
+    "target_manifest_sha256": "77b745c682df0427ed1e862fc766480deccec9910bba1434b257f6ed28228714",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "After removing the non-normative praise, the message contains deterministic facts about shared components, a fixed dark theme, responsive behavior, and the shell-guidance deliverable boundary.",
+      "interfaces_inspected": [
+        "GET /api/pages",
+        "GET /api/ui-shell",
+        "built website DOM",
+        "generated shell guidance artifact"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Representative website pages render the same shared header and shared footer components.",
+        "gold_requirement_refs": [
+          "REQ_WEBSITE_FOOTER"
+        ],
+        "gold_state_paths": [
+          "REQ_WEBSITE_FOOTER.attributes.shared_component",
+          "REQ_WEBSITE_FOOTER.attributes.applies_to"
+        ],
+        "evidence_message_ids": [
+          27
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_DOM",
+            "surface": "website pages",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "at least two representative website pages",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "header and footer landmarks",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "shared header identity across pages",
+                "operator": "EQUALS",
+                "expected": true
+              },
+              {
+                "subject": "shared footer identity across pages",
+                "operator": "EQUALS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "Website pages retain the fixed dark landing-page-derived theme and expose no user theme switch.",
+        "gold_requirement_refs": [
+          "REQ_WEBSITE_PAGE_THEME"
+        ],
+        "gold_state_paths": [
+          "REQ_WEBSITE_PAGE_THEME.attributes.page_theme",
+          "REQ_WEBSITE_PAGE_THEME.attributes.theme_reference"
+        ],
+        "evidence_message_ids": [
+          27
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "website page themes",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "representative website pages",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "page theme and switch controls",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "page theme",
+                "operator": "EQUALS",
+                "expected": "dark"
+              },
+              {
+                "subject": "theme reference",
+                "operator": "EQUALS",
+                "expected": "landing page"
+              },
+              {
+                "subject": "user theme switch",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Open the website."
+            ],
+            "action": "Search all interactive controls for a theme switch.",
+            "expected_failure_or_absence": "No user-operable theme switch is present."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The previously established responsive breakpoint rules remain applied at the frozen viewport set.",
+        "gold_requirement_refs": [
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE"
+        ],
+        "gold_state_paths": [
+          "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.attributes.breakpoint_basis"
+        ],
+        "evidence_message_ids": [
+          27
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "FRONTEND_RESPONSIVE",
+            "surface": "representative website page",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "website page",
+                "parameters": {}
+              },
+              {
+                "operation": "RESIZE_VIEWPORT",
+                "target": "website page",
+                "parameters": {
+                  "viewports": [
+                    [
+                      1440,
+                      900
+                    ],
+                    [
+                      768,
+                      1024
+                    ],
+                    [
+                      390,
+                      844
+                    ]
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "document scroll width at every viewport",
+                "operator": "LESS_THAN_OR_EQUAL",
+                "expected": "viewport width"
+              },
+              {
+                "subject": "header and footer visibility at every viewport",
+                "operator": "EQUALS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use frozen Chromium, device scale factor 1, fixed fonts, and disabled animations."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC004",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The dashboard deliverable is a shell-container styling-guidance artifact rather than an implementation of dashboard application screens.",
+        "gold_requirement_refs": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING"
+        ],
+        "gold_state_paths": [
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.deliverable_type",
+          "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.canvas_design"
+        ],
+        "evidence_message_ids": [
+          27
+        ],
+        "observables": [
+          {
+            "observable_id": "OBS004",
+            "type": "ARTIFACT",
+            "surface": "generated shell guidance artifact",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "shell guidance output",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "deliverable type",
+                "operator": "EQUALS",
+                "expected": "shell container styling guidance"
+              },
+              {
+                "subject": "dashboard application-screen implementation claim",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_WEBSITE_FOOTER.attributes.shared_component",
+        "REQ_WEBSITE_FOOTER.attributes.applies_to",
+        "REQ_WEBSITE_PAGE_THEME.attributes.page_theme",
+        "REQ_WEBSITE_PAGE_THEME.attributes.theme_reference",
+        "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.attributes.breakpoint_basis",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.deliverable_type",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.canvas_design"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_WEBSITE_FOOTER.attributes.shared_component",
+        "REQ_WEBSITE_FOOTER.attributes.applies_to",
+        "REQ_WEBSITE_PAGE_THEME.attributes.page_theme",
+        "REQ_WEBSITE_PAGE_THEME.attributes.theme_reference",
+        "REQ_RESPONSIVE_BREAKPOINT_GUIDANCE.attributes.breakpoint_basis",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.deliverable_type",
+        "REQ_ADMIN_WORKSPACE_SHELL_STYLING.attributes.canvas_design"
+      ],
+      "preserved_requirement_refs": [],
+      "uncovered_items": [
+        {
+          "finding_id": "F001",
+          "severity": "INFO",
+          "category": "SUBJECTIVE_ONLY",
+          "evidence": "The phrase \"the top half of the landing page looks great\" expresses approval but provides no new deterministic visual specification.",
+          "required_action": "Exclude this praise from binary RQ4 scoring; retain only the explicit shared-component, dark-theme, breakpoint, and shell-guidance facts."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

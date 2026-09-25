@@ -1,0 +1,36 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T009",
+  "before_message_id": 153,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "7e65ead70b2524ee14e098457b6c9c0a9f0a4612702717d5d2c5bc9334a23e9c",
+    "pre_repo_sha256": "d704708462cbf753a9da1cead2e0312e8309dcbca2842edfe7b5edb80e1e3bbd",
+    "target_manifest_sha256": "e83d9a4456ea599fca7912114a765fefa9e00c3c168243f63381645c4a64e8f4",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {"determination": "DETERMINISTIC_OBSERVABLE", "rationale": "Retention is observable as two populated zero-ohm resistor symbols and footprints, one in each power-board SDA0 and SCL0 path. Connectivity can be checked from the schematic graph and footprint presence from the PCB, without accepting a descriptive property flag.", "interfaces_inspected": ["dist/design.kicad_sch components and nets", "dist/design.kicad_pcb resistor footprints", "src/artifact_model.py:ARTIFACT_MODEL.components"], "subjective_only": false, "repair_requirements": []},
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001", "scope": "TARGET_BEHAVIOR", "statement": "The power-board SDA0 and SCL0 signal paths each contain exactly one populated two-pin 0 Ω series resistor with a matching PCB footprint; neither signal has a direct net bypass around its resistor.",
+        "gold_requirement_refs": ["REQ_I2C_BUS_ELECTRICAL"], "gold_state_paths": ["REQ_I2C_BUS_ELECTRICAL.attributes.power_board_i2c_series_resistors"], "evidence_message_ids": [153],
+        "observables": [{"observable_id": "OBS001", "type": "ARTIFACT", "surface": "dist/design.kicad_sch I2C connectivity and dist/design.kicad_pcb resistor population", "setup": ["Build schematic and PCB artifacts.", "Identify the power-board I2C connector endpoints and internal SDA0/SCL0 endpoints."], "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_sch and dist/design.kicad_pcb", "parameters": {"graph_paths": ["SDA0", "SCL0"], "component_class": "two-pin resistor"}}], "expected_observations": [
+          {"subject": "populated 0-ohm series resistors across SDA0 and SCL0 paths", "operator": "COUNT_EQUALS", "expected": 2},
+          {"subject": "I2C paths lacking exactly one resistor edge", "operator": "COUNT_EQUALS", "expected": 0},
+          {"subject": "direct connector-to-internal-net bypass paths avoiding the resistor", "operator": "COUNT_EQUALS", "expected": 0},
+          {"subject": "series resistor references missing from PCB footprints", "operator": "COUNT_EQUALS", "expected": 0}
+        ], "determinism_controls": ["Derive graph edges from actual schematic pins/nets.", "Treat DNP/not-fitted BOM fields as unpopulated even if a footprint exists.", "Do not accept a synthetic requirement component with no pins as a resistor implementation."]}],
+        "negative_cases": [{"case_id": "NC001", "setup": ["The model says retain but no resistor pins or PCB footprints exist."], "action": "Traverse each I2C path and join references to PCB footprints.", "expected_failure_or_absence": "The criterion fails."}, {"case_id": "NC002", "setup": ["The resistors exist but a same-net connection bypasses them."], "action": "Search for a connector-to-bus path excluding resistor edges.", "expected_failure_or_absence": "The criterion fails."}]
+      }
+    ],
+    "coverage_summary": {"affected_gold_state_paths": ["REQ_I2C_BUS_ELECTRICAL.attributes.power_board_i2c_series_resistors"], "covered_affected_gold_state_paths": ["REQ_I2C_BUS_ELECTRICAL.attributes.power_board_i2c_series_resistors"], "preserved_requirement_refs": ["REQ_INTERBOARD_POWER_SIGNAL_LINKS", "REQ_POWER_BOARD_LAYER_STACK"], "uncovered_items": []}
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

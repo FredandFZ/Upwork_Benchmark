@@ -1,0 +1,162 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_0b514652c0c219f286d5",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T015",
+  "target_fingerprint": "a4c5bb0f12b5a1d58ca42efc302f257e852ffe743ea23ae72609cf6592d96402",
+  "condition": "C1",
+  "turns": 290,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ1\\43214420_T015_RQ1.json",
+      "file_sha256": "fceb5c145e59c5b00053b06ca6d0634582837e85f7823f02f6007260ab0a5b92",
+      "content_sha256": "d7b118d0d9cd641f89578596283e911b9279677a3d5f143eb4bae02c7bafd799"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ2\\43214420_T015_RQ2.json",
+      "file_sha256": "a86dc063d1eafc738ab38e59652b0df9e462572ab13a9cfbf6bf90672d086a06",
+      "content_sha256": "479fed5c0ae8db5f58067c84d6d9a31a56de45ebfe6337e7a848b6b6cc8dd758"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43214420\\RQ3\\43214420_T015_RQ3.json",
+      "file_sha256": "6243ce83eaef128511a1cb6abf1f4705878fb2d4b2cfffb5ffa31731b8f9e402",
+      "content_sha256": "574184c9df6c9da19f61d665b00914888ea737b3c23de6cf98a04fda2721e5ef"
+    }
+  },
+  "public_files": {
+    "task.json": "79759a12e6e0c684c851d981f4b68baab7ca613dccd543ff2abbe536c1ad13d9",
+    "history.jsonl": "33d69ac73a6133359fb77ae00d52d3876f86720d4e4acce5e915edb0df6d586b",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T015_before_291/pre_repo.zip",
+    "archive_sha256": "fa6fa16c0187964358fe862c512a5bae958280ce80e8c54b5af855b7c6f65173",
+    "tree_sha256": "b8d6048e30510d0a3c17e8f8aa6827787b1850bbbe2187f5773a64f80ffbbefe",
+    "manifest_path": "Code Environment/43214420/targets/T015_before_291/manifest.json",
+    "manifest_sha256": "6623d4d7a678c8d0e67a8c467c1ec2a075cf3a447b3ed6d342f210df0f825e99",
+    "before_message_id": 291,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "On the actual ESP32-S3-WROOM-1 symbol, GPIO5 connects to 5V_EN, GPIO38 connects to SCL0, and GPIO26 connects to SPI_MOSI; GPIO3, GPIO22, and GPIO23 do not carry those superseded functions, and GPIO22/GPIO23/GPIO25/GPIO27 are not exposed as usable WROOM-1 connections elsewhere in the design.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_sch ESP32-S3-WROOM-1 pin-to-net map",
+            "setup": [
+              "Build the schematic and select the populated ESP32-S3-WROOM-1 module by library id/reference."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_sch",
+                "parameters": {
+                  "extract": "ESP32 named pin to resolved net mapping",
+                  "pins": [
+                    "GPIO3",
+                    "GPIO5",
+                    "GPIO22",
+                    "GPIO23",
+                    "GPIO25",
+                    "GPIO26",
+                    "GPIO27",
+                    "GPIO38"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "ESP32 GPIO5 resolved net",
+                "operator": "EQUALS",
+                "expected": "5V_EN"
+              },
+              {
+                "subject": "ESP32 GPIO38 resolved net",
+                "operator": "EQUALS",
+                "expected": "SCL0"
+              },
+              {
+                "subject": "ESP32 GPIO26 resolved net",
+                "operator": "EQUALS",
+                "expected": "SPI_MOSI"
+              },
+              {
+                "subject": "superseded pairs GPIO3=5V_EN, GPIO22=SCL0, GPIO23=SPI_MOSI",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "design connections using unavailable WROOM-1 GPIO22/GPIO23/GPIO25/GPIO27",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Resolve named pins from the actual module symbol/library mapping.",
+              "Follow labels, hierarchical labels, and net ties before comparing canonical net names.",
+              "Ignore unconnected hidden aliases that are not exposed pins."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "A summary component lists the new strings but the ESP32 pins retain old nets."
+            ],
+            "action": "Parse actual symbol connectivity.",
+            "expected_failure_or_absence": "The criterion fails."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "30157f3e15624b4fbc760a42e4f6db85aa747ded338e6c09a36828c380afc52f",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

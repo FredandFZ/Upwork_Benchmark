@@ -1,0 +1,234 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_b2498ca9fd4a3e172a5c",
+  "input_release": "44036410-stage2-final-20260925-rq123-main-v1",
+  "project_id": "44036410",
+  "target_id": "44036410_T002",
+  "target_fingerprint": "e5f403bee2e4e2e8624265b009d4d7faf24da50083d747b7dcf6c804464b2c67",
+  "condition": "C2",
+  "turns": 49,
+  "difficulty": "MEDIUM",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44036410\\RQ1\\44036410_T002_RQ1.json",
+      "file_sha256": "9b3aa3151165ec5fecee3d9f7a126e4f47a8ad70cab07eb8a96eb662c7acefa8",
+      "content_sha256": "f020617117301d3bcdb4836bb899a3f1a13f1bbf8a1e7dd729bb1e6b93abcd29"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44036410\\RQ2\\44036410_T002_RQ2.json",
+      "file_sha256": "229cbbb2a260bb665cd4eeb439b2c7cb30e6a4058c715eae33faebbcb4af9175",
+      "content_sha256": "38738fb42b0528bae35d2201b20eb4df1b0df568fe90b2a44315c992b3e12436"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44036410\\RQ3\\44036410_T002_RQ3.json",
+      "file_sha256": "ba129bca9f9217c7e30ebdbac9e14d211adbcdb275878d8c655f1f9c74096341",
+      "content_sha256": "d5574b9f8c3897a7618cf04d310b18f8ef359c438e3a363e53efa476b361f2b3"
+    }
+  },
+  "public_files": {
+    "task.json": "e5345a2f36b9b7119c9ace6f5bf509f1bcb08446791233ca2604af7285a9f540",
+    "history.jsonl": "7ce9e01fe5012aaa197817f650f0ad0c4a43b0e9c7787d42993ec593abcebcb3",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/44036410/targets/T002_before_50/pre_repo.zip",
+    "archive_sha256": "5da8b635c093d456179a1789a51b1f4cb09c6933893eb927ab49b5213a6de264",
+    "tree_sha256": "134b52182873828acddcdd82d1a979e7f613d8a0a1bfbb18d0b419e0142f19d8",
+    "manifest_path": "Code Environment/44036410/targets/T002_before_50/manifest.json",
+    "manifest_sha256": "962a5d2a197cdee6365979bb5507c1c8e40778515183b269afd147b720de8b91",
+    "before_message_id": 50,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The report displays Assessment Date: [Assessment Date] or an editable assessment-date field, and removes the malformed duplicate date text.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "DOCX content controls and PDF text",
+            "setup": [
+              "Build report artifacts"
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "assessment date field and visible text",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "visible assessment-date text or editable field",
+                "operator": "MATCHES_REGEX",
+                "expected": "Assessment Date: \\[Assessment Date\\]|editable assessment-date content control"
+              },
+              {
+                "subject": "malformed Assessment Date: Assessment Date. text",
+                "operator": "ABSENT",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "OOXML structural parsing",
+              "fixed PDF renderer",
+              "network disabled"
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Page two contains the two approved replacement sentences and no longer contains the typo or superseded assessment-note sentence.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "Generated page-two text",
+            "setup": [
+              "Build and parse page two"
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "page-two paragraphs",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "page-two text",
+                "operator": "CONTAINS",
+                "expected": "Owners often overrate gated driveways."
+              },
+              {
+                "subject": "page-two text",
+                "operator": "CONTAINS",
+                "expected": "Assessment note: Storage slightly improves the vehicle’s security presentation, but not enough to offset the wider weaknesses in the setup."
+              },
+              {
+                "subject": "page-two text",
+                "operator": "NOT_CONTAINS",
+                "expected": "Owners often overrate gated drivers."
+              },
+              {
+                "subject": "page-two text",
+                "operator": "NOT_CONTAINS",
+                "expected": "Storage is helping presentations slightly"
+              }
+            ],
+            "determinism_controls": [
+              "fixed Unicode normalization",
+              "fixed PDF renderer"
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Page four restores the same standard footer information used on pages one through three; the retained distribution warning does not overlap that footer and occupies less page area than in the frozen pre-artifact.",
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "PDF page-four text and coordinates",
+            "setup": [
+              "Build with fixed fonts and page size",
+              "Parse page-four warning and footer boxes",
+              "Parse the frozen pre-artifact warning box"
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "page-four footer and distribution-warning regions",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "page-four standard footer fields",
+                "operator": "EQUALS",
+                "expected": [
+                  "report name",
+                  "report ID",
+                  "vehicle group",
+                  "confidential/restricted status",
+                  "assessment date",
+                  "page number"
+                ]
+              },
+              {
+                "subject": "warning text indicating confidential limited distribution",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "warning/footer intersection area",
+                "operator": "EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "warning bounding-box area",
+                "operator": "LESS_THAN_OR_EQUAL",
+                "expected": "frozen pre-artifact warning area"
+              }
+            ],
+            "determinism_controls": [
+              "fixed fonts",
+              "fixed page size",
+              "frozen pre-artifact baseline",
+              "coordinate parsing"
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "7c6b0afd68fca77cd7313ff60faf4500a6fafe7179caea95cf75b6eab7862cf7",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

@@ -116,8 +116,8 @@ FN。目前缺少：
 
 ### 4.1 问题描述
 
-RQ4 §6.6 要求 validator 在错误 pre-repo 与正确 delivery 上做双向校准；RQ1 尚无同等级的强制
-校准协议。现有单元测试覆盖若干 relation 和 evidence 分支，但没有把“全部 25 个正式 targets 的
+RQ4 §6.6 要求通用 Agent Judge 在 pre-repo、正确 delivery 与 partial/mutant 私有样本上完成
+抽样校准；RQ1 尚无同等级的强制校准协议。现有单元测试覆盖若干 relation 和 evidence 分支，但没有把“全部 25 个正式 targets 的
 oracle 必须满分”写成发布门槛，也没有系统验证 merge/split 与 Evidence 解耦后的精确计数。
 
 ### 4.2 修改方案

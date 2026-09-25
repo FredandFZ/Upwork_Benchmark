@@ -1,0 +1,174 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_2bf632d7295386880eac",
+  "input_release": "44035087-stage2-final-20260925-rq123-main-v1",
+  "project_id": "44035087",
+  "target_id": "44035087_T004",
+  "target_fingerprint": "c2b9aa4ad72db8ebd533f91b4168545ee843452a18f74f56fe34b0a5ae549a65",
+  "condition": "C1",
+  "turns": 40,
+  "difficulty": "MEDIUM",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ1\\44035087_T004_RQ1.json",
+      "file_sha256": "949b3bedaa9350b7e1f5f282c7cc65a400db945aa627af888f8cf486076bed6b",
+      "content_sha256": "11a035ccc4ba02490ee6c96c97be7239ce68e027e28cbee394147519efffe995"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ2\\44035087_T004_RQ2.json",
+      "file_sha256": "80317c3e206993d207aed1ea3aef9552dff448e72349c942cf5cf37cdcf8126f",
+      "content_sha256": "1bfb852adab89bb91503e4867b0c36e97151d7a35a50258ba7ddae425059faff"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\44035087\\RQ3\\44035087_T004_RQ3.json",
+      "file_sha256": "72af4d8d854987a7a568d3e52457b50084b439e99f1de4a444fb3a9c22d53322",
+      "content_sha256": "2e51db1cc260369d3d0cc81a4f7786921a36bc2184b41fedb08c278fe4c080e2"
+    }
+  },
+  "public_files": {
+    "task.json": "f855d4cd850e49b975ffa9769a7ab1834faf5ba5c378cfc054970cfca636c842",
+    "history.jsonl": "5ba62176b9a7eeda2e4dd517cc67040046b47dd8066d5e84e967b426610c0e5a",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/44035087/targets/T004_before_41/pre_repo.zip",
+    "archive_sha256": "df436b6427db5a17fe27aa706a64b6b2066da4da231455b5b11d1fb09c0d4733",
+    "tree_sha256": "4247714b35ffd71e1df9a5057bb7551337a38969bd00f5a2e6e29df601c4187f",
+    "manifest_path": "Code Environment/44035087/targets/T004_before_41/manifest.json",
+    "manifest_sha256": "06a7ad323be5ca77f8ff857c76ce372e8fc04b6feab1d0f4b44a0fe18dfc0793",
+    "before_message_id": 41,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The pricing surface presents four packages, each with one predefined price for each of the four specified property-size categories.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_DOM",
+            "surface": "Pricing page",
+            "setup": [
+              "Build and open the pricing page"
+            ],
+            "actions": [
+              {
+                "operation": "QUERY_DOM",
+                "target": "pricing matrix headers and package rows",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "package count",
+                "operator": "COUNT_EQUALS",
+                "expected": 4
+              },
+              {
+                "subject": "category labels",
+                "operator": "EQUALS",
+                "expected": [
+                  "under 1200 sqft",
+                  "1201-2400 sqft",
+                  "2401-3600 sqft",
+                  "3600+ sqft"
+                ]
+              },
+              {
+                "subject": "price cells per package",
+                "operator": "COUNT_EQUALS",
+                "expected": 4
+              }
+            ],
+            "determinism_controls": [
+              "frozen browser",
+              "offline assets"
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "REMOVAL",
+        "statement": "Pricing is a predefined matrix rather than an interactive calculator.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "REMOVE",
+            "surface": "Pricing page controls",
+            "setup": [
+              "Open the built pricing page"
+            ],
+            "actions": [
+              {
+                "operation": "QUERY_DOM",
+                "target": "square-footage calculator inputs and calculate controls",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "calculator form and calculate action",
+                "operator": "ABSENT",
+                "expected": true
+              },
+              {
+                "subject": "predefined pricing matrix",
+                "operator": "EXISTS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "frozen browser",
+              "clean storage"
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "5fa348cdaad8e4d48230aa2c0bbf4b943f016702ee7b596789688110f0d5589e",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}

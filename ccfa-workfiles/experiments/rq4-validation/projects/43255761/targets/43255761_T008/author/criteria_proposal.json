@@ -1,0 +1,354 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T008",
+  "before_message_id": 238,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "a010f17ef42ecef1d3fe7f3c9e12625a6aa12f322874358e96d0fce3b79ccb7e",
+    "pre_repo_sha256": "edd04b6218651ebf474749d240e800db71519dec467f40fc260c6e298cf82cc1",
+    "target_manifest_sha256": "66fbaf69e427780eb8a1a0cfe691c3f9d08fe1e0eaa46be760348a2b53ded45e",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The grouped feedback is split into independent checks over content-control types, placeholder metadata, table/text-box geometry, paragraph spacing, borders, date controls, and theme color definitions in built DOCX packages. The request to review bullet appearance with Tariq is a human-review action without an objective target value and is explicitly left out of deterministic scoring.",
+      "interfaces_inspected": [
+        "dist/template.docx!/word/document.xml",
+        "dist/template.docx!/word/styles.xml",
+        "dist/template.docx!/word/theme/theme1.xml",
+        "src/artifact_runtime.py:_docx_parts",
+        "src/artifact_runtime.py:_parse_docx",
+        "work_item.post_task_observable_features"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Proposal controls for Advantages, Settings, Attachments, Headline, and Date, the Guidance reflections control, and the Board Seminar agenda control use real Word placeholder-backed content controls rather than literal ordinary text; each has a valid placeholder reference and w:showingPlcHdr so fixture input replaces the instruction rather than appending to it.",
+        "gold_requirement_refs": ["REQ_FIELD_PLACEHOLDER_ACTIVATION"],
+        "gold_state_paths": [
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION.scope.contexts",
+          "REQ_FIELD_PLACEHOLDER_ACTIVATION.execution.observed_behavior"
+        ],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "built template-set DOCX content controls and glossary placeholders",
+            "setup": ["Build the Proposal, Guidance, and Board Seminar DOCX fixtures."],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "built DOCX template set",
+                "parameters": {"required_tags": ["proposal.advantages", "proposal.settings", "proposal.attachments", "proposal.headline", "proposal.date", "guidance.reflections", "board_seminar.agenda"]}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "required tagged controls found exactly once", "operator": "COUNT_EQUALS", "expected": 7},
+              {"subject": "required controls missing w:showingPlcHdr or a resolvable w:placeholder/w:docPart", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "required controls whose deterministic fixture input leaves the original instruction concatenated with user text", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": [
+              "Select controls by frozen semantic w:tag, never paragraph order.",
+              "Resolve placeholder building blocks from actual DOCX parts and apply the same fixed replacement text to each control."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC001", "setup": ["A required location contains bracketed instruction as ordinary w:t text outside a content control."], "action": "Resolve the required semantic tag and placeholder reference.", "expected_failure_or_absence": "The criterion fails even if the visible words resemble a placeholder."}
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Proposal left-column headline and text-box fields wrap long fixture text within their declared cell/text-box width, and the right-hand column retains the same grid position and width before and after the fixture is inserted.",
+        "gold_requirement_refs": ["REQ_FIELD_TEXT_WRAPPING"],
+        "gold_state_paths": ["REQ_FIELD_TEXT_WRAPPING.existence"],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "Proposal DOCX table/text-box geometry",
+            "setup": ["Insert a fixed 240-character space-delimited string into each tagged left-column field in a temporary DOCX copy."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "temporary Proposal DOCX", "parameters": {"parts": ["word/document.xml"], "compare": "table grid, cell widths, text-box extents, and wrap declarations before/after insertion"}}
+            ],
+            "expected_observations": [
+              {"subject": "left fields with wrapping disabled or overflow enabled", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "right-column grid start and width after insertion", "operator": "EQUALS", "expected": "pre-insertion right-column grid start and width"}
+            ],
+            "determinism_controls": [
+              "Use fixed fixture text and compare OOXML geometry values, not screenshots.",
+              "Resolve widths in twentieths of a point and reject auto-fit growth that moves the adjacent column."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC002", "setup": ["A table uses auto-fit so the left cell expansion changes the right-column grid."], "action": "Compare grid geometry before and after long-text insertion.", "expected_failure_or_absence": "The criterion fails even if a short default string appears acceptable."}
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Board Seminar Item and Title control is configured for multiline text and retains two regular paragraphs inside the same tagged control after a deterministic two-line fixture is saved and reopened.",
+        "gold_requirement_refs": ["REQ_MULTILINE_FIELD_INPUT"],
+        "gold_state_paths": ["REQ_MULTILINE_FIELD_INPUT.existence"],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "Board Seminar DOCX Item and Title content control",
+            "setup": ["Create a temporary copy with two fixture paragraphs inside the board_seminar.item_and_title control."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "temporary Board Seminar DOCX", "parameters": {"control_tag": "board_seminar.item_and_title", "required_attribute": "w:text/@w:multiLine=1"}}
+            ],
+            "expected_observations": [
+              {"subject": "matching tagged multiline controls", "operator": "COUNT_EQUALS", "expected": 1},
+              {"subject": "fixture paragraphs retained under the same w:sdt after reopen", "operator": "COUNT_EQUALS", "expected": 2}
+            ],
+            "determinism_controls": ["Use a fixed two-paragraph fixture and tag-based selection.", "Verify actual XML nesting after package reopen."]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC003", "setup": ["The field is a single-line content control."], "action": "Inspect w:text/@w:multiLine and inject two paragraphs.", "expected_failure_or_absence": "The criterion fails on the missing multiline declaration or paragraph retention."}
+        ]
+      },
+      {
+        "criterion_id": "AC004",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Proposal and Board Meeting date fields use the same unlocked w:date content-control structure, date format, locale, and calendar mapping as the Board Seminar date field.",
+        "gold_requirement_refs": ["REQ_DATE_FIELD_CONTROL"],
+        "gold_state_paths": ["REQ_DATE_FIELD_CONTROL.scope.contexts"],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS004",
+            "type": "ARTIFACT",
+            "surface": "Proposal, Board Meeting, and Board Seminar DOCX date content controls",
+            "setup": ["Build all three template DOCX files."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "built DOCX template set", "parameters": {"tags": ["proposal.date", "board_meeting.date", "board_seminar.date"], "properties": ["w:date", "w:dateFormat", "w:lid", "w:calendar", "w:lock"]}}
+            ],
+            "expected_observations": [
+              {"subject": "three tag-to-date-control signatures", "operator": "COUNT_EQUALS", "expected": 3},
+              {"subject": "Proposal date-control signature", "operator": "EQUALS", "expected": "Board Seminar date-control signature"},
+              {"subject": "Board Meeting date-control signature", "operator": "EQUALS", "expected": "Board Seminar date-control signature"},
+              {"subject": "date controls locked against content editing", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": ["Compare canonicalized OOXML property tuples.", "Require real w:date controls; visible date-like text is insufficient."]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC004", "setup": ["Proposal displays a date placeholder in an ordinary text control."], "action": "Inspect the semantic tag's w:sdtPr control type.", "expected_failure_or_absence": "The criterion fails because no calendar date control exists."}
+        ]
+      },
+      {
+        "criterion_id": "AC005",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "In Guidance, the container below short description has fixed OOXML width/margins, and the pencil drawing extent and offset remain wholly inside that container after a fixed long-text fixture is inserted without manual line breaks.",
+        "gold_requirement_refs": ["REQ_GUIDANCE_FIXED_MARGINS"],
+        "gold_state_paths": ["REQ_GUIDANCE_FIXED_MARGINS.existence"],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS005",
+            "type": "ARTIFACT",
+            "surface": "Guidance DOCX short-description container and pencil drawing geometry",
+            "setup": ["Insert fixed long text without manual line breaks into the tagged guidance.short_description field in a temporary DOCX."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "temporary Guidance DOCX", "parameters": {"measure": ["w:tcW or wp:extent", "cell/text-box margins", "wp:positionH", "pencil wp:extent"]}}
+            ],
+            "expected_observations": [
+              {"subject": "short-description container width and margins after insertion", "operator": "EQUALS", "expected": "pre-insertion width and margins"},
+              {"subject": "pencil drawing horizontal and vertical bounds", "operator": "LESS_THAN_OR_EQUAL", "expected": "containing cell/text-box inner bounds"}
+            ],
+            "determinism_controls": ["Use OOXML EMU/twip geometry with exact integer arithmetic.", "Use a fixed text fixture and no rendering heuristic."]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC005", "setup": ["Long text changes auto-fit width or places any pencil extent beyond the container."], "action": "Compare geometry and bounds.", "expected_failure_or_absence": "The criterion fails regardless of descriptive model text."}
+        ]
+      },
+      {
+        "criterion_id": "AC006",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Normal Enter in continuous-text areas of Proposal and Guidance creates a paragraph using the continuous-text style, whose effective before/after spacing is strictly smaller than the corresponding bullet-item style spacing and does not require a manual line break.",
+        "gold_requirement_refs": ["REQ_PARAGRAPH_RETURN_SPACING"],
+        "gold_state_paths": ["REQ_PARAGRAPH_RETURN_SPACING.existence"],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS006",
+            "type": "ARTIFACT",
+            "surface": "Proposal and Guidance DOCX paragraph styles and continuous-text fixtures",
+            "setup": ["Insert a second ordinary w:p into each tagged continuous-text area using its inherited paragraph style."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "temporary Proposal and Guidance DOCX files", "parameters": {"parts": ["word/document.xml", "word/styles.xml"], "resolve_effective_spacing": true}}
+            ],
+            "expected_observations": [
+              {"subject": "new continuous-text nodes serialized as ordinary paragraphs", "operator": "COUNT_EQUALS", "expected": 2},
+              {"subject": "effective continuous-text after spacing", "operator": "LESS_THAN_OR_EQUAL", "expected": "effective bullet-item after spacing minus one twip"},
+              {"subject": "manual w:br nodes required by the fixture", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": ["Resolve paragraph-style inheritance before comparing numeric twips.", "Use ordinary paragraph nodes as the Enter surrogate and never infer from prose fields."]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC006", "setup": ["Continuous text inherits the same or larger after-spacing as bullet items."], "action": "Resolve both effective spacing values.", "expected_failure_or_absence": "The criterion fails because regular paragraph breaks retain bullet-scale separation."}
+        ]
+      },
+      {
+        "criterion_id": "AC007",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "In Board Meeting, the Item and Title, Topic, Proposal, and Start Time fields begin on the same declared table-grid column and share the same effective left cell margin and paragraph indentation.",
+        "gold_requirement_refs": ["REQ_BOARD_MEETING_FIELD_ALIGNMENT"],
+        "gold_state_paths": ["REQ_BOARD_MEETING_FIELD_ALIGNMENT.existence"],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS007",
+            "type": "ARTIFACT",
+            "surface": "Board Meeting DOCX table-grid and paragraph geometry",
+            "setup": ["Build the Board Meeting DOCX."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "Board Meeting DOCX", "parameters": {"tags": ["board_meeting.item_and_title", "board_meeting.topic", "board_meeting.proposal", "board_meeting.start_time"], "resolve": ["table-grid start", "cell margin", "paragraph indentation"]}}
+            ],
+            "expected_observations": [
+              {"subject": "canonical geometry tuples for the four fields", "operator": "COUNT_EQUALS", "expected": 1}
+            ],
+            "determinism_controls": ["Resolve inherited table/cell/paragraph properties into twips.", "Match fields by semantic tag rather than visible order."]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC007", "setup": ["Item and Title differs by one grid column, margin, or indentation value."], "action": "Compare canonical geometry tuples.", "expected_failure_or_absence": "The criterion fails on the exact structural mismatch."}
+        ]
+      },
+      {
+        "criterion_id": "AC008",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Adding one ordinary paragraph immediately after the Board Meeting Topic field does not create a new paragraph or table-cell top/bottom border, and preserves the pre-existing borders of adjacent rows.",
+        "gold_requirement_refs": ["REQ_BOARD_MEETING_ROW_INSERTION"],
+        "gold_state_paths": ["REQ_BOARD_MEETING_ROW_INSERTION.existence"],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS008",
+            "type": "ARTIFACT",
+            "surface": "temporary Board Meeting DOCX after Topic paragraph insertion",
+            "setup": ["Copy the Board Meeting DOCX and insert a fixed ordinary paragraph immediately after the tagged Topic field."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "temporary Board Meeting DOCX", "parameters": {"compare": ["inserted w:p/w:pPr/w:pBdr", "containing w:tc/w:tcPr/w:tcBorders", "adjacent row border signatures"]}}
+            ],
+            "expected_observations": [
+              {"subject": "top or bottom border introduced on the inserted paragraph", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "containing and adjacent row border signatures after insertion", "operator": "EQUALS", "expected": "pre-insertion border signatures"}
+            ],
+            "determinism_controls": ["Apply one fixed XML insertion at the semantic Topic boundary.", "Compare explicit and inherited border signatures, including nil/none semantics."]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC008", "setup": ["The new paragraph inherits or creates an extra horizontal border after Topic."], "action": "Resolve paragraph and cell borders before and after insertion.", "expected_failure_or_absence": "The criterion fails while insertion elsewhere is irrelevant."}
+        ]
+      },
+      {
+        "criterion_id": "AC009",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Master DOCX exposes a non-empty controlled theme/custom color choice set that is a strict subset of the frozen pre-repo's offered color set while retaining every theme color marked required by the existing template.",
+        "gold_requirement_refs": ["REQ_THEME_COLOR_PALETTE"],
+        "gold_state_paths": [
+          "REQ_THEME_COLOR_PALETTE.attributes.color_option_policy",
+          "REQ_THEME_COLOR_PALETTE.execution"
+        ],
+        "evidence_message_ids": [238],
+        "observables": [
+          {
+            "observable_id": "OBS009",
+            "type": "ARTIFACT",
+            "surface": "Master DOCX theme and custom color parts",
+            "setup": ["Build the Master DOCX and parse the same parts from the frozen pre-repo artifact."],
+            "actions": [
+              {"operation": "PARSE_ARTIFACT", "target": "Master DOCX and frozen pre-repo Master DOCX", "parameters": {"parts": ["word/theme/theme1.xml", "customXml color-choice part"], "normalize": "uppercase six-digit sRGB"}}
+            ],
+            "expected_observations": [
+              {"subject": "candidate offered color set size", "operator": "GREATER_THAN_OR_EQUAL", "expected": 1},
+              {"subject": "candidate offered color set", "operator": "NOT_EQUALS", "expected": "frozen pre-repo offered color set"},
+              {"subject": "candidate colors absent from frozen pre-repo offered set", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "required theme colors absent from candidate set", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": ["Compare canonical sRGB values from package parts.", "Use the frozen pre-repo artifact as the only baseline; do not trust model flags."]
+          }
+        ],
+        "negative_cases": [
+          {"case_id": "NC009", "setup": ["Candidate keeps the complete pre-repo color set or removes a required theme color."], "action": "Compare normalized sets.", "expected_failure_or_absence": "The criterion fails on equality with the full set or missing required colors."}
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_THEME_COLOR_PALETTE.attributes.color_option_policy",
+        "REQ_THEME_COLOR_PALETTE.execution",
+        "REQ_BULLET_VISUAL_DESIGN.execution.observed_behavior",
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION.scope.contexts",
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION.execution.observed_behavior",
+        "REQ_FIELD_TEXT_WRAPPING.existence",
+        "REQ_MULTILINE_FIELD_INPUT.existence",
+        "REQ_DATE_FIELD_CONTROL.scope.contexts",
+        "REQ_GUIDANCE_FIXED_MARGINS.existence",
+        "REQ_PARAGRAPH_RETURN_SPACING.existence",
+        "REQ_BOARD_MEETING_FIELD_ALIGNMENT.existence",
+        "REQ_BOARD_MEETING_ROW_INSERTION.existence"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_THEME_COLOR_PALETTE.attributes.color_option_policy",
+        "REQ_THEME_COLOR_PALETTE.execution",
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION.scope.contexts",
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION.execution.observed_behavior",
+        "REQ_FIELD_TEXT_WRAPPING.existence",
+        "REQ_MULTILINE_FIELD_INPUT.existence",
+        "REQ_DATE_FIELD_CONTROL.scope.contexts",
+        "REQ_GUIDANCE_FIXED_MARGINS.existence",
+        "REQ_PARAGRAPH_RETURN_SPACING.existence",
+        "REQ_BOARD_MEETING_FIELD_ALIGNMENT.existence",
+        "REQ_BOARD_MEETING_ROW_INSERTION.existence"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_FIELD_LABEL_HELP_TEXT",
+        "REQ_FIELD_FORMATTING_PRESERVATION",
+        "REQ_PASTED_TABLE_COLUMN_CONTAINMENT",
+        "REQ_WORD_WINDOWS_COMPATIBILITY"
+      ],
+      "uncovered_items": [
+        {
+          "finding_id": "T008-GAP-001",
+          "severity": "MEDIUM",
+          "category": "SUBJECTIVE_ONLY",
+          "evidence": "The bullet clause asks for review with Tariq because sizes and spacing 'look incorrect' but supplies no numeric typography, geometry, or approved visual reference.",
+          "required_action": "Exclude REQ_BULLET_VISUAL_DESIGN.execution.observed_behavior from deterministic scoring until an approved numeric or frozen-reference specification exists."
+        }
+      ]
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

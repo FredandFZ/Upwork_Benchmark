@@ -1,0 +1,70 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T004",
+  "before_message_id": 77,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "068a52c683d75a0e31b7b09e561fae9c57d1195b193c64bc7b19c9db95aa6c99",
+    "pre_repo_sha256": "48930218767ff37740390a03dc95dc6bf155e8a6bb2d8ee2b59f56eeb13f3692",
+    "target_manifest_sha256": "b66693f11655ff889901987b05453c43be62c69bfe01a6a3decd25143eaf430f",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The revised placement is observable from placed connector courtyards and the closed Edge.Cuts polygon: the USB-C and battery connector can be associated with their nearest parallel board edges and required to occupy opposite edge zones. Existing mounting-hole clearance remains a measurable PCB geometry regression.",
+      "interfaces_inspected": ["dist/design.kicad_pcb footprints", "dist/design.kicad_pcb Edge.Cuts", "src/artifact_runtime.py:_kicad_text"],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The battery connector and USB-C connector occupy opposite parallel edge zones of the PCB: each connector courtyard is closest to a different outline segment and those two segments have opposite outward normals; both courtyards remain within the board envelope except the permitted USB shell protrusion.",
+        "gold_requirement_refs": ["REQ_POWER_BOARD_BATTERY_INTERFACE", "REQ_POWER_BOARD_MECHANICAL_LAYOUT"],
+        "gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.battery_connector_placement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.battery_connector_arrangement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.execution"],
+        "evidence_message_ids": [77],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb connector placement relative to Edge.Cuts",
+            "setup": ["Build the PCB and resolve USB-C and battery connector courtyard/body polygons."],
+            "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_pcb", "parameters": {"derive": ["nearest outline segment", "edge outward normal", "courtyard containment"]}}],
+            "expected_observations": [
+              {"subject": "USB-C nearest edge equals battery connector nearest edge", "operator": "EQUALS", "expected": false},
+              {"subject": "dot product of the two normalized edge outward normals", "operator": "EQUALS", "expected": -1, "tolerance": 0.000001},
+              {"subject": "battery connector courtyard contained by board outline", "operator": "EQUALS", "expected": true}
+            ],
+            "determinism_controls": ["Use transformed footprint geometry in millimetres.", "Do not infer placement from model prose or reference order."]
+          }
+        ],
+        "negative_cases": [{"case_id": "NC001", "setup": ["Both connectors sit near the same or adjacent board edge."], "action": "Compute nearest edge segments and normals.", "expected_failure_or_absence": "The criterion fails even when their coordinate distance is large."}]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "PRESERVED_REGRESSION",
+        "statement": "The relocated battery connector courtyard does not intersect any mounting-hole drill, copper, or keep-out envelope.",
+        "gold_requirement_refs": ["REQ_POWER_BOARD_MECHANICAL_LAYOUT"],
+        "gold_state_paths": ["REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.mounting_hole_clearance"],
+        "evidence_message_ids": [77],
+        "observables": [{"observable_id": "OBS002", "type": "ARTIFACT", "surface": "dist/design.kicad_pcb battery connector and mounting-hole geometry", "setup": ["Resolve placed battery courtyard and all mounting-hole envelopes."], "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_pcb", "parameters": {"intersection_test": true}}], "expected_observations": [{"subject": "battery connector to mounting-hole envelope intersections", "operator": "COUNT_EQUALS", "expected": 0}], "determinism_controls": ["Apply rotation and side mirroring.", "Test complete geometry rather than origins."]}],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.battery_connector_placement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.battery_connector_arrangement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.execution"],
+      "covered_affected_gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.battery_connector_placement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.battery_connector_arrangement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.execution"],
+      "preserved_requirement_refs": ["REQ_POWER_BOARD_USB_CONNECTOR", "REQ_POWER_BOARD_BATTERY_SAFETY"],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

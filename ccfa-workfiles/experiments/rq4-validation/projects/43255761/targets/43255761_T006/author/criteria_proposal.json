@@ -1,0 +1,96 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T006",
+  "before_message_id": 195,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "c6a9375c6cd6f079fae59521e301a30076811809c5c723518727263dbaa2694a",
+    "pre_repo_sha256": "0aaabb86166cee4091677b70855b60fd6354f3af7e67a5a54c2b6d5e584bc719",
+    "target_manifest_sha256": "d4cd4e3f84957ada298c39ab4b541662160130abbd35b70f8e24ebff0c90867a",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "Help persistence can be tested without trusting application configuration by clearing only each control's editable content in a temporary DOCX copy, then verifying its w:tag, w:alias, placeholder reference, and resolved placeholder text remain intact.",
+      "interfaces_inspected": [
+        "dist/template.docx!/word/document.xml",
+        "dist/template.docx!/word/glossary/document.xml",
+        "src/artifact_runtime.py:_docx_parts"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "After editable content is removed from each interactive content control in a temporary DOCX copy, that control retains its unique tag, non-empty alias/help label, valid placeholder reference, and non-empty resolved placeholder text.",
+        "gold_requirement_refs": ["REQ_FIELD_LABEL_HELP_TEXT"],
+        "gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.help_text_persistence"],
+        "evidence_message_ids": [195],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "temporary cleared DOCX content-control metadata",
+            "setup": [
+              "Copy the built DOCX to a temporary path.",
+              "Record tag, alias, placeholder relationship, and resolved placeholder text for each interactive control."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "temporary cleared DOCX",
+                "parameters": {"mutation": "remove editable descendants of w:sdtContent while preserving w:sdtPr and package relationships"}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "post-clear tag-to-alias mapping", "operator": "EQUALS", "expected": "pre-clear tag-to-alias mapping"},
+              {"subject": "post-clear tag-to-resolved-placeholder-text mapping", "operator": "EQUALS", "expected": "pre-clear tag-to-resolved-placeholder-text mapping"},
+              {"subject": "post-clear controls with missing or blank help metadata", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": [
+              "Mutate a temporary package and preserve ZIP member names and relationships.",
+              "Resolve placeholders from OOXML package parts; do not accept source configuration or custom model prose as behavioral evidence."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": ["Clearing a field removes its only instruction text and it has no persistent alias/placeholder."],
+            "action": "Clear the field in the temporary package and resolve retained metadata.",
+            "expected_failure_or_absence": "The criterion fails for the now-unidentifiable field."
+          }
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.help_text_persistence"],
+      "covered_affected_gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.help_text_persistence"],
+      "preserved_requirement_refs": [
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+        "REQ_FIELD_VISUAL_CUES",
+        "REQ_FIELD_FORMATTING_PRESERVATION"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

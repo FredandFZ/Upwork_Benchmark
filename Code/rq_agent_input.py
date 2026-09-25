@@ -17,6 +17,7 @@ PRIVATE_MANIFEST_SCHEMA_VERSION = "rq-private-package-manifest-v2"
 TASK_SCHEMA_VERSION = "rq-agent-task-v1"
 CONDITIONS = ("C1", "C2")
 REASONING_RQS = ("RQ1", "RQ2", "RQ3")
+RQ4_REGISTRY_SCHEMA_VERSION = "rq4-agent-judge-registry-v1"
 
 
 class RQMaterializationError(ValueError):
@@ -49,6 +50,37 @@ def _file_sha256(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def load_rq4_agent_judge_registry(
+    path: str | Path,
+) -> tuple[dict[str, Any], dict[tuple[str, str], dict[str, Any]]]:
+    """Load and index the frozen RQ4 sidecar without changing RQ1--RQ3 files."""
+
+    source = Path(path).resolve()
+    registry = _read_json(source)
+    if registry.get("schema_version") != RQ4_REGISTRY_SCHEMA_VERSION:
+        raise RQMaterializationError("unsupported RQ4 Agent Judge registry schema")
+    contract = registry.get("judge_contract")
+    rows = registry.get("targets")
+    if not isinstance(contract, dict) or not isinstance(rows, list) or not rows:
+        raise RQMaterializationError("RQ4 Agent Judge registry is incomplete")
+    expected_count = registry.get("selection", {}).get("included_target_count")
+    if expected_count != len(rows):
+        raise RQMaterializationError("RQ4 registry target count is inconsistent")
+    indexed: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            raise RQMaterializationError("RQ4 registry target must be an object")
+        key = (row.get("project_id"), row.get("target_id"))
+        if not all(isinstance(value, str) and value for value in key):
+            raise RQMaterializationError("RQ4 registry target identity is invalid")
+        if key in indexed:
+            raise RQMaterializationError(f"duplicate RQ4 registry target {key}")
+        indexed[key] = deepcopy(row)
+    registry["registry_path"] = str(source)
+    registry["registry_sha256"] = _file_sha256(source)
+    return registry, indexed
 
 
 def _id_key(value: Any) -> str:
@@ -216,6 +248,8 @@ def _assert_no_public_leakage(files: Mapping[str, str]) -> None:
         "acceptance_criteria",
         "validator_id",
         "reference_delivery",
+        "judge_contract",
+        "rq4_agent_judge",
         "archive_path",
         "pre_repo.zip",
     )
@@ -237,6 +271,9 @@ def materialize_reasoning_input(
     instructions_path: str | Path,
     response_schema_path: str | Path,
     mode: str = "smoke",
+    rq4_evaluation_record: Mapping[str, Any] | None = None,
+    rq4_judge_contract: Mapping[str, Any] | None = None,
+    rq4_registry_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Build one target/condition Phase A public package and private manifest."""
 
@@ -308,24 +345,62 @@ def materialize_reasoning_input(
         name: sha256(content.encode("utf-8")).hexdigest()
         for name, content in public_files.items()
     }
+    rq4_binding: dict[str, Any] | None = None
+    if rq4_evaluation_record is not None:
+        rq4_binding = deepcopy(dict(rq4_evaluation_record))
+        if (
+            rq4_binding.get("project_id") != manifest.get("project_id")
+            or rq4_binding.get("target_id") != target_id
+            or rq4_binding.get("target_message_id") != first.get("target_message_id")
+            or rq4_binding.get("target_fingerprint") != target.get("target_fingerprint")
+        ):
+            raise RQMaterializationError(
+                f"RQ4 registry identity does not match {manifest.get('project_id')}/{target_id}"
+            )
+        if rq4_binding.get("status") != "READY_FOR_PHASE_A_LINK":
+            raise RQMaterializationError(f"RQ4 registry target {target_id!r} is not ready")
+        criteria = rq4_binding.get("acceptance_criteria")
+        eligibility_rows = rq4_binding.get("condition_eligibility")
+        if not isinstance(criteria, list) or not criteria:
+            raise RQMaterializationError(f"RQ4 registry target {target_id!r} has no criteria")
+        if not isinstance(eligibility_rows, Mapping):
+            raise RQMaterializationError(f"RQ4 registry target {target_id!r} has no eligibility")
+        if not isinstance(rq4_judge_contract, Mapping):
+            raise RQMaterializationError("RQ4 registry binding requires a Judge contract")
     package_id = "pkg_" + _canonical_sha256(
         {
             "input_release": manifest["input_release"],
             "target_fingerprint": target["target_fingerprint"],
             "condition": condition,
             "public_hashes": public_hashes,
+            "rq4_execution_binding": (
+                {
+                    "criteria_proposal_sha256": rq4_binding["source_identity"][
+                        "criteria_proposal_sha256"
+                    ],
+                    "judge_contract": dict(rq4_judge_contract or {}),
+                    "registry_sha256": rq4_registry_sha256,
+                }
+                if rq4_binding is not None
+                else None
+            ),
         }
     )[:20]
     rq4_view = views.get("RQ4")
     rq4_gold = rq4_view.get("construction_gold", {}) if rq4_view else {}
-    eligibility = rq4_gold.get("eligibility_by_condition", {}).get(condition, {})
-    code_environment = rq4_view.get("code_environment", {}) if rq4_view else {}
+    if rq4_binding is not None:
+        eligibility = rq4_binding["condition_eligibility"].get(condition, {})
+        code_environment = rq4_binding.get("code_environment", {})
+    else:
+        eligibility = rq4_gold.get("eligibility_by_condition", {}).get(condition, {})
+        code_environment = rq4_view.get("code_environment", {}) if rq4_view else {}
     repository = None
-    if rq4_view is not None:
+    if rq4_view is not None or rq4_binding is not None:
         repository = {
             "archive_path": code_environment.get("archive_path"),
             "archive_sha256": code_environment.get("archive_sha256"),
-            "tree_sha256": code_environment.get("repository_tree_sha256"),
+            "tree_sha256": code_environment.get("tree_sha256")
+            or code_environment.get("repository_tree_sha256"),
             "manifest_path": code_environment.get("manifest_path"),
             "manifest_sha256": code_environment.get("manifest_sha256"),
             "before_message_id": code_environment.get("before_message_id"),
@@ -347,7 +422,7 @@ def materialize_reasoning_input(
         "turns": target["turns"],
         "difficulty": target["difficulty"],
         "reasoning_active_rqs": active_rqs,
-        "execution_rq": "RQ4" if rq4_view is not None else None,
+        "execution_rq": "RQ4" if (rq4_view is not None or rq4_binding is not None) else None,
         "source_instances": {
             rq_id: {
                 "path": str(paths[rq_id]),
@@ -365,14 +440,35 @@ def materialize_reasoning_input(
         "rq4": {
             "eligible": eligibility.get("rq4_eligible") is True,
             "eligibility_status": eligibility.get("status"),
-            "execution_ready": rq4_gold.get("execution_ready") is True,
+            "execution_ready": (
+                eligibility.get("rq4_eligible") is True
+                and rq4_binding is not None
+                and isinstance(rq4_judge_contract, Mapping)
+            )
+            if rq4_binding is not None
+            else rq4_gold.get("execution_ready") is True,
             "exclusion_reason": eligibility.get("exclusion_reason"),
             "acceptance_criteria": deepcopy(
-                rq4_gold.get("acceptance_criteria", [])
+                rq4_binding.get("acceptance_criteria", [])
+                if rq4_binding is not None
+                else rq4_gold.get("acceptance_criteria", [])
             ),
-            "validator_ids": deepcopy(rq4_gold.get("validator_ids", [])),
+            "acceptance_criteria_sha256": (
+                rq4_binding.get("source_identity", {}).get("criteria_proposal_sha256")
+                if rq4_binding is not None
+                else None
+            ),
+            "judge_contract": deepcopy(dict(rq4_judge_contract or {})),
+            "registry_sha256": rq4_registry_sha256,
+            "evaluation_commands": deepcopy(
+                rq4_binding.get("evaluation_commands", {})
+                if rq4_binding is not None
+                else {}
+            ),
             "execution_readiness_blockers": deepcopy(
-                rq4_gold.get("execution_readiness_blockers", [])
+                []
+                if rq4_binding is not None and eligibility.get("rq4_eligible") is True
+                else rq4_gold.get("execution_readiness_blockers", [])
             ),
         },
         "mode": mode.upper(),
@@ -468,6 +564,7 @@ __all__ = [
     "CONDITIONS",
     "RQMaterializationError",
     "load_target_views",
+    "load_rq4_agent_judge_registry",
     "materialize_reasoning_input",
     "stage_phase_a_workspace",
     "write_materialized_input",

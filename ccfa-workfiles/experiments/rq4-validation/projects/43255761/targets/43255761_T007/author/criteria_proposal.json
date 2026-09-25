@@ -1,0 +1,143 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T007",
+  "before_message_id": 197,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "100bdebc1d5a30bc475b7bc3f96d9f7864bf58a5392057d9935345377b5be441",
+    "pre_repo_sha256": "c41a290a86fab897e15162bc31ebb65ca6fde22c13c5194eb6db65804b1cdd50",
+    "target_manifest_sha256": "50b905342485e11bac02072914348c75c8f6c3b3cc448979c3662747fd55544a",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The clarified cue is visible instructional text, not a subjective color judgment. A DOCX parser can require non-empty displayed/placeholder text for every interactive control and can verify the same instruction may also appear in w:alias.",
+      "interfaces_inspected": [
+        "dist/template.docx!/word/document.xml",
+        "dist/template.docx!/word/glossary/document.xml",
+        "src/artifact_runtime.py:_parse_docx"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Every interactive content control has non-whitespace in-field instructional text, either directly in w:sdtContent or through a valid resolved placeholder, so no editable field is represented by blank content.",
+        "gold_requirement_refs": [
+          "REQ_FIELD_LABEL_HELP_TEXT",
+          "REQ_FIELD_VISUAL_CUES"
+        ],
+        "gold_state_paths": [
+          "REQ_FIELD_LABEL_HELP_TEXT.attributes.empty_field_guidance",
+          "REQ_FIELD_VISUAL_CUES.attributes.editable_field_visual_cue",
+          "REQ_FIELD_VISUAL_CUES.ambiguity",
+          "REQ_FIELD_VISUAL_CUES.execution"
+        ],
+        "evidence_message_ids": [197],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx interactive content controls",
+            "setup": ["Build dist/template.docx in a fresh workspace."],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {"resolve": ["w:sdtContent visible text", "w:placeholder/w:docPart"]}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "interactive controls with blank direct and resolved in-field instruction", "operator": "COUNT_EQUALS", "expected": 0},
+              {"subject": "interactive controls with a dangling placeholder reference", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": [
+              "Treat whitespace-only text as blank after OOXML whitespace normalization.",
+              "Inspect actual DOCX package parts and do not accept source-configuration values as evidence."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": ["A control has an alias but its in-field content and resolved placeholder are empty."],
+            "action": "Resolve visible in-field instruction independently of alias.",
+            "expected_failure_or_absence": "The criterion fails because label-only help does not keep the field visibly identifiable."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Where an interactive control has both a label and in-field instruction, duplicating the same normalized help text in w:alias and the field is accepted and is not treated as an error.",
+        "gold_requirement_refs": ["REQ_FIELD_LABEL_HELP_TEXT"],
+        "gold_state_paths": ["REQ_FIELD_LABEL_HELP_TEXT.attributes.duplicate_help_text_allowed"],
+        "evidence_message_ids": [197],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx w:sdt label/content pairs",
+            "setup": ["Use the built DOCX from AC001."],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {"compare": "normalized w:alias with resolved in-field instruction per w:tag"}
+              }
+            ],
+            "expected_observations": [
+              {"subject": "controls with matching non-empty label and in-field instruction", "operator": "GREATER_THAN_OR_EQUAL", "expected": 1}
+            ],
+            "determinism_controls": [
+              "Use tag-based pairing and exact normalized text equality.",
+              "Do not infer acceptance from a configuration flag."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.duplicate_help_text_allowed",
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.empty_field_guidance",
+        "REQ_FIELD_VISUAL_CUES.attributes.editable_field_visual_cue",
+        "REQ_FIELD_VISUAL_CUES.ambiguity",
+        "REQ_FIELD_VISUAL_CUES.execution"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.duplicate_help_text_allowed",
+        "REQ_FIELD_LABEL_HELP_TEXT.attributes.empty_field_guidance",
+        "REQ_FIELD_VISUAL_CUES.attributes.editable_field_visual_cue",
+        "REQ_FIELD_VISUAL_CUES.ambiguity",
+        "REQ_FIELD_VISUAL_CUES.execution"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_FIELD_PLACEHOLDER_ACTIVATION",
+        "REQ_FIELD_FORMATTING_PRESERVATION",
+        "REQ_WORD_WINDOWS_COMPATIBILITY"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

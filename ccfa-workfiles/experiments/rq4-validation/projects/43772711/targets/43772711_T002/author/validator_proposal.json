@@ -1,0 +1,40 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T002",
+  "before_message_id": 25,
+  "author_role": "VALIDATOR_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "8703504bd4f54ddf1bb275c2870e37a56ee621a1e1245608c2eac4b86df43073",
+    "pre_repo_sha256": "ef8f2b4b209c4906aaf6a81e1614f5389c235f198c8edaee102f74cd59e98818",
+    "target_manifest_sha256": "2e00c6024bdbaf1c9916db51c454effb5ffc816b57816c22121ab198bf93aa8c",
+    "upstream_proposals": [{"role": "CRITERIA_AUTHOR", "path": "author/criteria_proposal.json", "sha256": "b32b3dbc7181ad99d00b9e307d65878a2ccd5470de8a90fe7f9d04b3808bfeb3"}]
+  },
+  "produced_files": [
+    {"path": "validator/validator_core.py", "sha256": "533a0f04ee8caef252448f2e38b42961a5b3b358ad32733fd3d9da29c511b6c4", "purpose": "Target-local deterministic build/regression runner and frozen-Chrome responsive DOM harness", "researcher_only": true},
+    {"path": "validator/run_validator.py", "sha256": "3ad158663cee000349d16c52a8a1cc3ee6dfc3e08c330f47c24f5fe87fceb46a", "purpose": "Target-bound hidden validator entrypoint", "researcher_only": true}
+  ],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "acceptance_criteria_sha256": "b32b3dbc7181ad99d00b9e307d65878a2ccd5470de8a90fe7f9d04b3808bfeb3",
+    "harness": {
+      "language": "Python 3 stdlib with frozen Chrome sha256=e8bce39747ea63c9c7d4306f7635d2916c9ecb0cf913fbcf5e7acc4539b5b8a0",
+      "entrypoint": "validator/run_validator.py",
+      "build_command": ["{python}", "{validator_root}/validator/run_validator.py", "--component", "build", "--repo", "{repo}", "--result", "{repo}/.rq4-results/build.json"],
+      "target_test_command": ["{python}", "{validator_root}/validator/run_validator.py", "--component", "target", "--repo", "{repo}", "--result", "{repo}/.rq4-results/target.json"],
+      "regression_command": ["{python}", "{validator_root}/validator/run_validator.py", "--component", "regression", "--repo", "{repo}", "--result", "{repo}/.rq4-results/regression.json"],
+      "timeout_seconds": 90, "network_policy": "DISABLED", "fresh_workspace_required": true, "machine_readable_result_path": ".rq4-results/{build,target,regression}.json"
+    },
+    "criterion_coverage": [
+      {"criterion_id": "AC001", "test_ids": ["T002-AC001-OBS001"], "observable_ids": ["OBS001"]},
+      {"criterion_id": "AC002", "test_ids": ["T002-AC002-OBS002"], "observable_ids": ["OBS002"]},
+      {"criterion_id": "AC003", "test_ids": ["T002-AC003-OBS003"], "observable_ids": ["OBS003"]},
+      {"criterion_id": "AC004", "test_ids": ["T002-AC004-OBS004"], "observable_ids": ["OBS004"]}
+    ],
+    "result_contract": {"components": ["BUILD_PASS", "TARGET_TEST_PASS", "REGRESSION_PASS"], "final_rule": "BUILD_PASS AND TARGET_TEST_PASS AND REGRESSION_PASS", "harness_error_is_agent_failure": false},
+    "calibration_contract": {"pre_repo_expected": {"build": "PASS", "regression": "PASS", "target_test": "FAIL"}, "reference_expected": {"build": "PASS", "regression": "PASS", "target_test": "PASS"}, "adversarial_expected": "EVERY_PARTIAL_OR_MUTANT_FAILS_TARGET_OR_REGRESSION", "actual_results_may_be_written_by_author": false},
+    "implementation_independence": {"no_llm_judge": true, "no_network": true, "no_reference_patch_comparison": true, "no_gold_mapping_direct_score": true, "no_unrequired_internal_structure_assertion": true}
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

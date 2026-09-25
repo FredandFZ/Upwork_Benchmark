@@ -12,18 +12,25 @@ import re
 try:  # Package import in tests; script import in CLIs.
     from .evaluation.alignment import validate_alignment_response
     from .evaluation.rq1 import validate_relation_response
-    from .evaluation.state import validate_semantic_fact_response
+    from .evaluation.state import (
+        validate_field_alignment_response,
+        validate_semantic_fact_response,
+    )
     from .rq_run_identity import RQRunConfigError, file_sha256, judge_config_id
 except ImportError:  # pragma: no cover
     from evaluation.alignment import validate_alignment_response
     from evaluation.rq1 import validate_relation_response
-    from evaluation.state import validate_semantic_fact_response
+    from evaluation.state import (
+        validate_field_alignment_response,
+        validate_semantic_fact_response,
+    )
     from rq_run_identity import RQRunConfigError, file_sha256, judge_config_id
 
 
 RQ1_ALIGNMENT_REQUEST = "rq1-alignment-request-v1"
 REQUIREMENT_ALIGNMENT_REQUEST = "requirement-alignment-request-v1"
 STATE_SEMANTIC_REQUEST = "state-semantic-request-v1"
+STATE_FIELD_ALIGNMENT_REQUEST = "state-field-alignment-request-v1"
 CLARIFICATION_REQUEST = "rq3-clarification-semantic-request-v1"
 
 
@@ -124,6 +131,26 @@ def response_schema_for_request(request: Mapping[str, Any]) -> dict[str, Any]:
                 "enum": request.get("relation_values"),
             },
         }
+    elif version == STATE_FIELD_ALIGNMENT_REQUEST:
+        pairs = _array_ids(
+            request,
+            "candidate_pairs",
+            ("prediction_field_ref", "gold_field_ref"),
+        )
+        item_properties = {
+            "prediction_field_ref": {
+                "type": "string",
+                "enum": sorted({row["prediction_field_ref"] for row in pairs}),
+            },
+            "gold_field_ref": {
+                "type": "string",
+                "enum": sorted({row["gold_field_ref"] for row in pairs}),
+            },
+            "relation": {
+                "type": "string",
+                "enum": request.get("relation_values"),
+            },
+        }
     elif version == CLARIFICATION_REQUEST:
         candidates = _array_ids(request, "candidates", ("candidate_id",))
         item_properties = {
@@ -177,6 +204,8 @@ def validate_judge_response(
         validate_alignment_response(request, value)
     elif version == STATE_SEMANTIC_REQUEST:
         validate_semantic_fact_response(request, value)
+    elif version == STATE_FIELD_ALIGNMENT_REQUEST:
+        validate_field_alignment_response(request, value)
     elif version == CLARIFICATION_REQUEST:
         expected = {
             row["candidate_id"]
@@ -225,6 +254,7 @@ def deterministic_empty_response(
         RQ1_ALIGNMENT_REQUEST: "candidate_pairs",
         REQUIREMENT_ALIGNMENT_REQUEST: "candidate_pairs",
         STATE_SEMANTIC_REQUEST: "facts",
+        STATE_FIELD_ALIGNMENT_REQUEST: "candidate_pairs",
         CLARIFICATION_REQUEST: "candidates",
     }.get(version)
     if collection is None or request.get(collection) != []:
@@ -264,11 +294,12 @@ def normalize_judge_config(
         "retries": value.get("retries", 3),
         "timeout_seconds": value.get("timeout_seconds", 900),
         "judge_prompt_sha256": file_sha256(judge_prompt_path),
-        "request_contract": "RQ_EVALUATOR_GENERATED_V1",
+        "request_contract": "RQ_EVALUATOR_GENERATED_V2",
         "scorer_versions": {
             "RQ1": "rq1-evaluation-result-v1",
-            "RQ2": "rq2-evaluation-result-v1",
-            "RQ3": "rq3-evaluation-result-v1",
+            "RQ2": "rq2-evaluation-result-v2",
+            "RQ3": "rq3-evaluation-result-v2",
+            "state_field_alignment": "state-field-alignment-v1",
         },
         "strict_response_validation": True,
     }

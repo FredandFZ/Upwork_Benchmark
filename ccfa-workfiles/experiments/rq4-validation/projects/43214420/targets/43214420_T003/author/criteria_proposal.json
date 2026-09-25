@@ -1,0 +1,84 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T003",
+  "before_message_id": 72,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "31ba7fa4a1500b99f761dbe102d3073bcc72bc8d6646163c94ce6c0e0ad9030e",
+    "pre_repo_sha256": "55d395711d91fa117bdd6e5653a957629d3ebf232fb5cd9b76006a96728e78d6",
+    "target_manifest_sha256": "7e57978aae1bbf91b8495324a67f3ede0d6a99a2bd6eb925ad860d1215dceb96",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {"independent_review_state": "NOT_REVIEWED", "calibration_status": "NOT_RUN_BY_AUTHOR", "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"},
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "Fit, connector separation, and mounting-hole obstruction can be reduced to polygon containment/intersection and minimum-distance facts over the built PCB outline, connector courtyards, and plated/non-plated mounting holes. 'Small gap' is scored only as strictly positive courtyard clearance; no subjective preferred magnitude is invented.",
+      "interfaces_inspected": ["dist/design.kicad_pcb footprints", "dist/design.kicad_pcb Edge.Cuts", "src/artifact_model.py:ARTIFACT_MODEL.footprints", "src/artifact_model.py:ARTIFACT_MODEL.geometry"],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The battery connector and adjacent board JST are both wholly inside the closed board outline and their transformed F.CrtYd/B.CrtYd polygons have strictly positive edge-to-edge clearance with no overlap.",
+        "gold_requirement_refs": ["REQ_POWER_BOARD_BATTERY_INTERFACE", "REQ_POWER_BOARD_MECHANICAL_LAYOUT"],
+        "gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.battery_connector_placement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.battery_connector_arrangement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.connector_gap_requirement"],
+        "evidence_message_ids": [72],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb board outline and connector courtyards",
+            "setup": ["Build design.kicad_pcb in a fresh workspace.", "Select the battery and board JST footprints by stable reference/value and resolve placed courtyard polygons."],
+            "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_pcb", "parameters": {"geometry": ["Edge.Cuts closed polygon", "connector courtyard polygons"], "units": "mm"}}],
+            "expected_observations": [
+              {"subject": "battery connector courtyard contained by board outline", "operator": "EQUALS", "expected": true},
+              {"subject": "board JST courtyard contained by board outline", "operator": "EQUALS", "expected": true},
+              {"subject": "connector courtyard intersection area in mm^2", "operator": "EQUALS", "expected": 0},
+              {"subject": "connector courtyard minimum distance in mm", "operator": "NOT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": ["Apply footprint translation, rotation, and side mirroring before polygon tests.", "Require real courtyard geometry from the built PCB; footprint origin distance alone is insufficient."]
+          }
+        ],
+        "negative_cases": [{"case_id": "NC001", "setup": ["Connector origins differ but their courtyards touch or overlap."], "action": "Compute transformed polygon intersection and distance.", "expected_failure_or_absence": "The criterion fails because origin separation is not usable clearance."}]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "PRESERVED_REGRESSION",
+        "statement": "No battery-connector or board-JST courtyard intersects any mounting-hole copper, drill, or mechanical keep-out region in the built PCB.",
+        "gold_requirement_refs": ["REQ_POWER_BOARD_BATTERY_INTERFACE", "REQ_POWER_BOARD_MECHANICAL_LAYOUT"],
+        "gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.mounting_hole_clearance", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.mounting_hole_clearance"],
+        "evidence_message_ids": [72],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb connector courtyards and mounting holes",
+            "setup": ["Resolve all MountingHole footprints and NPTH/PTH drill envelopes."],
+            "actions": [{"operation": "PARSE_ARTIFACT", "target": "dist/design.kicad_pcb", "parameters": {"compare": "connector courtyard polygons against hole drill/copper/keep-out envelopes"}}],
+            "expected_observations": [
+              {"subject": "mounting holes found", "operator": "COUNT_EQUALS", "expected": 8},
+              {"subject": "connector-to-mounting-hole envelope intersections", "operator": "COUNT_EQUALS", "expected": 0}
+            ],
+            "determinism_controls": ["Use exact placed geometry from the PCB.", "Include drill diameter, pad copper, and explicit keep-out shapes in the hole envelope."]
+          }
+        ],
+        "negative_cases": [{"case_id": "NC002", "setup": ["A connector visually misses the drill center but overlaps the pad or keep-out."], "action": "Intersect full envelopes.", "expected_failure_or_absence": "The criterion fails."}]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.battery_connector_placement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_gap_requirement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.mounting_hole_clearance", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.battery_connector_arrangement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.mounting_hole_clearance"],
+      "covered_affected_gold_state_paths": ["REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.battery_connector_placement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.connector_gap_requirement", "REQ_POWER_BOARD_BATTERY_INTERFACE.attributes.mounting_hole_clearance", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.battery_connector_arrangement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.connector_gap_requirement", "REQ_POWER_BOARD_MECHANICAL_LAYOUT.attributes.mounting_hole_clearance"],
+      "preserved_requirement_refs": ["REQ_POWER_BOARD_USB_CONNECTOR", "REQ_POWER_BOARD_BATTERY_SAFETY"],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {"no_fabricated_execution_results": true, "no_calibration_claim": true, "no_eligibility_claim": true, "no_agent_visible_leakage_written": true}
+}

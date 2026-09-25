@@ -1,0 +1,167 @@
+{
+  "schema_version": "rq4-validator-authoring-proposal-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T001",
+  "before_message_id": 79,
+  "author_role": "CRITERIA_AUTHOR",
+  "proposal_status": "PROPOSED",
+  "source_identity": {
+    "work_item_sha256": "f3123e3dc7b12d7b0c40999d6d1be1cc67d87d7eb59d9b7a22f7d14022492c50",
+    "pre_repo_sha256": "c8f7b7c0e66b343df697dfe355aed0933e5d0a7a58f6e1765f562402656ea669",
+    "target_manifest_sha256": "dc943da8bbf4d9c1c8cc3faca4b67ee10cbed780f02cd877a1bae5b872b1bcbb",
+    "upstream_proposals": []
+  },
+  "produced_files": [],
+  "review_status": {
+    "independent_review_state": "NOT_REVIEWED",
+    "calibration_status": "NOT_RUN_BY_AUTHOR",
+    "eligibility_status": "NOT_DETERMINED_BY_AUTHOR"
+  },
+  "payload": {
+    "observability_triage": {
+      "determination": "DETERMINISTIC_OBSERVABLE",
+      "rationale": "The requested caption-style name and its existing typography can be read directly from word/styles.xml, while actual use by image and table captions can be read from paragraph style references in word/document.xml. These are stable DOCX package facts and do not rely on current_state.py declarations.",
+      "interfaces_inspected": [
+        "dist/template.docx!/word/styles.xml",
+        "dist/template.docx!/word/document.xml",
+        "src/artifact_runtime.py:build_artifacts",
+        "src/artifact_runtime.py:parse_artifacts"
+      ],
+      "subjective_only": false,
+      "repair_requirements": []
+    },
+    "downstream_disposition": "PROCEED_TO_VALIDATOR_AUTHORING",
+    "blocker_or_exclusion": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The built DOCX defines one paragraph style whose displayed name is exactly 'caption text'; the style specifies Century Gothic, italic, 11 pt text with 15 pt line spacing.",
+        "gold_requirement_refs": [
+          "REQ_STYLE_NAMING_CONVENTION",
+          "REQ_CAPTION_STYLE"
+        ],
+        "gold_state_paths": [
+          "REQ_STYLE_NAMING_CONVENTION.attributes.style_name_language",
+          "REQ_CAPTION_STYLE.attributes.style_name",
+          "REQ_CAPTION_STYLE.execution"
+        ],
+        "evidence_message_ids": [79],
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx!/word/styles.xml",
+            "setup": [
+              "Build dist/template.docx in a fresh network-disabled workspace."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "parts": ["word/styles.xml"],
+                  "namespace": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+                }
+              }
+            ],
+            "expected_observations": [
+              {"subject": "paragraph styles with normalized w:name/@w:val equal to 'caption text'", "operator": "COUNT_EQUALS", "expected": 1},
+              {"subject": "caption text effective run font", "operator": "EQUALS", "expected": "Century Gothic"},
+              {"subject": "caption text effective italic flag", "operator": "EQUALS", "expected": true},
+              {"subject": "caption text effective size in half-points", "operator": "EQUALS", "expected": 22},
+              {"subject": "caption text effective line spacing in twentieths of a point", "operator": "EQUALS", "expected": 300}
+            ],
+            "determinism_controls": [
+              "Use namespace-aware XML parsing and resolve basedOn inheritance before comparing effective properties.",
+              "Match the displayed style name exactly after XML entity decoding; do not inspect source-code literals."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": ["A DOCX contains the text 'caption text' only in a body paragraph."],
+            "action": "Parse word/styles.xml and resolve paragraph styles.",
+            "expected_failure_or_absence": "The criterion fails because no paragraph style has that displayed name."
+          },
+          {
+            "case_id": "NC002",
+            "setup": ["A style named 'caption text' exists but uses default typography."],
+            "action": "Resolve its effective run and paragraph properties.",
+            "expected_failure_or_absence": "The criterion fails on font, italic, size, or line spacing."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Image-label and table-label paragraphs in the built DOCX both reference the paragraph style whose displayed name is 'caption text'.",
+        "gold_requirement_refs": ["REQ_CAPTION_STYLE"],
+        "gold_state_paths": ["REQ_CAPTION_STYLE.attributes.caption_targets"],
+        "evidence_message_ids": [79],
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx!/word/document.xml",
+            "setup": [
+              "Build the frozen image-caption and table-caption fixture into dist/template.docx."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "parts": ["word/document.xml", "word/styles.xml"],
+                  "fixtures": ["image_label", "table_label"]
+                }
+              }
+            ],
+            "expected_observations": [
+              {"subject": "image-label fixture effective paragraph style name", "operator": "EQUALS", "expected": "caption text"},
+              {"subject": "table-label fixture effective paragraph style name", "operator": "EQUALS", "expected": "caption text"}
+            ],
+            "determinism_controls": [
+              "Identify fixture paragraphs by frozen semantic bookmarks/content-control tags rather than paragraph order.",
+              "Resolve w:pStyle IDs through word/styles.xml before comparing displayed names."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC003",
+            "setup": ["The caption style exists but neither caption fixture references it."],
+            "action": "Resolve effective paragraph styles for both fixtures.",
+            "expected_failure_or_absence": "The criterion fails; an unused style declaration is insufficient."
+          }
+        ]
+      }
+    ],
+    "coverage_summary": {
+      "affected_gold_state_paths": [
+        "REQ_STYLE_NAMING_CONVENTION.attributes.style_name_language",
+        "REQ_CAPTION_STYLE.attributes.style_name",
+        "REQ_CAPTION_STYLE.execution"
+      ],
+      "covered_affected_gold_state_paths": [
+        "REQ_STYLE_NAMING_CONVENTION.attributes.style_name_language",
+        "REQ_CAPTION_STYLE.attributes.style_name",
+        "REQ_CAPTION_STYLE.execution"
+      ],
+      "preserved_requirement_refs": [
+        "REQ_TEMPLATE_DEFAULT_LANGUAGE",
+        "REQ_STYLE_CATALOG_IMPLEMENTATION",
+        "REQ_TITLE_HEADING_TYPOGRAPHY",
+        "REQ_HEADING_3_TYPOGRAPHY"
+      ],
+      "uncovered_items": []
+    }
+  },
+  "author_declaration": {
+    "no_fabricated_execution_results": true,
+    "no_calibration_claim": true,
+    "no_eligibility_claim": true,
+    "no_agent_visible_leakage_written": true
+  }
+}

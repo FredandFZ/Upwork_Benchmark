@@ -1,0 +1,59 @@
+{
+  "schema_version": "rq123-experiment-config-v1",
+  "experiment_id": "rq123-claude-code-pilot",
+  "repetitions": 1,
+  "agent": {
+    "provider": "claude_code_cli",
+    "runtime_version": "replace-with-exact-claude-code-version-at-least-2.1.259",
+    "model": "replace-with-claude-model-name",
+    "model_version": "replace-with-exact-claude-model-id",
+    "reasoning_effort": "high",
+    "tool_policy": "NO_TOOLS_RESTRICTED_NO_MCP_NO_HOST_CUSTOMIZATIONS",
+    "command": [
+      "claude",
+      "-p",
+      "--restricted",
+      "--no-session-persistence",
+      "--disable-slash-commands",
+      "--permission-mode",
+      "dontAsk",
+      "--permission-prompts",
+      "none",
+      "--tools",
+      "",
+      "--disallowedTools",
+      "mcp__*",
+      "--no-chrome",
+      "--model",
+      "{model_version}",
+      "--effort",
+      "{reasoning_effort}",
+      "--output-format",
+      "json",
+      "--json-schema",
+      "{response_schema_json}",
+      "Use the complete benchmark request supplied on stdin and return only the response required by its JSON Schema. Do not ask questions outside that response contract."
+    ],
+    "output_mode": "claude_structured_json",
+    "output_filename": "agent_response.json",
+    "timeout_seconds": 900,
+    "environment_allowlist": [
+      "HOME",
+      "USERPROFILE",
+      "APPDATA",
+      "LOCALAPPDATA",
+      "XDG_CONFIG_HOME",
+      "CLAUDE_CONFIG_DIR"
+    ]
+  },
+  "judge": {
+    "provider": "upwork_stage1",
+    "api_interface_version": "stage1-chat-completions-v1",
+    "model": "replace-with-judge-model-id",
+    "model_version": "replace-with-exact-judge-model-version-or-snapshot",
+    "reasoning_effort": "high",
+    "max_concurrent_requests": 4,
+    "retries": 3,
+    "timeout_seconds": 900
+  }
+}

@@ -14,6 +14,7 @@ from .alignment import (
 )
 from .state import (
     STATE_DIMENSIONS,
+    build_field_alignment_request as build_state_field_alignment_request,
     build_semantic_fact_request,
     score_state,
     validate_semantic_fact_response,
@@ -21,7 +22,7 @@ from .state import (
 
 
 AGENT_RESPONSE_SCHEMA_VERSION = "rq3-agent-response-v3"
-EVALUATION_RESULT_SCHEMA_VERSION = "rq3-evaluation-result-v1"
+EVALUATION_RESULT_SCHEMA_VERSION = "rq3-evaluation-result-v2"
 AGGREGATE_RESULT_SCHEMA_VERSION = "rq3-aggregate-result-v1"
 CLARIFICATION_REQUEST_SCHEMA_VERSION = "rq3-clarification-semantic-request-v1"
 CLARIFICATION_RESPONSE_SCHEMA_VERSION = "rq3-clarification-semantic-response-v1"
@@ -228,6 +229,7 @@ def build_state_semantic_request(
     instance: Mapping[str, Any],
     response: Mapping[str, Any],
     alignment_response: Mapping[str, Any],
+    field_alignment_response: Mapping[str, Any],
     *,
     condition: str,
 ) -> dict[str, Any]:
@@ -243,6 +245,11 @@ def build_state_semantic_request(
         pairs.append(
             {
                 "pair_id": f"rq3-{condition}-{match['prediction_ref']}-{match['gold_ref']}",
+                "prediction_ref": match["prediction_ref"],
+                "gold_ref": match["gold_ref"],
+                "gold_requirement_id": requirement_id,
+                "predicted_requirement_summary": predicted["requirement_summary"],
+                "gold_requirement_summary": gold["affected_requirement_alignment_gold"][requirement_id]["canonical_summary"],
                 "gold_state": branch["post_task_states"][requirement_id],
                 "predicted_state": predicted["state"],
                 "scoring_specs": gold["post_state_scoring_specs"][requirement_id],
@@ -251,6 +258,43 @@ def build_state_semantic_request(
     return build_semantic_fact_request(
         target_id=instance.get("target_id"),
         purpose=f"RQ3_POST_STATE_FACT_EQUIVALENCE_{condition}",
+        state_pairs=pairs,
+        field_alignment_response=field_alignment_response,
+    )
+
+
+def build_field_alignment_request(
+    instance: Mapping[str, Any],
+    response: Mapping[str, Any],
+    alignment_response: Mapping[str, Any],
+    *,
+    condition: str,
+) -> dict[str, Any]:
+    gold, branch, _, ref_map, alignment = _alignment_context(
+        instance, response, alignment_response, condition=condition
+    )
+    if branch["decision"] != "ACT":
+        raise RQ3EvaluationError("field alignment is only valid for ACT")
+    pairs = []
+    for match in alignment["matched_pairs"]:
+        requirement_id = ref_map[match["gold_ref"]]
+        predicted = alignment["predictions_by_ref"][match["prediction_ref"]]
+        pairs.append(
+            {
+                "pair_id": f"rq3-{condition}-{match['prediction_ref']}-{match['gold_ref']}",
+                "prediction_ref": match["prediction_ref"],
+                "gold_ref": match["gold_ref"],
+                "gold_requirement_id": requirement_id,
+                "predicted_requirement_summary": predicted["requirement_summary"],
+                "gold_requirement_summary": gold["affected_requirement_alignment_gold"][requirement_id]["canonical_summary"],
+                "gold_state": branch["post_task_states"][requirement_id],
+                "predicted_state": predicted["state"],
+                "scoring_specs": gold["post_state_scoring_specs"][requirement_id],
+            }
+        )
+    return build_state_field_alignment_request(
+        target_id=instance.get("target_id"),
+        purpose=f"RQ3_ATTRIBUTE_FIELD_ALIGNMENT_{condition}",
         state_pairs=pairs,
     )
 
@@ -383,6 +427,7 @@ def score_rq3(
     *,
     condition: str,
     alignment_response: Mapping[str, Any] | None = None,
+    field_alignment_response: Mapping[str, Any] | None = None,
     semantic_response: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     normalized = validate_agent_response(instance, response, condition=condition)
@@ -402,8 +447,17 @@ def score_rq3(
         key: value for key, value in alignment.items() if key != "predictions_by_ref"
     }
     if gold_decision == "ACT":
-        state_request = build_state_semantic_request(
+        if field_alignment_response is None:
+            raise RQ3EvaluationError("ACT scoring requires field-alignment response")
+        field_request = build_field_alignment_request(
             instance, normalized, alignment_response, condition=condition
+        )
+        state_request = build_state_semantic_request(
+            instance,
+            normalized,
+            alignment_response,
+            field_alignment_response,
+            condition=condition,
         )
         semantic_relations = validate_semantic_fact_response(
             state_request, semantic_response
@@ -436,6 +490,8 @@ def score_rq3(
                         predicted_state=predicted["state"],
                         scoring_specs=gold["post_state_scoring_specs"][requirement_id],
                         semantic_relations=semantic_relations,
+                        field_alignment_request=field_request,
+                        field_alignment_response=field_alignment_response,
                     ),
                 }
             )
@@ -480,7 +536,10 @@ def score_rq3(
             },
             "alignment": public_alignment,
             "post_state_details": scored_states,
-            "diagnostics": {"semantic_fact_count": len(state_request["facts"])},
+            "diagnostics": {
+                "semantic_fact_count": len(state_request["facts"]),
+                "field_alignment_candidate_count": len(field_request["candidate_pairs"]),
+            },
         }
 
     clarification_request = build_clarification_semantic_request(
@@ -783,6 +842,7 @@ __all__ = [
     "aggregate_rq3_results",
     "build_alignment_request",
     "build_clarification_semantic_request",
+    "build_field_alignment_request",
     "build_state_semantic_request",
     "score_rq3",
     "score_rq3_constant_decision_baseline",

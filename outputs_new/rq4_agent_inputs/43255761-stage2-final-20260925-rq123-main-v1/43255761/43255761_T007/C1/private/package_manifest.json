@@ -1,0 +1,175 @@
+{
+  "schema_version": "rq-private-package-manifest-v2",
+  "manifest_kind": "IMMUTABLE_INPUT_PACKAGE",
+  "package_id": "pkg_3587b22d0b4501cec506",
+  "input_release": "43255761-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43255761",
+  "target_id": "43255761_T007",
+  "target_fingerprint": "76ae12fbec8d7a074b4dc4c1f785d58754aa4db0145bddd2fe391dc07218ccf2",
+  "condition": "C1",
+  "turns": 196,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ1\\43255761_T007_RQ1.json",
+      "file_sha256": "90fdebc5bd382841f54e0ce535680530d7b5bf54ba98ebc933170894a145b5b1",
+      "content_sha256": "99b726b608316c3ae3c4147c551ac036d4e9175bf79b8f44743654292a93c9cf"
+    },
+    "RQ2": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ2\\43255761_T007_RQ2.json",
+      "file_sha256": "a2da55f4508483cfd43fed9323a67c34e9ef6f7ae48839d5dda579917616d75b",
+      "content_sha256": "70e8606c43a216685bd9c0792bac71bd33c833d44a3186fd0a895894001039a5"
+    },
+    "RQ3": {
+      "path": "D:\\Python_workplace\\Upwork\\Upwork_Benchmark\\outputs_new\\stage2\\43255761\\RQ3\\43255761_T007_RQ3.json",
+      "file_sha256": "d14ce9208e621530c1ee36d9887f6db5a160b260eeec9aed4e81385eb90e2038",
+      "content_sha256": "5b6d800adebecc18734959eba97828029a502878040bc03a32df41b7feff0f45"
+    }
+  },
+  "public_files": {
+    "task.json": "4948d7f86ad95a2bf004399fd4e0bb93399cb42441845e1ae2d7266938bf9c9c",
+    "history.jsonl": "45e45d8f76f6516a04a04df54f14299b9229ebfa30efc580f9d353c0e274def0",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "phase_gate_policy": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true
+  },
+  "repository": {
+    "archive_path": "Code Environment/43255761/targets/T007_before_197/pre_repo.zip",
+    "archive_sha256": "c41a290a86fab897e15162bc31ebb65ca6fde22c13c5194eb6db65804b1cdd50",
+    "tree_sha256": "e1c0d66263b4b29da420d42432b8186d63eaa13ff86aade91ed5aef03e2130b3",
+    "manifest_path": "Code Environment/43255761/targets/T007_before_197/manifest.json",
+    "manifest_sha256": "50b905342485e11bac02072914348c75c8f6c3b3cc448979c3662747fd55544a",
+    "before_message_id": 197,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Every interactive content control has non-whitespace in-field instructional text, either directly in w:sdtContent or through a valid resolved placeholder, so no editable field is represented by blank content.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx interactive content controls",
+            "setup": [
+              "Build dist/template.docx in a fresh workspace."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "resolve": [
+                    "w:sdtContent visible text",
+                    "w:placeholder/w:docPart"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "interactive controls with blank direct and resolved in-field instruction",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "interactive controls with a dangling placeholder reference",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Treat whitespace-only text as blank after OOXML whitespace normalization.",
+              "Inspect actual DOCX package parts and do not accept source-configuration values as evidence."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "A control has an alias but its in-field content and resolved placeholder are empty."
+            ],
+            "action": "Resolve visible in-field instruction independently of alias.",
+            "expected_failure_or_absence": "The criterion fails because label-only help does not keep the field visibly identifiable."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Where an interactive control has both a label and in-field instruction, duplicating the same normalized help text in w:alias and the field is accepted and is not treated as an error.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/template.docx w:sdt label/content pairs",
+            "setup": [
+              "Use the built DOCX from AC001."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/template.docx",
+                "parameters": {
+                  "compare": "normalized w:alias with resolved in-field instruction per w:tag"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "controls with matching non-empty label and in-field instruction",
+                "operator": "GREATER_THAN_OR_EQUAL",
+                "expected": 1
+              }
+            ],
+            "determinism_controls": [
+              "Use tag-based pairing and exact normalized text equality.",
+              "Do not infer acceptance from a configuration flag."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "d36d84b35de729bb2919c74396a0a36b3e68bb039c4f30cb67dca4f45a69f6cc",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY"
+}
