@@ -13,6 +13,7 @@ from rq_agent_input import (
     CONDITIONS,
     RQMaterializationError,
     materialize_reasoning_input,
+    stage_phase_a_workspace,
     write_materialized_input,
 )
 
@@ -96,11 +97,22 @@ def parse_args() -> argparse.Namespace:
         help="Root for separated public/private run artifacts.",
     )
     parser.add_argument(
+        "--workspace-root",
+        type=Path,
+        help=(
+            "Optionally copy each public package into a fresh opaque <run_id>/ "
+            "workspace suitable for an isolated Agent launch."
+        ),
+    )
+    parser.add_argument(
         "--validate-only",
         action="store_true",
         help="Validate and hash packages in memory without writing files.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.validate_only and args.workspace_root is not None:
+        parser.error("--workspace-root cannot be used with --validate-only")
+    return args
 
 
 def _target_ids(manifest: dict[str, Any], requested: str | None) -> list[str]:
@@ -130,7 +142,7 @@ def main() -> int:
         manifest = _read_manifest(project_dir / "rq_instance_manifest.json")
         target_ids = _target_ids(manifest, args.target_id)
         conditions = tuple(dict.fromkeys(args.condition or CONDITIONS))
-        completed: list[tuple[str, str, str]] = []
+        completed: list[tuple[str, str, str, Path | None]] = []
         for target_id in target_ids:
             for condition in conditions:
                 materialized = materialize_reasoning_input(
@@ -141,16 +153,24 @@ def main() -> int:
                     response_schema_path=args.response_schema,
                     mode=args.mode,
                 )
+                workspace = None
                 if not args.validate_only:
                     write_materialized_input(materialized, args.output_root)
-                completed.append((target_id, condition, materialized["run_id"]))
+                    if args.workspace_root is not None:
+                        workspace = stage_phase_a_workspace(
+                            materialized, args.workspace_root
+                        )
+                completed.append(
+                    (target_id, condition, materialized["run_id"], workspace)
+                )
         action = "validated" if args.validate_only else "materialized"
         print(
             f"{manifest.get('project_id')}: {action} {len(completed)} "
             f"Phase A package(s) in {args.mode.upper()} mode"
         )
-        for target_id, condition, run_id in completed:
-            print(f"  {target_id}/{condition}: {run_id}")
+        for target_id, condition, run_id, workspace in completed:
+            suffix = f" -> {workspace}" if workspace is not None else ""
+            print(f"  {target_id}/{condition}: {run_id}{suffix}")
         return 0
     except (OSError, RQMaterializationError) as exc:
         print(f"RQ Agent input materialization failed: {exc}", file=sys.stderr)

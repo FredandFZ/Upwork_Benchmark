@@ -319,6 +319,22 @@ def materialize_reasoning_input(
     rq4_view = views.get("RQ4")
     rq4_gold = rq4_view.get("construction_gold", {}) if rq4_view else {}
     eligibility = rq4_gold.get("eligibility_by_condition", {}).get(condition, {})
+    code_environment = rq4_view.get("code_environment", {}) if rq4_view else {}
+    repository = None
+    if rq4_view is not None:
+        repository = {
+            "archive_path": code_environment.get("archive_path"),
+            "archive_sha256": code_environment.get("archive_sha256"),
+            "tree_sha256": code_environment.get("repository_tree_sha256"),
+            "manifest_path": code_environment.get("manifest_path"),
+            "manifest_sha256": code_environment.get("manifest_sha256"),
+            "before_message_id": code_environment.get("before_message_id"),
+            "available_to_phase": "B_ONLY",
+            "extracted_during_phase_a": False,
+            "reconstruction_validation": deepcopy(
+                code_environment.get("reconstruction_validation")
+            ),
+        }
     private_manifest = {
         "schema_version": PRIVATE_MANIFEST_SCHEMA_VERSION,
         "run_id": run_id,
@@ -346,10 +362,19 @@ def materialize_reasoning_input(
             "phase_a_frozen_at": None,
             "phase_b_requires_agent_act": True,
         },
+        "repository": repository,
         "rq4": {
             "eligible": eligibility.get("rq4_eligible") is True,
+            "eligibility_status": eligibility.get("status"),
             "execution_ready": rq4_gold.get("execution_ready") is True,
             "exclusion_reason": eligibility.get("exclusion_reason"),
+            "acceptance_criteria": deepcopy(
+                rq4_gold.get("acceptance_criteria", [])
+            ),
+            "validator_ids": deepcopy(rq4_gold.get("validator_ids", [])),
+            "execution_readiness_blockers": deepcopy(
+                rq4_gold.get("execution_readiness_blockers", [])
+            ),
         },
         "mode": mode.upper(),
         "score_status": "READY" if mode == "formal" else "NOT_SCORED",
@@ -382,15 +407,48 @@ def write_materialized_input(
     for name, content in materialized["public_files"].items():
         path = public_dir / name
         temporary = path.with_name(f".{path.name}.tmp")
-        temporary.write_text(content, encoding="utf-8")
+        # Bytes avoid platform newline conversion so the recorded public hash
+        # is identical on Windows and POSIX runners.
+        temporary.write_bytes(content.encode("utf-8"))
         temporary.replace(path)
     temporary = private_path.with_name(f".{private_path.name}.tmp")
-    temporary.write_text(
-        json.dumps(private_manifest, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+    temporary.write_bytes(
+        (json.dumps(private_manifest, ensure_ascii=False, indent=2) + "\n").encode(
+            "utf-8"
+        )
     )
     temporary.replace(private_path)
     return public_dir, private_path
+
+
+def stage_phase_a_workspace(
+    materialized: Mapping[str, Any],
+    workspace_root: str | Path,
+) -> Path:
+    """Create a fresh opaque Agent-visible workspace with public files only."""
+
+    run_id = materialized.get("run_id")
+    if not isinstance(run_id, str) or not re.fullmatch(r"run_[0-9a-f]{20}", run_id):
+        raise RQMaterializationError("materialized package has an invalid run_id")
+    public_files = materialized.get("public_files")
+    if not isinstance(public_files, Mapping) or set(public_files) != {
+        "task.json",
+        "history.jsonl",
+        "instructions.md",
+        "response.schema.json",
+    }:
+        raise RQMaterializationError("materialized package has invalid public files")
+    destination = Path(workspace_root).resolve() / run_id
+    if destination.exists():
+        raise RQMaterializationError(
+            f"Phase A workspace already exists and will not be reused: {destination}"
+        )
+    destination.mkdir(parents=True)
+    for name, content in public_files.items():
+        if not isinstance(content, str):
+            raise RQMaterializationError(f"public file {name!r} must be text")
+        (destination / name).write_bytes(content.encode("utf-8"))
+    return destination
 
 
 __all__ = [
@@ -398,5 +456,6 @@ __all__ = [
     "RQMaterializationError",
     "load_target_views",
     "materialize_reasoning_input",
+    "stage_phase_a_workspace",
     "write_materialized_input",
 ]

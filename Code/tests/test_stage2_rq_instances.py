@@ -495,6 +495,20 @@ class RQInstanceTests(unittest.TestCase):
             "IMPLEMENT",
         )
         self.assertEqual(len(rq4["code_environment"]["archive_sha256"]), 64)
+        self.assertFalse(
+            rq4["construction_gold"]["eligibility_by_condition"]["C1"][
+                "rq4_eligible"
+            ]
+        )
+        indexes = build_rq_indexes(collections)
+        manifest = build_project_manifest(
+            collections,
+            indexes,
+            project_id="P1",
+        )
+        self.assertNotIn(
+            "RQ4", manifest["targets"][0]["conditions"]["C1"]["active_rqs"]
+        )
 
     def test_legacy_primary_rq_targets_do_not_control_materialization(self):
         collections = build_rq_instances(

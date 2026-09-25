@@ -1649,6 +1649,14 @@ def _build_rq4_gold(
         "inherited_constraint_review_status": relevance["review_status"],
         "acceptance_criteria": [],
         "validator_ids": [],
+        "eligibility_by_condition": {
+            condition: {
+                "rq4_eligible": False,
+                "status": "PENDING_RQ3_GOLD_AND_EXECUTION_REVIEW",
+                "exclusion_reason": "RQ3_GOLD_OR_EXECUTION_ASSETS_NOT_FROZEN",
+            }
+            for condition in CONDITIONS
+        },
         "execution_ready": False,
         "execution_readiness_blockers": [
             "FINAL_BLOCKING_AMBIGUITY_DECISION_REQUIRED",
@@ -2056,6 +2064,22 @@ def validate_rq_instance(instance: dict[str, Any]) -> list[str]:
             errors.append("RQ4 requires a Code Environment reference")
         elif code_environment.get("extracted_during_instance_construction") is not False:
             errors.append("RQ4 archive must not be extracted during construction")
+        construction_gold = instance.get("construction_gold")
+        eligibility = (
+            construction_gold.get("eligibility_by_condition")
+            if isinstance(construction_gold, dict)
+            else None
+        )
+        if not isinstance(eligibility, dict) or set(eligibility) != set(CONDITIONS):
+            errors.append("RQ4 eligibility must contain exactly C1 and C2")
+        elif any(
+            not isinstance(eligibility[condition], dict)
+            or not isinstance(
+                eligibility[condition].get("rq4_eligible"), bool
+            )
+            for condition in CONDITIONS
+        ):
+            errors.append("RQ4 condition eligibility records are invalid")
     if "construction_gold" not in instance:
         errors.append("construction_gold is required")
     elif rq_id == "RQ1":
@@ -2351,7 +2375,18 @@ def build_project_manifest(
                     raise RQInstanceError(
                         f"target {target_id!r} has inconsistent {condition} history"
                     )
-                if record.get("available") is True:
+                is_active = record.get("available") is True
+                if rq_id == "RQ4":
+                    gold = instance.get("construction_gold", {})
+                    eligibility = gold.get("eligibility_by_condition", {}).get(
+                        condition, {}
+                    )
+                    is_active = bool(
+                        is_active
+                        and eligibility.get("rq4_eligible") is True
+                        and gold.get("execution_ready") is True
+                    )
+                if is_active:
                     condition_record["active_rqs"].append(rq_id)
 
     return {

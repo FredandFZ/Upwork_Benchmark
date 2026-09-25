@@ -9,14 +9,22 @@ from Code.rq_agent_input import (
     RQMaterializationError,
     load_target_views,
     materialize_reasoning_input,
+    stage_phase_a_workspace,
     write_materialized_input,
 )
+from Code.rq_phase_a import RQPhaseAError, freeze_phase_a_response
 from Code.stage2.rq_instances import (
     build_project_manifest,
     build_rq_indexes,
     build_rq_instances,
 )
-from Code.tests.test_stage2_rq_instances import _gold, _messages, _state_graph
+from Code.tests.test_stage2_rq_instances import (
+    _act_state_graph,
+    _gold,
+    _messages,
+    _state_graph,
+    _write_code_environment,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -58,6 +66,42 @@ def _write_project(project_dir: Path) -> None:
             )
         _write_json(project_dir / rq_id / "index.json", indexes[rq_id])
     _write_json(project_dir / "rq_instance_manifest.json", manifest)
+
+
+def _clarify_response(evidence_message_ids: list[int]) -> dict:
+    state = {
+        "attributes": {"colour": "blue"},
+        "scope": {
+            "persistence": "PROJECT_PERSISTENT",
+            "components": ["FRONTEND"],
+            "contexts": ["BUTTON"],
+        },
+        "lifecycle_status": "ACTIVE",
+        "ambiguity": None,
+        "execution": None,
+    }
+    return {
+        "requirements": [
+            {
+                "requirement_ref": "agent-local-1",
+                "requirement_summary": "Button colour",
+                "evidence_message_ids": evidence_message_ids,
+                "pre_task_state": state,
+            }
+        ],
+        "decision": "CLARIFY",
+        "post_task_states": None,
+        "clarifications": [
+            {
+                "requirement_ref": "agent-local-1",
+                "requirement_summary": "Button colour",
+                "dimension": "VALUE",
+                "field": "colour",
+                "missing_information": "The requested final colour is not definite.",
+                "question": "Should the final button colour be green?",
+            }
+        ],
+    }
 
 
 class RQAgentMaterializationTests(unittest.TestCase):
@@ -116,6 +160,23 @@ class RQAgentMaterializationTests(unittest.TestCase):
             self.assertTrue(private_path.is_file())
             self.assertNotEqual(private_path.parent, public_dir)
             self.assertNotIn("source_instances", (public_dir / "task.json").read_text())
+            workspace = stage_phase_a_workspace(c1, root / "workspaces")
+            self.assertEqual(workspace.name, c1["run_id"])
+            self.assertEqual(
+                {path.name for path in workspace.iterdir()},
+                {
+                    "task.json",
+                    "history.jsonl",
+                    "instructions.md",
+                    "response.schema.json",
+                },
+            )
+            self.assertNotIn("P1_T001", str(workspace))
+            self.assertNotIn("C1", str(workspace))
+            with self.assertRaisesRegex(
+                RQMaterializationError, "will not be reused"
+            ):
+                stage_phase_a_workspace(c1, root / "workspaces")
 
     def test_formal_mode_blocks_unreviewed_rq2_and_rq3_gold(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -133,6 +194,59 @@ class RQAgentMaterializationTests(unittest.TestCase):
                     mode="formal",
                 )
 
+    def test_rq4_candidate_metadata_stays_private_and_gate_stays_inactive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project_dir = root / "P1"
+            code_environment = _write_code_environment(
+                root / "code_environment",
+                event_types=["MODIFY", "INTRODUCE"],
+            )
+            collections = build_rq_instances(
+                _gold(),
+                _act_state_graph(),
+                _messages(),
+                input_release="P1-rq4-test",
+                code_environment_dir=code_environment,
+            )
+            indexes = build_rq_indexes(collections)
+            manifest = build_project_manifest(
+                collections,
+                indexes,
+                project_id="P1",
+                input_release="P1-rq4-test",
+                output_dir=project_dir,
+            )
+            for rq_id in ("RQ1", "RQ2", "RQ3", "RQ4"):
+                for instance in collections[rq_id]:
+                    _write_json(
+                        project_dir / rq_id / f"{instance['instance_id']}.json",
+                        instance,
+                    )
+                _write_json(project_dir / rq_id / "index.json", indexes[rq_id])
+            _write_json(project_dir / "rq_instance_manifest.json", manifest)
+
+            package = materialize_reasoning_input(
+                project_dir,
+                "P1_T001",
+                "C1",
+                instructions_path=INSTRUCTIONS,
+                response_schema_path=RESPONSE_SCHEMA,
+            )
+
+            private = package["private_manifest"]
+            public_text = "\n".join(package["public_files"].values())
+            self.assertEqual(private["execution_rq"], "RQ4")
+            self.assertFalse(private["rq4"]["eligible"])
+            self.assertFalse(private["rq4"]["execution_ready"])
+            self.assertEqual(private["repository"]["available_to_phase"], "B_ONLY")
+            self.assertIsNotNone(private["repository"]["archive_sha256"])
+            self.assertNotIn("archive_path", public_text)
+            self.assertNotIn("pre_repo.zip", public_text)
+            self.assertNotIn(
+                "RQ4", manifest["targets"][0]["conditions"]["C1"]["active_rqs"]
+            )
+
     def test_manifest_hash_detects_tampered_instance(self):
         with tempfile.TemporaryDirectory() as directory:
             project_dir = Path(directory) / "P1"
@@ -148,6 +262,84 @@ class RQAgentMaterializationTests(unittest.TestCase):
 
             with self.assertRaisesRegex(RQMaterializationError, "content hash"):
                 load_target_views(project_dir, "P1_T001")
+
+    def test_phase_a_response_is_frozen_once_and_keeps_phase_b_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project_dir = root / "P1"
+            _write_project(project_dir)
+            package = materialize_reasoning_input(
+                project_dir,
+                "P1_T001",
+                "C1",
+                instructions_path=INSTRUCTIONS,
+                response_schema_path=RESPONSE_SCHEMA,
+            )
+            public_dir, private_path = write_materialized_input(
+                package, root / "inputs"
+            )
+            response_path = root / "agent_response.json"
+            _write_json(response_path, _clarify_response([10]))
+
+            result = freeze_phase_a_response(
+                private_manifest_path=private_path,
+                public_dir=public_dir,
+                response_path=response_path,
+                freeze_root=root / "runs",
+            )
+
+            self.assertEqual(result["freeze_record"]["decision"], "CLARIFY")
+            self.assertEqual(result["freeze_record"]["phase_b_gate"], "CLOSED")
+            self.assertEqual(
+                result["freeze_record"]["phase_b_gate_reason"],
+                "AGENT_DECISION_NOT_ACT",
+            )
+            frozen = result["freeze_dir"] / "agent_response.json"
+            self.assertTrue(frozen.is_file())
+            self.assertEqual(
+                result["freeze_record"]["response_sha256"],
+                (result["freeze_dir"] / "agent_response.sha256")
+                .read_text()
+                .strip(),
+            )
+            updated_private = json.loads(private_path.read_text())
+            self.assertEqual(
+                updated_private["phase_gate"]["phase_a_response_sha256"],
+                result["freeze_record"]["response_sha256"],
+            )
+            with self.assertRaisesRegex(RQPhaseAError, "already frozen"):
+                freeze_phase_a_response(
+                    private_manifest_path=private_path,
+                    public_dir=public_dir,
+                    response_path=response_path,
+                    freeze_root=root / "runs",
+                )
+
+    def test_phase_a_freeze_rejects_evidence_hidden_by_condition(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            project_dir = root / "P1"
+            _write_project(project_dir)
+            package = materialize_reasoning_input(
+                project_dir,
+                "P1_T001",
+                "C2",
+                instructions_path=INSTRUCTIONS,
+                response_schema_path=RESPONSE_SCHEMA,
+            )
+            public_dir, private_path = write_materialized_input(
+                package, root / "inputs"
+            )
+            response_path = root / "agent_response.json"
+            _write_json(response_path, _clarify_response([20]))
+
+            with self.assertRaisesRegex(RQPhaseAError, "outside visible history"):
+                freeze_phase_a_response(
+                    private_manifest_path=private_path,
+                    public_dir=public_dir,
+                    response_path=response_path,
+                    freeze_root=root / "runs",
+                )
 
 
 if __name__ == "__main__":
