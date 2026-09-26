@@ -1,0 +1,187 @@
+{
+  "requirements": [
+    {
+      "requirement_ref": "ticket_issuance_and_prize_draw",
+      "requirement_summary": "Issue prize tickets on qualifying purchases and use them in the active random prize draw.",
+      "evidence_message_ids": [
+        21,
+        158,
+        195,
+        210,
+        211,
+        305
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "big_block_status": "removed",
+          "last_fully_described_prize_configuration": {
+            "winners_per_block": 3,
+            "prize_per_winner_usd": 900,
+            "block_trigger_sales": 750,
+            "selection_method": "Chainlink VRF",
+            "ticket_lifecycle": "tickets apply only to the current draw and expire after it"
+          },
+          "ticket_quantity_per_successful_referral": {
+            "status": "unresolved",
+            "documented_values": [
+              4,
+              1
+            ],
+            "details": "Message 210 says both that each referral supplies 4 entries and that each referral generates one ticket; message 305 later refers to a singular draw entry."
+          },
+          "latest_requested_draw_outcomes": {
+            "valid_referral": "entry into a $2,000 reward drawing for the chosen referrer",
+            "missing_or_rejected_referral": "a $900 draw entry assigned to a random NFT owner"
+          },
+          "six_ticket_rule_present_before_task": false
+        },
+        "scope": {
+          "ticket_creation": "Referral-linked mint purchases; secondary transactions may count toward or fund blocks but do not create tickets under the earlier surviving rule.",
+          "affected_draws": "Small/$900 program after removal of Big Blocks, except that message 305 introduces an incompletely specified $2,000 drawing for valid referrals."
+        },
+        "lifecycle_status": "Big Blocks were removed; the remaining ticket quantity and the relationship between the $900 and $2,000 drawings are unresolved.",
+        "ambiguity": [
+          {
+            "field": "ticket_quantity_per_purchase",
+            "issue": "The latest implemented request contains incompatible quantities of four and one, and no visible historical message specifies six."
+          },
+          {
+            "field": "valid_referral_drawing",
+            "issue": "The $2,000 drawing introduced in message 305 has no trigger, winner count, ticket lifecycle, or explanation of whether it replaces the recurring $900 draw."
+          }
+        ],
+        "execution": {
+          "last_confirmed_execution_message_id": 211,
+          "confirmed_scope": "The message-210 updates were reported as implemented.",
+          "later_unconfirmed_request_message_id": 305,
+          "status": "No visible execution confirmation for the later popup and allocation rules."
+        }
+      }
+    },
+    {
+      "requirement_ref": "referral_validation_and_reward_recipient",
+      "requirement_summary": "Validate referral NFTs before checkout and determine who receives the commission and draw entry when a referral is valid, missing, or rejected.",
+      "evidence_message_ids": [
+        21,
+        146,
+        195,
+        210,
+        305
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "valid_referral_condition": "Only NFTs confirmed before checkout are valid.",
+          "valid_referral_result": {
+            "recipient": "chosen referrer",
+            "displayed_reward": "$25 credit plus entry into a $2,000 reward drawing"
+          },
+          "missing_or_rejected_referral_result": {
+            "recipient": "random NFT owner",
+            "commission_usd": 18,
+            "draw_reward": "one $900 draw entry"
+          },
+          "allocation_method": "random recipient selection; no weighting basis is specified",
+          "prior_rules_superseded": {
+            "commission_usd": 10,
+            "recipient_for_no_code": "random existing NFT holder",
+            "ticket_quantities": [
+              7,
+              4,
+              1
+            ]
+          }
+        },
+        "scope": {
+          "validation_time": "before checkout",
+          "invalid_cases": [
+            "missing referral",
+            "rejected referral"
+          ],
+          "eligible_random_recipient_population": "NFT owners, with no further eligibility or weighting definition"
+        },
+        "lifecycle_status": "Message 305 is the latest requested rule for referral validation and popup outcomes, superseding earlier $10 no-referral wording for those cases.",
+        "ambiguity": [
+          {
+            "field": "weighted_selection",
+            "issue": "No historical requirement defines a weighted draw for selecting the random NFT owner or identifies the weighting variable."
+          },
+          {
+            "field": "credit_vs_commission",
+            "issue": "The valid-referral outcome is called a $25 credit, while earlier requirements and the current task use commission terminology."
+          }
+        ],
+        "execution": {
+          "requested_in_message_id": 305,
+          "implementation_confirmed": false
+        }
+      }
+    },
+    {
+      "requirement_ref": "purchase_ticket_count_execution",
+      "requirement_summary": "Ensure each completed qualifying purchase produces the required ticket issuance and diagnose discrepancies between purchase and ticket counts.",
+      "evidence_message_ids": [
+        211,
+        305,
+        539
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "confirmed_runtime_ticket_count_rule": null,
+          "old_contract_note": "Lost copies in an old contract were mentioned, but the affected deployment and relationship to current purchases were not identified.",
+          "latest_observed_implementation_basis": "Message 210 was reported implemented before the later message-305 changes."
+        },
+        "scope": {
+          "deployment": "unknown",
+          "transactions": "No hashes, checkout statuses, referral statuses, or contract events for the nine purchases are present."
+        },
+        "lifecycle_status": "Runtime state cannot be reconstructed from visible history.",
+        "ambiguity": [
+          {
+            "field": "deployment",
+            "issue": "It is unknown whether the nine purchases used the old contract, the message-210 deployment, or a deployment incorporating message 305."
+          }
+        ],
+        "execution": {
+          "diagnostic_evidence_available": false,
+          "reason": "The history contains no transaction-level records or implementation confirmation after message 305."
+        }
+      }
+    }
+  ],
+  "decision": "CLARIFY",
+  "post_task_states": null,
+  "clarifications": [
+    {
+      "requirement_ref": "ticket_issuance_and_prize_draw",
+      "requirement_summary": "Define the new six-ticket issuance rule unambiguously.",
+      "dimension": "BEHAVIOR",
+      "field": "ticket_quantity_per_purchase",
+      "missing_information": "It is unclear whether six tickets replace all prior one-ticket/four-entry rules for every completed purchase or only for referral-free purchases.",
+      "question": "Should every confirmed purchase create exactly 6 tickets, whether it uses a valid referral, has no referral, or has a rejected referral—so that nine confirmed purchases create 54 tickets?"
+    },
+    {
+      "requirement_ref": "referral_validation_and_reward_recipient",
+      "requirement_summary": "Define the weighted allocation of referral-free rewards.",
+      "dimension": "BEHAVIOR",
+      "field": "weighted_selection",
+      "missing_information": "Neither the weighting basis nor whether the commission and six tickets share a recipient is specified.",
+      "question": "For a referral-free purchase, what determines each NFT owner's weight, and should one weighted draw assign both the commission and all 6 tickets to the same NFT, or should the commission and tickets be drawn separately?"
+    },
+    {
+      "requirement_ref": "referral_validation_and_reward_recipient",
+      "requirement_summary": "Resolve the commission and prize-program values that the new rule should retain or replace.",
+      "dimension": "VALUE",
+      "field": "reward_amounts_and_draw_program",
+      "missing_information": "Visible history contains $10, $18, and $25 referral-related amounts and both $900 and $2,000 drawings; the current task does not identify which remain valid.",
+      "question": "What commission amount applies to valid and referral-free purchases, and does this change replace message 305's $25 credit/$18 commission/$2,000-drawing rules while retaining the 3 × $900 draw every 750 sales?"
+    },
+    {
+      "requirement_ref": "purchase_ticket_count_execution",
+      "requirement_summary": "Identify the cause of the observed eight-ticket result after nine purchases.",
+      "dimension": "EXECUTION",
+      "field": "purchase_and_contract_evidence",
+      "missing_information": "No transaction records identify whether all nine purchases finalized, which used referrals, or which contract version processed them.",
+      "question": "Which contract/deployment processed the nine buys, and can you provide their transaction hashes or statuses and indicate which purchase was referral-free or rejected?"
+    }
+  ]
+}

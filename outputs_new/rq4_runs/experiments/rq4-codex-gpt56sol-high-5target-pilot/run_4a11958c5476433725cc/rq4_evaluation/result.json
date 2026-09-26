@@ -1,0 +1,96 @@
+{
+  "schema_version": "rq4-evaluation-result-v1",
+  "finalizer_version": "rq4-agent-judge-finalizer-v1",
+  "run_id": "run_4a11958c5476433725cc",
+  "project_id": "43804272",
+  "target_id": "43804272_T001",
+  "condition": "C2",
+  "agent_config_id": "agentcfg_c063cefa36f03f763020",
+  "repetition": 1,
+  "judge_config_id": "rq4judge_a72dea46d50c949838e7",
+  "components": {
+    "build": {
+      "status": "PASS",
+      "command": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "build complete\n",
+      "stderr_tail": ""
+    },
+    "regression": {
+      "status": "PASS",
+      "command": [
+        "{python}",
+        "scripts/check.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"renderer\": \"mobile\",\n  \"artifact_count\": 2,\n  \"feature_count\": 11,\n  \"route_count\": 2\n}\n",
+      "stderr_tail": ""
+    }
+  },
+  "judge_result": {
+    "schema_version": "rq4-agent-judge-result-v1",
+    "target_id": "43804272_T001",
+    "criteria": [
+      {
+        "criterion_id": "AC001",
+        "verdict": "FAIL",
+        "evidence": [
+          {
+            "operation": "Ran scripts/build.py and scripts/check.py in an isolated fresh copy, then parsed the generated dist/app-config.json.",
+            "observation": "The build succeeded, but the generated JSON had only the top-level keys features, project, and routes. It contained no Android locale index and therefore zero declared Android locale resource entries, not the required 77.",
+            "artifact": "repository/dist/app-config.json"
+          },
+          {
+            "operation": "Inspected the platform build metadata and searched the complete workspace for locale declarations or resources.",
+            "observation": "PLATFORM_BUILD contains platforms and capability metadata only; no 77-locale list, per-locale resources, or Android locale index exists anywhere in the repository.",
+            "artifact": "repository/src/platform_build.py"
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "verdict": "FAIL",
+        "evidence": [
+          {
+            "operation": "Parsed the locale index from the isolated fresh build for use as the required set_locale input set.",
+            "observation": "The candidate build produced no Android locale index, so it supplied zero declared Android locales and the required one-call-per-declared-locale interaction could not occur.",
+            "artifact": "repository/dist/app-config.json"
+          },
+          {
+            "operation": "Called POST /api/locales through Application.request with EN_us, ar, he-IL, fa_IR, ur-PK, zh-Hant, and not-a-declared-locale.",
+            "observation": "All sample calls returned status 200, normalized locale strings, and ltr or rtl directions, including the undeclared value. This confirms the generic setter works for samples but does not establish selection of the required build-declared 77-locale inventory because that inventory is absent.",
+            "artifact": "repository/src/domain.py"
+          },
+          {
+            "operation": "Inspected the built public interaction HTML and JavaScript.",
+            "observation": "The visible form exposes only an angle-samples measurement field and posts to /api/measurements; it provides no locale selector and never calls /api/locales.",
+            "artifact": "repository/web/app.js"
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC003",
+        "verdict": "FAIL",
+        "evidence": [
+          {
+            "operation": "Ran a fresh isolated build and parsed its generated platform configuration for an iOS locale resource index.",
+            "observation": "The generated configuration contained zero iOS locale-index keys and zero declared iOS locale entries, rather than the required 40.",
+            "artifact": "repository/dist/app-config.json"
+          },
+          {
+            "operation": "Inspected PLATFORM_BUILD and searched all repository files for iOS locale declarations and resources.",
+            "observation": "The only iOS localization metadata is the qualitative capability value localization_scale='large-scale'; there is no concrete App Store locale set or per-locale resource index to compare or select.",
+            "artifact": "repository/src/platform_build.py"
+          }
+        ]
+      }
+    ],
+    "judge_summary": "The fresh build and generic smoke tests succeed, and the locale endpoint normalizes arbitrary sample inputs, but the build produces neither the required 77-entry Android locale inventory nor the required 40-entry iOS inventory. The public preview also exposes no locale-selection interaction."
+  },
+  "score_status": "SCORED",
+  "result": "FAIL",
+  "decision_reason": "ACCEPTANCE_CRITERION_FAIL"
+}

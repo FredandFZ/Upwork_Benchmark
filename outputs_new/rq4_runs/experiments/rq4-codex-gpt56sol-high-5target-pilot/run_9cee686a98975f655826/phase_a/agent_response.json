@@ -1,0 +1,184 @@
+{
+  "requirements": [
+    {
+      "requirement_ref": "connector-layout",
+      "requirement_summary": "Use vertical JST connectors, with the battery JST beside the board JST.",
+      "evidence_message_ids": [
+        62,
+        63,
+        64,
+        69,
+        70
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "connector_style": "JST",
+          "connector_orientation": "vertical",
+          "selected_reference": "first picture",
+          "relative_placement": "battery JST next to board JST",
+          "layout_reference": "AM_1"
+        },
+        "scope": {
+          "board": "first power PCB",
+          "connectors": [
+            "battery JST",
+            "board JST"
+          ]
+        },
+        "lifecycle_status": "selected and active, pending final physical layout",
+        "ambiguity": [
+          {
+            "field": "exact_arrangement",
+            "issue": "The first picture and AM_1 are referenced but their visual contents and dimensions are not visible in the history."
+          },
+          {
+            "field": "connector_spacing",
+            "issue": "No minimum clearance between the two connectors was specified."
+          }
+        ],
+        "execution": {
+          "status": "acknowledged",
+          "evidence_message_id": 70,
+          "detail": "The freelancer stated that they believed they understood the arrangement, but no visible implemented layout was supplied."
+        }
+      }
+    },
+    {
+      "requirement_ref": "board-envelope-and-orientation",
+      "requirement_summary": "Keep the board compact and non-square, with an approximately 4:2 aspect ratio and USB-C on the shorter edge, while fitting the required installation orientation.",
+      "evidence_message_ids": [
+        55,
+        56,
+        57,
+        66,
+        67,
+        68
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "size_policy": "as small as the components permit",
+          "preferred_aspect_ratio": "approximately 4:2",
+          "shape_exclusion": "not square",
+          "usb_c_location": "shorter edge",
+          "usb_projection": "protrudes slightly from the shorter edge",
+          "installation_constraint": "must fit vertically in the discussed orientation"
+        },
+        "scope": {
+          "board": "first power PCB",
+          "installation": "inside the case and into its base/support"
+        },
+        "lifecycle_status": "active",
+        "ambiguity": [
+          {
+            "field": "board_dimensions",
+            "issue": "No maximum board length, width, or dimensioned enclosure envelope was provided."
+          },
+          {
+            "field": "orientation",
+            "issue": "The board was described as lying horizontally inside the case and later as needing to fit vertically in a referenced orientation; the unavailable images prevent precise reconciliation."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "mounting-hole-clearance",
+      "requirement_summary": "Provide eight M2.5 mounting holes at the board corners and preserve access to them.",
+      "evidence_message_ids": [
+        54,
+        55,
+        57,
+        67
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "mounting_hole_count": 8,
+          "mounting_hole_size": "M2.5",
+          "mounting_hole_location": "corners",
+          "mounting_method": "support may use screws"
+        },
+        "scope": {
+          "board": "first power PCB",
+          "affected_layout": "component and connector placement around all mounting holes"
+        },
+        "lifecycle_status": "active",
+        "ambiguity": [
+          {
+            "field": "mounting_hole_coordinates",
+            "issue": "Exact hole coordinates and edge offsets were not specified."
+          },
+          {
+            "field": "mounting_hole_keepout",
+            "issue": "No required mechanical clearance around the holes was specified."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "battery-accessibility",
+      "requirement_summary": "The connector layout must permit the battery to be connected when the assembly is installed in the base.",
+      "evidence_message_ids": [
+        64,
+        66,
+        67,
+        69
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "battery_connection_access": "must remain usable after installation",
+          "disallowed_condition": "an orientation that prevents connecting the battery underneath",
+          "preferred_resolution": "place the vertical battery JST beside the vertical board JST"
+        },
+        "scope": {
+          "assembly": "power PCB installed in the base/support",
+          "interface": "battery JST connection"
+        },
+        "lifecycle_status": "active",
+        "ambiguity": [
+          {
+            "field": "mechanical_clearance",
+            "issue": "The available clearance beneath and around the installed board is not dimensioned."
+          }
+        ],
+        "execution": null
+      }
+    }
+  ],
+  "decision": "CLARIFY",
+  "post_task_states": null,
+  "clarifications": [
+    {
+      "requirement_ref": "connector-layout",
+      "requirement_summary": "Use vertical JST connectors, with the battery JST beside the board JST.",
+      "dimension": "VALUE",
+      "field": "exact_arrangement",
+      "missing_information": "The arrangement being approved is not visible because the referenced image or layout is absent from the available history.",
+      "question": "Please provide the approved arrangement as a dimensioned image or specify the exact connector positions and orientations."
+    },
+    {
+      "requirement_ref": "connector-layout",
+      "requirement_summary": "Use vertical JST connectors, with the battery JST beside the board JST.",
+      "dimension": "VALUE",
+      "field": "minimum_connector_gap",
+      "missing_information": "A 'small gap' does not define a unique minimum edge-to-edge or courtyard clearance.",
+      "question": "What minimum clearance in millimetres is required between the connector bodies or their PCB courtyards?"
+    },
+    {
+      "requirement_ref": "board-envelope-and-orientation",
+      "requirement_summary": "Keep the board compact and non-square, with an approximately 4:2 aspect ratio and USB-C on the shorter edge, while fitting the required installation orientation.",
+      "dimension": "DEPENDENCY",
+      "field": "fit_envelope",
+      "missing_information": "No dimensioned board limit, enclosure envelope, or surrounding mechanical keepout defines whether the arrangement fits.",
+      "question": "What are the maximum board dimensions and the dimensioned enclosure or support envelope that the arrangement must fit within?"
+    },
+    {
+      "requirement_ref": "mounting-hole-clearance",
+      "requirement_summary": "Provide eight M2.5 mounting holes at the board corners and preserve access to them.",
+      "dimension": "VALUE",
+      "field": "mounting_hole_keepout",
+      "missing_information": "The exact hole locations and required clearance for screw heads or tools are unspecified.",
+      "question": "What are the coordinates or edge offsets of all eight M2.5 holes, and what keepout radius must be maintained around each hole?"
+    }
+  ]
+}

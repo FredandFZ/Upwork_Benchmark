@@ -1,0 +1,160 @@
+{
+  "requirements": [
+    {
+      "requirement_ref": "pcb-form-factor",
+      "requirement_summary": "The PCB must be compact, approximately 4:2 rather than square, with USB-C on a shorter edge.",
+      "evidence_message_ids": [
+        55,
+        57
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "size": "As small as the components permit",
+          "preferred_aspect_ratio": "Approximately 4:2",
+          "shape_constraint": "Not square",
+          "usb_c_edge": "Shorter edge",
+          "usb_projection": "Slightly beyond the case edge"
+        },
+        "scope": {
+          "applies_to": "PCB outline and USB-C placement"
+        },
+        "lifecycle_status": "active",
+        "ambiguity": [
+          {
+            "field": "board_dimensions",
+            "issue": "No exact maximum dimensions or case envelope are provided."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "mounting-holes",
+      "requirement_summary": "The board must provide eight M2.5 mounting holes at the corners for screw mounting.",
+      "evidence_message_ids": [
+        55,
+        57,
+        67
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "hole_count": 8,
+          "hole_size": "M2.5",
+          "placement": "At the corners",
+          "mounting_method": "May use screws with a redesigned 3D-printed support"
+        },
+        "scope": {
+          "applies_to": "PCB mounting features and support interface"
+        },
+        "lifecycle_status": "active",
+        "ambiguity": [
+          {
+            "field": "hole_coordinates",
+            "issue": "Exact hole locations and required component keepout clearances are not specified."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "installed-orientation-and-fit",
+      "requirement_summary": "The board and connector arrangement must fit the case in the required installed orientation while preserving access to the battery connection underneath.",
+      "evidence_message_ids": [
+        55,
+        66,
+        67,
+        68,
+        69
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "case_placement": "Board described as lying horizontally inside the case",
+          "orientation_constraint": "Also required to fit vertically in the referenced orientation",
+          "battery_access": "Plugging in a connector must not prevent connecting the battery underneath"
+        },
+        "scope": {
+          "applies_to": "Installed PCB and connector geometry inside the case"
+        },
+        "lifecycle_status": "active",
+        "ambiguity": [
+          {
+            "field": "installed_orientation",
+            "issue": "The relationship between the earlier horizontal placement and the later vertical-fit requirement is not established."
+          },
+          {
+            "field": "case_envelope",
+            "issue": "No internal case dimensions, support geometry, or clearance limits are visible."
+          }
+        ],
+        "execution": null
+      }
+    },
+    {
+      "requirement_ref": "jst-connector-arrangement",
+      "requirement_summary": "The preferred arrangement places the battery JST next to the board JST, with both connectors vertical.",
+      "evidence_message_ids": [
+        66,
+        69
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "relative_placement": "Battery JST next to board JST",
+          "battery_jst_orientation": "Vertical",
+          "board_jst_orientation": "Vertical",
+          "priority": "Preferred"
+        },
+        "scope": {
+          "applies_to": "Battery and board JST connector placement"
+        },
+        "lifecycle_status": "active_preference",
+        "ambiguity": [
+          {
+            "field": "reference_arrangement",
+            "issue": "The referenced AM_1 image is not present in the visible evidence."
+          },
+          {
+            "field": "connector_spacing",
+            "issue": "No minimum gap or measurement reference points are specified."
+          }
+        ],
+        "execution": null
+      }
+    }
+  ],
+  "decision": "CLARIFY",
+  "post_task_states": null,
+  "clarifications": [
+    {
+      "requirement_ref": "jst-connector-arrangement",
+      "requirement_summary": "Identify and dimension the arrangement being conditionally approved.",
+      "dimension": "EXECUTION",
+      "field": "reference_arrangement",
+      "missing_information": "The proposed arrangement and AM_1 are not visible, so its connector positions and relationship to the holes cannot be evaluated.",
+      "question": "Please provide the referenced arrangement or a dimensioned layout showing the board outline, both JST connectors, USB-C connector, and all eight mounting holes."
+    },
+    {
+      "requirement_ref": "jst-connector-arrangement",
+      "requirement_summary": "Define the required gap between the connectors.",
+      "dimension": "VALUE",
+      "field": "minimum_connector_gap",
+      "missing_information": "The phrase \"at least a small gap\" does not specify a measurable minimum or the surfaces between which it is measured.",
+      "question": "What minimum connector-to-connector clearance is required, in millimetres, and should it be measured between connector bodies, plugs, or cable exits?"
+    },
+    {
+      "requirement_ref": "installed-orientation-and-fit",
+      "requirement_summary": "Define the fit envelope and final installed orientation.",
+      "dimension": "BEHAVIOR",
+      "field": "installed_orientation_and_envelope",
+      "missing_information": "The visible history mentions both horizontal placement and vertical fit, and provides no case dimensions.",
+      "question": "In the final installation, is the PCB horizontal or vertical, and what maximum width, length, and installed height must the complete arrangement fit within?"
+    },
+    {
+      "requirement_ref": "mounting-holes",
+      "requirement_summary": "Define the mounting-hole keepout required by the no-coverage condition.",
+      "dimension": "VALUE",
+      "field": "mounting_hole_keepout",
+      "missing_information": "Although all eight M2.5 holes must remain usable, the necessary clearance around their edges, screw heads, or support hardware is unspecified.",
+      "question": "What unobstructed keepout diameter or edge clearance is required around each of the eight M2.5 mounting holes?"
+    }
+  ]
+}

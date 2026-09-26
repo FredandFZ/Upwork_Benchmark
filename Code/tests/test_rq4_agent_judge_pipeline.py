@@ -18,7 +18,7 @@ from Code.rq4_agent_judge import (
     validate_agent_judge_result,
 )
 from Code.rq4_phase_b import freeze_phase_b_repository, stage_phase_b_workspace
-from Code.run_rq4_agent_judges import evaluate_run
+from Code.run_rq4_agent_judges import _tree_sha256 as _judge_tree_sha256, evaluate_run
 from Code.aggregate_rq4_results import aggregate
 
 
@@ -46,6 +46,19 @@ def _tree_sha256(root: Path) -> str:
 
 
 class RQ4AgentJudgePipelineTests(unittest.TestCase):
+    def test_judge_tree_guard_ignores_runtime_cache_but_not_source_changes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "app.py"
+            source.write_text("VALUE = 1\n", encoding="utf-8")
+            baseline = _judge_tree_sha256(root)
+            cache = root / "__pycache__" / "app.cpython-312.pyc"
+            cache.parent.mkdir()
+            cache.write_bytes(b"runtime cache")
+            self.assertEqual(_judge_tree_sha256(root), baseline)
+            source.write_text("VALUE = 2\n", encoding="utf-8")
+            self.assertNotEqual(_judge_tree_sha256(root), baseline)
+
     def test_current_registry_selects_exactly_40_deterministic_targets(self):
         registry = build_registry(expected_count=40)
         self.assertEqual(registry["selection"]["raw_target_count"], 99)

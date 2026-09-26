@@ -1,0 +1,358 @@
+{
+  "schema_version": "rq-private-run-manifest-v2",
+  "manifest_kind": "ISOLATED_AGENT_RUN",
+  "run_id": "run_7e39bf6a093baaf078aa",
+  "package_id": "pkg_ca8b86240105215c3468",
+  "input_release": "43772711-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43772711",
+  "target_id": "43772711_T001",
+  "target_fingerprint": "eb598b7bd9e978a0a7233260160b34b9b0ef8afbaf5f3b2a2e0201d6646f9104",
+  "condition": "C2",
+  "turns": 5,
+  "difficulty": "SHORT",
+  "reasoning_active_rqs": [
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "private/source_instances/RQ1.json",
+      "file_sha256": "63a92d86e226bed595e19a860c617c9d9fad1eb7f7ffc3e0a088549311bcf7fd",
+      "content_sha256": "1f8d9d7f4a8176f0b45b2f4b35cdd9104e2ffba438fc9e2422c6a4f794d385d2"
+    },
+    "RQ2": {
+      "path": "private/source_instances/RQ2.json",
+      "file_sha256": "6505e4399fa6802bcbc8700262f8af5be95a6029fbe3b87e1e19071c64717cd8",
+      "content_sha256": "87ce5b4245c2387f4a0369f6ac635ae4961973a582cc1866e47bb8d84220feac"
+    },
+    "RQ3": {
+      "path": "private/source_instances/RQ3.json",
+      "file_sha256": "9a38474d1843caee74399463145dc0cb988898aadd6226be77951a6e3de718b5",
+      "content_sha256": "1a55f1107813a4c08639e5987b072130be2c084a8ca1a0707e3642e5b2c42474"
+    }
+  },
+  "public_files": {
+    "task.json": "dfc54b5c0640923aea49e7c946e1209636c2972a04b0e74d2eaf5986c50d797c",
+    "history.jsonl": "7d74920a45010f267a1841127a59c397eb2e2a92a3098d115747b56b0f92aab4",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repository": {
+    "archive_path": "Code Environment/43772711/targets/T001_before_6/pre_repo.zip",
+    "archive_sha256": "08af3351004af5e21ee88438018c5be27418969173c2500568645ce947e387e3",
+    "tree_sha256": "73b082282f35339f82d81bd86134e2253bdf5fa612c04bc8fa9217e75a4a325a",
+    "manifest_path": "Code Environment/43772711/targets/T001_before_6/manifest.json",
+    "manifest_sha256": "a8f413418b996a72860c764fe0a19aaff74f71de33389e1dacf74f4fb4f2a1e5",
+    "before_message_id": 6,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The workspace shell exposes a header, side navigation panel, footer, and main canvas as distinct public UI regions.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FRONTEND_DOM",
+            "surface": "built workspace shell",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "workspace shell",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "header, navigation, main, footer",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "landmark header",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark side navigation",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark main canvas",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "landmark footer",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen local fixture and offline runtime."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Both light and dark shell modes can be selected through the public shell interaction while preserving all shell regions.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "FRONTEND_INTERACTION",
+            "surface": "PATCH /api/ui-shell/theme and built shell",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/ui-shell/theme",
+                "parameters": {
+                  "method": "PATCH",
+                  "json": {
+                    "theme": "light"
+                  }
+                }
+              },
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/ui-shell/theme",
+                "parameters": {
+                  "method": "PATCH",
+                  "json": {
+                    "theme": "dark"
+                  }
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "light selection response theme",
+                "operator": "EQUALS",
+                "expected": "light"
+              },
+              {
+                "subject": "dark selection response theme",
+                "operator": "EQUALS",
+                "expected": "dark"
+              },
+              {
+                "subject": "shell landmarks after each selection",
+                "operator": "COUNT_EQUALS",
+                "expected": 4
+              }
+            ],
+            "determinism_controls": [
+              "Reset application state between theme cases.",
+              "Use the frozen local browser and disable animations."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Header, side navigation, and footer have explicit font, color, and icon treatments in each supported theme.",
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "FRONTEND_DOM",
+            "surface": "computed styles and icons for shell regions",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "OPEN_PAGE",
+                "target": "workspace shell",
+                "parameters": {}
+              },
+              {
+                "operation": "QUERY_DOM",
+                "target": "shell regions in light and dark themes",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "computed font-family for every shell region",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "computed foreground/background color for every shell region",
+                "operator": "EXISTS",
+                "expected": true
+              },
+              {
+                "subject": "icon element or accessible icon label in header/navigation/footer",
+                "operator": "EXISTS",
+                "expected": true
+              }
+            ],
+            "determinism_controls": [
+              "Use one frozen Chromium build and fixed fonts.",
+              "Evaluate both themes at 1440x900."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "56e4f006083d1438380798c55f57598689a11a43ca10a64e34ec12f2e94fe9fd",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY",
+  "package_manifest_sha256": "19ac9e5c0261e8986c705061a31c08471d59fd95330f8b8e0818f7543df99461",
+  "agent_config_id": "agentcfg_c063cefa36f03f763020",
+  "agent_config": {
+    "provider": "codex_cli",
+    "runtime_version": "codex-cli 0.155.1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "tool_policy": "READ_ONLY_NO_REPOSITORY_NO_EXTERNAL_TOOLS",
+    "session_isolation": "NEW_PROCESS_PER_TARGET_CONDITION",
+    "persistent_conversation": false,
+    "command": [
+      "codex.cmd",
+      "exec",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--ignore-rules",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "read-only",
+      "--model",
+      "{model_version}",
+      "-c",
+      "model_reasoning_effort=\"{reasoning_effort}\"",
+      "--output-last-message",
+      "agent_response.json",
+      "--json",
+      "-"
+    ],
+    "output_mode": "workspace_file",
+    "output_filename": "agent_response.json",
+    "timeout_seconds": 900,
+    "environment_allowlist": [
+      "APPDATA",
+      "CODEX_HOME",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "USERPROFILE"
+    ],
+    "run_prompt_sha256": "d6612995a1ab349f6f22b80f24dbed3c4fb9430f8b21560853c9c0494ac28678",
+    "instructions_sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response_schema_sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repetition": 1,
+  "phase_gate": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true,
+    "phase_a_response_sha256": "2d705283bf64d515535a4f8310e028b37d06b2df257cc4e3278eaba52686df32",
+    "phase_a_frozen_at": "2026-09-25T21:50:05.446817Z",
+    "phase_a_decision": "ACT",
+    "phase_b_gate": "OPEN",
+    "phase_b_gate_reason": null
+  },
+  "phase_a_input_files": {
+    "task.json": {
+      "path": "private/phase_a_input/task.json",
+      "sha256": "dfc54b5c0640923aea49e7c946e1209636c2972a04b0e74d2eaf5986c50d797c"
+    },
+    "history.jsonl": {
+      "path": "private/phase_a_input/history.jsonl",
+      "sha256": "7d74920a45010f267a1841127a59c397eb2e2a92a3098d115747b56b0f92aab4"
+    },
+    "instructions.md": {
+      "path": "private/phase_a_input/instructions.md",
+      "sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3"
+    },
+    "response.schema.json": {
+      "path": "private/phase_a_input/response.schema.json",
+      "sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+    }
+  },
+  "phase_b_agent_config_id": "agentcfg_5e9030005aea8fb33748",
+  "phase_b_agent_config": {
+    "provider": "codex_cli",
+    "runtime_version": "codex-cli 0.155.1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "tool_policy": "LOCAL_REPOSITORY_WRITE_NO_NETWORK",
+    "session_isolation": "NEW_PROCESS_PER_TARGET_CONDITION",
+    "persistent_conversation": false,
+    "command": [
+      "codex.cmd",
+      "exec",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--ignore-rules",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "workspace-write",
+      "--model",
+      "{model_version}",
+      "-c",
+      "model_reasoning_effort=\"{reasoning_effort}\"",
+      "--output-last-message",
+      "phase_b_agent_summary.txt",
+      "--json",
+      "-"
+    ],
+    "output_mode": "workspace_file",
+    "output_filename": "phase_b_agent_summary.txt",
+    "timeout_seconds": 1800,
+    "environment_allowlist": [
+      "APPDATA",
+      "CODEX_HOME",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "USERPROFILE"
+    ],
+    "run_prompt_sha256": "56b35cd10d2023e5ba59f6d8cbfacdce4a4f7f71375d091d5aa35c28a57cb11d",
+    "instructions_sha256": "56b35cd10d2023e5ba59f6d8cbfacdce4a4f7f71375d091d5aa35c28a57cb11d",
+    "response_schema_sha256": "56b35cd10d2023e5ba59f6d8cbfacdce4a4f7f71375d091d5aa35c28a57cb11d"
+  }
+}

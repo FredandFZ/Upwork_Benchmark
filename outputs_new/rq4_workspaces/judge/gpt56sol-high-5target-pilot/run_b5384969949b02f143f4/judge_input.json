@@ -1,0 +1,196 @@
+{
+  "schema_version": "rq4-agent-judge-input-v1",
+  "target_id": "43772711_T001",
+  "task": {
+    "message_id": 6,
+    "speaker": "client",
+    "text": "Hi Marissa,\n\nThe landing-page engagement can go ahead, so I will hire you for that. We can leave the UI/UX discussion until our meeting.\n\nI probably made that second area sound broader than intended. At this stage, I only want to agree on and style the main UI-shell components—the header, side navigation panel, and footer—including their fonts, colors, icon styles, and treatment in both light and dark modes. Settings, monitoring logs, provisioning, applications, and the other screens will sit within the main canvas and evolve over time. Their styling is a separate, though very important, question.\n\nDerek"
+  },
+  "acceptance_criteria": [
+    {
+      "criterion_id": "AC001",
+      "scope": "TARGET_BEHAVIOR",
+      "statement": "The workspace shell exposes a header, side navigation panel, footer, and main canvas as distinct public UI regions.",
+      "observables": [
+        {
+          "observable_id": "OBS001",
+          "type": "FRONTEND_DOM",
+          "surface": "built workspace shell",
+          "setup": [
+            "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+          ],
+          "actions": [
+            {
+              "operation": "OPEN_PAGE",
+              "target": "workspace shell",
+              "parameters": {}
+            },
+            {
+              "operation": "QUERY_DOM",
+              "target": "header, navigation, main, footer",
+              "parameters": {}
+            }
+          ],
+          "expected_observations": [
+            {
+              "subject": "landmark header",
+              "operator": "COUNT_EQUALS",
+              "expected": 1
+            },
+            {
+              "subject": "landmark side navigation",
+              "operator": "COUNT_EQUALS",
+              "expected": 1
+            },
+            {
+              "subject": "landmark main canvas",
+              "operator": "COUNT_EQUALS",
+              "expected": 1
+            },
+            {
+              "subject": "landmark footer",
+              "operator": "COUNT_EQUALS",
+              "expected": 1
+            }
+          ],
+          "determinism_controls": [
+            "Use the frozen local fixture and offline runtime."
+          ]
+        }
+      ],
+      "negative_cases": []
+    },
+    {
+      "criterion_id": "AC002",
+      "scope": "TARGET_BEHAVIOR",
+      "statement": "Both light and dark shell modes can be selected through the public shell interaction while preserving all shell regions.",
+      "observables": [
+        {
+          "observable_id": "OBS002",
+          "type": "FRONTEND_INTERACTION",
+          "surface": "PATCH /api/ui-shell/theme and built shell",
+          "setup": [
+            "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+          ],
+          "actions": [
+            {
+              "operation": "HTTP_REQUEST",
+              "target": "/api/ui-shell/theme",
+              "parameters": {
+                "method": "PATCH",
+                "json": {
+                  "theme": "light"
+                }
+              }
+            },
+            {
+              "operation": "HTTP_REQUEST",
+              "target": "/api/ui-shell/theme",
+              "parameters": {
+                "method": "PATCH",
+                "json": {
+                  "theme": "dark"
+                }
+              }
+            }
+          ],
+          "expected_observations": [
+            {
+              "subject": "light selection response theme",
+              "operator": "EQUALS",
+              "expected": "light"
+            },
+            {
+              "subject": "dark selection response theme",
+              "operator": "EQUALS",
+              "expected": "dark"
+            },
+            {
+              "subject": "shell landmarks after each selection",
+              "operator": "COUNT_EQUALS",
+              "expected": 4
+            }
+          ],
+          "determinism_controls": [
+            "Reset application state between theme cases.",
+            "Use the frozen local browser and disable animations."
+          ]
+        }
+      ],
+      "negative_cases": []
+    },
+    {
+      "criterion_id": "AC003",
+      "scope": "TARGET_BEHAVIOR",
+      "statement": "Header, side navigation, and footer have explicit font, color, and icon treatments in each supported theme.",
+      "observables": [
+        {
+          "observable_id": "OBS003",
+          "type": "FRONTEND_DOM",
+          "surface": "computed styles and icons for shell regions",
+          "setup": [
+            "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+          ],
+          "actions": [
+            {
+              "operation": "OPEN_PAGE",
+              "target": "workspace shell",
+              "parameters": {}
+            },
+            {
+              "operation": "QUERY_DOM",
+              "target": "shell regions in light and dark themes",
+              "parameters": {}
+            }
+          ],
+          "expected_observations": [
+            {
+              "subject": "computed font-family for every shell region",
+              "operator": "EXISTS",
+              "expected": true
+            },
+            {
+              "subject": "computed foreground/background color for every shell region",
+              "operator": "EXISTS",
+              "expected": true
+            },
+            {
+              "subject": "icon element or accessible icon label in header/navigation/footer",
+              "operator": "EXISTS",
+              "expected": true
+            }
+          ],
+          "determinism_controls": [
+            "Use one frozen Chromium build and fixed fonts.",
+            "Evaluate both themes at 1440x900."
+          ]
+        }
+      ],
+      "negative_cases": []
+    }
+  ],
+  "deterministic_checks": {
+    "build": {
+      "status": "PASS",
+      "command": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "build complete\n",
+      "stderr_tail": ""
+    },
+    "regression": {
+      "status": "PASS",
+      "command": [
+        "{python}",
+        "scripts/check.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"renderer\": \"web\",\n  \"artifact_count\": 2,\n  \"feature_count\": 2,\n  \"route_count\": 3\n}\n",
+      "stderr_tail": ""
+    }
+  },
+  "repository_path": "repository",
+  "network_policy": "DISABLED"
+}

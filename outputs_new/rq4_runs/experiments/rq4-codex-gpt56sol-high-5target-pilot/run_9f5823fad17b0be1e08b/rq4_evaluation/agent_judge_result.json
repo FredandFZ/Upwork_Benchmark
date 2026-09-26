@@ -1,0 +1,65 @@
+{
+  "schema_version": "rq4-agent-judge-result-v1",
+  "target_id": "43804272_T001",
+  "criteria": [
+    {
+      "criterion_id": "AC001",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Copied the repository to an isolated temporary directory and ran `python scripts/build.py`.",
+          "observation": "The build exited 0 and produced only app-config.json, app.js, and mobile-preview.html.",
+          "artifact": null
+        },
+        {
+          "operation": "Recursively parsed the generated app-config.json and imported PLATFORM_BUILD from src/platform_build.py.",
+          "observation": "app-config.json had only project, routes, and features at its root; PLATFORM_BUILD had only schema_version, platforms, and current_capabilities. Neither structure contained a locale/language index, yielding 0 Android locale entries instead of 77.",
+          "artifact": null
+        },
+        {
+          "operation": "Scanned the isolated repository recursively for Android values-* directories and locale resource files.",
+          "observation": "Found 0 Android locale directories and 0 Android locale resource files.",
+          "artifact": null
+        }
+      ]
+    },
+    {
+      "criterion_id": "AC002",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Derived the Android locale index from the same generated build and attempted the required per-index public locale sweep.",
+          "observation": "The generated build exposed 0 Android locale entries, so the required sweep made 0 calls and could not establish selection behavior for the required declared Android locale set.",
+          "artifact": null
+        },
+        {
+          "operation": "Called the public POST /api/locales interaction on independently reset app instances with EN_us, ar, he-IL, fa_IR, ur, and zz_invalid.",
+          "observation": "All six calls returned status 200, normalized locale strings, and ltr or rtl directions; however, these ad hoc probes do not replace the absent build-declared Android locale index.",
+          "artifact": null
+        }
+      ]
+    },
+    {
+      "criterion_id": "AC003",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Recursively parsed the generated app-config.json and PLATFORM_BUILD for the iOS locale resource index.",
+          "observation": "No locale/language index was present, yielding 0 iOS locale entries instead of the required 40.",
+          "artifact": null
+        },
+        {
+          "operation": "Scanned the isolated repository recursively for .lproj directories and Localizable.strings, InfoPlist.strings, or Localizable.stringsdict files.",
+          "observation": "Found 0 iOS localization bundle directories and 0 iOS localization files.",
+          "artifact": null
+        },
+        {
+          "operation": "Attempted the required public set_locale sweep using the iOS index produced by the same build.",
+          "observation": "The build supplied 0 iOS locale entries, so 0 per-locale selection calls were possible.",
+          "artifact": null
+        }
+      ]
+    }
+  ],
+  "judge_summary": "The documented build and all five repository tests completed successfully in an isolated copy, but the generated artifacts and platform metadata contain no Android or iOS locale indexes or localization resources. The public locale endpoint handles individual arbitrary inputs, but there are no declared platform locale sets to exhaustively select."
+}

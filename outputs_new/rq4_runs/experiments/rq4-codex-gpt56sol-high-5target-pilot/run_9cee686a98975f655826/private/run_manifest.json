@@ -1,0 +1,270 @@
+{
+  "schema_version": "rq-private-run-manifest-v2",
+  "manifest_kind": "ISOLATED_AGENT_RUN",
+  "run_id": "run_9cee686a98975f655826",
+  "package_id": "pkg_6efa58d10ae5c484eeb9",
+  "input_release": "43214420-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43214420",
+  "target_id": "43214420_T003",
+  "target_fingerprint": "150c9fcab5e01c3c1befc2a2f936e3495dd7c874e555ceb3f7357645ed2d29b2",
+  "condition": "C1",
+  "turns": 71,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "private/source_instances/RQ1.json",
+      "file_sha256": "8d37120dbd2c0d3ad73c366e6183bedee773a01db6479078795cb95bb101c8f9",
+      "content_sha256": "3d9bce23e90268cdb3ef2fae0a153c289876c6095719b4c427050b8c41a8e0f5"
+    },
+    "RQ2": {
+      "path": "private/source_instances/RQ2.json",
+      "file_sha256": "745b2bd03952944f19e3e5205ae8c1725ac931b11657b98a780523c5e242cafa",
+      "content_sha256": "f60f45a2685d3ee86eb59ff430a819158836cb3821817a3d02b61e988808d67e"
+    },
+    "RQ3": {
+      "path": "private/source_instances/RQ3.json",
+      "file_sha256": "d79d7ff5598e76bd97431c69a1c37ff34f1fbd633c3948fb70db626ecaa30612",
+      "content_sha256": "df544a802f00b7dd0325a4b98f1852d74ea1c0f7481960a99ba8e7d8b4869b72"
+    }
+  },
+  "public_files": {
+    "task.json": "4c1e603f65f67e8b2346afd063d86d242b11f6ec980a2325612a01633aee1d76",
+    "history.jsonl": "fd35da236881fb238fedeeaaae9123a878353c29c84d67c2a681bf1963b6395e",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repository": {
+    "archive_path": "Code Environment/43214420/targets/T003_before_72/pre_repo.zip",
+    "archive_sha256": "55d395711d91fa117bdd6e5653a957629d3ebf232fb5cd9b76006a96728e78d6",
+    "tree_sha256": "39e2914f9bb493798e143a9d487aabde10ab78259ff76bc69e4fe8cdae8c4ffa",
+    "manifest_path": "Code Environment/43214420/targets/T003_before_72/manifest.json",
+    "manifest_sha256": "7e57978aae1bbf91b8495324a67f3ede0d6a99a2bd6eb925ad860d1215dceb96",
+    "before_message_id": 72,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The battery connector and adjacent board JST are both wholly inside the closed board outline and their transformed F.CrtYd/B.CrtYd polygons have strictly positive edge-to-edge clearance with no overlap.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb board outline and connector courtyards",
+            "setup": [
+              "Build design.kicad_pcb in a fresh workspace.",
+              "Select the battery and board JST footprints by stable reference/value and resolve placed courtyard polygons."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_pcb",
+                "parameters": {
+                  "geometry": [
+                    "Edge.Cuts closed polygon",
+                    "connector courtyard polygons"
+                  ],
+                  "units": "mm"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "battery connector courtyard contained by board outline",
+                "operator": "EQUALS",
+                "expected": true
+              },
+              {
+                "subject": "board JST courtyard contained by board outline",
+                "operator": "EQUALS",
+                "expected": true
+              },
+              {
+                "subject": "connector courtyard intersection area in mm^2",
+                "operator": "EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "connector courtyard minimum distance in mm",
+                "operator": "NOT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Apply footprint translation, rotation, and side mirroring before polygon tests.",
+              "Require real courtyard geometry from the built PCB; footprint origin distance alone is insufficient."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC001",
+            "setup": [
+              "Connector origins differ but their courtyards touch or overlap."
+            ],
+            "action": "Compute transformed polygon intersection and distance.",
+            "expected_failure_or_absence": "The criterion fails because origin separation is not usable clearance."
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "PRESERVED_REGRESSION",
+        "statement": "No battery-connector or board-JST courtyard intersects any mounting-hole copper, drill, or mechanical keep-out region in the built PCB.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "ARTIFACT",
+            "surface": "dist/design.kicad_pcb connector courtyards and mounting holes",
+            "setup": [
+              "Resolve all MountingHole footprints and NPTH/PTH drill envelopes."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "dist/design.kicad_pcb",
+                "parameters": {
+                  "compare": "connector courtyard polygons against hole drill/copper/keep-out envelopes"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "mounting holes found",
+                "operator": "COUNT_EQUALS",
+                "expected": 8
+              },
+              {
+                "subject": "connector-to-mounting-hole envelope intersections",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use exact placed geometry from the PCB.",
+              "Include drill diameter, pad copper, and explicit keep-out shapes in the hole envelope."
+            ]
+          }
+        ],
+        "negative_cases": [
+          {
+            "case_id": "NC002",
+            "setup": [
+              "A connector visually misses the drill center but overlaps the pad or keep-out."
+            ],
+            "action": "Intersect full envelopes.",
+            "expected_failure_or_absence": "The criterion fails."
+          }
+        ]
+      }
+    ],
+    "acceptance_criteria_sha256": "ac29cc971b12f4a3ef2b766839177edc24fba38b2e4c51a0ffcf3cf0e571cd64",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY",
+  "package_manifest_sha256": "d17ec0d349bf39c84624be3da63f8cd686893d159d4ce3360748da6a8fae3572",
+  "agent_config_id": "agentcfg_c063cefa36f03f763020",
+  "agent_config": {
+    "provider": "codex_cli",
+    "runtime_version": "codex-cli 0.155.1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "tool_policy": "READ_ONLY_NO_REPOSITORY_NO_EXTERNAL_TOOLS",
+    "session_isolation": "NEW_PROCESS_PER_TARGET_CONDITION",
+    "persistent_conversation": false,
+    "command": [
+      "codex.cmd",
+      "exec",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--ignore-rules",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "read-only",
+      "--model",
+      "{model_version}",
+      "-c",
+      "model_reasoning_effort=\"{reasoning_effort}\"",
+      "--output-last-message",
+      "agent_response.json",
+      "--json",
+      "-"
+    ],
+    "output_mode": "workspace_file",
+    "output_filename": "agent_response.json",
+    "timeout_seconds": 900,
+    "environment_allowlist": [
+      "APPDATA",
+      "CODEX_HOME",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "USERPROFILE"
+    ],
+    "run_prompt_sha256": "d6612995a1ab349f6f22b80f24dbed3c4fb9430f8b21560853c9c0494ac28678",
+    "instructions_sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response_schema_sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repetition": 1,
+  "phase_gate": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true,
+    "phase_a_response_sha256": "a974d4270d55a9f0558b31751d8ad2eca68f7e9fc0728896e6813381a3dce241",
+    "phase_a_frozen_at": "2026-09-25T21:45:55.400040Z",
+    "phase_a_decision": "CLARIFY",
+    "phase_b_gate": "CLOSED",
+    "phase_b_gate_reason": "AGENT_DECISION_NOT_ACT"
+  },
+  "phase_a_input_files": {
+    "task.json": {
+      "path": "private/phase_a_input/task.json",
+      "sha256": "4c1e603f65f67e8b2346afd063d86d242b11f6ec980a2325612a01633aee1d76"
+    },
+    "history.jsonl": {
+      "path": "private/phase_a_input/history.jsonl",
+      "sha256": "fd35da236881fb238fedeeaaae9123a878353c29c84d67c2a681bf1963b6395e"
+    },
+    "instructions.md": {
+      "path": "private/phase_a_input/instructions.md",
+      "sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3"
+    },
+    "response.schema.json": {
+      "path": "private/phase_a_input/response.schema.json",
+      "sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": "rq4-evaluation-result-v1",
+  "finalizer_version": "rq4-agent-judge-finalizer-v1",
+  "run_id": "run_5d62b6c393ca5b394731",
+  "project_id": "43255761",
+  "target_id": "43255761_T001",
+  "condition": "C1",
+  "agent_config_id": "agentcfg_c063cefa36f03f763020",
+  "repetition": 1,
+  "judge_config_id": "rq4judge_a72dea46d50c949838e7",
+  "components": {
+    "build": {
+      "status": "PASS",
+      "command": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "build complete\n",
+      "stderr_tail": ""
+    },
+    "regression": {
+      "status": "PASS",
+      "command": [
+        "{python}",
+        "scripts/check.py"
+      ],
+      "exit_code": 0,
+      "stdout_tail": "{\n  \"renderer\": \"docx\",\n  \"artifact_count\": 2,\n  \"feature_count\": 14,\n  \"domain_model\": \"artifact-docx-v1\"\n}\n",
+      "stderr_tail": ""
+    }
+  },
+  "judge_result": {
+    "schema_version": "rq4-agent-judge-result-v1",
+    "target_id": "43255761_T001",
+    "criteria": [
+      {
+        "criterion_id": "AC001",
+        "verdict": "FAIL",
+        "evidence": [
+          {
+            "operation": "Built template.docx in a fresh temporary directory and parsed word/styles.xml using namespace-aware ElementTree queries.",
+            "observation": "Zero paragraph styles had the displayed name 'caption text'. The only related style was 'Image and Table Caption Style'; it had size 22 half-points but no font declaration, no italic flag, and no line-spacing value.",
+            "artifact": "repository/dist/template.docx"
+          },
+          {
+            "operation": "Compared SHA-256 content hashes of the fresh build and repository/dist/template.docx.",
+            "observation": "The hashes matched, establishing that the inspected fresh artifact was identical to the supplied artifact.",
+            "artifact": "repository/dist/template.docx"
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC002",
+        "verdict": "FAIL",
+        "evidence": [
+          {
+            "operation": "Parsed word/document.xml and word/styles.xml from the fresh build, enumerating paragraph-style references, bookmarks, and content-control tags.",
+            "observation": "No image_label or table_label fixture bookmarks were present, there were no content-control tags, and zero paragraphs referenced style ID 'ImageandTableCaptionStyle'. The caption section heading used 'Heading1', while the paragraph containing caption_targets had no paragraph style.",
+            "artifact": "repository/dist/template.docx"
+          }
+        ]
+      }
+    ],
+    "judge_summary": "A clean temporary build was successfully produced and matched the supplied DOCX byte-for-byte. OOXML inspection established that the required 'caption text' style and both required styled caption fixtures are absent."
+  },
+  "score_status": "SCORED",
+  "result": "FAIL",
+  "decision_reason": "ACCEPTANCE_CRITERION_FAIL"
+}

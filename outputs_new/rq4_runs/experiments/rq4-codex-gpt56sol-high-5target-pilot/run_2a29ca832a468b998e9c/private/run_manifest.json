@@ -1,0 +1,329 @@
+{
+  "schema_version": "rq-private-run-manifest-v2",
+  "manifest_kind": "ISOLATED_AGENT_RUN",
+  "run_id": "run_2a29ca832a468b998e9c",
+  "package_id": "pkg_062779300772ecabe692",
+  "input_release": "42204309-stage2-final-20260925-rq123-main-v1",
+  "project_id": "42204309",
+  "target_id": "42204309_T024",
+  "target_fingerprint": "fd203c81a7741f5323d3b8214198f413147062b659468fcb35eb59fe961a6f78",
+  "condition": "C1",
+  "turns": 564,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "private/source_instances/RQ1.json",
+      "file_sha256": "783697d946c9f0b3183f18bd04916623b76e38e7175428dac6d74add143f431c",
+      "content_sha256": "f82cb09bd3427b93b5bd5d1585dc23c7cc9ca02a830e2531ea328523263150cf"
+    },
+    "RQ2": {
+      "path": "private/source_instances/RQ2.json",
+      "file_sha256": "b07abe129ec5b97483870c342b76cd136c3184aefbbc01b52ee353ba43a854a4",
+      "content_sha256": "46f69435773c05343e8b6bee8fa8aeb849dc560fa68bb75de711c949dbd9635a"
+    },
+    "RQ3": {
+      "path": "private/source_instances/RQ3.json",
+      "file_sha256": "6d7485a1dd71176a26e4723599d0bd39d9148034485ae8e0e1169fc5d57971cc",
+      "content_sha256": "8450df4762df179e2b27372096d75ec2a152e14c45d328e728695b038b4ac710"
+    }
+  },
+  "public_files": {
+    "task.json": "3be0c4f9aabbe45373d7da4132de504ce1e6adc66135b5c06d196b86e9c5ece0",
+    "history.jsonl": "624efb0102e90221ffbdd0b83a3b457200674b7db4acf718363d93ebd47a5d60",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repository": {
+    "archive_path": "Code Environment/42204309/targets/T024_before_565/pre_repo.zip",
+    "archive_sha256": "a327099a15fe3014d863f9d98b25f65b64f80e1580d866d80d1c523a35589812",
+    "tree_sha256": "e1b072dadeb42f686420df31386e1b07fb8db2abab380fe37f890f3fc6c8a7c4",
+    "manifest_path": "Code Environment/42204309/targets/T024_before_565/manifest.json",
+    "manifest_sha256": "d20a6cf88dc8f9a954133fa7b8fd98e09f2a5a105565a98ec245ff618dbf5391",
+    "before_message_id": 565,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "A non-promotional mint without a referral code creates exactly six prize tickets and assigns them to an eligible NFT owner.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "FUNCTION",
+            "surface": "HarborQuillService.mint and owner dashboards",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "register_referral",
+                "parameters": {
+                  "owners": [
+                    "owner-a",
+                    "owner-b"
+                  ],
+                  "codes": [
+                    "A",
+                    "B"
+                  ]
+                }
+              },
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "mint",
+                "parameters": {
+                  "buyer": "buyer",
+                  "amount_usd": 30,
+                  "referral_code": null,
+                  "promotional": false
+                }
+              },
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "dashboard",
+                "parameters": {
+                  "for_each": [
+                    "owner-a",
+                    "owner-b"
+                  ]
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "tickets created by the no-referral mint",
+                "operator": "COUNT_EQUALS",
+                "expected": 6
+              },
+              {
+                "subject": "ticket recipient eligibility",
+                "operator": "EQUALS",
+                "expected": "active NFT owner"
+              },
+              {
+                "subject": "tickets recorded across owner dashboards",
+                "operator": "COUNT_EQUALS",
+                "expected": 6
+              }
+            ],
+            "determinism_controls": [
+              "Use a frozen deterministic weighted-selector seed.",
+              "Seed only eligible owners before the tested mint."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "A non-promotional mint without a referral code creates one $18 commission allocation through the weighted owner draw.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "API",
+            "surface": "POST /api/mints and GET /api/dashboard",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/mints",
+                "parameters": {
+                  "method": "POST",
+                  "json": {
+                    "buyer": "buyer",
+                    "amount_usd": 30
+                  }
+                }
+              },
+              {
+                "operation": "HTTP_REQUEST",
+                "target": "/api/dashboard",
+                "parameters": {
+                  "method": "GET",
+                  "for_each_seeded_owner": true
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "commission allocation count",
+                "operator": "COUNT_EQUALS",
+                "expected": 1
+              },
+              {
+                "subject": "allocated commission amount USD",
+                "operator": "EQUALS",
+                "expected": 18
+              },
+              {
+                "subject": "commission recipient eligibility",
+                "operator": "EQUALS",
+                "expected": "active NFT owner"
+              }
+            ],
+            "determinism_controls": [
+              "Use the same frozen eligible-owner fixture and weighted-selector seed as OBS001."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Weighted no-referral selection respects owner weights and never selects an ineligible owner.",
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "FUNCTION",
+            "surface": "no-referral weighted selector through repeated mint outcomes",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and run its supported build/check commands."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "mint",
+                "parameters": {
+                  "repeat": 1000,
+                  "referral_code": null,
+                  "promotional": false,
+                  "fixed_seed": 240565
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "ineligible recipient count",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              },
+              {
+                "subject": "higher-weight owner selection count",
+                "operator": "GREATER_THAN_OR_EQUAL",
+                "expected": "lower-weight owner selection count"
+              }
+            ],
+            "determinism_controls": [
+              "Use a fixed seed and a fixture with unequal positive owner weights.",
+              "Assert ordering rather than an implementation-specific exact sequence."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "e31399ff0637711606314b430a16aa61609554b2dc6ac81f49c9d388366d3988",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY",
+  "package_manifest_sha256": "147b170935a8256e46be15b62bcc545b78443c12ca496a579721225b4afff072",
+  "agent_config_id": "agentcfg_c063cefa36f03f763020",
+  "agent_config": {
+    "provider": "codex_cli",
+    "runtime_version": "codex-cli 0.155.1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "tool_policy": "READ_ONLY_NO_REPOSITORY_NO_EXTERNAL_TOOLS",
+    "session_isolation": "NEW_PROCESS_PER_TARGET_CONDITION",
+    "persistent_conversation": false,
+    "command": [
+      "codex.cmd",
+      "exec",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--ignore-rules",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "read-only",
+      "--model",
+      "{model_version}",
+      "-c",
+      "model_reasoning_effort=\"{reasoning_effort}\"",
+      "--output-last-message",
+      "agent_response.json",
+      "--json",
+      "-"
+    ],
+    "output_mode": "workspace_file",
+    "output_filename": "agent_response.json",
+    "timeout_seconds": 900,
+    "environment_allowlist": [
+      "APPDATA",
+      "CODEX_HOME",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "USERPROFILE"
+    ],
+    "run_prompt_sha256": "d6612995a1ab349f6f22b80f24dbed3c4fb9430f8b21560853c9c0494ac28678",
+    "instructions_sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response_schema_sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repetition": 1,
+  "phase_gate": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true,
+    "phase_a_response_sha256": "91b8054ee1b4a2a461565894efd860ec70e92a1088871271776ee038b8293d19",
+    "phase_a_frozen_at": "2026-09-25T21:43:40.606524Z",
+    "phase_a_decision": "CLARIFY",
+    "phase_b_gate": "CLOSED",
+    "phase_b_gate_reason": "AGENT_DECISION_NOT_ACT"
+  },
+  "phase_a_input_files": {
+    "task.json": {
+      "path": "private/phase_a_input/task.json",
+      "sha256": "3be0c4f9aabbe45373d7da4132de504ce1e6adc66135b5c06d196b86e9c5ece0"
+    },
+    "history.jsonl": {
+      "path": "private/phase_a_input/history.jsonl",
+      "sha256": "624efb0102e90221ffbdd0b83a3b457200674b7db4acf718363d93ebd47a5d60"
+    },
+    "instructions.md": {
+      "path": "private/phase_a_input/instructions.md",
+      "sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3"
+    },
+    "response.schema.json": {
+      "path": "private/phase_a_input/response.schema.json",
+      "sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+    }
+  }
+}

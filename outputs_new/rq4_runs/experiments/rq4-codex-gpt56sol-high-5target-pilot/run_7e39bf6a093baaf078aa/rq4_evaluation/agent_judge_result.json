@@ -1,0 +1,50 @@
+{
+  "schema_version": "rq4-agent-judge-result-v1",
+  "target_id": "43772711_T001",
+  "criteria": [
+    {
+      "criterion_id": "AC001",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Built a fresh temporary repository copy with `python -B scripts/build.py`, served it locally, and queried the post-script DOM using headless Chrome at 1440x900.",
+          "observation": "The build exited 0 with `build complete`. DOM landmark counts were header=1, navigation=0, main=1, footer=0; the required side navigation and footer regions were absent.",
+          "artifact": null
+        }
+      ]
+    },
+    {
+      "criterion_id": "AC002",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "In independently reset server instances, sent PATCH requests to `/api/ui-shell/theme` for `light` and `dark`, then loaded the shell in headless Chrome.",
+          "observation": "The light request returned HTTP 200 with theme `light`, but the dark request returned HTTP 400 with `{\"error\":\"unsupported theme\"}`. After both requests, Chrome found only 2 of the 4 required landmarks: header=1, navigation=0, main=1, footer=0.",
+          "artifact": null
+        },
+        {
+          "operation": "Queried the rendered Chrome DOM for a public theme interaction.",
+          "observation": "No element attributes identifying a theme, light, or dark control were present.",
+          "artifact": null
+        }
+      ]
+    },
+    {
+      "criterion_id": "AC003",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Inspected the rendered DOM in headless Chrome at 1440x900 after each independently reset light and dark theme case.",
+          "observation": "Both cases had no navigation or footer element, so those regions had no computable font or foreground/background treatment. The dark case was additionally rejected as unsupported.",
+          "artifact": null
+        },
+        {
+          "operation": "Queried the rendered DOM for SVG, IMG, I, icon-class, and accessible icon-label candidates.",
+          "observation": "Zero icon candidates were found across the page; therefore icon treatment was absent from the header and the missing navigation/footer regions.",
+          "artifact": null
+        }
+      ]
+    }
+  ],
+  "judge_summary": "A fresh-copy build and local Chromium execution succeeded, but the delivered page exposes only header and main landmarks. It lacks navigation, footer, dark-theme support, a public theme control, and shell icons."
+}

@@ -8,6 +8,7 @@ from copy import deepcopy
 import json
 from pathlib import Path
 import shutil
+import stat
 import sys
 import tempfile
 from typing import Any, Mapping
@@ -47,6 +48,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class RQ4PhaseBRunnerError(ValueError):
     pass
+
+
+def _remove_readonly_and_retry(function: Any, path: str, _exc_info: Any) -> None:
+    """Allow cleanup of the intentionally read-only frozen Phase A response."""
+
+    Path(path).chmod(stat.S_IWRITE | stat.S_IREAD)
+    function(path)
 
 
 def _write_json(path: Path, value: Any) -> None:
@@ -139,7 +147,7 @@ def run_phase_b_case(
         if workspace.exists():
             expected = workspace_root.resolve() / run_id
             if workspace.resolve() == expected.resolve():
-                shutil.rmtree(workspace)
+                shutil.rmtree(workspace, onerror=_remove_readonly_and_retry)
 
 
 def main() -> int:

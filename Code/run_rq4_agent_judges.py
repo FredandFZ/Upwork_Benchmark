@@ -56,8 +56,18 @@ class RQ4JudgeRunnerError(ValueError):
 
 
 def _tree_sha256(root: Path) -> str:
+    ignored_parts = {"__pycache__", ".git", ".rq4-results"}
     digest = hashlib.sha256()
-    for path in sorted((p for p in root.rglob("*") if p.is_file()), key=lambda p: p.relative_to(root).as_posix()):
+    files = (
+        path
+        for path in root.rglob("*")
+        if path.is_file()
+        and path.suffix != ".pyc"
+        and not any(
+            part in ignored_parts for part in path.relative_to(root).parts
+        )
+    )
+    for path in sorted(files, key=lambda p: p.relative_to(root).as_posix()):
         relative = path.relative_to(root).as_posix()
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
@@ -246,23 +256,76 @@ def main() -> int:
         judge_config = config.get("rq4_judge_agent")
         if not isinstance(judge_config, Mapping):
             raise RQ4JudgeRunnerError("config requires rq4_judge_agent")
-        runs = sorted(path.parent.parent for path in args.run_root.rglob("phase_b/freeze_record.json"))
+        discovered_runs = sorted(
+            path.parent.parent
+            for path in args.run_root.rglob("phase_b/freeze_record.json")
+        )
+        skipped_evaluated = [
+            run
+            for run in discovered_runs
+            if (run / "rq4_evaluation" / "result.json").is_file()
+        ]
+        runs = [run for run in discovered_runs if run not in skipped_evaluated]
         if args.limit is not None:
             runs = runs[: args.limit]
         if not runs:
+            if skipped_evaluated:
+                print(
+                    json.dumps(
+                        {
+                            "requested": 0,
+                            "evaluated": 0,
+                            "skipped_evaluated": len(skipped_evaluated),
+                            "scored": 0,
+                            "review_required": 0,
+                            "failed": 0,
+                            "failures": [],
+                        },
+                        ensure_ascii=False,
+                        indent=2,
+                    )
+                )
+                return 0
             raise RQ4JudgeRunnerError("no frozen Phase B runs found")
-        results = [
-            evaluate_run(
-                run_dir=run,
-                judge_config=judge_config,
-                prompt_path=args.prompt.resolve(),
-                response_schema_path=args.response_schema.resolve(),
-                workspace_root=args.workspace_root,
+        results = []
+        failures = []
+        for run in runs:
+            try:
+                result = evaluate_run(
+                    run_dir=run,
+                    judge_config=judge_config,
+                    prompt_path=args.prompt.resolve(),
+                    response_schema_path=args.response_schema.resolve(),
+                    workspace_root=args.workspace_root,
+                )
+                results.append(result)
+                print(
+                    f"{run.name}: {result['score_status']}"
+                    + (f"/{result['result']}" if result["result"] else "")
+                )
+            except Exception as exc:
+                failures.append(
+                    {"run_id": run.name, "error": f"{type(exc).__name__}: {exc}"}
+                )
+                print(f"FAILED {run.name}: {exc}", file=sys.stderr)
+        print(
+            json.dumps(
+                {
+                    "requested": len(runs),
+                    "evaluated": len(results),
+                    "skipped_evaluated": len(skipped_evaluated),
+                    "scored": sum(r["score_status"] == "SCORED" for r in results),
+                    "review_required": sum(
+                        r["score_status"] == "REVIEW_REQUIRED" for r in results
+                    ),
+                    "failed": len(failures),
+                    "failures": failures,
+                },
+                ensure_ascii=False,
+                indent=2,
             )
-            for run in runs
-        ]
-        print(json.dumps({"evaluated": len(results), "scored": sum(r["score_status"] == "SCORED" for r in results), "review_required": sum(r["score_status"] == "REVIEW_REQUIRED" for r in results)}, ensure_ascii=False, indent=2))
-        return 0
+        )
+        return 2 if failures else 0
     except (OSError, KeyError, TypeError, RQ4JudgeRunnerError, RQ4JudgeValidationError, RQ4PhaseBError, RQAgentRuntimeError) as exc:
         print(f"RQ4 Agent Judge failed: {exc}", file=sys.stderr)
         return 2

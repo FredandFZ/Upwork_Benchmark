@@ -1,0 +1,229 @@
+{
+  "requirements": [
+    {
+      "requirement_ref": "REQ-TICKET-ISSUANCE",
+      "requirement_summary": "Successful purchases create active prize-draw tickets, with the applicable quantity and recipient determined by referral status.",
+      "evidence_message_ids": [
+        21,
+        146,
+        195,
+        210,
+        305,
+        309
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "active_draw_type": "Small Block only",
+          "valid_referral_ticket_quantity": 1,
+          "no_referral_ticket_quantity": 1,
+          "ticket_expiry": "After the applicable 750-sale block is drawn",
+          "failed_transaction_ticket_quantity": 0
+        },
+        "scope": {
+          "transactions": "Finalized successful mints only",
+          "draw": "Current $900 Small Block draw",
+          "excluded_mechanics": "Big Block tickets were removed"
+        },
+        "lifecycle_status": "Active on the newly deployed contract",
+        "ambiguity": [
+          {
+            "field": "valid_referral_ticket_quantity",
+            "detail": "Message 210 contains both '4 entries' and 'one ticket per referral'; its later detailed wording supports one ticket, but the history is internally inconsistent."
+          },
+          {
+            "field": "no_referral_ticket_quantity",
+            "detail": "The latest visible pre-task wording specifies one draw entry, while the current task asserts six; the six-ticket rule was not previously established."
+          }
+        ],
+        "execution": {
+          "new_contract_deployed_message_id": 546,
+          "new_contract_active_message_id": 555,
+          "testing_enabled_message_id": 562
+        }
+      }
+    },
+    {
+      "requirement_ref": "REQ-NO-REFERRAL-ALLOCATION",
+      "requirement_summary": "When a purchase has no valid referral, its fallback commission and prize entry must be assigned to an eligible existing NFT owner rather than the purchaser self-referring.",
+      "evidence_message_ids": [
+        21,
+        146,
+        291,
+        305,
+        308,
+        375
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "recipient_type": "Existing NFT owner",
+          "newly_minted_nft_eligible": false,
+          "selection_description": "Random allocation",
+          "commission_and_ticket_bundling": "Not established",
+          "weighting_basis": "Not established"
+        },
+        "scope": {
+          "trigger": "Successful mint with a missing, rejected, or otherwise invalid referral",
+          "eligibility": "NFTs confirmed before checkout"
+        },
+        "lifecycle_status": "Active requirement, but the deployed bootstrap behavior had diverged from it",
+        "ambiguity": [
+          {
+            "field": "selection_description",
+            "detail": "Earlier requirements say random existing NFT; later implementation commentary mentions a weighted VRF draw, without defining its weights."
+          },
+          {
+            "field": "commission_and_ticket_bundling",
+            "detail": "The history does not say whether the commission and all tickets go to one selected NFT or are drawn independently."
+          }
+        ],
+        "execution": {
+          "reported_early_supply_behavior": "For totalSupply <= 8, the implementation sent commission to the treasury operator and reserved/manual ticket handling instead of ordinary random-owner allocation.",
+          "evidence_message_id": 375
+        }
+      }
+    },
+    {
+      "requirement_ref": "REQ-COMMISSION-ECONOMICS",
+      "requirement_summary": "A successful mint distributes the purchase price among the founder, affiliate or fallback recipient, and the Small Block prize pool.",
+      "evidence_message_ids": [
+        195,
+        305,
+        375
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "purchase_price_usd": 30,
+          "founder_share_usd": 12,
+          "referred_affiliate_commission_usd": 10,
+          "small_block_pool_share_usd": 8,
+          "no_referral_commission_usd": 18
+        },
+        "scope": {
+          "payment_events": "Successful mints",
+          "big_block_allocation": "Removed"
+        },
+        "lifecycle_status": "Active but internally inconsistent for no-referral purchases",
+        "ambiguity": [
+          {
+            "field": "no_referral_commission_usd",
+            "detail": "Message 305 specifies an $18 fallback commission, but the $30 split in message 195 allows only a $10 affiliate commission after the $12 founder and $8 pool shares. Message 375 separately reports a $12 treasury fallback for early supply."
+          }
+        ],
+        "execution": {
+          "early_supply_fallback": "Commission was reported as routed to the treasury operator after 45 minutes when totalSupply <= 8.",
+          "evidence_message_id": 375
+        }
+      }
+    },
+    {
+      "requirement_ref": "REQ-SMALL-BLOCK-DRAW",
+      "requirement_summary": "The remaining prize system awards three $900 prizes for each 750-sale block using Chainlink VRF, with additional tickets increasing the chance of selection.",
+      "evidence_message_ids": [
+        8,
+        158,
+        195,
+        210
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "block_size_sales": 750,
+          "winner_count": 3,
+          "prize_per_winner_usd": 900,
+          "selection_system": "Chainlink VRF",
+          "chance_model": "More tickets provide more chances",
+          "ticket_reset": "Tickets apply only to their current block"
+        },
+        "scope": {
+          "funding_sources": "Mints and applicable secondary transactions",
+          "prize_system": "Small Block only"
+        },
+        "lifecycle_status": "Active",
+        "ambiguity": null,
+        "execution": {
+          "chainlink_consumer_setup": "A consumer for the redeployed contract was added before the new deployment became active.",
+          "evidence_message_ids": [
+            494,
+            504,
+            546
+          ]
+        }
+      }
+    },
+    {
+      "requirement_ref": "REQ-MINT-ACCOUNTING",
+      "requirement_summary": "Only finalized successful mint transactions may increase mint, NFT, referral, ticket, earnings, or pool records.",
+      "evidence_message_ids": [
+        309,
+        361,
+        368
+      ],
+      "pre_task_state": {
+        "attributes": {
+          "count_failed_mints": false,
+          "success_evidence": "Confirmed mint receipt containing a Mint event and tokenId",
+          "approval_is_purchase": false
+        },
+        "scope": {
+          "systems": [
+            "Homepage statistics",
+            "Dashboard",
+            "NFT records",
+            "Ticket records",
+            "Commission records",
+            "Prize-pool records"
+          ]
+        },
+        "lifecycle_status": "Active",
+        "ambiguity": null,
+        "execution": {
+          "historical_issue": "Failed or approval-only attempts had previously been recorded or shown as successful.",
+          "claimed_fix": "Success UI and accounting were gated on an actual Mint event."
+        }
+      }
+    }
+  ],
+  "decision": "CLARIFY",
+  "post_task_states": null,
+  "clarifications": [
+    {
+      "requirement_ref": "REQ-TICKET-ISSUANCE",
+      "requirement_summary": "Determine whether six tickets replaces the prior ticket quantities and exactly which purchases receive them.",
+      "dimension": "VALUE",
+      "field": "ticket_quantity_per_purchase",
+      "missing_information": "The history most recently specifies one Small Block entry per referral or fallback allocation, while the current task introduces six without stating whether this applies only to referral-free purchases or to every successful purchase.",
+      "question": "Should every successful purchase create six Small Block tickets, or should six apply only when no valid referral is supplied? How many tickets should a purchase with a valid referral create?"
+    },
+    {
+      "requirement_ref": "REQ-NO-REFERRAL-ALLOCATION",
+      "requirement_summary": "Define the weighted fallback allocation for the commission and six tickets.",
+      "dimension": "BEHAVIOR",
+      "field": "weighted_allocation",
+      "missing_information": "The eligible population, weighting basis, and whether the commission and tickets share one selected recipient are not uniquely defined.",
+      "question": "For a referral-free purchase, should one weighted draw select a single previously confirmed NFT to receive both the commission and all six tickets, or should the commission and tickets be drawn separately? What supplies the weights—each NFT's current active tickets, referral count, or one equal weight per NFT?"
+    },
+    {
+      "requirement_ref": "REQ-COMMISSION-ECONOMICS",
+      "requirement_summary": "Resolve the fallback commission amount without breaking the $30 allocation.",
+      "dimension": "VALUE",
+      "field": "no_referral_commission_usd",
+      "missing_information": "Visible requirements conflict between a $10 affiliate share, an $18 fallback commission, and the implemented $12 early-supply treasury payment.",
+      "question": "What exact commission amount should a referral-free purchase allocate by weighted draw: $10, $18, or another amount? Should the $12 founder share and $8 prize-pool contribution remain unchanged?"
+    },
+    {
+      "requirement_ref": "REQ-NO-REFERRAL-ALLOCATION",
+      "requirement_summary": "Define bootstrap behavior when no prior NFT can participate in the weighted draw.",
+      "dimension": "BEHAVIOR",
+      "field": "empty_eligible_set",
+      "missing_information": "The first purchase has no previously confirmed NFT owner, so the required weighted allocation cannot run; the prior implementation used a treasury/reserved-ticket exception through supply 8, which the current task appears to reject.",
+      "question": "For the first purchase, when no prior NFT exists, should its commission and six tickets be held and allocated after the next NFT exists, sent to the treasury, assigned to the first buyer, or handled another way? Should the special totalSupply <= 8 exception be removed entirely?"
+    },
+    {
+      "requirement_ref": "REQ-MINT-ACCOUNTING",
+      "requirement_summary": "Establish the transaction facts needed to diagnose why nine buys produced eight tickets.",
+      "dimension": "EXECUTION",
+      "field": "nine_buy_test_sequence",
+      "missing_information": "The visible pre-task history does not identify the nine transaction hashes, which buys finalized, or which used valid referrals, so it cannot distinguish a bootstrap omission from failed accounting or incorrect ticket issuance.",
+      "question": "Were all nine buys finalized on the new contract, and for each buy was the referral valid, missing, or rejected? Please provide the nine mint transaction hashes or token IDs so the missing ticket issuance can be traced."
+    }
+  ]
+}

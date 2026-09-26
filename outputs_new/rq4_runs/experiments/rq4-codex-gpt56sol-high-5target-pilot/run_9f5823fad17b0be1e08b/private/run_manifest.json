@@ -1,0 +1,339 @@
+{
+  "schema_version": "rq-private-run-manifest-v2",
+  "manifest_kind": "ISOLATED_AGENT_RUN",
+  "run_id": "run_9f5823fad17b0be1e08b",
+  "package_id": "pkg_fce32e295a50c091f374",
+  "input_release": "43804272-stage2-final-20260925-rq123-main-v1",
+  "project_id": "43804272",
+  "target_id": "43804272_T001",
+  "target_fingerprint": "403868349aa3a4d625bad5467cffe5307f7eef9dc35796fc51c56394c6a60f65",
+  "condition": "C1",
+  "turns": 70,
+  "difficulty": "LONG",
+  "reasoning_active_rqs": [
+    "RQ1",
+    "RQ2",
+    "RQ3"
+  ],
+  "execution_rq": "RQ4",
+  "source_instances": {
+    "RQ1": {
+      "path": "private/source_instances/RQ1.json",
+      "file_sha256": "7a56fb0ca2491711540ce175e4f70161a811c26fe5f4370a2000abce87c6eb45",
+      "content_sha256": "260174a6ec5cd42f9cabf123b613ac93bc7a3c351ec71051b7ca107b70c1dcd2"
+    },
+    "RQ2": {
+      "path": "private/source_instances/RQ2.json",
+      "file_sha256": "5b4da5e3a147832c26626a50b4ca447d2ed81c38143b33e9f8abb35cf3e29b34",
+      "content_sha256": "e071e249089a6122c6848cc6f767c9572adf419872b94e561c38b8c5d6d7937b"
+    },
+    "RQ3": {
+      "path": "private/source_instances/RQ3.json",
+      "file_sha256": "02bb9f0b8b7aa98cfa1c2bdfb3ef744039995fbd7a87283d36e5965812766f12",
+      "content_sha256": "23a3e41a0a57cf9a99f0d49cad914aae04ce9d5d05ba19b49668c6710911c5ba"
+    }
+  },
+  "public_files": {
+    "task.json": "49f99fe120642ad3ebcb928a381edfd3337bb345844584489d8bd8348a7f0cf3",
+    "history.jsonl": "2e2ff63954aed8d8c7e10d36daa19760f4dc43f910bfdf04beda2bce02727d92",
+    "instructions.md": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response.schema.json": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repository": {
+    "archive_path": "Code Environment/43804272/targets/T001_before_71/pre_repo.zip",
+    "archive_sha256": "e91b7621bb972f66121a8e47223f83d283b29862aa7aadfd5036f65972b0b502",
+    "tree_sha256": "6fc608bff5d54875e747393348e407e7c41e3eb19ffb8f699c83b29da8ae3e12",
+    "manifest_path": "Code Environment/43804272/targets/T001_before_71/manifest.json",
+    "manifest_sha256": "5e399e3cc9a4ee963ded64b9b273f7c45b129b0bb2727075730bc702a1449285",
+    "before_message_id": 71,
+    "available_to_phase": "B_ONLY",
+    "extracted_during_phase_a": false,
+    "reconstruction_validation": null
+  },
+  "rq4": {
+    "eligible": true,
+    "eligibility_status": "ELIGIBLE",
+    "execution_ready": true,
+    "exclusion_reason": null,
+    "acceptance_criteria": [
+      {
+        "criterion_id": "AC001",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The Android platform build contains exactly the frozen 77-language Google Play locale set with one resource entry per locale.",
+        "observables": [
+          {
+            "observable_id": "OBS001",
+            "type": "ARTIFACT",
+            "surface": "Android platform build metadata and locale resource index",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "Android locale resource index",
+                "parameters": {}
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "unique Android locale count",
+                "operator": "COUNT_EQUALS",
+                "expected": 77
+              },
+              {
+                "subject": "Android locale set",
+                "operator": "EQUALS",
+                "expected": "frozen Google Play 77-language fixture"
+              },
+              {
+                "subject": "missing or duplicate locale resources",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use a frozen target-era Google Play language fixture.",
+              "Sort and normalize locale tags before set comparison."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC002",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "Every declared Android locale can be selected through the public app interaction and yields a valid direction.",
+        "observables": [
+          {
+            "observable_id": "OBS002",
+            "type": "FUNCTION",
+            "surface": "CurrentMobileService.set_locale",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "set_locale",
+                "parameters": {
+                  "for_each": "Android locale resource index"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "returned locale for every call",
+                "operator": "EQUALS",
+                "expected": "normalized requested locale"
+              },
+              {
+                "subject": "returned direction for every call",
+                "operator": "MATCHES_REGEX",
+                "expected": "^(ltr|rtl)$"
+              },
+              {
+                "subject": "failed locale selections",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use the locale index produced by the same candidate build.",
+              "Reset service state between locale cases."
+            ]
+          }
+        ],
+        "negative_cases": []
+      },
+      {
+        "criterion_id": "AC003",
+        "scope": "TARGET_BEHAVIOR",
+        "statement": "The iOS platform build contains the complete frozen App Store language set and every declared locale is selectable.",
+        "observables": [
+          {
+            "observable_id": "OBS003",
+            "type": "ARTIFACT",
+            "surface": "iOS platform build metadata and locale resource index",
+            "setup": [
+              "Extract a fresh copy of the frozen pre-repo and build it with the repository command."
+            ],
+            "actions": [
+              {
+                "operation": "PARSE_ARTIFACT",
+                "target": "iOS locale resource index",
+                "parameters": {}
+              },
+              {
+                "operation": "CALL_FUNCTION",
+                "target": "set_locale",
+                "parameters": {
+                  "for_each": "iOS locale resource index"
+                }
+              }
+            ],
+            "expected_observations": [
+              {
+                "subject": "unique iOS locale count",
+                "operator": "COUNT_EQUALS",
+                "expected": 40
+              },
+              {
+                "subject": "iOS locale set",
+                "operator": "EQUALS",
+                "expected": "frozen target-era App Store language fixture"
+              },
+              {
+                "subject": "failed locale selections",
+                "operator": "COUNT_EQUALS",
+                "expected": 0
+              }
+            ],
+            "determinism_controls": [
+              "Use the frozen target-era App Store language fixture referenced by the work item.",
+              "Normalize locale tags before set comparison."
+            ]
+          }
+        ],
+        "negative_cases": []
+      }
+    ],
+    "acceptance_criteria_sha256": "0c6b896fc51f3654505f1ecd39fafcff10add21a14d5eee05950c823950c23af",
+    "judge_contract": {
+      "prompt_path": "prompt/rq4_agent_judge.md",
+      "prompt_sha256": "cf6f4be18d97548b85b967d83f07f04f195a54bd2cad963017d3de1fde53dd6e",
+      "response_schema_path": "schema/rq4_agent_judge_result.schema.json",
+      "response_schema_sha256": "8118cc49278c3ffecd3debcf739d7e526b4917fb086052a27643d9b44280e648",
+      "finalizer_version": "rq4-agent-judge-finalizer-v1"
+    },
+    "registry_sha256": "833ac899f23b92397d53dc364d70bf2cc86e3f72cc4287c5a332c5196b605336",
+    "evaluation_commands": {
+      "build": [
+        "{python}",
+        "scripts/build.py"
+      ],
+      "regression": [
+        "{python}",
+        "scripts/check.py"
+      ]
+    },
+    "execution_readiness_blockers": []
+  },
+  "mode": "FORMAL",
+  "score_status": "READY",
+  "package_manifest_sha256": "bdaa8c1726808bbc0a27b5f31ec50ab1ea8383853d9b4c102cb3eeacfa770023",
+  "agent_config_id": "agentcfg_c063cefa36f03f763020",
+  "agent_config": {
+    "provider": "codex_cli",
+    "runtime_version": "codex-cli 0.155.1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "tool_policy": "READ_ONLY_NO_REPOSITORY_NO_EXTERNAL_TOOLS",
+    "session_isolation": "NEW_PROCESS_PER_TARGET_CONDITION",
+    "persistent_conversation": false,
+    "command": [
+      "codex.cmd",
+      "exec",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--ignore-rules",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "read-only",
+      "--model",
+      "{model_version}",
+      "-c",
+      "model_reasoning_effort=\"{reasoning_effort}\"",
+      "--output-last-message",
+      "agent_response.json",
+      "--json",
+      "-"
+    ],
+    "output_mode": "workspace_file",
+    "output_filename": "agent_response.json",
+    "timeout_seconds": 900,
+    "environment_allowlist": [
+      "APPDATA",
+      "CODEX_HOME",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "USERPROFILE"
+    ],
+    "run_prompt_sha256": "d6612995a1ab349f6f22b80f24dbed3c4fb9430f8b21560853c9c0494ac28678",
+    "instructions_sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3",
+    "response_schema_sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+  },
+  "repetition": 1,
+  "phase_gate": {
+    "repository_visible_in_phase_a": false,
+    "phase_b_requires_agent_act": true,
+    "phase_a_response_sha256": "9ab0ecaf00a05db0f24ebf689933a71a6520abccb083627a726cccfeb7dc596d",
+    "phase_a_frozen_at": "2026-09-25T21:51:08.153448Z",
+    "phase_a_decision": "ACT",
+    "phase_b_gate": "OPEN",
+    "phase_b_gate_reason": null
+  },
+  "phase_a_input_files": {
+    "task.json": {
+      "path": "private/phase_a_input/task.json",
+      "sha256": "49f99fe120642ad3ebcb928a381edfd3337bb345844584489d8bd8348a7f0cf3"
+    },
+    "history.jsonl": {
+      "path": "private/phase_a_input/history.jsonl",
+      "sha256": "2e2ff63954aed8d8c7e10d36daa19760f4dc43f910bfdf04beda2bce02727d92"
+    },
+    "instructions.md": {
+      "path": "private/phase_a_input/instructions.md",
+      "sha256": "a255504b36387e2ad10f56e95fe6c0703f401bb5b0789c717b598081afe4bce3"
+    },
+    "response.schema.json": {
+      "path": "private/phase_a_input/response.schema.json",
+      "sha256": "d8f72198348a41a6dde0d1a50db05f74191de1c0a0aa3b20e2c6e920caec902c"
+    }
+  },
+  "phase_b_agent_config_id": "agentcfg_5e9030005aea8fb33748",
+  "phase_b_agent_config": {
+    "provider": "codex_cli",
+    "runtime_version": "codex-cli 0.155.1",
+    "model": "gpt-5.6-sol",
+    "model_version": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "tool_policy": "LOCAL_REPOSITORY_WRITE_NO_NETWORK",
+    "session_isolation": "NEW_PROCESS_PER_TARGET_CONDITION",
+    "persistent_conversation": false,
+    "command": [
+      "codex.cmd",
+      "exec",
+      "--ephemeral",
+      "--ignore-user-config",
+      "--ignore-rules",
+      "--skip-git-repo-check",
+      "--sandbox",
+      "workspace-write",
+      "--model",
+      "{model_version}",
+      "-c",
+      "model_reasoning_effort=\"{reasoning_effort}\"",
+      "--output-last-message",
+      "phase_b_agent_summary.txt",
+      "--json",
+      "-"
+    ],
+    "output_mode": "workspace_file",
+    "output_filename": "phase_b_agent_summary.txt",
+    "timeout_seconds": 1800,
+    "environment_allowlist": [
+      "APPDATA",
+      "CODEX_HOME",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "LOCALAPPDATA",
+      "USERPROFILE"
+    ],
+    "run_prompt_sha256": "56b35cd10d2023e5ba59f6d8cbfacdce4a4f7f71375d091d5aa35c28a57cb11d",
+    "instructions_sha256": "56b35cd10d2023e5ba59f6d8cbfacdce4a4f7f71375d091d5aa35c28a57cb11d",
+    "response_schema_sha256": "56b35cd10d2023e5ba59f6d8cbfacdce4a4f7f71375d091d5aa35c28a57cb11d"
+  }
+}

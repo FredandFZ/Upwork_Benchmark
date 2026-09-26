@@ -1,0 +1,53 @@
+{
+  "schema_version": "rq4-agent-judge-result-v1",
+  "target_id": "43772711_T001",
+  "criteria": [
+    {
+      "criterion_id": "AC001",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Built a fresh temporary copy with scripts/serve.py, opened the workspace shell in headless Chrome, and queried the rendered landmark elements.",
+          "observation": "The rendered DOM contained header=1, nav=0, main=1, and footer=0. The required side navigation and footer regions were absent."
+        }
+      ]
+    },
+    {
+      "criterion_id": "AC002",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Sent PATCH /api/ui-shell/theme with {\"theme\":\"light\"} to a fresh local server.",
+          "observation": "The response was HTTP 200 with theme=\"light\", but theme_modes contained only [\"light\"]."
+        },
+        {
+          "operation": "Reset the application by starting another fresh temporary server, then sent PATCH /api/ui-shell/theme with {\"theme\":\"dark\"}.",
+          "observation": "The response was HTTP 400 with {\"error\":\"unsupported theme\"}; dark mode could not be selected."
+        },
+        {
+          "operation": "Opened the built shell in headless Chrome after the dark-selection attempt and queried its landmarks.",
+          "observation": "Only two shell landmarks were present: header=1 and main=1; nav=0 and footer=0."
+        }
+      ]
+    },
+    {
+      "criterion_id": "AC003",
+      "verdict": "FAIL",
+      "evidence": [
+        {
+          "operation": "Used Chrome DevTools Runtime.evaluate at the requested 1440x900 browser window to query computed styles, theme markers, and icon elements in the built artifact.",
+          "observation": "Header had computed fontFamily=\"system-ui\", color=\"rgb(23, 32, 51)\", and backgroundColor=\"rgba(0, 0, 0, 0)\". Navigation and footer returned null because those regions did not exist."
+        },
+        {
+          "operation": "Queried rendered icon selectors (svg, img, role=img, icon classes, and accessible icon labels) in the document and shell regions.",
+          "observation": "The document, header, navigation, and footer each contained zero matching icon elements."
+        },
+        {
+          "operation": "Compared SHA-256 hashes of the browser-tested dist artifacts with a fresh temporary build.",
+          "observation": "index.html, app.js, and catalog.json hashes matched the fresh build exactly, confirming the runtime probe evaluated the current reproducible build output."
+        }
+      ]
+    }
+  ],
+  "judge_summary": "Runtime evidence shows that the built page exposes only header and main regions. Dark theme selection is rejected, and the absent navigation/footer regions and zero detected icons prevent complete per-theme shell styling."
+}
